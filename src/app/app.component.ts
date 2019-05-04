@@ -22,29 +22,10 @@ success : any;
     
   }
 
-
-  ngOnInit() {
-    console.log("App says hello");
-
-    let $this = this;
-    this.electronService.send(new MessageRequest(Channel.APP_READY, function (evt, response : MessageResponse) {
-      console.log('hier kommt was zurueck');
-      if (response.responseType === ResponseType.SUCCESS) {
-        //$this.conn.setConnectionEstablished(true);
-        $this.success = "Hurra!";
-
-      } else {
-       // $this.conn.setConnectionEstablished(false);
-       $this.success = "Ohhhh weia :(";
-      }
-    }));
-
-   /* this.electronService.on("startup-error", function (evt, data) {
-      console.log("An error occured: " + data);
-    }); 
-    this.electronService.on("connection-established", function (evt, data) {
-      console.log("Connection: " + data);
-    });*/
-
+  isProjectOpened() {
+    return true;
   }
+
+
+ 
 }

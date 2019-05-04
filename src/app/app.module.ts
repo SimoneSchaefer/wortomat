@@ -3,6 +3,7 @@ import '../polyfills';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NotifierModule } from 'angular-notifier';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
@@ -18,7 +19,10 @@ import { WebviewDirective } from './directives/webview.directive';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { LoadingComponent } from './components/loading/loading.component';
+import { SettingsComponent } from './components/settings/settings.component';
+import { ProjectsComponent } from './components/projects/projects.component';
+import { AlertService } from './services/alert.service';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -29,7 +33,10 @@ export function HttpLoaderFactory(http: HttpClient) {
   declarations: [
     AppComponent,
     HomeComponent,
-    WebviewDirective
+    WebviewDirective,
+    LoadingComponent,
+    SettingsComponent,
+    ProjectsComponent
   ],
   imports: [
     BrowserModule,
@@ -43,9 +50,9 @@ export function HttpLoaderFactory(http: HttpClient) {
         deps: [HttpClient]
       }
     }),
-    NgbModule
+    NotifierModule
   ],
-  providers: [ElectronService],
+  providers: [ElectronService, AlertService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

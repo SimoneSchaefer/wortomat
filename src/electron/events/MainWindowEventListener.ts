@@ -30,7 +30,7 @@ export class MainWindowEventListener {
         private dbHandler: DBService) {
 
         this.registerOnAppyReadyListener();
-      //  this.registerStoreSettingsListener();
+        this.registerStoreSettingsListener();
       /*  this.registerExportSettingsListener();
         this.registerCreateOrUpdateListener();
         this.registerDeleteSingleListener();
@@ -67,14 +67,15 @@ export class MainWindowEventListener {
      * Required data: 
      * - request.data, which is of type SettingsHandler#SettingsObject
      */
-    /*private registerStoreSettingsListener(): void {
+    private registerStoreSettingsListener(): void {
         let $this = this;
         this.emitter.on(Channel.SETTINGS_STORED, function (evt: any, request: MessageRequest) {
-            $this.settingsHandler.saveConfiguration(request.data)
-                .then(response => $this.respond(request.identifier, ResponseType.SUCCESS))
-                .catch(error => {Logger.error("Could not store settings: " + error); $this.respond(request.identifier, error)});
+           // return $this.settingsHandler.saveConfiguration(request.data);
+            $this.respond(request.identifier, $this.settingsHandler.saveConfiguration(request.data));
+              //  .then(response => $this.respond(request.identifier, ResponseType.SUCCESS))
+              //  .catch(error => {Logger.error("Could not store settings: " + error); $this.respond(request.identifier, error)});
         });
-    }*/
+    }
 
 
     /** 

@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import { Logger } from '../services/Logger';
-var dateFormat = require('dateformat');
+import { ResponseType } from '../../app/message/Message';
 
 
 export class SettingsProvider {
@@ -35,6 +35,73 @@ export class SettingsProvider {
             }
         });
     }
+
+    public saveConfiguration(settings: settingsObject): ResponseType {
+        Logger.debug(JSON.stringify(settings));
+        if (!settings) {
+            Logger.debug('nope0');
+            return ResponseType.ERROR_GENERAL;
+        } 
+        if (!settings.dbpath) {
+            Logger.debug(`nope1`);
+            return ResponseType.ERROR_MISSING_DB_PATH;
+        }
+        if (!settings.exportpath) {
+            Logger.debug(`nope2`);
+            return ResponseType.ERROR_MISSING_EXPORT_PATH;
+        }
+        if (!fs.existsSync(settings.dbpath)) {
+            Logger.debug(`nope3`);
+            return ResponseType.ERROR_INVALID_DB_PATH;
+        }
+        if (!fs.existsSync(settings.exportpath)) {
+            Logger.debug(`nope4`);
+            return ResponseType.ERROR_INVALID_EXPORT_PATH;
+        }
+        let content = JSON.stringify(settings);
+
+        let filePath = this.getConfigFilePath();
+        fs.writeFile(filePath, content, function (err) {
+            if (err) {
+                Logger.debug(`nope5`);
+                return ResponseType.ERROR_INVALID_EXPORT_PATH;
+            }
+            Logger.debug(`???`);
+            return ResponseType.SUCCESS
+        });
+        /*return new Promise<ResponseType>((resolve, reject) => {
+            let filePath = this.getConfigFilePath();
+
+            Logger.debug(`try to save settings to ${filePath}, settings are ${settings.dbpath} and ${settings.exportpath}`);
+
+            if (!settings || !settings.dbpath) {
+                Logger.debug(`nope1`);
+                reject(ResponseType.ERROR_MISSING_DB_PATH);
+            }
+            if (!settings.exportpath) {
+                Logger.debug(`nope2`);
+                reject(ResponseType.ERROR_MISSING_EXPORT_PATH);
+            }
+            if (!fs.existsSync(settings.dbpath)) {
+                Logger.debug(`nope3`);
+                reject(ResponseType.ERROR_INVALID_DB_PATH);
+            }
+            if (!fs.existsSync(settings.exportpath)) {
+                Logger.debug(`nope4`);
+                reject(ResponseType.ERROR_INVALID_EXPORT_PATH);
+            }
+            let content = JSON.stringify(settings);
+            fs.writeFile(filePath, content, function (err) {
+                if (err) {
+                    Logger.debug(`nope5`);
+                    reject(ResponseType.ERROR_INVALID_EXPORT_PATH);
+                }
+                Logger.debug(`???`);
+                resolve();
+            });
+        });*/
+    }
+
 
 
 
