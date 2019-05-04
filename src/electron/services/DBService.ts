@@ -2,7 +2,7 @@
 import "reflect-metadata";
 import { SettingsProvider } from './SettingsProvider'
 import { Logger } from './Logger'
-import { createConnection, Connection, ConnectionManager } from "typeorm";
+import { createConnection, getConnection, Connection, getConnectionManager } from "typeorm";
 import * as fs from 'fs';
 import { ProjectEntity } from "../../app/entity/ProjectEntity";
 
@@ -12,23 +12,30 @@ export class DBService {
     constructor(private settingsHandler: SettingsProvider) {}
 
 
-    createConnection(): Promise<Connection> {
+    createConnection(dbName? : string): Promise<Connection> {
         let $this = this;
-        let shouldSync = this.shouldSync();
-        Logger.debug(`Try to connect to database: ${$this.settingsHandler.getDBPath()}, sync is: ${shouldSync}`);
-        return createConnection({
-            type: "sqlite",
-            database: $this.settingsHandler.getDBPath(),
-            entities: [
-                ProjectEntity
-            ],
-            synchronize: shouldSync,
-            logging: true
-        });
+        let dbPath = dbName? this.settingsHandler.settings.dbpath + '/' + dbName : this.settingsHandler.getDBPath();
+        let name =  dbName ? dbName : "main";
+        let shouldSync = this.shouldSync(dbPath);
+        Logger.debug(`Try to connect to database: ${dbPath}, sync is: ${shouldSync}`);
+
+        if (getConnectionManager().has(name)) {
+            return Promise.resolve(getConnectionManager().get(name));
+        } else {
+            return createConnection({
+                name : name,
+                type: "sqlite",
+                database: dbPath,
+                entities: [
+                    ProjectEntity
+                ],    
+                synchronize: shouldSync,
+                logging: true
+            });
+        } 
     }
 
-    private shouldSync() {
-        let dbPath = this.settingsHandler.getDBPath();
-        return !fs.existsSync(dbPath) || fs.statSync(dbPath).size == 0;
+    private shouldSync(path : string) {
+        return !fs.existsSync(path) || fs.statSync(path).size == 0;
     }
 }

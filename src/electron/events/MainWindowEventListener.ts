@@ -37,6 +37,7 @@ export class MainWindowEventListener {
         this.registerCreateOrUpdateListener();
         this.registerDeleteSingleListener();
         this.registerLoadSingleListener();
+        this.registerOpenProjectListener();
         
     }
 
@@ -76,7 +77,32 @@ export class MainWindowEventListener {
         });
     }
 
-        /** 
+
+  
+    /** 
+    * 
+    * #Channel.OPEN_PROJECT 
+    * 
+    * Required data: 
+    * - request.data.entity, which is of type AbstractBaseEntity
+    */
+   private registerOpenProjectListener(): void {
+    let $this = this;
+    this.emitter.on(Channel.OPEN_PROJECT, function (evt: any, request: MessageRequest) {
+        let loader = LoaderFactory.getLoader(request.data.dataType, request.data.projectId, $this.settingsHandler, $this.dbHandler);
+        /*loader.loadAll()
+            .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
+            .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));*/
+        $this.dbHandler.createConnection($this.settingsHandler.getDbNameForProject(request.data.entity))
+            .then((result) => $this.respond(request.identifier, ResponseType.SUCCESS, result.name))
+            .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
+        
+    });
+}
+
+
+
+    /** 
     * Called to load all entities of type #dataType
     * 
     * #Channel.LOAD_SINGLE 
@@ -84,13 +110,13 @@ export class MainWindowEventListener {
     * Required data: 
     * - request.data.dataType, which is of type Message#DataType
     * Optional data:
-    * - request.data.projectId, which is a number
+    * - request.data.projectId, which is used to find the project database
     */
    private registerLoadAllListener(): void {
     let $this = this;
 
     this.emitter.on(Channel.LOAD_ALL, function (evt: any, request: MessageRequest) {
-        let loader = LoaderFactory.getLoader(request.data.dataType);
+        let loader = LoaderFactory.getLoader(request.data.dataType, request.data.projectId, $this.settingsHandler, $this.dbHandler);
         Logger.debug(`load all: ` + JSON.stringify(request));
         loader.loadAll()
             .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
@@ -112,7 +138,7 @@ export class MainWindowEventListener {
     private registerCreateOrUpdateListener(): void {
         let $this = this;
         this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
-            let loader = LoaderFactory.getLoader(request.data.dataType);
+            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.projectId, $this.settingsHandler, $this.dbHandler);
             loader.createOrUpdate(request.data.entity)
                 .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
@@ -172,7 +198,7 @@ export class MainWindowEventListener {
     private registerLoadSingleListener(): void {
         let $this = this;
         this.emitter.on(Channel.LOAD_SINGLE, function (evt: any, request: MessageRequest) {
-            let loader = LoaderFactory.getLoader(request.data.dataType);
+            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.projectId, $this.settingsHandler, $this.dbHandler);
             loader.loadSingle(request.data.id)
                 .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
@@ -197,7 +223,7 @@ export class MainWindowEventListener {
     private registerDeleteSingleListener(): void {
         let $this = this;
         this.emitter.on(Channel.DELETE_SINGLE, function (evt: any, request: MessageRequest) {
-            let loader = LoaderFactory.getLoader(request.data.dataType);
+            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.projectId, $this.settingsHandler, $this.dbHandler);
             loader.removeSingle(request.data.id)
                 .then(() => $this.respond(request.identifier, ResponseType.SUCCESS))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));

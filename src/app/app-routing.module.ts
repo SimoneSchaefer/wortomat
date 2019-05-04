@@ -5,6 +5,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 import { ConnectionGuard } from './guards/connection.guard';
+import { ProjectIndexComponent } from './components/project-index/project-index.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,10 @@ const routes: Routes = [
   {
     path : 'projects/edit/:id',
     component : ProjectEditComponent
+  },
+  {
+    path : 'projectIndex',
+    component : ProjectIndexComponent
   },
 ];
 

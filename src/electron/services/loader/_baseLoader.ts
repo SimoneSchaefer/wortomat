@@ -45,6 +45,15 @@ export abstract class BaseLoader {
         return {};
      }
 
+  /**
+      * To be overwritten in subclasses in case
+      * special operations need to be done
+      * before saving an entity
+      */
+     protected beforeCreate(entity : BaseEntity) : Promise<any> {
+        return Promise.resolve();
+     }
+
 
      private getLoadOptions(id: number) {
          Logger.debug(`condition for id ${id} is: ${this.getCondition(id)}`)
@@ -63,9 +72,13 @@ export abstract class BaseLoader {
      * @param entity the entity to be saved
      */
     public createOrUpdate(entity: BaseEntity) : Promise<BaseEntity> {
-        return RepositoryFactory.getRepository(this.channel)
-        .then(repository => {
-            return repository.save(entity)
+        return this.beforeCreate(entity).then(() => {
+            return RepositoryFactory.getRepository(this.channel)
+            .then(repository => {
+                return repository.save(entity)
+            });
+        }).catch(function() {
+            return Promise.reject();
         });
     }
 

@@ -3,6 +3,9 @@ import { ProjectService } from '../../services/electron/project.service';
 import { ResponseType } from '../../message/Message';
 import { BaseEntity } from '../../entity/_baseEntity';
 import { AlertService } from '../../services/alert.service';
+import { ProjectEntity } from '../../entity/ProjectEntity';
+import { OpenProjectService } from '../../services/open-project.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-projects',
@@ -12,7 +15,7 @@ import { AlertService } from '../../services/alert.service';
 export class ProjectsComponent implements OnInit {
   private _entities = new Array<BaseEntity>();
 
-  constructor(private _baseService: ProjectService, private _alertService: AlertService) {
+  constructor(private _baseService: ProjectService, private _openProjectService: OpenProjectService, private _alertService: AlertService, private _router : Router) {
 
   }
 
@@ -31,9 +34,31 @@ export class ProjectsComponent implements OnInit {
     this._entities = val;
   }
 
-  protected delete(id : number): void {
+
+  open(project: ProjectEntity) {
     let $this = this;
-    console.log('I AM DELETE');
+    $this._baseService.open(project, function (response) {
+
+      console.dir(response);
+      if (response.responseType == ResponseType.SUCCESS) {
+        $this._alertService.success('SUCCESS_PROJECT_OPENED');
+        $this._openProjectService.identifier = response.msg;
+        $this._router.navigateByUrl('/projectIndex');
+      } else {
+        $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
+      }
+    });
+
+
+  }
+
+
+
+
+
+  delete(id : number): void {
+    let $this = this;
+    console.log('I DELETE');
     if (confirm("PROJECT_REALLY_DELETE")) {
       $this._baseService.remove(id, function (response) {
         if (response.responseType == ResponseType.SUCCESS) {
@@ -42,9 +67,7 @@ export class ProjectsComponent implements OnInit {
           $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
         }
       });
-
     }
-
   }
 
 

@@ -9,7 +9,7 @@ export class RepositoryFactory {
     public static getRepository(channel: DataType): Promise<Repository<BaseEntity>> {
         return new Promise<Repository<BaseEntity>>((resolve, reject) => {
             if (channel == DataType.PROJECTS) {
-                resolve(getRepository(ProjectEntity));
+                resolve(getRepository(ProjectEntity, "main"));
             }
             /*if (channel == DataType.CHAPTERS) {
                 resolve(getRepository(ChapterEntity));

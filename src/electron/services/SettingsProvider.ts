@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { Logger } from '../services/Logger';
 import { ResponseType } from '../../app/message/Message';
+import { ProjectEntity } from '../../app/entity/ProjectEntity';
 
 
 export class SettingsProvider {
@@ -69,6 +70,10 @@ export class SettingsProvider {
             Logger.debug(`???`);
             return ResponseType.SUCCESS
         });
+    }
+
+    public getDbNameForProject(project : ProjectEntity) {
+        return project.name.replace(" ", "_") + '.db';
     }
 
 

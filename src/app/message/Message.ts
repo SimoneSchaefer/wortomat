@@ -49,6 +49,7 @@ export enum Channel {
     APP_READY       =   "app-ready",
     SETTINGS_STORED =   "settings-stored",
     EXPORT =   "export",
+    OPEN_PROJECT = "open-project",
     CREATE_OR_UPDATE="create-or-update",
     LOAD_SINGLE = "load-single",
     LOAD_ALL = "load-all",
