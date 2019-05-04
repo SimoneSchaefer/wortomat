@@ -12,6 +12,7 @@ import { SettingsProvider } from '../services/SettingsProvider';
 import { DBService } from '../services/DBService';
 import { Initializer } from './Initializer';
 import { MessageRequest, MessageResponse, Channel, ResponseType, FileFormat } from "../../app/message/Message"
+import { LoaderFactory } from '../services/loader/LoaderFactory';
 //import { PartLoader } from '../loader/PartLoader';
 
 
@@ -31,11 +32,12 @@ export class MainWindowEventListener {
 
         this.registerOnAppyReadyListener();
         this.registerStoreSettingsListener();
+        this.registerLoadAllListener();
       /*  this.registerExportSettingsListener();
         this.registerCreateOrUpdateListener();
         this.registerDeleteSingleListener();
         this.registerLoadSingleListener();
-        this.registerLoadAllListener();*/
+        */
     }
 
 
@@ -70,12 +72,31 @@ export class MainWindowEventListener {
     private registerStoreSettingsListener(): void {
         let $this = this;
         this.emitter.on(Channel.SETTINGS_STORED, function (evt: any, request: MessageRequest) {
-           // return $this.settingsHandler.saveConfiguration(request.data);
             $this.respond(request.identifier, $this.settingsHandler.saveConfiguration(request.data));
-              //  .then(response => $this.respond(request.identifier, ResponseType.SUCCESS))
-              //  .catch(error => {Logger.error("Could not store settings: " + error); $this.respond(request.identifier, error)});
         });
     }
+
+        /** 
+    * Called to load all entities of type #dataType
+    * 
+    * #Channel.LOAD_SINGLE 
+    * 
+    * Required data: 
+    * - request.data.dataType, which is of type Message#DataType
+    * Optional data:
+    * - request.data.projectId, which is a number
+    */
+   private registerLoadAllListener(): void {
+    let $this = this;
+
+    this.emitter.on(Channel.LOAD_ALL, function (evt: any, request: MessageRequest) {
+        let loader = LoaderFactory.getLoader(request.data.dataType);
+        Logger.debug(`load all: ` + JSON.stringify(request));
+        loader.loadAll()
+            .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
+            .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
+    });
+}
 
 
     /** 
@@ -156,28 +177,9 @@ export class MainWindowEventListener {
 
 
 
-    /** 
-    * Called to load all entities of type #dataType
-    * 
-    * #Channel.LOAD_SINGLE 
-    * 
-    * Required data: 
-    * - request.data.dataType, which is of type Message#DataType
-    * Optional data:
-    * - request.data.projectId, which is a number
-    */
-   /*private registerLoadAllListener(): void {
-    let $this = this;
 
-    this.emitter.on(Channel.LOAD_ALL, function (evt: any, request: MessageRequest) {
-        let loader = LoaderFactory.getLoader(request.data.dataType);
-        Logger.debug(`load all: ` + JSON.stringify(request));
-        loader.loadAll(request.data.projectId)
-            .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
-            .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
-    });
-}
-*/
+
+
 
     /** 
     * Called to load an entity with a specific id

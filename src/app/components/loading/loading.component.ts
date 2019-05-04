@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ElectronService } from '../../providers/electron.service';
+import { ElectronService } from '../../services/electron/electron.service';
 import { MessageRequest, ResponseType, Channel, MessageResponse } from '../../message/Message';
 import { ConnectionGuard } from '../../guards/connection.guard';
 

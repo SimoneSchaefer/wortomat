@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { ElectronService } from './providers/electron.service';
+import { ElectronService } from './services/electron/electron.service';
 import { TranslateService } from '@ngx-translate/core';
 import { AppConfig } from '../environments/environment';
-import { MessageRequest, MessageResponse, Channel, ResponseType } from './message/Message';
 
 @Component({
   selector: 'app-root',

@@ -69,37 +69,6 @@ export class SettingsProvider {
             Logger.debug(`???`);
             return ResponseType.SUCCESS
         });
-        /*return new Promise<ResponseType>((resolve, reject) => {
-            let filePath = this.getConfigFilePath();
-
-            Logger.debug(`try to save settings to ${filePath}, settings are ${settings.dbpath} and ${settings.exportpath}`);
-
-            if (!settings || !settings.dbpath) {
-                Logger.debug(`nope1`);
-                reject(ResponseType.ERROR_MISSING_DB_PATH);
-            }
-            if (!settings.exportpath) {
-                Logger.debug(`nope2`);
-                reject(ResponseType.ERROR_MISSING_EXPORT_PATH);
-            }
-            if (!fs.existsSync(settings.dbpath)) {
-                Logger.debug(`nope3`);
-                reject(ResponseType.ERROR_INVALID_DB_PATH);
-            }
-            if (!fs.existsSync(settings.exportpath)) {
-                Logger.debug(`nope4`);
-                reject(ResponseType.ERROR_INVALID_EXPORT_PATH);
-            }
-            let content = JSON.stringify(settings);
-            fs.writeFile(filePath, content, function (err) {
-                if (err) {
-                    Logger.debug(`nope5`);
-                    reject(ResponseType.ERROR_INVALID_EXPORT_PATH);
-                }
-                Logger.debug(`???`);
-                resolve();
-            });
-        });*/
     }
 
 

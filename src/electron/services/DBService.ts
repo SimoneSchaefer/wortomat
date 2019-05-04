@@ -4,6 +4,7 @@ import { SettingsProvider } from './SettingsProvider'
 import { Logger } from './Logger'
 import { createConnection, Connection, ConnectionManager } from "typeorm";
 import * as fs from 'fs';
+import { ProjectEntity } from "../../app/entity/ProjectEntity";
 
 
 export class DBService {
@@ -19,6 +20,7 @@ export class DBService {
             type: "sqlite",
             database: $this.settingsHandler.getDBPath(),
             entities: [
+                ProjectEntity
             ],
             synchronize: shouldSync,
             logging: true

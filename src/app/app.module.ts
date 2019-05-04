@@ -13,7 +13,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
-import { ElectronService } from './providers/electron.service';
+import { ElectronService } from './services/electron/electron.service';
 
 import { WebviewDirective } from './directives/webview.directive';
 
