@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ElectronService } from './services/electron/electron.service';
 import { TranslateService } from '@ngx-translate/core';
 import { AppConfig } from '../environments/environment';
@@ -8,8 +8,7 @@ import { AppConfig } from '../environments/environment';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-success : any;
+export class AppComponent implements OnInit {
 
 
   constructor(public electronService: ElectronService,
@@ -21,8 +20,12 @@ success : any;
     
   }
 
+  ngOnInit() {
+    
+  }
+
   isProjectOpened() {
-    return true;
+    return false;
   }
 
 

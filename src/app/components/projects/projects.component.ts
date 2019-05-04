@@ -10,14 +10,18 @@ import { AlertService } from '../../services/alert.service';
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-  private _entities: Array<BaseEntity>;
+  private _entities = new Array<BaseEntity>();
 
-  constructor(private _baseService: ProjectService, private _alertService: AlertService, private _app: ApplicationRef) {
+  constructor(private _baseService: ProjectService, private _alertService: AlertService) {
+
   }
 
   ngOnInit() {
     this.load();
+
   }
+
+
 
   public get entities(): Array<BaseEntity> {
     return this._entities;
@@ -25,8 +29,25 @@ export class ProjectsComponent implements OnInit {
 
   public set entities(val: Array<BaseEntity>) {
     this._entities = val;
-    this._app.tick();
   }
+
+  protected delete(id : number): void {
+    let $this = this;
+    console.log('I AM DELETE');
+    if (confirm("PROJECT_REALLY_DELETE")) {
+      $this._baseService.remove(id, function (response) {
+        if (response.responseType == ResponseType.SUCCESS) {
+          $this.load();
+        } else {
+          $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
+        }
+      });
+
+    }
+
+  }
+
+
 
   protected load(): void {
     let $this = this;

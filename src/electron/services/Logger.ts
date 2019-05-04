@@ -7,18 +7,18 @@ export class Logger {
     }
 
     public static debug(msg: string, args?: any[]) {
-        log.debug(msg, args);
+        log.debug(msg, args? args : '');
     }
 
     public static info(msg: string, args?: any[]) {
-        log.info(msg, args);
+        log.info(msg, args? args : '');
     }
 
     public static warn(msg: string, args?: any[]) {
-        log.warn(msg, args);
+        log.warn(msg, args? args : '');
     }
 
     public static error(msg: string, args?: any[]) {
-        log.error(msg, args);
+        log.error(msg, args? args : '');
     }
 }

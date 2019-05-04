@@ -33,11 +33,11 @@ export class MainWindowEventListener {
         this.registerOnAppyReadyListener();
         this.registerStoreSettingsListener();
         this.registerLoadAllListener();
-      /*  this.registerExportSettingsListener();
+      /*  this.registerExportSettingsListener();*/
         this.registerCreateOrUpdateListener();
         this.registerDeleteSingleListener();
         this.registerLoadSingleListener();
-        */
+        
     }
 
 
@@ -99,6 +99,29 @@ export class MainWindowEventListener {
 }
 
 
+
+    /** 
+    * Called when an entity shall be created or updated.
+    * 
+    * #Channel.CREATE_OR_UPDATE 
+    * 
+    * Required data: 
+    * - request.data.dataType, which is of type Message#DataType
+    * - request.data.model, which is of type AbstractBaseEntity
+    */
+    private registerCreateOrUpdateListener(): void {
+        let $this = this;
+        this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
+            let loader = LoaderFactory.getLoader(request.data.dataType);
+            loader.createOrUpdate(request.data.entity)
+                .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
+                .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
+        });
+    }
+
+
+
+
     /** 
     * Called when user wants to export his/her novel.
     * 
@@ -136,25 +159,6 @@ export class MainWindowEventListener {
     }*/
 
 
-    /** 
-    * Called when an entity shall be created or updated.
-    * 
-    * #Channel.CREATE_OR_UPDATE 
-    * 
-    * Required data: 
-    * - request.data.dataType, which is of type Message#DataType
-    * - request.data.model, which is of type AbstractBaseEntity
-    */
-    /*private registerCreateOrUpdateListener(): void {
-        let $this = this;
-        this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
-            let loader = LoaderFactory.getLoader(request.data.dataType);
-            loader.createOrUpdate(request.data.entity)
-                .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
-                .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
-        });
-    }*/
-
 
     /** 
     * Called to load an entity with a specific id
@@ -165,7 +169,7 @@ export class MainWindowEventListener {
     * - request.data.dataType, which is of type Message#DataType
     * - request.data.id, which is of type number
     */
-    /*private registerLoadSingleListener(): void {
+    private registerLoadSingleListener(): void {
         let $this = this;
         this.emitter.on(Channel.LOAD_SINGLE, function (evt: any, request: MessageRequest) {
             let loader = LoaderFactory.getLoader(request.data.dataType);
@@ -173,7 +177,7 @@ export class MainWindowEventListener {
                 .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
         });
-    }*/
+    }
 
 
 
@@ -190,7 +194,7 @@ export class MainWindowEventListener {
     * - request.data.dataType, which is of type Message#DataType
     * - request.data.id, which is of type number
     */
-    /*private registerDeleteSingleListener(): void {
+    private registerDeleteSingleListener(): void {
         let $this = this;
         this.emitter.on(Channel.DELETE_SINGLE, function (evt: any, request: MessageRequest) {
             let loader = LoaderFactory.getLoader(request.data.dataType);
@@ -198,7 +202,7 @@ export class MainWindowEventListener {
                 .then(() => $this.respond(request.identifier, ResponseType.SUCCESS))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
         });
-    }*/
+    }
 
 
 

@@ -9,6 +9,9 @@ export class AlertService {
 
   constructor(private _notifierService : NotifierService, private _translate : TranslateService, private _app : ApplicationRef) { }
 
+  public success(message : string) {
+    this.notify('success', message);
+  }
   public error(message : string) {
     this.notify('error', message);
   }

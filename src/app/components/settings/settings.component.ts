@@ -3,6 +3,7 @@ import { MessageRequest, Channel, ResponseType, MessageResponse } from '../../me
 import { ElectronService } from '../../services/electron/electron.service';
 import { ConnectionGuard } from '../../guards/connection.guard';
 import { AlertService } from '../../services/alert.service';
+import { ConnectionService } from '../../services/connection.service';
 
 /**
  * Let the user enter the paths to project DB and export paths. 
@@ -17,7 +18,7 @@ export class SettingsComponent implements OnInit {
   private _exportpath: string;
 
   constructor(private _electronService: ElectronService,
-    private _connectionGuard: ConnectionGuard, private _alert: AlertService) { }
+    private _connectionService: ConnectionService, private _alert: AlertService) { }
 
   ngOnInit() {
   }
@@ -30,9 +31,9 @@ export class SettingsComponent implements OnInit {
       console.log('service says ');
       console.log(response);
       if (response.responseType == ResponseType.SUCCESS) {
-        $this._connectionGuard.setConnectionEstablished(true);
+        $this._connectionService.connectionEstablished = true;
       } else {
-        $this._connectionGuard.setConnectionEstablished(false);
+        $this._connectionService.connectionEstablished = false;
         $this._alert.error('ERROR_SAVE_SETTINGS_' + response.responseType);
       }
     }, { dbpath: this._dbpath, exportpath: this._exportpath }));

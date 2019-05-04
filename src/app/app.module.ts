@@ -1,3 +1,4 @@
+import 'zone.js/dist/zone-mix';
 import 'reflect-metadata';
 import '../polyfills';
 import { BrowserModule } from '@angular/platform-browser';
@@ -23,6 +24,7 @@ import { LoadingComponent } from './components/loading/loading.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { AlertService } from './services/alert.service';
+import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -36,7 +38,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     WebviewDirective,
     LoadingComponent,
     SettingsComponent,
-    ProjectsComponent
+    ProjectsComponent,
+    ProjectEditComponent
   ],
   imports: [
     BrowserModule,

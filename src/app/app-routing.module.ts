@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoadingComponent } from './components/loading/loading.component'
 import { SettingsComponent } from './components/settings/settings.component';
 import { ProjectsComponent } from './components/projects/projects.component';
+import { ProjectEditComponent } from './components/project-edit/project-edit.component';
+import { ConnectionGuard } from './guards/connection.guard';
 
 const routes: Routes = [
   {
@@ -16,8 +18,19 @@ const routes: Routes = [
   {
     path: 'projects',
     component: ProjectsComponent,
+    canActivate: [ConnectionGuard]
+  },
+  {
+    path : 'projects/add',
+    component : ProjectEditComponent
+  },
+  {
+    path : 'projects/edit/:id',
+    component : ProjectEditComponent
   },
 ];
+
+
 
 @NgModule({
   imports: [
