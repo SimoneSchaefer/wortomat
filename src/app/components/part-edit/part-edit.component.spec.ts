@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProjectIndexComponent } from './project-index.component';
+import { PartEditComponent } from './part-edit.component';
 
-describe('ProjectIndexComponent', () => {
-  let component: ProjectIndexComponent;
-  let fixture: ComponentFixture<ProjectIndexComponent>;
+describe('PartEditComponent', () => {
+  let component: PartEditComponent;
+  let fixture: ComponentFixture<PartEditComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ProjectIndexComponent ]
+      declarations: [ PartEditComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ProjectIndexComponent);
+    fixture = TestBed.createComponent(PartEditComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

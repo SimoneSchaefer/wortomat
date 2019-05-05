@@ -5,7 +5,8 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 import { ConnectionGuard } from './guards/connection.guard';
-import { ProjectIndexComponent } from './components/project-index/project-index.component';
+import { PartsComponent } from './components/parts/parts.component';
+import { PartEditComponent } from './components/part-edit/part-edit.component';
 
 const routes: Routes = [
   {
@@ -30,8 +31,16 @@ const routes: Routes = [
     component : ProjectEditComponent
   },
   {
-    path : 'projectIndex',
-    component : ProjectIndexComponent
+    path : 'parts',
+    component : PartsComponent
+  },
+  {
+    path : 'parts/add',
+    component : PartEditComponent
+  },
+  {
+    path : 'parts/edit/:id',
+    component : PartEditComponent
   },
 ];
 

@@ -17,16 +17,10 @@ export class ProjectEditComponent extends BaseDetailComponent {
     route : ActivatedRoute, 
     router : Router, 
     baseService: ProjectService,
-    alertService : AlertService, 
-    zone : NgZone) {
-    super(route, router, baseService, alertService, zone);
+    alertService : AlertService) {
+    super(route, router, baseService, alertService);
   }
 
-
-
-  protected afterCreate(entity: BaseEntity) {
-    let proj = entity as ProjectEntity;    
-  }
 
   protected createNewModel() : ProjectEntity {
     let proj = new ProjectEntity();    

@@ -19,8 +19,7 @@ export abstract class BaseDetailComponent  {
         protected route: ActivatedRoute,
         private _router: Router,
         protected baseService: BaseService,
-        private _alertService : AlertService,
-        private _zone : NgZone) {
+        private _alertService : AlertService) {
     }
 
     protected beforeSave(): void {
@@ -48,8 +47,7 @@ export abstract class BaseDetailComponent  {
     }
 
     protected goBack() {
-        let $this = this;
-        this._zone.run(() => $this._router.navigateByUrl('/' + this.getRedirectUrl()));
+        this._router.navigateByUrl('/' + this.getRedirectUrl());
     }
 
     protected getRedirectUrl() {

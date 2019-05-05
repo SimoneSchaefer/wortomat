@@ -8,11 +8,11 @@ import { Router } from '@angular/router';
 import { ResponseType } from '../../message/Message';
 
 @Component({
-  selector: 'app-project-index',
-  templateUrl: './project-index.component.html',
-  styleUrls: ['./project-index.component.scss']
+  selector: 'app-parts',
+  templateUrl: './parts.component.html',
+  styleUrls: ['./parts.component.scss']
 })
-export class ProjectIndexComponent extends BaseEntityComponent  {
+export class PartsComponent extends BaseEntityComponent  {
 
   constructor(_baseService: PartService, _openProjectService: OpenProjectService, _alertService: AlertService, 
     private _projectService : ProjectService, private _router : Router) {

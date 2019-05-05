@@ -25,8 +25,9 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { AlertService } from './services/alert.service';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
-import { ProjectIndexComponent } from './components/project-index/project-index.component';
+import { PartsComponent } from './components/parts/parts.component';
 import { PartComponent } from './components/part/part.component';
+import { PartEditComponent } from './components/part-edit/part-edit.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -42,8 +43,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     SettingsComponent,
     ProjectsComponent,
     ProjectEditComponent,
-    ProjectIndexComponent,
-    PartComponent
+    PartsComponent,
+    PartComponent,
+    PartEditComponent
   ],
   imports: [
     BrowserModule,

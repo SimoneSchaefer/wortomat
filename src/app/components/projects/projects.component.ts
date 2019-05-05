@@ -30,7 +30,7 @@ export class ProjectsComponent extends BaseEntityComponent {
       if (response.responseType == ResponseType.SUCCESS) {
         $this.alertService.success('SUCCESS_PROJECT_OPENED');
         $this.openProjectService.identifier = response.msg;
-        $this._router.navigateByUrl('/projectIndex');
+        $this._router.navigateByUrl('/parts');
       } else {
         $this.alertService.error(`ERROR_PROJECTS_${response.msg}`);
       }
