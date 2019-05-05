@@ -16,7 +16,8 @@ import { BaseEntityComponent } from '../_baseEntityComponent';
 export class ProjectsComponent extends BaseEntityComponent {
 
   constructor(_baseService: ProjectService, _openProjectService: OpenProjectService, _alertService: AlertService, private _router : Router) {
-    super(_baseService, 
+    super(_baseService,
+      null, 
       _openProjectService, 
       _alertService);
   }

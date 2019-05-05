@@ -6,6 +6,7 @@ import { AlertService } from '../../services/alert.service';
 import { ProjectService } from '../../services/electron/project.service';
 import { Router } from '@angular/router';
 import { ResponseType } from '../../message/Message';
+import { ChapterService } from '../../services/electron/chapter.service';
 
 @Component({
   selector: 'app-parts',
@@ -14,12 +15,20 @@ import { ResponseType } from '../../message/Message';
 })
 export class PartsComponent extends BaseEntityComponent  {
 
-  constructor(_baseService: PartService, _openProjectService: OpenProjectService, _alertService: AlertService, 
+  constructor(
+    _groupService: PartService, 
+    _memberService : ChapterService,
+    _openProjectService: OpenProjectService, 
+    _alertService: AlertService, 
     private _projectService : ProjectService, private _router : Router) {
-    super(_baseService, 
+    super(_groupService, 
+      _memberService,
       _openProjectService, 
       _alertService);
   }
+
+
+  
 
 
   

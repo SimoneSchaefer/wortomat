@@ -13,7 +13,8 @@ export class BaseEntityComponent implements OnInit {
   private _entities = new Array<BaseEntity>();
 
   constructor(
-      private _baseService: BaseService, 
+      private _groupService : BaseService,
+      private _memberService : BaseService, 
       private _openProjectService: OpenProjectService, 
       private _alertService: AlertService) {
 
@@ -33,7 +34,7 @@ export class BaseEntityComponent implements OnInit {
   }
 
   protected get baseService(): BaseService {
-    return this._baseService;
+    return this._groupService;
   }
 
   protected get alertService(): AlertService {
@@ -46,29 +47,37 @@ export class BaseEntityComponent implements OnInit {
 
  
 
+  deleteMember(id : number) : void {
+    this.delete(this._memberService, id);
+  }
 
 
 
-  delete(id : number): void {
+  deleteGroup(id : number): void {
+    this.delete(this._groupService, id);
+    
+  }
+
+  private delete(service : BaseService, id : number) {
     let $this = this;
     console.log('I DELETE');
-    if (confirm("PROJECT_REALLY_DELETE")) {
-      $this._baseService.remove(id, function (response) {
+    if (confirm("REALLY_DELETE")) {
+      service.remove(id, function (response) {
         if (response.responseType == ResponseType.SUCCESS) {
           $this.load();
         } else {
-          $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
+          $this._alertService.error(`ERROR_${response.msg}`);
         }
       });
-    }
   }
+}
 
 
 
   protected load(): void {
     let $this = this;
     console.log('I AM LOADING');
-    $this._baseService.loadAll(function (response) {
+    $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
         $this.entities = response.data.entities;
       } else {

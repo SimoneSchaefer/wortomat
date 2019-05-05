@@ -12,7 +12,7 @@
         </span>
         <button class="btn btn-primary" (click)="open(ent)" translate>PROJECT_OPEN</button>
         <a  [routerLink]="'/projects/edit/' + ent.id" class="btn btn-primary" translate>PROJECT_EDIT</a>
-        <button class="btn btn-primary" (click)="delete(ent.id)" translate>PROJECT_DELETE</button>
+        <button class="btn btn-primary" (click)="deleteGroup(ent.id)" translate>PROJECT_DELETE</button>
       </span>
     </li>
   </ul>
