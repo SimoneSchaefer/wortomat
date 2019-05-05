@@ -39,9 +39,9 @@ export abstract class BaseLoader {
       * (default filters according to project id)
       */
      protected getCondition(id: number) : Partial<BaseEntity>|ObjectLiteral|string {
-         if (id > 0) {
+         /*if (id > 0) {
             return {project: id};  
-         }
+         }*/
         return {};
      }
 
@@ -93,7 +93,7 @@ export abstract class BaseLoader {
     public loadAll() : Promise<BaseEntity[]>  {
         return RepositoryFactory.getRepository(this.channel, this.connectionName)
         .then(repository => {
-            return repository.find()
+            return repository.find(this.getLoadOptions(-1))
         });
     }
 

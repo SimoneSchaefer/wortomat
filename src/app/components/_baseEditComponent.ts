@@ -17,7 +17,7 @@ export abstract class BaseDetailComponent  {
 
     constructor(
         protected route: ActivatedRoute,
-        private _router: Router,
+        protected _router: Router,
         protected baseService: BaseService,
         private _alertService : AlertService) {
     }

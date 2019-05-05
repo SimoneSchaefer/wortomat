@@ -6,18 +6,19 @@ import { SettingsProvider } from '../SettingsProvider';
 import { DBService } from '../DBService';
 import { ProjectEntity } from '../../../app/entity/ProjectEntity';
 import { PartEntity } from '../../../app/entity/PartEntity';
+import { ChapterEntity } from '../../../app/entity/ChapterEntity';
 
 
-export class PartLoader extends BaseLoader {
+export class ChapterLoader extends BaseLoader {
     constructor(connectionName : string) {
-        super(DataType.PARTS, connectionName);
+        super(DataType.CHAPTERS, connectionName);
     }
    
-    protected getOrderBy() : { [P in keyof PartEntity]?: "ASC"|"DESC"|1|-1 } {
+    protected getOrderBy() : { [P in keyof ChapterEntity]?: "ASC"|"DESC"|1|-1 } {
        return {["order"] : 'ASC'};
     }
 
     protected getRelations() : string[]{
-        return ["chapters"];
+        return ["part"];
     }
 }

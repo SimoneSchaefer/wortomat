@@ -1,0 +1,19 @@
+<div class="container">
+    <form #settingsForm="ngForm" *ngIf="baseModel">
+
+        <div class="form-group">
+        <label for="name" translate>CHAPTER.NAME</label>
+        <input type="text" class="form-control" id="name"  webkitdirectory directory required  [(ngModel)]="baseModel.name" name="name">
+      </div>
+  
+        <div class="form-group">
+        <label for="summary" translate>CHAPTER.SUMMARY</label>
+        <input type="text" class="form-control" id="summary"  webkitdirectory directory required  [(ngModel)]="baseModel.summary" name="summary">
+      </div>
+
+        <div class="">
+          <button class="btn btn-primary" (click)="save()">CHAPTER.SAVE</button>
+          <button class="btn btn-primary" (click)="goBack()">CHAPTER.CANCEL</button>
+        </div>
+    </form>
+    </div>

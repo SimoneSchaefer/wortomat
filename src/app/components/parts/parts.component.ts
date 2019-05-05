@@ -21,6 +21,9 @@ export class PartsComponent extends BaseEntityComponent  {
       _alertService);
   }
 
+
+  
+
   closeProject() {
     let $this = this;
     $this._projectService.close(function (response) {

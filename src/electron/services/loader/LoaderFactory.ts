@@ -5,6 +5,7 @@ import { ProjectLoader } from "./ProjectLoader";
 import { SettingsProvider } from "../SettingsProvider";
 import { DBService } from "../DBService";
 import { PartLoader } from "./PartLoader";
+import { ChapterLoader } from "./ChapterLoader";
 
 
 export class LoaderFactory {
@@ -15,9 +16,10 @@ export class LoaderFactory {
         if (type === DataType.PARTS) {
             return new PartLoader(connectionName);
         }
-       /* if (type === DataType.CHAPTERS) {
-            return new ChapterLoader();
+        if (type === DataType.CHAPTERS) {
+            return new ChapterLoader(connectionName);
         }
+        /*
         if (type === DataType.SCENES) {
             return new SceneLoader();
         }

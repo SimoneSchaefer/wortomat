@@ -160,6 +160,7 @@ export class MainWindowEventListener {
     private registerCreateOrUpdateListener(): void {
         let $this = this;
         this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
+            Logger.info("saving or updating entity of type " + request.data.dataType + " and connection " + request.data.connectionName);
             let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
             loader.createOrUpdate(request.data.entity)
                 .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))

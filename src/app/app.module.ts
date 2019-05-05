@@ -28,6 +28,7 @@ import { ProjectEditComponent } from './components/project-edit/project-edit.com
 import { PartsComponent } from './components/parts/parts.component';
 import { PartComponent } from './components/part/part.component';
 import { PartEditComponent } from './components/part-edit/part-edit.component';
+import { ChapterEditComponent } from './components/chapter-edit/chapter-edit.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -45,7 +46,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     ProjectEditComponent,
     PartsComponent,
     PartComponent,
-    PartEditComponent
+    PartEditComponent,
+    ChapterEditComponent
   ],
   imports: [
     BrowserModule,

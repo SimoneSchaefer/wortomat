@@ -5,6 +5,7 @@ import { BaseEntity } from '../../../app/entity/_baseEntity';
 import { Channel, ResponseType, DataType } from '../../../app/message/Message';
 import { PartEntity } from '../../../app/entity/PartEntity';
 import { Logger } from '../Logger';
+import { ChapterEntity } from '../../../app/entity/ChapterEntity';
 
 
 export class RepositoryFactory {
@@ -17,9 +18,10 @@ export class RepositoryFactory {
             if (channel == DataType.PARTS) {
                 resolve(getRepository(PartEntity, connectionName));
             }
-            /*if (channel == DataType.CHAPTERS) {
-                resolve(getRepository(ChapterEntity));
+            if (channel == DataType.CHAPTERS) {
+                resolve(getRepository(ChapterEntity, connectionName));
             }
+            /*
             if (channel == DataType.SCENES) {
                 resolve(getRepository(SceneEntity));
             }
