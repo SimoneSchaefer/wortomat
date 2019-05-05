@@ -1,27 +1,24 @@
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
-<p>
-  project-index works!
-</p>
+
+<div class="container">
+   <h1 translate>PARTS</h1>
+
+  <a [routerLink]="['/projects/add']" class="btn btn-primary" translate>NEW_PROJECT</a>
+
+
+  <ul class="list-group" *ngIf="entities?.length">
+    <li  *ngFor="let ent of entities" class="list-group-item">
+      <span class="d-flex flex-row">
+        {{ent.name}}
+        <span class="btn-group">
+        </span>
+        <button class="btn btn-primary" (click)="open(ent)" translate>PROJECT_OPEN</button>
+        <a  [routerLink]="'/projects/edit/' + ent.id" class="btn btn-primary" translate>PROJECT_EDIT</a>
+        <button class="btn btn-primary" (click)="delete(ent.id)" translate>PROJECT_DELETE</button>
+      </span>
+    </li>
+  </ul>
+
+</div>
+
+
+<button class="btn btn-primary" (click)="closeProject()">PROJECT_CLOSE</button>

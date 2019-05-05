@@ -6,82 +6,34 @@ import { AlertService } from '../../services/alert.service';
 import { ProjectEntity } from '../../entity/ProjectEntity';
 import { OpenProjectService } from '../../services/open-project.service';
 import { Router } from '@angular/router';
+import { BaseEntityComponent } from '../_baseEntityComponent';
 
 @Component({
   selector: 'app-projects',
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
 })
-export class ProjectsComponent implements OnInit {
-  private _entities = new Array<BaseEntity>();
+export class ProjectsComponent extends BaseEntityComponent {
 
-  constructor(private _baseService: ProjectService, private _openProjectService: OpenProjectService, private _alertService: AlertService, private _router : Router) {
-
-  }
-
-  ngOnInit() {
-    this.load();
-
-  }
-
-
-
-  public get entities(): Array<BaseEntity> {
-    return this._entities;
-  }
-
-  public set entities(val: Array<BaseEntity>) {
-    this._entities = val;
+  constructor(_baseService: ProjectService, _openProjectService: OpenProjectService, _alertService: AlertService, private _router : Router) {
+    super(_baseService, 
+      _openProjectService, 
+      _alertService);
   }
 
 
   open(project: ProjectEntity) {
     let $this = this;
-    $this._baseService.open(project, function (response) {
-
+    let projectService = $this.baseService as ProjectService;
+    projectService.open(project, function (response) {
       console.dir(response);
       if (response.responseType == ResponseType.SUCCESS) {
-        $this._alertService.success('SUCCESS_PROJECT_OPENED');
-        $this._openProjectService.identifier = response.msg;
+        $this.alertService.success('SUCCESS_PROJECT_OPENED');
+        $this.openProjectService.identifier = response.msg;
         $this._router.navigateByUrl('/projectIndex');
       } else {
-        $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
-      }
-    });
-
-
-  }
-
-
-
-
-
-  delete(id : number): void {
-    let $this = this;
-    console.log('I DELETE');
-    if (confirm("PROJECT_REALLY_DELETE")) {
-      $this._baseService.remove(id, function (response) {
-        if (response.responseType == ResponseType.SUCCESS) {
-          $this.load();
-        } else {
-          $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
-        }
-      });
-    }
-  }
-
-
-
-  protected load(): void {
-    let $this = this;
-    console.log('I AM LOADING');
-    $this._baseService.loadAll(function (response) {
-      if (response.responseType == ResponseType.SUCCESS) {
-        $this.entities = response.data.entities;
-      } else {
-        $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
+        $this.alertService.error(`ERROR_PROJECTS_${response.msg}`);
       }
     });
   }
-
 }

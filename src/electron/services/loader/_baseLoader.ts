@@ -11,7 +11,7 @@ import { Channel, DataType } from '../../../app/message/Message';
 
 export abstract class BaseLoader {
 
-    constructor(protected channel: DataType) {}
+    constructor(protected channel: DataType, protected connectionName : string) {}
 
 
     /** 
@@ -73,7 +73,7 @@ export abstract class BaseLoader {
      */
     public createOrUpdate(entity: BaseEntity) : Promise<BaseEntity> {
         return this.beforeCreate(entity).then(() => {
-            return RepositoryFactory.getRepository(this.channel)
+            return RepositoryFactory.getRepository(this.channel, this.connectionName)
             .then(repository => {
                 return repository.save(entity)
             });
@@ -91,7 +91,7 @@ export abstract class BaseLoader {
         * 
      */
     public loadAll() : Promise<BaseEntity[]>  {
-        return RepositoryFactory.getRepository(this.channel)
+        return RepositoryFactory.getRepository(this.channel, this.connectionName)
         .then(repository => {
             return repository.find()
         });
@@ -105,7 +105,7 @@ export abstract class BaseLoader {
      * @param id primary key
      */
     public loadSingle(id: number) : Promise<BaseEntity>{
-        return RepositoryFactory.getRepository(this.channel)
+        return RepositoryFactory.getRepository(this.channel, this.connectionName)
         .then(repository => {
             return repository.findOne(id, this.getLoadOptions(-1));
         });        
@@ -122,7 +122,7 @@ export abstract class BaseLoader {
         let $this = this;
         return this.loadSingle(id)
         .then(entity => {
-            RepositoryFactory.getRepository($this.channel).then(repository => {
+            RepositoryFactory.getRepository($this.channel, this.connectionName).then(repository => {
                 return repository.remove(entity);
             });
         });

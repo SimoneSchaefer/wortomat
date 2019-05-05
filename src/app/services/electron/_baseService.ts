@@ -1,12 +1,13 @@
 import { ElectronService } from './electron.service'
 import { BaseEntity } from '../../entity/_baseEntity';
 import { Channel, MessageRequest, MessageResponse, ResponseType, DataType } from '../../message/Message'
+import { OpenProjectService } from '../open-project.service';
 
 export abstract class BaseService {
 
     protected abstract getDataType(): DataType;
 
-    constructor(protected electronService: ElectronService) {
+    constructor(protected electronService: ElectronService, protected openProjectService : OpenProjectService) {
     }
 
 
@@ -19,7 +20,8 @@ export abstract class BaseService {
             }, 
             {
                 entity : entity, 
-                dataType: $this.getDataType()
+                dataType: $this.getDataType(),
+                connectionName : $this.openProjectService.identifier 
             })
         );
     }
@@ -30,7 +32,8 @@ export abstract class BaseService {
         this.electronService.send(new MessageRequest(Channel.LOAD_ALL, function (evt, response: MessageResponse) {
             callback(response);
         }, {
-            dataType: $this.getDataType()
+            dataType: $this.getDataType(),
+            connectionName : $this.openProjectService.identifier 
         }));
     }
 
@@ -39,7 +42,11 @@ export abstract class BaseService {
         let $this = this;
         this.electronService.send(new MessageRequest(Channel.LOAD_SINGLE, function (evt, response: MessageResponse) {
             callback(response);
-        }, {id: id, dataType: $this.getDataType()}));
+        }, {
+            id: id, 
+            dataType: $this.getDataType(),     
+            connectionName : $this.openProjectService.identifier 
+        }));
     }
 
 
@@ -47,7 +54,11 @@ export abstract class BaseService {
         let $this = this;
         this.electronService.send(new MessageRequest(Channel.DELETE_SINGLE, function (evt, response: MessageResponse) {
             callback(response);
-        }, {id: id, dataType: $this.getDataType()}));
+        }, {
+            id: id, 
+            dataType: $this.getDataType(),
+            connectionName : $this.openProjectService.identifier 
+        }));
     }
    
 

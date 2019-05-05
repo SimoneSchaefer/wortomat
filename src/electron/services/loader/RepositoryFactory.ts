@@ -3,13 +3,19 @@ import { Repository, getRepository } from 'typeorm';
 import { ProjectEntity } from '../../../app/entity/ProjectEntity';
 import { BaseEntity } from '../../../app/entity/_baseEntity';
 import { Channel, ResponseType, DataType } from '../../../app/message/Message';
+import { PartEntity } from '../../../app/entity/PartEntity';
+import { Logger } from '../Logger';
 
 
 export class RepositoryFactory {
-    public static getRepository(channel: DataType): Promise<Repository<BaseEntity>> {
+    public static getRepository(channel: DataType, connectionName): Promise<Repository<BaseEntity>> {
         return new Promise<Repository<BaseEntity>>((resolve, reject) => {
+            Logger.info('get repository for channel ' + channel + " and connection " + connectionName);
             if (channel == DataType.PROJECTS) {
-                resolve(getRepository(ProjectEntity, "main"));
+                resolve(getRepository(ProjectEntity, connectionName));
+            }
+            if (channel == DataType.PARTS) {
+                resolve(getRepository(PartEntity, connectionName));
             }
             /*if (channel == DataType.CHAPTERS) {
                 resolve(getRepository(ChapterEntity));

@@ -1,15 +1,42 @@
 import { Component, OnInit } from '@angular/core';
+import { BaseEntityComponent } from '../_baseEntityComponent';
+import { PartService } from '../../services/electron/part.service';
+import { OpenProjectService } from '../../services/open-project.service';
+import { AlertService } from '../../services/alert.service';
+import { ProjectService } from '../../services/electron/project.service';
+import { Router } from '@angular/router';
+import { ResponseType } from '../../message/Message';
 
 @Component({
   selector: 'app-project-index',
   templateUrl: './project-index.component.html',
   styleUrls: ['./project-index.component.scss']
 })
-export class ProjectIndexComponent implements OnInit {
+export class ProjectIndexComponent extends BaseEntityComponent  {
 
-  constructor() { }
-
-  ngOnInit() {
+  constructor(_baseService: PartService, _openProjectService: OpenProjectService, _alertService: AlertService, 
+    private _projectService : ProjectService, private _router : Router) {
+    super(_baseService, 
+      _openProjectService, 
+      _alertService);
   }
+
+  closeProject() {
+    let $this = this;
+    $this._projectService.close(function (response) {
+      console.dir(response);
+      if (response.responseType == ResponseType.SUCCESS) {
+        $this.alertService.success('SUCCESS_PROJECT_CLOSED');
+        $this.openProjectService.identifier = "main";
+        $this._router.navigateByUrl('/projects');
+      } else {
+        $this.alertService.error(`ERROR_PROJECTS_${response.msg}`);
+      }
+    });
+  }
+
+
+
+
 
 }

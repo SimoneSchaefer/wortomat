@@ -1,17 +1,16 @@
-import {Column, PrimaryGeneratedColumn, OneToMany} from "typeorm";
-import { BaseEntity } from "./_baseEntity";
+import {Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
 
 
 //Not used, as SQLITE does not understand enums. 
 //I leave it here for documentation purposes. 
-/*export enum Status {
+export enum Status {
     Todo = 0,
     FirstDraft = 1,
     RevisedDraft = 2,
     Finished = 3
-}*/
+}
 
-export abstract class GroupEntity {
+export abstract class BaseGroupEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -29,7 +28,4 @@ export abstract class GroupEntity {
 
     @Column("integer", {default: -1})
     order: number;
-
-   /* @OneToMany(type => BaseEntity, children => children, {cascade: true})
-    children : Array<BaseEntity>; */  
 }

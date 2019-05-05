@@ -1,5 +1,4 @@
 import {Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
-import { GroupEntity } from "./_baseGroupEntity";
 
 
 //Not used, as SQLITE does not understand enums. 
@@ -29,7 +28,4 @@ export abstract class BaseEntity {
 
     @Column("integer", {default: -1})
     order: number;
-
-   /* @ManyToOne(type => GroupEntity, group => group.children)
-    parent : GroupEntity;*/
 }

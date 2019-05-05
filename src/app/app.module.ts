@@ -26,6 +26,7 @@ import { ProjectsComponent } from './components/projects/projects.component';
 import { AlertService } from './services/alert.service';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 import { ProjectIndexComponent } from './components/project-index/project-index.component';
+import { PartComponent } from './components/part/part.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -41,7 +42,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     SettingsComponent,
     ProjectsComponent,
     ProjectEditComponent,
-    ProjectIndexComponent
+    ProjectIndexComponent,
+    PartComponent
   ],
   imports: [
     BrowserModule,

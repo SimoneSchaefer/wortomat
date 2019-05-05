@@ -4,9 +4,11 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class OpenProjectService {
-  private _identifier : string;
+  private _identifier  = "main";
 
-  constructor() { }
+  constructor() {
+    
+   }
 
   public get identifier() {
     return this._identifier;

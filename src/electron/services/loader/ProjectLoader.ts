@@ -8,22 +8,17 @@ import { ProjectEntity } from '../../../app/entity/ProjectEntity';
 
 
 export class ProjectLoader extends BaseLoader {
-    constructor(private _settingsHandler : SettingsProvider, private dbHandler : DBService) {
-        super(DataType.PROJECTS);
+    constructor(connectionName : string, private dbHandler : DBService) {
+        super(DataType.PROJECTS, connectionName);
     }
 
 
     protected beforeCreate(entity : BaseEntity) : Promise<any> {
         //before saving a new project, we need to create a new db
-        let dbName = entity.name.replace(" ", "_") + '.db';
-        return this.dbHandler.createConnection(this._settingsHandler.getDbNameForProject(entity as ProjectEntity));
+        return this.dbHandler.createConnection(this.connectionName);
     }
-
-   /* protected getRelations() : string[]{
-        return ["parts", "parts.chapters", "parts.chapters.scenes"];
-    }*/
-
-   /* protected getOrderBy() : { [P in keyof PartEntity]?: "ASC"|"DESC"|1|-1 } {
-        return {["order"] : 'ASC'};
-    }*/
+   
+    protected getOrderBy() : { [P in keyof ProjectEntity]?: "ASC"|"DESC"|1|-1 } {
+       return {["order"] : 'ASC'};
+    }
 }
