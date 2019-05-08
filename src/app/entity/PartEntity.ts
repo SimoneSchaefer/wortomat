@@ -7,5 +7,5 @@ import { ChapterEntity } from "./ChapterEntity";
 export class PartEntity extends BaseGroupEntity {
   
     @OneToMany(type => ChapterEntity, chapter => chapter.part, {cascade : true})
-    chapters : Array<ChapterEntity>;
+    children : Array<ChapterEntity>;
 }

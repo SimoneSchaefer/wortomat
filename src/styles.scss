@@ -1,5 +1,7 @@
 
 @import "~angular-notifier/styles";
+@import "~@fortawesome/fontawesome-free/css/all.min.css";
+
 
 
 /* You can add global styles to this file, and also import other style files */
@@ -8,27 +10,12 @@ html, body {
   padding: 0;
   height: 100%;
 }
-.navbar.fixed-top {
-	padding-bottom: 0;
-	height: 49px;
-	.navbar-brand {
-		padding-left: 30px;
-		padding-right: 30px;
-	}
-	.nav-link.active {
-		color: #343a40 !important;
-	}	
-	.navbar-nav > li > a{
-		padding-left: 1rem !important;
-		padding-right: 1rem !important;
-	}
-	.nav-tabs .nav-link:hover {
-		border-color: transparent;
-	}
-}
+
 .container {
   margin-top : 200px;
 }
+
+
 
 
 /**
@@ -47,3 +34,4 @@ Spinner
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+

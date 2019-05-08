@@ -18,6 +18,6 @@ export class PartLoader extends BaseLoader {
     }
 
     protected getRelations() : string[]{
-        return ["chapters"];
+        return ["children"];
     }
 }

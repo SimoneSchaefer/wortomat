@@ -1,0 +1,18 @@
+.navbar.fixed-top {
+	padding-bottom: 0;
+	height: 49px;
+	.navbar-brand {
+		padding-left: 30px;
+		padding-right: 30px;
+	}
+	.nav-link.active {
+		color: #343a40 !important;
+	}	
+	.navbar-nav > li > a{
+		padding-left: 1rem !important;
+		padding-right: 1rem !important;
+	}
+	.nav-tabs .nav-link:hover {
+		border-color: transparent;
+	}
+}

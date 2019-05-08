@@ -1,8 +1,15 @@
 
-<div class="container">
-   <h1 translate>PARTS</h1>
+<app-vertical-bar [entities]="entities"></app-vertical-bar>
 
-  <a [routerLink]="['/parts/add']" class="btn btn-primary" translate>NEW_PART</a>
+<div class="container">
+
+
+
+
+
+   <h1 translate>PARTS.HEADER</h1>
+
+  <a [routerLink]="['/parts/add']" class="btn btn-primary" translate>PARTS.NEW</a>
 
 
   <ul class="list-group" *ngIf="entities?.length">
@@ -11,9 +18,9 @@
         {{ent.name}}
         <span class="btn-group">
         </span>
-        <a  [routerLink]="'/chapters/add/' + ent.id" class="btn btn-primary" translate>PART_NEW_CHAPTER</a>
-        <a  [routerLink]="'/parts/edit/' + ent.id" class="btn btn-primary" translate>PART_EDIT</a>
-        <button class="btn btn-primary" (click)="deleteGroup(ent.id)" translate>PART_DELETE</button>
+        <a  [routerLink]="'/chapters/add/' + ent.id" class="btn btn-primary" translate>PARTS.NEW_CHAPTER</a>
+        <a  [routerLink]="'/parts/edit/' + ent.id" class="btn btn-primary" translate>PARTS.EDIT</a>
+        <button class="btn btn-primary" (click)="deleteGroup(ent.id)" translate>PARTS.DELETE</button>
       </span>
       <ul class="list-group">
             <li  *ngFor="let chapter of ent.chapters" class="list-group-item">
@@ -30,4 +37,3 @@
 </div>
 
 
-<button class="btn btn-primary" (click)="closeProject()">PROJECT_CLOSE</button>

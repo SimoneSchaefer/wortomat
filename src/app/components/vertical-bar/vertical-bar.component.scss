@@ -1,0 +1,24 @@
+
+.vertical-bar {
+	background-color: rgba(0, 0, 0, 0.03);
+	border-right: 1px solid rgba(0, 0,0,0.125);
+	height: 100%;
+	top:3em;
+	padding-top: 2em;
+	width: 14em;
+	position: absolute;
+	border-radius: calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0;
+
+	li {
+		border-bottom: 1px solid rgba(0,0,0,0.125);
+		padding-top: 1em;
+		padding-bottom: 1em;
+    }
+
+    li.active {       
+        background-color: #ffffff;
+        margin-right: -0.1em;
+    }
+    
+
+}

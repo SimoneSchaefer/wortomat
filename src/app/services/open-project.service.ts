@@ -10,6 +10,10 @@ export class OpenProjectService {
     
    }
 
+  public hasOpenedProject() {
+    return this._identifier != "main";
+  }
+
   public get identifier() {
     return this._identifier;
   }

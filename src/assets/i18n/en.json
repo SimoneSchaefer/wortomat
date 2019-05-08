@@ -1,7 +1,41 @@
 {
-  "PAGES": {
-      "HOME": {
-          "TITLE": "App works !"
-      }
+  "MENU": {
+    "PROJECTS" : "Projects",
+    "CONTENT": "Chapters",
+    "PLOTLINES" : "Plotlines",
+    "CHARACTERS" : "People",
+    "LOCATIONS" : "Locations",
+    "EXPORT" : "Export", 
+    "ABOUT" : "About",
+    "CLOSE" : "Close Project"
+  },
+  "PROJECTS" : {
+    "HEADER": "Projects",
+    "NEW" : "New Project",
+    "NONE_YET": "You haven't created any projects yet.",
+    "NAME" : "Name",
+    "SUMMARY" : "Summary",
+    "SAVE" : "Save",
+    "CANCEL" : "Cancel",
+    "EDIT" : "Edit",
+    "OPEN" : "Open",
+    "DELETE" : "Delete",
+    "OPENED_SUCCESS" : "Opened Project",
+    "CLOSED_SUCCESS" : "Closed Project"
+  },
+  "PARTS" : {
+    "HEADER": "Parts",
+    "NEW" : "New Part",
+    "NONE_YET": "You haven't created any parts yet.",
+    "NAME" : "Name",
+    "SUMMARY" : "Summary",
+    "SAVE" : "Save",
+    "CANCEL" : "Cancel",
+    "EDIT" : "Edit",
+    "OPEN" : "Open",
+    "DELETE" : "Delete",
+    "NEW_CHAPTER" : "New chapter",
+    "CHAPTER_EDIT" : "Edit chapter",
+    "CHAPTER_DELETE" : "Delete chapter"
   }
 }

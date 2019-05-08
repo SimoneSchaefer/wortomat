@@ -1,0 +1,44 @@
+<div class="vertical-bar">
+  <button class="btn btn-primary btn-big m-2 h5" (click)="addParent()">
+    <i class="fas fa-icon fa-plus"></i>
+    <strong>New group</strong>
+  </button>
+  <div *ngFor="let group of this.entities">
+    <h1 class="h6 charactergroup p-2 nav-item text-white bg-dark">
+      <span class="clickable" (click)="toggle(group)" *ngIf="!editing(group)">
+        <i class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
+        <i class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>
+        <span>
+          {{group.name}}
+        </span>
+      </span>
+
+      <span class="float-right  btn-group options" *ngIf="!editing(group)">
+        <button class="btn btn-link button-icon" (click)="add(group)"><i class="fa fa-icon fa-plus" ></i></button>
+        <button class="btn btn-link button-icon" (click)="edit(group)"><i class="fa fa-icon fa-pen" ></i></button>
+        <button class="btn btn-link button-icon" (click)="delete(group)"><i class="fa fa-icon fa-times" ></i></button>
+      </span>
+
+      <span *ngIf="editing(group)" class="form-inline">
+        <input class="form-control" type="text" [(ngModel)]="group.name" />
+        <button class="btn btn-primary" (click)="updateParentName(group)">
+          <i class="fa fa-icon fa-check"></i>
+        </button>
+      </span>
+    </h1>
+    <ul class="nav flex-column" dnd-list="list" [class.hidden]="!visible(group)">
+      <li class="nav-item pl-2 entity clickable" (click)="select(character)" *ngFor="let character of group.children" [class.active]="selectedEntity==character">
+        <span class="text-uppercase bold">{{character.name}}</span>
+        <div class="row ">
+          <div class="col-4">
+            <img aria-hidden="true" src="{{character.image}}" [class.greyImage]="selectedEntity!=character" class="img-thumbnail croppedImage-character-list "
+              alt="{{character.name}}" title="{{character.name}}" />
+          </div>
+          <div class="col-8 summary">
+            {{character.summary}}
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

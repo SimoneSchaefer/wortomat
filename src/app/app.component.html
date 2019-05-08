@@ -1,15 +1,9 @@
 <div class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
-    <span class="navbar-brand">WORTOMAT</span>
+    <span class="navbar-brand"><a href="http://localhost:4200">WORTOMAT</a></span>
     <!-- Show this menu if the user already selected a novel for writing-->
     <ul class="navbar-nav nav-tabs" *ngIf="isProjectOpened();else no_open_project" role="tablist">
         <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/books']" translate>MENU.NOVEL</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/content']" translate>Content</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/chapters']" translate>MENU.CHAPTERS</a>
+            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/parts']" translate>MENU.CONTENT</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/plotlines']" translate>MENU.PLOTLINES</a>
@@ -18,12 +12,17 @@
             <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/characters']" translate>MENU.CHARACTERS</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/locations']" translate>MENU.LOCATIONS</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/export']" translate>MENU.EXPORT</a>
         </li>
         <li class="nav-item">
                 <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/about']" translate>MENU.ABOUT</a>
         </li>
     </ul>
+    <button *ngIf="isProjectOpened()" class="btn btn-primary" (click)="closeProject()" translate>MENU.CLOSE</button>
+
 
     <!--Show this menu when no novel has been created/selected-->
     <ng-template #no_open_project>

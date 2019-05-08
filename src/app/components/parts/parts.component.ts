@@ -31,21 +31,6 @@ export class PartsComponent extends BaseEntityComponent  {
   
 
 
-  
-
-  closeProject() {
-    let $this = this;
-    $this._projectService.close(function (response) {
-      console.dir(response);
-      if (response.responseType == ResponseType.SUCCESS) {
-        $this.alertService.success('SUCCESS_PROJECT_CLOSED');
-        $this.openProjectService.identifier = "main";
-        $this._router.navigateByUrl('/projects');
-      } else {
-        $this.alertService.error(`ERROR_PROJECTS_${response.msg}`);
-      }
-    });
-  }
 
 
 
