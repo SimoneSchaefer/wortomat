@@ -1,64 +1,90 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { BaseEntity } from '../../entity/_baseEntity';
+import { Component, OnInit, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
+import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 
 @Component({
   selector: 'app-vertical-bar',
   templateUrl: './vertical-bar.component.html',
   styleUrls: ['./vertical-bar.component.scss']
 })
-export class VerticalBarComponent implements OnInit {
+export class VerticalBarComponent implements OnInit, OnChanges {
 
   private _entities: BaseEntity[];
-  protected _selectedEntity: BaseEntity;
+  private _selectedEntity: BaseEntity;
+  private _editing = new Array<number>();
+  private _entityType : ENTITY_TYPE;
+  @Output() addNewGroup = new EventEmitter();
+  @Output() addNewMember = new EventEmitter<BaseGroupEntity>();
+  @Output() updateParentName = new EventEmitter();
+  @Output() deleteGroup = new EventEmitter<BaseGroupEntity>();
+  @Output() deleteMember = new EventEmitter<BaseEntity>();
+  @Output() select = new EventEmitter<BaseEntity>();
 
   constructor() { }
 
   ngOnInit() {
+    if (this.entities.length) {
+      if (this.entities[0]['children']&& this.entities[0]['children'].length) {
+        this.selectedEntity = this.entities[0]['children'][0];
+      }
+    }
   }
+  ngOnChanges() {
+    console.log('something changed!');
+    console.dir(this._entities);
+  }
+
+  public addNewParentEntity() {
+    this.addNewGroup.emit();
+  }
+  public addNewChildEntity(parent : BaseGroupEntity) {
+    this.addNewMember.emit(parent);
+  }
+  public deleteParent(entity : BaseGroupEntity) {
+    this.deleteGroup.emit(entity);
+  }
+  public deleteChild(entity : BaseEntity) {
+    this.deleteMember.emit(entity);
+  }
+  public selectEntity(entity : BaseEntity) {
+    this.select.emit(entity);
+  }
+
+  updateParentEntityName(parent: BaseEntity): void {
+    this.updateParentName.emit(parent);
+   // this._editing.splice(this._editing.indexOf(parent.id), 1);
+   // let $this = this;
+    /*$this.parentService.save(parent, function (response) {
+      console.dir(response);
+      $this.init();
+    });*/
+  }
+
 
   @Input()
   set entities(value: BaseEntity[]) {
+    console.dir('VerticalBarComponent#setting entities');
+    console.dir(value);
     this._entities = value;
   }
-
+  @Input()
+  set entityType(value: ENTITY_TYPE) {
+    this._entityType = value;
+  }
+  @Input()
+  set selectedEntity(value: BaseEntity) {
+    console.dir('VerticalBarComponent#setting selectedEntity');
+    console.dir(value);
+    this._selectedEntity = value;
+  }
   get entities(): BaseEntity[] {
     return this._entities;
   }
-
-  private _editing = new Array<number>();
-
-  //protected abstract createNewParent(): BaseEntity;
-  //protected abstract getStateType(): TYPES;
-
-
-  public addParent() {
-    /*let p = this.createNewParent();
-    p.order = 0;
-    let $this = this;*/
-    /*this.openProjectService.getCurrentProject(function (proj) {
-      p.project = proj;
-      /*for (let entity of $this.entities) {
-          entity.order = entity.order + 1;
-          $this.parentService.save(entity, function (response) {
-              console.dir(response);
-          });
-      }*/
-    /*$this.parentService.save(p, function (response) {
-      console.dir(response);
-      $this.init();
-    });
-  });*/
+  get entityType(): ENTITY_TYPE {
+    return this._entityType;
   }
-
-
-  public saveChild(child: BaseEntity) {
-    //super.save(child, this.childService);
-  }
-
-
-
-  deleteChild(child: BaseEntity) {
-    // super.delete(child, this.childService);
+  get selectedEntity() : BaseEntity {
+    return this._selectedEntity;
   }
 
 
@@ -69,7 +95,6 @@ export class VerticalBarComponent implements OnInit {
   }
 
   editing(parent: BaseEntity): boolean {
-    console.dir(parent);
     return this._editing.indexOf(parent.id) >= 0;
   }
 
@@ -85,27 +110,4 @@ export class VerticalBarComponent implements OnInit {
   }
 
 
-  public select(entity: BaseEntity) {
-    this._selectedEntity = entity;
-  }
-
-  set selectedEntity(entity: BaseEntity) {
-    this._selectedEntity = entity;
-  }
-
-  get selectedEntity() {
-    return this._selectedEntity;
-  }
-
-
-  updateParentName(parent: BaseEntity): void {
-    this._editing.splice(this._editing.indexOf(parent.id), 1);
-    let $this = this;
-    /*$this.parentService.save(parent, function (response) {
-      console.dir(response);
-      $this.init();
-    });*/
-
-
-  }
 }

@@ -25,11 +25,7 @@ export class SettingsComponent implements OnInit {
 
   save(): void {
     let $this = this;
-    console.log('SPEISCHERN');
-    console.dir({ dbpath: this._dbpath, exportpath: this._exportpath });
     this._electronService.send(new MessageRequest(Channel.SETTINGS_STORED, function (evt, response: MessageResponse) {
-      console.log('service says ');
-      console.log(response);
       if (response.responseType == ResponseType.SUCCESS) {
         $this._connectionService.connectionEstablished = true;
       } else {

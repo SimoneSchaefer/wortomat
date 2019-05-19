@@ -61,7 +61,6 @@ export abstract class BaseDetailComponent  {
         this.route.params.subscribe(params => {
             $this.params = params;
             if ($this.params["id"]) {
-                console.dir();
                 $this.baseService.load(params["id"], function (response) {
                     if (response.responseType === ResponseType.SUCCESS) {
                         $this.baseModel = response.data.entity;

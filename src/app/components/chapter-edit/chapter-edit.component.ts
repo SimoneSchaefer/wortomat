@@ -35,14 +35,11 @@ export class ChapterEditComponent extends BaseDetailComponent {
       let chapter = new ChapterEntity();
       this._partService.load(this.params['partId'], function (response) {
         let m = new ChapterEntity();
-        console.log(response);
         m.part = response.data.entity;
         $this.baseModel = m;
-        console.log('creating new chapter for part ' + response);
       });
       return chapter;
     } else {
-      console.log("no group id given");
       return null;
     }
   }

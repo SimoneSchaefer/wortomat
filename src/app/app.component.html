@@ -21,7 +21,10 @@
                 <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/about']" translate>MENU.ABOUT</a>
         </li>
     </ul>
-    <button *ngIf="isProjectOpened()" class="btn btn-primary" (click)="closeProject()" translate>MENU.CLOSE</button>
+    <button *ngIf="isProjectOpened()" class="btn btn-primary ml-5" (click)="closeProject()">
+        <i class="fa fa-icon fa-key pr-1"></i>
+        <span translate>MENU.CLOSE</span>
+    </button>
 
 
     <!--Show this menu when no novel has been created/selected-->

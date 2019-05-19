@@ -12,9 +12,10 @@ export enum Status {
 
 
 export enum ENTITY_TYPE {
-    PROJECT = 'project',
-    CHARACTER = 'character',
-    LOCATION = 'location'
+    PROJECTS = 'projects',
+    PARTS = 'parts',
+    CHARACTERS = 'characters',
+    LOCATIONS = 'locations'
   }
   
 

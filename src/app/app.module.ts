@@ -26,8 +26,6 @@ import { ProjectsComponent } from './components/projects/projects.component';
 import { AlertService } from './services/alert.service';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 import { PartsComponent } from './components/parts/parts.component';
-import { PartComponent } from './components/part/part.component';
-import { PartEditComponent } from './components/part-edit/part-edit.component';
 import { ChapterEditComponent } from './components/chapter-edit/chapter-edit.component';
 import { VerticalBarComponent } from './components/vertical-bar/vertical-bar.component';
 import { ImageUploadComponent } from './components/image-upload/image-upload.component';
@@ -49,8 +47,6 @@ export function HttpLoaderFactory(http: HttpClient) {
     ProjectsComponent,
     ProjectEditComponent,
     PartsComponent,
-    PartComponent,
-    PartEditComponent,
     ChapterEditComponent,
     VerticalBarComponent,
     ImageUploadComponent,

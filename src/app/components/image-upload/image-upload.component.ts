@@ -43,7 +43,6 @@ export class ImageUploadComponent implements OnInit {
   }
   @Input('entityType')
   set entityType (entityType : ENTITY_TYPE) {
-    console.log('entityType is ' + entityType);
     this._entityType = entityType;
   }
 }

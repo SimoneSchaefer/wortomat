@@ -15,7 +15,13 @@ html, body {
   margin-top : 10em;
 }
 
-
+.grabbable {
+	cursor: move;
+	opacity: 0.25;
+}
+.clickable {
+	cursor: pointer;
+}
 
 
 /**

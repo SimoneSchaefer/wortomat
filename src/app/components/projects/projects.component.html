@@ -1,7 +1,10 @@
 <div class="container">
-    <div *ngIf="!entities?.length" class="alert alert-info" translate>PROJECTS.NONE_YET</div>
+  <div *ngIf="!entities?.length" class="jumbotron">
+    <h1 class="display-4" translate>PROJECTS.NONE_YET_HEADER</h1>
+    <span translate>PROJECTS.NONE_YET_INFO</span>
+  </div>
   <div class="row">
-    <div class="col-4  d-flex align-items-stretch">
+    <div class="col-3 d-flex align-items-stretch">
       <div class="card w-100">
         <div class="card-body text-center">
           <a [routerLink]="['/projects/add']" class="btn btn-link btn-lg">
@@ -11,9 +14,9 @@
         </div>
       </div>
     </div>
-    <div class="col-4  d-flex align-items-stretch" *ngFor="let project of entities">
+    <div class="col-3 d-flex align-items-stretch" *ngFor="let project of entities">
       <div class="card ">
-        <app-optional-image [baseEntity]="project" [css]="'card-img-top'" [entityType]="'project'"></app-optional-image>
+        <app-optional-image [baseEntity]="project" [css]="'card-img-top'" [entityType]="'projects'"></app-optional-image>
         <div class="card-body">
           <h5 class="card-title">{{project.name}}</h5>
           <p class="card-text">{{project.summary}}</p>

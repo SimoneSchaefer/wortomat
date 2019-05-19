@@ -12,7 +12,8 @@
   "PROJECTS" : {
     "HEADER": "Projects",
     "NEW" : "New Project",
-    "NONE_YET": "You haven't created any projects yet.",
+    "NONE_YET_HEADER" : "Welcome",
+    "NONE_YET_INFO": "You haven't created any projects yet. Ready to start your new bestseller novel?",
     "NAME" : "Name",
     "SUMMARY" : "Summary",
     "SAVE" : "Save",
@@ -26,7 +27,8 @@
   "PARTS" : {
     "HEADER": "Parts",
     "NEW" : "New Part",
-    "NONE_YET": "You haven't created any parts yet.",
+    "NONE_YET_HEADER" : "You haven't created any chapters yet.",
+    "NONE_YET_INFO": "Each chapter belongs to a part. Use the button on the left side to create a new part.",    
     "NAME" : "Name",
     "SUMMARY" : "Summary",
     "SAVE" : "Save",
@@ -36,7 +38,11 @@
     "DELETE" : "Delete",
     "NEW_CHAPTER" : "New chapter",
     "CHAPTER_EDIT" : "Edit chapter",
-    "CHAPTER_DELETE" : "Delete chapter"
+    "CHAPTER_DELETE" : "Delete chapter",
+    "UNTITLED" : "Untitled part",
+    "CHILD_UNTITLED" : "Untitled chapter",
+    "CREATED_SUCCESS" : "Part has been created",
+    "CHILD_CREATED_SUCCESS" : "Chapter has been created"
   },
   "CHOOSE_IMAGE" : "Choose image",
   "SAVE_SUCCESS" : "Saved",
