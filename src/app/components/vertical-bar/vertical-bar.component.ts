@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
+import { StateService, STATE } from '../../services/state.service';
 
 @Component({
   selector: 'app-vertical-bar',
@@ -20,7 +21,7 @@ export class VerticalBarComponent implements OnInit, OnChanges {
   @Output() deleteMember = new EventEmitter<BaseEntity>();
   @Output() select = new EventEmitter<BaseEntity>();
 
-  constructor() { }
+  constructor(private _stateService : StateService) { }
 
   ngOnInit() {
     if (this.entities.length) {
@@ -61,32 +62,6 @@ export class VerticalBarComponent implements OnInit, OnChanges {
   }
 
 
-  @Input()
-  set entities(value: BaseEntity[]) {
-    console.dir('VerticalBarComponent#setting entities');
-    console.dir(value);
-    this._entities = value;
-  }
-  @Input()
-  set entityType(value: ENTITY_TYPE) {
-    this._entityType = value;
-  }
-  @Input()
-  set selectedEntity(value: BaseEntity) {
-    console.dir('VerticalBarComponent#setting selectedEntity');
-    console.dir(value);
-    this._selectedEntity = value;
-  }
-  get entities(): BaseEntity[] {
-    return this._entities;
-  }
-  get entityType(): ENTITY_TYPE {
-    return this._entityType;
-  }
-  get selectedEntity() : BaseEntity {
-    return this._selectedEntity;
-  }
-
 
   edit(parent: BaseEntity) {
     if (this._editing.indexOf(parent.id) < 0) {
@@ -98,16 +73,35 @@ export class VerticalBarComponent implements OnInit, OnChanges {
     return this._editing.indexOf(parent.id) >= 0;
   }
 
-
   visible(group: BaseEntity) {
-    return true;
-    //return this.stateService.getState(this.getStateType(), group) == STATE.EXPANDED;
+    return this._stateService.getState(this.entityType, group) == STATE.EXPANDED;
   }
 
   toggle(group: BaseEntity) {
-    //this.stateService.toggleState(this.getStateType(), group);
-
+    this._stateService.toggleState(this.entityType, group);
   }
 
 
+
+  @Input()
+  set entities(value: BaseEntity[]) {
+    this._entities = value;
+  }
+  @Input()
+  set entityType(value: ENTITY_TYPE) {
+    this._entityType = value;
+  }
+  @Input()
+  set selectedEntity(value: BaseEntity) {
+    this._selectedEntity = value;
+  }
+  get entities(): BaseEntity[] {
+    return this._entities;
+  }
+  get entityType(): ENTITY_TYPE {
+    return this._entityType;
+  }
+  get selectedEntity() : BaseEntity {
+    return this._selectedEntity;
+  }
 }

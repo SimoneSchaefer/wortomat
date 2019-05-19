@@ -5,18 +5,17 @@
   </button>
   <div *ngFor="let group of this.entities">
     <div class="groupcontainer">
-    <h1 class="h6 group p-3 nav-item">
-      <span class="clickable" (click)="toggle(group)" *ngIf="!editing(group)">
-        <i class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
-        <i class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>
-        <span>
-          {{group.name}}
+      <h1 class="h6 group p-3 nav-item mb-0 border-bottom">
+        <span class="clickable" (click)="toggle(group)" *ngIf="!editing(group)">
+          <i class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
+          <i class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>
+          <span>
+            {{group.name}}
+          </span>
         </span>
-      </span>
-    </h1>
+      </h1>
 
-
-      <span class="float-right  btn-group options" *ngIf="!editing(group)">
+      <span class="float-right group btn-group options w-100" *ngIf="!editing(group)" [class.hidden]="!visible(group)">
         <button class="btn btn-link button-icon" (click)="addNewChildEntity(group)"><i class="fa fa-icon fa-plus" ></i></button>
         <button class="btn btn-link button-icon" (click)="edit(group)"><i class="fa fa-icon fa-pen" ></i></button>
         <button class="btn btn-link button-icon" (click)="deleteParent(group)"><i class="fa fa-icon fa-times" ></i></button>

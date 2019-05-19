@@ -31,6 +31,7 @@ import { VerticalBarComponent } from './components/vertical-bar/vertical-bar.com
 import { ImageUploadComponent } from './components/image-upload/image-upload.component';
 import { ImageUploadModule } from 'ng2-imageupload';
 import { OptionalImageComponent } from './components/optional-image/optional-image.component';
+import { StateService } from './services/state.service';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -67,7 +68,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     NotifierModule,
     ImageUploadModule
   ],
-  providers: [ElectronService, AlertService],
+  providers: [ElectronService, AlertService, StateService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
