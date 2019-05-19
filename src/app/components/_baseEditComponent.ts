@@ -37,10 +37,10 @@ export abstract class BaseDetailComponent  {
         let $this = this;
         this.baseService.save(this.baseModel, function (response) {
             if (response.responseType == ResponseType.SUCCESS) {
-                $this._alertService.success('SUCCESS_PROJECT_SAVE');
+                $this._alertService.success('SAVE_SUCCESS');
                 $this.goBack();
             } else {
-                $this._alertService.error('ERROR_PROJECT_SAVE');
+                $this._alertService.error('SAVE_ERROR');
             }
         });
 

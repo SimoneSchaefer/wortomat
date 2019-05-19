@@ -1,0 +1,9 @@
+<div class="image-upload">
+  <img *ngIf="baseEntity.image" [src]="baseEntity.image" class="croppedImage-big img-thumbnail" />
+  <img *ngIf="!baseEntity.image" [src]="'../../../assets/img/dummy-' + entityType + '.jpg'" class="image-preview img-thumbnail greyImage" />
+  <input id="file-upload" type="file" imageUpload (imageSelected)="selected($event)" [resizeOptions]="resizeOptions" class="inputfile form-control">
+  <div class="mt-3">
+    <label for="file-upload" class="btn btn-primary image-upload-button" translate>CHOOSE_IMAGE</label>
+  </div>
+</div>      
+          

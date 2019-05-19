@@ -1,0 +1,3 @@
+<img *ngIf="baseEntity?.image" [class]="css" [src]="baseEntity.image">
+<img *ngIf="!baseEntity?.image" [src]="'../../../assets/img/dummy-' + entityType + '.jpg'" class="image-preview w-100 greyImage" />
+

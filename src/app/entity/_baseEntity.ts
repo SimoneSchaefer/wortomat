@@ -10,6 +10,14 @@ export enum Status {
     Finished = 3
 }
 
+
+export enum ENTITY_TYPE {
+    PROJECT = 'project',
+    CHARACTER = 'character',
+    LOCATION = 'location'
+  }
+  
+
 export abstract class BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
@@ -28,4 +36,7 @@ export abstract class BaseEntity {
 
     @Column("integer", {default: -1})
     order: number;
+
+    @Column("blob", {nullable : true})
+    image : string;
 }

@@ -60,8 +60,7 @@ export class BaseEntityComponent implements OnInit {
 
   private delete(service : BaseService, id : number) {
     let $this = this;
-    console.log('I DELETE');
-    if (confirm("REALLY_DELETE")) {
+    if (confirm("Really delete?")) {
       service.remove(id, function (response) {
         if (response.responseType == ResponseType.SUCCESS) {
           $this.load();

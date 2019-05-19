@@ -30,6 +30,9 @@ import { PartComponent } from './components/part/part.component';
 import { PartEditComponent } from './components/part-edit/part-edit.component';
 import { ChapterEditComponent } from './components/chapter-edit/chapter-edit.component';
 import { VerticalBarComponent } from './components/vertical-bar/vertical-bar.component';
+import { ImageUploadComponent } from './components/image-upload/image-upload.component';
+import { ImageUploadModule } from 'ng2-imageupload';
+import { OptionalImageComponent } from './components/optional-image/optional-image.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -49,7 +52,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     PartComponent,
     PartEditComponent,
     ChapterEditComponent,
-    VerticalBarComponent
+    VerticalBarComponent,
+    ImageUploadComponent,
+    OptionalImageComponent
   ],
   imports: [
     BrowserModule,
@@ -63,7 +68,8 @@ export function HttpLoaderFactory(http: HttpClient) {
         deps: [HttpClient]
       }
     }),
-    NotifierModule
+    NotifierModule,
+    ImageUploadModule
   ],
   providers: [ElectronService, AlertService],
   bootstrap: [AppComponent]

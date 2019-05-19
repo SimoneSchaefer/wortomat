@@ -37,5 +37,9 @@
     "NEW_CHAPTER" : "New chapter",
     "CHAPTER_EDIT" : "Edit chapter",
     "CHAPTER_DELETE" : "Delete chapter"
-  }
+  },
+  "CHOOSE_IMAGE" : "Choose image",
+  "SAVE_SUCCESS" : "Saved",
+  "SAVE_ERROR" : "Could not be saved",
+  "REALLY_DELETE" : "Are you sure?"
 }
