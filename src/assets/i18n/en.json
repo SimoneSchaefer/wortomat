@@ -42,6 +42,7 @@
     "UNTITLED" : "Untitled part",
     "CHILD_UNTITLED" : "Untitled chapter",
     "CREATED_SUCCESS" : "Part has been created",
+    "UPDATED_SUCCESS" : "Part has been updated",
     "CHILD_CREATED_SUCCESS" : "Chapter has been created"
   },
   "CHOOSE_IMAGE" : "Choose image",

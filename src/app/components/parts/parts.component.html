@@ -1,5 +1,6 @@
 
 <app-vertical-bar [entities]="entities" [entityType]="'parts'" [selectedEntity]="selectedEntity"
+  (updateGroup)="updateGroup($event)"
   (addNewGroup)="addNewGroup($event)"
   (addNewMember)="addNewMember($event)"
   (deleteGroup)="deleteGroup($event)"

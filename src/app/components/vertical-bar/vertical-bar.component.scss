@@ -19,13 +19,58 @@
         background-color: #ffffff;
         margin-right: -0.1em;
 	}
+
+	.groupcontainer {
+		position: relative;
+		width: 100%;
+	}
 	
 	.group {
 		background-color: rgba(0, 0, 0, 0.125);
 	}
 
+
 	.hidden {
 		display: none;
-	}    
+	} 
 
+	.options {
+		position: absolute;
+    top: 0;
+    padding: 0;
+		margin: 0;
+		right: 0;
+		background-color: transparent;
+		display: none;
+
+		i {
+			font-size: 0.8em;
+		}
+
+	}
+
+	.groupcontainer {
+		&:hover .options{
+			display: block;
+
+		}
+	}
+}
+
+
+.inline-editing,
+.inline-editing * {
+	z-index: 10000;
+}
+
+	
+.modal-mask {
+	content: "";
+	background: rgba(0, 0, 0, 0.6);
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9999;
 }

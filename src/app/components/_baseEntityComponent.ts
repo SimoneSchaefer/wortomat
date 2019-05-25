@@ -31,6 +31,11 @@ export abstract class BaseEntityComponent implements OnInit {
     this._load(true);
   }
 
+  updateGroup(member : BaseEntity) : void {
+    this.save(this._groupService, member, this.entities);
+
+  }
+
   deleteMember(member : BaseEntity) : void {
     this.delete(this._memberService, member);
   }
@@ -48,19 +53,20 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
   select(entity : BaseEntity) {
-    console.log('now selecting');
-    console.dir(entity);
     this.selectedEntity = entity;
   }
 
 
   private save(baseService : BaseService, newEntity : BaseEntity, entities : BaseEntity[], prefix : string = '') {
     let $this = this;
-    newEntity.name = this._translateService.instant(this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
-    newEntity.order = entities.length + 1;
+    let newElement = (newEntity.id < 1) ? true : false;
+    if (newElement) {
+     // newEntity.name = this._translateService.instant(this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
+      newEntity.order = entities.length + 1;
+    }   
     baseService.save(newEntity, function(response) {
       if (response.responseType === ResponseType.SUCCESS) {
-        $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+"CREATED_SUCCESS");
+        $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
         $this._loadDelayed();         
       } else {
         $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");

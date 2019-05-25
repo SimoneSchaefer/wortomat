@@ -8,15 +8,16 @@ import { StateService, STATE } from '../../services/state.service';
   templateUrl: './vertical-bar.component.html',
   styleUrls: ['./vertical-bar.component.scss']
 })
-export class VerticalBarComponent implements OnInit, OnChanges {
+export class VerticalBarComponent implements OnInit {
 
   private _entities: BaseEntity[];
   private _selectedEntity: BaseEntity;
   private _editing = new Array<number>();
   private _entityType : ENTITY_TYPE;
+  private _currentValue : string;
   @Output() addNewGroup = new EventEmitter();
   @Output() addNewMember = new EventEmitter<BaseGroupEntity>();
-  @Output() updateParentName = new EventEmitter();
+  @Output() updateGroup = new EventEmitter<BaseGroupEntity>();
   @Output() deleteGroup = new EventEmitter<BaseGroupEntity>();
   @Output() deleteMember = new EventEmitter<BaseEntity>();
   @Output() select = new EventEmitter<BaseEntity>();
@@ -29,10 +30,6 @@ export class VerticalBarComponent implements OnInit, OnChanges {
         this.selectedEntity = this.entities[0]['children'][0];
       }
     }
-  }
-  ngOnChanges() {
-    console.log('something changed!');
-    console.dir(this._entities);
   }
 
   public addNewParentEntity() {
@@ -52,25 +49,31 @@ export class VerticalBarComponent implements OnInit, OnChanges {
   }
 
   updateParentEntityName(parent: BaseEntity): void {
-    this.updateParentName.emit(parent);
-   // this._editing.splice(this._editing.indexOf(parent.id), 1);
-   // let $this = this;
-    /*$this.parentService.save(parent, function (response) {
-      console.dir(response);
-      $this.init();
-    });*/
+    parent.name = this.currentValue;
+    this.updateGroup.emit(parent);
+    this.cancelEditingParentEntityName(parent);
   }
 
 
+  cancelEditingParentEntityName(parent: BaseEntity) : void {
+    this._editing.splice(this._editing.indexOf(parent.id), 1);
+    this.currentValue = null;
+  }
 
-  edit(parent: BaseEntity) {
+  editParent(parent: BaseEntity) {
     if (this._editing.indexOf(parent.id) < 0) {
       this._editing.push(parent.id);
+      this.currentValue = parent.name;
     }
   }
 
   editing(parent: BaseEntity): boolean {
     return this._editing.indexOf(parent.id) >= 0;
+  }
+
+  inEditMode() : boolean {
+    console.dir();
+    return this._editing.length > 0;
   }
 
   visible(group: BaseEntity) {
@@ -103,5 +106,11 @@ export class VerticalBarComponent implements OnInit, OnChanges {
   }
   get selectedEntity() : BaseEntity {
     return this._selectedEntity;
+  }
+  get currentValue() : string {
+    return this._currentValue;
+  }
+  set currentValue(val : string) {
+    this._currentValue = val;
   }
 }
