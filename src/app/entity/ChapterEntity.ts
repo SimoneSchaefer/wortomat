@@ -5,6 +5,6 @@ import { PartEntity } from "./PartEntity";
 
 @Entity()
 export class ChapterEntity extends BaseEntity {
-    @ManyToOne(type => PartEntity, part => part.children, {cascade: false})
-    part : PartEntity;
+    @ManyToOne(type => PartEntity, parent => parent.children, {onDelete: 'CASCADE'})
+    parent : PartEntity;
 }

@@ -35,7 +35,7 @@ export class ChapterEditComponent extends BaseDetailComponent {
       let chapter = new ChapterEntity();
       this._partService.load(this.params['partId'], function (response) {
         let m = new ChapterEntity();
-        m.part = response.data.entity;
+        m.parent = response.data.entity;
         $this.baseModel = m;
       });
       return chapter;

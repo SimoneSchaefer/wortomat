@@ -1,6 +1,7 @@
 
 <app-vertical-bar [entities]="entities" [entityType]="'parts'" [selectedEntity]="selectedEntity"
   (updateGroup)="updateGroup($event)"
+  (updateMember)="updateMember($event)"
   (addNewGroup)="addNewGroup($event)"
   (addNewMember)="addNewMember($event)"
   (deleteGroup)="deleteGroup($event)"
@@ -14,6 +15,12 @@
       <span translate>PARTS.NONE_YET_INFO</span>
     </div>
     
+    <div *ngIf="entities?.length&&!selectedEntity" class="jumbotron w-100">
+      <h1 class="display-6" translate>PARTS.NO_CHILDREN_YET_HEADER</h1>
+      <span translate>PARTS.NO_CHILDREN_YET_INFO</span>
+    </div>
+
+
     {{selectedEntity?.id}}
 
   </div>

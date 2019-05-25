@@ -12,7 +12,8 @@ export class VerticalBarComponent implements OnInit {
 
   private _entities: BaseEntity[];
   private _selectedEntity: BaseEntity;
-  private _editing = new Array<number>();
+  private _editingParent = new Array<number>();
+  private _editingChild = new Array<number>();
   private _entityType : ENTITY_TYPE;
   private _currentValue : string;
   @Output() addNewGroup = new EventEmitter();
@@ -20,6 +21,8 @@ export class VerticalBarComponent implements OnInit {
   @Output() updateGroup = new EventEmitter<BaseGroupEntity>();
   @Output() deleteGroup = new EventEmitter<BaseGroupEntity>();
   @Output() deleteMember = new EventEmitter<BaseEntity>();
+  @Output() updateMember = new EventEmitter<BaseEntity>();
+
   @Output() select = new EventEmitter<BaseEntity>();
 
   constructor(private _stateService : StateService) { }
@@ -48,32 +51,56 @@ export class VerticalBarComponent implements OnInit {
     this.select.emit(entity);
   }
 
-  updateParentEntityName(parent: BaseEntity): void {
+  updateParentEntityName(parent: BaseGroupEntity): void {
     parent.name = this.currentValue;
     this.updateGroup.emit(parent);
     this.cancelEditingParentEntityName(parent);
   }
 
 
-  cancelEditingParentEntityName(parent: BaseEntity) : void {
-    this._editing.splice(this._editing.indexOf(parent.id), 1);
+  cancelEditingParentEntityName(parent: BaseGroupEntity) : void {
+    this._editingParent.splice(this._editingParent.indexOf(parent.id), 1);
     this.currentValue = null;
   }
 
-  editParent(parent: BaseEntity) {
-    if (this._editing.indexOf(parent.id) < 0) {
-      this._editing.push(parent.id);
+
+  updateChildEntityName(child: BaseEntity): void {
+    child.name = this.currentValue;
+    this.updateMember.emit(child);
+    this.cancelEditingChildEntityName(child);
+  }
+
+
+  cancelEditingChildEntityName(child: BaseEntity) : void {
+    this._editingChild.splice(this._editingChild.indexOf(child.id), 1);
+    this.currentValue = null;
+  }
+
+
+  editParent(parent: BaseGroupEntity) {
+    if (this._editingParent.indexOf(parent.id) < 0) {
+      this._editingParent.push(parent.id);
       this.currentValue = parent.name;
     }
   }
 
-  editing(parent: BaseEntity): boolean {
-    return this._editing.indexOf(parent.id) >= 0;
+
+  editChild(child: BaseEntity) {
+    if (this._editingChild.indexOf(child.id) < 0) {
+      this._editingChild.push(child.id);
+      this.currentValue = child.name;
+    }
+  }
+
+  editingParent(parent: BaseGroupEntity): boolean {
+    return this._editingParent.indexOf(parent.id) >= 0;
+  }
+  editingChild(child: BaseEntity): boolean {
+    return this._editingChild.indexOf(child.id) >= 0;
   }
 
   inEditMode() : boolean {
-    console.dir();
-    return this._editing.length > 0;
+    return this._editingParent.length > 0 || this._editingChild.length > 0 ;
   }
 
   visible(group: BaseEntity) {

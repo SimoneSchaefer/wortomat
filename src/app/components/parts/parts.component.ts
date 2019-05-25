@@ -36,7 +36,7 @@ export class PartsComponent extends BaseEntityComponent  {
   }
   protected newMember(parent : PartEntity) : BaseEntity {
     let member = new ChapterEntity();
-    member.part = parent;
+    member.parent = parent;
     return member;
   }
   protected entityType() : ENTITY_TYPE {

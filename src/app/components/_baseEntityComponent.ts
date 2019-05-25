@@ -31,9 +31,12 @@ export abstract class BaseEntityComponent implements OnInit {
     this._load(true);
   }
 
-  updateGroup(member : BaseEntity) : void {
-    this.save(this._groupService, member, this.entities);
+  updateGroup(group : BaseGroupEntity) : void {
+    this.save(this._groupService, group, this.entities);
+  }
 
+  updateMember(member : BaseEntity) : void {
+    this.save(this._memberService, member, null, 'CHILD_');
   }
 
   deleteMember(member : BaseEntity) : void {
@@ -59,9 +62,8 @@ export abstract class BaseEntityComponent implements OnInit {
 
   private save(baseService : BaseService, newEntity : BaseEntity, entities : BaseEntity[], prefix : string = '') {
     let $this = this;
-    let newElement = (newEntity.id < 1) ? true : false;
+    let newElement = (newEntity.id) ? false : true;
     if (newElement) {
-     // newEntity.name = this._translateService.instant(this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
       newEntity.order = entities.length + 1;
     }   
     baseService.save(newEntity, function(response) {
@@ -81,7 +83,7 @@ export abstract class BaseEntityComponent implements OnInit {
     if (confirm(this._translateService.instant("REALLY_DELETE"))) {
       service.remove(entity.id, function (response) {
         if (response.responseType == ResponseType.SUCCESS) {
-          $this._loadDelayed();         
+          $this._loadDelayed(true);         
         } else {
           $this._alertService.error(`ERROR_${response.msg}`);
         }
@@ -90,10 +92,10 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
 
-  private _loadDelayed() {
+  private _loadDelayed(selectFirst : boolean = false) {
     let $this = this;
     setTimeout(function() {
-      $this._load();
+      $this._load(selectFirst);
     }, 500);
   }
 
@@ -105,10 +107,11 @@ export abstract class BaseEntityComponent implements OnInit {
       if (response.responseType == ResponseType.SUCCESS) {
         $this.entities = response.data.entities;
         if (selectFirst) {
+          $this.selectedEntity = null;
           if ($this.entities.length) {
             if ($this.entities[0]['children']&&$this.entities[0]['children'].length) {
               $this.selectedEntity = $this.entities[0]['children'][0];
-            }
+            } 
           }
         }
       } else {
