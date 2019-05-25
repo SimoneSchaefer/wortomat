@@ -32,6 +32,8 @@ import { ImageUploadComponent } from './components/image-upload/image-upload.com
 import { ImageUploadModule } from 'ng2-imageupload';
 import { OptionalImageComponent } from './components/optional-image/optional-image.component';
 import { StateService } from './services/state.service';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -66,7 +68,9 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     }),
     NotifierModule,
-    ImageUploadModule
+    ImageUploadModule,
+    BrowserAnimationsModule,
+    DragDropModule
   ],
   providers: [ElectronService, AlertService, StateService],
   bootstrap: [AppComponent]

@@ -2,6 +2,7 @@ import { ElectronService } from './electron.service'
 import { BaseEntity } from '../../entity/_baseEntity';
 import { Channel, MessageRequest, MessageResponse, ResponseType, DataType } from '../../message/Message'
 import { OpenProjectService } from '../open-project.service';
+import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 
 export abstract class BaseService {
 
@@ -10,10 +11,39 @@ export abstract class BaseService {
     constructor(protected electronService: ElectronService, protected openProjectService : OpenProjectService) {
     }
 
+    saveAll(entities: BaseGroupEntity[], callback: (response: MessageResponse) => void) {
+        let $this = this;
+        /*console.log('saving all entity of type ' + $this.getDataType());
+        console.dir(entities);
+        for (let entity of entities) {
+            this.electronService.send(new MessageRequest(
+                Channel.CREATE_OR_UPDATE, 
+                function (evt, response: MessageResponse) {
+                    //callback(response);
+                }, 
+                {
+                    entity : entity, 
+                    dataType: $this.getDataType(),
+                    connectionName : $this.openProjectService.identifier 
+                })
+            );  
+        }*/
+        this.electronService.send(new MessageRequest(
+            Channel.SAVE_ALL, 
+            function (evt, response: MessageResponse) {
+                callback(response);
+            }, 
+            {
+                entities : entities, 
+                dataType: $this.getDataType(),
+                connectionName : $this.openProjectService.identifier 
+            })
+        );
+    }
+
 
     save(entity: BaseEntity, callback: (response: MessageResponse) => void) {
         let $this = this;
-        console.log('saving entity of type ' + $this.getDataType());
         this.electronService.send(new MessageRequest(
             Channel.CREATE_OR_UPDATE, 
             function (evt, response: MessageResponse) {
@@ -45,7 +75,7 @@ export abstract class BaseService {
             callback(response);
         }, {
             id: id, 
-            dataType: $this.getDataType(),     
+             dataType: $this.getDataType(),     
             connectionName : $this.openProjectService.identifier 
         }));
     }

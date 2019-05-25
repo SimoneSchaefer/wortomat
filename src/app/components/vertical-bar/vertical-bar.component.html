@@ -1,30 +1,41 @@
 
 
-<div class="vertical-bar">
+<div class="vertical-bar" cdkDropList [cdkDropListData]="entities" (cdkDropListDropped)="dropGroup($event)">
+
+  <!-- ADD NEW GROUP-->
   <button (click)="addNewParentEntity()" class="btn btn-link btn-lg">
     <i class="fas fa-icon fa-plus pr-1"></i>
     {{'' + entityType + '.NEW' | uppercase | translate}}
   </button>
-  <div *ngFor="let group of this.entities">
-    <div class="groupcontainer">
 
+
+  <!--ITERATE AL GROUPS-->
+  <div *ngFor="let group of this.entities" cdkDropListGroup cdkDrag [cdkDragData]="group" >
+
+    <!--GROUP HEADER-->
+    <div class="groupcontainer grabbable">
+
+      <!-- OPTIONS -->
       <span class="float-right group btn-group options" *ngIf="!editingParent(group)">
         <button class="btn btn-link button-icon p-0 mr-2" (click)="addNewChildEntity(group)"><i class="fa fa-icon fa-plus" ></i></button>
         <button class="btn btn-link button-icon p-0 mr-2" (click)="editParent(group)"><i class="fa fa-icon fa-pen" ></i></button>
         <button class="btn btn-link button-icon p-0 mr-2" (click)="deleteParent(group)"><i class="fa fa-icon fa-trash" ></i></button>
       </span>
+
+      <!-- (TOGGABLE) TITLE-->
       <h1 class="h6 group p-3 nav-item mb-0 border-bottom text-uppercase " *ngIf="!editingParent(group)">
         <span class="clickable" (click)="toggle(group)">
           <i class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
           <i class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>
+        </span>
           <span class="ml-2">
             {{group.name ? group.name : entityType.toUpperCase() + '.UNTITLED' | translate}}
           </span>
-        </span>
       </h1>
+
+      <!-- EDIT TITLE-->
       <div *ngIf="editingParent(group)" class="form-inline inline-editing m-1">
        <div class="modal-mask"></div>
-
        <input class="form-control pr-0" type="text" [(ngModel)]="currentValue"/>
        <div class="button-group mt-1 w-100">
          <button class="btn btn-primary" (click)="updateParentEntityName(group)">
@@ -36,8 +47,17 @@
        </div>
       </div>     
     </div>
-    <ul class="nav flex-column w-100 " [class.hidden]="!visible(group)">
-      <li class="nav-item pl-2 entity clickable groupcontainer" (click)="selectEntity(child)" *ngFor="let child of group.children" [class.active]="selectedEntity==child">
+
+
+    <!-- GROUP MEMBERS-->
+    <ul class="nav flex-column w-100 " [class.hidden]="!visible(group)" id={{group.id}}  
+          cdkDropList          
+          [cdkDropListData]="group.children" 
+          (cdkDropListDropped)="dropItem($event)"
+          [cdkDropListConnectedTo]="getConnectedList()">
+      <li class="nav-item pl-2 entity grabbable groupcontainer" 
+        (click)="selectEntity(child)" *ngFor="let child of group.children" [class.active]="selectedEntity==child"
+         cdkDrag [cdkDragData]="child">
         <span class="float-right group btn-group options"  *ngIf="!editingChild(child)" >
           <button class="btn btn-link button-icon p-0 mr-2" (click)="editChild(child)"><i class="fa fa-icon fa-pen" ></i></button>
           <button class="btn btn-link button-icon p-0 mr-2" (click)="deleteChild(child)"><i class="fa fa-icon fa-trash" ></i></button>
@@ -59,8 +79,7 @@
           </button>
         </div>
       </div>
-      </li>
-    </ul>
-  </div>
+    </li>
+  </ul>
 </div>
 

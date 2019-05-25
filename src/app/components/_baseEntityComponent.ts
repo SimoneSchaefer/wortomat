@@ -59,6 +59,22 @@ export abstract class BaseEntityComponent implements OnInit {
     this.selectedEntity = entity;
   }
 
+  updateOrder(entities: BaseGroupEntity[]) {
+    let $this = this;
+    console.dir('updateOrder');
+    console.dir(entities);
+    this._groupService.saveAll(entities, function(response) {
+      if (response.responseType === ResponseType.SUCCESS) {
+        $this._alertService.success($this.entityType().toUpperCase() + ".UPDATED") + "_SUCCESS";
+        $this._loadDelayed();         
+      } else {
+        console.dir(response);
+        $this._alertService.error($this.entityType().toUpperCase() + ".ERROR");
+      }
+    });
+
+  }
+
 
   private save(baseService : BaseService, newEntity : BaseEntity, entities : BaseEntity[], prefix : string = '') {
     let $this = this;
@@ -71,7 +87,7 @@ export abstract class BaseEntityComponent implements OnInit {
         $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
         $this._loadDelayed();         
       } else {
-        $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
+        $this._alertService.error($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
       }
     });
   }
@@ -106,6 +122,10 @@ export abstract class BaseEntityComponent implements OnInit {
     $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
         $this.entities = response.data.entities;
+
+        
+
+
         if (selectFirst) {
           $this.selectedEntity = null;
           if ($this.entities.length) {

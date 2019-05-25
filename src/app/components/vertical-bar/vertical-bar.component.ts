@@ -2,6 +2,8 @@ import { Component, OnInit, Input, Output, EventEmitter, OnChanges } from '@angu
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { StateService, STATE } from '../../services/state.service';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+
 
 @Component({
   selector: 'app-vertical-bar',
@@ -22,6 +24,7 @@ export class VerticalBarComponent implements OnInit {
   @Output() deleteGroup = new EventEmitter<BaseGroupEntity>();
   @Output() deleteMember = new EventEmitter<BaseEntity>();
   @Output() updateMember = new EventEmitter<BaseEntity>();
+  @Output() updateOrder = new EventEmitter<BaseGroupEntity[]>();
 
   @Output() select = new EventEmitter<BaseEntity>();
 
@@ -111,6 +114,43 @@ export class VerticalBarComponent implements OnInit {
     this._stateService.toggleState(this.entityType, group);
   }
 
+  dropGroup($event) {
+    moveItemInArray(this._entities, $event.previousIndex, $event.currentIndex);
+    this._updateOrder();
+  }
+
+  dropItem(event) {
+    console.dir(event);
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex);
+    }
+    this._updateOrder();
+  }
+
+  private _updateOrder() {
+    let i = 0;
+    for (let entity of this._entities) {
+      entity.order = i;
+      i++;
+      for (let j = 0; j < entity['children'].length; j++) {
+        entity['children'][j].parent = entity;
+        entity['children'][j].order = j;
+        j++;
+      }
+    }
+    console.log('updated order');
+    console.dir(this._entities);
+    this.updateOrder.emit(this._entities);
+  }
+
+  getConnectedList(): any[] {
+    return this.entities.map(x => `${x.id}`);
+  }
 
 
   @Input()

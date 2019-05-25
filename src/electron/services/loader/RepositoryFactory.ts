@@ -9,6 +9,18 @@ import { ChapterEntity } from '../../../app/entity/ChapterEntity';
 
 
 export class RepositoryFactory {
+
+    public static getChildRepository(channel: DataType, connectionName): Promise<Repository<BaseEntity>> {
+        return new Promise<Repository<BaseEntity>>((resolve, reject) => {
+            Logger.info('get child repository for channel ' + channel + " and connection " + connectionName);
+            if (channel == DataType.PARTS) {
+                resolve(getRepository(ChapterEntity, connectionName));
+            }
+            reject(ResponseType.ERROR_UNKNOWN_REPOSITORY);
+        })
+    }
+
+
     public static getRepository(channel: DataType, connectionName): Promise<Repository<BaseEntity>> {
         return new Promise<Repository<BaseEntity>>((resolve, reject) => {
             Logger.info('get repository for channel ' + channel + " and connection " + connectionName);

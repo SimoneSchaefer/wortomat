@@ -39,6 +39,7 @@ export class MainWindowEventListener {
         this.registerLoadSingleListener();
         this.registerOpenProjectListener();
         this.registerCloseProjectListener();
+        this.registerSaveAllListener();
         
     }
 
@@ -126,7 +127,7 @@ export class MainWindowEventListener {
     /** 
     * Called to load all entities of type #dataType
     * 
-    * #Channel.LOAD_SINGLE 
+    * #Channel.LOAD_ALL 
     * 
     * Required data: 
     * - request.data.dataType, which is of type Message#DataType
@@ -153,17 +154,39 @@ export class MainWindowEventListener {
     * 
     * Required data: 
     * - request.data.dataType, which is of type Message#DataType
-    * - request.data.model, which is of type AbstractBaseEntity
+    * - request.data.entity, which is of type AbstractBaseEntity
     * - request.data.connectionName, which is used to find the project database
 
     */
-    private registerCreateOrUpdateListener(): void {
+   private registerCreateOrUpdateListener(): void {
+    let $this = this;
+    this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
+        Logger.info("saving or updating entity of type " + request.data.dataType + " and connection " + request.data.connectionName);
+        let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
+        loader.createOrUpdate(request.data.entity)
+            .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
+            .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
+    });
+    }
+
+    /** 
+    * Called when a list of entities shall be updated
+    * 
+    * #Channel.CREATE_OR_UPDATE 
+    * 
+    * Required data: 
+    * - request.data.dataType, which is of type Message#DataType
+    * - request.data.entities, which is of type AbstractBaseEntity[]
+    * - request.data.connectionName, which is used to find the project database
+
+    */
+    private registerSaveAllListener(): void {
         let $this = this;
-        this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
-            Logger.info("saving or updating entity of type " + request.data.dataType + " and connection " + request.data.connectionName);
+        this.emitter.on(Channel.SAVE_ALL, function (evt: any, request: MessageRequest) {
+            Logger.info("saving all entities of type " + request.data.dataType + " and connection " + request.data.connectionName);
             let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
-            loader.createOrUpdate(request.data.entity)
-                .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
+            loader.saveAll(request.data.entities)
+                .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
         });
     }
