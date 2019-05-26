@@ -6,6 +6,6 @@ import { ChapterEntity } from "./ChapterEntity";
 @Entity()
 export class PartEntity extends BaseGroupEntity {
   
-    @OneToMany(type => ChapterEntity, chapter => chapter.parent)
+    @OneToMany(type => ChapterEntity, chapter => chapter.parent, {/*onUpdate : 'CASCADE'*/})
     children : Array<ChapterEntity>;
 }

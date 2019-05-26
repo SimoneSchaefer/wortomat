@@ -1,4 +1,4 @@
-import { FindOneOptions, FindManyOptions, Repository, getRepository, Entity, ObjectLiteral } from 'typeorm';
+import { Repository, getRepository, Entity, ObjectLiteral, FindOptions, FindOptionsOrder, FindOptionsRelation } from 'typeorm';
 
 import { Logger } from '../Logger';
 
@@ -21,7 +21,7 @@ export abstract class BaseLoader {
      * To be overwritten in subclasses in case 
      * special arguments for loading shall be used, e.g. relations or ordering
     */
-    protected getRelations() : string[]{
+    protected getRelations() : FindOptionsRelation<BaseEntity>{
         return [];
     }
 
@@ -31,7 +31,7 @@ export abstract class BaseLoader {
      * To be overwritten in subclasses in case 
      * special arguments for loading shall be used, e.g. relations or ordering
     */
-    protected getOrderBy() : { [P in keyof BaseEntity]?: "ASC"|"DESC"|1|-1 } {
+    protected getOrderBy() : FindOptionsOrder<BaseEntity> {
         return {};
      }
 
@@ -58,11 +58,11 @@ export abstract class BaseLoader {
      }
 
 
-     private getLoadOptions(id: number) {
+     private getLoadOptions(id: number) : FindOptions<BaseEntity> {
          return {
             relations : this.getRelations(),
             order: this.getOrderBy(),
-            where: this.getCondition(id)
+            //where: this.getCondition(id)
          }
      }
 
@@ -86,35 +86,50 @@ export abstract class BaseLoader {
 
 
 
+
+
+
+
+
     /**
      * Updates all entities. 
      * 
      * @param entity the entity to be saved
      */
     public saveAll(entities: BaseGroupEntity[]) : Promise<BaseEntity[]> {
-        Logger.info("saving all entities");
+        Logger.info("saving all entities, count is " + entities.length);
         return RepositoryFactory.getRepository(this.channel, this.connectionName)
             .then(repository => {
-                Logger.info("saving all entities II" );
-                
                 entities.forEach(e => {
-                    Logger.info(e.name);
+                    Logger.info(e.name + ' ' + e.id);
                     if (e['children']) {
+                        //Workaround: Typeorm apparently does not check relations for changes when doing updates.
+                        //So we need to update the children here. 
                         for (let child of e['children']) {
-                            Logger.info(child.name + ' ' + child.order);
                             RepositoryFactory.getChildRepository(this.channel, this.connectionName).then(rep => {
-                                Logger.info('saving child');
-                                rep.save(child);
+                                child.parent = e;
+                                Logger.info('Saving ' + child.name + ' ' + child.order + ' and parent ' + child.parent);
+                                this.saveWithWait(rep, child);
+
+
+
+
+
                             });
                         }
                     }
                 });
-                return repository.save(entities)
+                return repository.save(entities);
             }).catch(function(e) {
                 Logger.error("saving entities failed " + e);
                 return Promise.reject();
         });
     }
+
+    async saveWithWait(repository, entity) {
+        return await repository.save(entity);
+    }
+
 
 
 

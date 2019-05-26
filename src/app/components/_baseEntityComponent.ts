@@ -61,7 +61,7 @@ export abstract class BaseEntityComponent implements OnInit {
 
   updateOrder(entities: BaseGroupEntity[]) {
     let $this = this;
-    console.dir('updateOrder');
+    console.dir('baseEntityComponent#updateOrder');
     console.dir(entities);
     this._groupService.saveAll(entities, function(response) {
       if (response.responseType === ResponseType.SUCCESS) {

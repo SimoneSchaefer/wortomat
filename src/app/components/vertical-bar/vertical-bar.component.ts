@@ -3,6 +3,7 @@ import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { StateService, STATE } from '../../services/state.service';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { EntityListenerMetadata } from 'typeorm/metadata/EntityListenerMetadata';
 
 
 @Component({
@@ -120,7 +121,6 @@ export class VerticalBarComponent implements OnInit {
   }
 
   dropItem(event) {
-    console.dir(event);
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -138,9 +138,9 @@ export class VerticalBarComponent implements OnInit {
       entity.order = i;
       i++;
       for (let j = 0; j < entity['children'].length; j++) {
+        
         entity['children'][j].parent = entity;
         entity['children'][j].order = j;
-        j++;
       }
     }
     console.log('updated order');

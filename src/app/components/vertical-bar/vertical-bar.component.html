@@ -64,6 +64,7 @@
         </span>
           <span class="bold"  *ngIf="!editingChild(child)" >
             {{child.name ? child.name : entityType.toUpperCase() + '.CHILD_UNTITLED' | translate}}
+             - {{child.order}}
         </span>
 
         <div *ngIf="editingChild(child)" class="form-inline inline-editing m-1">
