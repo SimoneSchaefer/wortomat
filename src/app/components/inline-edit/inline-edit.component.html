@@ -7,23 +7,23 @@
   
   
     <!-- TITLE IN NO-EDIT-MODE-->
-  <div class="h6 group p-3 nav-item mb-0 border-bottom " *ngIf="!editing">
+  <div class="h6 group p-3 nav-item mb-0 border-bottom " [class.parent]="!isChild" *ngIf="!editing">
       <span class="ml-2">
         {{entity.name ? entity.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
       </span>
   </div>
 
   <!-- EDIT TITLE-->
-  <div *ngIf="editing" class="form-inline inline-editing m-1">
+  <div *ngIf="editing" class="form-inline inline-editing m-0 p-1">
     <div class="modal-mask"></div>
     <div class="border bg-white rounded pt-3 pb-3">
       <div class="form form-group w-100 p-1">
-        <small class="form-text text-muted" translate>NAME_HINT</small>
+        <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
         <input class="form-control w-100" type="text" [(ngModel)]="currentNameValue"/>
       </div>
       <div class="form form-group w-100 p-1">
-        <small class="form-text text-muted" translate>SUMMARY_HINT</small>
-        <textarea class="form-control pr-0" type="text" [(ngModel)]="currentSummaryValue"></textarea>
+        <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
+        <textarea class="form-control pr-0 w-100" type="text" [(ngModel)]="currentSummaryValue"></textarea>
       </div>
       <div class="button-group mt-1 w-100 p-1">
         <button class="btn btn-primary" (click)="update()">

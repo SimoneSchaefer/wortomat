@@ -12,12 +12,21 @@
   <!--ITERATE AL GROUPS-->
   <div *ngFor="let group of this.entities" cdkDropListGroup cdkDrag [cdkDragData]="group" >
 
-    <div class="parent navitem">
-      <!--GROUP HEADER-->
-      <app-inline-edit 
+    <div class="parent navitem clickable pl-0" (click)="toggle(group)">
+
+      <div class="d-flex align-items-center">
+      <span class="pl-3 flex-none" >
+        <i class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
+        <i class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>       
+        
+      </span>
+      <app-inline-edit class="flex-auto"
         [entity]="group" [entityType]="entityType" [isChild]="false"
         (onUpdate)="onParentUpdate(group)" (onNewChild)="onNewChild(group)" (onDelete)="onParentDelete(group)"
-      ></app-inline-edit>     
+      ></app-inline-edit>  
+
+      </div>
+   
     </div>
 
 
@@ -29,7 +38,7 @@
           [cdkDropListConnectedTo]="getConnectedList()">
         
         <!--Empty dummy icon to make dragging to empty containers possible-->
-        <div class="navitem entity groupcontainer child pl-3" *ngIf="!group.children?.length" cdkDrag >&nbsp;</div>
+        <div class="navitem entity groupcontainer child pl-0" *ngIf="!group.children?.length" cdkDrag >&nbsp;</div>
      
         <!-- Iterate children-->
         <div class="navitem entity groupcontainer child pl-3" *ngFor="let child of group.children" 

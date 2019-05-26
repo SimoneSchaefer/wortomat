@@ -21,6 +21,20 @@
 		}		
 	}	
 
+
+.parent .groupcontainer {
+	left: -2em;
+}
+
+
+	.flex-none {
+		flex: none;
+	}
+
+	.flex-auto {
+		flex: auto;
+	}
+
 	.child {
 		padding-left: 3em;
 	}

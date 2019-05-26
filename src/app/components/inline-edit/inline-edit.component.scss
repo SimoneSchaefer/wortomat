@@ -1,6 +1,8 @@
 
 
-
+.inline-editing {
+    position: fixed;
+}
 
 .inline-editing,
 .inline-editing * {
@@ -30,8 +32,8 @@
 
 .options {
     position: absolute;
-top: 0;
-padding: 0;
+    top: 0;
+    padding: 0;
     margin: 0;
     right: 0;
     background-color: transparent;
@@ -44,4 +46,13 @@ padding: 0;
         display: block;
 
     }
+}
+
+
+.h6 {
+    padding-right: 3em;
+}
+.parent.h6 {
+    font-weight: bold;
+    padding-right: 1em;
 }
