@@ -34,6 +34,7 @@ import { OptionalImageComponent } from './components/optional-image/optional-ima
 import { StateService } from './services/state.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import { InlineEditComponent } from './components/inline-edit/inline-edit.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -53,7 +54,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     ChapterEditComponent,
     VerticalBarComponent,
     ImageUploadComponent,
-    OptionalImageComponent
+    OptionalImageComponent,
+    InlineEditComponent
   ],
   imports: [
     BrowserModule,

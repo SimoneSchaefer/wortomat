@@ -42,7 +42,7 @@
     "CHAPTER_EDIT" : "Edit chapter",
     "CHAPTER_DELETE" : "Delete chapter",
     "UNTITLED" : "Untitled part",
-    "CHILD_UNTITLED" : "Untitled chapter",
+    "UNTITLED_CHILD" : "Untitled chapter",
     "CREATED_SUCCESS" : "Part has been created",
     "UPDATED_SUCCESS" : "Part has been updated",
     "CHILD_CREATED_SUCCESS" : "Chapter has been created"
@@ -50,5 +50,8 @@
   "CHOOSE_IMAGE" : "Choose image",
   "SAVE_SUCCESS" : "Saved",
   "SAVE_ERROR" : "Could not be saved",
-  "REALLY_DELETE" : "Are you sure?"
+  "REALLY_DELETE" : "Are you sure?",
+  "NAME_HINT" : "Enter name",
+  "SUMMARY_HINT" : "Enter summary"
+  
 }
