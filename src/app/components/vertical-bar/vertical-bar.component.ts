@@ -137,8 +137,7 @@ export class VerticalBarComponent implements OnInit {
     for (let entity of this._entities) {
       entity.order = i;
       i++;
-      for (let j = 0; j < entity['children'].length; j++) {
-        
+      for (let j = 0; j < entity['children'].length; j++) {        
         entity['children'][j].parent = entity;
         entity['children'][j].order = j;
       }

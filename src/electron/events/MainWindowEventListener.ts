@@ -33,20 +33,19 @@ export class MainWindowEventListener {
         this.registerOnAppyReadyListener();
         this.registerStoreSettingsListener();
         this.registerLoadAllListener();
-      /*  this.registerExportSettingsListener();*/
         this.registerCreateOrUpdateListener();
         this.registerDeleteSingleListener();
         this.registerLoadSingleListener();
         this.registerOpenProjectListener();
         this.registerCloseProjectListener();
-        this.registerSaveAllListener();
+        this.registerUpdateOrderListener();
         
+        /*  this.registerExportSettingsListener();*/
     }
 
 
     /** 
-     * Initialize Application,
-     * once the frontend has registered
+     * Initialize Application once the frontend has registered
      * 
      * #Channel.APP_READY
      * 
@@ -74,28 +73,25 @@ export class MainWindowEventListener {
      */
     private registerStoreSettingsListener(): void {
         let $this = this;
-        this.emitter.on(Channel.SETTINGS_STORED, function (evt: any, request: MessageRequest) {
+        this.emitter.on(Channel.SETTINGS_STORED, function (_: any, request: MessageRequest) {
             $this.respond(request.identifier, $this.settingsHandler.saveConfiguration(request.data));
         });
     }
 
 
-
-
-
-  
+ 
     /** 
-    * 
     * #Channel.OPEN_PROJECT 
     * 
     * Required data: 
     * - request.data.entity, which is of type AbstractBaseEntity
     * 
-    * Response: name of the DB connection to use. This name has to be passed for every further request
+    * Response: 
+    * - name: name of the DB connection to use. This name has to be passed for every further request
     */
     private registerOpenProjectListener(): void {
         let $this = this;
-        this.emitter.on(Channel.OPEN_PROJECT, function (evt: any, request: MessageRequest) {
+        this.emitter.on(Channel.OPEN_PROJECT, function (_: any, request: MessageRequest) {
             $this.dbHandler.createConnection($this.settingsHandler.getDbNameForProject(request.data.entity))
                 .then((result) => $this.respond(request.identifier, ResponseType.SUCCESS, result.name))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));        
@@ -110,12 +106,15 @@ export class MainWindowEventListener {
     * 
     * Required data: 
     * - request.data.connectionName, which is used to find the project database
+    * 
+    * Response: 
+    * - empty
     */
    private registerCloseProjectListener(): void {
     let $this = this;
-    this.emitter.on(Channel.CLOSE_PROJECT, function (evt: any, request: MessageRequest) {
+    this.emitter.on(Channel.CLOSE_PROJECT, function (_: any, request: MessageRequest) {
         $this.dbHandler.closeConnection(request.data.connectionName)
-            .then((result) => $this.respond(request.identifier, ResponseType.SUCCESS))
+            .then((_) => $this.respond(request.identifier, ResponseType.SUCCESS))
             .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
         });
     }
@@ -132,18 +131,21 @@ export class MainWindowEventListener {
     * Required data: 
     * - request.data.dataType, which is of type Message#DataType
     * - request.data.connectionName, which is used to find the project database
+    * 
+    * Response: 
+    * - entities: loaded entities
     */
    private registerLoadAllListener(): void {
     let $this = this;
 
-    this.emitter.on(Channel.LOAD_ALL, function (evt: any, request: MessageRequest) {
+    this.emitter.on(Channel.LOAD_ALL, function (_: any, request: MessageRequest) {
         let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
         Logger.debug(`load all: ` + JSON.stringify(request));
         loader.loadAll()
             .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
             .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
-    });
-}
+        });
+    }
 
 
 
@@ -154,42 +156,102 @@ export class MainWindowEventListener {
     * 
     * Required data: 
     * - request.data.dataType, which is of type Message#DataType
-    * - request.data.entity, which is of type AbstractBaseEntity
+    * - request.data.entity, which is of type BaseEntity
     * - request.data.connectionName, which is used to find the project database
-
+    * 
+    * Response: 
+    * - entity: updated entity
     */
    private registerCreateOrUpdateListener(): void {
     let $this = this;
-    this.emitter.on(Channel.CREATE_OR_UPDATE, function (evt: any, request: MessageRequest) {
+    this.emitter.on(Channel.CREATE_OR_UPDATE, function (_: any, request: MessageRequest) {
         Logger.info("saving or updating entity of type " + request.data.dataType + " and connection " + request.data.connectionName);
         let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
         loader.createOrUpdate(request.data.entity)
             .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
             .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
-    });
+        });
     }
 
     /** 
-    * Called when a list of entities shall be updated
+    * Called when the order of entities shall be updated
     * 
-    * #Channel.CREATE_OR_UPDATE 
+    * #Channel.UPDATE_ORDER 
     * 
     * Required data: 
     * - request.data.dataType, which is of type Message#DataType
-    * - request.data.entities, which is of type AbstractBaseEntity[]
+    * - request.data.entities, which is of type BaseEntity[]
     * - request.data.connectionName, which is used to find the project database
-
+    * 
+    * Response: 
+    * - entities: updated entities
     */
-    private registerSaveAllListener(): void {
+    private registerUpdateOrderListener(): void {
         let $this = this;
-        this.emitter.on(Channel.SAVE_ALL, function (evt: any, request: MessageRequest) {
-            Logger.info("saving all entities of type " + request.data.dataType + " and connection " + request.data.connectionName);
+        this.emitter.on(Channel.UPDATE_ORDER, function (_: any, request: MessageRequest) {
+            Logger.info("updating order for all entities of type " + request.data.dataType + " and connection " + request.data.connectionName);
             let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
-            loader.saveAll(request.data.entities)
+            loader.updateOrder(request.data.entities)
                 .then((entities) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entities: entities}))
                 .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
         });
     }
+
+
+    /** 
+    * Called to load an entity with a specific id
+    * 
+    * #Channel.LOAD_SINGLE 
+    * 
+    * Required data: 
+    * - request.data.dataType, which is of type Message#DataType
+    * - request.data.id, which is of type number
+    * - request.data.connectionName, which is used to find the project database
+    * 
+    * Response: 
+    * - entity: loaded entity
+    */
+    private registerLoadSingleListener(): void {
+        let $this = this;
+        this.emitter.on(Channel.LOAD_SINGLE, function (evt: any, request: MessageRequest) {
+            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
+            loader.loadSingle(request.data.id)
+                .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
+                .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
+        });
+    }
+
+
+
+
+
+
+
+    /** 
+    * Called to delete an entity with a specific id
+    * 
+    * #Channel.DELETE_SINGLE 
+    * 
+    * Required data: 
+    * - request.data.dataType, which is of type Message#DataType
+    * - request.data.id, which is of type number
+    * - request.data.connectionName, which is used to find the project database
+    * 
+    * Respnse: 
+    * empty
+    */
+    private registerDeleteSingleListener(): void {
+        let $this = this;
+        this.emitter.on(Channel.DELETE_SINGLE, function (evt: any, request: MessageRequest) {
+            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
+            loader.removeSingle(request.data.id)
+                .then(() => $this.respond(request.identifier, ResponseType.SUCCESS))
+                .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
+        });
+    }
+
+
+
 
 
 
@@ -229,56 +291,6 @@ export class MainWindowEventListener {
             }
         });
     }*/
-
-
-
-    /** 
-    * Called to load an entity with a specific id
-    * 
-    * #Channel.LOAD_SINGLE 
-    * 
-    * Required data: 
-    * - request.data.dataType, which is of type Message#DataType
-    * - request.data.id, which is of type number
-    * - request.data.connectionName, which is used to find the project database
-
-    */
-    private registerLoadSingleListener(): void {
-        let $this = this;
-        this.emitter.on(Channel.LOAD_SINGLE, function (evt: any, request: MessageRequest) {
-            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
-            loader.loadSingle(request.data.id)
-                .then((entity) => $this.respond(request.identifier, ResponseType.SUCCESS, "", {entity: entity}))
-                .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
-        });
-    }
-
-
-
-
-
-
-
-    /** 
-    * Called to delete an entity with a specific id
-    * 
-    * #Channel.DELETE_SINGLE 
-    * 
-    * Required data: 
-    * - request.data.dataType, which is of type Message#DataType
-    * - request.data.id, which is of type number
-    *  - request.data.connectionName, which is used to find the project database
-
-    */
-    private registerDeleteSingleListener(): void {
-        let $this = this;
-        this.emitter.on(Channel.DELETE_SINGLE, function (evt: any, request: MessageRequest) {
-            let loader = LoaderFactory.getLoader(request.data.dataType, request.data.connectionName, $this.dbHandler);
-            loader.removeSingle(request.data.id)
-                .then(() => $this.respond(request.identifier, ResponseType.SUCCESS))
-                .catch(error => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, error));
-        });
-    }
 
 
 

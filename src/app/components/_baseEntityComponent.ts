@@ -121,8 +121,9 @@ export abstract class BaseEntityComponent implements OnInit {
     let $this = this;
     $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
-        $this.entities = response.data.entities;
-
+        $this.entities = response.data.entities; 
+        
+        //WTF Workaround. Sometimes, group-member assignment is lost in update. 
         
 
 

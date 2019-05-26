@@ -52,7 +52,7 @@ export enum Channel {
     OPEN_PROJECT = "open-project",
     CLOSE_PROJECT = "close-project",
     CREATE_OR_UPDATE="create-or-update",
-    SAVE_ALL="save-all",
+    UPDATE_ORDER="update-order",
     LOAD_SINGLE = "load-single",
     LOAD_ALL = "load-all",
     DELETE_SINGLE = "delete-single"

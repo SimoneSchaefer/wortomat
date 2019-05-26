@@ -1,16 +1,9 @@
-import { Repository, getRepository, Entity, ObjectLiteral, FindOptions, FindOptionsOrder, FindOptionsRelation } from 'typeorm';
-
+import { ObjectLiteral, FindOptions, FindOptionsOrder, FindOptionsRelation } from 'typeorm';
 import { Logger } from '../Logger';
-
 import { RepositoryFactory} from './RepositoryFactory'
 import { BaseEntity } from '../../../app/entity/_baseEntity';
-
-import { UiMessageHandler } from "../UiMessageHandler";
-import { ProjectEntity } from '../../../app/entity/ProjectEntity';
-import { Channel, DataType } from '../../../app/message/Message';
-import { log } from 'electron-log';
+import { DataType } from '../../../app/message/Message';
 import { BaseGroupEntity } from '../../../app/entity/_baseGroupEntity';
-import { ChildrenOutletContexts } from '@angular/router';
 
 export abstract class BaseLoader {
 
@@ -96,40 +89,31 @@ export abstract class BaseLoader {
      * 
      * @param entity the entity to be saved
      */
-    public saveAll(entities: BaseGroupEntity[]) : Promise<BaseEntity[]> {
+    public updateOrder(entities: BaseGroupEntity[]) : Promise<BaseEntity[]> {
         Logger.info("saving all entities, count is " + entities.length);
+        let childChannel = 'chapter_entity';
         return RepositoryFactory.getRepository(this.channel, this.connectionName)
             .then(repository => {
                 entities.forEach(e => {
                     Logger.info(e.name + ' ' + e.id);
                     if (e['children']) {
                         //Workaround: Typeorm apparently does not check relations for changes when doing updates.
-                        //So we need to update the children here. 
+                        //Also, under some circumstances, relation between children and parents are lost (?)
+                        //So we need to update the children here manually. 
                         for (let child of e['children']) {
                             RepositoryFactory.getChildRepository(this.channel, this.connectionName).then(rep => {
-                                child.parent = e;
-                                Logger.info('Saving ' + child.name + ' ' + child.order + ' and parent ' + child.parent);
-                                this.saveWithWait(rep, child);
-
-
-
-
-
+                                rep.query("update " + childChannel + " set 'order'=" + child.order + ", parentId="+e.id+" where id=" + child.id);                            
                             });
                         }
                     }
                 });
-                return repository.save(entities);
+                return repository.save(entities, {reload: false});
             }).catch(function(e) {
                 Logger.error("saving entities failed " + e);
                 return Promise.reject();
         });
     }
-
-    async saveWithWait(repository, entity) {
-        return await repository.save(entity);
-    }
-
+    
 
 
 

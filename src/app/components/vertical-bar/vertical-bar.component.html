@@ -55,6 +55,8 @@
           [cdkDropListData]="group.children" 
           (cdkDropListDropped)="dropItem($event)"
           [cdkDropListConnectedTo]="getConnectedList()">
+      <li class="nav-item pl-2 entity groupcontainer" 
+        *ngIf="!group.children?.length" cdkDrag ></li>
       <li class="nav-item pl-2 entity grabbable groupcontainer" 
         (click)="selectEntity(child)" *ngFor="let child of group.children" [class.active]="selectedEntity==child"
          cdkDrag [cdkDragData]="child">
