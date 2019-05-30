@@ -6,18 +6,29 @@ import { SettingsProvider } from "../SettingsProvider";
 import { DBService } from "../DBService";
 import { PartLoader } from "./PartLoader";
 import { ChapterLoader } from "./ChapterLoader";
+import { CharactergroupLoader } from "./CharactergroupLoader";
+import { CharacterLoader } from "./CharacterLoader";
 
 
 export class LoaderFactory {
     public static getLoader(type : DataType, connectionName : string, databaseHandler : DBService) : BaseLoader {
+
         if (type === DataType.PROJECTS) {
             return new ProjectLoader(connectionName, databaseHandler);
         }
+        //return new BaseLoader(type, connectionName);
+        
         if (type === DataType.PARTS) {
             return new PartLoader(connectionName);
         }
         if (type === DataType.CHAPTERS) {
             return new ChapterLoader(connectionName);
+        }
+        if (type === DataType.CHARACTER_GROUPS) {
+            return new CharactergroupLoader(connectionName);
+        }
+        if (type === DataType.CHARACTERS) {
+            return new CharacterLoader(connectionName);
         }
         /*
         if (type === DataType.SCENES) {
@@ -36,7 +47,7 @@ export class LoaderFactory {
         if (type === DataType.PARTS) {
             return new PartLoader();
         }*/
-        Logger.error("Unknown entity data type: " + type);
-        return null;
+        /*Logger.error("Unknown entity data type: " + type);
+        return null;*/
     }
 }

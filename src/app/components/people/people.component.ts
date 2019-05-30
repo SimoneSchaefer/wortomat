@@ -9,17 +9,20 @@ import { PartEntity } from '../../entity/PartEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { ChapterEntity } from '../../entity/ChapterEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
+import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
+import { CharacterGroupService } from '../../services/electron/character-group.service';
+import { CharacterService } from '../../services/electron/character.service';
 
 @Component({
-  selector: 'app-parts',
-  templateUrl: './parts.component.html',
-  styleUrls: ['./parts.component.scss']
+  selector: 'app-people',
+  templateUrl: './people.component.html',
+  styleUrls: ['./people.component.scss']
 })
-export class PartsComponent extends BaseEntityComponent  {
+export class PeopleComponent extends BaseEntityComponent  {
 
   constructor(
-    _groupService: PartService, 
-    _memberService : ChapterService,
+    _groupService: CharacterGroupService, 
+    _memberService : CharacterService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService) {
@@ -40,6 +43,6 @@ export class PartsComponent extends BaseEntityComponent  {
     return member;
   }
   protected entityType() : ENTITY_TYPE {
-    return ENTITY_TYPE.PARTS;
+    return ENTITY_TYPE.CHARACTERS;
   }
 }

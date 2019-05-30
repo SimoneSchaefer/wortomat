@@ -19,14 +19,12 @@ import { ElectronService } from './services/electron/electron.service';
 import { WebviewDirective } from './directives/webview.directive';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './components/home/home.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { SettingsComponent } from './components/settings/settings.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { AlertService } from './services/alert.service';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 import { PartsComponent } from './components/parts/parts.component';
-import { ChapterEditComponent } from './components/chapter-edit/chapter-edit.component';
 import { VerticalBarComponent } from './components/vertical-bar/vertical-bar.component';
 import { ImageUploadComponent } from './components/image-upload/image-upload.component';
 import { ImageUploadModule } from 'ng2-imageupload';
@@ -35,6 +33,10 @@ import { StateService } from './services/state.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { InlineEditComponent } from './components/inline-edit/inline-edit.component';
+import { PeopleComponent } from './components/people/people.component';
+import { LocationsComponent } from './components/locations/locations.component';
+import { PlotlinesComponent } from './components/plotlines/plotlines.component';
+import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -44,18 +46,20 @@ export function HttpLoaderFactory(http: HttpClient) {
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent,
     WebviewDirective,
     LoadingComponent,
     SettingsComponent,
     ProjectsComponent,
     ProjectEditComponent,
     PartsComponent,
-    ChapterEditComponent,
     VerticalBarComponent,
     ImageUploadComponent,
     OptionalImageComponent,
-    InlineEditComponent
+    InlineEditComponent,
+    PeopleComponent,
+    LocationsComponent,
+    PlotlinesComponent,
+    BackgroundsComponent
   ],
   imports: [
     BrowserModule,

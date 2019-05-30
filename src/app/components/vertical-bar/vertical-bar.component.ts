@@ -12,7 +12,7 @@ import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 })
 export class VerticalBarComponent implements OnInit {
 
-  private _entities: BaseEntity[];
+  private _entities: BaseGroupEntity[];
   private _selectedEntity: BaseEntity;
   private _entityType : ENTITY_TYPE;
 
@@ -134,7 +134,7 @@ export class VerticalBarComponent implements OnInit {
   ///////////GETTER/SETTER//////////////
   //////////////////////////////////////  
   @Input()
-  set entities(value: BaseEntity[]) {
+  set entities(value: BaseGroupEntity[]) {
     this._entities = value;
   }
   @Input()
@@ -145,7 +145,7 @@ export class VerticalBarComponent implements OnInit {
   set selectedEntity(value: BaseEntity) {
     this._selectedEntity = value;
   }
-  get entities(): BaseEntity[] {
+  get entities(): BaseGroupEntity[] {
     return this._entities;
   }
   get entityType(): ENTITY_TYPE {

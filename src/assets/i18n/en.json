@@ -5,6 +5,7 @@
     "PLOTLINES" : "Plotlines",
     "CHARACTERS" : "People",
     "LOCATIONS" : "Locations",
+    "BACKGROUNDS" : "Backgrounds",
     "EXPORT" : "Export", 
     "ABOUT" : "About",
     "CLOSE" : "Close Project"

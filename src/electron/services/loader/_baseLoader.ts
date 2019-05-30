@@ -5,27 +5,31 @@ import { BaseEntity } from '../../../app/entity/_baseEntity';
 import { DataType } from '../../../app/message/Message';
 import { BaseGroupEntity } from '../../../app/entity/_baseGroupEntity';
 
-export abstract class BaseLoader {
+export class BaseLoader {
 
     constructor(protected channel: DataType, protected connectionName : string) {}
 
 
+
+      /** 
+     * To be overwritten in subclasses in case 
+     * special arguments for loading shall be used, e.g. relations or ordering
+    */    
+    protected getOrderBy() : { [P in keyof BaseEntity]?: "ASC"|"DESC"|1|-1 } {
+     //   return {["order"] : 'ASC'};
+     return {};
+     }
+
+
+
     /** 
      * To be overwritten in subclasses in case 
      * special arguments for loading shall be used, e.g. relations or ordering
     */
-    protected getRelations() : FindOptionsRelation<BaseEntity>{
-        return [];
-    }
-
-
-
-    /** 
-     * To be overwritten in subclasses in case 
-     * special arguments for loading shall be used, e.g. relations or ordering
-    */
-    protected getOrderBy() : FindOptionsOrder<BaseEntity> {
-        return {};
+ 
+     protected getRelations() : string[]{
+       //  return ["children"];
+       return [];
      }
 
 
@@ -70,7 +74,7 @@ export abstract class BaseLoader {
         return this.beforeCreate(entity).then(() => {
             return RepositoryFactory.getRepository(this.channel, this.connectionName)
             .then(repository => {
-                return repository.save(entity)
+                return repository.save(entity as any)
             });
         }).catch(function() {
             return Promise.reject();
@@ -107,7 +111,7 @@ export abstract class BaseLoader {
                         }
                     }
                 });
-                return repository.save(entities, {reload: false});
+                return repository.save(entities as any[], {reload: false});
             }).catch(function(e) {
                 Logger.error("saving entities failed " + e);
                 return Promise.reject();
@@ -123,7 +127,7 @@ export abstract class BaseLoader {
      * @param id the associated project. Pass -1 if all entities shall be loaded
         * 
      */
-    public loadAll() : Promise<BaseEntity[]>  {
+    public loadAll() : Promise<BaseGroupEntity[]>  {
         return RepositoryFactory.getRepository(this.channel, this.connectionName)
         .then(repository => {
             return repository.find(this.getLoadOptions(-1))
@@ -183,7 +187,7 @@ export abstract class BaseLoader {
         return this.loadSingle(id)
         .then(entity => {
             RepositoryFactory.getRepository($this.channel, this.connectionName).then(repository => {
-                return repository.remove(entity);
+                return repository.remove(entity as BaseGroupEntity);
             });
         }).catch(function() {
             return Promise.reject();
