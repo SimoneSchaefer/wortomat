@@ -39,8 +39,12 @@ export enum DataType {
     CHAPTERS = "chapters",
     CHARACTERS = "characters",
     CHARACTER_GROUPS = "characterGroups",
+    PLOTLINE_GROUPS = "plotlineGroups",
     PLOTLINES = "plotlines",
-    SCENES = "scenes",
+    LOCATIONS = "locations", 
+    LOCATION_GROUPS = "locationGroups", 
+    BACKGROUND = "background",
+    BACKGROUND_GROUPS = "backgroundGroups",
     PROJECTS = "projects",
     PARTS = "parts"
 }

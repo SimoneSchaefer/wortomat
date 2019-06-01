@@ -16,8 +16,7 @@ export class BaseLoader {
      * special arguments for loading shall be used, e.g. relations or ordering
     */    
     protected getOrderBy() : { [P in keyof BaseEntity]?: "ASC"|"DESC"|1|-1 } {
-     //   return {["order"] : 'ASC'};
-     return {};
+        return {["order"] : 'ASC'};
      }
 
 
@@ -127,12 +126,13 @@ export class BaseLoader {
      * @param id the associated project. Pass -1 if all entities shall be loaded
         * 
      */
-    public loadAll() : Promise<BaseGroupEntity[]>  {
+    public loadAll() : Promise<BaseEntity[]>  {
         return RepositoryFactory.getRepository(this.channel, this.connectionName)
         .then(repository => {
             return repository.find(this.getLoadOptions(-1))
             .then(entities => {
-              //  Logger.info('setting order on ' + entities);
+
+                Logger.info('entities loaded ' + entities);
                 entities.forEach(entity => {
                     if (entity['children']) {
                       //  Logger.info('inspecting entity with ' + entity['children'].length + ' children');
@@ -154,7 +154,8 @@ export class BaseLoader {
                 });
                 return entities;
             })
-        }).catch(function() {
+        }).catch(function(e) {
+            console.error('error: ' + e);
             return Promise.reject();
         });
     }

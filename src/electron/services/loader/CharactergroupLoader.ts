@@ -1,18 +1,12 @@
 import { DataType } from '../../../app/message/Message';
 import { BaseLoader } from './_baseLoader';
 import { PartEntity } from '../../../app/entity/PartEntity';
+import { BaseGroupLoader } from './_baseGroupLoader';
 
 
-export class CharactergroupLoader extends BaseLoader {
+export class CharactergroupLoader extends BaseGroupLoader {
     constructor(connectionName : string) {
         super(DataType.CHARACTERS, connectionName);
     }
    
-    protected getOrderBy() : { [P in keyof PartEntity]?: "ASC"|"DESC"|1|-1 } {
-       return {["order"] : 'ASC'};
-    }
-
-    protected getRelations() : string[]{
-        return ["children"];
-    }
 }

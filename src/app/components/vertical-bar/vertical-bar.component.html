@@ -12,10 +12,10 @@
   <!--ITERATE AL GROUPS-->
   <div *ngFor="let group of this.entities" cdkDropListGroup cdkDrag [cdkDragData]="group" >
 
-    <div class="parent navitem clickable pl-0" (click)="toggle(group)">
+    <div class="parent navitem pl-0">
 
       <div class="d-flex align-items-center">
-      <span class="pl-3 flex-none" >
+      <span class="pl-3 flex-none clickable"  (click)="toggle(group)">
         <i class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
         <i class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>       
         

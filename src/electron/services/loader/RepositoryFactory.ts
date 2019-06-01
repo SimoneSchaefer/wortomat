@@ -9,6 +9,7 @@ import { ChapterEntity } from '../../../app/entity/ChapterEntity';
 import { BaseChildEntity } from '../../../app/entity/_baseChildEntity';
 import { BaseGroupEntity } from '../../../app/entity/_baseGroupEntity';
 import { CharacterGroupEntity } from '../../../app/entity/CharacterGroupEntity';
+import { CharacterEntity } from '../../../app/entity/CharacterEntity';
 
 
 export class RepositoryFactory {
@@ -24,7 +25,7 @@ export class RepositoryFactory {
     }
 
 
-    public static getRepository(channel: DataType, connectionName): Promise<Repository<BaseGroupEntity>> {
+    public static getRepository(channel: DataType, connectionName): Promise<Repository<BaseEntity>> {
         return new Promise<Repository<any>>((resolve, reject) => {
             Logger.info('get repository for channel ' + channel + " and connection " + connectionName);
             if (channel == DataType.PROJECTS) {
@@ -34,7 +35,13 @@ export class RepositoryFactory {
             if (channel == DataType.PARTS) {
                 resolve(getRepository(PartEntity, connectionName));
             }
+            if (channel == DataType.CHAPTERS) {
+                resolve(getRepository(ChapterEntity, connectionName));
+            }
             if (channel == DataType.CHARACTERS) {
+                resolve(getRepository(CharacterEntity, connectionName));
+            }
+            if (channel == DataType.CHARACTER_GROUPS) {
                 resolve(getRepository(CharacterGroupEntity, connectionName));
             }
             /*
