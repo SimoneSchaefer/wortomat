@@ -22,9 +22,7 @@
       </span>
       <app-inline-edit class="flex-auto w-80"
         [entity]="group" [entityType]="entityType" [isChild]="false"
-        (onUpdate)="onParentUpdate(group)" (onNewChild)="onNewChild(group)" (onDelete)="onParentDelete(group)"
-      ></app-inline-edit>  
-
+        (onUpdate)="onParentUpdate(group)" (onNewChild)="onNewChild(group)" (onDelete)="onParentDelete(group)"></app-inline-edit>  
       </div>
    
     </div>
@@ -43,10 +41,19 @@
         <!-- Iterate children-->
         <div class="navitem entity groupcontainer child pl-3" *ngFor="let child of group.children" 
           (click)="selectEntity(child)" [class.active]="selectedEntity==child" cdkDrag [cdkDragData]="child">
-          <app-inline-edit 
+          <div class="row border-bottom">
+            <div class="col-3 pl-0 pr-0">
+            <app-optional-image [baseEntity]="child"  [css]="'thumbnail w-100'" [entityType]="entityType"></app-optional-image>
+            </div>
+            <div class="col-9 pl-0 pr-0">
+            <app-inline-edit 
             [entity]="child" [entityType]="entityType" [isChild]="true"
             (onUpdate)="onChildUpdate(child)"  (onDelete)="onChildDelete(child)"
           ></app-inline-edit>  
+          </div>
+          </div>
+
+         
         </div>
   </div>
 </div>

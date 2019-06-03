@@ -7,10 +7,13 @@
   
   
     <!-- TITLE IN NO-EDIT-MODE-->
-  <div class="h6 group p-3 nav-item mb-0 border-bottom " [class.parent]="!isChild" *ngIf="!editing">
-      <span class="ml-2">
+  <div class="h6 group p-3 nav-item mb-0 " [class.parent]="!isChild" *ngIf="!editing">
+      <div class="ml-2">
         {{entity.name ? entity.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
-      </span>
+      </div>      
+      <div class="ml-2 small hint" *ngIf="entity.summary">
+        {{entity.summary}}
+      </div>
   </div>
 
   <!-- EDIT TITLE-->
@@ -18,12 +21,13 @@
     <div class="modal-mask"></div>
     <div class="border bg-white rounded pt-3 pb-3">
       <div class="form form-group w-100 p-1">
+        <div><app-image-upload [baseEntity]="entity" [entityType]="entityType"></app-image-upload></div>
         <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
         <input class="form-control w-100" type="text" [(ngModel)]="currentNameValue"/>
       </div>
       <div class="form form-group w-100 p-1">
         <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
-        <textarea class="form-control pr-0 w-100" type="text" [(ngModel)]="currentSummaryValue"></textarea>
+        <input class="form-control pr-0 w-100" type="text" [(ngModel)]="currentSummaryValue" />
       </div>
       <div class="button-group mt-1 w-100 p-1">
         <button class="btn btn-primary" (click)="update()">

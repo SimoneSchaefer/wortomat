@@ -14,13 +14,13 @@
 <div class="main-wrapper">
   <div class="container">
     <div *ngIf="!entities?.length" class="jumbotron w-100">
-      <h1 class="display-6" translate>PARTS.NONE_YET_HEADER</h1>
-      <span translate>PARTS.NONE_YET_INFO</span>
+      <h1 class="display-6" translate>{{(entityType() | uppercase)  + '.NONE_YET_HEADER' | translate}}</h1>
+      <span translate>{{(entityType() | uppercase)  + '.NONE_YET_INFO' | translate}}</span>
     </div>
     
     <div *ngIf="entities?.length&&!selectedEntity" class="jumbotron w-100">
-      <h1 class="display-6" translate>PARTS.NO_CHILDREN_YET_HEADER</h1>
-      <span translate>PARTS.NO_CHILDREN_YET_INFO</span>
+      <h1 class="display-6">{{(entityType() | uppercase)  + '.NO_CHILDREN_YET_HEADER' | translate}}></h1>
+      <span>{{(entityType() | uppercase)  + '.NO_CHILDREN_YET_INFO' | translate}}</span>
     </div>
 
 
