@@ -1,24 +1,24 @@
 import { Component } from '@angular/core';
 import { BaseEntityComponent } from '../_baseEntityComponent';
-import { PartService } from '../../services/electron/part.service';
 import { OpenProjectService } from '../../services/open-project.service';
 import { AlertService } from '../../services/alert.service';
-import { ChapterService } from '../../services/electron/chapter.service';
 import { TranslateService } from '@ngx-translate/core';
-import { PartEntity } from '../../entity/PartEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
-import { ChapterEntity } from '../../entity/ChapterEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
+import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
+import { CharacterGroupService } from '../../services/electron/character-group.service';
+import { CharacterService } from '../../services/electron/character.service';
+import { CharacterEntity } from '../../entity/CharacterEntity';
 
 @Component({
-  selector: 'app-parts',
+  selector: 'app-people',
   templateUrl: '../_baseEntityComponent.html'
 })
-export class PartsComponent extends BaseEntityComponent  {
+export class PeopleComponent extends BaseEntityComponent  {
 
   constructor(
-    _groupService: PartService, 
-    _memberService : ChapterService,
+    _groupService: CharacterGroupService, 
+    _memberService : CharacterService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService) {
@@ -31,14 +31,14 @@ export class PartsComponent extends BaseEntityComponent  {
 
 
   protected newGroup() : BaseGroupEntity {
-    return new PartEntity();
+    return new CharacterGroupEntity();
   }
-  protected newMember(parent : PartEntity) : BaseEntity {
-    let member = new ChapterEntity();
+  protected newMember(parent : CharacterGroupEntity) : BaseEntity {
+    let member = new CharacterEntity();
     member.parent = parent;
     return member;
   }
   protected entityType() : ENTITY_TYPE {
-    return ENTITY_TYPE.PARTS;
+    return ENTITY_TYPE.CHARACTERS;
   }
 }

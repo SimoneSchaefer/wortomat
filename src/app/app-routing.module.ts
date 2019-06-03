@@ -6,7 +6,10 @@ import { ProjectsComponent } from './components/projects/projects.component';
 import { ProjectEditComponent } from './components/project-edit/project-edit.component';
 import { ConnectionGuard } from './guards/connection.guard';
 import { PartsComponent } from './components/parts/parts.component';
-import { ChapterEditComponent } from './components/chapter-edit/chapter-edit.component';
+import { PeopleComponent } from './components/people/people.component';
+import { LocationsComponent } from './components/locations/locations.component';
+import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
+import { PlotlinesComponent } from './components/plotlines/plotlines.component';
 
 const routes: Routes = [
   {
@@ -35,13 +38,21 @@ const routes: Routes = [
     component : PartsComponent
   },
   {
-    path : 'chapters/add/:partId',
-    component : ChapterEditComponent
+    path : 'people',
+    component : PeopleComponent
   },
   {
-    path : 'chapters/edit/:id',
-    component : ChapterEditComponent
+    path : 'locations',
+    component : LocationsComponent
   },
+  {
+    path : 'backgrounds',
+    component : BackgroundsComponent
+  },
+  {
+    path : 'plotlines',
+    component : PlotlinesComponent
+  }
 ];
 
 

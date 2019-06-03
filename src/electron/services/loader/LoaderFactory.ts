@@ -6,36 +6,23 @@ import { SettingsProvider } from "../SettingsProvider";
 import { DBService } from "../DBService";
 import { PartLoader } from "./PartLoader";
 import { ChapterLoader } from "./ChapterLoader";
+import { CharactergroupLoader } from "./CharactergroupLoader";
+import { CharacterLoader } from "./CharacterLoader";
+import { BaseGroupLoader } from "./_baseGroupLoader";
 
 
 export class LoaderFactory {
     public static getLoader(type : DataType, connectionName : string, databaseHandler : DBService) : BaseLoader {
+
         if (type === DataType.PROJECTS) {
             return new ProjectLoader(connectionName, databaseHandler);
+        }       
+        if ([DataType.PARTS, DataType.CHARACTER_GROUPS, DataType.LOCATION_GROUPS, DataType.BACKGROUND_GROUPS, DataType.PLOTLINE_GROUPS].includes(type)) {
+            return new BaseGroupLoader(type, connectionName);
         }
-        if (type === DataType.PARTS) {
-            return new PartLoader(connectionName);
+        if ([DataType.CHAPTERS, DataType.CHARACTERS, DataType.LOCATIONS, DataType.BACKGROUND, DataType.PLOTLINES].includes(type)) {
+            return new BaseLoader(type, connectionName);
         }
-        if (type === DataType.CHAPTERS) {
-            return new ChapterLoader(connectionName);
-        }
-        /*
-        if (type === DataType.SCENES) {
-            return new SceneLoader();
-        }
-        if (type === DataType.CHARACTERS) {
-            return new CharacterLoader();
-        }
-        if (type === DataType.CHARACTER_GROUPS) {
-            return new CharacterGroupLoader();
-        }
-        if (type === DataType.PLOTLINES) {
-            return new PlotlineLoader();
-        }
-        
-        if (type === DataType.PARTS) {
-            return new PartLoader();
-        }*/
         Logger.error("Unknown entity data type: " + type);
         return null;
     }

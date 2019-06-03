@@ -1,24 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BaseEntityComponent } from '../_baseEntityComponent';
-import { PartService } from '../../services/electron/part.service';
+import { PlotlineGroupEntity } from '../../entity/PlotlineGroupEntity';
+import { PlotlineGroupService } from '../../services/electron/plotline-group.service';
+import { PlotlineService } from '../../services/electron/plotline.service';
 import { OpenProjectService } from '../../services/open-project.service';
 import { AlertService } from '../../services/alert.service';
-import { ChapterService } from '../../services/electron/chapter.service';
 import { TranslateService } from '@ngx-translate/core';
-import { PartEntity } from '../../entity/PartEntity';
-import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
-import { ChapterEntity } from '../../entity/ChapterEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
+import { PlotlineEntity } from '../../entity/PlotlineEntity';
+import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 
 @Component({
-  selector: 'app-parts',
+  selector: 'app-plotlines',  
   templateUrl: '../_baseEntityComponent.html'
 })
-export class PartsComponent extends BaseEntityComponent  {
+export class PlotlinesComponent  extends BaseEntityComponent  {
 
   constructor(
-    _groupService: PartService, 
-    _memberService : ChapterService,
+    _groupService: PlotlineGroupService, 
+    _memberService : PlotlineService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService) {
@@ -31,14 +31,14 @@ export class PartsComponent extends BaseEntityComponent  {
 
 
   protected newGroup() : BaseGroupEntity {
-    return new PartEntity();
+    return new PlotlineGroupEntity();
   }
-  protected newMember(parent : PartEntity) : BaseEntity {
-    let member = new ChapterEntity();
+  protected newMember(parent : PlotlineGroupEntity) : BaseEntity {
+    let member = new PlotlineEntity();
     member.parent = parent;
     return member;
   }
   protected entityType() : ENTITY_TYPE {
-    return ENTITY_TYPE.PARTS;
+    return ENTITY_TYPE.PLOTLINES;
   }
 }

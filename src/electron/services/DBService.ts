@@ -7,6 +7,14 @@ import * as fs from 'fs';
 import { ProjectEntity } from "../../app/entity/ProjectEntity";
 import { PartEntity } from "../../app/entity/PartEntity";
 import { ChapterEntity } from "../../app/entity/ChapterEntity";
+import { CharacterGroupEntity } from "../../app/entity/CharacterGroupEntity";
+import { CharacterEntity } from "../../app/entity/CharacterEntity";
+import { LocationGroupEntity } from "../../app/entity/LocationGroupEntity";
+import { LocationEntity } from "../../app/entity/LocationEntity";
+import { BackgroundGroupEntity } from "../../app/entity/BackgroundGroupEntity";
+import { BackgroundEntity } from "../../app/entity/BackgroundEntity";
+import { PlotlineGroupEntity } from "../../app/entity/PlotlineGroupEntity";
+import { PlotlineEntity } from "../../app/entity/PlotlineEntity";
 
 
 export class DBService {
@@ -29,7 +37,14 @@ export class DBService {
         let name =  dbName ? dbName : "main";
         let shouldSync = this.shouldSync(dbPath);
         Logger.debug(`Try to connect to database: ${dbPath}, sync is: ${shouldSync}`);
-        let entities = name === 'main' ? [ProjectEntity] : [PartEntity, ChapterEntity];
+        let entities = name === 'main' ? [ProjectEntity] : [
+            PartEntity, ChapterEntity, 
+            CharacterGroupEntity, CharacterEntity,
+            LocationGroupEntity, LocationEntity,
+            BackgroundGroupEntity, BackgroundEntity,
+            PlotlineGroupEntity, PlotlineEntity,
+            
+            ];
 
         if (getConnectionManager().has(name)) {
             let connection = getConnectionManager().get(name);

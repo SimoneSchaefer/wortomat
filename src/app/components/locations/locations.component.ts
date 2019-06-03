@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { BaseEntityComponent } from '../_baseEntityComponent';
 import { PartService } from '../../services/electron/part.service';
 import { OpenProjectService } from '../../services/open-project.service';
@@ -9,16 +9,22 @@ import { PartEntity } from '../../entity/PartEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { ChapterEntity } from '../../entity/ChapterEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
+import { LocationService } from '../../services/electron/location.service';
+import { LocationGroupService } from '../../services/electron/location-group.service';
+import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
+import { LocationEntity } from '../../entity/LocationEntity';
+
 
 @Component({
-  selector: 'app-parts',
+  selector: 'app-locations',
   templateUrl: '../_baseEntityComponent.html'
 })
-export class PartsComponent extends BaseEntityComponent  {
+export class LocationsComponent  extends BaseEntityComponent  {
 
+  
   constructor(
-    _groupService: PartService, 
-    _memberService : ChapterService,
+    _groupService: LocationGroupService, 
+    _memberService : LocationService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService) {
@@ -31,14 +37,15 @@ export class PartsComponent extends BaseEntityComponent  {
 
 
   protected newGroup() : BaseGroupEntity {
-    return new PartEntity();
+    return new LocationGroupEntity();
   }
-  protected newMember(parent : PartEntity) : BaseEntity {
-    let member = new ChapterEntity();
+  protected newMember(parent : LocationGroupEntity) : BaseEntity {
+    let member = new LocationEntity();
     member.parent = parent;
     return member;
   }
   protected entityType() : ENTITY_TYPE {
-    return ENTITY_TYPE.PARTS;
+    return ENTITY_TYPE.LOCATIONS;
   }
+
 }

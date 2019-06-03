@@ -80,7 +80,7 @@ export abstract class BaseEntityComponent implements OnInit {
     let $this = this;
     let newElement = (newEntity.id) ? false : true;
     if (newElement) {
-      newEntity.order = entities.length + 1;
+      newEntity.order = $this.entities.length + 1;
     }   
     baseService.save(newEntity, function(response) {
       if (response.responseType === ResponseType.SUCCESS) {
@@ -121,10 +121,8 @@ export abstract class BaseEntityComponent implements OnInit {
     let $this = this;
     $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
-        $this.entities = response.data.entities; 
-        
-        //WTF Workaround. Sometimes, group-member assignment is lost in update. 
-        
+        $this.entities = response.data.entities ? response.data.entities : new Array(); 
+            
 
 
         if (selectFirst) {

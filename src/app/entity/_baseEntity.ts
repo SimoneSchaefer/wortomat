@@ -1,4 +1,5 @@
 import {Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
+import { BaseGroupEntity } from "./_baseGroupEntity";
 
 
 //Not used, as SQLITE does not understand enums. 
@@ -15,7 +16,9 @@ export enum ENTITY_TYPE {
     PROJECTS = 'projects',
     PARTS = 'parts',
     CHARACTERS = 'characters',
-    LOCATIONS = 'locations'
+    LOCATIONS = 'locations',
+    PLOTLINES = 'plotlines',
+    BACKGROUNDS = 'backgrounds'
   }
   
 
@@ -40,4 +43,5 @@ export abstract class BaseEntity {
 
     @Column("blob", {nullable : true})
     image : string;
+
 }
