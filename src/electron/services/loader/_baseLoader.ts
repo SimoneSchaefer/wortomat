@@ -94,7 +94,6 @@ export class BaseLoader {
      */
     public updateOrder(entities: BaseGroupEntity[]) : Promise<BaseEntity[]> {
         Logger.info("saving all entities, count is " + entities.length);
-        let childChannel = 'chapter_entity';
         return RepositoryFactory.getRepository(this.channel, this.connectionName)
             .then(repository => {
                 entities.forEach(e => {
@@ -105,7 +104,7 @@ export class BaseLoader {
                         //So we need to update the children here manually. 
                         for (let child of e['children']) {
                             RepositoryFactory.getChildRepository(this.channel, this.connectionName).then(rep => {
-                                rep.query("update " + childChannel + " set 'order'=" + child.order + ", parentId="+e.id+" where id=" + child.id);                            
+                                rep.query("update " + rep.metadata.tableName + " set 'order'=" + child.order + ", parentId="+e.id+" where id=" + child.id);                            
                             });
                         }
                     }

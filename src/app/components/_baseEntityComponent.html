@@ -1,7 +1,6 @@
 
-
 <div class="d-flex h-100">
-<app-vertical-bar [entities]="entities" [entityType]="'parts'" [selectedEntity]="selectedEntity"
+<app-vertical-bar [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity"
   (updateGroup)="updateGroup($event)"
   (updateMember)="updateMember($event)"
   (addNewGroup)="addNewGroup($event)"

@@ -16,7 +16,9 @@ export enum ENTITY_TYPE {
     PROJECTS = 'projects',
     PARTS = 'parts',
     CHARACTERS = 'characters',
-    LOCATIONS = 'locations'
+    LOCATIONS = 'locations',
+    PLOTLINES = 'plotlines',
+    BACKGROUNDS = 'backgrounds'
   }
   
 

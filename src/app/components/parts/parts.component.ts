@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { BaseEntityComponent } from '../_baseEntityComponent';
 import { PartService } from '../../services/electron/part.service';
 import { OpenProjectService } from '../../services/open-project.service';
@@ -12,8 +12,7 @@ import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 
 @Component({
   selector: 'app-parts',
-  templateUrl: './parts.component.html',
-  styleUrls: ['./parts.component.scss']
+  templateUrl: '../_baseEntityComponent.html'
 })
 export class PartsComponent extends BaseEntityComponent  {
 

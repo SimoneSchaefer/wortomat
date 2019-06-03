@@ -1,22 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { BaseEntityComponent } from '../_baseEntityComponent';
-import { PartService } from '../../services/electron/part.service';
 import { OpenProjectService } from '../../services/open-project.service';
 import { AlertService } from '../../services/alert.service';
-import { ChapterService } from '../../services/electron/chapter.service';
 import { TranslateService } from '@ngx-translate/core';
-import { PartEntity } from '../../entity/PartEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
-import { ChapterEntity } from '../../entity/ChapterEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
 import { CharacterGroupService } from '../../services/electron/character-group.service';
 import { CharacterService } from '../../services/electron/character.service';
+import { CharacterEntity } from '../../entity/CharacterEntity';
 
 @Component({
   selector: 'app-people',
-  templateUrl: './people.component.html',
-  styleUrls: ['./people.component.scss']
+  templateUrl: '../_baseEntityComponent.html'
 })
 export class PeopleComponent extends BaseEntityComponent  {
 
@@ -35,10 +31,10 @@ export class PeopleComponent extends BaseEntityComponent  {
 
 
   protected newGroup() : BaseGroupEntity {
-    return new PartEntity();
+    return new CharacterGroupEntity();
   }
-  protected newMember(parent : PartEntity) : BaseEntity {
-    let member = new ChapterEntity();
+  protected newMember(parent : CharacterGroupEntity) : BaseEntity {
+    let member = new CharacterEntity();
     member.parent = parent;
     return member;
   }
