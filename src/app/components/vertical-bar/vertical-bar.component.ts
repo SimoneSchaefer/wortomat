@@ -15,6 +15,7 @@ export class VerticalBarComponent implements OnInit {
   private _entities: BaseGroupEntity[];
   private _selectedEntity: BaseEntity;
   private _entityType : ENTITY_TYPE;
+  private _displayOptions: DisplayOptions;
 
   @Output() addNewGroup = new EventEmitter();
   @Output() addNewMember = new EventEmitter<BaseGroupEntity>();
@@ -134,6 +135,10 @@ export class VerticalBarComponent implements OnInit {
   ///////////GETTER/SETTER//////////////
   //////////////////////////////////////  
   @Input()
+  set displayOptions(value: DisplayOptions) {
+    this._displayOptions = value;
+  }
+  @Input()
   set entities(value: BaseGroupEntity[]) {
     this._entities = value;
   }
@@ -154,4 +159,11 @@ export class VerticalBarComponent implements OnInit {
   get selectedEntity() : BaseEntity {
     return this._selectedEntity;
   }
+  get displayOptions() : DisplayOptions {
+    return this._displayOptions;
+  }
+}
+
+export class DisplayOptions {
+  showImage : boolean;
 }

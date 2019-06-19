@@ -6,6 +6,7 @@ import { OpenProjectService } from '../services/open-project.service';
 import { BaseService } from '../services/electron/_baseService';
 import { TranslateService } from '@ngx-translate/core';
 import { BaseGroupEntity } from '../entity/_baseGroupEntity';
+import { DisplayOptions } from './vertical-bar/vertical-bar.component';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -18,6 +19,12 @@ export abstract class BaseEntityComponent implements OnInit {
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
   private _editorOpen : boolean;
+  private _currentNotes : string;
+  private _detailsOpen : boolean;
+  private _currentNameValue : string;
+  private _currentSummaryValue : string;
+  private _currentDetailedSummaryValue : string;
+
 
   constructor(
       private _groupService : BaseService,
@@ -25,25 +32,60 @@ export abstract class BaseEntityComponent implements OnInit {
       private _openProjectService: OpenProjectService, 
       private _alertService: AlertService,
       private _translateService : TranslateService) {
-
   }
 
   ngOnInit() {
     this._load(true);
   }
 
+  protected displayOptions() : DisplayOptions {
+    return {
+      showImage: false
+    };
+  }  
+  
+  
+  startEditDetails() {
+    this.currentNameValue = this.selectedEntity.name;
+    this.currentSummaryValue = this.selectedEntity.summary;
+    this.currentDetailedSummaryValue = this.selectedEntity.detailedSummary;
+    this.detailsOpen = true;
+  }
+
+  update() {
+    this.selectedEntity.name = this.currentNameValue;
+    this.selectedEntity.summary = this.currentSummaryValue;
+    this.selectedEntity.detailedSummary = this.currentDetailedSummaryValue;
+
+    console.dir("iporierpoiewr");
+    console.dir(this.selectedEntity);
+    this.updateMember(this.selectedEntity);
+    this.cancelUpdate();
+  }
+
+  cancelUpdate() {
+    this.detailsOpen = false;
+    this.currentNameValue = null;
+    this.currentSummaryValue = null;
+    this.currentDetailedSummaryValue = null;
+  }
 
  saveAndCloseEditor () : void {
+   this._selectedEntity.notes = this._currentNotes;
+   console.log('sajdoisajdoisaduoisadu');
+   console.dir(this._selectedEntity);
    this.updateMember(this._selectedEntity);
    this.closeEditor();
  }
 
   closeEditor() : void {
     this._editorOpen = false;
+    this._currentNotes = "";
   }
 
   openEditor() : void {
     this._editorOpen = true;
+    this._currentNotes = this.selectedEntity.notes;
   }
 
   updateGroup(group : BaseGroupEntity) : void {
@@ -154,14 +196,20 @@ export abstract class BaseEntityComponent implements OnInit {
     });
   }
 
-  public get entities(): Array<BaseEntity> {
+  get entities(): Array<BaseEntity> {
     return this._entities;
   }
-  public set entities(val: Array<BaseEntity>) {
+  set entities(val: Array<BaseEntity>) {
     this._entities = val;
   }
-  get selectedEntity() {
+  get selectedEntity() : BaseEntity {
     return this._selectedEntity;
+  }
+  get currentNotes() : string {
+    return this._currentNotes;
+  }
+  set currentNotes(val: string) {
+    this._currentNotes = val;
   }
   set selectedEntity(val : BaseEntity) {
     this._selectedEntity = val;
@@ -177,5 +225,31 @@ export abstract class BaseEntityComponent implements OnInit {
   }
   protected get openProjectService(): OpenProjectService {
     return this._openProjectService;
+  }
+
+
+  get currentNameValue() {
+    return this._currentNameValue;
+  }
+  get currentSummaryValue() {
+    return this._currentSummaryValue;
+  }
+  get currentDetailedSummaryValue() {
+    return this._currentDetailedSummaryValue;
+  }
+  get detailsOpen() {
+    return this._detailsOpen;
+  }
+  set currentSummaryValue(val : string) {
+    this._currentSummaryValue = val;
+  }
+  set currentDetailedSummaryValue(val : string) {
+    this._currentDetailedSummaryValue = val;
+  }
+  set currentNameValue(val : string) {
+    this._currentNameValue = val;
+  }
+  set detailsOpen(val : boolean) {
+    this._detailsOpen = val;
   }
 }

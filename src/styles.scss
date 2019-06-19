@@ -12,7 +12,7 @@ html, body {
 }
 
 .container {
-  margin-top : 10em;
+  margin-top : 5em;
 }
 
 .grabbable {
@@ -41,6 +41,10 @@ html, body {
 
 .modal-big .modal-dialog {
     max-width: 1000px !important;
+}
+
+.fr-element.fr-view {
+  max-height: 700px;
 }
 
 

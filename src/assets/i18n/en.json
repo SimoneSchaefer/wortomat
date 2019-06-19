@@ -146,6 +146,9 @@
   "SAVE_ERROR" : "Could not be saved",
   "REALLY_DELETE" : "Are you sure?",
   "NAME_HINT" : "Enter name",
-  "SUMMARY_HINT" : "Enter summary"
+  "SUMMARY_HINT" : "Enter summary",
+  "SAVE" : "Save",
+  "CLOSE" : "Close",
+  "EDIT_DETAILS" : "Edit details"
   
 }

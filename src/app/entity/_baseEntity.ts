@@ -30,7 +30,10 @@ export abstract class BaseEntity {
     name: string;    
     
     @Column("text", {nullable: true})
-    summary: string;
+    summary: string; 
+    
+    @Column("text", {nullable: true})
+    detailedSummary: string;
 
     @Column("text", {nullable: true})
     notes: string;

@@ -41,19 +41,32 @@
         <!-- Iterate children-->
         <div class="navitem entity groupcontainer child pl-3" *ngFor="let child of group.children" 
           (click)="selectEntity(child)" [class.active]="selectedEntity==child" cdkDrag [cdkDragData]="child">
-          <div class="row border-bottom mr-0">
+          <div class="row border-bottom mr-0" *ngIf="displayOptions.showImage">
             <div class="col-3 pl-0 pr-0">
             <app-optional-image [baseEntity]="child"  [css]="'thumbnail w-100'" [entityType]="entityType"></app-optional-image>
             </div>
             <div class="col-9 pl-0 pr-0">
-            <app-inline-edit 
-            [entity]="child" [entityType]="entityType" [isChild]="true"
-            (onUpdate)="onChildUpdate(child)"  (onDelete)="onChildDelete(child)"
-          ></app-inline-edit>  
-          </div>
+              <div class="h6 p-3 nav-item mb-0 ">
+                  <div class="ml-2">
+                    {{entity.name ? entity.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
+                  </div>      
+                  <div class="ml-2 small hint" *ngIf="child.summary">
+                    {{child.summary}}
+                  </div>
+              </div>
+            </div>
           </div>
 
-         
+          <div class="row border-bottom mr-0" *ngIf="!displayOptions.showImage">
+          <div class="h6 p-3 nav-item mb-0 ">
+              <div class="ml-2">
+                {{child.name ? child.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
+              </div>      
+              <div class="ml-2 small hint" *ngIf="child.summary">
+                {{child.summary}}
+              </div>
+          </div>
+          </div>
         </div>
   </div>
 </div>
