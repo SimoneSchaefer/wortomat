@@ -13,6 +13,11 @@ import { DBService } from '../services/DBService';
 import { Initializer } from './Initializer';
 import { MessageRequest, MessageResponse, Channel, ResponseType, FileFormat } from "../../app/message/Message"
 import { LoaderFactory } from '../services/loader/LoaderFactory';
+import { PartLoader } from '../services/loader/PartLoader';
+import { ExportDataProvider } from '../export/ExportDataProvider';
+import { Exporter } from '../export/Exporter';
+import { HTMLExporter } from '../export/HTMLExporter';
+import { PDFLatexExporter } from '../export/PDFLatexExporter';
 //import { PartLoader } from '../loader/PartLoader';
 
 
@@ -39,8 +44,7 @@ export class MainWindowEventListener {
         this.registerOpenProjectListener();
         this.registerCloseProjectListener();
         this.registerUpdateOrderListener();
-        
-        /*  this.registerExportSettingsListener();*/
+        this.registerExportSettingsListener();
     }
 
 
@@ -262,26 +266,23 @@ export class MainWindowEventListener {
     * #Channel.EXPORT 
     * 
     * Required data:
-    * - request.data.format, which is of type #FileFormat
+    * - request.data.options, which is of type #ExportOptions
     * - projectId, which is of type number
     */
-    /*private registerExportSettingsListener(): void {
+    private registerExportSettingsListener(): void {
         let $this = this;
         this.emitter.on(Channel.EXPORT, function (evt: any, request: MessageRequest) {
-            Logger.debug(`export to format ${request.data.format}`)
-            let dataProvider = new ExportDataProvider(new PartLoader(), request.data.projectId);
+            Logger.debug(`export to format ${request.data.format}, connection is ${request.data.connectionName}`)
+            let dataProvider = new ExportDataProvider(new PartLoader(request.data.connectionName));
             let exporter : Exporter;
-            Logger.info("exporting to " + request.data.format);
-            if ((request.data.format) == FileFormat.PDF) {
-                exporter = new PDFExporter();
-            } else if ((request.data.format) == FileFormat.HTML) {
-                exporter = new PDFHTMLExporter();              
-            } else if ((request.data.format) == FileFormat.PDFLATEX) {
+            Logger.info("exporting to " + request.data.options.format);
+             if ((request.data.options.format) == "HTML") {
+                exporter = new HTMLExporter();              
+            } else if ((request.data.options.format) ==  "PDFLATEX") {
                 exporter = new PDFLatexExporter();              
             }        
             if (exporter) {
                 Logger.debug(`export to format ${request.data.format}`)
-
                 exporter.export($this.settingsHandler, dataProvider)
                 .then(path => $this.respond(request.identifier, ResponseType.SUCCESS, path))
                 .catch(err => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, err));
@@ -290,7 +291,7 @@ export class MainWindowEventListener {
 
             }
         });
-    }*/
+    }
 
 
 

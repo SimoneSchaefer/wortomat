@@ -10,6 +10,7 @@ import { PeopleComponent } from './components/people/people.component';
 import { LocationsComponent } from './components/locations/locations.component';
 import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
 import { PlotlinesComponent } from './components/plotlines/plotlines.component';
+import { ExportComponent } from './components/export/export.component';
 
 const routes: Routes = [
   {
@@ -52,6 +53,10 @@ const routes: Routes = [
   {
     path : 'plotlines',
     component : PlotlinesComponent
+  },
+  {
+    path : 'export',
+    component : ExportComponent
   }
 ];
 

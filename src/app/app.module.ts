@@ -38,6 +38,7 @@ import { LocationsComponent } from './components/locations/locations.component';
 import { PlotlinesComponent } from './components/plotlines/plotlines.component';
 import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
 import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
+import { ExportComponent } from './components/export/export.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -60,7 +61,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     PeopleComponent,
     LocationsComponent,
     PlotlinesComponent,
-    BackgroundsComponent
+    BackgroundsComponent,
+    ExportComponent
   ],
   imports: [
     BrowserModule,

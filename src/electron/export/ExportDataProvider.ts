@@ -14,8 +14,6 @@ export class ExportDataProvider {
   public collectData(): Promise<string> {
     let html = "";
     let $this = this;
-    let repo = getRepository(ChapterEntity);
-
 
     return new Promise<string>(function (resolve, reject) {
 
