@@ -17,6 +17,7 @@ export abstract class BaseEntityComponent implements OnInit {
 
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
+  private _editorOpen : boolean;
 
   constructor(
       private _groupService : BaseService,
@@ -29,6 +30,20 @@ export abstract class BaseEntityComponent implements OnInit {
 
   ngOnInit() {
     this._load(true);
+  }
+
+
+ saveAndCloseEditor () : void {
+   this.updateMember(this._selectedEntity);
+   this.closeEditor();
+ }
+
+  closeEditor() : void {
+    this._editorOpen = false;
+  }
+
+  openEditor() : void {
+    this._editorOpen = true;
   }
 
   updateGroup(group : BaseGroupEntity) : void {
@@ -150,6 +165,9 @@ export abstract class BaseEntityComponent implements OnInit {
   }
   set selectedEntity(val : BaseEntity) {
     this._selectedEntity = val;
+  }
+  get editorOpen() : boolean {
+    return this._editorOpen;
   }
   protected get baseService(): BaseService {
     return this._groupService;

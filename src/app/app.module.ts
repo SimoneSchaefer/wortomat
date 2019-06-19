@@ -37,6 +37,7 @@ import { PeopleComponent } from './components/people/people.component';
 import { LocationsComponent } from './components/locations/locations.component';
 import { PlotlinesComponent } from './components/plotlines/plotlines.component';
 import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
+import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -76,7 +77,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     NotifierModule,
     ImageUploadModule,
     BrowserAnimationsModule,
-    DragDropModule
+    DragDropModule,
+    FroalaEditorModule.forRoot(), 
+    FroalaViewModule.forRoot()
   ],
   providers: [ElectronService, AlertService, StateService],
   bootstrap: [AppComponent]

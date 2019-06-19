@@ -17,10 +17,14 @@
   </div>
 
   <!-- EDIT TITLE-->
-  <div *ngIf="editing" class="form-inline inline-editing m-0 p-1">
-    <div class="modal-mask"></div>
-    <div class="border bg-white rounded pt-3 pb-3">
-      <div class="form form-group w-100 p-1">
+
+
+    <div  *ngIf="editing" class="modal-open">
+      <div class="modal-mask"></div>
+      <div  class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+          <div class="form form-group w-100 p-1">
         <div><app-image-upload [baseEntity]="entity" [entityType]="entityType"></app-image-upload></div>
         <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
         <input class="form-control w-100" type="text" [(ngModel)]="currentNameValue"/>
@@ -37,6 +41,10 @@
           <i class="fa fa-icon fa-times"></i>
         </button>
       </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
-  </div> 
 </div> 

@@ -41,7 +41,7 @@
         <!-- Iterate children-->
         <div class="navitem entity groupcontainer child pl-3" *ngFor="let child of group.children" 
           (click)="selectEntity(child)" [class.active]="selectedEntity==child" cdkDrag [cdkDragData]="child">
-          <div class="row border-bottom">
+          <div class="row border-bottom mr-0">
             <div class="col-3 pl-0 pr-0">
             <app-optional-image [baseEntity]="child"  [css]="'thumbnail w-100'" [entityType]="entityType"></app-optional-image>
             </div>
