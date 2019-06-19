@@ -4,6 +4,7 @@ import * as os from 'os';
 import { Logger } from '../services/Logger';
 import { ResponseType } from '../../app/message/Message';
 import { ProjectEntity } from '../../app/entity/ProjectEntity';
+var dateFormat = require('dateformat');
 
 
 export class SettingsProvider {
@@ -89,6 +90,10 @@ export class SettingsProvider {
 
     public getDBPath() {
         return this.settings.dbpath + "/wortomat.db";
+    }
+
+    public generateNewExportFilePath(ending: string) {
+        return this.settings.exportpath + "Export_" + dateFormat(new Date(), "yyyy-mm-dd-h-MM-ss") + "." + ending;
     }
 
 
