@@ -272,10 +272,11 @@ export class MainWindowEventListener {
     private registerExportSettingsListener(): void {
         let $this = this;
         this.emitter.on(Channel.EXPORT, function (evt: any, request: MessageRequest) {
-            Logger.debug(`export to format ${request.data.format}, connection is ${request.data.connectionName}`)
-            let dataProvider = new ExportDataProvider(new PartLoader(request.data.connectionName));
+            Logger.debug(`export to format ${request.data.options.format}, connection is ${request.data.connectionName}`)
+            let dataProvider = new ExportDataProvider(new PartLoader(request.data.connectionName), request.data.options);
             let exporter : Exporter;
             Logger.info("exporting to " + request.data.options.format);
+            Logger.info(request.data.options);
              if ((request.data.options.format) == "HTML") {
                 exporter = new HTMLExporter();              
             } else if ((request.data.options.format) ==  "PDFLATEX") {

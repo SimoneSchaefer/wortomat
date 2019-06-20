@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ElectronService } from '../../services/electron/electron.service';
 import { MessageRequest, Channel, MessageResponse, ResponseType } from '../../message/Message';
 import { OpenProjectService } from '../../services/open-project.service';
+import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-export',
@@ -16,19 +17,29 @@ export class ExportComponent implements OnInit {
   private success : string;
   private error : string;
   private processing: boolean;
-  constructor(private electronService : ElectronService, private openProjectService : OpenProjectService) { }
+  exportForm : FormGroup;
+  constructor(private electronService : ElectronService, private openProjectService : OpenProjectService, private formBuilder : FormBuilder) { }
 
   ngOnInit() {
+    this.exportForm = this.createFormGroup();
   }
 
-  export(): void {
+  createFormGroup() {
+    return this.formBuilder.group({
+      format : ExportFormat.HTML,
+      includeName : true,
+      includeSummary : false,
+      includeDetailedSummary : false,
+      includeContent : true
+    });      
+  }
+
+  onSubmit() {
+    const options : ExportOptions = Object.assign({}, this.exportForm.value);
     let $this = this;
     $this.processing = true;
     $this.success = "";
     $this.error = "";
-    let options = {
-      format : ExportFormat.HTML
-    }
     this.electronService.send(new MessageRequest(Channel.EXPORT, function (evt, response: MessageResponse) {
       $this.processing = true;
       if (response.responseType === ResponseType.SUCCESS) {
@@ -40,6 +51,10 @@ export class ExportComponent implements OnInit {
         options : options,                 
         connectionName : $this.openProjectService.identifier 
     }));
+  }
+
+  export(): void {
+    
   }
 
 }

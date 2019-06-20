@@ -5,6 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NotifierModule } from 'angular-notifier';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
@@ -80,6 +81,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     ImageUploadModule,
     BrowserAnimationsModule,
     DragDropModule,
+    ReactiveFormsModule,
     FroalaEditorModule.forRoot(), 
     FroalaViewModule.forRoot()
   ],

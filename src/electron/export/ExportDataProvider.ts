@@ -9,7 +9,7 @@ import { PartEntity } from "../../app/entity/PartEntity";
 
 export class ExportDataProvider {
 
-  public constructor(private partloader: PartLoader) { }
+  public constructor(private partloader: PartLoader, private _exportOptions : Object) { }
 
   public collectData(): Promise<string> {
     let html = "";
@@ -21,28 +21,30 @@ export class ExportDataProvider {
         .then(function (entities) {
           let parts = entities as BaseEntity[];
 
-          //order chapters and scenes first...
+          //order chapters first...
           for (let entity of parts) {
             let part = entity as PartEntity;
             part.children.sort(function (a, b) {
               return (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0);
             });
-            /*for (let chapter of part.children) {
-              chapter.children.sort(function (a, b) {
-                return (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0);
-              });
-            }*/
           }
-
 
           //append HTML
           for (let entity of parts) {
             let part = entity as PartEntity;
             for (let chapter of part.children) {
-              html += `<h1>${chapter.name}</h1>`;
-              //for (let scene of chapter.scenes) {
-                html += chapter.notes;
-              //}
+              if ($this._exportOptions['includeName'] && chapter.name) {
+                html += `<h1>${chapter.name}</h1>`;
+              }
+              if ($this._exportOptions['includeSummary'] && chapter.summary) {
+                html += `<p><b>${chapter.summary}</b></p>`;
+              }
+              if ($this._exportOptions['includeDetailedSummary'] && chapter.detailedSummary) {
+                html += `<p><i>${chapter.detailedSummary}</i></p>`;
+              }
+              if ($this._exportOptions['includeContent'] && chapter.notes) {
+                html += `<p>${chapter.notes}</p>`;
+              }
             }            
           }
           resolve(html);

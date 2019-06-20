@@ -1,32 +1,32 @@
 <div class="main-wrapper">
   <div class="container">
-  <div class="formgroup">
-
-    <input type="checkbox"> Include name
-
+    <form [formGroup]="exportForm" (ngSubmit)="onSubmit()">
+<div class="formgroup">
+    <input formControlName="includeName" type="checkbox"> Include name
   </div>
 
   <div class="formgroup">
+    <input formControlName="includeSummary"  type="checkbox"> Include summary
+  </div>
 
-    <input type="checkbox"> Include summary
-    
+  <div class="formgroup">
+    <input formControlName="includeDetailedSummary"  type="checkbox"> Include detailed summary
+  </div>
+
+  <div class="formgroup">
+    <input formControlName="includeContent"  type="checkbox"> Include content
   </div>
 
 
   <div class="formgroup">
-
-    <input type="checkbox"> Include detailed summary
-    
-  </div>
-  <div class="formgroup">
-
-    <select> 
-      <option>HTML</option>
-      <option>PDFLATEX* (requires latex)
+    <select formControlName="format"> 
+      <option *ngFor="let format of formatOptions" [value]="format">{{format}}</option>
     </select>
     
   </div>
 
-  <button class="btn btn-primary" (click)="export()">Export</button>
+  <button class="btn btn-primary" type="submit" >Export</button>
+    </form>
+  
   </div>
 </div>
