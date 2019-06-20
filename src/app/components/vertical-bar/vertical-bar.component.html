@@ -46,7 +46,7 @@
             <app-optional-image [baseEntity]="child"  [css]="'thumbnail w-100'" [entityType]="entityType"></app-optional-image>
             </div>
             <div class="col-9 pl-0 pr-0">
-              <div class="h6 p-3 nav-item mb-0 ">
+              <div class="h6 p-1 nav-item mb-0 ">
                   <div class="ml-2">
                     {{entity.name ? entity.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
                   </div>      
@@ -58,7 +58,7 @@
           </div>
 
           <div class="row border-bottom mr-0" *ngIf="!displayOptions.showImage">
-          <div class="h6 p-3 nav-item mb-0 ">
+          <div class="h6 p-1 nav-item mb-0 ">
               <div class="ml-2">
                 {{child.name ? child.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
               </div>      

@@ -22,6 +22,14 @@
     <select formControlName="format"> 
       <option *ngFor="let format of formatOptions" [value]="format">{{format}}</option>
     </select>
+    (*) NOTE that PDFLATEX requires latex, pandoc and memoir. <br >
+    Installation for UBUNTU: <br>
+    sudo apt-get install pandoc<br>
+    sudo apt-get install texlive-latex-base<br >
+    sudo apt-get install texlive-latex-recommended<br />
+    sudo apt-get install texlive-latex-extra<br />
+    sudo apt-get install texlive-latex-fonts-extra<br />
+    
     
   </div>
 

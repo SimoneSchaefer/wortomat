@@ -25,14 +25,14 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
           <div class="form form-group w-100 p-1">
-        <div><app-image-upload [baseEntity]="entity" [entityType]="entityType"></app-image-upload></div>
+       <!--<div><app-image-upload [baseEntity]="entity" [entityType]="entityType"></app-image-upload></div>-->
         <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
         <input class="form-control w-100" type="text" [(ngModel)]="currentNameValue"/>
       </div>
-      <div class="form form-group w-100 p-1">
+      <!--<div class="form form-group w-100 p-1">
         <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
         <input class="form-control pr-0 w-100" type="text" [(ngModel)]="currentSummaryValue" />
-      </div>
+      </div>-->
       <div class="button-group mt-1 w-100 p-1">
         <button class="btn btn-primary" (click)="update()">
           <i class="fa fa-icon fa-check"></i>

@@ -27,6 +27,10 @@ export class PDFLatexExporter implements Exporter {
                     //replacements: section -> chapter, end document, include setup
                     var fs = require('fs')
                     var path = require('path')
+
+
+                    fs.copyFileSync(global['__basedir'] + '/src/assets/templates/setup.tex', settingsHandler.settings.exportpath + '/setup.tex')
+
                     var content = fs.readFileSync(fileNameLatex);
                     content = "\\include{setup}\n" + content + "\n\\end{document}"
                     content = content.replace(/\\section/g, '\\chapter');
