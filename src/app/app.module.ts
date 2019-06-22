@@ -38,7 +38,11 @@ import { PeopleComponent } from './components/people/people.component';
 import { LocationsComponent } from './components/locations/locations.component';
 import { PlotlinesComponent } from './components/plotlines/plotlines.component';
 import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
+
+import 'froala-editor/js/plugins.pkgd.min.js';
+import 'froala-editor/js/plugins/colors.min.js';
 import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
+
 import { ExportComponent } from './components/export/export.component';
 
 // AoT requires an exported function for factories

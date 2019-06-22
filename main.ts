@@ -6,6 +6,7 @@ import { Application } from './src/electron/application';
 let win, serve, application;
 const args = process.argv.slice(1);
 serve = args.some(val => val === '--serve');
+global['__basedir'] = __dirname;
 
 function createWindow() {
 

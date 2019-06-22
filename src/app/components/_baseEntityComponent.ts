@@ -25,6 +25,19 @@ export abstract class BaseEntityComponent implements OnInit {
   private _currentSummaryValue : string;
   private _currentDetailedSummaryValue : string;
 
+  public editorOptions = {
+    charCounterCount: true,
+    theme: 'gray',
+    toolbarButtons: [
+      'fontFamily', 'fontSize', 
+      '|', 'bold', 'italic', 'underline', 'strikeThrough', /*'subscript', 'superscript'*/, 
+      '|', 'textColor', 'backgroundColor',
+      '|', 'outdent', 'indent',      
+      '|', 'formatOL', 'formatUL',
+      '|', 'clearFormatting', 'undo', 'redo']
+
+  }
+
 
   constructor(
       private _groupService : BaseService,
@@ -71,6 +84,7 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
  saveAndCloseEditor () : void {
+   console.dir(this._currentNotes);
    this._selectedEntity.notes = this._currentNotes;
    console.log('sajdoisajdoisaduoisadu');
    console.dir(this._selectedEntity);
@@ -140,6 +154,7 @@ export abstract class BaseEntityComponent implements OnInit {
       newEntity.order = $this.entities.length + 1;
     }   
     baseService.save(newEntity, function(response) {
+      $this._selectedEntity = newEntity;
       if (response.responseType === ResponseType.SUCCESS) {
         $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
         $this._loadDelayed();         
@@ -209,6 +224,7 @@ export abstract class BaseEntityComponent implements OnInit {
     return this._currentNotes;
   }
   set currentNotes(val: string) {
+    console.log('updating current notes to ' + val);
     this._currentNotes = val;
   }
   set selectedEntity(val : BaseEntity) {
