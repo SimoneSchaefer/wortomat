@@ -47,8 +47,8 @@ export abstract class BaseEntityComponent implements OnInit {
     if (this.selectedEntityIsParent()) {
       let content = '';
       for (let child of this.selectedEntity['children']) {
-        content += '<h4 class="text-muted">'+child.name+'</h4>';
-        content += child.notes;
+        content += '<h4 class="text-muted">'+(child.name ? child.name : '')+'</h4>';
+        content += child.notes ? child.notes : '';
       }
       return content;
     }
@@ -71,7 +71,11 @@ export abstract class BaseEntityComponent implements OnInit {
     this.selectedEntity.name = this.currentNameValue;
     this.selectedEntity.summary = this.currentSummaryValue;
     this.selectedEntity.detailedSummary = this.currentDetailedSummaryValue;
-    this.updateMember(this.selectedEntity);
+    if (this.selectedEntityIsParent()) {
+      this.updateGroup(this.selectedEntity as BaseGroupEntity);
+    } else {
+      this.updateMember(this.selectedEntity);
+    }
     this.cancelUpdate();
   }
 
@@ -138,7 +142,7 @@ export abstract class BaseEntityComponent implements OnInit {
     let $this = this;
     this._groupService.saveAll(entities, function(response) {
       if (response.responseType === ResponseType.SUCCESS) {
-        $this._alertService.success($this.entityType().toUpperCase() + ".UPDATED") + "_SUCCESS";
+        //$this._alertService.success($this.entityType().toUpperCase() + ".UPDATED") + "_SUCCESS";
         $this._loadDelayed();         
       } else {
         console.dir(response);
@@ -156,13 +160,10 @@ export abstract class BaseEntityComponent implements OnInit {
       newEntity.order = $this.entities.length + 1;
     }   
     baseService.save(newEntity, function(response) {
-      console.log('newEntity is');
-      console.dir(newEntity);
-      console.dir(response);
       $this._selectedEntity = response.data.entity;
       if (response.responseType === ResponseType.SUCCESS) {
-        $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
-        $this._loadDelayed();         
+        //$this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
+        $this._loadDelayed(false, newElement ? $this.startEditDetails : null);                
       } else {
         $this._alertService.error($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
       }
@@ -185,14 +186,14 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
 
-  private _loadDelayed(selectFirst : boolean = false) {
+  private _loadDelayed(selectFirst : boolean = false, callback = null) {
     let $this = this;
     setTimeout(function() {
-      $this._load(selectFirst);
+      $this._load(selectFirst, callback);
     }, 500);
   }
 
-  private _load(selectFirst : boolean = false): void {
+  private _load(selectFirst : boolean = false, callback = null): void {
     let $this = this;
     $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
@@ -204,6 +205,9 @@ export abstract class BaseEntityComponent implements OnInit {
               $this.selectedEntity = $this.entities[0]['children'][0];
             } 
           }
+        } 
+        if (callback) {
+          callback.apply($this);
         }
       } else {
         $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);

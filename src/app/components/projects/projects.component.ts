@@ -46,7 +46,7 @@ export class ProjectsComponent extends BaseEntityComponent {
     let projectService = $this.baseService as ProjectService;
     projectService.open(project, function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
-        $this.alertService.success('PROJECTS.OPENED_SUCCESS');
+       // $this.alertService.success('PROJECTS.OPENED_SUCCESS');
         $this.openProjectService.identifier = response.msg;
         $this._router.navigateByUrl('/parts');
       } else {
