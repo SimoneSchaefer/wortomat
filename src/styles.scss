@@ -14,10 +14,10 @@ html, body {
 
 .main {
   padding-top: 41px;
-  height: 100%;
+  height: calc(100vh - 100px);
 }
 
-.scrollbar {
+.scrollbar.left {
   direction: rtl;
 }
 
@@ -43,6 +43,15 @@ html, body {
 
 .container {
   margin-top : 5em;
+}
+
+.wrapper {
+	position: sticky;
+  top: 0;
+  height: 100%;
+  padding-top: .5rem;
+  overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .grabbable {

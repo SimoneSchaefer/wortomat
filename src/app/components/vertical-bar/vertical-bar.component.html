@@ -1,18 +1,15 @@
-<div class="border-bottom">
-  <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted">
-    <span>{{'' + entityType + '.NEW' | uppercase | translate}}</span>
-    <a class="d-flex align-items-center text-muted btn btn-link btn-lg" (click)="addNewParentEntity()" >
-      <i class="fas fa-icon fa-plus pr-1"></i>
-    </a>
-  </h6>
-</div>
-<div class="sidebar-sticky scrollbar">
+<div class="sidebar-sticky scrollbar left">
   <ul class="nav flex-column"  cdkDropList [cdkDropListData]="entities" (cdkDropListDropped)="dropGroup($event)">
     <li class="nav-item border-bottom grabbable" *ngFor="let group of this.entities" cdkDropListGroup cdkDrag [cdkDragData]="group" >
       <h6 class="d-flex mb-0">
-        <div class="d-flex">
-          <i (click)="toggle(group)" title="Open" class="fa fa-icon pr-1 clickable btn btn-link" [ngClass]="{'fa-folder-open': visible(group), 'fa-folder': !visible(group)}"></i>
-          <div (click)="selectEntity(group)" class="h6 bold clickable btn btn-link"  [class.active]="selectedEntity==group">{{group.name}}</div>
+        <div class="d-flex btn-link text-left">
+          <h6 class="h6 bold clickable btn btn-link">  
+            <i (click)="toggle(group)" title="Close" class="fa fa-icon fa-chevron-down"  *ngIf="visible(group)"></i>
+            <i (click)="toggle(group)" title="Open" class="fa fa-icon fa-chevron-right"  *ngIf="!visible(group)"></i>
+          </h6>
+          <div (click)="selectEntity(group)" class="h6 bold clickable btn btn-link"  [class.active]="isSelected(group)">
+            {{group.name ? group.name : (entityType.toUpperCase() + '.UNTITLED') | translate}}          
+          </div>
         </div>
       </h6>
 
@@ -23,8 +20,9 @@
           (cdkDropListDropped)="dropItem($event)"
           [cdkDropListConnectedTo]="getConnectedList()">
         <li class="nav-item d-flex small grabbable" *ngFor="let child of group.children" cdkDrag [cdkDragData]="child">
-          <div (click)="selectEntity(child)" class="clickable btn btn-link text-left" [class.active]="selectedEntity==child" >
-            {{child.name}} - <span class="text-muted small">{{child.summary}}</span>
+          <div (click)="selectEntity(child)" class="clickable btn-link text-left pl-4 py-1" [class.active]="isSelected(child)" >
+            {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
+            <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>
           </div>              
         </li>
       </ul>

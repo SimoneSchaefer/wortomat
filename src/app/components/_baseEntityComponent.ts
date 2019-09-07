@@ -25,10 +25,7 @@ export abstract class BaseEntityComponent implements OnInit {
   private _currentSummaryValue : string;
   private _currentDetailedSummaryValue : string;
 
- 
-
-
-  constructor(
+   constructor(
       private _groupService : BaseService,
       private _memberService : BaseService, 
       private _openProjectService: OpenProjectService, 
@@ -44,7 +41,23 @@ export abstract class BaseEntityComponent implements OnInit {
     return {
       showImage: false
     };
-  }  
+  }
+
+  getContent() : string {
+    if (this.selectedEntityIsParent()) {
+      let content = '';
+      for (let child of this.selectedEntity['children']) {
+        content += '<h4 class="text-muted">'+child.name+'</h4>';
+        content += child.notes;
+      }
+      return content;
+    }
+    return this.selectedEntity.notes;
+  }
+    
+  selectedEntityIsParent() {
+    return this.selectedEntity && 'children' in this.selectedEntity;
+  }
   
   
   startEditDetails() {
@@ -58,9 +71,6 @@ export abstract class BaseEntityComponent implements OnInit {
     this.selectedEntity.name = this.currentNameValue;
     this.selectedEntity.summary = this.currentSummaryValue;
     this.selectedEntity.detailedSummary = this.currentDetailedSummaryValue;
-
-    console.dir("iporierpoiewr");
-    console.dir(this.selectedEntity);
     this.updateMember(this.selectedEntity);
     this.cancelUpdate();
   }
@@ -73,10 +83,7 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
  saveAndCloseEditor () : void {
-   console.dir(this._currentNotes);
    this._selectedEntity.notes = this._currentNotes;
-   console.log('sajdoisajdoisaduoisadu');
-   console.dir(this._selectedEntity);
    this.updateMember(this._selectedEntity);
    this.closeEditor();
  }
@@ -86,7 +93,7 @@ export abstract class BaseEntityComponent implements OnInit {
     this._currentNotes = "";
   }
 
-  openEditor() : void {
+  continueWriting() : void {
     this._editorOpen = true;
     this._currentNotes = this.selectedEntity.notes;
   }
@@ -97,6 +104,14 @@ export abstract class BaseEntityComponent implements OnInit {
 
   updateMember(member : BaseEntity) : void {
     this.save(this._memberService, member, null, 'CHILD_');
+  }
+
+  deleteEntity(): void {
+    if (this.selectedEntityIsParent()) {
+      this.deleteGroup(this.selectedEntity as BaseGroupEntity);
+    } else {
+      this.deleteMember(this.selectedEntity);
+    }
   }
 
   deleteMember(member : BaseEntity) : void {
@@ -121,8 +136,6 @@ export abstract class BaseEntityComponent implements OnInit {
 
   updateOrder(entities: BaseGroupEntity[]) {
     let $this = this;
-    console.dir('baseEntityComponent#updateOrder');
-    console.dir(entities);
     this._groupService.saveAll(entities, function(response) {
       if (response.responseType === ResponseType.SUCCESS) {
         $this._alertService.success($this.entityType().toUpperCase() + ".UPDATED") + "_SUCCESS";
@@ -143,7 +156,10 @@ export abstract class BaseEntityComponent implements OnInit {
       newEntity.order = $this.entities.length + 1;
     }   
     baseService.save(newEntity, function(response) {
-      $this._selectedEntity = newEntity;
+      console.log('newEntity is');
+      console.dir(newEntity);
+      console.dir(response);
+      $this._selectedEntity = response.data.entity;
       if (response.responseType === ResponseType.SUCCESS) {
         $this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
         $this._loadDelayed();         
@@ -176,16 +192,11 @@ export abstract class BaseEntityComponent implements OnInit {
     }, 500);
   }
 
-
-
   private _load(selectFirst : boolean = false): void {
     let $this = this;
     $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
-        $this.entities = response.data.entities ? response.data.entities : new Array(); 
-            
-
-
+        $this.entities = response.data.entities ? response.data.entities : new Array();           
         if (selectFirst) {
           $this.selectedEntity = null;
           if ($this.entities.length) {
@@ -213,7 +224,6 @@ export abstract class BaseEntityComponent implements OnInit {
     return this._currentNotes;
   }
   set currentNotes(val: string) {
-    console.log('updating current notes to ' + val);
     this._currentNotes = val;
   }
   set selectedEntity(val : BaseEntity) {
@@ -222,17 +232,6 @@ export abstract class BaseEntityComponent implements OnInit {
   get editorOpen() : boolean {
     return this._editorOpen;
   }
-  protected get baseService(): BaseService {
-    return this._groupService;
-  }
-  protected get alertService(): AlertService {
-    return this._alertService;
-  }
-  protected get openProjectService(): OpenProjectService {
-    return this._openProjectService;
-  }
-
-
   get currentNameValue() {
     return this._currentNameValue;
   }
@@ -256,5 +255,14 @@ export abstract class BaseEntityComponent implements OnInit {
   }
   set detailsOpen(val : boolean) {
     this._detailsOpen = val;
+  }
+  protected get baseService(): BaseService {
+    return this._groupService;
+  }
+  protected get alertService(): AlertService {
+    return this._alertService;
+  }
+  protected get openProjectService(): OpenProjectService {
+    return this._openProjectService;
   }
 }

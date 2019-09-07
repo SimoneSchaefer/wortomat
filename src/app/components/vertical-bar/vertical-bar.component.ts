@@ -17,12 +17,6 @@ export class VerticalBarComponent implements OnInit {
   private _entityType : ENTITY_TYPE;
   private _displayOptions: DisplayOptions;
 
-  @Output() addNewGroup = new EventEmitter();
-  @Output() addNewMember = new EventEmitter<BaseGroupEntity>();
-  @Output() updateGroup = new EventEmitter<BaseGroupEntity>();
-  @Output() deleteGroup = new EventEmitter<BaseGroupEntity>();
-  @Output() deleteMember = new EventEmitter<BaseEntity>();
-  @Output() updateMember = new EventEmitter<BaseEntity>();
   @Output() updateOrder = new EventEmitter<BaseGroupEntity[]>();
   @Output() select = new EventEmitter<BaseEntity>();
 
@@ -84,29 +78,25 @@ export class VerticalBarComponent implements OnInit {
     return this.entities.map(x => `${x.id}`);
   }
 
+  isSelected(entity: BaseEntity) {
+    return (this.selectedEntityIsParent() === this.entityIsParent(entity)) && this.selectedEntity.id === entity.id;
+  }
+
+  selectedEntityIsParent() {
+    return this.selectedEntity && this.entityIsParent(this.selectedEntity);
+  }
+
+  entityIsParent(entity: BaseEntity) {
+    return 'children' in entity;
+  }
+
   ///////////////////////////////
   ///////////EVENTS//////////////
   ///////////////////////////////
-  public onParentUpdate(parent : BaseGroupEntity) {
-    this.updateGroup.emit(parent);
-  }
-  public onParentDelete(parent : BaseGroupEntity) {
-    this.deleteGroup.emit(parent);
-  }
-  public onChildUpdate(child : BaseEntity) {
-    this.updateMember.emit(child);
-  }
-  public onChildDelete(entity : BaseEntity) {
-    this.deleteMember.emit(entity);
-  }
-  public onNewChild(parent: BaseGroupEntity) {
-    this.addNewMember.emit(parent);
-  }
-  public addNewParentEntity() {
-    this.addNewGroup.emit();
-  }
   public selectEntity(entity : BaseEntity) {
-    console.log('select ' + entity.name);
+    if (this.entityIsParent(entity) && !this.visible(entity)) {
+      this.toggle(entity);
+    }
     this.select.emit(entity);
   }
 
