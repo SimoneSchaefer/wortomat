@@ -4,6 +4,7 @@
 
 
 
+
 /* You can add global styles to this file, and also import other style files */
 html, body {
   margin: 0;
@@ -11,8 +12,46 @@ html, body {
   height: 100%;
 }
 
+.main {
+  padding-top: 41px;
+  height: calc(100vh - 100px);
+}
+
+.scrollbar.left {
+  direction: rtl;
+}
+
+.scrollbar > * {
+  direction: ltr;
+}
+
+.scrollbar::-webkit-scrollbar{
+	width: 8px;
+	background-color: #F5F5F5;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #bbb;
+}
+.scrollbar::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 8px;
+	background-color: #F5F5F5;
+}
+
+
 .container {
   margin-top : 5em;
+}
+
+.wrapper {
+	position: sticky;
+  top: 0;
+  height: 100%;
+  padding-top: .5rem;
+  overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .grabbable {

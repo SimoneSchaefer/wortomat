@@ -147,6 +147,7 @@
   "REALLY_DELETE" : "Are you sure?",
   "NAME_HINT" : "Enter name",
   "SUMMARY_HINT" : "Enter summary",
+  "DETAILED_SUMMARY_HINT" : "Enter detailed summary",
   "SAVE" : "Save",
   "CLOSE" : "Close",
   "EDIT_DETAILS" : "Edit details"

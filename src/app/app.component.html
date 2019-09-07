@@ -1,51 +1,43 @@
-<div class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
-    <span class="navbar-brand"><a href="http://localhost:4200">WORTOMAT</a></span>
-    <!-- Show this menu if the user already selected a novel for writing-->
-    <ul class="navbar-nav nav-tabs" *ngIf="isProjectOpened();else no_open_project" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/parts']" translate>MENU.CONTENT</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/plotlines']" translate>MENU.PLOTLINES</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/people']" translate>MENU.CHARACTERS</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/locations']" translate>MENU.LOCATIONS</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/backgrounds']" translate>MENU.BACKGROUNDS</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/export']" translate>MENU.EXPORT</a>
-        </li>
-        <li class="nav-item">
-                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/about']" translate>MENU.ABOUT</a>
-        </li>
-    </ul>
-    <button *ngIf="isProjectOpened()" class="btn btn-primary ml-5" (click)="closeProject()">
-        <i class="fa fa-icon fa-key pr-1"></i>
-        <span translate>MENU.CLOSE</span>
-    </button>
-
-
-    <!--Show this menu when no novel has been created/selected-->
-    <ng-template #no_open_project>
-        <ul class="navbar-nav nav-tabs" role="tablist">
-            <li class="nav-item">
+<nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap pb-0">
+    <a class="navbar-brand col-2 m-0" href="http://localhost:4200">WORTOMAT</a>
+    <div class="col-10 m-0 p-0 d-flex justify-content-between">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" *ngIf="isProjectOpened()">
+                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/parts']" translate>MENU.CONTENT</a>
+            </li>
+            <li class="nav-item" *ngIf="isProjectOpened()">
+                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/plotlines']" translate>MENU.PLOTLINES</a>
+            </li>
+            <li class="nav-item" *ngIf="isProjectOpened()">
+                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/people']" translate>MENU.CHARACTERS</a>
+            </li>
+            <li class="nav-item" *ngIf="isProjectOpened()">
+                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/locations']" translate>MENU.LOCATIONS</a>
+            </li>
+            <li class="nav-item" *ngIf="isProjectOpened()">
+                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/backgrounds']" translate>MENU.BACKGROUNDS</a>
+            </li>
+            <li class="nav-item" *ngIf="isProjectOpened()">
+                <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/export']" translate>MENU.EXPORT</a>
+            </li>
+            <li class="nav-item"  *ngIf="!isProjectOpened()">
                 <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/projects']" translate>MENU.PROJECTS</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/about']" translate>MENU.ABOUT</a>
             </li>
         </ul>
-    </ng-template>
-</div>
- <notifier-container></notifier-container>
+        <button *ngIf="isProjectOpened()" class="btn btn-primary ml-5" (click)="closeProject()">
+            <i class="fa fa-icon fa-key pr-1"></i>
+            <span translate>MENU.CLOSE</span>
+        </button>
+    </div>
+ </nav>
 
-<div class="wrapper">
-    <router-outlet></router-outlet>
+<router-outlet></router-outlet>
 
-</div>
+<notifier-container></notifier-container>
+
+
+
 

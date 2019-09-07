@@ -1,28 +1,26 @@
 .navbar.fixed-top {
-	padding-bottom: 0;
-	height: 49px;
-	.navbar-brand {
-		padding-left: 30px;
-		padding-right: 30px;
-	}
 	.nav-link.active {
 		color: #343a40 !important;
+	}
+	.nav-tabs {
+		border-bottom: 0;
 	}	
-	.navbar-nav > li > a{
+	.nav-tabs > li > a{
 		padding-left: 1rem !important;
 		padding-right: 1rem !important;
+		color: #d2d2d2;
 	}
 	.nav-tabs .nav-link:hover {
 		border-color: transparent;
 	}
 }
-.navbar-nav {
-	left: 70px;
-}
 
 .wrapper {
 	width: 100%;
-	/*position: absolute;*/
-	top: 50px;
-	height: 100%;
+}
+
+
+#wrapper {
+	text-align: center;
+	margin: auto;
 }

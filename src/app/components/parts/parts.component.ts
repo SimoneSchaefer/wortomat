@@ -31,7 +31,9 @@ export class PartsComponent extends BaseEntityComponent  {
 
 
   protected newGroup() : BaseGroupEntity {
-    return new PartEntity();
+    let part = new PartEntity();
+    part.children = [];
+    return part;
   }
   protected newMember(parent : PartEntity) : BaseEntity {
     let member = new ChapterEntity();

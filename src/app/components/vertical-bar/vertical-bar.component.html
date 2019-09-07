@@ -1,15 +1,51 @@
+<div class="sidebar-sticky scrollbar left">
+  <ul class="nav flex-column"  cdkDropList [cdkDropListData]="entities" (cdkDropListDropped)="dropGroup($event)">
+    <li class="nav-item border-bottom grabbable" *ngFor="let group of this.entities" cdkDropListGroup cdkDrag [cdkDragData]="group" >
+      <h6 class="d-flex mb-0">
+        <div class="d-flex btn-link text-left">
+          <h6 (click)="toggle(group)"  class="h6 bold clickable btn btn-link">  
+            <i title="Close" class="fa fa-icon fa-chevron-down"  *ngIf="visible(group)"></i>
+            <i title="Open" class="fa fa-icon fa-chevron-right"  *ngIf="!visible(group)"></i>
+          </h6>
+          <div (click)="selectEntity(group)" class="h6 bold clickable btn btn-link"  [class.active]="isSelected(group)">
+            {{group.name ? group.name : (entityType.toUpperCase() + '.UNTITLED') | translate}}          
+          </div>
+        </div>
+      </h6>
 
+      <!-- children-->
+      <ul class="nav flex-column" *ngIf="visible(group)"  
+          cdkDropList          
+          [cdkDropListData]="group.children" 
+          (cdkDropListDropped)="dropItem($event)"
+          [cdkDropListConnectedTo]="getConnectedList()">
+        <li class="nav-item d-flex small grabbable" *ngFor="let child of group.children" cdkDrag [cdkDragData]="child">
+          <div (click)="selectEntity(child)" class="clickable btn-link text-left pl-4 py-1" [class.active]="isSelected(child)" >
+            {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
+            <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>
+          </div>              
+        </li>
+      </ul>
+    </li>
+  </ul>
+ </div>
+
+
+
+
+
+
+
+<!--
 
 <div class="vertical-bar" cdkDropList [cdkDropListData]="entities" (cdkDropListDropped)="dropGroup($event)">
 
-  <!-- ADD NEW GROUP-->
   <button (click)="addNewParentEntity()" class="btn btn-link btn-lg">
     <i class="fas fa-icon fa-plus pr-1"></i>
     {{'' + entityType + '.NEW' | uppercase | translate}}
   </button>
 
 
-  <!--ITERATE AL GROUPS-->
   <div *ngFor="let group of this.entities" cdkDropListGroup cdkDrag [cdkDragData]="group" >
 
     <div class="parent navitem pl-0">
@@ -28,17 +64,14 @@
     </div>
 
 
-      <!-- GROUP MEMBERS-->
       <div class="nav flex-column w-100 clickable" [class.hidden]="!visible(group)" id={{group.id}}  
           cdkDropList          
           [cdkDropListData]="group.children" 
           (cdkDropListDropped)="dropItem($event)"
           [cdkDropListConnectedTo]="getConnectedList()">
         
-        <!--Empty dummy icon to make dragging to empty containers possible-->
         <div class="navitem entity groupcontainer child pl-0" *ngIf="!group.children?.length" cdkDrag >&nbsp;</div>
      
-        <!-- Iterate children-->
         <div class="navitem entity groupcontainer child pl-3" *ngFor="let child of group.children" 
           (click)="selectEntity(child)" [class.active]="selectedEntity==child" cdkDrag [cdkDragData]="child">
           <div class="row border-bottom mr-0" *ngIf="displayOptions.showImage">
@@ -70,4 +103,4 @@
         </div>
   </div>
 </div>
-
+-->
