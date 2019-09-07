@@ -9,6 +9,7 @@ import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
 import { CharacterGroupService } from '../../services/electron/character-group.service';
 import { CharacterService } from '../../services/electron/character.service';
 import { CharacterEntity } from '../../entity/CharacterEntity';
+import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
 
 @Component({
   selector: 'app-people',
@@ -29,6 +30,11 @@ export class PeopleComponent extends BaseEntityComponent  {
       _translationService);
   }
 
+  protected displayOptions() : DisplayOptions {
+    return {
+      showImage: true
+    };
+  } 
 
   protected newGroup() : BaseGroupEntity {
     return new CharacterGroupEntity();

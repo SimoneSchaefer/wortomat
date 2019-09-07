@@ -25,18 +25,7 @@ export abstract class BaseEntityComponent implements OnInit {
   private _currentSummaryValue : string;
   private _currentDetailedSummaryValue : string;
 
-  public editorOptions = {
-    charCounterCount: true,
-    theme: 'gray',
-    toolbarButtons: [
-      'fontFamily', 'fontSize', 
-      '|', 'bold', 'italic', 'underline', 'strikeThrough', /*'subscript', 'superscript'*/, 
-      '|', 'textColor', 'backgroundColor',
-      '|', 'outdent', 'indent',      
-      '|', 'formatOL', 'formatUL',
-      '|', 'clearFormatting', 'undo', 'redo']
-
-  }
+ 
 
 
   constructor(

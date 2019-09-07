@@ -34,6 +34,8 @@ export class PDFLatexExporter implements Exporter {
                     var content = fs.readFileSync(fileNameLatex);
                     content = "\\include{setup}\n" + content + "\n\\end{document}"
                     content = content.replace(/\\section/g, '\\chapter');
+                    content = content.replace(new RegExp('``', 'g'), '\\glqq ');
+                    content = content.replace(new RegExp('\'\'', 'g'), '\\grqq  ');
 
                     fs.writeFileSync(fileNameLatex, content);
 

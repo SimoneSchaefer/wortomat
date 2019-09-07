@@ -48,7 +48,7 @@
             <div class="col-9 pl-0 pr-0">
               <div class="h6 p-1 nav-item mb-0 ">
                   <div class="ml-2">
-                    {{entity.name ? entity.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
+                    {{child.name ? child.name : entityType.toUpperCase() + '.UNTITLED' + (isChild ? '_CHILD' : '') | translate}}
                   </div>      
                   <div class="ml-2 small hint" *ngIf="child.summary">
                     {{child.summary}}

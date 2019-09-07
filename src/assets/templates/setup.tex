@@ -1,8 +1,9 @@
 % universal settings
 \documentclass[smalldemyvopaper,11pt,twoside,onecolumn,openright,extrafontsizes]{memoir}
-\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[osf]{Alegreya,AlegreyaSans}
+\usepackage[german]{babel}
 
 % PACKAGE DEFINITION
 % typographical packages
@@ -10,16 +11,17 @@
 \usepackage{setspace} % for line spacing
 \usepackage{lettrine} % for drop caps and awesome chapter beginnings
 \usepackage{titlesec} % for manipulation of chapter titles
+\usepackage{csquotes}
+%\MakeOuterQuote{"}
 
 % for placeholder text
 \usepackage{lipsum} % to generate Lorem Ipsum
-
 % other
 \usepackage{calc}
 \usepackage{hologo}
 \usepackage[hidelinks]{hyperref}
 %\usepackage{showframe}
-
+\RequirePackage[ngerman=ngerman-x-latest]{hyphsubst}
 % PHYSICAL DOCUMENT SETUP
 % media settings
 \setstocksize{8.5in}{5.675in}
@@ -27,6 +29,11 @@
 \setbinding{0.175in}
 \setlrmarginsandblock{0.611in}{1.222in}{*}
 \setulmarginsandblock{0.722in}{1.545in}{*}
+
+
+
+
+
 
 % defining the title and the author
 %\title{\LaTeX{} ePub Template}
@@ -49,6 +56,8 @@
   \end{center}
 \endgroup}
 \makeatother
+
+
 
 % custom title page
 \thispagestyle{empty}

@@ -44,6 +44,7 @@ import 'froala-editor/js/plugins/colors.min.js';
 import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 import { ExportComponent } from './components/export/export.component';
+import { EditorComponent } from './components/editor/editor.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -67,7 +68,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     LocationsComponent,
     PlotlinesComponent,
     BackgroundsComponent,
-    ExportComponent
+    ExportComponent,
+    EditorComponent
   ],
   imports: [
     BrowserModule,
