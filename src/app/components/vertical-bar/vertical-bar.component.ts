@@ -90,6 +90,32 @@ export class VerticalBarComponent implements OnInit {
     return 'children' in entity;
   }
 
+  todoCount(entity: BaseEntity) {
+      let subString = '<span style="background-color: rgb(255, 255, 0); color: rgb(255, 0, 0);">';
+      let n = 0;
+      let pos = 0;
+      let step =  subString.length;
+      let content = (entity.notes? entity.notes : '');
+      while (true) {
+          pos = content.indexOf(subString, pos);
+          if (pos >= 0) {
+              ++n;
+              pos += step;
+              //ignore empty tags
+              if (content.substring(pos, pos + 7) == "</span>") {
+                console.log('wupsi');
+                n--;
+              }
+          } else break;
+      }
+      return n;
+   }
+
+
+
+
+
+
   ///////////////////////////////
   ///////////EVENTS//////////////
   ///////////////////////////////

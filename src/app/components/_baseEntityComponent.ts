@@ -7,6 +7,7 @@ import { BaseService } from '../services/electron/_baseService';
 import { TranslateService } from '@ngx-translate/core';
 import { BaseGroupEntity } from '../entity/_baseGroupEntity';
 import { DisplayOptions } from './vertical-bar/vertical-bar.component';
+import FroalaEditor from 'froala-editor';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -25,6 +26,19 @@ export abstract class BaseEntityComponent implements OnInit {
   private _currentSummaryValue : string;
   private _currentDetailedSummaryValue : string;
 
+  public editorOptions = {
+    charCounterCount: true,
+    theme: 'gray',
+    toolbarButtons: [
+      'fontFamily', 'fontSize', 
+      '|', 'bold', 'italic', 'underline', 'strikeThrough', /*'subscript', 'superscript'*/, 
+      '|', 'textColor', 'backgroundColor',
+     // '|', 'outdent', 'indent',      
+      '|', 'formatOL', //'formatUL',
+      '|', 'clearFormatting', 'undo', 'redo', 'todo']
+
+  }
+
    constructor(
       private _groupService : BaseService,
       private _memberService : BaseService, 
@@ -33,8 +47,26 @@ export abstract class BaseEntityComponent implements OnInit {
       private _translateService : TranslateService) {
   }
 
+  options() {
+    return this.editorOptions;
+  }
   ngOnInit() {
     this._load(true);
+
+    FroalaEditor.DefineIcon('todo', {NAME: 'paint-brush'});
+    FroalaEditor.RegisterCommand('todo', {
+      title: 'Mark as TODO',
+      focus: false,
+      undo: false,
+      refreshAfterCallback: false,
+      icon: 'paint-brush',
+      callback: function(bla) {
+         if (bla === 'todo') {
+          this.colors.background('#ffff00');
+          this.colors.text('#ff0000');
+        }
+      }
+    });
   }
 
   protected displayOptions() : DisplayOptions {
@@ -86,9 +118,21 @@ export abstract class BaseEntityComponent implements OnInit {
     this.currentDetailedSummaryValue = null;
   }
 
+  replaceAll(target, search, replacement) {
+    return target.replace(new RegExp(search, 'g'), replacement);
+  };
+   
+
  saveAndCloseEditor () : void {
-   this._selectedEntity.notes = this._currentNotes;
+   console.log('saveAndClose');
+   console.log(this._currentNotes);
+   let content = this.replaceAll((this._currentNotes), '<span style="background-color: rgb(255, 255, 0); color: rgb(255, 0, 0);"></span>', '');
+   console.log(content);
+
+   this._selectedEntity.notes = content;
+
    this.updateMember(this._selectedEntity);
+   this._currentNotes = null;
    this.closeEditor();
  }
 
@@ -99,6 +143,7 @@ export abstract class BaseEntityComponent implements OnInit {
 
   continueWriting() : void {
     this._editorOpen = true;
+    this._currentNotes = 'Loading...';
     this._currentNotes = this.selectedEntity.notes;
   }
 
@@ -228,6 +273,8 @@ export abstract class BaseEntityComponent implements OnInit {
     return this._currentNotes;
   }
   set currentNotes(val: string) {
+    console.log('setter');
+    console.log(val);
     this._currentNotes = val;
   }
   set selectedEntity(val : BaseEntity) {
