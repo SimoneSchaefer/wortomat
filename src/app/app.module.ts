@@ -38,6 +38,7 @@ import { PeopleComponent } from './components/people/people.component';
 import { LocationsComponent } from './components/locations/locations.component';
 import { PlotlinesComponent } from './components/plotlines/plotlines.component';
 import { BackgroundsComponent } from './components/backgrounds/backgrounds.component';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import 'froala-editor/js/plugins.pkgd.min.js';
 import 'froala-editor/js/plugins/colors.min.js';
@@ -45,6 +46,8 @@ import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 import { ExportComponent } from './components/export/export.component';
 import { EditorComponent } from './components/editor/editor.component';
+import { WysiwygEditorComponent } from './components/wysiwyg-editor/wysiwyg-editor.component';
+import { EditDetailsComponent } from './components/edit-details/edit-details.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -69,7 +72,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     PlotlinesComponent,
     BackgroundsComponent,
     ExportComponent,
-    EditorComponent
+    EditorComponent,
+    WysiwygEditorComponent,
+    EditDetailsComponent
   ],
   imports: [
     BrowserModule,
@@ -89,7 +94,12 @@ export function HttpLoaderFactory(http: HttpClient) {
     DragDropModule,
     ReactiveFormsModule,
     FroalaEditorModule.forRoot(), 
-    FroalaViewModule.forRoot()
+    FroalaViewModule.forRoot(),
+    NgbModule
+  ],
+  entryComponents: [
+    WysiwygEditorComponent,
+    EditDetailsComponent
   ],
   providers: [ElectronService, AlertService, StateService],
   bootstrap: [AppComponent]

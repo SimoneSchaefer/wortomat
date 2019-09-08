@@ -66,7 +66,6 @@ html, body {
   z-index: 100000;
 }
 
-	
 .modal-mask {
 	content: "";
 	background: rgba(0, 0, 0, 0.6);
@@ -84,6 +83,30 @@ html, body {
 
 .fr-element.fr-view {
   max-height: 700px;
+}
+
+.fr-view .fr-class-todo-marker {
+  background-color: #ffff00;
+  color: #ff0000;
+}
+
+.fr-element::-webkit-scrollbar{
+	width: 8px;
+	background-color: #F5F5F5;
+}
+.fr-element::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #bbb;
+}
+.fr-element::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 8px;
+	background-color: #F5F5F5;
+}
+
+.modal.show {
+  height: auto !important;
 }
 
 

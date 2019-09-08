@@ -9,6 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BackgroundGroupEntity } from '../../entity/BackgroundGroupEntity';
 import { BackgroundEntity } from '../../entity/BackgroundEntity';
 import { ENTITY_TYPE, BaseEntity } from '../../entity/_baseEntity';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-backgrounds',
@@ -21,12 +22,15 @@ export class BackgroundsComponent  extends BaseEntityComponent  {
     _memberService : BackgroundService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService) {
+    _translationService : TranslateService,
+    _modalService: NgbModal
+    ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
-      _translationService);
+      _translationService,
+      _modalService);
   }
 
 

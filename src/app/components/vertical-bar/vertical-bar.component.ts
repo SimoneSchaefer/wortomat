@@ -3,6 +3,7 @@ import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { StateService, STATE } from '../../services/state.service';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { TodoCounterService } from '../../services/todo-counter.service';
 
 
 @Component({
@@ -20,7 +21,7 @@ export class VerticalBarComponent implements OnInit {
   @Output() updateOrder = new EventEmitter<BaseGroupEntity[]>();
   @Output() select = new EventEmitter<BaseEntity>();
 
-  constructor(private _stateService : StateService) { }
+  constructor(private _stateService : StateService, private _todoCounter : TodoCounterService) { }
 
   ngOnInit() {}
 
@@ -89,6 +90,15 @@ export class VerticalBarComponent implements OnInit {
   entityIsParent(entity: BaseEntity) {
     return 'children' in entity;
   }
+
+  todoCount(entity: BaseEntity) {
+    return this._todoCounter.todoCount(entity.notes? entity.notes : '');
+   }
+
+
+
+
+
 
   ///////////////////////////////
   ///////////EVENTS//////////////

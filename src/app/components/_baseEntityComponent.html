@@ -18,8 +18,8 @@
           <div class="button-group">
             <button class="btn btn-primary"  (click)="continueWriting()" *ngIf="!selectedEntityIsParent()">Continue writing</button>
             <button class="btn btn-primary"  (click)="addNewMember(selectedEntity)" *ngIf="selectedEntityIsParent()">Add chapter</button>
-            <button class="btn btn-primary" (click)="startEditDetails()">Edit details</button>
-            <button class="btn btn-danger" (click)="deleteEntity()">Delete</button>              
+            <button class="btn btn-primary" (click)="editDetails()">Edit details</button>
+            <button class="btn btn-danger" (click)="deleteSelectedEntity()">Delete</button>              
           </div>
         </div>
       </div>
@@ -37,71 +37,4 @@
       </main>
   </div>
 </div>
-
-
-<div *ngIf="editorOpen" class="modal-open modal-big">
-  <div class="modal-mask"></div>
-  <div  class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{selectedEntity?.name}}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="closeEditor()">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div [froalaEditor]="editorOptions" [(froalaModel)]="currentNotes"></div>             
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary"  (click)="saveAndCloseEditor()" translate>SAVE</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="closeEditor()" translate>CLOSE</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
- <div  *ngIf="detailsOpen" class="modal-open modal-big">
-    <div class="modal-mask"></div>
-    <div  class="modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" translate>EDIT_DETAILS</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="closeEditor()">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form form-group w-100 p-1">
-              <div *ngIf="displayOptions.displayImage"><app-image-upload [baseEntity]="selectedEntity" [entityType]="entityType"></app-image-upload></div>
-              <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
-              <input class="form-control w-100" type="text" [(ngModel)]="currentNameValue"/>
-            </div>
-            <div class="form form-group w-100 p-1">
-              <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
-              <input class="form-control pr-0 w-100" type="text" [(ngModel)]="currentSummaryValue" />
-            </div>
-
-            <div class="form form-group w-100 p-1">
-              <div><small class="form-text text-muted" translate>DETAILED_SUMMARY_HINT</small></div>
-              <div [froalaEditor]="options" [(froalaModel)]="currentDetailedSummaryValue"></div>                 
-            </div>             
-          </div>
-          <div class="modal-footer">
-            <div class="button-group mt-1 w-100 p-1">
-              <button class="btn btn-primary" (click)="update()" translate>
-                SAVE
-              </button>
-              <button class="btn btn-primary" (click)="cancelUpdate()" translate>
-              CLOSE
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 

@@ -20,7 +20,12 @@
           (cdkDropListDropped)="dropItem($event)"
           [cdkDropListConnectedTo]="getConnectedList()">
         <li class="nav-item d-flex small grabbable" *ngFor="let child of group.children" cdkDrag [cdkDragData]="child">
-          <div (click)="selectEntity(child)" class="clickable btn-link text-left pl-4 py-1" [class.active]="isSelected(child)" >
+          <div class="todo-wrapper">
+            <div *ngIf="todoCount(child) as c" class="todo-hint h6 p-1" title="{{c}} TODOs found">
+              {{c}}
+            </div>
+          </div>
+          <div (click)="selectEntity(child)" class="clickable btn-link text-left pl-2 py-1" [class.active]="isSelected(child)" >
             {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
             <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>
           </div>              
