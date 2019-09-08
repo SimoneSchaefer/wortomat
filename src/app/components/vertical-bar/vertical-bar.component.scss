@@ -24,69 +24,11 @@
 	color: #ff0000;
 }
 
+.hidden {
+	display: none;
+} 
 
 
-
-
-.vertical-bar {
-	background-color: rgba(0, 0, 0, 0.03);
-	height: 100%;
-	top:3em;
-	padding-top: 2em;
-	width: 20em;
-	border-radius: calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0;
-	overflow-y: auto;
-	overflow-x: hidden;
-	box-shadow: inset -7px 0 9px -7px rgba(0,0,0,0.7);
-
-
-  .child.navitem.active {       
-			background-color: #ffffff;
-			margin-right: -0.1em;
-		}
-	.child.navitem {
-		background-color: #f9f8f8;
-		color: #000;
-		&:not(.active) {
-			box-shadow: inset -7px 0 9px -7px rgba(0,0,0,0.7);
-		}		
-	}	
-
-
-.parent .groupcontainer {
-	left: -2em;
-}
-
-
-	.flex-none {
-		flex: none;
-	}
-
-	.flex-auto {
-		flex: auto;
-	}
-
-	.child {
-		padding-left: 3em;
-	}
-
-	.parent {
-		background-color: #efefef;
-		box-shadow: inset -7px 0 9px -7px rgba(0,0,0,0.7);
-	}
-	.group {
-		background-color: rgba(0, 0, 0, 0.125);
-	}
-
-	.hidden {
-		display: none;
-	} 
-}
-/*
-.cdk-drop-list-dragging {
-	list-style: none;
-	color: #d2d2d2;
-}*/
 .cdk-drag-preview {
 	list-style: none;
 	color: #d2d2d2;

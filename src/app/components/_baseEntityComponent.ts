@@ -169,7 +169,9 @@ export abstract class BaseEntityComponent implements OnInit {
     if ($this.entities.length) {
       if ($this.entities[0]['children']&&$this.entities[0]['children'].length) {
         $this.selectedEntity = $this.entities[0]['children'][0];
-      } 
+      } else {
+        $this.selectedEntity = $this.entities[0];
+      }
     }
   }
 
