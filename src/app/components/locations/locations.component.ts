@@ -14,6 +14,7 @@ import { LocationGroupService } from '../../services/electron/location-group.ser
 import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
 import { LocationEntity } from '../../entity/LocationEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
 
 
 @Component({
@@ -38,6 +39,12 @@ export class LocationsComponent  extends BaseEntityComponent  {
       _translationService,
       _modalService);
   }
+
+  protected displayOptions() : DisplayOptions {
+    return {
+      showImage: true
+    };
+  } 
 
 
   protected newGroup() : BaseGroupEntity {
