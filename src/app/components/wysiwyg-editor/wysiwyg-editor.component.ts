@@ -19,26 +19,16 @@ export class WysiwygEditorComponent implements OnInit {
       '|', 'bold', 'italic', 'underline', 'strikeThrough',
       '|', 'textColor', 'backgroundColor',
       '|', 'formatOL',
-      '|', 'clearFormatting', 'undo', 'redo', 'todo']
+      '|', 'clearFormatting', 'undo', 'redo', 'inlineClass'],
+    inlineClasses: {
+      'fr-class-todo-marker': 'mark as TODO'
+    }
   }
 
 
   constructor(private _activeModal: NgbActiveModal, private _translateService: TranslateService) { }
 
-  ngOnInit() {
-    FroalaEditor.DefineIcon('todo', {NAME: 'paint-brush'});
-    FroalaEditor.RegisterCommand('todo', {
-      title: 'Mark as TODO',
-      focus: false,
-      undo: false,
-      refreshAfterCallback: false,
-      icon: 'todo',
-      callback: function(_) {
-        this.colors.background('#ffff00');
-        this.colors.text('#ff0000');
-      }
-    });
-  }
+  ngOnInit() {}
 
   save() {
     this._activeModal.close(this.content);
