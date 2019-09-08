@@ -28,10 +28,10 @@
   "PARTS" : {
     "HEADER": "Parts",
     "NEW" : "New Part",
-    "NONE_YET_HEADER" : "You haven't created any chapters yet.",
-    "NONE_YET_INFO": "Each chapter belongs to a part. Use the button on the left side to create a new part.",    
+    "NONE_YET_HEADER" : "You haven't written anything yet.",
+    "NONE_YET_INFO": "Each chapter belongs to a part. Use the button in the toolbar to create a new part.",    
     "NO_CHILDREN_YET_HEADER" : "You haven't created any chapters yet.",
-    "NO_CHILDREN_YET_INFO": "Each chapter belongs to a part. Hover your part with the mouse and use the button to create a new chapter for your part.",    
+    "NO_CHILDREN_YET_INFO": "Each chapter belongs to a part. Use the Add Chapter button in the toolbar to create new content",    
     "NAME" : "Name",
     "SUMMARY" : "Summary",
     "SAVE" : "Save",

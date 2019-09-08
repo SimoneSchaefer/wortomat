@@ -44,7 +44,7 @@ export class AppComponent implements OnInit {
     let $this = this;
     $this._projectService.close(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
-        $this.alertService.success('PROJECTS.CLOSED_SUCCESS');
+       // $this.alertService.success('PROJECTS.CLOSED_SUCCESS');
         $this._openProjectService.identifier = "main";
         $this._router.navigateByUrl('/projects');
       } else {
