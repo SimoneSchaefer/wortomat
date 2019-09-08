@@ -1,13 +1,13 @@
 
 <div class="main">
-  <div class="toolbar border-bottom pt-3">
+  <div class="toolbar border-bottom pt-0">
     <div class="row m-0">
-      <div class="col col-4">
+      <div class="col col-4 bg-light border-right">
         <div class="d-flex justify-content-between p-3">
           <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1">
-            <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
-            <button class="d-flex align-items-center btn btn-link btn-lg clickable" (click)="addNewGroup()" >
+            <button class="d-flex align-items-center btn btn-primary clickable" (click)="addNewGroup()" >
               <i class="fas fa-icon fa-plus pr-1"></i>
+              <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
             </button>
           </h6>
         </div>
@@ -26,11 +26,11 @@
     </div>
   </div>
     <div class="row h-100 m-0 p-0">
-      <nav class="col-4 d-none d-md-block bg-light sidebar pt-3 pl-1 pr-1  border-right">
+      <nav class="col-4 d-none d-md-block bg-light sidebar pt-0 pl-1 pr-1  border-right">
         <app-vertical-bar [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity" [displayOptions]="displayOptions()"
           (select)="select($event)" (updateOrder)="updateOrder($event)"></app-vertical-bar>
       </nav>
-      <main role="main" class="col-8 pt-3 ">
+      <main role="main" class="col-8 pt-0 ">
         <div class="wrapper scrollbar">
           <div *ngIf="entities.length===0">
             <div class="alert alert-light" role="alert">
