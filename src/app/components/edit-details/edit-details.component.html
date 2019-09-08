@@ -5,20 +5,32 @@
   </button>
 </div>
 <div class="modal-body">
-  <div class="form form-group w-100 p-1">
-    <!--<div *ngIf="displayOptions.displayImage"><app-image-upload [baseEntity]="selectedEntity" [entityType]="entityType"></app-image-upload></div>-->
-    <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
-    <input class="form-control w-100" type="text" [(ngModel)]="name"/>
-  </div>
-  <div class="form form-group w-100 p-1">
-    <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
-    <input class="form-control pr-0 w-100" type="text" [(ngModel)]="summary" />
-  </div>
+    <div class="row mx-0">
+      <div class="col col-4" *ngIf="displayOptions?.showImage" >    
+        <app-image-upload [baseEntity]="baseEntity" [entityType]="entityType"></app-image-upload>
+      </div>
+      <div class="col" [ngClass]="{'col-8' : displayOptions?.showImage}">
+        <div class="form form-group w-100 p-1">
+          <small class="form-text text-muted" translate>NAME_HINT</small>
+          <input class="form-control w-100" type="text" [(ngModel)]="baseEntity.name"/>
+        </div>
+        <div class="form form-group w-100 p-1">
+          <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
+          <input class="form-control pr-0 w-100" type="text" [(ngModel)]="baseEntity.summary" />
+        </div>
+      </div>
+    </div>
+    <div>
+  </div>   
 
-  <div class="form form-group w-100 p-1">
-    <div><small class="form-text text-muted" translate>DETAILED_SUMMARY_HINT</small></div>
-    <div [froalaEditor]="options" [(froalaModel)]="detailedSummary"></div>                 
-  </div>             
+    <div class="row mx-0">
+    <div class="col">
+      <div class="form form-group w-100 p-1">
+        <div><small class="form-text text-muted" translate>DETAILED_SUMMARY_HINT</small></div>
+        <div [froalaEditor]="options" [(froalaModel)]="baseEntity.detailedSummary"></div>                 
+      </div> 
+    </div>
+  </div>            
 </div>
 <div class="modal-footer">
   <div class="button-group mt-1 w-100 p-1">
