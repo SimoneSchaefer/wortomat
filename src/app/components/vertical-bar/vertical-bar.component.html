@@ -14,7 +14,7 @@
       </h6>
 
       <!-- children-->
-      <ul class="nav flex-column" *ngIf="visible(group)"  
+      <ul class="nav flex-column"  [class.hidden]="!visible(group)" id={{group.id}}  
           cdkDropList          
           [cdkDropListData]="group.children" 
           (cdkDropListDropped)="dropItem($event)"

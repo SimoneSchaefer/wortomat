@@ -61,9 +61,12 @@ export class VerticalBarComponent implements OnInit {
    * @param event 
    */
   dropItem(event) {
+    console.log('dropped item');
     if (event.previousContainer === event.container) {
+      console.log('same container');
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
+      console.log('different container');
       transferArrayItem(event.previousContainer.data,
         event.container.data,
         event.previousIndex,
