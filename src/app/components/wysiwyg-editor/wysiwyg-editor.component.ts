@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import FroalaEditor from 'froala-editor';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
@@ -20,7 +20,6 @@ export class WysiwygEditorComponent implements OnInit {
       '|', 'textColor', 'backgroundColor',
       '|', 'formatOL',
       '|', 'clearFormatting', 'undo', 'redo', 'todo']
-
   }
 
 
@@ -34,11 +33,9 @@ export class WysiwygEditorComponent implements OnInit {
       undo: false,
       refreshAfterCallback: false,
       icon: 'todo',
-      callback: function(bla) {
-         if (bla === 'todo') {
-          this.colors.background('#ffff00');
-          this.colors.text('#ff0000');
-        }
+      callback: function(_) {
+        this.colors.background('#ffff00');
+        this.colors.text('#ff0000');
       }
     });
   }
@@ -49,32 +46,17 @@ export class WysiwygEditorComponent implements OnInit {
 
   close() {
     if (confirm(this._translateService.instant("REALLY_CLOSE"))) {
-      this._activeModal.dismiss();
+      this._activeModal.dismiss('dismiss');
     }
   }
 
-  get editorOptions() {
-    return this._editorOptions;
-  }
+  get editorOptions() { return this._editorOptions;}
+  set editorOptions(options: any) { this._editorOptions = options;};
 
-  set editorOptions(options: any) {
-    this._editorOptions = options;
-  };
+  get content() { return this._content;}
+  set content(content: string) { this._content = content; }
 
-  get content() {
-    return this._content;
-  }
-
-  set content(content: string) {
-    this._content = content;
-  }
-
-  get title() {
-    return this._title;
-  }
-
-  set title(title: string) {
-    this._title = title;
-  }
+  get title() { return this._title;}
+  set title(title: string) { this._title = title; }
 
 }

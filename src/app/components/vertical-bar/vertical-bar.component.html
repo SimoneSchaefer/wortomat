@@ -21,7 +21,7 @@
           [cdkDropListConnectedTo]="getConnectedList()">
         <li class="nav-item d-flex small grabbable" *ngFor="let child of group.children" cdkDrag [cdkDragData]="child">
           <div class="todo-wrapper">
-            <div *ngIf="todoCount(child) as c" class="todo-hint h6 p-1">
+            <div *ngIf="todoCount(child) as c" class="todo-hint h6 p-1" title="{{c}} TODOs found">
               {{c}}
             </div>
           </div>

@@ -1,0 +1,32 @@
+<div class="modal-header">
+  <h5 class="modal-title" translate>EDIT_DETAILS</h5>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="form form-group w-100 p-1">
+    <!--<div *ngIf="displayOptions.displayImage"><app-image-upload [baseEntity]="selectedEntity" [entityType]="entityType"></app-image-upload></div>-->
+    <div><small class="form-text text-muted" translate>NAME_HINT</small></div>
+    <input class="form-control w-100" type="text" [(ngModel)]="name"/>
+  </div>
+  <div class="form form-group w-100 p-1">
+    <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
+    <input class="form-control pr-0 w-100" type="text" [(ngModel)]="summary" />
+  </div>
+
+  <div class="form form-group w-100 p-1">
+    <div><small class="form-text text-muted" translate>DETAILED_SUMMARY_HINT</small></div>
+    <div [froalaEditor]="options" [(froalaModel)]="detailedSummary"></div>                 
+  </div>             
+</div>
+<div class="modal-footer">
+  <div class="button-group mt-1 w-100 p-1">
+    <button class="btn btn-primary" (click)="save()" translate>
+      SAVE
+    </button>
+    <button class="btn btn-primary" (click)="close()" translate>
+    CLOSE
+    </button>
+  </div>
+</div>

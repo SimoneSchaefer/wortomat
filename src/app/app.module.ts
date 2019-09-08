@@ -47,6 +47,7 @@ import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 import { ExportComponent } from './components/export/export.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { WysiwygEditorComponent } from './components/wysiwyg-editor/wysiwyg-editor.component';
+import { EditDetailsComponent } from './components/edit-details/edit-details.component';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -72,7 +73,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     BackgroundsComponent,
     ExportComponent,
     EditorComponent,
-    WysiwygEditorComponent
+    WysiwygEditorComponent,
+    EditDetailsComponent
   ],
   imports: [
     BrowserModule,
@@ -96,7 +98,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     NgbModule
   ],
   entryComponents: [
-    WysiwygEditorComponent
+    WysiwygEditorComponent,
+    EditDetailsComponent
   ],
   providers: [ElectronService, AlertService, StateService],
   bootstrap: [AppComponent]

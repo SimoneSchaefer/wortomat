@@ -9,6 +9,7 @@ import { BaseGroupEntity } from '../entity/_baseGroupEntity';
 import { DisplayOptions } from './vertical-bar/vertical-bar.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WysiwygEditorComponent } from './wysiwyg-editor/wysiwyg-editor.component';
+import { EditDetailsComponent } from './edit-details/edit-details.component';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -16,16 +17,9 @@ export abstract class BaseEntityComponent implements OnInit {
   protected abstract newGroup() : BaseEntity;
   protected abstract newMember(parent : BaseGroupEntity) : BaseEntity;
   protected abstract entityType() : ENTITY_TYPE;
-  
 
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
-  private _detailsOpen : boolean;
-  private _currentNameValue : string;
-  private _currentSummaryValue : string;
-  private _currentDetailedSummaryValue : string;
-
-
 
    constructor(
       private _groupService : BaseService,
@@ -36,15 +30,92 @@ export abstract class BaseEntityComponent implements OnInit {
       private _modalService: NgbModal) {
   }
 
-  ngOnInit() {
-    this._load(true);
-  }
+  ngOnInit() { this._load(true); }
 
   protected displayOptions() : DisplayOptions {
     return {
       showImage: false
     };
   }
+    
+
+  
+  editDetails() {
+    const modalRef = this._modalService.open(EditDetailsComponent, {size: 'lg', backdrop: 'static'});
+    modalRef.componentInstance.name = this.selectedEntity.name;
+    modalRef.componentInstance.summary = this.selectedEntity.summary;
+    modalRef.componentInstance.detailedSummary = this.selectedEntity.detailedSummary;
+    modalRef.result.then(content => {
+      this.selectedEntity.name = content.name;
+      this.selectedEntity.summary = content.summary;
+      this.selectedEntity.detailedSummary = content.detailedSummary;
+      if (this.selectedEntityIsParent()) {
+        this.updateGroup(this.selectedEntity as BaseGroupEntity);
+      } else {
+        this.updateMember(this.selectedEntity);
+      }
+    }).catch((error) => {if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')});
+  }
+
+  continueWriting() : void {
+    const modalRef = this._modalService.open(WysiwygEditorComponent, {size: 'lg', backdrop: 'static'});
+    modalRef.componentInstance.content = this.selectedEntity.notes;
+    modalRef.componentInstance.title = this.selectedEntity.name;
+    modalRef.result.then(content => {
+      this.selectedEntity.notes = content;
+      this.updateMember(this._selectedEntity);
+    }).catch((error) => {if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')});
+  }
+
+
+  selectedEntityIsParent() {
+    return this.selectedEntity && 'children' in this.selectedEntity;
+  }  
+
+  updateGroup(group : BaseGroupEntity) : void {
+    this.save(this._groupService, group, this.entities);
+  }
+
+  updateMember(member : BaseEntity) : void {
+    this.save(this._memberService, member, null, 'CHILD_');
+  }
+
+  addNewGroup() {
+    this.save(this._groupService, this.newGroup(), this.entities);
+  }
+
+  addNewMember(parentEntity : BaseGroupEntity) {
+    this.save(this._memberService, this.newMember(parentEntity), parentEntity['children'], 'CHILD_');
+  }
+
+  select(entity : BaseEntity) { this.selectedEntity = entity; }
+
+ 
+  deleteSelectedEntity() {
+    const $this = this;
+    if (confirm(this._translateService.instant("REALLY_DELETE"))) {
+      let service = this.selectedEntityIsParent() ? this._groupService : this._memberService;
+      service.remove(this.selectedEntity.id, function (response) {
+        if (response.responseType == ResponseType.SUCCESS) {
+          $this._loadDelayed(true);         
+        } else {
+          $this._alertService.error(`ERROR_${response.msg}`);
+        }
+      });
+    }
+  }
+
+  updateOrder(entities: BaseGroupEntity[]) {
+    let $this = this;
+    this._groupService.saveAll(entities, function(response) {
+      if (response.responseType === ResponseType.SUCCESS) {
+        $this._loadDelayed();         
+      } else {
+        $this._alertService.error($this.entityType().toUpperCase() + ".ERROR");
+      }
+    });
+  }
+
 
   getContent() : string {
     if (this.selectedEntityIsParent()) {
@@ -57,99 +128,6 @@ export abstract class BaseEntityComponent implements OnInit {
     }
     return this.selectedEntity.notes;
   }
-    
-  selectedEntityIsParent() {
-    return this.selectedEntity && 'children' in this.selectedEntity;
-  }
-  
-  
-  startEditDetails() {
-    this.currentNameValue = this.selectedEntity.name;
-    this.currentSummaryValue = this.selectedEntity.summary;
-    this.currentDetailedSummaryValue = this.selectedEntity.detailedSummary;
-    this.detailsOpen = true;
-  }
-
-  update() {
-    this.selectedEntity.name = this.currentNameValue;
-    this.selectedEntity.summary = this.currentSummaryValue;
-    this.selectedEntity.detailedSummary = this.currentDetailedSummaryValue;
-    if (this.selectedEntityIsParent()) {
-      this.updateGroup(this.selectedEntity as BaseGroupEntity);
-    } else {
-      this.updateMember(this.selectedEntity);
-    }
-    this.cancelUpdate();
-  }
-
-  cancelUpdate() {
-    this.detailsOpen = false;
-    this.currentNameValue = null;
-    this.currentSummaryValue = null;
-    this.currentDetailedSummaryValue = null;
-  }
-
-
-  continueWriting() : void {
-    const modalRef = this._modalService.open(WysiwygEditorComponent, {size: 'lg', backdrop: 'static'});
-    modalRef.componentInstance.content = this.selectedEntity.notes;
-    modalRef.componentInstance.title = this.selectedEntity.name;
-    modalRef.result.then(content => {
-      this.selectedEntity.notes = content;
-      this.updateMember(this._selectedEntity);
-    }).catch(() => this.alertService.error('SAVE_ERROR'));
-  }
-
-  updateGroup(group : BaseGroupEntity) : void {
-    this.save(this._groupService, group, this.entities);
-  }
-
-  updateMember(member : BaseEntity) : void {
-    this.save(this._memberService, member, null, 'CHILD_');
-  }
-
-  deleteEntity(): void {
-    if (this.selectedEntityIsParent()) {
-      this.deleteGroup(this.selectedEntity as BaseGroupEntity);
-    } else {
-      this.deleteMember(this.selectedEntity);
-    }
-  }
-
-  deleteMember(member : BaseEntity) : void {
-    this.delete(this._memberService, member);
-  }
-
-  deleteGroup(group : BaseGroupEntity): void {
-    this.delete(this._groupService, group); 
-  }
-
-  addNewGroup() {
-    this.save(this._groupService, this.newGroup(), this.entities);
-  }
-
-  addNewMember(parentEntity : BaseGroupEntity) {
-    this.save(this._memberService, this.newMember(parentEntity), parentEntity['children'], 'CHILD_');
-  }
-
-  select(entity : BaseEntity) {
-    this.selectedEntity = entity;
-  }
-
-  updateOrder(entities: BaseGroupEntity[]) {
-    let $this = this;
-    this._groupService.saveAll(entities, function(response) {
-      if (response.responseType === ResponseType.SUCCESS) {
-        //$this._alertService.success($this.entityType().toUpperCase() + ".UPDATED") + "_SUCCESS";
-        $this._loadDelayed();         
-      } else {
-        console.dir(response);
-        $this._alertService.error($this.entityType().toUpperCase() + ".ERROR");
-      }
-    });
-
-  }
-
 
   private save(baseService : BaseService, newEntity : BaseEntity, entities : BaseEntity[], prefix : string = '') {
     let $this = this;
@@ -160,29 +138,12 @@ export abstract class BaseEntityComponent implements OnInit {
     baseService.save(newEntity, function(response) {
       $this._selectedEntity = response.data.entity;
       if (response.responseType === ResponseType.SUCCESS) {
-        //$this._alertService.success($this.entityType().toUpperCase() + "."+prefix+ (newElement ? "CREATED" : "UPDATED") + "_SUCCESS");
-        $this._loadDelayed(false, newElement ? $this.startEditDetails : null);                
+        $this._loadDelayed(false, newElement ? $this.editDetails : null);                
       } else {
         $this._alertService.error($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
       }
     });
   }
-
-
-
-  private delete(service : BaseService, entity : BaseEntity) {
-    let $this = this;
-    if (confirm(this._translateService.instant("REALLY_DELETE"))) {
-      service.remove(entity.id, function (response) {
-        if (response.responseType == ResponseType.SUCCESS) {
-          $this._loadDelayed(true);         
-        } else {
-          $this._alertService.error(`ERROR_${response.msg}`);
-        }
-      });
-    }
-  }
-
 
   private _loadDelayed(selectFirst : boolean = false, callback = null) {
     let $this = this;
@@ -196,66 +157,29 @@ export abstract class BaseEntityComponent implements OnInit {
     $this._groupService.loadAll(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
         $this.entities = response.data.entities ? response.data.entities : new Array();           
-        if (selectFirst) {
-          $this.selectedEntity = null;
-          if ($this.entities.length) {
-            if ($this.entities[0]['children']&&$this.entities[0]['children'].length) {
-              $this.selectedEntity = $this.entities[0]['children'][0];
-            } 
-          }
-        } 
-        if (callback) {
-          callback.apply($this);
-        }
-      } else {
-        $this._alertService.error(`ERROR_PROJECTS_${response.msg}`);
-      }
+        if (selectFirst) { $this._selectFirst(); } 
+        if (callback) { callback.apply($this); }
+      } else { $this._alertService.error(`ERROR_PROJECTS_${response.msg}`); }
     });
   }
 
-  get entities(): Array<BaseEntity> {
-    return this._entities;
+  private _selectFirst() {
+    let $this = this;
+    $this.selectedEntity = null;
+    if ($this.entities.length) {
+      if ($this.entities[0]['children']&&$this.entities[0]['children'].length) {
+        $this.selectedEntity = $this.entities[0]['children'][0];
+      } 
+    }
   }
-  set entities(val: Array<BaseEntity>) {
-    this._entities = val;
-  }
-  get selectedEntity() : BaseEntity {
-    return this._selectedEntity;
-  }
-  set selectedEntity(val : BaseEntity) {
-    this._selectedEntity = val;
-  }
-  get currentNameValue() {
-    return this._currentNameValue;
-  }
-  get currentSummaryValue() {
-    return this._currentSummaryValue;
-  }
-  get currentDetailedSummaryValue() {
-    return this._currentDetailedSummaryValue;
-  }
-  get detailsOpen() {
-    return this._detailsOpen;
-  }
-  set currentSummaryValue(val : string) {
-    this._currentSummaryValue = val;
-  }
-  set currentDetailedSummaryValue(val : string) {
-    this._currentDetailedSummaryValue = val;
-  }
-  set currentNameValue(val : string) {
-    this._currentNameValue = val;
-  }
-  set detailsOpen(val : boolean) {
-    this._detailsOpen = val;
-  }
-  protected get baseService(): BaseService {
-    return this._groupService;
-  }
-  protected get alertService(): AlertService {
-    return this._alertService;
-  }
-  protected get openProjectService(): OpenProjectService {
-    return this._openProjectService;
-  }
+
+  get entities(): Array<BaseEntity> { return this._entities;}
+  set entities(val: Array<BaseEntity>) {this._entities = val;}
+
+  get selectedEntity() : BaseEntity { return this._selectedEntity; }
+  set selectedEntity(val : BaseEntity) {this._selectedEntity = val;}
+
+  protected get baseService(): BaseService { return this._groupService; }
+  protected get alertService(): AlertService { return this._alertService; }
+  protected get openProjectService(): OpenProjectService {return this._openProjectService;}
 }
