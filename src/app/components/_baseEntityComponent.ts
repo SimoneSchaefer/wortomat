@@ -1,4 +1,4 @@
-import { OnInit } from '@angular/core';
+import { OnInit, SystemJsNgModuleLoaderConfig } from '@angular/core';
 import { ResponseType } from '../message/Message';
 import { BaseEntity, ENTITY_TYPE } from '../entity/_baseEntity';
 import { AlertService } from '../services/alert.service';
@@ -37,18 +37,14 @@ export abstract class BaseEntityComponent implements OnInit {
       showImage: false
     };
   }
-    
-
-  
+      
   editDetails() {
     const modalRef = this._modalService.open(EditDetailsComponent, {size: 'lg', backdrop: 'static'});
-    modalRef.componentInstance.name = this.selectedEntity.name;
-    modalRef.componentInstance.summary = this.selectedEntity.summary;
-    modalRef.componentInstance.detailedSummary = this.selectedEntity.detailedSummary;
-    modalRef.result.then(content => {
-      this.selectedEntity.name = content.name;
-      this.selectedEntity.summary = content.summary;
-      this.selectedEntity.detailedSummary = content.detailedSummary;
+    modalRef.componentInstance.baseEntity = this.selectedEntity;
+    modalRef.componentInstance.entityType = this.entityType();
+    modalRef.componentInstance.displayOptions = this.displayOptions();
+    modalRef.result.then(entity => {
+      this.selectedEntity = entity;
       if (this.selectedEntityIsParent()) {
         this.updateGroup(this.selectedEntity as BaseGroupEntity);
       } else {

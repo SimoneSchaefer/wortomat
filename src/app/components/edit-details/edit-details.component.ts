@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import FroalaEditor from 'froala-editor';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
+import { BaseEntity } from '../../entity/_baseEntity';
 
 @Component({
   selector: 'app-edit-details',
@@ -9,10 +10,14 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./edit-details.component.scss']
 })
 export class EditDetailsComponent implements OnInit {
-  private _name : string;
+  private _baseEntity : BaseEntity;
+  /*private _name : string;
   private _summary : string;
   private _detailedSummary : string;
+  private _image: string;*/
   private _title: string;
+  private _displayOptions;
+  private _entityType : string;
 
   private _editorOptions = {
     charCounterCount: true,
@@ -31,11 +36,11 @@ export class EditDetailsComponent implements OnInit {
   ngOnInit() {}
 
   save() {
-    this._activeModal.close({
-      'name' : this.name,
+    this._activeModal.close(this.baseEntity
+       /* 'name' : this.name,
       'summary' : this.summary,
-      'detailedSummary' : this.detailedSummary
-    });
+      'detailedSummary' : this.detailedSummary*/
+    );
   }
 
   close() {
@@ -44,19 +49,30 @@ export class EditDetailsComponent implements OnInit {
     }
   }
 
+  get displayOptions() {console.log(this._displayOptions);return this._displayOptions;}
+  set displayOptions(options: any) {this._displayOptions = options;};
+
   get editorOptions() {return this._editorOptions;}
   set editorOptions(options: any) {this._editorOptions = options;};
 
-  get name() { return this._name;}
+  get baseEntity() {return this._baseEntity}
+  set baseEntity(baseEntity: BaseEntity) { this._baseEntity = baseEntity}
+
+  get entityType() { return this._entityType;}
+  set entityType(entityType: string) {this._entityType = entityType;}
+
+  /*get name() { return this._name;}
   set name(name: string) {this._name = name;}
 
   get summary() {return this._summary;}
   set summary(summary: string) {this._summary = summary;}
 
+  get image() {return this._image;}
+  set image(image: string) {this._image = image;}
+
   get detailedSummary() {return this._detailedSummary;}
-  set detailedSummary(detailedSummary: string) {this._detailedSummary = detailedSummary;}
+  set detailedSummary(detailedSummary: string) {this._detailedSummary = detailedSummary;}*/
 
   get title() { return this._title; }
   set title(title: string) { this._title = title; }
-
 }

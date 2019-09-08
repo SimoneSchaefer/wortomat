@@ -23,9 +23,7 @@
         <li class="nav-item small grabbable" *ngFor="let child of group.children" cdkDrag [cdkDragData]="child">
           <div class="d-flex">
             <div class="todo-wrapper">
-              <div *ngIf="todoCount(child) as c" class="todo-hint h6 p-1" title="{{c}} TODOs found">
-                {{c}}
-              </div>
+              <span *ngIf="todoCount(child) as c"  title="{{c}} TODOs found" class="badge badge-danger ml-2">{{c}}</span>
             </div>
             <div (click)="selectEntity(child)" class="clickable btn-link text-left pl-2 py-1 overflow-ellipsis" [class.active]="isSelected(child)" >
               {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
