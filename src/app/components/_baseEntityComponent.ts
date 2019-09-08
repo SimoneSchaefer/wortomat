@@ -7,7 +7,8 @@ import { BaseService } from '../services/electron/_baseService';
 import { TranslateService } from '@ngx-translate/core';
 import { BaseGroupEntity } from '../entity/_baseGroupEntity';
 import { DisplayOptions } from './vertical-bar/vertical-bar.component';
-import FroalaEditor from 'froala-editor';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { WysiwygEditorComponent } from './wysiwyg-editor/wysiwyg-editor.component';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -19,54 +20,24 @@ export abstract class BaseEntityComponent implements OnInit {
 
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
-  private _editorOpen : boolean;
-  private _currentNotes : string;
   private _detailsOpen : boolean;
   private _currentNameValue : string;
   private _currentSummaryValue : string;
   private _currentDetailedSummaryValue : string;
 
-  public editorOptions = {
-    charCounterCount: true,
-    theme: 'gray',
-    toolbarButtons: [
-      'fontFamily', 'fontSize', 
-      '|', 'bold', 'italic', 'underline', 'strikeThrough', /*'subscript', 'superscript'*/, 
-      '|', 'textColor', 'backgroundColor',
-     // '|', 'outdent', 'indent',      
-      '|', 'formatOL', //'formatUL',
-      '|', 'clearFormatting', 'undo', 'redo', 'todo']
 
-  }
 
    constructor(
       private _groupService : BaseService,
       private _memberService : BaseService, 
       private _openProjectService: OpenProjectService, 
       private _alertService: AlertService,
-      private _translateService : TranslateService) {
+      private _translateService : TranslateService,
+      private _modalService: NgbModal) {
   }
 
-  options() {
-    return this.editorOptions;
-  }
   ngOnInit() {
     this._load(true);
-
-    FroalaEditor.DefineIcon('todo', {NAME: 'paint-brush'});
-    FroalaEditor.RegisterCommand('todo', {
-      title: 'Mark as TODO',
-      focus: false,
-      undo: false,
-      refreshAfterCallback: false,
-      icon: 'paint-brush',
-      callback: function(bla) {
-         if (bla === 'todo') {
-          this.colors.background('#ffff00');
-          this.colors.text('#ff0000');
-        }
-      }
-    });
   }
 
   protected displayOptions() : DisplayOptions {
@@ -118,33 +89,15 @@ export abstract class BaseEntityComponent implements OnInit {
     this.currentDetailedSummaryValue = null;
   }
 
-  replaceAll(target, search, replacement) {
-    return target.replace(new RegExp(search, 'g'), replacement);
-  };
-   
-
- saveAndCloseEditor () : void {
-   console.log('saveAndClose');
-   console.log(this._currentNotes);
-   let content = this.replaceAll((this._currentNotes), '<span style="background-color: rgb(255, 255, 0); color: rgb(255, 0, 0);"></span>', '');
-   console.log(content);
-
-   this._selectedEntity.notes = content;
-
-   this.updateMember(this._selectedEntity);
-   this._currentNotes = null;
-   this.closeEditor();
- }
-
-  closeEditor() : void {
-    this._editorOpen = false;
-    this._currentNotes = "";
-  }
 
   continueWriting() : void {
-    this._editorOpen = true;
-    this._currentNotes = 'Loading...';
-    this._currentNotes = this.selectedEntity.notes;
+    const modalRef = this._modalService.open(WysiwygEditorComponent, {size: 'lg', backdrop: 'static'});
+    modalRef.componentInstance.content = this.selectedEntity.notes;
+    modalRef.componentInstance.title = this.selectedEntity.name;
+    modalRef.result.then(content => {
+      this.selectedEntity.notes = content;
+      this.updateMember(this._selectedEntity);
+    }).catch(() => this.alertService.error('SAVE_ERROR'));
   }
 
   updateGroup(group : BaseGroupEntity) : void {
@@ -269,19 +222,8 @@ export abstract class BaseEntityComponent implements OnInit {
   get selectedEntity() : BaseEntity {
     return this._selectedEntity;
   }
-  get currentNotes() : string {
-    return this._currentNotes;
-  }
-  set currentNotes(val: string) {
-    console.log('setter');
-    console.log(val);
-    this._currentNotes = val;
-  }
   set selectedEntity(val : BaseEntity) {
     this._selectedEntity = val;
-  }
-  get editorOpen() : boolean {
-    return this._editorOpen;
   }
   get currentNameValue() {
     return this._currentNameValue;

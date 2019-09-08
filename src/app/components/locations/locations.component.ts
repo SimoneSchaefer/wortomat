@@ -13,6 +13,7 @@ import { LocationService } from '../../services/electron/location.service';
 import { LocationGroupService } from '../../services/electron/location-group.service';
 import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
 import { LocationEntity } from '../../entity/LocationEntity';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component({
@@ -27,12 +28,15 @@ export class LocationsComponent  extends BaseEntityComponent  {
     _memberService : LocationService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService) {
+    _translationService : TranslateService,
+    _modalService: NgbModal
+    ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
-      _translationService);
+      _translationService,
+      _modalService);
   }
 
 

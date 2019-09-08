@@ -9,6 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { PlotlineEntity } from '../../entity/PlotlineEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-plotlines',  
@@ -21,12 +22,15 @@ export class PlotlinesComponent  extends BaseEntityComponent  {
     _memberService : PlotlineService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService) {
+    _translationService : TranslateService,
+    _modalService: NgbModal
+    ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
-      _translationService);
+      _translationService,
+      _modalService);
   }
 
 

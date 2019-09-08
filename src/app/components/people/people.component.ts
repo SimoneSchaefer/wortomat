@@ -10,6 +10,7 @@ import { CharacterGroupService } from '../../services/electron/character-group.s
 import { CharacterService } from '../../services/electron/character.service';
 import { CharacterEntity } from '../../entity/CharacterEntity';
 import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-people',
@@ -22,12 +23,15 @@ export class PeopleComponent extends BaseEntityComponent  {
     _memberService : CharacterService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService) {
+    _translationService : TranslateService,
+    _modalService: NgbModal
+    ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
-      _translationService);
+      _translationService,
+      _modalService);
   }
 
   protected displayOptions() : DisplayOptions {

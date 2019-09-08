@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { BaseEntityComponent } from '../_baseEntityComponent';
 import { TranslateService } from '@ngx-translate/core';
 import { PartEntity } from '../../entity/PartEntity';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-projects',
@@ -21,13 +22,15 @@ export class ProjectsComponent extends BaseEntityComponent {
     _baseService: ProjectService, 
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService,    
+    _translationService : TranslateService,  
+    _modalService: NgbModal,  
     private _router : Router) {
     super(_baseService,
       null, 
       _openProjectService, 
       _alertService,
-      _translationService
+      _translationService,
+      _modalService
       );
   }
   protected newGroup() : BaseEntity {

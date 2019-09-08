@@ -9,6 +9,7 @@ import { PartEntity } from '../../entity/PartEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { ChapterEntity } from '../../entity/ChapterEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-parts',
@@ -21,12 +22,15 @@ export class PartsComponent extends BaseEntityComponent  {
     _memberService : ChapterService,
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService) {
+    _translationService : TranslateService,
+    _modalService: NgbModal
+    ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
-      _translationService);
+      _translationService,
+      _modalService);
   }
 
 

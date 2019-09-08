@@ -3,6 +3,7 @@ import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { StateService, STATE } from '../../services/state.service';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { TodoCounterService } from '../../services/todo-counter.service';
 
 
 @Component({
@@ -20,7 +21,7 @@ export class VerticalBarComponent implements OnInit {
   @Output() updateOrder = new EventEmitter<BaseGroupEntity[]>();
   @Output() select = new EventEmitter<BaseEntity>();
 
-  constructor(private _stateService : StateService) { }
+  constructor(private _stateService : StateService, private _todoCounter : TodoCounterService) { }
 
   ngOnInit() {}
 
@@ -91,24 +92,7 @@ export class VerticalBarComponent implements OnInit {
   }
 
   todoCount(entity: BaseEntity) {
-      let subString = '<span style="background-color: rgb(255, 255, 0); color: rgb(255, 0, 0);">';
-      let n = 0;
-      let pos = 0;
-      let step =  subString.length;
-      let content = (entity.notes? entity.notes : '');
-      while (true) {
-          pos = content.indexOf(subString, pos);
-          if (pos >= 0) {
-              ++n;
-              pos += step;
-              //ignore empty tags
-              if (content.substring(pos, pos + 7) == "</span>") {
-                console.log('wupsi');
-                n--;
-              }
-          } else break;
-      }
-      return n;
+    return this._todoCounter.todoCount(entity.notes? entity.notes : '');
    }
 
 

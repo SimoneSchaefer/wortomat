@@ -66,7 +66,6 @@ html, body {
   z-index: 100000;
 }
 
-	
 .modal-mask {
 	content: "";
 	background: rgba(0, 0, 0, 0.6);
@@ -84,6 +83,10 @@ html, body {
 
 .fr-element.fr-view {
   max-height: 700px;
+}
+
+.modal.show {
+  height: auto !important;
 }
 
 
