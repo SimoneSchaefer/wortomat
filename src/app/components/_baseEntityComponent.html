@@ -10,11 +10,27 @@
               <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
             </button>
           </h6>
+
+
         </div>
       </div>
       <div class="col col-8">
         <div class="d-flex justify-content-between p-3">
           <!--<h1 class="h4 text-muted text-nowrap">{{selectedEntity?.name}}</h1>-->
+          <!-- Display options-->
+          <div class="btn-group btn-group-toggle">
+            <label class="btn-primary" ngbButtonLabel>
+              <input type="checkbox" ngbButton [(ngModel)]="display.summary" (click)="toggleView('summary')">{{'SUMMARY' | translate}}
+            </label>
+            <label class="btn-primary" ngbButtonLabel>
+              <input type="checkbox" ngbButton [(ngModel)]="display.extended_summary" (click)="toggleView('extended_summary')">{{'EXTENDED_SUMMARY'  | translate}}
+            </label>
+            <label class="btn-primary" ngbButtonLabel>
+              <input type="checkbox" ngbButton [(ngModel)]="display.content" (click)="toggleView('content')">{{'CONTENT' | translate}}
+            </label>
+          </div>
+
+
           <div class="button-group" *ngIf="selectedEntity">
             <button class="btn btn-primary"  (click)="continueWriting()" *ngIf="!selectedEntityIsParent()">Continue writing</button>
             <button class="btn btn-primary"  (click)="addNewMember(selectedEntity)" *ngIf="selectedEntityIsParent()">Add chapter</button>
@@ -46,7 +62,9 @@
             <span>{{'' + entityType() + '.NO_CHILDREN_YET_INFO' | uppercase | translate}}</span> 
           </div>
           </div>
-          <div *ngIf="selectedEntity" [froalaView]="getContent()"></div>
+          <div *ngIf="selectedEntity">
+            <div [froalaView]="getContent()"></div>
+          </div>
       </div>
       </main>
   </div>

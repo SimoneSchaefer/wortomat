@@ -1,5 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
-import FroalaEditor from 'froala-editor';
+import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BaseEntity } from '../../entity/_baseEntity';
@@ -11,10 +10,6 @@ import { BaseEntity } from '../../entity/_baseEntity';
 })
 export class EditDetailsComponent implements OnInit {
   private _baseEntity : BaseEntity;
-  /*private _name : string;
-  private _summary : string;
-  private _detailedSummary : string;
-  private _image: string;*/
   private _title: string;
   private _displayOptions;
   private _entityType : string;
@@ -26,7 +21,7 @@ export class EditDetailsComponent implements OnInit {
       'fontFamily', 'fontSize', 
       '|', 'bold', 'italic', 'underline', 'strikeThrough',
       '|', 'textColor', 'backgroundColor',
-      '|', 'formatOL',
+      '|', 'formatUL',
       '|', 'clearFormatting', 'undo', 'redo']
 
   }
@@ -36,11 +31,7 @@ export class EditDetailsComponent implements OnInit {
   ngOnInit() {}
 
   save() {
-    this._activeModal.close(this.baseEntity
-       /* 'name' : this.name,
-      'summary' : this.summary,
-      'detailedSummary' : this.detailedSummary*/
-    );
+    this._activeModal.close(this.baseEntity);
   }
 
   close() {
@@ -60,18 +51,6 @@ export class EditDetailsComponent implements OnInit {
 
   get entityType() { return this._entityType;}
   set entityType(entityType: string) {this._entityType = entityType;}
-
-  /*get name() { return this._name;}
-  set name(name: string) {this._name = name;}
-
-  get summary() {return this._summary;}
-  set summary(summary: string) {this._summary = summary;}
-
-  get image() {return this._image;}
-  set image(image: string) {this._image = image;}
-
-  get detailedSummary() {return this._detailedSummary;}
-  set detailedSummary(detailedSummary: string) {this._detailedSummary = detailedSummary;}*/
 
   get title() { return this._title; }
   set title(title: string) { this._title = title; }

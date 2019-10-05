@@ -10,6 +10,7 @@ import { BaseEntityComponent } from '../_baseEntityComponent';
 import { TranslateService } from '@ngx-translate/core';
 import { PartEntity } from '../../entity/PartEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { StateService } from '../../services/state.service';
 
 @Component({
   selector: 'app-projects',
@@ -23,14 +24,16 @@ export class ProjectsComponent extends BaseEntityComponent {
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService,  
-    _modalService: NgbModal,  
+    _modalService: NgbModal,
+    _stateService: StateService , 
     private _router : Router) {
     super(_baseService,
       null, 
       _openProjectService, 
       _alertService,
       _translationService,
-      _modalService
+      _modalService,
+      _stateService
       );
   }
   protected newGroup() : BaseEntity {

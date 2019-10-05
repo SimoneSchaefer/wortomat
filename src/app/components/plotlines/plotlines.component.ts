@@ -10,6 +10,7 @@ import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { PlotlineEntity } from '../../entity/PlotlineEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { StateService } from '../../services/state.service';
 
 @Component({
   selector: 'app-plotlines',  
@@ -23,14 +24,16 @@ export class PlotlinesComponent  extends BaseEntityComponent  {
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService,
-    _modalService: NgbModal
+    _modalService: NgbModal,
+    _stateService: StateService
     ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
       _translationService,
-      _modalService);
+      _modalService,
+      _stateService);
   }
 
 

@@ -10,6 +10,8 @@ import { DisplayOptions } from './vertical-bar/vertical-bar.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WysiwygEditorComponent } from './wysiwyg-editor/wysiwyg-editor.component';
 import { EditDetailsComponent } from './edit-details/edit-details.component';
+import { BaseChildEntity } from '../entity/_baseChildEntity';
+import { StateService, DISPLAY_STATE, DISPLAY_ITEM, } from '../services/state.service';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -20,6 +22,8 @@ export abstract class BaseEntityComponent implements OnInit {
 
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
+  display = {};
+
 
    constructor(
       private _groupService : BaseService,
@@ -27,15 +31,29 @@ export abstract class BaseEntityComponent implements OnInit {
       private _openProjectService: OpenProjectService, 
       private _alertService: AlertService,
       private _translateService : TranslateService,
-      private _modalService: NgbModal) {
+      private _modalService: NgbModal,
+      private _stateService: StateService) {
   }
 
-  ngOnInit() { this._load(true); }
+  ngOnInit() { 
+    this._load(true); 
+    this.display =  {
+      summary: this._stateService.showItem(this.entityType(), 'summary'),
+      extended_summary: this._stateService.showItem(this.entityType(), 'extended_summary'),
+      content: this._stateService.showItem(this.entityType(), 'content')
+    }
+  }
 
   protected displayOptions() : DisplayOptions {
     return {
       showImage: false
     };
+  } 
+
+
+  toggleView(type: DISPLAY_ITEM) {
+  //  this._stateService.toggleDisplayState(this.entityType(), type as DISPLAY_TYPES);
+    this._stateService.toggleDisplayItemState(this.entityType(), type);
   }
       
   editDetails() {
@@ -118,11 +136,25 @@ export abstract class BaseEntityComponent implements OnInit {
       let content = '';
       for (let child of this.selectedEntity['children']) {
         content += '<h4 class="text-muted">'+(child.name ? child.name : '')+'</h4>';
-        content += child.notes ? child.notes : '';
+        content += this.getContentForChild(child);
       }
       return content;
     }
-    return this.selectedEntity.notes;
+    return this.getContentForChild(this.selectedEntity as BaseChildEntity);;
+  }
+
+  private getContentForChild(child: BaseChildEntity) {
+    let content = '';
+    if (this._stateService.showItem(this.entityType(), 'summary')) {
+      content += `<b>${child.summary || ''}</b>`;
+    }
+    if (this._stateService.showItem(this.entityType(), 'extended_summary')) {
+      content += `<i>${child.detailedSummary || ''}</i><hr>`;
+    }
+    if (this._stateService.showItem(this.entityType(), 'content')) {
+      content += child.notes || '';
+    }
+    return content;
   }
 
   private save(baseService : BaseService, newEntity : BaseEntity, entities : BaseEntity[], prefix : string = '') {

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
-import { StateService, STATE } from '../../services/state.service';
+import { StateService } from '../../services/state.service';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { TodoCounterService } from '../../services/todo-counter.service';
 
@@ -31,7 +31,7 @@ export class VerticalBarComponent implements OnInit {
    * @param group 
    */
   visible(group: BaseEntity) {
-    return this._stateService.getState(this.entityType, group) == STATE.EXPANDED;
+    return this._stateService.entityCollapsed(this.entityType, group);
   }
 
   /**
@@ -40,7 +40,7 @@ export class VerticalBarComponent implements OnInit {
    * @param group 
    */
   toggle(group: BaseEntity) {
-    this._stateService.toggleState(this.entityType, group);
+    this._stateService.toggleItemCollapseState(this.entityType, group);
   }
 
 

@@ -15,6 +15,7 @@ import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
 import { LocationEntity } from '../../entity/LocationEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
+import { StateService } from '../../services/state.service';
 
 
 @Component({
@@ -30,14 +31,16 @@ export class LocationsComponent  extends BaseEntityComponent  {
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService,
-    _modalService: NgbModal
+    _modalService: NgbModal,
+    _stateService: StateService
     ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
       _translationService,
-      _modalService);
+      _modalService,
+      _stateService);
   }
 
   protected displayOptions() : DisplayOptions {

@@ -11,6 +11,7 @@ import { CharacterService } from '../../services/electron/character.service';
 import { CharacterEntity } from '../../entity/CharacterEntity';
 import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { StateService } from '../../services/state.service';
 
 @Component({
   selector: 'app-people',
@@ -24,14 +25,16 @@ export class PeopleComponent extends BaseEntityComponent  {
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
     _translationService : TranslateService,
-    _modalService: NgbModal
+    _modalService: NgbModal,
+    _stateService: StateService
     ) {
     super(_groupService, 
       _memberService,
       _openProjectService, 
       _alertService,
       _translationService,
-      _modalService);
+      _modalService,
+      _stateService);
   }
 
   protected displayOptions() : DisplayOptions {
@@ -41,7 +44,9 @@ export class PeopleComponent extends BaseEntityComponent  {
   } 
 
   protected newGroup() : BaseGroupEntity {
-    return new CharacterGroupEntity();
+    let group = new CharacterGroupEntity();
+    group.children = [];
+    return group;
   }
   protected newMember(parent : CharacterGroupEntity) : BaseEntity {
     let member = new CharacterEntity();

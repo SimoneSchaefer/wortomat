@@ -151,6 +151,9 @@
   "DETAILED_SUMMARY_HINT" : "Enter detailed summary",
   "SAVE" : "Save",
   "CLOSE" : "Close",
-  "EDIT_DETAILS" : "Edit details"
+  "EDIT_DETAILS" : "Edit details",
+  "SUMMARY": "Summary",
+  "EXTENDED_SUMMARY": "Abstract",
+  "CONTENT": "Content"
   
 }
