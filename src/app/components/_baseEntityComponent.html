@@ -63,7 +63,13 @@
           </div>
           </div>
           <div *ngIf="selectedEntity">
-            <div [froalaView]="getContent()"></div>
+            <div *ngFor="let child of getChildren()">
+              <h4 class="text-muted">{{child.name ? child.name : ''}}</h4>
+              <b class="bold" *ngIf="showSummary()">{{child.summary ? child.summary : ''}}</b>
+              <div [froalaView]="child.detailedSummary ? '<i>' + child.detailedSummary + '</i>' : ''" *ngIf="showExtendedSummary()"></div>
+              <hr >
+              <div *ngIf="showContent()" [froalaView]="child.notes"></div>
+            </div>
           </div>
       </div>
       </main>

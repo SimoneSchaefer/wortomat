@@ -130,6 +130,12 @@ export abstract class BaseEntityComponent implements OnInit {
     });
   }
 
+  getChildren(): BaseEntity[] {
+    if (this.selectedEntityIsParent()) {
+      return this.selectedEntity['children'];
+    }
+    return [this.selectedEntity];
+  }
 
   getContent() : string {
     if (this.selectedEntityIsParent()) {
@@ -141,6 +147,18 @@ export abstract class BaseEntityComponent implements OnInit {
       return content;
     }
     return this.getContentForChild(this.selectedEntity as BaseChildEntity);;
+  }
+
+  showSummary() : boolean {
+    return this._stateService.showItem(this.entityType(), 'summary');
+  }
+
+  showExtendedSummary() : boolean {
+    return this._stateService.showItem(this.entityType(), 'extended_summary');
+  }
+
+  showContent(): boolean {
+    return this._stateService.showItem(this.entityType(), 'content');
   }
 
   private getContentForChild(child: BaseChildEntity) {

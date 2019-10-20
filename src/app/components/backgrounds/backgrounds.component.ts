@@ -38,7 +38,9 @@ export class BackgroundsComponent  extends BaseEntityComponent  {
 
 
   protected newGroup() : BaseGroupEntity {
-    return new BackgroundGroupEntity();
+    let group = new BackgroundGroupEntity();
+    group.children = [];
+    return group;
   }
   protected newMember(parent : BackgroundGroupEntity) : BaseEntity {
     let member = new BackgroundEntity();
