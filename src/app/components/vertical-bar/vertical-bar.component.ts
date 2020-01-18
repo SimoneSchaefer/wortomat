@@ -96,7 +96,19 @@ export class VerticalBarComponent implements OnInit {
 
   todoCount(entity: BaseEntity) {
     return this._todoCounter.todoCount(entity.notes? entity.notes : '');
-   }
+  }
+  
+  ideaCount(entity: BaseEntity) {
+     return this._todoCounter.ideaCount(entity.notes? entity.notes : '');
+  }
+
+  inconsistencyCount(entity: BaseEntity) {
+    return this._todoCounter.inconsistencyCount(entity.notes? entity.notes : '');
+  }
+
+  doublecheckCount(entity: BaseEntity) {
+       return this._todoCounter.doublecheckCount(entity.notes? entity.notes : '');
+  }
 
 
 

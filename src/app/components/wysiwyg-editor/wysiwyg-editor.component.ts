@@ -21,7 +21,11 @@ export class WysiwygEditorComponent implements OnInit {
       '|', 'formatOL',
       '|', 'clearFormatting', 'undo', 'redo', 'inlineClass'],
     inlineClasses: {
-      'fr-class-todo-marker': 'mark as TODO'
+      'fr-class-todo-marker': 'mark as TODO',
+      'fr-class-idea-marker': 'mark as IDEA',
+      'fr-class-inconsistency-marker': 'mark as INCONSISTENT',
+      'fr-class-doublecheck-marker': 'mark as CHECK AGAIN',
+     
     }
   }
 

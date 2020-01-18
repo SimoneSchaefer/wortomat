@@ -22,29 +22,19 @@ export class AppComponent implements OnInit {
     private _projectService : ProjectService,
     private alertService : AlertService,
     private _router : Router) {
-
     translate.setDefaultLang('en');
-    console.log('AppConfig', AppConfig);
+     }
 
-    
-  }
-
-  ngOnInit() {
-    
-  }
+  ngOnInit() { }
 
   isProjectOpened() {
     return this._openProjectService.hasOpenedProject();
-  }
-
-
-  
+  }  
 
   closeProject() {
     let $this = this;
     $this._projectService.close(function (response) {
       if (response.responseType == ResponseType.SUCCESS) {
-       // $this.alertService.success('PROJECTS.CLOSED_SUCCESS');
         $this._openProjectService.identifier = "main";
         $this._router.navigateByUrl('/projects');
       } else {

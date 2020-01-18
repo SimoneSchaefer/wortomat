@@ -8,7 +8,8 @@
             <i title="Open" class="fa fa-icon fa-chevron-right"  *ngIf="!visible(group)"></i>
           </h6>
           <div (click)="selectEntity(group)" class="h6 pl-0 bold clickable btn btn-link"  [class.active]="isSelected(group)">
-            {{group.name ? group.name : (entityType.toUpperCase() + '.UNTITLED') | translate}}          
+            {{group.name ? group.name : (entityType.toUpperCase() + '.UNTITLED') | translate}} 
+            <span class="text-muted" *ngIf="group.summary">- {{group.summary}}</span>                  
           </div>
         </div>
       </h6>
@@ -30,7 +31,11 @@
               <div (click)="selectEntity(child)" [ngClass]="{'overflow-ellipsis' : !displayOptions?.showImage}" class="clickable btn-link text-left pl-2 py-1" [class.active]="isSelected(child)" >
                 {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
                 <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>
-                <span *ngIf="todoCount(child) as c"  title="{{c}} TODOs found" class="badge badge-danger ml-2">{{c}}</span>
+                <span class="ml-2"></span>
+                <span *ngIf="todoCount(child) as c"  title="{{c}} TODOs found" class="badge badge-warning ml-1">{{c}}</span>
+                <span *ngIf="ideaCount(child) as c"  title="{{c}} ideas found" class="badge badge-primary ml-1">{{c}}</span>
+                <span *ngIf="inconsistencyCount(child) as c"  title="{{c}} inconsistencies found" class="badge badge-danger ml-1">{{c}}</span>
+                <span *ngIf="doublecheckCount(child) as c"  title="{{c}} check again found" class="badge badge-secondary ml-1">{{c}}</span>
               </div>
             </div>   
           </div>           
