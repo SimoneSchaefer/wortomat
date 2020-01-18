@@ -1,21 +1,13 @@
 
 <div class="main">
-  <div class="toolbar border-bottom pt-0">
+  <div class="toolbar  bg-white border-bottom pt-0">
     <div class="row no-gutters">
       <div class="col col-5">
-        <div class="d-flex justify-content-between p-3">
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-1 mb-1">
-            <button class="d-flex align-items-center btn btn-primary clickable" (click)="addNewGroup()" >
-              <i class="fas fa-icon fa-plus pr-1"></i>
-              <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
-            </button>
-          </h6>
-        </div>
-      </div>
-      <div class="col col-7">
-        <div class="d-flex justify-content-between p-3">
-          <!--<h1 class="h4 text-muted text-nowrap">{{selectedEntity?.name}}</h1>-->
-          <!-- Display options-->
+        <div class="d-flex p-3">
+          <button class="d-flex align-items-center btn btn-primary clickable mr-3" (click)="addNewGroup()" >
+            <i class="fas fa-icon fa-plus pr-1"></i>
+            <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
+          </button>
           <div class="btn-group btn-group-toggle">
             <label class="btn-primary" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.summary" (click)="toggleView('summary')">{{'SUMMARY' | translate}}
@@ -27,6 +19,13 @@
               <input type="checkbox" ngbButton [(ngModel)]="display.content" (click)="toggleView('content')">{{'CONTENT' | translate}}
             </label>
           </div>
+        </div>
+      </div>
+      <div class="col col-7">
+        <div class="d-flex justify-content-between p-3">
+          <!--<h1 class="h4 text-muted text-nowrap">{{selectedEntity?.name}}</h1>-->
+          <!-- Display options-->
+
 
 
           <div class="button-group" *ngIf="selectedEntity">

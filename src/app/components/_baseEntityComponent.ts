@@ -58,6 +58,11 @@ export abstract class BaseEntityComponent implements OnInit {
   }
       
   editDetails(entity) {
+    debugger
+    if (!entity) {
+      console.log('hier sama richtig');
+      entity = this.selectedEntity;      
+    }
     this.selectedEntity = entity;
     const modalRef = this._modalService.open(EditDetailsComponent, {size: 'lg', backdrop: 'static'});
     modalRef.componentInstance.baseEntity = entity;
