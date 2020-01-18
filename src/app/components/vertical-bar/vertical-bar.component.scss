@@ -28,6 +28,19 @@
 	display: none;
 } 
 
+.list-group-item {
+	padding: .3em 1em;
+	border-left: none;
+	border-right: none;
+}
+
+.list-group-item:first-child {
+	border-top: none;
+}
+
+.list-group-item:last-child {
+	border-bottom: none;
+}
 
 .cdk-drag-preview {
 	list-style: none;

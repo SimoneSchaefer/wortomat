@@ -12,6 +12,7 @@ import { WysiwygEditorComponent } from './wysiwyg-editor/wysiwyg-editor.componen
 import { EditDetailsComponent } from './edit-details/edit-details.component';
 import { BaseChildEntity } from '../entity/_baseChildEntity';
 import { StateService, DISPLAY_STATE, DISPLAY_ITEM, } from '../services/state.service';
+import { EntityRepository } from 'typeorm';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -56,9 +57,10 @@ export abstract class BaseEntityComponent implements OnInit {
     this._stateService.toggleDisplayItemState(this.entityType(), type);
   }
       
-  editDetails() {
+  editDetails(entity) {
+    this.selectedEntity = entity;
     const modalRef = this._modalService.open(EditDetailsComponent, {size: 'lg', backdrop: 'static'});
-    modalRef.componentInstance.baseEntity = this.selectedEntity;
+    modalRef.componentInstance.baseEntity = entity;
     modalRef.componentInstance.entityType = this.entityType();
     modalRef.componentInstance.displayOptions = this.displayOptions();
     modalRef.result.then(entity => {
@@ -71,7 +73,8 @@ export abstract class BaseEntityComponent implements OnInit {
     }).catch((error) => {if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')});
   }
 
-  continueWriting() : void {
+  continueWriting(entity) : void {
+    this.selectedEntity = entity;
     const modalRef = this._modalService.open(WysiwygEditorComponent, {size: 'lg', backdrop: 'static'});
     modalRef.componentInstance.content = this.selectedEntity.notes;
     modalRef.componentInstance.title = this.selectedEntity.name;
@@ -79,6 +82,10 @@ export abstract class BaseEntityComponent implements OnInit {
       this.selectedEntity.notes = content;
       this.updateMember(this._selectedEntity);
     }).catch((error) => {if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')});
+  }
+
+  entityIsParent(entity) {
+    return entity && 'children' in entity;
   }
 
 
@@ -105,11 +112,11 @@ export abstract class BaseEntityComponent implements OnInit {
   select(entity : BaseEntity) { this.selectedEntity = entity; }
 
  
-  deleteSelectedEntity() {
+  deleteEntity(entity) {
     const $this = this;
     if (confirm(this._translateService.instant("REALLY_DELETE"))) {
-      let service = this.selectedEntityIsParent() ? this._groupService : this._memberService;
-      service.remove(this.selectedEntity.id, function (response) {
+      let service = this.entityIsParent(entity) ? this._groupService : this._memberService;
+      service.remove(entity.id, function (response) {
         if (response.responseType == ResponseType.SUCCESS) {
           $this._loadDelayed(true);         
         } else {

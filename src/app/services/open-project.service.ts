@@ -19,6 +19,8 @@ export class OpenProjectService {
   }
 
   public set identifier(identifier : string) {
+    // debugger
+    console.log('id!', identifier);
     this._identifier = identifier;
   }
 }

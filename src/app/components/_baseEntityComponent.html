@@ -1,20 +1,18 @@
 
 <div class="main">
   <div class="toolbar border-bottom pt-0">
-    <div class="row m-0">
-      <div class="col col-6 bg-light border-right">
+    <div class="row no-gutters">
+      <div class="col col-5">
         <div class="d-flex justify-content-between p-3">
-          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1">
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-1 mb-1">
             <button class="d-flex align-items-center btn btn-primary clickable" (click)="addNewGroup()" >
               <i class="fas fa-icon fa-plus pr-1"></i>
               <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
             </button>
           </h6>
-
-
         </div>
       </div>
-      <div class="col col-6">
+      <div class="col col-7">
         <div class="d-flex justify-content-between p-3">
           <!--<h1 class="h4 text-muted text-nowrap">{{selectedEntity?.name}}</h1>-->
           <!-- Display options-->
@@ -32,22 +30,26 @@
 
 
           <div class="button-group" *ngIf="selectedEntity">
-            <button class="btn btn-primary"  (click)="continueWriting()" *ngIf="!selectedEntityIsParent()">Continue writing</button>
+           <!-- <button class="btn btn-primary"  (click)="continueWriting()" *ngIf="!selectedEntityIsParent()">Continue writing</button>
             <button class="btn btn-primary"  (click)="addNewMember(selectedEntity)" *ngIf="selectedEntityIsParent()">Add chapter</button>
-            <button class="btn btn-primary" (click)="editDetails()">Edit details</button>
-            <button class="btn btn-danger" (click)="deleteSelectedEntity()">Delete</button>              
+            <button class="btn btn-primary" (click)="editDetails()">Edit details</button>-->
+           <!-- <button class="btn btn-danger" (click)="deleteSelectedEntity()">Delete</button>              -->
           </div>
         </div>
       </div>
     </div>
   </div>
-    <div class="row h-100 m-0 p-0">
-      <nav class="col-6 d-none d-md-block bg-light sidebar pt-0 pl-1 pr-1  border-right">
+    <div class="row h-100 no-gutters bg-light">
+      <nav class="col-5 d-none d-md-block bg-light sidebar pt-0 pl-1 pr-1">
         <app-vertical-bar [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity" [displayOptions]="displayOptions()"
-          (select)="select($event)" (updateOrder)="updateOrder($event)"></app-vertical-bar>
+          (select)="select($event)" 
+          (updateOrder)="updateOrder($event)" 
+          (write)="continueWriting($event)"
+          (delete)="deleteEntity($event)"
+          (edit)="editDetails($event)"></app-vertical-bar>
       </nav>
-      <main role="main" class="col-6 pt-0 ">
-        <div class="wrapper scrollbar">
+      <main role="main" class="col-7 pt-0 bg-light">
+        <div class="wrapper scrollbar card bg-white px-3">
           <div *ngIf="entities.length===0">
             <div class="alert alert-light" role="alert">
                <span>{{'' + entityType() + '.NONE_YET_HEADER' | uppercase | translate}}</span>
