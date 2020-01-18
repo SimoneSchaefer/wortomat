@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
-import { BaseEntity } from '../../entity/_baseEntity';
+import { BaseEntity, Status } from '../../entity/_baseEntity';
+import { STATUS_CODES } from 'http';
 
 @Component({
   selector: 'app-edit-details',
@@ -40,7 +41,21 @@ export class EditDetailsComponent implements OnInit {
     }
   }
 
-  get displayOptions() {console.log(this._displayOptions);return this._displayOptions;}
+  active(baseEntity, status) {
+    let active = ''+baseEntity.status === status;
+    if (active) console.log('active', status);
+    return active;
+  }
+
+  toggleStatus($event) {
+    console.log($event);
+  }
+
+  getStatus() {
+    return Object.keys(Status).filter(key => parseInt(key, 10) >= 0).map(key => parseInt(key, 10));
+  }
+
+  get displayOptions() {return this._displayOptions;}
   set displayOptions(options: any) {this._displayOptions = options;};
 
   get editorOptions() {return this._editorOptions;}

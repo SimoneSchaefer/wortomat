@@ -23,6 +23,7 @@ export class VerticalBarComponent implements OnInit {
   @Output() edit = new EventEmitter<BaseEntity>();
   @Output() write = new EventEmitter<BaseEntity>();
   @Output() delete = new EventEmitter<BaseEntity>();
+  @Output() add = new EventEmitter<BaseEntity>();
 
   constructor(private _stateService : StateService, private _todoCounter : TodoCounterService) { }
 

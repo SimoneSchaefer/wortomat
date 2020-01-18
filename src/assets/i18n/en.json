@@ -154,6 +154,14 @@
   "EDIT_DETAILS" : "Edit details",
   "SUMMARY": "Summary",
   "EXTENDED_SUMMARY": "Abstract",
-  "CONTENT": "Content"
+  "CONTENT": "Content",
+  "DROP_SOMETHING": "Drop something here...",
+  "STATUS": {
+    "STATUS": "Status",
+    "0": "TODO",
+    "1": "First draft",
+    "2": "Revised draft",
+    "3": "Done"
+  }
   
 }

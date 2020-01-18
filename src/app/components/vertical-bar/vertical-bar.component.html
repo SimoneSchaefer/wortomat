@@ -8,6 +8,7 @@
               <i title="Close" class="fa fa-icon fa-chevron-down" *ngIf="visible(group)"></i>
               <i title="Open" class="fa fa-icon fa-chevron-right" *ngIf="!visible(group)"></i>
             </button>
+            <button class="btn btn-xs btn-link" (click)="add.emit(group)"><i class="fa fa-plus"></i></button>
             <button class="btn btn-xs btn-link" (click)="edit.emit(group)"><i class="fa fa-edit"></i></button>
             <button class="btn btn-xs btn-link" (click)="delete.emit(group)"><i class="fa fa-trash-alt"></i></button>  
           </div> 
@@ -25,7 +26,7 @@
         [cdkDropListData]="group.children" 
         (cdkDropListDropped)="dropItem($event)"
         [cdkDropListConnectedTo]="getConnectedList()">
-      <li class="navitem small grabbable list-group-item" *ngIf="!group.children?.length" cdkDrag >&nbsp;</li>
+      <li class="navitem small list-group-item" *ngIf="!group.children?.length" ><div class="alert alert-light">{{'DROP_SOMETHING' | translate}}</div></li>
       <li class="nav-item small grabbable list-group-item" *ngFor="let child of group.children" cdkDrag [cdkDragData]="child">
         <div class="row no-gutters">
           <div class="col col-3"  *ngIf="displayOptions?.showImage" >
@@ -39,6 +40,7 @@
                 <button class="btn btn-xs btn-link" (click)="edit.emit(child)"><i class="fa fa-edit"></i></button>
                 <button class="btn btn-xs btn-link" (click)="delete.emit(child)"><i class="fa fa-trash-alt"></i></button>                  
               </div>
+              <div class="px-3 align-items-center d-flex text-lighter" [innerHTML]="child.status | statusIcon" title="{{'STATUS.' + child.status | translate}}"></div>
               <div (click)="selectEntity(child)" [ngClass]="{'overflow-ellipsis' : !displayOptions?.showImage}" class="clickable btn-link text-left pl-2 py-1" [class.active]="isSelected(child)" >
                 {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
                 <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>

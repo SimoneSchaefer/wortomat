@@ -48,6 +48,7 @@ import { ExportComponent } from './components/export/export.component';
 import { EditorComponent } from './components/editor/editor.component';
 import { WysiwygEditorComponent } from './components/wysiwyg-editor/wysiwyg-editor.component';
 import { EditDetailsComponent } from './components/edit-details/edit-details.component';
+import { StatusIconPipe } from './pipes/status-icon.pipe';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -74,7 +75,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     ExportComponent,
     EditorComponent,
     WysiwygEditorComponent,
-    EditDetailsComponent
+    EditDetailsComponent,
+    StatusIconPipe
   ],
   imports: [
     BrowserModule,
