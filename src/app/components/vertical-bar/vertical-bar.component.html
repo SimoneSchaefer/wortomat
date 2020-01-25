@@ -40,7 +40,7 @@
                 <button class="btn btn-xs btn-link" (click)="edit.emit(child)"><i class="fa fa-edit"></i></button>
                 <button class="btn btn-xs btn-link" (click)="delete.emit(child)"><i class="fa fa-trash-alt"></i></button>                  
               </div>
-              <div class="px-3 align-items-center d-flex text-lighter" [innerHTML]="child.status | statusIcon" title="{{'STATUS.' + child.status | translate}}"></div>
+              <div class="px-3 align-items-center d-flex text-lighter w-16-px" [innerHTML]="child.status | statusIcon" title="{{'STATUS.' + child.status | translate}}"></div>
               <div (click)="selectEntity(child)" [ngClass]="{'overflow-ellipsis' : !displayOptions?.showImage}" class="clickable btn-link text-left pl-2 py-1" [class.active]="isSelected(child)" >
                 {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
                 <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>

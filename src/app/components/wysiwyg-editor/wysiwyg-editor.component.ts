@@ -26,6 +26,19 @@ export class WysiwygEditorComponent implements OnInit {
       'fr-class-inconsistency-marker': 'mark as INCONSISTENT',
       'fr-class-doublecheck-marker': 'mark as CHECK AGAIN',
      
+    },      
+    events : {
+      'image.beforeUpload': function (files: Blob[]) { // makes images formatted in base64
+        if (files.length > 0) {
+          var reader = new FileReader();
+          reader.onloadend = (e) => {
+            var result =  e.target['result'];
+            this.image.insert(result, null, null,this.image.get());
+          }
+          reader.readAsDataURL(files[0]);
+          return false;
+        }
+      }
     }
   }
 

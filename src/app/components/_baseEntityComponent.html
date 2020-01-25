@@ -8,14 +8,14 @@
             <i class="fas fa-icon fa-plus pr-1"></i>
             <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
           </button>
-          <div class="btn-group btn-group-toggle">
-            <label class="btn-primary" ngbButtonLabel>
+          <div class="btn-group btn-group-toggle clickable">
+            <label class="btn btn-primary clickable" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.summary" (click)="toggleView('summary')">{{'SUMMARY' | translate}}
             </label>
-            <label class="btn-primary" ngbButtonLabel>
+            <label class="btn btn-primary clickable" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.extended_summary" (click)="toggleView('extended_summary')">{{'EXTENDED_SUMMARY'  | translate}}
             </label>
-            <label class="btn-primary" ngbButtonLabel>
+            <label class="btn btn-primary clickable" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.content" (click)="toggleView('content')">{{'CONTENT' | translate}}
             </label>
           </div>
