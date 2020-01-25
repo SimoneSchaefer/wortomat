@@ -41,7 +41,7 @@ export abstract class BaseEntityComponent implements OnInit {
     this._load(true); 
     if (this.showSummary()) this.selectedDisplayContent.push('summary');
     if (this.showExtendedSummary()) this.selectedDisplayContent.push('extended_summary');
-    if (this.showSummary()) this.selectedDisplayContent.push('content');
+    if (this.showContent()) this.selectedDisplayContent.push('content');
   }
 
   protected displayOptions() : DisplayOptions {
