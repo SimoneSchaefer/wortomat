@@ -40,8 +40,8 @@
     <div class="col">
       <div class="form form-group w-100 p-1">
         <div><small class="form-text text-muted" translate>PLOTLINES.HEADER</small></div>
-        <ng-select [multiple]="true" [items]="availablePlotlines"  bindLabel="name"
-        [closeOnSelect]="false" [(ngModel)]="baseEntity.plotlines">
+        <ng-select [multiple]="true" [items]="availablePlotlines"  bindLabel="name" [addTag]="addPlotlinePromise"
+        [closeOnSelect]="false" [(ngModel)]="baseEntity.plotlines" [loading]="loading === 'plotlines'">
         </ng-select>
       </div> 
     </div>
@@ -50,8 +50,8 @@
     <div class="col">
       <div class="form form-group w-100 p-1">
         <div><small class="form-text text-muted" translate>CHARACTERS.HEADER</small></div>
-        <ng-select [multiple]="true" [items]="availableCharacters"  bindLabel="name"
-        [closeOnSelect]="false" [(ngModel)]="baseEntity.characters">
+        <ng-select [multiple]="true" [items]="availableCharacters"  bindLabel="name"  [addTag]="addCharactersPromise"
+        [closeOnSelect]="false" [(ngModel)]="baseEntity.characters" [loading]="loading === 'characters'">
         </ng-select>
       </div> 
     </div>
@@ -60,7 +60,7 @@
     <div class="col">
       <div class="form form-group w-100 p-1">
         <div><small class="form-text text-muted" translate>LOCATIONS.HEADER</small></div>
-        <ng-select [multiple]="true" [items]="availableLocations"  bindLabel="name"
+        <ng-select [multiple]="true" [items]="availableLocations"  bindLabel="name" [addTag]="addLocationsPromise"
         [closeOnSelect]="false" [(ngModel)]="baseEntity.locations">
         </ng-select>
       </div> 

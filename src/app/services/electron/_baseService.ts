@@ -29,6 +29,7 @@ export abstract class BaseService {
 
     save(entity: BaseEntity, callback: (response: MessageResponse) => void) {
         let $this = this;
+        console.log('save!');
         this.electronService.send(new MessageRequest(
             Channel.CREATE_OR_UPDATE, 
             function (evt, response: MessageResponse) {

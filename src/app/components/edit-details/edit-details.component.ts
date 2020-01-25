@@ -10,6 +10,12 @@ import { CharacterEntity } from '../../entity/CharacterEntity';
 import { CharacterService } from '../../services/electron/character.service';
 import { LocationEntity } from '../../entity/LocationEntity';
 import { LocationService } from '../../services/electron/location.service';
+import { PlotlineGroupEntity } from '../../entity/PlotlineGroupEntity';
+import { PlotlineGroupService } from '../../services/electron/plotline-group.service';
+import { CharacterGroupService } from '../../services/electron/character-group.service';
+import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
+import { LocationGroupService } from '../../services/electron/location-group.service';
+import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
 
 @Component({
   selector: 'app-edit-details',
@@ -21,6 +27,8 @@ export class EditDetailsComponent implements OnInit {
   private _title: string;
   private _displayOptions;
   private _entityType : string;
+
+  loading: string | null;
 
   availablePlotlines: PlotlineEntity[] = [];
   availableCharacters: CharacterEntity[] = [];
@@ -41,8 +49,11 @@ export class EditDetailsComponent implements OnInit {
     private _activeModal: NgbActiveModal, 
     private _translateService: TranslateService, 
     private _plotLineService: PlotlineService, 
+    private _plotlineGroupService: PlotlineGroupService,
     private _characterService: CharacterService,
-    private _locationService: LocationService) { }
+    private _characterGroupService: CharacterGroupService,
+    private _locationService: LocationService,
+    private _locationGroupService: LocationGroupService) { }
 
 
   ngOnInit() {
@@ -50,6 +61,7 @@ export class EditDetailsComponent implements OnInit {
     this._plotLineService.loadAll(function(response) {
       if (response.responseType == ResponseType.SUCCESS) {
         $this.availablePlotlines = response.data.entities ? response.data.entities : new Array(); 
+        console.log($this.availablePlotlines);
       }
     });
     this._characterService.loadAll(function(response) {
@@ -72,6 +84,73 @@ export class EditDetailsComponent implements OnInit {
     if (confirm(this._translateService.instant("REALLY_CLOSE"))) {
       this._activeModal.dismiss("dismiss");
     }
+  }
+
+  addPlotlinePromise = (name: string) => {
+    let $this = this;
+    $this.loading = 'plotlines';
+    return new Promise((resolve) => {
+      this._plotlineGroupService.loadAll(function(groups) {
+        const plotline = new PlotlineEntity();
+        plotline.name = name;
+        plotline.parent = groups.data.entities.length ? groups.data.entities[0] : new PlotlineGroupEntity();
+        $this._plotLineService.save(plotline, function(response) {
+          $this.loading = null;
+          if (response.responseType === ResponseType.SUCCESS) {
+            const result = response.data.entity;
+            result.valid = true;
+            resolve(result);
+          } else {
+            resolve({valid: false});
+          }
+        });
+      });
+    });  
+  }
+
+  addCharactersPromise = (name: string) => {
+    let $this = this;
+    $this.loading = 'characters';
+    return new Promise((resolve) => {
+      this._characterGroupService.loadAll(function(groups) {
+        const character = new CharacterEntity();
+        character.name = name;
+        character.parent = groups.data.entities.length ? groups.data.entities[0] : new CharacterGroupEntity();
+        $this._characterService.save(character, function(response) {
+          $this.loading = null;
+          if (response.responseType === ResponseType.SUCCESS) {
+            const result = response.data.entity;
+            result.valid = true;
+            resolve(result);
+          } else {
+            resolve({valid: false});
+          }
+        });
+      });
+    });  
+  }
+
+
+  addLocationsPromise = (name: string) => {
+    let $this = this;
+    $this.loading = 'locations';
+    return new Promise((resolve) => {
+      this._locationGroupService.loadAll(function(groups) {
+        const location = new LocationEntity();
+        location.name = name;
+        location.parent = groups.data.entities.length ? groups.data.entities[0] : new LocationGroupEntity();
+        $this._locationService.save(location, function(response) {
+          $this.loading = null;
+          if (response.responseType === ResponseType.SUCCESS) {
+            const result = response.data.entity;
+            result.valid = true;
+            resolve(result);
+          } else {
+            resolve({valid: false});
+          }
+        });
+      });
+    });  
   }
 
   active(baseEntity, status) {
