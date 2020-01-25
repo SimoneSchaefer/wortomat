@@ -30,12 +30,18 @@ export class DBService {
         }
     }
 
+    static initializeConnection(dbpathAndName: string) {
+        let dbPath = dbpathAndName;
+        let name =  "main";
+        let shouldSync = this.shouldSync(dbPath);
+        return DBService.createConn(dbPath, name, [ProjectEntity], shouldSync);
+    }
 
     createConnection(dbName? : string): Promise<Connection> {
         let $this = this;
         let dbPath = dbName? this.settingsHandler.settings.dbpath + '/' + dbName : this.settingsHandler.getDBPath();
         let name =  dbName ? dbName : "main";
-        let shouldSync = this.shouldSync(dbPath);
+        let shouldSync = DBService.shouldSync(dbPath);
         Logger.debug(`Try to connect to database: ${dbPath}, sync is: ${shouldSync}`);
         let entities = name === 'main' ? [ProjectEntity] : [
             PartEntity, ChapterEntity, 
@@ -54,18 +60,32 @@ export class DBService {
                 return connection.connect();
             }
         } else {
-            return createConnection({
+            const connection  = DBService.createConn(dbPath, name, entities, shouldSync);
+            /*return createConnection({
                 name : name,
                 type: "sqlite",
                 database: dbPath,
                 entities: entities,    
                 synchronize: shouldSync,
                 logging: true
-            });
+            });*/
+            return Promise.resolve(connection);
         } 
     }
 
-    private shouldSync(path : string) {
+    static async createConn(dbPath: string, name: string, entities, shouldSync: boolean) {
+        const connection = await createConnection({
+            name : name,
+            type: "sqlite",
+            database: dbPath,
+            entities: entities,    
+            synchronize: shouldSync,
+            logging: true
+        });
+        return connection;
+    }
+
+    private static shouldSync(path : string) {
         return !fs.existsSync(path) || fs.statSync(path).size == 0;
     }
 }

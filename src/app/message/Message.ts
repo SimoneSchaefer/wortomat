@@ -31,7 +31,7 @@ export enum ResponseType {
     ERROR_MISSING_EXPORT_PATH = "missing_export_path",
     ERROR_INVALID_DB_PATH = "invalid_db_path",
     ERROR_INVALID_EXPORT_PATH = "invalid_export_path",
-    ERROR_SETTINGS_STORE_ = "could_not_store",
+    ERROR_SETTINGS_STORE = "could_not_store",
     ERROR_UNKNOWN_REPOSITORY = "unknown_repository"
 }
 

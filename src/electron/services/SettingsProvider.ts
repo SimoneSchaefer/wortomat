@@ -4,6 +4,7 @@ import * as os from 'os';
 import { Logger } from '../services/Logger';
 import { ResponseType } from '../../app/message/Message';
 import { ProjectEntity } from '../../app/entity/ProjectEntity';
+import { DBService } from './DBService';
 var dateFormat = require('dateformat');
 
 
@@ -63,14 +64,15 @@ export class SettingsProvider {
         let content = JSON.stringify(settings);
 
         let filePath = this.getConfigFilePath();
-        fs.writeFile(filePath, content, function (err) {
-            if (err) {
-                Logger.debug(`nope5`);
-                return ResponseType.ERROR_INVALID_EXPORT_PATH;
-            }
-            Logger.debug(`???`);
+        try {
+            fs.writeFileSync(filePath, content);
+            this.readConfiguration().then((result) => {
+                DBService.initializeConnection(this.settings.dbpath + '/wortomat.db');
+            });
             return ResponseType.SUCCESS
-        });
+        } catch(e) {
+            return ResponseType.ERROR_SETTINGS_STORE;
+        }
     }
 
     public getDbNameForProject(project : ProjectEntity) {

@@ -28,7 +28,7 @@ export class ProjectsComponent extends BaseEntityComponent {
     _stateService: StateService , 
     private _router : Router) {
     super(_baseService,
-      null, 
+      _baseService, 
       _openProjectService, 
       _alertService,
       _translationService,

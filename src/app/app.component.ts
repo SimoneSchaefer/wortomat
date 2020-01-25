@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
   }
 
   isOnSettingsPage() {
-    return this._router.url !== 'settings';
+    return this._router.url.includes('settings');
   }
   
   closeProject() {

@@ -20,7 +20,7 @@ export class Initializer {
             this.settingsHandler.readConfiguration()
                 .then(function () {
                     Logger.debug(`trigger db connection`);
-                    $this.dbHandler.createConnection();
+                    $this.waitForConnection();
                 })
                 .then(function () {
                     $this.initialized = true;
@@ -33,5 +33,9 @@ export class Initializer {
                     reject(error);
                 });
         });
+    }
+
+    async waitForConnection() {
+        await this.dbHandler.createConnection();
     }
 }
