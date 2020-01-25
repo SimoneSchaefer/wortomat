@@ -6,7 +6,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NotifierModule } from 'angular-notifier';
 import { ReactiveFormsModule } from '@angular/forms';
-
+import { NgSelectModule } from '@ng-select/ng-select';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -97,7 +97,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     ReactiveFormsModule,
     FroalaEditorModule.forRoot(), 
     FroalaViewModule.forRoot(),
-    NgbModule
+    NgbModule,
+    NgSelectModule
   ],
   entryComponents: [
     WysiwygEditorComponent,

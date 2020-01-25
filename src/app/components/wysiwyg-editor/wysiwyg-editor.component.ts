@@ -14,11 +14,13 @@ export class WysiwygEditorComponent implements OnInit {
   private _editorOptions = {
     charCounterCount: true,
     theme: 'gray',
+    pastePlain: true,
+    autofocus: true,
     toolbarButtons: [
       'fontFamily', 'fontSize', 
       '|', 'bold', 'italic', 'underline', 'strikeThrough',
       '|', 'textColor', 'backgroundColor',
-      '|', 'formatOL',
+      '|', 'formatOL', 'formatUL',
       '|', 'clearFormatting', 'undo', 'redo', 'inlineClass'],
     inlineClasses: {
       'fr-class-todo-marker': 'mark as TODO',
@@ -61,7 +63,7 @@ export class WysiwygEditorComponent implements OnInit {
   set editorOptions(options: any) { this._editorOptions = options;};
 
   get content() { return this._content;}
-  set content(content: string) { this._content = content; }
+  set content(content: string) { this._content = content;console.log('editorContent', content); }
 
   get title() { return this._title;}
   set title(title: string) { this._title = title; }

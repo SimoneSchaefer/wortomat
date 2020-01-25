@@ -21,9 +21,10 @@ export abstract class BaseEntityComponent implements OnInit {
   protected abstract newMember(parent : BaseGroupEntity) : BaseEntity;
   protected abstract entityType() : ENTITY_TYPE;
 
+  selectedDisplayContent: Array<DISPLAY_ITEM> = [];
+
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
-  display = {};
 
 
    constructor(
@@ -38,11 +39,9 @@ export abstract class BaseEntityComponent implements OnInit {
 
   ngOnInit() { 
     this._load(true); 
-    this.display =  {
-      summary: this._stateService.showItem(this.entityType(), 'summary'),
-      extended_summary: this._stateService.showItem(this.entityType(), 'extended_summary'),
-      content: this._stateService.showItem(this.entityType(), 'content')
-    }
+    if (this.showSummary()) this.selectedDisplayContent.push('summary');
+    if (this.showExtendedSummary()) this.selectedDisplayContent.push('extended_summary');
+    if (this.showSummary()) this.selectedDisplayContent.push('content');
   }
 
   protected displayOptions() : DisplayOptions {
@@ -52,9 +51,14 @@ export abstract class BaseEntityComponent implements OnInit {
   } 
 
 
-  toggleView(type: DISPLAY_ITEM) {
-  //  this._stateService.toggleDisplayState(this.entityType(), type as DISPLAY_TYPES);
-    this._stateService.toggleDisplayItemState(this.entityType(), type);
+  resetView() {
+    if (this.showSummary()) this._stateService.toggleDisplayItemState(this.entityType(), 'summary');
+    if (this.showExtendedSummary()) this._stateService.toggleDisplayItemState(this.entityType(), 'extended_summary');
+    if (this.showContent()) this._stateService.toggleDisplayItemState(this.entityType(), 'content');
+
+  }
+  toggleView(type) {
+    this._stateService.toggleDisplayItemState(this.entityType(), type.value ? type.value : type);
   }
       
   editDetails(entity) {
@@ -160,6 +164,7 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
   showSummary() : boolean {
+    console.log('showSummary', this._stateService.showItem(this.entityType(), 'summary'))
     return this._stateService.showItem(this.entityType(), 'summary');
   }
 

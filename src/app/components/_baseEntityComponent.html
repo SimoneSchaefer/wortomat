@@ -8,7 +8,12 @@
             <i class="fas fa-icon fa-plus pr-1"></i>
             <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
           </button>
-          <div class="btn-group btn-group-toggle clickable">
+          <ng-select [multiple]="true" [closeOnSelect]="false" [(ngModel)]="selectedDisplayContent" (clear)="resetView()" (add)="toggleView($event)" (remove)="toggleView($event)">
+            <ng-option [value]="'summary'">{{'SUMMARY' | translate}}</ng-option>
+            <ng-option [value]="'extended_summary'">{{'EXTENDED_SUMMARY'  | translate}}</ng-option>
+            <ng-option [value]="'content'">{{'CONTENT' | translate}}</ng-option>
+          </ng-select>
+         <!-- <div class="btn-group btn-group-toggle clickable">
             <label class="btn btn-primary clickable" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.summary" (click)="toggleView('summary')">{{'SUMMARY' | translate}}
             </label>
@@ -18,22 +23,7 @@
             <label class="btn btn-primary clickable" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.content" (click)="toggleView('content')">{{'CONTENT' | translate}}
             </label>
-          </div>
-        </div>
-      </div>
-      <div class="col col-7">
-        <div class="d-flex justify-content-between p-3">
-          <!--<h1 class="h4 text-muted text-nowrap">{{selectedEntity?.name}}</h1>-->
-          <!-- Display options-->
-
-
-
-          <div class="button-group" *ngIf="selectedEntity">
-           <!-- <button class="btn btn-primary"  (click)="continueWriting()" *ngIf="!selectedEntityIsParent()">Continue writing</button>
-            <button class="btn btn-primary"  (click)="addNewMember(selectedEntity)" *ngIf="selectedEntityIsParent()">Add chapter</button>
-            <button class="btn btn-primary" (click)="editDetails()">Edit details</button>-->
-           <!-- <button class="btn btn-danger" (click)="deleteSelectedEntity()">Delete</button>              -->
-          </div>
+          </div>-->
         </div>
       </div>
     </div>
