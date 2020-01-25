@@ -29,8 +29,12 @@ export class AppComponent implements OnInit {
 
   isProjectOpened() {
     return this._openProjectService.hasOpenedProject();
-  }  
+  }
 
+  isOnSettingsPage() {
+    return this._router.url !== 'settings';
+  }
+  
   closeProject() {
     let $this = this;
     $this._projectService.close(function (response) {

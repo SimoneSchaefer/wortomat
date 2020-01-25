@@ -34,7 +34,21 @@
         </div>
       </div> 
     </div>
-  </div> 
+  </div>
+  
+  <div class="row no-gutters" *ngIf="baseEntity['plotlines']">
+    <div class="col">
+      <div class="form form-group w-100 p-1">
+        <div><small class="form-text text-muted" translate>PLOT.PLOTLINE</small></div>
+        <!--<div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" [(ngModel)]="baseEntity.status" >
+          <label *ngFor="let status of getStatus()" class="btn btn-primary with-border clickable" [ngClass]="{'active': active(baseEntity, status)}" ngbButtonLabel>
+            <input type="radio" ngbButton [value]="status">{{'STATUS.' + status | translate}}
+          </label>
+        </div>-->
+
+      </div> 
+    </div>
+  </div>
 
     <div class="row mx-0">
     <div class="col">

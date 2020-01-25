@@ -1,20 +1,23 @@
-<div class="container">
-    <form #settingsForm="ngForm">
-        <div *ngIf="errorMessage" class="alert alert-danger" translate>ERROR.{{errorMessage}}</div>
+<div class="container w-80">
+    <h1 class="h3 my-3" translate>SETTINGS.HEADER</h1>
+    <div class="lead text-muted mb-5" translate>SETTINGS.HINT</div>
 
+    <form #settingsForm="ngForm">
         <div class="form-group">
         <label for="name" translate>SETTINGS.PROJECT_DB_PATH</label>
-        <input type="text" class="form-control" id="name"  webkitdirectory directory required  [(ngModel)]="dbpath" name="dbpath">
+        <input class="form-control" id="name"  webkitdirectory directory required  [(ngModel)]="dbpath" name="dbpath">
+        <small class="text-muted form-text" translate>SETTINGS.PROJECT_DB_PATH_HINT</small>
       </div>
   
       <div class="form-group">
           <label for="summary" translate>SETTINGS.EXPORT_PATH</label>
-          <input type="text" class="form-control" id="summary" webkitdirectory directory  required [(ngModel)]="exportpath" name="exportpath">
+          <input class="form-control" id="summary" webkitdirectory directory  required [(ngModel)]="exportpath" name="exportpath">
+          <small class="text-muted form-text" translate>SETTINGS.EXPORT_PATH_HINT</small>
         </div>
 
 
         <div class="">
-          <button class="btn btn-primary" (click)="save()">SETTINGS.SAVE</button>
+          <button class="btn btn-primary" [disabled]="!dbpath||!exportpath" (click)="save()" translate>SETTINGS.SAVE</button>
         </div>
     </form>
     </div>

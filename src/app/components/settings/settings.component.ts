@@ -30,7 +30,7 @@ export class SettingsComponent implements OnInit {
         $this._connectionService.connectionEstablished = true;
       } else {
         $this._connectionService.connectionEstablished = false;
-        $this._alert.error('ERROR_SAVE_SETTINGS_' + response.responseType);
+        $this._alert.error('SETTINGS.ERROR.' + response.responseType);
       }
     }, { dbpath: this._dbpath, exportpath: this._exportpath }));
   }

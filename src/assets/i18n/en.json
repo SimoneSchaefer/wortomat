@@ -10,6 +10,22 @@
     "ABOUT" : "About",
     "CLOSE" : "Close Project"
   },
+  "SETTINGS": {
+    "HEADER": "Ready to write your novel?",
+    "HINT": "Setting up wortomat only takes a second!",
+    "PROJECT_DB_PATH" : "Project path",
+    "PROJECT_DB_PATH_HINT" : "This is were wortomat will store your novels on your computer",
+    "EXPORT_PATH": "Export path",
+    "EXPORT_PATH_HINT": "This is were you will find your exported novel on your computer",
+    "SAVE": "Continue",
+    "BROWSE": "Choose folder",
+    "ERROR": {
+      "missing_db_path": "This did not work. Please enter a project path",
+      "invalid_db_path": "This did not work. The project path you provided was invalid, please provide an existing folder.",
+      "invalid_export_path": "This did not work. The export path you provided was invalid, please provide an existing folder.",
+      "missing_export_path": "This did not work. Please enter an export path"
+    }
+  },
   "PROJECTS" : {
     "HEADER": "Projects",
     "NEW" : "New Project",

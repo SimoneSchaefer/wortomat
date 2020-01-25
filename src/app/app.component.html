@@ -1,7 +1,7 @@
 <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap pb-0">
     <a class="navbar-brand col-2 m-0" href="http://localhost:4200">WORTOMAT</a>
     <div class="col-10 m-0 p-0 d-flex justify-content-between">
-        <ul class="nav nav-tabs" role="tablist">
+        <ul class="nav nav-tabs" role="tablist" *ngIf="!isOnSettingsPage()">
             <li class="nav-item" *ngIf="isProjectOpened()">
                 <a class="nav-link" [routerLinkActive]="['active']" [routerLink]="['/parts']" translate>MENU.CONTENT</a>
             </li>
