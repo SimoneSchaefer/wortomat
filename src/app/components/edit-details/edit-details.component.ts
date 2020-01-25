@@ -3,6 +3,13 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BaseEntity, Status } from '../../entity/_baseEntity';
 import { STATUS_CODES } from 'http';
+import { PlotlineService } from '../../services/electron/plotline.service';
+import { PlotlineEntity } from '../../entity/PlotlineEntity';
+import { ResponseType } from '../../message/Message';
+import { CharacterEntity } from '../../entity/CharacterEntity';
+import { CharacterService } from '../../services/electron/character.service';
+import { LocationEntity } from '../../entity/LocationEntity';
+import { LocationService } from '../../services/electron/location.service';
 
 @Component({
   selector: 'app-edit-details',
@@ -15,6 +22,10 @@ export class EditDetailsComponent implements OnInit {
   private _displayOptions;
   private _entityType : string;
 
+  availablePlotlines: PlotlineEntity[] = [];
+  availableCharacters: CharacterEntity[] = [];
+  availableLocations: LocationEntity[] = [];
+
   private _editorOptions = {
     charCounterCount: true,
     theme: 'gray',
@@ -26,10 +37,32 @@ export class EditDetailsComponent implements OnInit {
       '|', 'clearFormatting', 'undo', 'redo']
 
   }
-  constructor(private _activeModal: NgbActiveModal, private _translateService: TranslateService) { }
+  constructor(
+    private _activeModal: NgbActiveModal, 
+    private _translateService: TranslateService, 
+    private _plotLineService: PlotlineService, 
+    private _characterService: CharacterService,
+    private _locationService: LocationService) { }
 
 
-  ngOnInit() {}
+  ngOnInit() {
+    let $this = this;
+    this._plotLineService.loadAll(function(response) {
+      if (response.responseType == ResponseType.SUCCESS) {
+        $this.availablePlotlines = response.data.entities ? response.data.entities : new Array(); 
+      }
+    });
+    this._characterService.loadAll(function(response) {
+      if (response.responseType == ResponseType.SUCCESS) {
+        $this.availableCharacters = response.data.entities ? response.data.entities : new Array(); 
+      }
+    });
+    this._locationService.loadAll(function(response) {
+      if (response.responseType == ResponseType.SUCCESS) {
+        $this.availableLocations = response.data.entities ? response.data.entities : new Array(); 
+      }
+    });
+  }
 
   save() {
     this._activeModal.close(this.baseEntity);

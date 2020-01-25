@@ -164,7 +164,6 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
   showSummary() : boolean {
-    console.log('showSummary', this._stateService.showItem(this.entityType(), 'summary'))
     return this._stateService.showItem(this.entityType(), 'summary');
   }
 

@@ -11,15 +11,15 @@ export class ChapterEntity extends BaseEntity {
     @ManyToOne(type => PartEntity, parent => parent.children, {onDelete: 'CASCADE'/*, onUpdate: 'CASCADE'*/, eager: true})
     parent : PartEntity;
 
-    @ManyToMany(type => PlotlineEntity)
+    @ManyToMany(type => PlotlineEntity, {eager: true})
     @JoinTable()
     plotlines: PlotlineEntity[];
 
-    @ManyToMany(type => CharacterEntity)
+    @ManyToMany(type => CharacterEntity, {eager: true})
     @JoinTable()
     characters: CharacterEntity[];
 
-    @ManyToMany(type => LocationEntity)
+    @ManyToMany(type => LocationEntity, {eager: true})
     @JoinTable()
-    location: LocationEntity[];
+    locations: LocationEntity[];
 }

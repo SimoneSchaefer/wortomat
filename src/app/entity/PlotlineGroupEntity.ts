@@ -9,6 +9,6 @@ import { PlotlineEntity } from "./PlotlineEntity";
 @Entity()
 export class PlotlineGroupEntity extends BaseGroupEntity {
   
-    @OneToMany(type => PlotlineEntity, location => location.parent, {/*onUpdate : 'CASCADE'*/})
+    @OneToMany(type => PlotlineEntity, plotline => plotline.parent, {/*onUpdate : 'CASCADE'*/})
     children : Array<PlotlineEntity>;
 }
