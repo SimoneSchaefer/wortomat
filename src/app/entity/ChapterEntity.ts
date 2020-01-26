@@ -1,5 +1,5 @@
 import { BaseEntity } from "./_baseEntity";
-import { Entity, ManyToOne, ManyToMany, JoinTable } from "typeorm";
+import { Entity, ManyToOne, ManyToMany, JoinTable, Column } from "typeorm";
 import { PartEntity } from "./PartEntity";
 import { PlotlineEntity } from "./PlotlineEntity";
 import { CharacterEntity } from "./CharacterEntity";
@@ -22,4 +22,7 @@ export class ChapterEntity extends BaseEntity {
     @ManyToMany(type => LocationEntity, {eager: true})
     @JoinTable()
     locations: LocationEntity[];
+
+    @Column('datetime')
+    date: Date;
 }
