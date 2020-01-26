@@ -5,6 +5,7 @@ import { StateService } from '../../services/state.service';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { TodoCounterService } from '../../services/todo-counter.service';
 import { GroupTypes } from '../parts/parts.component';
+import { FilterService } from '../../services/filter.service';
 
 
 @Component({
@@ -22,6 +23,10 @@ export class VerticalBarComponent implements OnInit {
 
   @Input()
   groupBy: GroupTypes;
+
+  @Input()
+  filterBy;
+  
   @Output() updateOrder = new EventEmitter<BaseGroupEntity[]>();
   @Output() select = new EventEmitter<BaseEntity>();
   @Output() edit = new EventEmitter<BaseEntity>();
@@ -29,7 +34,7 @@ export class VerticalBarComponent implements OnInit {
   @Output() delete = new EventEmitter<BaseEntity>();
   @Output() add = new EventEmitter<BaseEntity>();
 
-  constructor(private _stateService : StateService, private _todoCounter : TodoCounterService) { }
+  constructor(private _stateService : StateService, private _todoCounter : TodoCounterService, private _filterService: FilterService) { }
 
   ngOnInit() {}
 
