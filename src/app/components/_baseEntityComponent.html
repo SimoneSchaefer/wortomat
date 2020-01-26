@@ -4,15 +4,24 @@
     <div class="row no-gutters">
       <div class="col col-5">
         <div class="d-flex p-3">
-          <button class="d-flex align-items-center btn btn-primary clickable mr-3" (click)="addNewGroup()" >
+          <div>
+            <button class="d-flex align-items-center btn btn-primary clickable mr-3" (click)="addNewGroup()" >
             <i class="fas fa-icon fa-plus pr-1"></i>
             <span>{{'' + entityType() + '.NEW' | uppercase | translate}}</span>
           </button>
+          </div>
+          <div>
           <ng-select [multiple]="true" [closeOnSelect]="false" [(ngModel)]="selectedDisplayContent" (clear)="resetView()" (add)="toggleView($event)" (remove)="toggleView($event)">
             <ng-option [value]="'summary'">{{'SUMMARY' | translate}}</ng-option>
             <ng-option [value]="'extended_summary'">{{'EXTENDED_SUMMARY'  | translate}}</ng-option>
             <ng-option [value]="'content'">{{'CONTENT' | translate}}</ng-option>
           </ng-select>
+          </div>
+          <div *ngIf="groupBy">
+          <ng-select [multiple]="true" [items]="availablePlotlines"  bindLabel="name"
+          [closeOnSelect]="false" [(ngModel)]="selectedPlotlines">
+          </ng-select>
+        </div>
          <!-- <div class="btn-group btn-group-toggle clickable">
             <label class="btn btn-primary clickable" ngbButtonLabel>
               <input type="checkbox" ngbButton [(ngModel)]="display.summary" (click)="toggleView('summary')">{{'SUMMARY' | translate}}
@@ -30,7 +39,7 @@
   </div>
     <div class="row h-100 no-gutters bg-light">
       <nav class="col-5 d-none d-md-block bg-light sidebar pt-0 pl-1 pr-1">
-        <app-vertical-bar [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity" [displayOptions]="displayOptions()"
+        <app-vertical-bar [groupBy]="groupBy" [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity" [displayOptions]="displayOptions()"
           (select)="select($event)" 
           (updateOrder)="updateOrder($event)" 
           (write)="continueWriting($event)"

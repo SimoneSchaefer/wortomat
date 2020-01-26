@@ -196,8 +196,8 @@ export abstract class BaseEntityComponent implements OnInit {
       newEntity.order = $this.entities.length + 1;
     }   
     baseService.save(newEntity, function(response) {
-      $this._selectedEntity = response.data.entity;
       if (response.responseType === ResponseType.SUCCESS) {
+        $this._selectedEntity = response.data.entity;
         $this._loadDelayed(false, newElement ? $this.editDetails : null);                
       } else {
         $this._alertService.error($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");

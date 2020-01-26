@@ -4,6 +4,7 @@ import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 import { StateService } from '../../services/state.service';
 import { moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { TodoCounterService } from '../../services/todo-counter.service';
+import { GroupTypes } from '../parts/parts.component';
 
 
 @Component({
@@ -13,11 +14,14 @@ import { TodoCounterService } from '../../services/todo-counter.service';
 })
 export class VerticalBarComponent implements OnInit {
 
-  private _entities: BaseGroupEntity[];
+
+  private _entities: BaseGroupEntity[] = [];
   private _selectedEntity: BaseEntity;
   private _entityType : ENTITY_TYPE;
   private _displayOptions: DisplayOptions;
 
+  @Input()
+  groupBy: GroupTypes;
   @Output() updateOrder = new EventEmitter<BaseGroupEntity[]>();
   @Output() select = new EventEmitter<BaseEntity>();
   @Output() edit = new EventEmitter<BaseEntity>();
