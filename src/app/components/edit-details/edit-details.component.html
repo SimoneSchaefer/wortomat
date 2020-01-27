@@ -1,65 +1,80 @@
-<div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="close()">
+<div class="modal-header border-bottom-0">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs w-100" *ngIf="!baseEntity['children']">
+    <li class="nav-item">
+      <a [ngClass]="{'active': currentEditMode === DETAILS_EDIT_MODE.DETAILS}" class="clickable nav-link" data-toggle="tab" (click)="currentEditMode = DETAILS_EDIT_MODE.DETAILS">{{ 'EDIT_DETAILS' | translate}}</a></li>
+    <li class="nav-item">
+      <a [ngClass]="{'active': currentEditMode === DETAILS_EDIT_MODE.CONTENT}" class="clickable nav-link" data-toggle="tab" (click)="currentEditMode = DETAILS_EDIT_MODE.CONTENT">{{ 'CONTINUE_WRITING' | translate}}</a></li>
+  </ul>  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="close()">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div class="modal-body">
-  <div class="" *ngIf="currentEditMode === DETAILS_EDIT_MODE.CONTENT">
-    <app-wysiwyg-editor [(content)]="baseEntity.notes"></app-wysiwyg-editor>
-  </div>
 
-  <ng-container *ngIf="currentEditMode === DETAILS_EDIT_MODE.DETAILS">
-    <div class="form form-group w-100 p-1">
-      <small class="form-text text-muted" translate>NAME_HINT</small>
-      <input class="form-control w-100" type="text" [(ngModel)]="baseEntity.name"/>
-    </div>
-    <div class="form form-group w-100 p-1">
-      <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
-      <input class="form-control pr-0 w-100" type="text" [(ngModel)]="baseEntity.summary" />
-    </div>
+  
 
-    <div class="form form-group w-100 p-1" *ngIf="!baseEntity['children']">
-      <div><small class="form-text text-muted" translate>STATUS.STATUS</small></div>
-      <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" [(ngModel)]="baseEntity.status" >
-        <label *ngFor="let status of getStatus()" class="btn btn-primary with-border clickable" [ngClass]="{'active': active(baseEntity, status)}" ngbButtonLabel>
-          <input type="radio" ngbButton [value]="status">{{'STATUS.' + status | translate}}
-        </label>
+    <!-- Tab panes -->
+  <div class="tab-content">
+    <div class="tab-pane" [ngClass]="{'active show': currentEditMode === DETAILS_EDIT_MODE.CONTENT}" id="home">
+      <div class="" *ngIf="currentEditMode === DETAILS_EDIT_MODE.CONTENT">
+        <app-wysiwyg-editor [(content)]="baseEntity.notes"></app-wysiwyg-editor>
       </div>
-    </div> 
-
-    <div class="form form-group w-100 p-1" *ngIf="baseEntity['plotlines']">
-      <div><small class="form-text text-muted" translate>PLOTLINES.HEADER</small></div>
-      <ng-select [multiple]="true" [items]="availablePlotlines"  bindLabel="name" [addTag]="addPlotlinePromise"
-      [closeOnSelect]="false" [(ngModel)]="baseEntity.plotlines" [loading]="loading === 'plotlines'">
-      </ng-select>
-    </div> 
- 
-
-    <div class="form form-group w-100 p-1" *ngIf="baseEntity['characters']">
-      <div><small class="form-text text-muted" translate>CHARACTERS.HEADER</small></div>
-      <ng-select [multiple]="true" [items]="availableCharacters"  bindLabel="name"  [addTag]="addCharactersPromise"
-        [closeOnSelect]="true" [(ngModel)]="baseEntity.characters" [loading]="loading === 'characters'">
-      </ng-select>
-    </div> 
- 
-
-    <div class="form form-group w-100 p-1" *ngIf="baseEntity['locations']">
-      <div><small class="form-text text-muted" translate>LOCATIONS.HEADER</small></div>
-      <ng-select [multiple]="true" [items]="availableLocations"  bindLabel="name" [addTag]="addLocationsPromise"
-        [closeOnSelect]="false" [(ngModel)]="baseEntity.locations">
-      </ng-select>
-    </div> 
-
-    <div class="form form-group w-100 p-1">
-      <div><small class="form-text text-muted" translate>DETAILED_SUMMARY_HINT</small></div>
-      <app-wysiwyg-editor [(content)]="baseEntity.detailedSummary"></app-wysiwyg-editor>
-    </div> 
-  </ng-container>      
+    </div>
+    <div class="tab-pane" [ngClass]="{'active show': currentEditMode === DETAILS_EDIT_MODE.DETAILS}" id="profile">
+      <ng-container *ngIf="currentEditMode === DETAILS_EDIT_MODE.DETAILS">
+        <div class="form form-group w-100 p-1">
+          <small class="form-text text-muted" translate>NAME_HINT</small>
+          <input class="form-control w-100" type="text" [(ngModel)]="baseEntity.name"/>
+        </div>
+        <div class="form form-group w-100 p-1">
+          <div><small class="form-text text-muted" translate>SUMMARY_HINT</small></div>
+          <input class="form-control pr-0 w-100" type="text" [(ngModel)]="baseEntity.summary" />
+        </div>
+    
+        <div class="form form-group w-100 p-1" *ngIf="!baseEntity['children']">
+          <div><small class="form-text text-muted" translate>STATUS.STATUS</small></div>
+          <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" [(ngModel)]="baseEntity.status" >
+            <label *ngFor="let status of getStatus()" class="btn btn-primary with-border clickable" [ngClass]="{'active': active(baseEntity, status)}" ngbButtonLabel>
+              <input type="radio" ngbButton [value]="status">{{'STATUS.' + status | translate}}
+            </label>
+          </div>
+        </div> 
+    
+        <div class="form form-group w-100 p-1" *ngIf="baseEntity['plotlines']">
+          <div><small class="form-text text-muted" translate>PLOTLINES.HEADER</small></div>
+          <ng-select [multiple]="true" [items]="availablePlotlines"  bindLabel="name" [addTag]="addPlotlinePromise"
+          [closeOnSelect]="false" [(ngModel)]="baseEntity.plotlines" [loading]="loading === 'plotlines'">
+          </ng-select>
+        </div> 
+     
+    
+        <div class="form form-group w-100 p-1" *ngIf="baseEntity['characters']">
+          <div><small class="form-text text-muted" translate>CHARACTERS.HEADER</small></div>
+          <ng-select [multiple]="true" [items]="availableCharacters"  bindLabel="name"  [addTag]="addCharactersPromise"
+            [closeOnSelect]="true" [(ngModel)]="baseEntity.characters" [loading]="loading === 'characters'">
+          </ng-select>
+        </div> 
+     
+    
+        <div class="form form-group w-100 p-1" *ngIf="baseEntity['locations']">
+          <div><small class="form-text text-muted" translate>LOCATIONS.HEADER</small></div>
+          <ng-select [multiple]="true" [items]="availableLocations"  bindLabel="name" [addTag]="addLocationsPromise"
+            [closeOnSelect]="false" [(ngModel)]="baseEntity.locations">
+          </ng-select>
+        </div> 
+    
+        <div class="form form-group w-100 p-1">
+          <div><small class="form-text text-muted" translate>DETAILED_SUMMARY_HINT</small></div>
+          <app-wysiwyg-editor [(content)]="baseEntity.detailedSummary"></app-wysiwyg-editor>
+        </div> 
+      </ng-container>  
+    </div>
+  </div>    
 </div>
 
 <div class="modal-footer">
   <div class="d-flex w-100 justify-content-between">
-      <div *ngIf="!baseEntity['children']">
+     <!-- <div *ngIf="!baseEntity['children']">
         <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" [(ngModel)]="currentEditMode" >
           <label class="btn btn-primary with-border clickable" [ngClass]="{'active': currentEditMode === DETAILS_EDIT_MODE.DETAILS}" ngbButtonLabel>
             <input type="radio" ngbButton [value]="DETAILS_EDIT_MODE.DETAILS">{{ 'EDIT_DETAILS' | translate}}
@@ -68,7 +83,7 @@
             <input type="radio" ngbButton [value]="DETAILS_EDIT_MODE.CONTENT">{{ 'CONTINUE_WRITING' | translate}}
           </label>
         </div>
-      </div>
+      </div>-->
       <div>
         <div class="button-group mt-1 w-100 p-1">
           <button class="btn btn-danger" (click)="delete()" translate>
