@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateService } from '@ngx-translate/core';
 import { BaseEntity, Status } from '../../entity/_baseEntity';
@@ -17,16 +17,25 @@ import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
 import { LocationGroupService } from '../../services/electron/location-group.service';
 import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
 
+export enum DETAILS_EDIT_MODE {
+  DETAILS = 'DETAILS',
+  CONTENT = 'CONTENT'
+}
+
 @Component({
   selector: 'app-edit-details',
   templateUrl: './edit-details.component.html',
   styleUrls: ['./edit-details.component.scss']
 })
 export class EditDetailsComponent implements OnInit {
+  DETAILS_EDIT_MODE = DETAILS_EDIT_MODE;
   private _baseEntity : BaseEntity;
   private _title: string;
-  private _displayOptions;
   private _entityType : string;
+
+  @Output() onDelete = new EventEmitter();
+
+  currentEditMode = DETAILS_EDIT_MODE.DETAILS;
 
   loading: string | null;
 
@@ -84,6 +93,12 @@ export class EditDetailsComponent implements OnInit {
     if (confirm(this._translateService.instant("REALLY_CLOSE"))) {
       this._activeModal.dismiss("dismiss");
     }
+  }
+
+  delete() {
+    if (confirm(this._translateService.instant("REALLY_DELETE"))) {
+      this._activeModal.dismiss("delete");
+    } 
   }
 
   addPlotlinePromise = (name: string) => {
@@ -166,9 +181,6 @@ export class EditDetailsComponent implements OnInit {
   getStatus() {
     return Object.keys(Status).filter(key => parseInt(key, 10) >= 0).map(key => parseInt(key, 10));
   }
-
-  get displayOptions() {return this._displayOptions;}
-  set displayOptions(options: any) {this._displayOptions = options;};
 
   get editorOptions() {return this._editorOptions;}
   set editorOptions(options: any) {this._editorOptions = options;};

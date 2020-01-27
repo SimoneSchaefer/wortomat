@@ -51,6 +51,10 @@ export class VerticalBarComponent implements OnInit {
     this._stateService.toggleItemCollapseState(this.entityType, group);
   }
 
+  wordCount(entity: BaseEntity) {
+    return entity.notes ? entity.notes.match(/(\w+)/g).length : 0;
+  }
+
 
   /**
    * Called on drop of a group element

@@ -10,7 +10,7 @@
             </button>
             <button class="btn btn-xs btn-link" (click)="add.emit(group)"><i class="fa fa-plus"></i></button>
             <button class="btn btn-xs btn-link" (click)="edit.emit(group)"><i class="fa fa-edit"></i></button>
-            <button class="btn btn-xs btn-link" (click)="delete.emit(group)"><i class="fa fa-trash-alt"></i></button>  
+            <!--<button class="btn btn-xs btn-link" (click)="delete.emit(group)"><i class="fa fa-trash-alt"></i></button>  -->
           </div> 
           <div (click)="selectEntity(group)" class="pl-3 bold clickable btn btn-link card-title my-2"  [class.active]="isSelected(group)">
             {{group.name ? group.name : (entityType.toUpperCase() + '.UNTITLED') | translate}} 
@@ -36,13 +36,16 @@
           <div class="col" [ngClass]="{'col-8' : displayOptions?.showImage}">
             <div class="d-flex">
               <div class="d-flex">
-                <button class="btn btn-sm btn-link" (click)="write.emit(child)"><i class="fa fa-feather"></i></button>
                 <button class="btn btn-xs btn-link" (click)="edit.emit(child)"><i class="fa fa-edit"></i></button>
-                <button class="btn btn-xs btn-link" (click)="delete.emit(child)"><i class="fa fa-trash-alt"></i></button>                  
+
+               <!--
+                 <button class="btn btn-sm btn-link" (click)="write.emit(child)"><i class="fa fa-feather"></i></button>
+                <button class="btn btn-xs btn-link" (click)="delete.emit(child)"><i class="fa fa-trash-alt"></i></button>   -->              
               </div>
               <div class="px-3 align-items-center d-flex text-lighter w-16-px" [innerHTML]="child.status | statusIcon" title="{{'STATUS.' + child.status | translate}}"></div>
               <div (click)="selectEntity(child)" [ngClass]="{'overflow-ellipsis' : !displayOptions?.showImage}" class="clickable btn-link text-left pl-2 py-1" [class.active]="isSelected(child)" >
                 {{child.name ? child.name : (entityType.toUpperCase() + '.UNTITLED_CHILD') | translate}}
+                <span class="small text-muted">({{wordCount(child)}})</span>
                 <span class="text-muted" *ngIf="child.summary">- {{child.summary}}</span>
                 <span class="ml-2"></span>
                 <span *ngIf="todoCount(child) as c"  title="{{c}} TODOs found" class="badge badge-warning ml-1">{{c}}</span>

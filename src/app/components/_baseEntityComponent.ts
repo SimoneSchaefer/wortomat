@@ -1,4 +1,4 @@
-import { OnInit, SystemJsNgModuleLoaderConfig } from '@angular/core';
+import { OnInit } from '@angular/core';
 import { ResponseType } from '../message/Message';
 import { BaseEntity, ENTITY_TYPE } from '../entity/_baseEntity';
 import { AlertService } from '../services/alert.service';
@@ -11,8 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { WysiwygEditorComponent } from './wysiwyg-editor/wysiwyg-editor.component';
 import { EditDetailsComponent } from './edit-details/edit-details.component';
 import { BaseChildEntity } from '../entity/_baseChildEntity';
-import { StateService, DISPLAY_STATE, DISPLAY_ITEM, } from '../services/state.service';
-import { EntityRepository } from 'typeorm';
+import { StateService, DISPLAY_ITEM, } from '../services/state.service';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -66,7 +65,7 @@ export abstract class BaseEntityComponent implements OnInit {
       entity = this.selectedEntity;      
     }
     this.selectedEntity = entity;
-    const modalRef = this._modalService.open(EditDetailsComponent, {size: 'lg', backdrop: 'static'});
+    const modalRef = this._modalService.open(EditDetailsComponent, {size: 'lg', backdrop: 'static', keyboard : false});
     modalRef.componentInstance.baseEntity = entity;
     modalRef.componentInstance.entityType = this.entityType();
     modalRef.componentInstance.displayOptions = this.displayOptions();
@@ -77,7 +76,11 @@ export abstract class BaseEntityComponent implements OnInit {
       } else {
         this.updateMember(this.selectedEntity);
       }
-    }).catch((error) => {if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')});
+    }).catch((error) => {
+      if (error === 'delete') {
+        this.deleteEntity(entity);
+      } else if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')
+    });
   }
 
   continueWriting(entity) : void {
