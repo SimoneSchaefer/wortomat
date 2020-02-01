@@ -11,6 +11,7 @@ import { PlotlineEntity } from '../../entity/PlotlineEntity';
 import { BaseEntity, ENTITY_TYPE } from '../../entity/_baseEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StateService } from '../../services/state.service';
+import { BaseChildEntity } from '../../entity/_baseChildEntity';
 
 @Component({
   selector: 'app-plotlines',  
@@ -40,10 +41,8 @@ export class PlotlinesComponent  extends BaseEntityComponent  {
   protected newGroup() : BaseGroupEntity {
     return new PlotlineGroupEntity();
   }
-  protected newMember(parent : PlotlineGroupEntity) : BaseEntity {
-    let member = new PlotlineEntity();
-    member.parent = parent;
-    return member;
+  protected newMember() : BaseChildEntity {
+    return new PlotlineEntity();
   }
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PLOTLINES;

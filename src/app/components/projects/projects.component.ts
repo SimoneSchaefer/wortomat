@@ -11,6 +11,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { PartEntity } from '../../entity/PartEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StateService } from '../../services/state.service';
+import { BaseChildEntity } from '../../entity/_baseChildEntity';
+import { ChapterEntity } from '../../entity/ChapterEntity';
 
 @Component({
   selector: 'app-projects',
@@ -39,8 +41,9 @@ export class ProjectsComponent extends BaseEntityComponent {
   protected newGroup() : BaseEntity {
     return new ProjectEntity();
   }
-  protected newMember() : BaseEntity {
-    return new PartEntity();
+  protected newMember() : BaseChildEntity {
+    //TODO
+    return new ChapterEntity();
   }
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PROJECTS;

@@ -24,5 +24,5 @@ export class ChapterEntity extends BaseEntity {
     locations: LocationEntity[];
 
     @Column('datetime')
-    date: Date;
+    date: Date = new Date();
 }

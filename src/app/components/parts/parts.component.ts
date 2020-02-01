@@ -18,6 +18,7 @@ import { ResponseType } from '../../message/Message';
 import { PlotlineEntity } from '../../entity/PlotlineEntity';
 import { CharacterEntity } from '../../entity/CharacterEntity';
 import { LocationEntity } from '../../entity/LocationEntity';
+import { BaseChildEntity } from '../../entity/_baseChildEntity';
 
 
 export enum GroupTypes {
@@ -92,18 +93,11 @@ export class PartsComponent extends BaseEntityComponent  {
   }
 
   
-
-
   protected newGroup() : BaseGroupEntity {
-    let part = new PartEntity();
-    part.children = [];
-    return part;
+    return new PartEntity();
   }
-  protected newMember(parent : PartEntity) : BaseEntity {
-    let member = new ChapterEntity();
-    member.date = new Date();
-    member.parent = parent;
-    return member;
+  protected newMember() : BaseChildEntity {
+    return new ChapterEntity();
   }
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PARTS;

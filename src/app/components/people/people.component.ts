@@ -12,6 +12,7 @@ import { CharacterEntity } from '../../entity/CharacterEntity';
 import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StateService } from '../../services/state.service';
+import { BaseChildEntity } from '../../entity/_baseChildEntity';
 
 @Component({
   selector: 'app-people',
@@ -42,10 +43,8 @@ export class PeopleComponent extends BaseEntityComponent  {
     group.children = [];
     return group;
   }
-  protected newMember(parent : CharacterGroupEntity) : BaseEntity {
-    let member = new CharacterEntity();
-    member.parent = parent;
-    return member;
+  protected newMember() : BaseChildEntity {
+    return new CharacterEntity();
   }
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.CHARACTERS;

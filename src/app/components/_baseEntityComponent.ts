@@ -17,7 +17,7 @@ import { StateService, DISPLAY_ITEM, } from '../services/state.service';
 export abstract class BaseEntityComponent implements OnInit {
 
   protected abstract newGroup() : BaseEntity;
-  protected abstract newMember(parent : BaseGroupEntity) : BaseEntity;
+  protected abstract newMember() : BaseChildEntity;
   protected abstract entityType() : ENTITY_TYPE;
 
   selectedDisplayContent: Array<DISPLAY_ITEM> = [];
@@ -116,7 +116,9 @@ export abstract class BaseEntityComponent implements OnInit {
   }
 
   addNewMember(parentEntity : BaseGroupEntity) {
-    this.save(this._memberService, this.newMember(parentEntity), parentEntity['children'], 'CHILD_');
+    let newMember = this.newMember();
+    newMember.parent = parentEntity;
+    this.save(this._memberService, newMember, parentEntity.children, 'CHILD_');
   }
 
   select(entity : BaseEntity) { this.selectedEntity = entity; }

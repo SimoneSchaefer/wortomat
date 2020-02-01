@@ -11,6 +11,7 @@ import { BackgroundEntity } from '../../entity/BackgroundEntity';
 import { ENTITY_TYPE, BaseEntity } from '../../entity/_baseEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StateService } from '../../services/state.service';
+import { BaseChildEntity } from '../../entity/_baseChildEntity';
 
 @Component({
   selector: 'app-backgrounds',
@@ -42,10 +43,8 @@ export class BackgroundsComponent  extends BaseEntityComponent  {
     group.children = [];
     return group;
   }
-  protected newMember(parent : BackgroundGroupEntity) : BaseEntity {
-    let member = new BackgroundEntity();
-    member.parent = parent;
-    return member;
+  protected newMember() : BaseChildEntity {
+    return new BackgroundEntity();
   }
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.BACKGROUNDS;

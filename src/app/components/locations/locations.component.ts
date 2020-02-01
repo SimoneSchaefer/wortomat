@@ -16,6 +16,7 @@ import { LocationEntity } from '../../entity/LocationEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DisplayOptions } from '../vertical-bar/vertical-bar.component';
 import { StateService } from '../../services/state.service';
+import { BaseChildEntity } from '../../entity/_baseChildEntity';
 
 
 @Component({
@@ -46,10 +47,8 @@ export class LocationsComponent  extends BaseEntityComponent  {
   protected newGroup() : BaseGroupEntity {
     return new LocationGroupEntity();
   }
-  protected newMember(parent : LocationGroupEntity) : BaseEntity {
-    let member = new LocationEntity();
-    member.parent = parent;
-    return member;
+  protected newMember() : BaseChildEntity {
+    return new LocationEntity();
   }
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.LOCATIONS;
