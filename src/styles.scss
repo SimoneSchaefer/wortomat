@@ -40,13 +40,16 @@ html, body {
 	border-radius: 8px;
 	background-color: #F5F5F5;
 }
-::ng-deep {
-  .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value .ng-value-icon.left {
-    border-right: 1px solid red !important;
-  }
-}
+
 .ng-select .ng-select-container {
-  min-height: 40px;
+  height: 38px !important;
+}
+
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container {
+  padding-top: 2px !important;
+  padding-left: 2px !important;
+  padding-bottom: 2px !important;
+  
 }
 
 .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value .ng-value-icon.left {
@@ -57,6 +60,7 @@ html, body {
   font-size: 8em;
   border: 1px solid #d2d2d2;
   padding: 0.3em 0;
+  margin-bottom: 0 !important;
 }
 
 .ng-select .ng-select-container .ng-value-container .ng-input>input {
