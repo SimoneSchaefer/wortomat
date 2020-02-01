@@ -42,7 +42,17 @@
     "SUCCESS": "Your novel has been exported!",
     "ERROR": "Ups, that did not work :(",
     "NO_EXPORTS": "No exports found",
-    "EXPORT": "Export now"
+    "EXPORT": "Export now",
+    "AUTHOR": "Author",
+    "TITLE": "Title",
+    "SUBTITLE": "Subtitle",
+    "ISBN": "ISBN",
+    "PAGE_HEIGHT": "Page height (inch)",
+    "PAGE_WIDTH": "Page width (inch)" ,
+    "PAGE_MARGIN_INNER": "Margin inner (inch)",
+    "PAGE_MARGIN_OUTER": "Margin outer (inch)", 
+    "PAGE_MARGIN_TOP": "Margin top (inch)",
+    "PAGE_MARGIN_BOTTOM": "Margin bottom (inch)"    
   },
   "PROJECTS" : {
     "HEADER": "Projects",

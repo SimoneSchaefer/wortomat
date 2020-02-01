@@ -9,7 +9,7 @@ import { PartEntity } from "../../app/entity/PartEntity";
 
 export class ExportDataProvider {
 
-  public constructor(private partloader: PartLoader, private _exportOptions : Object) { }
+  public constructor(private partloader: PartLoader, private _exportOptions) { }
 
   public collectData(): Promise<string> {
     let html = "";
@@ -33,16 +33,16 @@ export class ExportDataProvider {
           for (let entity of parts) {
             let part = entity as PartEntity;
             for (let chapter of part.children) {
-              if ($this._exportOptions['includeName'] && chapter.name) {
+              if ($this._exportOptions.include.includes('title') && chapter.name) {
                 html += `<h1>${chapter.name}</h1>`;
               }
-              if ($this._exportOptions['includeSummary'] && chapter.summary) {
+              if ($this._exportOptions.include.includes('summary') && chapter.summary) {
                 html += `<p><b>${chapter.summary}</b></p>`;
               }
-              if ($this._exportOptions['includeDetailedSummary'] && chapter.detailedSummary) {
+              if ($this._exportOptions.include.includes('extended_summary') && chapter.detailedSummary) {
                 html += `<p><i>${chapter.detailedSummary}</i></p>`;
               }
-              if ($this._exportOptions['includeContent'] && chapter.notes) {
+              if ($this._exportOptions.include.includes('content') && chapter.notes) {
                 html += `<p>${chapter.notes}</p>`;
               }
             }            

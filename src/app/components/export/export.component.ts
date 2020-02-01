@@ -4,6 +4,8 @@ import { MessageRequest, Channel, MessageResponse, ResponseType } from '../../me
 import { OpenProjectService } from '../../services/open-project.service';
 import { FormGroup, FormControl, FormBuilder } from '@angular/forms';
 import { AlertService } from '../../services/alert.service';
+import { ExportSettings } from './export.settings.model';
+import { StateService } from '../../services/state.service';
 
 @Component({
   selector: 'app-export',
@@ -13,18 +15,34 @@ import { AlertService } from '../../services/alert.service';
 export class ExportComponent implements OnInit {
   private selectedContentOption: string;
   private selectedFormatOption: string;
-  private contentOptions = ["content", "notes"];
+  private contentOptions = ["title", "summary", "extended_summary", "content"];
   private formatOptions = [ExportFormat.HTML, ExportFormat.PDFLATEX];
-  private success : string;
-  private error : string;
   private processing: boolean;
   exportForm : FormGroup;
   existingExports = [];
-  constructor(private electronService : ElectronService, private openProjectService : OpenProjectService, private formBuilder : FormBuilder, private alertService: AlertService) { }
+  constructor(private electronService : ElectronService,
+     private openProjectService : OpenProjectService, 
+     private formBuilder : FormBuilder, 
+     private alertService: AlertService
+     ) { }
 
   ngOnInit() {
     this.exportForm = this.createFormGroup();
     this.loadExports();
+  }
+
+
+  getExportSettings() : ExportSettings {
+    let state = localStorage.getItem('export_settings');
+    if (state) {
+        return JSON.parse(state);
+    } else {
+        return new ExportSettings();
+    }
+  }
+
+  saveExportSettings() {
+    localStorage.setItem('export_settings', JSON.stringify(this.exportForm.value));
   }
 
   loadExports() {
@@ -37,17 +55,25 @@ export class ExportComponent implements OnInit {
   }
 
   createFormGroup() {
+    const settings = this.getExportSettings();
     return this.formBuilder.group({
-      format : ExportFormat.HTML,
-      includeName : true,
-      includeSummary : false,
-      includeDetailedSummary : false,
-      includeContent : true
+      format : settings.format,
+      include: new FormControl(settings.include),
+      author: settings.author,
+      title: settings.title,
+      isbn: settings.isbn,
+      pageHeight: settings.pageHeight,
+      pageWidth: settings.pageWidth,
+      marginInner: settings.marginInner,
+      marginOuter: settings.marginOuter,
+      marginTop: settings.marginTop,
+      marginBottom: settings.marginBottom
     });      
   }
 
   onSubmit() {
-    const options : ExportOptions = Object.assign({}, this.exportForm.value);
+    this.saveExportSettings();
+    const options : ExportSettings = this.getExportSettings()
     let $this = this;
     $this.processing = true;
     this.electronService.send(new MessageRequest(Channel.EXPORT, function (evt, response: MessageResponse) {

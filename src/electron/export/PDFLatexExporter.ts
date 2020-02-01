@@ -8,7 +8,7 @@ import { HTMLExporter } from "./HTMLExporter";
 const { exec } = require('child_process');
 
 export class PDFLatexExporter implements Exporter {
-    public export(settingsHandler: SettingsProvider, dataProvider: ExportDataProvider): Promise<string> {
+    public export(settingsHandler: SettingsProvider, dataProvider: ExportDataProvider, options): Promise<string> {
         return new Promise<string>(function (resolve, reject) {
 
             let htmlExport = new HTMLExporter();
@@ -29,14 +29,26 @@ export class PDFLatexExporter implements Exporter {
                     var path = require('path')
 
 
-                    fs.copyFileSync(global['__basedir'] + '/src/assets/templates/setup.tex', settingsHandler.settings.exportpath + '/setup.tex')
+                    const setupFilePath = settingsHandler.settings.exportpath + '/setup.tex';
+                    fs.copyFileSync(global['__basedir'] + '/src/assets/templates/setup.tex', setupFilePath)
+                    let setup = "" + fs.readFileSync(setupFilePath);
+                    setup = setup.replace('PLACEHOLDERAUTHOR', options.author || '');
+                    setup = setup.replace('PLACEHOLDERTITLE', options.title || '');
+                    setup = setup.replace('PLACEHOLDERISBN', options.isbn || '');
+                    setup = setup.replace('PLACEHOLDERPAGEHEIGHT', options.pageHeight || '8.5');
+                    setup = setup.replace('PLACEHOLDERPAGEWIDTH', options.pageWidth || '5.675');
+                    setup = setup.replace('PLACEHOLDERMARGININNER', options.marginOuter || '1.222');
+                    setup = setup.replace('PLACEHOLDERMARGINOUTER', options.marginOuter || '0.611');
+                    setup = setup.replace('PLACEHOLDERMARGINTOP', options.marginTop || '0.722');
+                    setup = setup.replace('PLACEHOLDERMARGINBOTTOM', options.marginBottom || '1.545');
+                    fs.writeFileSync(setupFilePath, setup);
+
 
                     var content = fs.readFileSync(fileNameLatex);
                     content = "\\include{setup}\n" + content + "\n\\end{document}"
                     content = content.replace(/\\section/g, '\\chapter');
                     content = content.replace(new RegExp('``', 'g'), '\\glqq ');
                     content = content.replace(new RegExp('\'\'', 'g'), '\\grqq  ');
-
                     fs.writeFileSync(fileNameLatex, content);
 
                     Logger.debug(`Converting file ${fileNameLatex}`);

@@ -21,8 +21,8 @@
       </div>
     </div>
   </div>
-    <div class="row h-100 no-gutters bg-light">
-      <nav class="col-5 d-none d-md-block bg-light sidebar pt-0 pl-1 pr-1">
+    <div class="row h-100 no-gutters ">
+      <nav class="col-5 d-none d-md-block sidebar pt-0 pl-1 pr-1">
         <app-vertical-bar [groupBy]="groupBy" [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity" [displayOptions]="displayOptions()"
           (select)="select($event)" 
           (updateOrder)="updateOrder($event)" 
@@ -31,7 +31,7 @@
           (add)="addNewMember($event)"
           (edit)="editDetails($event)"></app-vertical-bar>
       </nav>
-      <main role="main" class="col-7 pt-0 bg-light">
+      <main role="main" class="col-7 pt-0 ">
         <div class="wrapper scrollbar card bg-white px-3">
           <div *ngIf="entities.length===0">
             <div class="alert alert-light" role="alert">

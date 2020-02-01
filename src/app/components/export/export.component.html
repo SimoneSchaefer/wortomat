@@ -1,4 +1,5 @@
   <div class="container">
+    <form [formGroup]="exportForm" (ngSubmit)="onSubmit()">
     <div class="row">
        <div class="col-12">
         <div class="card">
@@ -6,65 +7,90 @@
           <div class="card-body">
             <div class="row">
               <div class="col-6">
-                <form [formGroup]="exportForm" (ngSubmit)="onSubmit()">
+                <div class="form-group">
+                  <label for="exampleInputEmail1" translate>EXPORT.AUTHOR</label>
+                  <input type="email" formControlName="author" class="form-control" id="exampleInputEmail1">
+                </div>
+                <div class="form-group">
+                  <label for="exampleInputEmail1" translate>EXPORT.TITLE</label>
+                  <input type="email" formControlName="title" class="form-control" id="exampleInputEmail1">
+                </div>
+                <!--<div class="form-group">
+                  <label for="exampleInputEmail1" translate>EXPORT.ISBN</label>
+                  <input type="email" formControlName="isbn"  class="form-control" id="exampleInputEmail1">
+                </div>-->
+                <div class="form-group">
+                  <div class="d-flex">
+                    <div class="pr-3">
+                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_HEIGHT</label>
+                      <input type="number" formControlName="pageHeight" class="form-control" id="exampleInputEmail1">
+                    </div>
+                    <div>
+                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_WIDTH</label>
+                      <input type="number" formControlName="pageWidth"  class="form-control" id="exampleInputEmail1">
+                    </div>
+                  </div>                    
+                </div>
 
-                  <div class="form-group">
-                    <div class="custom-control custom-checkbox">
-                      <input formControlName="includeName"  type="checkbox" class="custom-control-input" id="customCheck1">
-                      <label class="custom-control-label" for="customCheck1" translate>EXPORT.NAME</label>
+
+                <div class="form-group">
+                  <div class="d-flex">
+                    <div class="pr-3">
+                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_INNER</label>
+                      <input type="number" formControlName="marginInner" class="form-control" id="exampleInputEmail1">
                     </div>
-                  </div>
-            
-                  <div class="form-group">
-                    <div class="custom-control custom-checkbox">
-                      <input formControlName="includeSummary"  type="checkbox" class="custom-control-input" id="customCheck2">
-                      <label class="custom-control-label" for="customCheck2" translate>EXPORT.SUMMARY</label>
+                    <div>
+                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_OUTER</label>
+                      <input type="number" formControlName="marginOuter" class="form-control" id="exampleInputEmail1">
                     </div>
-                  </div>
-            
-            
-                  <div class="form-group">
-                    <div class="custom-control custom-checkbox">
-                      <input formControlName="includeDetailedSummary"  type="checkbox" class="custom-control-input" id="customCheck3">
-                      <label class="custom-control-label" for="customCheck3" translate>EXPORT.EXTENDED_SUMMARY</label>
+                  </div>                    
+                </div>
+                <div class="form-group">
+                  <div class="d-flex">
+                    <div class="pr-3">
+                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_TOP</label>
+                      <input type="number" formControlName="marginTop" class="form-control" id="exampleInputEmail1">
                     </div>
-                  </div>
+                    <div>
+                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_BOTTOM</label>
+                      <input type="number" formControlName="marginBottom" class="form-control" id="exampleInputEmail1">
+                    </div>
+                  </div>                    
+                </div>
+
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <ng-select [multiple]="true" [clearable]="false" [items]="contentOptions" formControlName="include"></ng-select>
+                </div>
             
-                  <div class="form-group">
-                    <div class="custom-control custom-checkbox">
-                      <input formControlName="includeContent"  type="checkbox" class="custom-control-input" id="customCheck4">
-                      <label class="custom-control-label" for="customCheck4" translate>EXPORT.CONTENT</label>
+                <div class="form-group">
+                  <ng-select [clearable]="false" [items]="formatOptions" formControlName="format"></ng-select>
+          
+                  <div *ngIf="exportForm.value.format === 'PDFLATEX'">
+                    <div class="alert alert-info mt-3">
+                      {{'EXPORT.PDFLATEX_HINT' | translate}}
+                      <div class="small">          
+                        <b>For Ubuntu:</b>sudo apt-get install pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-latex-fonts-extra texlive-lang-german       </div>
                     </div>
                   </div>  
+                </div>
             
-                  <div class="formgroup">
-                    <ng-select [clearable]="false" [items]="formatOptions" formControlName="format"></ng-select>
-            
-                    <div *ngIf="exportForm.value.format === 'PDFLATEX'">
-                      <div class="alert alert-info mt-3">
-                        {{'EXPORT.PDFLATEX_HINT' | translate}}
-                        <div class="small">          
-                          <b>For Ubuntu:</b>sudo apt-get install pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-latex-fonts-extra texlive-lang-german       </div>
-                      </div>
-                    </div>  
-                  </div>
-            
-                  <div class="formgroup mt-3">
-                    <button class="btn btn-primary" type="submit" [disabled]="processing">
-                      <i class="fas fa-cog fa-spin" *ngIf="processing"></i>
-                      {{'EXPORT.EXPORT' | translate}}
-                    </button>
-                  </div>
-                </form>
+                <div class="formgroup mt-3">
+                  <button class="btn btn-primary" type="submit" [disabled]="processing">
+                    <i class="fas fa-cog fa-spin" *ngIf="processing"></i>
+                    {{'EXPORT.EXPORT' | translate}}
+                  </button>
+                </div>
               </div>
-            </div>
-  
-          </div>
- 
+            </div>  
+          </div> 
         </div>
   
       </div>
     </div>
+    </form>
+
 
 
 

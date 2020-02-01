@@ -292,7 +292,7 @@ export class MainWindowEventListener {
             }        
             if (exporter) {
                 Logger.debug(`export to format ${request.data.format}`)
-                exporter.export($this.settingsHandler, dataProvider)
+                exporter.export($this.settingsHandler, dataProvider, request.data.options)
                 .then(path => $this.respond(request.identifier, ResponseType.SUCCESS, path))
                 .catch(err => $this.respond(request.identifier, ResponseType.ERROR_GENERAL, err));
             }    else {

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {BaseEntity, ENTITY_TYPE} from '../entity/_baseEntity'
+import { ExportSettings } from '../components/export/export.settings.model';
 
 /*
 export enum STATE {
@@ -88,6 +89,7 @@ class VISIBLITY_STATE {
 export class StateService {
   
   constructor() { this.getOrCreateState(); }
+
 
 
   showItem(type: ENTITY_TYPE, displayItem: DISPLAY_ITEM) {
