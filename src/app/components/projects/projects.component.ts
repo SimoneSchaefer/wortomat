@@ -13,6 +13,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StateService } from '../../services/state.service';
 import { BaseChildEntity } from '../../entity/_baseChildEntity';
 import { ChapterEntity } from '../../entity/ChapterEntity';
+import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-dialog.service';
 
 @Component({
   selector: 'app-projects',
@@ -25,9 +26,10 @@ export class ProjectsComponent extends BaseEntityComponent {
     _baseService: ProjectService, 
     _openProjectService: OpenProjectService, 
     _alertService: AlertService, 
-    _translationService : TranslateService,  
+    private _translationService : TranslateService,  
     _modalService: NgbModal,
-    _stateService: StateService , 
+    _stateService: StateService ,
+    private confirmationDialogService: ConfirmationDialogService,
     private _router : Router) {
     super(_baseService,
       _baseService, 
@@ -35,7 +37,8 @@ export class ProjectsComponent extends BaseEntityComponent {
       _alertService,
       _translationService,
       _modalService,
-      _stateService
+      _stateService,
+      confirmationDialogService
       );
   }
   protected newGroup() : BaseEntity {
@@ -48,6 +51,15 @@ export class ProjectsComponent extends BaseEntityComponent {
   protected entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PROJECTS;
   }
+
+  deleteEntity(entity) {
+    this.confirmationDialogService.confirm(this._translationService.instant("PLEASE_CONFIRM"), this._translationService.instant("REALLY_DELETE"))
+    .then((confirmed) => {
+      if (confirmed) super.deleteEntity(entity);
+    }).catch(() => { console.log('DO NOT DELETE')})    
+  }
+
+  
 
 
   open(project: ProjectEntity) {

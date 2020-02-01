@@ -12,6 +12,7 @@ import { ENTITY_TYPE, BaseEntity } from '../../entity/_baseEntity';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { StateService } from '../../services/state.service';
 import { BaseChildEntity } from '../../entity/_baseChildEntity';
+import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-dialog.service';
 
 @Component({
   selector: 'app-backgrounds',
@@ -26,7 +27,8 @@ export class BackgroundsComponent  extends BaseEntityComponent  {
     _alertService: AlertService, 
     _translationService : TranslateService,
     _modalService: NgbModal,
-    _stateService: StateService
+    _stateService: StateService,
+    _confirmationDialogService: ConfirmationDialogService
     ) {
     super(_groupService, 
       _memberService,
@@ -34,7 +36,8 @@ export class BackgroundsComponent  extends BaseEntityComponent  {
       _alertService,
       _translationService,
       _modalService,
-      _stateService);
+      _stateService,
+      _confirmationDialogService);
   }
 
 

@@ -49,6 +49,8 @@ import { EditorComponent } from './components/editor/editor.component';
 import { WysiwygEditorComponent } from './components/wysiwyg-editor/wysiwyg-editor.component';
 import { EditDetailsComponent } from './components/edit-details/edit-details.component';
 import { StatusIconPipe } from './pipes/status-icon.pipe';
+import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogService } from './components/confirmation-dialog/confirmation-dialog.service';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -76,7 +78,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     EditorComponent,
     WysiwygEditorComponent,
     EditDetailsComponent,
-    StatusIconPipe
+    StatusIconPipe,
+    ConfirmationDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -102,9 +105,10 @@ export function HttpLoaderFactory(http: HttpClient) {
   ],
   entryComponents: [
     WysiwygEditorComponent,
-    EditDetailsComponent
+    EditDetailsComponent,
+    ConfirmationDialogComponent
   ],
-  providers: [ElectronService, AlertService, StateService],
+  providers: [ElectronService, AlertService, StateService, ConfirmationDialogService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

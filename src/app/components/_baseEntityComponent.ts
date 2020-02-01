@@ -11,6 +11,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditDetailsComponent } from './edit-details/edit-details.component';
 import { BaseChildEntity } from '../entity/_baseChildEntity';
 import { StateService, DISPLAY_ITEM, } from '../services/state.service';
+import { ConfirmationDialogService } from './confirmation-dialog/confirmation-dialog.service';
 
 
 export abstract class BaseEntityComponent implements OnInit {
@@ -32,7 +33,8 @@ export abstract class BaseEntityComponent implements OnInit {
       private _alertService: AlertService,
       private _translateService : TranslateService,
       private _modalService: NgbModal,
-      private _stateService: StateService) {
+      private _stateService: StateService,
+      private _confirmationDialogService: ConfirmationDialogService) {
   }
 
   ngOnInit() { 
@@ -115,16 +117,14 @@ export abstract class BaseEntityComponent implements OnInit {
  
   deleteEntity(entity) {
     const $this = this;
-    if (confirm(this._translateService.instant("REALLY_DELETE"))) {
-      let service = this.entityIsParent(entity) ? this._groupService : this._memberService;
-      service.remove(entity.id, function (response) {
-        if (response.responseType == ResponseType.SUCCESS) {
-          $this._loadDelayed(true);         
-        } else {
-          $this._alertService.error(`ERROR_${response.msg}`);
-        }
-      });
-    }
+    let service = this.entityIsParent(entity) ? this._groupService : this._memberService;
+    service.remove(entity.id, function (response) {
+      if (response.responseType == ResponseType.SUCCESS) {
+        $this._loadDelayed(true);         
+      } else {
+        $this._alertService.error(`ERROR_${response.msg}`);
+      }
+    });     
   }
 
   updateOrder(entities: BaseGroupEntity[]) {

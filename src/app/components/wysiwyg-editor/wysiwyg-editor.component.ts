@@ -17,7 +17,6 @@ export class WysiwygEditorComponent {
       charCounterCount: true,
       theme: 'gray',
       pastePlain: true,
-      autofocus: true,
       toolbarButtons: [
         'fontFamily', 'fontSize', 'bold', 'italic', 'underline', 'strikeThrough',
         '|', 'textColor', 'backgroundColor',

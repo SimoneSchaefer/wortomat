@@ -16,6 +16,7 @@ import { CharacterGroupService } from '../../services/electron/character-group.s
 import { CharacterGroupEntity } from '../../entity/CharacterGroupEntity';
 import { LocationGroupService } from '../../services/electron/location-group.service';
 import { LocationGroupEntity } from '../../entity/LocationGroupEntity';
+import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-dialog.service';
 
 export enum DETAILS_EDIT_MODE {
   DETAILS = 'DETAILS',
@@ -63,7 +64,8 @@ export class EditDetailsComponent implements OnInit {
     private _characterService: CharacterService,
     private _characterGroupService: CharacterGroupService,
     private _locationService: LocationService,
-    private _locationGroupService: LocationGroupService) { }
+    private _locationGroupService: LocationGroupService,
+    private _confirmationDialogService: ConfirmationDialogService) { }
 
 
   ngOnInit() {
@@ -94,15 +96,17 @@ export class EditDetailsComponent implements OnInit {
   }
 
   close() {
-    if (confirm(this._translateService.instant("REALLY_CLOSE"))) {
-      this._activeModal.dismiss("dismiss");
-    }
+    this._confirmationDialogService.confirm(this._translateService.instant("PLEASE_CONFIRM"), this._translateService.instant("REALLY_CLOSE"))
+    .then((confirmed) => {
+      if (confirmed) this._activeModal.dismiss("dismiss");
+    }).catch(() => {})   
   }
 
   delete() {
-    if (confirm(this._translateService.instant("REALLY_DELETE"))) {
-      this._activeModal.dismiss("delete");
-    } 
+    this._confirmationDialogService.confirm(this._translateService.instant("PLEASE_CONFIRM"), this._translateService.instant("REALLY_DELETE"))
+    .then((confirmed) => {
+      if (confirmed) this._activeModal.dismiss("delete");
+    }).catch(() => { console.log('DO NOT DELETE')})    
   }
 
   addPlotlinePromise = (name: string) => {

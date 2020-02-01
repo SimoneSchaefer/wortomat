@@ -19,6 +19,7 @@ import { PlotlineEntity } from '../../entity/PlotlineEntity';
 import { CharacterEntity } from '../../entity/CharacterEntity';
 import { LocationEntity } from '../../entity/LocationEntity';
 import { BaseChildEntity } from '../../entity/_baseChildEntity';
+import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-dialog.service';
 
 
 export enum GroupTypes {
@@ -53,11 +54,10 @@ export class PartsComponent extends BaseEntityComponent  {
     _translationService : TranslateService,
     _modalService: NgbModal,
     _stateService: StateService,
+    _confirmationDialogService: ConfirmationDialogService,
     private _plotlineService: PlotlineService,
     private _characterService: CharacterService,
-    private _locationService: LocationService
-
-
+    private _locationService: LocationService,
     ) {
     super(_groupService, 
       _memberService,
@@ -65,7 +65,8 @@ export class PartsComponent extends BaseEntityComponent  {
       _alertService,
       _translationService,
       _modalService,
-      _stateService);
+      _stateService,
+      _confirmationDialogService);
 
 
     let $this = this;
