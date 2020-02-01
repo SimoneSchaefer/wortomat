@@ -33,7 +33,7 @@
   "EXPORT": {
     "OPTIONS_HEADER": "Export Options",
     "FOUND_EXPORTS_HEADER": "Found exports",
-    "INCLUDE": "The export shall include..",
+    "INCLUDE": "Include",
     "NAME": "include name",
     "SUMMARY": "include summary",
     "EXTENDED_SUMMARY": "include extended summary",
@@ -47,12 +47,15 @@
     "TITLE": "Title",
     "SUBTITLE": "Subtitle",
     "ISBN": "ISBN",
-    "PAGE_HEIGHT": "Page height (inch)",
-    "PAGE_WIDTH": "Page width (inch)" ,
-    "PAGE_MARGIN_INNER": "Margin inner (inch)",
-    "PAGE_MARGIN_OUTER": "Margin outer (inch)", 
-    "PAGE_MARGIN_TOP": "Margin top (inch)",
-    "PAGE_MARGIN_BOTTOM": "Margin bottom (inch)"    
+    "PAGE_HEIGHT": "Page height",
+    "PAGE_WIDTH": "Page width" ,
+    "PAGE_MARGIN_INNER": "Margin inner",
+    "PAGE_MARGIN_OUTER": "Margin outer", 
+    "PAGE_MARGIN_TOP": "Margin top",
+    "PAGE_MARGIN_BOTTOM": "Margin bottom",
+    "SIZES": "Page sizes (in inch)",
+    "FORMAT": "Format",
+    "META": "Meta data"
   },
   "PROJECTS" : {
     "HEADER": "Projects",

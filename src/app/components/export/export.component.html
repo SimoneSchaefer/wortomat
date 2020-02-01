@@ -7,83 +7,93 @@
           <div class="card-body">
             <div class="row">
               <div class="col-6">
+                <fieldset>
+                  <legend translate>EXPORT.META</legend>
+                </fieldset>
                 <div class="form-group">
-                  <label for="exampleInputEmail1" translate>EXPORT.AUTHOR</label>
-                  <input type="email" formControlName="author" class="form-control" id="exampleInputEmail1">
+                  <label for="author" translate>EXPORT.AUTHOR</label>
+                  <input type="text" formControlName="author" class="form-control" id="author">
                 </div>
                 <div class="form-group">
-                  <label for="exampleInputEmail1" translate>EXPORT.TITLE</label>
-                  <input type="email" formControlName="title" class="form-control" id="exampleInputEmail1">
-                </div>
-                <!--<div class="form-group">
-                  <label for="exampleInputEmail1" translate>EXPORT.ISBN</label>
-                  <input type="email" formControlName="isbn"  class="form-control" id="exampleInputEmail1">
-                </div>-->
-                <div class="form-group">
-                  <div class="d-flex">
-                    <div class="pr-3">
-                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_HEIGHT</label>
-                      <input type="number" formControlName="pageHeight" class="form-control" id="exampleInputEmail1">
-                    </div>
-                    <div>
-                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_WIDTH</label>
-                      <input type="number" formControlName="pageWidth"  class="form-control" id="exampleInputEmail1">
-                    </div>
-                  </div>                    
-                </div>
-
-
-                <div class="form-group">
-                  <div class="d-flex">
-                    <div class="pr-3">
-                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_INNER</label>
-                      <input type="number" formControlName="marginInner" class="form-control" id="exampleInputEmail1">
-                    </div>
-                    <div>
-                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_OUTER</label>
-                      <input type="number" formControlName="marginOuter" class="form-control" id="exampleInputEmail1">
-                    </div>
-                  </div>                    
-                </div>
-                <div class="form-group">
-                  <div class="d-flex">
-                    <div class="pr-3">
-                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_TOP</label>
-                      <input type="number" formControlName="marginTop" class="form-control" id="exampleInputEmail1">
-                    </div>
-                    <div>
-                      <label for="exampleInputEmail1" translate>EXPORT.PAGE_MARGIN_BOTTOM</label>
-                      <input type="number" formControlName="marginBottom" class="form-control" id="exampleInputEmail1">
-                    </div>
-                  </div>                    
-                </div>
-
+                  <label for="title" translate>EXPORT.TITLE</label>
+                  <input type="text" formControlName="title" class="form-control" id="title">
+                </div> 
+                
+                <fieldset>
+                  <legend translate>EXPORT.INCLUDE</legend>                
+                  <div class="form-group">
+                    <ng-select [multiple]="true" [clearable]="false" [items]="contentOptions" formControlName="include"></ng-select>
+                  </div>
+                </fieldset>
               </div>
+
               <div class="col-6">
+           
+                <fieldset>
+                  <legend translate>EXPORT.FORMAT</legend>
                 <div class="form-group">
-                  <ng-select [multiple]="true" [clearable]="false" [items]="contentOptions" formControlName="include"></ng-select>
-                </div>
-            
-                <div class="form-group">
+                  <label>&nbsp;</label>
+
                   <ng-select [clearable]="false" [items]="formatOptions" formControlName="format"></ng-select>
           
                   <div *ngIf="exportForm.value.format === 'PDFLATEX'">
                     <div class="alert alert-info mt-3">
-                      {{'EXPORT.PDFLATEX_HINT' | translate}}
-                      <div class="small">          
-                        <b>For Ubuntu:</b>sudo apt-get install pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-latex-fonts-extra texlive-lang-german       </div>
+                      <i class="fa fa-exclamation-triangle mr-1"></i>{{'EXPORT.PDFLATEX_HINT' | translate}}
+                      <!--<div class="small">          
+                        <b>For Ubuntu:</b>sudo apt-get install pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-latex-fonts-extra texlive-lang-german       
+                      </div>-->
                     </div>
                   </div>  
                 </div>
+                </fieldset>
+
+                <fieldset *ngIf="exportForm.value.format === 'PDFLATEX'">
+                  <legend translate>EXPORT.SIZES</legend>
+                  <div class="form-group">
+                    <div class="d-flex">
+                      <div class="pr-3">
+                        <label for="pageHeight" translate>EXPORT.PAGE_HEIGHT</label>
+                        <input type="number" formControlName="pageHeight" class="form-control" id="pageHeight">
+                      </div>
+                      <div>
+                        <label for="pageWidth" translate>EXPORT.PAGE_WIDTH</label>
+                        <input type="number" formControlName="pageWidth"  class="form-control" id="pageWidth">
+                      </div>
+                    </div>                    
+                  </div>
+  
+  
+                  <div class="form-group">
+                    <div class="d-flex">
+                      <div class="mr-3">
+                        <label for="marginInner" translate>EXPORT.PAGE_MARGIN_INNER</label>
+                        <input type="number" formControlName="marginInner" class="form-control" id="marginInner">
+                      </div>
+                      <div class="mr-3">
+                        <label for="marginOuter" translate>EXPORT.PAGE_MARGIN_OUTER</label>
+                        <input type="number" formControlName="marginOuter" class="form-control" id="v">
+                      </div>
+                      <div class="mr-3">
+                        <label for="marginTop" translate>EXPORT.PAGE_MARGIN_TOP</label>
+                        <input type="number" formControlName="marginTop" class="form-control" id="marginTop">
+                      </div>
+                      <div>
+                        <label for="marginBottom" translate>EXPORT.PAGE_MARGIN_BOTTOM</label>
+                        <input type="number" formControlName="marginBottom" class="form-control" id="marginBottom">
+                      </div>
+                    </div>                    
+                  </div>
+                </fieldset>
             
-                <div class="formgroup mt-3">
-                  <button class="btn btn-primary" type="submit" [disabled]="processing">
-                    <i class="fas fa-cog fa-spin" *ngIf="processing"></i>
-                    {{'EXPORT.EXPORT' | translate}}
-                  </button>
-                </div>
+
               </div>
-            </div>  
+            </div> 
+            <div class="formgroup mt-3 text-right">
+              <button class="btn btn-primary" type="submit" [disabled]="processing">
+                <i class="fas fa-cog fa-spin" *ngIf="processing"></i>
+                {{'EXPORT.EXPORT' | translate}}
+              </button>
+            </div>
           </div> 
         </div>
   
