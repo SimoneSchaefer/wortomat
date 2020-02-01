@@ -54,6 +54,7 @@ export enum Channel {
     SETTINGS_STORED =   "settings-stored",
     EXPORT =   "export",
     LOAD_EXPORTS =   "load-exports",
+    OPEN_EXPORT =   "open-exports",
     OPEN_PROJECT = "open-project",
     CLOSE_PROJECT = "close-project",
     CREATE_OR_UPDATE="create-or-update",

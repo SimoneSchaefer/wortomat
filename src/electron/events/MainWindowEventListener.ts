@@ -1,4 +1,4 @@
-import { EventEmitter } from 'electron';
+import { EventEmitter, shell } from 'electron';
 import { Logger } from '../services/Logger';
 import { UiMessageHandler } from '../services/UiMessageHandler';
 import { SettingsProvider } from '../services/SettingsProvider';
@@ -13,7 +13,6 @@ import { HTMLExporter } from '../export/HTMLExporter';
 import { PDFLatexExporter } from '../export/PDFLatexExporter';
 
 var fs = require('fs');
-
 /**
  * This class handles communication between web-frontend
  * and electron-backend. 
@@ -39,6 +38,7 @@ export class MainWindowEventListener {
         this.registerUpdateOrderListener();
         this.registerExportSettingsListener();
         this.registerLoadExistingExportsListener();
+        this.registerOpenExportListener();
     }
 
 
@@ -252,6 +252,17 @@ export class MainWindowEventListener {
         this.emitter.on(Channel.LOAD_EXPORTS, function (evt: any, request: MessageRequest) {
             const filenames = fs.readdirSync($this.settingsHandler.settings.exportpath);
             $this.respond(request.identifier, ResponseType.SUCCESS, "", {filenames: filenames})
+        });
+    }
+
+
+
+    private registerOpenExportListener(): void {
+        let $this = this;
+        this.emitter.on(Channel.OPEN_EXPORT, function (evt: any, request: MessageRequest) {
+            shell.openItem($this.settingsHandler.settings.exportpath + '/' + request.data.filename);
+            //const filenames = fs.readdirSync($this.settingsHandler.settings.exportpath);
+            //$this.respond(request.identifier, ResponseType.SUCCESS, "", {filenames: filenames})
         });
     }
 

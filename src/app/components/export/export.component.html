@@ -1,47 +1,85 @@
-<div class="main-wrapper">
   <div class="container">
+    <div class="row">
+       <div class="col-12">
+        <div class="card">
+          <div class="card-header" translate>EXPORT.OPTIONS_HEADER</div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-6">
+                <form [formGroup]="exportForm" (ngSubmit)="onSubmit()">
 
-    <div class="exports">
-      <ul>
-        <li *ngFor="let export of existingExports">{{export}}</li>
-      </ul>
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input formControlName="includeName"  type="checkbox" class="custom-control-input" id="customCheck1">
+                      <label class="custom-control-label" for="customCheck1" translate>EXPORT.NAME</label>
+                    </div>
+                  </div>
+            
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input formControlName="includeSummary"  type="checkbox" class="custom-control-input" id="customCheck2">
+                      <label class="custom-control-label" for="customCheck2" translate>EXPORT.SUMMARY</label>
+                    </div>
+                  </div>
+            
+            
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input formControlName="includeDetailedSummary"  type="checkbox" class="custom-control-input" id="customCheck3">
+                      <label class="custom-control-label" for="customCheck3" translate>EXPORT.EXTENDED_SUMMARY</label>
+                    </div>
+                  </div>
+            
+                  <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                      <input formControlName="includeContent"  type="checkbox" class="custom-control-input" id="customCheck4">
+                      <label class="custom-control-label" for="customCheck4" translate>EXPORT.CONTENT</label>
+                    </div>
+                  </div>  
+            
+                  <div class="formgroup">
+                    <ng-select [clearable]="false" [items]="formatOptions" formControlName="format"></ng-select>
+            
+                    <div *ngIf="exportForm.value.format === 'PDFLATEX'">
+                      <div class="alert alert-info mt-3">
+                        {{'EXPORT.PDFLATEX_HINT' | translate}}
+                        <div class="small">          
+                          <b>For Ubuntu:</b>sudo apt-get install pandoc texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-latex-fonts-extra texlive-lang-german       </div>
+                      </div>
+                    </div>  
+                  </div>
+            
+                  <div class="formgroup mt-3">
+                    <button class="btn btn-primary" type="submit" [disabled]="processing">
+                      <i class="fas fa-cog fa-spin" *ngIf="processing"></i>
+                      {{'EXPORT.EXPORT' | translate}}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+  
+          </div>
+ 
+        </div>
+  
+      </div>
     </div>
 
-    <form [formGroup]="exportForm" (ngSubmit)="onSubmit()">
-<div class="formgroup">
-    <input formControlName="includeName" type="checkbox"> Include name
-  </div>
-
-  <div class="formgroup">
-    <input formControlName="includeSummary"  type="checkbox"> Include summary
-  </div>
-
-  <div class="formgroup">
-    <input formControlName="includeDetailedSummary"  type="checkbox"> Include detailed summary
-  </div>
-
-  <div class="formgroup">
-    <input formControlName="includeContent"  type="checkbox"> Include content
-  </div>
 
 
-  <div class="formgroup">
-    <select formControlName="format"> 
-      <option *ngFor="let format of formatOptions" [value]="format">{{format}}</option>
-    </select>
-    (*) NOTE that PDFLATEX requires latex, pandoc and memoir. <br >
-    Installation for UBUNTU: <br>
-    sudo apt-get install pandoc<br>
-    sudo apt-get install texlive-latex-base<br >
-    sudo apt-get install texlive-latex-recommended<br />
-    sudo apt-get install texlive-latex-extra<br />
-    sudo apt-get install texlive-latex-fonts-extra<br />
-    sudo apt-get install texlive-lang-german
-    
+    <div class="exports mt-3">
+      <div class="card">
+        <div class="card-header" translate>EXPORT.FOUND_EXPORTS_HEADER</div>
+        <div class="card-body">
+          <div *ngIf="!existingExports.length" class="hint" translate>EXPORT.NO_EXPORTS</div>
+          <ul class="list-group  list-group-flush" *ngIf="existingExports.length">
+            <li  class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let filename of existingExports">
+              {{filename}}
+              <button class="btn btn-link" (click)="openExport(filename)"><i class="fa fa-folder-open"></i></button>
+            </li>
+          </ul>
+          </div>
+        </div>
+    </div>  
   </div>
-
-  <button class="btn btn-primary" type="submit" >Export</button>
-    </form>
-  
-  </div>
-</div>

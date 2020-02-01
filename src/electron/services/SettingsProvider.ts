@@ -95,7 +95,7 @@ export class SettingsProvider {
     }
 
     public generateNewExportFilePath(ending: string) {
-        return this.settings.exportpath + "/Export_" + dateFormat(new Date(), "yyyy-mm-dd-h-MM-ss") + "." + ending;
+        return this.settings.exportpath + "/Export_" + dateFormat(new Date(), "yyyy-mm-dd-HH-MM-ss") + "." + ending;
     }
 
 

@@ -47,6 +47,8 @@ export class PDFLatexExporter implements Exporter {
                         }
                         let fileEndingsToDelete = ['tex', 'html', 'log', 'aux', 'out'];
                         fileEndingsToDelete.forEach(end => fs.unlinkSync(fileNamePDF.replace('.pdf', `.${end}`)));
+                        fs.unlinkSync(`${settingsHandler.settings.exportpath}/setup.tex`)
+                        fs.unlinkSync(`${settingsHandler.settings.exportpath}/setup.aux`)
                         resolve(fileNamePDF);
                     });         
                 });

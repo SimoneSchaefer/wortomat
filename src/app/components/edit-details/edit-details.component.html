@@ -43,7 +43,7 @@
         <div class="form form-group w-100 p-1" *ngIf="draft['plotlines']">
           <div><small class="form-text text-muted" translate>PLOTLINES.HEADER</small></div>
           <ng-select [multiple]="true" [items]="availablePlotlines"  bindLabel="name" [addTag]="addPlotlinePromise"
-          [closeOnSelect]="false" [(ngModel)]="draft.plotlines" [loading]="loading === 'plotlines'">
+          [(ngModel)]="draft.plotlines" [loading]="loading === 'plotlines'">
           </ng-select>
         </div> 
      
@@ -51,7 +51,7 @@
         <div class="form form-group w-100 p-1" *ngIf="draft['characters']">
           <div><small class="form-text text-muted" translate>CHARACTERS.HEADER</small></div>
           <ng-select [multiple]="true" [items]="availableCharacters"  bindLabel="name"  [addTag]="addCharactersPromise"
-            [closeOnSelect]="true" [(ngModel)]="draft.characters" [loading]="loading === 'characters'">
+            [(ngModel)]="draft.characters" [loading]="loading === 'characters'">
           </ng-select>
         </div> 
      
@@ -59,7 +59,7 @@
         <div class="form form-group w-100 p-1" *ngIf="draft['locations']">
           <div><small class="form-text text-muted" translate>LOCATIONS.HEADER</small></div>
           <ng-select [multiple]="true" [items]="availableLocations"  bindLabel="name" [addTag]="addLocationsPromise"
-            [closeOnSelect]="false" [(ngModel)]="draft.locations">
+             [(ngModel)]="draft.locations">
           </ng-select>
         </div> 
     

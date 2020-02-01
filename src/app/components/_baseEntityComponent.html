@@ -11,7 +11,7 @@
           </button>
           </div>
           <div>
-          <ng-select [multiple]="true" [closeOnSelect]="false" [(ngModel)]="selectedDisplayContent" (clear)="resetView()" (add)="toggleView($event)" (remove)="toggleView($event)">
+          <ng-select [clearable]="false" [multiple]="true" [(ngModel)]="selectedDisplayContent" (clear)="resetView()" (add)="toggleView($event)" (remove)="toggleView($event)">
             <ng-option [value]="'summary'">{{'SUMMARY' | translate}}</ng-option>
             <ng-option [value]="'extended_summary'">{{'EXTENDED_SUMMARY'  | translate}}</ng-option>
             <ng-option [value]="'content'">{{'CONTENT' | translate}}</ng-option>

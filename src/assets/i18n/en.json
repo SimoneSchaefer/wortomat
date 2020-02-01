@@ -30,6 +30,20 @@
       "missing_export_path": "This did not work. Please enter an export path"
     }
   },
+  "EXPORT": {
+    "OPTIONS_HEADER": "Export Options",
+    "FOUND_EXPORTS_HEADER": "Found exports",
+    "INCLUDE": "The export shall include..",
+    "NAME": "include name",
+    "SUMMARY": "include summary",
+    "EXTENDED_SUMMARY": "include extended summary",
+    "CONTENT": "include content",
+    "PDFLATEX_HINT": "requires latex, pandoc and memoir" ,
+    "SUCCESS": "Your novel has been exported!",
+    "ERROR": "Ups, that did not work :(",
+    "NO_EXPORTS": "No exports found",
+    "EXPORT": "Export now"
+  },
   "PROJECTS" : {
     "HEADER": "Projects",
     "NEW" : "New Project",
