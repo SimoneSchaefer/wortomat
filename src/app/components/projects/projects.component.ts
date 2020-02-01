@@ -14,6 +14,7 @@ import { StateService } from '../../services/state.service';
 import { BaseChildEntity } from '../../entity/_baseChildEntity';
 import { ChapterEntity } from '../../entity/ChapterEntity';
 import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-dialog.service';
+import { BaseGroupEntity } from '../../entity/_baseGroupEntity';
 
 @Component({
   selector: 'app-projects',
@@ -41,7 +42,7 @@ export class ProjectsComponent extends BaseEntityComponent {
       confirmationDialogService
       );
   }
-  protected newGroup() : BaseEntity {
+  protected newGroup() : BaseGroupEntity {
     return new ProjectEntity();
   }
   protected newMember() : BaseChildEntity {

@@ -1,5 +1,12 @@
 <div class="main-wrapper">
   <div class="container">
+
+    <div class="exports">
+      <ul>
+        <li *ngFor="let export of existingExports">{{export}}</li>
+      </ul>
+    </div>
+
     <form [formGroup]="exportForm" (ngSubmit)="onSubmit()">
 <div class="formgroup">
     <input formControlName="includeName" type="checkbox"> Include name

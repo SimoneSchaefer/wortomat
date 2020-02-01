@@ -16,7 +16,7 @@ import { ConfirmationDialogService } from './confirmation-dialog/confirmation-di
 
 export abstract class BaseEntityComponent implements OnInit {
 
-  protected abstract newGroup() : BaseEntity;
+  protected abstract newGroup() : BaseGroupEntity;
   protected abstract newMember() : BaseChildEntity;
   protected abstract entityType() : ENTITY_TYPE;
 
@@ -103,6 +103,7 @@ export abstract class BaseEntityComponent implements OnInit {
 
   addNewGroup() {
     let newGroup = this.newGroup();
+    newGroup.children = [];
     this.editDetails(newGroup);
   }
 

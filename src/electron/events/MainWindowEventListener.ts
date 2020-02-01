@@ -1,25 +1,18 @@
 import { EventEmitter } from 'electron';
 import { Logger } from '../services/Logger';
-//import { LoaderFactory } from '../loader/LoaderFactory';
 import { UiMessageHandler } from '../services/UiMessageHandler';
-/*import { ExportDataProvider } from '../export/ExportDataProvider';
-import { Exporter } from '../export/Exporter';
-import { PDFExporter } from '../export/PDFExporter';
-import {PDFHTMLExporter } from '../export/PDFHTMLExporter';
-import {PDFLatexExporter } from '../export/PDFLatexExporter';
-//import { ChapterLoader } from '../loader/ChapterLoader';*/
 import { SettingsProvider } from '../services/SettingsProvider';
 import { DBService } from '../services/DBService';
 import { Initializer } from './Initializer';
-import { MessageRequest, MessageResponse, Channel, ResponseType, FileFormat } from "../../app/message/Message"
+import { MessageRequest, MessageResponse, Channel, ResponseType } from "../../app/message/Message"
 import { LoaderFactory } from '../services/loader/LoaderFactory';
 import { PartLoader } from '../services/loader/PartLoader';
 import { ExportDataProvider } from '../export/ExportDataProvider';
 import { Exporter } from '../export/Exporter';
 import { HTMLExporter } from '../export/HTMLExporter';
 import { PDFLatexExporter } from '../export/PDFLatexExporter';
-//import { PartLoader } from '../loader/PartLoader';
 
+var fs = require('fs');
 
 /**
  * This class handles communication between web-frontend
@@ -45,6 +38,7 @@ export class MainWindowEventListener {
         this.registerCloseProjectListener();
         this.registerUpdateOrderListener();
         this.registerExportSettingsListener();
+        this.registerLoadExistingExportsListener();
     }
 
 
@@ -227,10 +221,6 @@ export class MainWindowEventListener {
 
 
 
-
-
-
-
     /** 
     * Called to delete an entity with a specific id
     * 
@@ -257,6 +247,13 @@ export class MainWindowEventListener {
 
 
 
+    private registerLoadExistingExportsListener(): void {
+        let $this = this;
+        this.emitter.on(Channel.LOAD_EXPORTS, function (evt: any, request: MessageRequest) {
+            const filenames = fs.readdirSync($this.settingsHandler.settings.exportpath);
+            $this.respond(request.identifier, ResponseType.SUCCESS, "", {filenames: filenames})
+        });
+    }
 
 
 

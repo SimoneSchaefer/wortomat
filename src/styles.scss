@@ -76,6 +76,21 @@ html, body {
 .btn-group .btn-primary {
   border-color: #0062cc;
 }
+
+.modal-backdrop { z-index:1050; }
+
+
+.confirmation-modal {
+
+  .modal-backdrop {
+    z-index: 1000001 !important;
+  }
+
+  .modal {
+    margin: 30vh auto;
+    z-index: 1000002 !important;
+  }
+}
   
 
 .wrapper {

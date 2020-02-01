@@ -18,10 +18,19 @@ export class ExportComponent implements OnInit {
   private error : string;
   private processing: boolean;
   exportForm : FormGroup;
+  existingExports = [];
   constructor(private electronService : ElectronService, private openProjectService : OpenProjectService, private formBuilder : FormBuilder) { }
 
   ngOnInit() {
     this.exportForm = this.createFormGroup();
+
+    let $this = this;
+    this.electronService.send(new MessageRequest(Channel.LOAD_EXPORTS, function (evt, response: MessageResponse) {
+      if (response.responseType === ResponseType.SUCCESS) {
+        $this.existingExports = response.data.filenames;
+      }
+    }));
+
   }
 
   createFormGroup() {
