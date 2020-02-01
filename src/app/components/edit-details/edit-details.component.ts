@@ -29,6 +29,7 @@ export enum DETAILS_EDIT_MODE {
 })
 export class EditDetailsComponent implements OnInit {
   DETAILS_EDIT_MODE = DETAILS_EDIT_MODE;
+  draft: BaseEntity;
   private _baseEntity : BaseEntity;
   private _title: string;
   private _entityType : string;
@@ -86,6 +87,9 @@ export class EditDetailsComponent implements OnInit {
   }
 
   save() {
+    for (const property in this.draft) {
+      this.baseEntity[property] = this.draft[property];
+    }
     this._activeModal.close(this.baseEntity);
   }
 
@@ -186,7 +190,10 @@ export class EditDetailsComponent implements OnInit {
   set editorOptions(options: any) {this._editorOptions = options;};
 
   get baseEntity() {return this._baseEntity}
-  set baseEntity(baseEntity: BaseEntity) { this._baseEntity = baseEntity}
+  set baseEntity(baseEntity: BaseEntity) { 
+    this._baseEntity = baseEntity;
+    this.draft = Object.assign({}, this.baseEntity);
+  }
 
   get entityType() { return this._entityType;}
   set entityType(entityType: string) {this._entityType = entityType;}
