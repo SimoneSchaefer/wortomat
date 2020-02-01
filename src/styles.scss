@@ -43,29 +43,40 @@ html, body {
 
 .ng-select .ng-select-container {
   height: 38px !important;
-}
 
-.ng-select.ng-select-multiple .ng-select-container .ng-value-container {
-  padding-top: 2px !important;
-  padding-left: 2px !important;
-  padding-bottom: 2px !important;
+  .ng-value-container {
+    padding-top: 2px !important;
+    padding-left: 2px !important;
+    padding-bottom: 2px !important;
+
+    .ng-input>input {
+      width: 2em !important;
+    }
   
+    .ng-value {
+      font-size: 0.8em;
+      border: 0px solid #d2d2d2;
+      padding: 0.3em 0;
+      margin-bottom: 0 !important;
+      margin-right: 2px !important;
+    
+      .ng-value-label {
+        padding: 1px 6px 1px 2px !important;
+      }
+    
+      .ng-value-icon.left {
+        border-right-width: 0px !important;
+        padding: 0px 1px 0 5px !important;
+      }
+    }
+    
+  }
 }
 
-.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value .ng-value-icon.left {
-  border-right-width: 0px !important;
-}
 
-.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
-  font-size: 8em;
-  border: 1px solid #d2d2d2;
-  padding: 0.3em 0;
-  margin-bottom: 0 !important;
-}
 
-.ng-select .ng-select-container .ng-value-container .ng-input>input {
-  width: 2em !important;
-}
+
+
 .container {
   margin-top : 5em;
 }
