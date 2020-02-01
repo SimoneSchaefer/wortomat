@@ -117,15 +117,19 @@ export abstract class BaseEntityComponent implements OnInit {
 
  
   deleteEntity(entity) {
-    const $this = this;
-    let service = this.entityIsParent(entity) ? this._groupService : this._memberService;
-    service.remove(entity.id, function (response) {
-      if (response.responseType == ResponseType.SUCCESS) {
-        $this._loadDelayed(true);         
-      } else {
-        $this._alertService.error(`ERROR_${response.msg}`);
-      }
-    });     
+    if (this._entities.length === 1 && this.entityIsParent(entity)) {
+      this._alertService.error('DELETE_LAST_NOT_ALLOWED');
+    } else {
+      const $this = this;
+      let service = this.entityIsParent(entity) ? this._groupService : this._memberService;
+      service.remove(entity.id, function (response) {
+        if (response.responseType == ResponseType.SUCCESS) {
+          $this._loadDelayed(true);         
+        } else {
+          $this._alertService.error(`ERROR_${response.msg}`);
+        }
+      });   
+    }  
   }
 
   updateOrder(entities: BaseGroupEntity[]) {

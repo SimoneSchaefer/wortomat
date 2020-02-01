@@ -207,6 +207,7 @@
   "EXTENDED_SUMMARY": "Abstract",
   "CONTENT": "Content",
   "DROP_SOMETHING": "Drop something here...",
+  "DELETE_LAST_NOT_ALLOWED": "You can't delete the last group...",
   "STATUS": {
     "STATUS": "Status",
     "0": "TODO",

@@ -15,6 +15,11 @@ import { BackgroundGroupEntity } from "../../app/entity/BackgroundGroupEntity";
 import { BackgroundEntity } from "../../app/entity/BackgroundEntity";
 import { PlotlineGroupEntity } from "../../app/entity/PlotlineGroupEntity";
 import { PlotlineEntity } from "../../app/entity/PlotlineEntity";
+import { LoaderFactory } from "./loader/LoaderFactory";
+import { ENTITY_TYPE } from "../../app/entity/_baseEntity";
+import { DataType } from "../../app/message/Message";
+import { BaseGroupEntity } from "../../app/entity/_baseGroupEntity";
+import { Data } from "@angular/router";
 
 
 export class DBService {
@@ -34,7 +39,7 @@ export class DBService {
         let dbPath = dbpathAndName;
         let name =  "main";
         let shouldSync = this.shouldSync(dbPath);
-        return DBService.createConn(dbPath, name, [ProjectEntity], shouldSync);
+        return DBService.createConn(dbPath, name, [ProjectEntity], shouldSync, null);
     }
 
     createConnection(dbName? : string): Promise<Connection> {
@@ -60,20 +65,12 @@ export class DBService {
                 return connection.connect();
             }
         } else {
-            const connection  = DBService.createConn(dbPath, name, entities, shouldSync);
-            /*return createConnection({
-                name : name,
-                type: "sqlite",
-                database: dbPath,
-                entities: entities,    
-                synchronize: shouldSync,
-                logging: true
-            });*/
-            return Promise.resolve(connection);
+            const connection  = DBService.createConn(dbPath, name, entities, shouldSync, this);
+             return Promise.resolve(connection);
         } 
     }
 
-    static async createConn(dbPath: string, name: string, entities, shouldSync: boolean) {
+    static async createConn(dbPath: string, name: string, entities, shouldSync: boolean, dbHandler: DBService) {
         const connection = await createConnection({
             name : name,
             type: "sqlite",
@@ -82,6 +79,22 @@ export class DBService {
             synchronize: shouldSync,
             logging: true
         });
+        if (shouldSync && dbHandler) {
+            let loader = LoaderFactory.getLoader(DataType.PARTS, name, dbHandler);
+            await loader.createOrUpdate(new PartEntity());
+            
+            loader = LoaderFactory.getLoader(DataType.CHARACTER_GROUPS, name, dbHandler);
+            await loader.createOrUpdate(new CharacterGroupEntity());
+
+            loader = LoaderFactory.getLoader(DataType.PLOTLINE_GROUPS, name, dbHandler);
+            await loader.createOrUpdate(new PlotlineGroupEntity());
+
+            loader = LoaderFactory.getLoader(DataType.BACKGROUND_GROUPS, name, dbHandler);
+            await loader.createOrUpdate(new BackgroundGroupEntity());
+
+            loader = LoaderFactory.getLoader(DataType.LOCATION_GROUPS, name, dbHandler);
+            await loader.createOrUpdate(new LocationGroupEntity());
+        } 
         return connection;
     }
 
