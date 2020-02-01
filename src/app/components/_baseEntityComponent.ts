@@ -8,7 +8,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { BaseGroupEntity } from '../entity/_baseGroupEntity';
 import { DisplayOptions } from './vertical-bar/vertical-bar.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { WysiwygEditorComponent } from './wysiwyg-editor/wysiwyg-editor.component';
 import { EditDetailsComponent } from './edit-details/edit-details.component';
 import { BaseChildEntity } from '../entity/_baseChildEntity';
 import { StateService, DISPLAY_ITEM, } from '../services/state.service';
@@ -83,17 +82,6 @@ export abstract class BaseEntityComponent implements OnInit {
     });
   }
 
-  continueWriting(entity) : void {
-    this.selectedEntity = entity;
-    const modalRef = this._modalService.open(WysiwygEditorComponent, {size: 'lg', backdrop: 'static'});
-    modalRef.componentInstance.content = this.selectedEntity.notes;
-    modalRef.componentInstance.title = this.selectedEntity.name;
-    modalRef.result.then(content => {
-      this.selectedEntity.notes = content;
-      this.updateMember(this._selectedEntity);
-    }).catch((error) => {if (error !== 'dismiss') this.alertService.error('SAVE_ERROR')});
-  }
-
   entityIsParent(entity) {
     return entity && 'children' in entity;
   }
@@ -104,21 +92,22 @@ export abstract class BaseEntityComponent implements OnInit {
   }  
 
   updateGroup(group : BaseGroupEntity) : void {
-    this.save(this._groupService, group, this.entities);
+    this.save(this._groupService, group);
   }
 
   updateMember(member : BaseEntity) : void {
-    this.save(this._memberService, member, null, 'CHILD_');
+    this.save(this._memberService, member, 'CHILD_');
   }
 
   addNewGroup() {
-    this.save(this._groupService, this.newGroup(), this.entities);
+    let newGroup = this.newGroup();
+    this.editDetails(newGroup);
   }
 
   addNewMember(parentEntity : BaseGroupEntity) {
     let newMember = this.newMember();
     newMember.parent = parentEntity;
-    this.save(this._memberService, newMember, parentEntity.children, 'CHILD_');
+    this.editDetails(newMember);    
   }
 
   select(entity : BaseEntity) { this.selectedEntity = entity; }
@@ -194,7 +183,7 @@ export abstract class BaseEntityComponent implements OnInit {
     return content;
   }
 
-  private save(baseService : BaseService, newEntity : BaseEntity, entities : BaseEntity[], prefix : string = '') {
+  private save(baseService : BaseService, newEntity : BaseEntity, prefix : string = '') {
     let $this = this;
     let newElement = (newEntity.id) ? false : true;
     if (newElement) {
@@ -203,7 +192,7 @@ export abstract class BaseEntityComponent implements OnInit {
     baseService.save(newEntity, function(response) {
       if (response.responseType === ResponseType.SUCCESS) {
         $this._selectedEntity = response.data.entity;
-        $this._loadDelayed(false, newElement ? $this.editDetails : null);                
+        $this._loadDelayed(false);                
       } else {
         $this._alertService.error($this.entityType().toUpperCase() + "."+prefix+"UNTITLED");
       }
