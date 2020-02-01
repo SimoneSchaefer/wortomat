@@ -37,12 +37,6 @@ export class PeopleComponent extends BaseEntityComponent  {
       _stateService);
   }
 
-  protected displayOptions() : DisplayOptions {
-    return {
-      showImage: true
-    };
-  } 
-
   protected newGroup() : BaseGroupEntity {
     let group = new CharacterGroupEntity();
     group.children = [];

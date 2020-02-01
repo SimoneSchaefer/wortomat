@@ -43,13 +43,6 @@ export class LocationsComponent  extends BaseEntityComponent  {
       _stateService);
   }
 
-  protected displayOptions() : DisplayOptions {
-    return {
-      showImage: true
-    };
-  } 
-
-
   protected newGroup() : BaseGroupEntity {
     return new LocationGroupEntity();
   }
