@@ -49,7 +49,7 @@ export class BackgroundsComponent  extends BaseEntityComponent  {
   protected newMember() : BaseChildEntity {
     return new BackgroundEntity();
   }
-  protected entityType() : ENTITY_TYPE {
+  entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.BACKGROUNDS;
   }
 

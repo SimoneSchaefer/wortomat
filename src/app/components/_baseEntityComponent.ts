@@ -18,7 +18,7 @@ export abstract class BaseEntityComponent implements OnInit {
 
   protected abstract newGroup() : BaseGroupEntity;
   protected abstract newMember() : BaseChildEntity;
-  protected abstract entityType() : ENTITY_TYPE;
+  abstract entityType() : ENTITY_TYPE;
 
   selectedDisplayContent: Array<DISPLAY_ITEM> = [];
   loading = false;

@@ -47,7 +47,7 @@ export class PlotlinesComponent  extends BaseEntityComponent  {
   protected newMember() : BaseChildEntity {
     return new PlotlineEntity();
   }
-  protected entityType() : ENTITY_TYPE {
+  entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PLOTLINES;
   }
 }

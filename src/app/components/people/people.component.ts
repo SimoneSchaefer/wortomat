@@ -49,7 +49,7 @@ export class PeopleComponent extends BaseEntityComponent  {
   protected newMember() : BaseChildEntity {
     return new CharacterEntity();
   }
-  protected entityType() : ENTITY_TYPE {
+  entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.CHARACTERS;
   }
 }

@@ -13,11 +13,11 @@ import { StateService } from '../../services/state.service';
   styleUrls: ['./export.component.scss']
 })
 export class ExportComponent implements OnInit {
-  private selectedContentOption: string;
-  private selectedFormatOption: string;
-  private contentOptions = ["title", "summary", "extended_summary", "content"];
-  private formatOptions = [ExportFormat.HTML, ExportFormat.PDFLATEX];
-  private processing: boolean;
+  selectedContentOption: string;
+  selectedFormatOption: string;
+  contentOptions = ["title", "summary", "extended_summary", "content"];
+  formatOptions = [ExportFormat.HTML, ExportFormat.PDFLATEX];
+  processing: boolean;
   exportForm : FormGroup;
   existingExports = [];
   constructor(private electronService : ElectronService,

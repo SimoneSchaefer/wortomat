@@ -49,7 +49,7 @@ export class ProjectsComponent extends BaseEntityComponent {
     //TODO
     return new ChapterEntity();
   }
-  protected entityType() : ENTITY_TYPE {
+  entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PROJECTS;
   }
 

@@ -100,7 +100,7 @@ export class PartsComponent extends BaseEntityComponent  {
   protected newMember() : BaseChildEntity {
     return new ChapterEntity();
   }
-  protected entityType() : ENTITY_TYPE {
+  entityType() : ENTITY_TYPE {
     return ENTITY_TYPE.PARTS;
   }
 }

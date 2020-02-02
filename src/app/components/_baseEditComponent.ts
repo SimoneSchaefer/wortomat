@@ -7,7 +7,7 @@ import { AlertService } from '../services/alert.service';
 
 
 export abstract class BaseDetailComponent  {
-    protected baseModel: BaseEntity;
+    baseModel: BaseEntity;
 
     protected abstract createNewModel(): BaseEntity;
 
