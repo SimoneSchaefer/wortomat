@@ -209,7 +209,7 @@ export abstract class BaseEntityComponent implements OnInit {
     let $this = this;
     setTimeout(function() {
       $this._load(selectFirst, callback);
-    }, 500);
+    }, 1);
   }
 
   private _load(selectFirst : boolean = false, callback = null): void {
