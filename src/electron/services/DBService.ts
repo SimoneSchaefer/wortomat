@@ -69,6 +69,7 @@ export class DBService {
              return Promise.resolve(connection);
         } 
     }
+    
 
     static async createConn(dbPath: string, name: string, entities, shouldSync: boolean, dbHandler: DBService) {
         const connection = await createConnection({

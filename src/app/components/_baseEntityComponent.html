@@ -1,7 +1,6 @@
-
-<div class="main">
+<div class="content-wrapper">
   <div class="toolbar  bg-white border-bottom pt-0">
-    <div class="row no-gutters">
+    <div class="row no-gutters h-100">
       <div class="col col-5">
         <div class="d-flex p-3">
           <div>
@@ -21,7 +20,12 @@
       </div>
     </div>
   </div>
-    <div class="row h-100 no-gutters ">
+  <ng-template #loadingtemplate>
+    <div class="container">
+      <div class="loader"></div>
+    </div>
+  </ng-template>
+    <div class="row h-100 no-gutters" *ngIf="!loading; else loadingtemplate">
       <nav class="col-5 d-none d-md-block sidebar pt-0 pl-1 pr-1">
         <app-vertical-bar [groupBy]="groupBy" [entities]="entities" [entityType]="entityType()" [selectedEntity]="selectedEntity" [displayOptions]="displayOptions()"
           (select)="select($event)" 
@@ -35,13 +39,13 @@
         <div class="wrapper scrollbar card bg-white px-3">
           <div *ngIf="entities.length===0">
             <div class="alert alert-light" role="alert">
-               <span>{{'' + entityType() + '.NONE_YET_HEADER' | uppercase | translate}}</span>
-               <br >
-               <span>{{'' + entityType() + '.NONE_YET_INFO' | uppercase | translate}}</span>
+                <span>{{'' + entityType() + '.NONE_YET_HEADER' | uppercase | translate}}</span>
+                <br >
+                <span>{{'' + entityType() + '.NONE_YET_INFO' | uppercase | translate}}</span>
             </div>
           </div>
           <div *ngIf="entities.length!==0&&selectedEntity&&selectedEntityIsParent()&&selectedEntity.children.length == 0">           
-           <div class="alert alert-light" role="alert">
+            <div class="alert alert-light" role="alert">
             <span>{{'' + entityType() + '.NO_CHILDREN_YET_HEADER' | uppercase | translate}}</span>
             <br >
             <span>{{'' + entityType() + '.NO_CHILDREN_YET_INFO' | uppercase | translate}}</span> 
@@ -60,4 +64,3 @@
       </main>
   </div>
 </div>
-

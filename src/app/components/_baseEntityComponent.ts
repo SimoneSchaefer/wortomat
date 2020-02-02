@@ -21,6 +21,7 @@ export abstract class BaseEntityComponent implements OnInit {
   protected abstract entityType() : ENTITY_TYPE;
 
   selectedDisplayContent: Array<DISPLAY_ITEM> = [];
+  loading = false;
 
   private _entities = new Array<BaseEntity>();
   private _selectedEntity: BaseEntity;
@@ -213,7 +214,9 @@ export abstract class BaseEntityComponent implements OnInit {
 
   private _load(selectFirst : boolean = false, callback = null): void {
     let $this = this;
+    $this.loading = true;
     $this._groupService.loadAll(function (response) {
+      $this.loading = false;
       if (response.responseType == ResponseType.SUCCESS) {
         $this.entities = response.data.entities ? response.data.entities : new Array();           
         if (selectFirst) { $this._selectFirst(); } 
