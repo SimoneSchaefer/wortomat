@@ -1,18 +1,32 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+  <NovelList 
+    v-bind:novels="novels"
+    @delete-novel="deleteNovel"/>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+import axios from 'axios'
+
+import NovelList from '@/components/novels/NovelList.vue'; 
 
 @Options({
   components: {
-    HelloWorld,
+    NovelList
   },
 })
-export default class Home extends Vue {}
+export default class BooksOverview extends Vue {
+  private novels = [];
+
+  mounted () {
+    axios.get('http://localhost:3000/novels')
+      .then(response => {
+        this.novels = response.data; 
+      });
+  }
+
+  deleteNovel(novel: any) {
+    console.log('Top level says: BE gone!')
+  }
+}
 </script>
