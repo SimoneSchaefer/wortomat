@@ -15,7 +15,7 @@
             </div>        
         </template>
         <template #content>
-            {{ novel.summary }}  
+            <EditableLabel v-bind:value="novel.summary"></EditableLabel>
         </template>
     </Card>
 </template>

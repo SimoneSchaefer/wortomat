@@ -16,6 +16,10 @@
   color: #2c3e50;
 }
 
+.w-100 {
+  width: 100%;
+}
+
 #nav {
   padding: 30px;
 }
