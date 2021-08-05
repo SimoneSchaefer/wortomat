@@ -5,7 +5,7 @@
         </template>
         <template #title>
             <div class="p-d-flex p-jc-between">
-                <EditableLabel v-bind:value="novel.title"></EditableLabel>
+                <EditableLabel v-bind:value="novel.title" @update-label="updateTitle"></EditableLabel>
                 <div>
                     <router-link :to="'/write/' + novel.id + '/chapters'">
                         <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right" ></Button>
@@ -15,7 +15,7 @@
             </div>        
         </template>
         <template #content>
-            <EditableLabel v-bind:value="novel.summary"></EditableLabel>
+            <EditableLabel v-bind:value="novel.summary" @update-label="updateSummary" ></EditableLabel>
         </template>
     </Card>
 </template>
@@ -30,6 +30,21 @@ import EditableLabel from '../shared/EditableLabel.vue';
 })  
 export default class Novel extends Vue {
   @Prop() novel!: any 
+
+  updateTitle(title: string) {
+    this.updateNovelProperty('title', title)
+  }
+
+  updateSummary(summary: string) {
+    this.updateNovelProperty('summary', summary)
+  }
+
+  updateNovelProperty(key: string, value: any) {
+      console.log('update ' + key + ' with value ' + value)
+    const novel = Object.assign({}, this.novel);
+    novel[key] = value;
+    this.$store.dispatch('updateNovel', novel) 
+  }
 
   deleteNovel() {
     this.$confirm.require({

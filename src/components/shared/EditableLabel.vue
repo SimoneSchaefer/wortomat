@@ -1,7 +1,7 @@
 <!-- template -->
 <template>
     <div class="container p-d-flex p-jc-between" v-bind:class=" { editing: editing}">
-        <div class="label" contenteditable="true" v-if="editing">{{ draft }}</div>
+        <div class="label" contenteditable="true" v-if="editing" @input="onInput">{{ value }}</div>
         <div class="label" v-on:dblclick="startEditMode()" contenteditable="false" v-else>{{ value }}</div>
         <div class="options" v-if="editing">
             <Button class="p-button p-button-text" icon="pi pi-check" v-on:click="updateLabel()"></Button>            
@@ -18,7 +18,9 @@
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
-@Options({})  
+@Options({
+    emits: [ 'update-label' ]
+})  
 export default class EditableLabel extends Vue {
   @Prop() value!: string; 
 
@@ -28,6 +30,10 @@ export default class EditableLabel extends Vue {
   startEditMode() {
     this.editing = true;
     this.draft = this.value;
+  }
+
+  onInput(e) {
+      this.draft = e.target.innerText;
   }
 
   cancel() {

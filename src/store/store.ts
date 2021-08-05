@@ -11,6 +11,12 @@ export default new Vuex.Store({
     addNovel(state, novel: Novel) {
       state.novels.push(novel);
     },
+    updateNovel(state, novel: Novel) {
+      const index = state.novels.findIndex(n => novel.id === n.id);
+      if (index > -1) {
+        state.novels.splice(index, 1, novel);
+      }
+    },
     deleteNovel(state, novel: Novel) {
       const index = state.novels.findIndex(n => novel.id === n.id);
       if (index > -1) {
@@ -26,6 +32,11 @@ export default new Vuex.Store({
     addNovel(context, novel: Novel) {
       new NovelService().create(novel).then(result => {
         context.commit('addNovel', result.data);
+      });
+    },
+    updateNovel(context, novel: Novel) {
+      new NovelService().update(novel).then(result => {
+        context.commit('updateNovel', result.data);
       });
     },
 
