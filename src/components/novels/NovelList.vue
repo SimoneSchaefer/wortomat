@@ -28,6 +28,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 import Novel from '@/components/novels/Novel.vue'; 
+import NovelModel from '@/models/Novel.model';
 
 @Options({ 
   components: { 
@@ -39,6 +40,10 @@ export default class NovelList extends Vue {
 
   startAddMode() {
     console.log('start adding')
+    const novel = new NovelModel();
+    novel.id = Date.now();
+    novel.title = 'Ein Buch! ' + Math.random();
+    this.$store.dispatch('addNovel', novel);
   }
 
   @Emit('delete-novel')

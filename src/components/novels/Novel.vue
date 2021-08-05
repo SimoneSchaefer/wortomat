@@ -37,14 +37,9 @@ export default class Novel extends Vue {
         header: 'Confirmation',
         icon: 'pi pi-exclamation-triangle',
         accept: () => {
-            this.confirmDeleteNovel();
+            this.$store.dispatch('deleteNovel', this.novel)
         }
     });
-  }
-
-  @Emit('delete-novel')
-  confirmDeleteNovel() {
-      return this.novel;
   }
 }
 </script>

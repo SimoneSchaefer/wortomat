@@ -1,14 +1,11 @@
 <template>
-  <NovelList 
-    v-bind:novels="novels"
-    @delete-novel="deleteNovel"/>
+  <NovelList v-bind:novels="novels" />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import axios from 'axios'
-
 import NovelList from '@/components/novels/NovelList.vue'; 
+import Novel from '@/models/Novel.model';
 
 @Options({
   components: {
@@ -16,17 +13,12 @@ import NovelList from '@/components/novels/NovelList.vue';
   },
 })
 export default class BooksOverview extends Vue {
-  private novels = [];
-
   mounted () {
-    axios.get('http://localhost:3000/novels')
-      .then(response => {
-        this.novels = response.data; 
-      });
+    this.$store.dispatch('loadNovels', this.$route.params.id)
   }
 
-  deleteNovel(novel: any) {
-    console.log('Top level says: BE gone!')
+  get novels(): Novel[] {
+    return this.$store.state.novels;
   }
 }
 </script>
