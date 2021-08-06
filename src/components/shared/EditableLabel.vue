@@ -54,7 +54,7 @@ export default class EditableLabel extends Vue {
 <style scoped>
 .container {
     background-color: white;
-    padding: 1em 0.5em;
+    /* padding: 1em 0.5em;*/
     text-align: left;
     flex-grow: 1;
     position: relative;

@@ -5,7 +5,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import NovelList from '@/components/novels/NovelList.vue'; 
-import Novel from '@/models/Novel.model';
+import { NovelModel} from '@/models/Novel.model';
 
 @Options({
   components: {
@@ -17,7 +17,7 @@ export default class BooksOverview extends Vue {
     this.$store.dispatch('loadNovels', this.$route.params.id)
   }
 
-  get novels(): Novel[] {
+  get novels(): NovelModel[] {
     return this.$store.state.novels;
   }
 }

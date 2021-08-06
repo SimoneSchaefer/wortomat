@@ -1,9 +1,8 @@
-import BaseModel from "./Base";
+import { BaseModel } from "./Base.model";
 
-export default class Chapter extends BaseModel {
+export class ChapterModel extends BaseModel {
     public title: string;
     public summary: string;
     public extended_summary: string;
     public content: string;   
-
 }

@@ -1,5 +1,5 @@
 <template>
-    <Card>
+    <Card class="h-100">
         <template #header>
             <Galleria :value="novel.covers" :numVisible="5"></Galleria>
         </template>
@@ -8,7 +8,7 @@
                 <EditableLabel v-bind:value="novel.title" @update-label="updateTitle"></EditableLabel>
                 <div>
                     <router-link :to="'/write/' + novel.id + '/chapters'">
-                        <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right" ></Button>
+                        <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right"></Button>
                     </router-link>
                     <Button v-on:click="deleteNovel()" class="p-button-text p-button-danger" icon="pi pi-trash" iconPos="right" title="Delete"></Button>
                 </div>  
@@ -22,14 +22,14 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Emit, Prop } from 'vue-property-decorator';
+import { Prop } from 'vue-property-decorator';
 import EditableLabel from '../shared/EditableLabel.vue';
 
 @Options({
     components: { EditableLabel }
 })  
 export default class Novel extends Vue {
-  @Prop() novel!: any 
+  @Prop() novel!: Novel 
 
   updateTitle(title: string) {
     this.updateNovelProperty('title', title)
@@ -40,7 +40,6 @@ export default class Novel extends Vue {
   }
 
   updateNovelProperty(key: string, value: any) {
-      console.log('update ' + key + ' with value ' + value)
     const novel = Object.assign({}, this.novel);
     novel[key] = value;
     this.$store.dispatch('updateNovel', novel) 
