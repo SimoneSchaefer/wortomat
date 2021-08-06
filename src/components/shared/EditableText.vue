@@ -9,7 +9,7 @@
             <Button label="Save" v-on:click="updateText"></Button>
         </template>
     </Dialog>
-    <div class="content" v-on:dblclick="startEditMode()" v-html="value"></div>
+    <div class="content" v-on:click="startEditMode()" v-html="value"></div>
 </template>
 
 
@@ -68,9 +68,13 @@ export default class EditableLabel extends Vue {
 
 <style scoped>
 .content {
-    text-align: left;
+    text-align: left;   
+    border: 3px solid transparent;
+    padding-top: 0.5em; 
 }
-.btn-group {
-
+div.content:hover {
+    cursor: url('/@assets/cursors/edit.png') 1 30, pointer;
+    background: aliceblue;
+    border: 3px dotted gray;
 }
 </style>

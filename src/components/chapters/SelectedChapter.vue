@@ -3,8 +3,8 @@
         <h1>                
             <EditableLabel v-bind:value="chapter.title" @update-label="updateTitle"></EditableLabel>
         </h1>
-        <EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary"></EditableLabel>
-        <EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary"></EditableLabel>
+        <EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="Summary"></EditableLabel>
+        <EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="Detailed summary"></EditableLabel>
         <EditableText v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>

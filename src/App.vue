@@ -1,20 +1,22 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
   <router-view/>
   <ConfirmDialog></ConfirmDialog>
 </template>
 
 <style>
-#app {
+body {
+  overflow: hidden;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
   height: 100vh;
+}
+.p-scrollpanel-bar {
+    background-color: #1976d2 !important;
+    opacity: 1 !important;
+    transition: background-color .3s !important;
 }
 
 .p-orderlist-list {
@@ -23,6 +25,18 @@
 .p-orderlist-list-item {
   box-shadow: none !important;
 }
+.p-splitter {
+  border-width: 0px !important;
+}
+.p-splitter-gutter {
+  background-color: #1976d2 !important;
+  opacity: 0.6 !important;
+}
+.p-splitter-gutter-handle {
+  background-color: #1976d2 !important;
+  opacity: 1 !important;
+}
+
 .bg-gray {
   background-color: #efefef;
 }
@@ -44,16 +58,4 @@
   height: 100%;
 }
 
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>

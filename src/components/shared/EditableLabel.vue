@@ -1,11 +1,20 @@
 <template>
-    <div class="container p-d-flex p-jc-between" v-bind:class=" { editing: editing}">
-        <div class="label" contenteditable="true" v-if="editing" @input="onInput">{{ value }}</div>
-        <div class="label" v-on:dblclick="startEditMode()" contenteditable="false" v-else>{{ value }}</div>
-        <div class="options" v-if="editing">
-            <Button class="p-button p-button-text" icon="pi pi-check" v-on:click="updateLabel()"></Button>            
-            <Button class="p-button p-button-text" icon="pi pi-times" v-on:click="cancel()"></Button>            
+    <div class="container w-100" v-bind:class=" { editing: editing}">
+        <div class="editing p-d-flex p-jc-between" v-if="editing">
+            <div class="label" contenteditable="true" @input="onInput">{{ value }}</div>
+            <div class="options">
+                <Button class="p-button p-button-text" icon="pi pi-check" v-on:click="updateLabel()"></Button>            
+                <Button class="p-button p-button-text" icon="pi pi-times" v-on:click="cancel()"></Button>            
+            </div>
         </div>
+        <div v-else>
+            <div class="label" v-on:click="startEditMode()" contenteditable="false">
+                <span v-if="value && value.trim().length">{{ value }}</span>
+                <span v-else class="dummy-text">{{ placeHolder }}</span>
+
+            </div>
+        </div>
+        
     </div>
     <!-- TODO add backdrop in main vue for reuse, use state to trigger visibility -->
     <div class="backdrop" v-if="editing"></div>
@@ -21,9 +30,15 @@ import { Emit, Prop } from 'vue-property-decorator';
 })  
 export default class EditableLabel extends Vue {
   @Prop() value!: string; 
+  @Prop() placeHolderTitle!: string; 
 
   private editing = false;
+  private dummyText = 'No content yet. Click to edit';
   private draft: string | null = null;
+
+  get placeHolder() {
+      return (this.placeHolderTitle || '') + ': No content yet. Click to edit';
+  }
 
   startEditMode() {
     this.editing = true;
@@ -59,12 +74,36 @@ export default class EditableLabel extends Vue {
 .container.editing {
     z-index: 101;
 }
+.dummy-text {
+    color: gray;
+    opacity: 0.5;
+}
 div.label {
     flex-grow: 1;
 }
-div[contenteditable="true"] {
+
+div[contenteditable="false"]:hover:after {
+   content: "\f304"; 
+   font-family: "Font Awesome 5 Free";
+   opacity: 0.5;
+   padding-left: 0.5em;
+   font-weight: 900;
+   position: absolute;
+   right:1em; 
+}
+
+div[contenteditable="false"] {
+    border: 3px solid transparent;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+}
+div[contenteditable="false"]:hover {
+    cursor: url('/assets/cursors/edit.png') 1 30, pointer;    
+}
+div[contenteditable="true"],div[contenteditable="false"]:hover {
     background: aliceblue;
     border: 3px dotted gray;
+    padding-top: 0.5em;
 }
 div.backdrop {
     background-color: rgba(0, 0, 0, 0.404);

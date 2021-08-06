@@ -15,6 +15,10 @@ import ConfirmationService from 'primevue/confirmationservice';
 import OrderList from 'primevue/orderlist';
 import Message from 'primevue/message';
 import Editor from 'primevue/editor';
+import ScrollPanel from 'primevue/scrollpanel';
+import TabMenu from 'primevue/tabmenu';
+
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
@@ -37,5 +41,7 @@ const app = createApp(App)
     .component('Dialog', Dialog)
     .component('ConfirmDialog', ConfirmDialog)
     .component('Message', Message)
+    .component('ScrollPanel', ScrollPanel)
+    .component('TabMenu', TabMenu)
 
 app.mount("#app");

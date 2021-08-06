@@ -1,16 +1,20 @@
 <template>
-  <Splitter style="height: 100%">
+  <Splitter style="height: 100%" stateKey="chapters-splitter">
     <SplitterPanel>
-      <ChapterList></ChapterList>     
+      <ScrollPanel style="height: 100%">
+        <ChapterList></ChapterList>     
+      </ScrollPanel>
     </SplitterPanel>
-    <SplitterPanel class="bg-gray">
-      <SelectedChapters></SelectedChapters>
+    <SplitterPanel class="bg-gray h-100">
+      <ScrollPanel style="height: 100%" class="custom">
+        <SelectedChapters></SelectedChapters>
+      </ScrollPanel>
     </SplitterPanel>
   </Splitter>
 </template>
 
 <script lang="ts">
-import { SELECTION_KEYS } from '@/store/store.helper';
+import ScrollPanel from 'primevue/scrollpanel';
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 import { Options, Vue } from 'vue-class-component';
@@ -19,31 +23,7 @@ import ChapterList from '@/components/chapters/ChapterList.vue';
 import SelectedChapters from '@/components/chapters/SelectedChapters.vue';
 
 @Options({
-  components: { Splitter, SplitterPanel, EditableLabel, ChapterList, SelectedChapters }
+  components: { Splitter, SplitterPanel, EditableLabel, ChapterList, SelectedChapters, ScrollPanel }
 })
-export default class Chapters extends Vue {
-  get chapters() {
-    return this.$store.state.currentNovel?.chapters || [];
-  }
-  get currentChapters() {
-    return this.$store.getters.currentChapters;
-  }
-  selectChapters(event)  {
-    const selected = [...event.value];
-    this.$store.dispatch('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: selected });
-  }
-  
-}
+export default class Chapters extends Vue {}
 </script>
-
-<style scoped>
-
-.title {
-  font-weight: bold;
-}
-.item {
-  text-align: left;
-}
-
-
-</style>
