@@ -1,4 +1,3 @@
-<!-- template -->
 <template>
     <div class="container p-d-flex p-jc-between" v-bind:class=" { editing: editing}">
         <div class="label" contenteditable="true" v-if="editing" @input="onInput">{{ value }}</div>
@@ -8,12 +7,11 @@
             <Button class="p-button p-button-text" icon="pi pi-times" v-on:click="cancel()"></Button>            
         </div>
     </div>
+    <!-- TODO add backdrop in main vue for reuse, use state to trigger visibility -->
     <div class="backdrop" v-if="editing"></div>
-    
 </template>
 
 
-<!-- code -->
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
@@ -50,7 +48,6 @@ export default class EditableLabel extends Vue {
 </script>
 
 
-<!-- styles -->
 <style scoped>
 .container {
     background-color: white;

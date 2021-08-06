@@ -5,19 +5,20 @@
         </h1>
         <EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary"></EditableLabel>
         <EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary"></EditableLabel>
-        <div>{{ chapter.content }}</div>
+        <EditableText v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/EditableLabel.vue';
+import EditableText from '@/components/shared/EditableText.vue';
 import { SELECTION_KEYS } from '@/store/store.helper';
 import { Prop } from 'vue-property-decorator';
 import { ChapterModel } from '@/models/Chapter.model';
 
 @Options({
-  components: { EditableLabel }
+  components: { EditableLabel, EditableText }
 })
 export default class SelectedChapters extends Vue {
     @Prop() chapter!: ChapterModel;
@@ -33,6 +34,11 @@ export default class SelectedChapters extends Vue {
     updateExtendedSummary(newValue: string) {
         this.updateChapter({ extended_summary: newValue });   
     }
+
+    updateContent(newValue: string) {
+        this.updateChapter({ content: newValue });   
+    }
+
 
     private updateChapter(overrideValues) {
         this.$store.dispatch('updateItem', { 
