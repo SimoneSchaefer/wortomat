@@ -6,7 +6,7 @@ import { NovelItemService } from './NovelItemService';
 export class ChapterService extends NovelItemService {
     readonly BACKEND_URL = 'http://localhost:3000';
     
-    update(_novelId: number, chapter: ChapterModel) {
+    update(chapter: ChapterModel) {
         return axios.put(`${this.BACKEND_URL}/chapters/${chapter.id}`, chapter)
     } 
 

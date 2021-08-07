@@ -10,11 +10,11 @@ export const KEY_TO_SERVICE: Map<string,NovelItemService>  = new Map<SELECTION_K
     [SELECTION_KEYS.CHAPTERS, new ChapterService()]
 ])
 
-export function updateItem(novelId: number, key: SELECTION_KEYS, item: BaseModel, overrideValues: Record<string, unknown>) {
+export function updateItem(key: SELECTION_KEYS, item: BaseModel, overrideValues: Record<string, unknown>) {
     const newItem = Object.assign({}, item, overrideValues);
     const serviceToUse = KEY_TO_SERVICE.get(key);
     if (serviceToUse) {
-        return serviceToUse.update(novelId, newItem);
+        return serviceToUse.update(newItem);
     }
 }
 

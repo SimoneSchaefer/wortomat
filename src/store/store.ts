@@ -48,6 +48,7 @@ export default new Vuex.Store({
         const ids = itemIdsToSelect(selection);
         const currentSelections = {...state.selection[novelId]} || {};
         currentSelections[selection.key] = ids;
+        console.log('store:::setting selection to ', currentSelections)
         state.selection[novelId] = currentSelections;
       }
     },
@@ -56,12 +57,17 @@ export default new Vuex.Store({
       if (index > -1) {
         state.currentNovel[update.key].splice(index, 1, update.item);
       }
+    },
+    setItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
+      state.currentNovel[update.key] = update.items;
     }
   },
 
   actions: {
     openNovel(context, novelId: number) {
       new NovelService().get(novelId).then(result => {
+        const sortedChapters = result.data[SELECTION_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 );
+        result.data[SELECTION_KEYS.CHAPTERS] = sortedChapters
         context.commit('openNovel', result.data);
       });
     },
@@ -88,11 +94,26 @@ export default new Vuex.Store({
     selectItems(context, item: { key: SELECTION_KEYS, items: BaseModel[]}) {
       context.commit('selectItems', item)        
     },
-    updateItem(context, update: { key: SELECTION_KEYS, novelId: number, oldItem: BaseModel, overrideValues: Record<string, unknown>}) {
-      const {key, novelId, oldItem, overrideValues } = update;
-      updateItem(novelId, key, oldItem, overrideValues ).then(result => {
+    updateItem(context, update: { key: SELECTION_KEYS, oldItem: BaseModel, overrideValues: Record<string, unknown>}) {
+      const {key, oldItem, overrideValues } = update;
+      updateItem(key, oldItem, overrideValues ).then(result => {
           context.commit('updateItem', { key: key, item: result.data })
       });      
+    },
+    async updateOrder(context, update: { key: SELECTION_KEYS, newOrder: BaseModel[] }) {
+      console.log('updating order in store', update.newOrder)
+      const results = []
+      let counter = 0;
+      for (const item of update.newOrder) {
+        const newItem = await updateItem(SELECTION_KEYS.CHAPTERS, item as BaseModel, { order: counter} );
+        results.push(newItem.data);
+        counter++;
+        /*.then(result => {
+          context.commit('updateItem', { key: key, item: result.data })
+        }*/
+      }
+      context.commit('setItems', { key: update.key, items: results })
+
     }
   }
 });

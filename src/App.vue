@@ -19,11 +19,16 @@ body {
     transition: background-color .3s !important;
 }
 
+.p-scrollpanel-content {
+  padding-right: 0px !important;
+}
+
 .p-orderlist-list {
   border-width: 0px !important;
 }
 .p-orderlist-list-item {
   box-shadow: none !important;
+  padding: 0;
 }
 .p-splitter {
   border-width: 0px !important;

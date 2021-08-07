@@ -16,6 +16,9 @@ import OrderList from 'primevue/orderlist';
 import Message from 'primevue/message';
 import ScrollPanel from 'primevue/scrollpanel';
 import TabMenu from 'primevue/tabmenu';
+import Badge from 'primevue/badge';
+import draggable from 'vuedraggable'
+
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -40,6 +43,8 @@ const app = createApp(App)
     .component('Message', Message)
     .component('ScrollPanel', ScrollPanel)
     .component('TabMenu', TabMenu)
+    .component('Badge', Badge)
+    .component('draggable', draggable)
 
 app.mount("#app");
 
