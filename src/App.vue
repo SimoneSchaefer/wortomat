@@ -29,8 +29,7 @@ body {
   border-width: 0px !important;
 }
 .p-splitter-gutter {
-  background-color: #1976d2 !important;
-  opacity: 0.6 !important;
+  background-color: #bad8f6 !important;
 }
 .p-splitter-gutter-handle {
   background-color: #1976d2 !important;

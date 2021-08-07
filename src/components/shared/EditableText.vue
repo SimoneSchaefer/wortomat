@@ -1,9 +1,11 @@
 <template>
-    <Dialog v-model:visible="editing" :modal="true">
-        <template #header>
-            <h3>{{ header }}</h3>
-        </template>
-        <Editor v-model="draft" @text-change="onInput"/>
+    <Dialog v-model:visible="editing" 
+    :modal="true" 
+    :closeOnEscape="false" 
+    :closable="false" 
+    :draggable="false"
+    :style="{ 'width': 'calc(100% - 5em)', 'max-width': '80em', 'text-align': 'left'  }">
+        <TipTap :content="draft" ref="editorRef"/>
         <template #footer>
             <Button label="Cancel" v-on:click="cancel"></Button>
             <Button label="Save" v-on:click="updateText"></Button>
@@ -16,8 +18,10 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
+import TipTap from './TipTap.vue'
 
 @Options({
+    components: { TipTap },
     emits: [ 'update-text' ]
 })  
 export default class EditableLabel extends Vue {
@@ -47,11 +51,6 @@ export default class EditableLabel extends Vue {
       }    
   }
 
-  onInput(event) {
-      this.draft = event.htmlValue
-  }
-
-
   private discard() {
         this.draft = this.value;
         this.editing = false;
@@ -59,8 +58,9 @@ export default class EditableLabel extends Vue {
 
   @Emit('update-text')
   updateText() {
+      const updatedContent = (this.$refs.editorRef as any).editor.getHTML();
       this.editing = false;
-      return this.draft;
+      return updatedContent;
   }
 }
 </script>

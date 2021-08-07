@@ -66,7 +66,6 @@ export default class EditableLabel extends Vue {
 <style scoped>
 .container {
     background-color: white;
-    /* padding: 1em 0.5em;*/
     text-align: left;
     flex-grow: 1;
     position: relative;
@@ -94,8 +93,7 @@ div[contenteditable="false"]:hover:after {
 
 div[contenteditable="false"] {
     border: 3px solid transparent;
-    padding-top: 0.5em;
-    padding-left: 0.5em;
+    padding: 0.5em;
 }
 div[contenteditable="false"]:hover {
     cursor: url('/assets/cursors/edit.png') 1 30, pointer;    
@@ -103,7 +101,7 @@ div[contenteditable="false"]:hover {
 div[contenteditable="true"],div[contenteditable="false"]:hover {
     background: aliceblue;
     border: 3px dotted gray;
-    padding-top: 0.5em;
+    padding: 0.5em;
 }
 div.backdrop {
     background-color: rgba(0, 0, 0, 0.404);

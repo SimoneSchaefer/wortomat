@@ -1,10 +1,8 @@
 <template>
     <div class="sheet">
-        <h1>                
-            <EditableLabel v-bind:value="chapter.title" @update-label="updateTitle"></EditableLabel>
-        </h1>
-        <EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="Summary"></EditableLabel>
-        <EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="Detailed summary"></EditableLabel>
+        <h1><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle"></EditableLabel></h1>
+        <b><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="Summary"></EditableLabel></b>
+        <i><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="Detailed summary"></EditableLabel></i>
         <EditableText v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>
@@ -38,7 +36,6 @@ export default class SelectedChapters extends Vue {
     updateContent(newValue: string) {
         this.updateChapter({ content: newValue });   
     }
-
 
     private updateChapter(overrideValues) {
         this.$store.dispatch('updateItem', { 

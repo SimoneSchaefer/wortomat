@@ -14,7 +14,6 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import ConfirmationService from 'primevue/confirmationservice';
 import OrderList from 'primevue/orderlist';
 import Message from 'primevue/message';
-import Editor from 'primevue/editor';
 import ScrollPanel from 'primevue/scrollpanel';
 import TabMenu from 'primevue/tabmenu';
 
@@ -25,14 +24,12 @@ import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
-
 const app = createApp(App)
     .use(router)
     .use(PrimeVue)
     .use(store)
     .use(ConfirmationService)
     .component('Button', Button)
-    .component('Editor', Editor)
     .component('Splitterpanel', Splitterpanel)
     .component('Splitter', Splitter)
     .component('Card', Card)
@@ -45,3 +42,6 @@ const app = createApp(App)
     .component('TabMenu', TabMenu)
 
 app.mount("#app");
+
+
+

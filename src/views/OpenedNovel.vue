@@ -16,7 +16,7 @@ export default class OpenedNovel extends Vue {
 
   get menuItems() {
     return [
-      {label: 'Home', icon: 'pi pi-fw pi-home', to: '/'},
+      {label: 'Home', icon: 'fa fa-home', to: '/'},
       {label: 'Chapters', icon: 'fa fa-book', to: 'chapters'},
       {label: 'Characters', icon: 'fa fa-users', to: 'characters'}
     ]

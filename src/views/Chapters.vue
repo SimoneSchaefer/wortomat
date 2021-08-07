@@ -1,12 +1,12 @@
 <template>
   <Splitter style="height: 100%" stateKey="chapters-splitter">
     <SplitterPanel>
-      <ScrollPanel style="height: 100%">
+      <ScrollPanel>
         <ChapterList></ChapterList>     
       </ScrollPanel>
     </SplitterPanel>
-    <SplitterPanel class="bg-gray h-100">
-      <ScrollPanel style="height: 100%" class="custom">
+    <SplitterPanel class="bg-gray">
+      <ScrollPanel style="height: 100%">
         <SelectedChapters></SelectedChapters>
       </ScrollPanel>
     </SplitterPanel>
