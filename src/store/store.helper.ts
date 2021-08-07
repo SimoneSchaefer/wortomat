@@ -42,21 +42,26 @@ export function updateItem(key: NOVEL_ITEM_KEYS, item: BaseModel, overrideValues
     }
 }
 
-export function getCurrentSelection(state, key: NOVEL_ITEM_KEYS) { 
-    if (novelIdOrRaise(state)) {
-        const selectedItemIds = getCurrentSelectionIds(state, key);
-        return state.currentNovel[key].filter(chapter => selectedItemIds.includes(chapter.id));
-    }
-    return [];   
-}
-
-export function getCurrentSelectionIds(state: IState, key: NOVEL_ITEM_KEYS) {
-    return state.selection.get(key) || [];
-}
-
-export function itemIdsToSelect(key: string, items: BaseModel[]) {
+export function itemIdsToSelect(key: string, items: BaseModel[]): number[] {
     return items.map( item => item.id);    
 }
+
+export function getChildItems(state: IState, key: NOVEL_ITEM_KEYS): BaseModel[] {
+    return state.currentNovel[key] as BaseModel[];
+}
+
+export function updateItemInStore(needle: BaseModel, haystack: BaseModel[], remove = false) {
+    const index = findItem(needle, haystack);
+    if (index > -1) {
+        if (remove) haystack.splice(index, 1);
+        if (!remove) haystack.splice(index, 1, needle);
+    }
+}
+
+export function findItem(needle: BaseModel, haystack: BaseModel[]) {
+    return haystack.findIndex(item => needle.id === item.id);
+}
+
 
 export function novelIdOrRaise(state) {
     const novelId = state.currentNovel?.id;
