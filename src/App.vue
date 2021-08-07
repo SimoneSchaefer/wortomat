@@ -49,6 +49,10 @@ body {
   padding: 1em;
 }
 
+.ProseMirror {
+  border: none !important;
+}
+
 .w-100 {
   width: 100%;
 }

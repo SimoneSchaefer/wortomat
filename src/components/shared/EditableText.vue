@@ -5,7 +5,7 @@
     :closable="false" 
     :draggable="false"
     :style="{ 'width': 'calc(100% - 5em)', 'max-width': '80em', 'text-align': 'left'  }">
-        <TipTap :content="draft" ref="editorRef"/>
+        <TipTap :content="value" ref="editorRef"/>
         <template #footer>
             <Button label="Cancel" v-on:click="cancel"></Button>
             <Button label="Save" v-on:click="updateText"></Button>
@@ -29,15 +29,14 @@ export default class EditableLabel extends Vue {
   @Prop() value!: string; 
 
   private editing = false;
-  private draft: string | null = null;
 
   startEditMode() {
     this.editing = true;
-    this.draft = this.value;
   }
 
   cancel() {
-      if (this.draft !== this.value) {
+      const updatedContent = this.getCurrentContent();
+      if (updatedContent !== this.value) {
         this.$confirm.require({
             message: 'Are you sure you want to proceed?',
             header: 'Confirmation',
@@ -52,15 +51,18 @@ export default class EditableLabel extends Vue {
   }
 
   private discard() {
-        this.draft = this.value;
         this.editing = false;
   }
 
   @Emit('update-text')
   updateText() {
-      const updatedContent = (this.$refs.editorRef as any).editor.getHTML();
+      const updatedContent = this.getCurrentContent();
       this.editing = false;
       return updatedContent;
+  }
+
+  private getCurrentContent() {
+      return (this.$refs.editorRef as any).editor.getHTML();
   }
 }
 </script>
