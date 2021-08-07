@@ -64,7 +64,6 @@ export default class ChapterList extends Vue {
   }
 
   selectChapter(selected: BaseModel, $event)  {
-    console.log('selectChapters', selected, $event)
     const selectedItems = $event.ctrlKey ? this.$store.getters.currentChapters : []
     selectedItems.push(selected);
     this.$store.dispatch('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: selectedItems });

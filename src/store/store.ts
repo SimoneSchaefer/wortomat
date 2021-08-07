@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import { BaseModel } from '../models/Base.model';
 import { NovelModel } from '../models/Novel.model';
 import { NovelService } from '../service/NovelService';
-import { getCurrentSelection, itemIdsToSelect, SELECTION_KEYS, updateItem } from './store.helper';
+import { addItem, deleteItem, getCurrentSelection, itemIdsToSelect, SELECTION_KEYS, updateItem } from './store.helper';
 
 export default new Vuex.Store({
   state: {
@@ -48,10 +48,12 @@ export default new Vuex.Store({
         const ids = itemIdsToSelect(selection);
         const currentSelections = {...state.selection[novelId]} || {};
         currentSelections[selection.key] = ids;
-        console.log('store:::setting selection to ', currentSelections)
         state.selection[novelId] = currentSelections;
       }
     },
+    addItem(state, update: { key: SELECTION_KEYS, item: BaseModel}) {
+      state.currentNovel[update.key].push(update.item);
+    }, 
     updateItem(state, update: { key: SELECTION_KEYS, item: BaseModel}) {
       const index = state.currentNovel[update.key].findIndex(i => i.id === update.item.id);
       if (index > -1) {
@@ -60,6 +62,11 @@ export default new Vuex.Store({
     },
     setItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
       state.currentNovel[update.key] = update.items;
+    },
+    deleteItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
+      const itemIds = update.items.map(item => item.id);
+      const currentItems = state.currentNovel[update.key];
+      state.currentNovel[update.key] = currentItems.filter(i => !itemIds.includes(i.id));
     }
   },
 
@@ -69,6 +76,9 @@ export default new Vuex.Store({
         const sortedChapters = result.data[SELECTION_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 );
         result.data[SELECTION_KEYS.CHAPTERS] = sortedChapters
         context.commit('openNovel', result.data);
+        if (result.data[SELECTION_KEYS.CHAPTERS].length) {
+          context.commit('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: [result.data[SELECTION_KEYS.CHAPTERS][0]] });
+        }
       });
     },
     addNovel(context, novel: NovelModel) {
@@ -94,23 +104,36 @@ export default new Vuex.Store({
     selectItems(context, item: { key: SELECTION_KEYS, items: BaseModel[]}) {
       context.commit('selectItems', item)        
     },
+    addItem(context, update: { key: SELECTION_KEYS, novelId: number, item: BaseModel}) {
+      const {key, novelId, item } = update;
+      addItem(key, novelId, item).then(result => {
+          context.commit('addItem', { key: key, item: result.data })
+      });      
+    },
     updateItem(context, update: { key: SELECTION_KEYS, oldItem: BaseModel, overrideValues: Record<string, unknown>}) {
       const {key, oldItem, overrideValues } = update;
       updateItem(key, oldItem, overrideValues ).then(result => {
           context.commit('updateItem', { key: key, item: result.data })
       });      
     },
+    async deleteItems(context, update: { key: SELECTION_KEYS, items: BaseModel[] }) {
+      const {key, items } = update;
+      const results = []
+
+      for (const item of items) {
+        await deleteItem(key, item );
+        results.push(item);
+      }  
+      context.commit('deleteItems', { key: key, items: results })
+
+    },
     async updateOrder(context, update: { key: SELECTION_KEYS, newOrder: BaseModel[] }) {
-      console.log('updating order in store', update.newOrder)
       const results = []
       let counter = 0;
       for (const item of update.newOrder) {
         const newItem = await updateItem(SELECTION_KEYS.CHAPTERS, item as BaseModel, { order: counter} );
         results.push(newItem.data);
         counter++;
-        /*.then(result => {
-          context.commit('updateItem', { key: key, item: result.data })
-        }*/
       }
       context.commit('setItems', { key: update.key, items: results })
 

@@ -11,12 +11,16 @@ import Card from 'primevue/card';
 import Galleria from 'primevue/galleria';
 import Dialog from 'primevue/dialog';
 import ConfirmDialog from 'primevue/confirmdialog';
+import ToastService from 'primevue/toastservice';
+import Toast from 'primevue/toast';
 import ConfirmationService from 'primevue/confirmationservice';
 import OrderList from 'primevue/orderlist';
 import Message from 'primevue/message';
 import ScrollPanel from 'primevue/scrollpanel';
 import TabMenu from 'primevue/tabmenu';
 import Badge from 'primevue/badge';
+import SpeedDial from 'primevue/speeddial';
+
 import draggable from 'vuedraggable'
 
 
@@ -32,6 +36,7 @@ const app = createApp(App)
     .use(PrimeVue)
     .use(store)
     .use(ConfirmationService)
+    .use(ToastService)
     .component('Button', Button)
     .component('Splitterpanel', Splitterpanel)
     .component('Splitter', Splitter)
@@ -40,10 +45,12 @@ const app = createApp(App)
     .component('Galleria', Galleria)
     .component('Dialog', Dialog)
     .component('ConfirmDialog', ConfirmDialog)
+    .component('Toast', Toast)
     .component('Message', Message)
     .component('ScrollPanel', ScrollPanel)
     .component('TabMenu', TabMenu)
     .component('Badge', Badge)
+    .component('SpeedDial', SpeedDial)
     .component('draggable', draggable)
 
 app.mount("#app");

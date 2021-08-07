@@ -6,5 +6,5 @@ export abstract class NovelItemService {
     
     abstract update(item: BaseModel): Promise<AxiosResponse>;
     abstract create(novelId: number, item: BaseModel): Promise<AxiosResponse>;
-    abstract delete(novelId: number, item: BaseModel): Promise<AxiosResponse>
+    abstract delete(item: BaseModel): Promise<AxiosResponse>
 }
