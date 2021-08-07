@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { ChapterModel } from '@/models/Chapter.model';
-import { SELECTION_KEYS } from '@/store/store.helper';
+import { NOVEL_ITEM_KEYS } from '@/store/store.helper';
 @Options({
   components: {  }
 })
@@ -21,7 +21,7 @@ export default class ChapterMenu extends Vue {
     const chapters = this.$store.state.currentNovel?.chapters || [];
     const maxOrder = Math.max.apply(Math, chapters.map(function(o) { return o.order; }))
     chapter.order = maxOrder;
-    this.$store.dispatch('addItem', { key: SELECTION_KEYS.CHAPTERS, novelId: novelId, item: chapter });
+    this.$store.dispatch('addItem', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: novelId, item: chapter });
   }
   get menuItems() {
     return [
@@ -40,7 +40,7 @@ export default class ChapterMenu extends Vue {
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                        this.$store.dispatch('deleteItems', { key: SELECTION_KEYS.CHAPTERS, items: this.$store.getters.currentChapters} )
+                        this.$store.dispatch('deleteItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: this.$store.getters.currentChapters} )
                     }
                 })
             }

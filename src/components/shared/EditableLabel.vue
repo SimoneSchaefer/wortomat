@@ -1,7 +1,9 @@
 <template>
     <div class="container w-100" v-bind:class=" { editing: editing}">
         <div class="editing p-d-flex p-jc-between" v-if="editing">
-            <div class="label" contenteditable="true" @input="onInput" ref="editableRef">{{ value }}</div>
+            <div class="label" contenteditable="true" @input="onInput" ref="editableRef" v-on:keyup.enter="updateLabel()" v-on:keyup.esc="cancel()">
+                {{ value }}
+            </div>
             <div class="options">
                 <Button class="p-button p-button-text" icon="pi pi-check" v-on:click="updateLabel()"></Button>            
                 <Button class="p-button p-button-text" icon="pi pi-times" v-on:click="cancel()"></Button>            
@@ -9,9 +11,7 @@
         </div>
         <div v-else>
             <div class="label" v-on:click="startEditMode()" contenteditable="false">
-                <span v-if="value && value.trim().length">{{ value }}</span>
-                <span v-else class="dummy-text">{{ placeHolder }}</span>
-
+                <MissingValueTolerantLabel :value="value" :fallback="placeHolder"></MissingValueTolerantLabel>
             </div>
         </div>
         
@@ -24,8 +24,10 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
+import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 
 @Options({
+    components: { MissingValueTolerantLabel},
     emits: [ 'update-label' ]
 })  
 export default class EditableLabel extends Vue {
@@ -33,11 +35,10 @@ export default class EditableLabel extends Vue {
   @Prop() placeHolderTitle!: string; 
 
   private editing = false;
-  private dummyText = 'No content yet. Click to edit';
   private draft: string | null = null;
 
   get placeHolder() {
-      return (this.placeHolderTitle || '') + ': No content yet. Click to edit';
+    return (this.placeHolderTitle || '') + ': No content yet. Click to edit';
   }
 
   startEditMode() {
@@ -77,10 +78,7 @@ export default class EditableLabel extends Vue {
 .container.editing {
     z-index: 101;
 }
-.dummy-text {
-    color: gray;
-    opacity: 0.5;
-}
+
 div.label {
     flex-grow: 1;
 }

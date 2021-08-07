@@ -2,13 +2,12 @@ import Vuex from 'vuex';
 import { BaseModel } from '../models/Base.model';
 import { NovelModel } from '../models/Novel.model';
 import { NovelService } from '../service/NovelService';
-import { addItem, deleteItem, getCurrentSelection, itemIdsToSelect, SELECTION_KEYS, updateItem } from './store.helper';
-
+import { createItem, deleteItems, getCurrentSelection, itemIdsToSelect, NOVEL_ITEM_KEYS, updateItem } from './store.helper';
 
 export interface IState {
   novels: NovelModel[],
   currentNovel: NovelModel,
-  selection: Map<SELECTION_KEYS,Array<BaseModel>>
+  selection: Map<NOVEL_ITEM_KEYS,Array<number>>
 }
 
 export default new Vuex.Store<IState>({
@@ -19,11 +18,11 @@ export default new Vuex.Store<IState>({
   },
 
   getters: {
-    openNovelId(state) {
+    openNovelId(state: IState) {
       return state.currentNovel?.id
     },
-    currentChapters(state) {
-      return getCurrentSelection(state, SELECTION_KEYS.CHAPTERS);      
+    currentChapters(state: IState) {
+      return getCurrentSelection(state, NOVEL_ITEM_KEYS.CHAPTERS);      
     }
   },
 
@@ -49,28 +48,23 @@ export default new Vuex.Store<IState>({
     openNovel(state, novel: NovelModel) {
       state.currentNovel = novel;
     },
-    selectItems(state, selection: { key: string, items: BaseModel[]}) {
-      const novelId = state.currentNovel?.id;
-      if (novelId) {
-        const ids = itemIdsToSelect(selection);
-        const currentSelections = {...state.selection[novelId]} || {};
-        currentSelections[selection.key] = ids;
-        state.selection[novelId] = currentSelections;
-      }
+    selectItems(state: IState, selection: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) {
+      const {key, items } = selection;
+      state.selection.set(key, itemIdsToSelect(key, items))
     },
-    addItem(state, update: { key: SELECTION_KEYS, item: BaseModel}) {
+    addItem(state, update: { key: NOVEL_ITEM_KEYS, item: BaseModel}) {
       (state.currentNovel[update.key] as BaseModel[]).push(update.item);
     }, 
-    updateItem(state, update: { key: SELECTION_KEYS, item: BaseModel}) {
+    updateItem(state, update: { key: NOVEL_ITEM_KEYS, item: BaseModel}) {
       const index = (state.currentNovel[update.key] as BaseModel[]).findIndex(i => i.id === update.item.id);
       if (index > -1) {
         (state.currentNovel[update.key] as BaseModel[]).splice(index, 1, update.item);
       }
     },
-    setItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
+    setItems(state, update: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) {
       (state.currentNovel[update.key] as BaseModel[]) = update.items;
     },
-    deleteItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
+    deleteItems(state, update: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) {
       const itemIds = update.items.map(item => item.id);
       const currentItems = (state.currentNovel[update.key] as BaseModel[]);
       (state.currentNovel[update.key] as BaseModel[]) = currentItems.filter(i => !itemIds.includes(i.id));
@@ -80,11 +74,11 @@ export default new Vuex.Store<IState>({
   actions: {
     openNovel(context, novelId: number) {
       new NovelService().get(novelId).then(result => {
-        const sortedChapters = result.data[SELECTION_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 );
-        result.data[SELECTION_KEYS.CHAPTERS] = sortedChapters
+        const sortedChapters = result.data[NOVEL_ITEM_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 );
+        result.data[NOVEL_ITEM_KEYS.CHAPTERS] = sortedChapters
         context.commit('openNovel', result.data);
-        if (result.data[SELECTION_KEYS.CHAPTERS].length) {
-          context.commit('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: [result.data[SELECTION_KEYS.CHAPTERS][0]] });
+        if (result.data[NOVEL_ITEM_KEYS.CHAPTERS].length) {
+          context.commit('selectItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: [result.data[NOVEL_ITEM_KEYS.CHAPTERS][0]] });
         }
       });
     },
@@ -108,38 +102,32 @@ export default new Vuex.Store<IState>({
         context.commit('setNovels', result.data)
       });  
     },
-    selectItems(context, item: { key: SELECTION_KEYS, items: BaseModel[]}) {
+    selectItems(context, item: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) {
       context.commit('selectItems', item)        
     },
-    addItem(context, update: { key: SELECTION_KEYS, novelId: number, item: BaseModel}) {
+    addItem(context, update: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel}) {
       const {key, novelId, item } = update;
-      addItem(key, novelId, item).then(result => {
+      createItem(key, novelId, item).then(result => {
           context.commit('addItem', { key: key, item: result.data });
-          context.commit('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: [result.data] });
+          context.commit('selectItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: [result.data] });
       });      
     },
-    updateItem(context, update: { key: SELECTION_KEYS, oldItem: BaseModel, overrideValues: Record<string, unknown>}) {
+    updateItem(context, update: { key: NOVEL_ITEM_KEYS, oldItem: BaseModel, overrideValues: Record<string, unknown>}) {
       const {key, oldItem, overrideValues } = update;
       updateItem(key, oldItem, overrideValues ).then(result => {
           context.commit('updateItem', { key: key, item: result.data })
       });      
     },
-    async deleteItems(context, update: { key: SELECTION_KEYS, items: BaseModel[] }) {
+    async deleteItems(context, update: { key: NOVEL_ITEM_KEYS, items: BaseModel[] }) {
       const {key, items } = update;
-      const results = []
-
-      for (const item of items) {
-        await deleteItem(key, item );
-        results.push(item);
-      }  
-      context.commit('deleteItems', { key: key, items: results })
-
+      const deleted = await deleteItems(key, items);
+      context.commit('deleteItems', { key: key, items: deleted })
     },
-    async updateOrder(context, update: { key: SELECTION_KEYS, newOrder: BaseModel[] }) {
+    async updateOrder(context, update: { key: NOVEL_ITEM_KEYS, newOrder: BaseModel[] }) {
       const results = []
       let counter = 0;
       for (const item of update.newOrder) {
-        const newItem = await updateItem(SELECTION_KEYS.CHAPTERS, item as BaseModel, { order: counter} );
+        const newItem = await updateItem(NOVEL_ITEM_KEYS.CHAPTERS, item as BaseModel, { order: counter} );
         results.push(newItem.data);
         counter++;
       }

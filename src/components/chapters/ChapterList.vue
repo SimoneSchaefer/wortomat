@@ -28,7 +28,7 @@
 <script lang="ts">
 import { BaseModel } from '@/models/Base.model';
 import { ChapterModel } from '@/models/Chapter.model';
-import { SELECTION_KEYS } from '@/store/store.helper';
+import { NOVEL_ITEM_KEYS } from '@/store/store.helper';
 import { Options, Vue } from 'vue-class-component';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import draggable from 'vuedraggable'
@@ -42,7 +42,7 @@ export default class ChapterList extends Vue {
   }
 
   set chapters(value) {
-    this.$store.dispatch('updateOrder', { key: SELECTION_KEYS.CHAPTERS, newOrder: value});
+    this.$store.dispatch('updateOrder', { key: NOVEL_ITEM_KEYS.CHAPTERS, newOrder: value});
   }
 
   getTodoCount(chapter: ChapterModel) {
@@ -71,7 +71,7 @@ export default class ChapterList extends Vue {
   selectChapter(selected: BaseModel, $event)  {
     const selectedItems = $event.ctrlKey ? this.$store.getters.currentChapters : []
     selectedItems.push(selected);
-    this.$store.dispatch('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: selectedItems });
+    this.$store.dispatch('selectItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: selectedItems });
   }  
 }
 </script>

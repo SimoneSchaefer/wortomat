@@ -11,7 +11,7 @@
 import { Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/EditableLabel.vue';
 import EditableText from '@/components/shared/EditableText.vue';
-import { SELECTION_KEYS } from '@/store/store.helper';
+import { NOVEL_ITEM_KEYS } from '@/store/store.helper';
 import { Prop } from 'vue-property-decorator';
 import { ChapterModel } from '@/models/Chapter.model';
 
@@ -39,7 +39,7 @@ export default class SelectedChapters extends Vue {
 
     private updateChapter(overrideValues) {
         this.$store.dispatch('updateItem', { 
-            key: SELECTION_KEYS.CHAPTERS, 
+            key: NOVEL_ITEM_KEYS.CHAPTERS, 
             novelId: this.$store.getters.openNovelId,
             oldItem: this.chapter,
             overrideValues: overrideValues
