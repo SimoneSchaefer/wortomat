@@ -4,11 +4,18 @@ import { NovelModel } from '../models/Novel.model';
 import { NovelService } from '../service/NovelService';
 import { addItem, deleteItem, getCurrentSelection, itemIdsToSelect, SELECTION_KEYS, updateItem } from './store.helper';
 
-export default new Vuex.Store({
+
+export interface IState {
+  novels: NovelModel[],
+  currentNovel: NovelModel,
+  selection: Map<SELECTION_KEYS,Array<BaseModel>>
+}
+
+export default new Vuex.Store<IState>({
   state: {
     novels: [],
     currentNovel: null,
-    selection: {}
+    selection: new Map()
   },
 
   getters: {
@@ -52,21 +59,21 @@ export default new Vuex.Store({
       }
     },
     addItem(state, update: { key: SELECTION_KEYS, item: BaseModel}) {
-      state.currentNovel[update.key].push(update.item);
+      (state.currentNovel[update.key] as BaseModel[]).push(update.item);
     }, 
     updateItem(state, update: { key: SELECTION_KEYS, item: BaseModel}) {
-      const index = state.currentNovel[update.key].findIndex(i => i.id === update.item.id);
+      const index = (state.currentNovel[update.key] as BaseModel[]).findIndex(i => i.id === update.item.id);
       if (index > -1) {
-        state.currentNovel[update.key].splice(index, 1, update.item);
+        (state.currentNovel[update.key] as BaseModel[]).splice(index, 1, update.item);
       }
     },
     setItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
-      state.currentNovel[update.key] = update.items;
+      (state.currentNovel[update.key] as BaseModel[]) = update.items;
     },
     deleteItems(state, update: { key: SELECTION_KEYS, items: BaseModel[]}) {
       const itemIds = update.items.map(item => item.id);
-      const currentItems = state.currentNovel[update.key];
-      state.currentNovel[update.key] = currentItems.filter(i => !itemIds.includes(i.id));
+      const currentItems = (state.currentNovel[update.key] as BaseModel[]);
+      (state.currentNovel[update.key] as BaseModel[]) = currentItems.filter(i => !itemIds.includes(i.id));
     }
   },
 
@@ -107,7 +114,8 @@ export default new Vuex.Store({
     addItem(context, update: { key: SELECTION_KEYS, novelId: number, item: BaseModel}) {
       const {key, novelId, item } = update;
       addItem(key, novelId, item).then(result => {
-          context.commit('addItem', { key: key, item: result.data })
+          context.commit('addItem', { key: key, item: result.data });
+          context.commit('selectItems', { key: SELECTION_KEYS.CHAPTERS, items: [result.data] });
       });      
     },
     updateItem(context, update: { key: SELECTION_KEYS, oldItem: BaseModel, overrideValues: Record<string, unknown>}) {

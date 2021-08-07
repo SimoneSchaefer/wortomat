@@ -1,7 +1,7 @@
 <template>
     <div class="container w-100" v-bind:class=" { editing: editing}">
         <div class="editing p-d-flex p-jc-between" v-if="editing">
-            <div class="label" contenteditable="true" @input="onInput">{{ value }}</div>
+            <div class="label" contenteditable="true" @input="onInput" ref="editableRef">{{ value }}</div>
             <div class="options">
                 <Button class="p-button p-button-text" icon="pi pi-check" v-on:click="updateLabel()"></Button>            
                 <Button class="p-button p-button-text" icon="pi pi-times" v-on:click="cancel()"></Button>            
@@ -43,6 +43,10 @@ export default class EditableLabel extends Vue {
   startEditMode() {
     this.editing = true;
     this.draft = this.value;
+
+    setTimeout(() => {
+        (this.$refs.editableRef as any).focus();
+    }, 0);
   }
 
   onInput(e) {

@@ -8,8 +8,12 @@
     <template #item="{element}">
       <div class="item p-jc-between" v-on:click="selectChapter(element, $event)" v-bind:class="{ active: isSelected(element)}">
           <div class="p-d-flex">
-            <div class="title">{{element.title}}</div>
-            <div class="summary">{{element.summary}}</div>
+            <div class="title">
+              <MissingValueTolerantLabel :value="element.title" fallbackValue="No title yet"></MissingValueTolerantLabel>
+            </div>
+            <div class="summary">
+              <MissingValueTolerantLabel :value="element.summary" fallbackValue="No summary yet"></MissingValueTolerantLabel>
+            </div>
           </div>
           <div class="badges">
             <Badge v-if="getTodoCount(element)" :value="getTodoCount(element)" severity="warning"></Badge>
@@ -26,10 +30,11 @@ import { BaseModel } from '@/models/Base.model';
 import { ChapterModel } from '@/models/Chapter.model';
 import { SELECTION_KEYS } from '@/store/store.helper';
 import { Options, Vue } from 'vue-class-component';
+import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import draggable from 'vuedraggable'
 
 @Options({
-  components: draggable
+  components: { draggable, MissingValueTolerantLabel}
 })
 export default class ChapterList extends Vue {
   get chapters() {
