@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { ChapterModel } from '@/models/Chapter.model';
-import { NOVEL_ITEM_KEYS } from '@/store/store.helper';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 @Options({
   components: {  }
 })

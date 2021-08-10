@@ -28,10 +28,10 @@
 <script lang="ts">
 import { BaseModel } from '@/models/Base.model';
 import { ChapterModel } from '@/models/Chapter.model';
-import { NOVEL_ITEM_KEYS } from '@/store/store.helper';
 import { Options, Vue } from 'vue-class-component';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import draggable from 'vuedraggable'
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 @Options({
   components: { draggable, MissingValueTolerantLabel}

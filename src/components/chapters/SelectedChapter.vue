@@ -11,9 +11,9 @@
 import { Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/EditableLabel.vue';
 import EditableText from '@/components/shared/EditableText.vue';
-import { NOVEL_ITEM_KEYS } from '@/store/store.helper';
 import { Prop } from 'vue-property-decorator';
 import { ChapterModel } from '@/models/Chapter.model';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 @Options({
   components: { EditableLabel, EditableText }

@@ -1,7 +1,8 @@
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
-import { IState } from "./store";
-import { getChildItems, itemIdsToSelect, NOVEL_ITEM_KEYS, updateItemInStore } from "./store.helper";
+import { IState } from "./istate";
+import { NOVEL_ITEM_KEYS } from "./keys";
+import { getChildItems, itemIdsToSelect, updateItemInStore } from "./store.helper";
 
 //// Novel mutations //// 
 const novelsLoaded = (state: IState, payload: NovelModel[]) => {

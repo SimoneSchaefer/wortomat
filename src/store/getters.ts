@@ -1,5 +1,6 @@
-import { IState } from "./store";
-import { novelIdOrRaise, NOVEL_ITEM_KEYS } from "./store.helper";
+import { IState } from "./istate";
+import { NOVEL_ITEM_KEYS } from "./keys";
+import { novelIdOrRaise } from "./store.helper";
 
 const openNovelId = state => state.currentNovel?.id;
 const currentChapters = state => getCurrentSelection(state, NOVEL_ITEM_KEYS.CHAPTERS);
