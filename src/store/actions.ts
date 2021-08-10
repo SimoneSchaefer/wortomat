@@ -2,14 +2,18 @@ import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS } from "./keys";
-import { createItem, updateItemInBackend, deleteItemsInBackend } from "./store.helper";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend } from "./store-api-adapter";
 
 const openNovel = (context, novelId: number) => {
     new NovelService().get(novelId).then(result => {
-      const sortedChapters = result.data[NOVEL_ITEM_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 );
+      const sortedChapters = result.data[NOVEL_ITEM_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 ); //TODO handle by API
       result.data[NOVEL_ITEM_KEYS.CHAPTERS] = sortedChapters
       context.commit('novelOpened', result.data);
       if (result.data[NOVEL_ITEM_KEYS.CHAPTERS].length) {
+        // TODO central selection handler to handle 'nothing-selected' case 
+        // - after opening a novel 
+        // - switching between tabs (keep selection?)
+        // - when selected element has been deleted
         context.commit('itemsSelected', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: [result.data[NOVEL_ITEM_KEYS.CHAPTERS][0]] });
       }
     });
@@ -44,7 +48,7 @@ const selectItems = (context, item: { key: NOVEL_ITEM_KEYS, items: BaseModel[]})
 
 const addItem = (context, update: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel}) => {
     const {key, novelId, item } = update;
-    createItem(key, novelId, item).then(result => {
+    createItemInBackend(key, novelId, item).then(result => {
         context.commit('itemAdded', { key: key, item: result.data });
         context.commit('itemsSelected', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: [result.data] });
     });      
@@ -85,4 +89,4 @@ const updateOrder = async (context, update: { key: NOVEL_ITEM_KEYS, newOrder: Ba
     updateItem,
     deleteItems,
     updateOrder
-  }
+}
