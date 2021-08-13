@@ -9,7 +9,7 @@ export class NovelService {
     }
     
     get(id: number) {
-        return axios.get(`${this.BACKEND_URL}/novels/${id}?_embed=chapters&_sort=order&_order=asc`)
+        return axios.get(`${this.BACKEND_URL}/novels/${id}?_embed=tags&_sort=order&_order=asc`)
     }
     
     update(novel: NovelModel) {

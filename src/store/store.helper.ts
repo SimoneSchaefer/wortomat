@@ -7,7 +7,7 @@ export function itemIdsToSelect(key: string, items: BaseModel[]): number[] {
 }
 
 export function getChildItems(state: IState, key: NOVEL_ITEM_KEYS): BaseModel[] {
-    return state.currentNovel[key] as BaseModel[];
+    return state.novelItems[key] as BaseModel[];
 }
 
 export function updateItemInStore(needle: BaseModel, haystack: BaseModel[], remove = false) {

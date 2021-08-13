@@ -38,7 +38,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
 })
 export default class ChapterList extends Vue {
   get chapters() {
-    return this.$store.state.currentNovel?.chapters || [];
+    return this.$store.state.novelItems[NOVEL_ITEM_KEYS.CHAPTERS] || [];
   }
 
   set chapters(value) {

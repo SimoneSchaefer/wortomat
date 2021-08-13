@@ -23,6 +23,7 @@ import EditableLabel from '@/components/shared/EditableLabel.vue';
 import ChapterList from '@/components/chapters/ChapterList.vue';
 import ChapterMenu from '@/components/chapters/ChapterMenu.vue';
 import SelectedChapters from '@/components/chapters/SelectedChapters.vue';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 
 @Options({
@@ -35,5 +36,10 @@ import SelectedChapters from '@/components/chapters/SelectedChapters.vue';
     SelectedChapters, 
     ChapterMenu }
 })
-export default class Chapters extends Vue {}
+export default class Chapters extends Vue {
+  mounted() {
+    this.$store.dispatch('loadItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: this.$route.params.id }); 
+  }
+}
+
 </script>

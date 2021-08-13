@@ -23,12 +23,14 @@ const novelDeleted = (state: IState, payload: NovelModel) => {
 
 const novelOpened = (state: IState, payload: NovelModel) => {
     state.currentNovel = payload;
+    state.novelItems[NOVEL_ITEM_KEYS.TAGS] = payload.tags;
 }
 
 //// Novel items mutations ////
 const itemsLoaded = (state, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) => {
     const {key, items } = payload;
-    state.currentNovel[key] = items;
+    state.novelItems[key] = items;
+    console.log('itemsLoaded', state)
 }
 
 const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) => {
@@ -38,18 +40,20 @@ const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Ba
     
 const itemAdded = (state, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}) => {
     const {key, item } = payload;
-    (state.currentNovel[key] as BaseModel[]).push(item);
+    const items = state.novelItems[key] as BaseModel[] || [];
+    items.push(item);
+    state.novelItems[key] = items;
 }
   
 const itemUpdated = (state, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}) => {
     const {key, item } = payload;
-    updateItemInStore(item, state.currentNovel[key] as BaseModel[]);
+    updateItemInStore(item, state.novelItems[key] as BaseModel[]);
 }
 
 const itemsDeleted = (state, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) => {
     const {key, items } = payload;
     const itemIds = items.map(item => item.id);
-    state.currentNovel[key] = getChildItems(state, key).filter(i => !itemIds.includes(i.id));
+    state.novelItems[key] = getChildItems(state, key).filter(i => !itemIds.includes(i.id));
 }
   
   export default {

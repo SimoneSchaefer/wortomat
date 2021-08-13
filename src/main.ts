@@ -20,6 +20,8 @@ import ScrollPanel from 'primevue/scrollpanel';
 import TabMenu from 'primevue/tabmenu';
 import Badge from 'primevue/badge';
 import SpeedDial from 'primevue/speeddial';
+import AutoComplete from 'primevue/autocomplete';
+import Chip from 'primevue/chip';
 
 import draggable from 'vuedraggable'
 
@@ -51,6 +53,8 @@ const app = createApp(App)
     .component('TabMenu', TabMenu)
     .component('Badge', Badge)
     .component('SpeedDial', SpeedDial)
+    .component('AutoComplete', AutoComplete)
+    .component('Chip', Chip)
     .component('draggable', draggable)
 
 app.mount("#app");

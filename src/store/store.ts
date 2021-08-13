@@ -9,7 +9,8 @@ export default new Vuex.Store<IState>({
   state: {
     novels: [],
     currentNovel: new NovelModel(),
-    selection: new Map()
+    selection: new Map(),
+    novelItems: {}
   },
   getters,
   mutations,
