@@ -18,7 +18,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
-import TipTap from './TipTap.vue'
+import TipTap from '../TipTap.vue'
 
 @Options({
     components: { TipTap },

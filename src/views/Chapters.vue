@@ -19,7 +19,7 @@ import ScrollPanel from 'primevue/scrollpanel';
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 import { Options, Vue } from 'vue-class-component';
-import EditableLabel from '@/components/shared/EditableLabel.vue';
+import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import ChapterList from '@/components/chapters/ChapterList.vue';
 import ChapterMenu from '@/components/chapters/ChapterMenu.vue';
 import SelectedChapters from '@/components/chapters/SelectedChapters.vue';

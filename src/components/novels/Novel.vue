@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import EditableLabel from '../shared/EditableLabel.vue';
+import EditableLabel from '../shared/inline-edit/EditableLabel.vue';
 
 @Options({
     components: { EditableLabel }

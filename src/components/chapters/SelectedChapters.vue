@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import EditableLabel from '@/components/shared/EditableLabel.vue';
+import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import SelectedChapter from '@/components/chapters/SelectedChapter.vue';
 
 @Options({

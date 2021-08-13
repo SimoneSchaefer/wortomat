@@ -10,9 +10,9 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import EditableLabel from '@/components/shared/EditableLabel.vue';
-import EditableText from '@/components/shared/EditableText.vue';
-import EditableTags from '@/components/shared/EditableTags.vue';
+import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import EditableText from '@/components/shared/inline-edit/EditableText.vue';
+import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
 import { Prop } from 'vue-property-decorator';
 import { ChapterModel } from '@/models/Chapter.model';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
