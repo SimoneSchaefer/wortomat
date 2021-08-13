@@ -50,7 +50,7 @@ export default class ChapterList extends Vue {
   }  
   
   getFixmeCount(chapter: ChapterModel) {
-    return this.getMarkerCount(chapter, 'red')
+    return this.getMarkerCount(chapter, '#D32F2F')
   }
 
   getIdeaCount(chapter: ChapterModel) {
@@ -59,7 +59,7 @@ export default class ChapterList extends Vue {
   
   getMarkerCount(chapter: ChapterModel, color: string) {
     // TODO: make part of model?
-    const regex = new RegExp(`data-color="${color}"`, 'g');
+    const regex = new RegExp(`data-background-color="${color}"`, 'g');
     const count = ((chapter.content || '').match(regex) || []).length;
     return count;
   }

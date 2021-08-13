@@ -11,17 +11,22 @@
             <Button label="Save" v-on:click="updateText"></Button>
         </template>
     </Dialog>
-    <div class="content" v-on:click="startEditMode()" v-html="value"></div>
+    <div class="content" v-on:click="startEditMode()">
+        <div v-if="value?.length" v-html="value"></div>
+        <div v-else><MissingValueTolerantLabel :value="value" fallback="No content added yet."></MissingValueTolerantLabel></div>
+    </div>
 </template>
 
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
-import TipTap from '../TipTap.vue'
+import TipTap from '../wysisyg/TipTap.vue'
+import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
+import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 
 @Options({
-    components: { TipTap },
+    components: { TipTap, InlineEdit, MissingValueTolerantLabel},
     emits: [ 'update-text' ]
 })  
 export default class EditableLabel extends Vue {
@@ -73,10 +78,20 @@ export default class EditableLabel extends Vue {
     text-align: left;   
     border: 3px solid transparent;
     padding-top: 0.5em; 
+    position: relative;
 }
 div.content:hover {
-    cursor: url('/@assets/cursors/edit.png') 1 30, pointer;
+    border: 3px solid transparent;
     background: aliceblue;
-    border: 3px dotted gray;
+    cursor: pointer;
+}
+div.content:hover:after {
+   content: "\f304"; 
+   font-family: "Font Awesome 5 Free";
+   opacity: 0.5;
+   font-weight: 900;
+   position: absolute;
+   right:1em; 
+   top: 0.5em;
 }
 </style>

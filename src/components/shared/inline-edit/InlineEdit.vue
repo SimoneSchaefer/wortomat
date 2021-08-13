@@ -1,7 +1,7 @@
 <template>
     <div class="container w-100" v-bind:class=" { editing: editing, readonly: !editing}" title="Click to edit">
         <div class="editing p-d-flex p-jc-between" v-if="editing">
-            <div class="value" v-on:keyup.esc="cancel" v-on:keyup.enter="update">
+            <div class="value" v-on:keydown.esc="cancel" v-on:keydown.enter="update">
                 <slot name="editing"></slot>
             </div>
             <div class="options">
@@ -74,13 +74,17 @@ export default class InlineEdit extends Vue {
    font-family: "Font Awesome 5 Free";
    opacity: 0.5;
    font-weight: 900;
+   font-size: 1rem;
+   font-style: normal;
    position: absolute;
    right:1em; 
    top: 0.5em;
 }
+.options {
+    width: 130px;
+}
 .value {
     flex-grow: 1;
-    line-height: 40px;
 }
 div.backdrop {
     background-color: rgba(0, 0, 0, 0.404);

@@ -1,9 +1,11 @@
 <template>
     <div class="sheet">
-        <h3><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></h3>
-        <b><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
+        <h1><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></h1>
         <EditableTags :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
+        <hr>
+        <b><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
         <i><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></i>
+        <hr>
         <EditableText v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>
@@ -25,7 +27,6 @@ export default class SelectedChapters extends Vue {
     @Prop() chapter!: ChapterModel;
 
     updateTags(newTags: TagModel[]) {
-        console.log('NEW TAGS', newTags)
         this.updateChapter({ tags: newTags});
     }
     
@@ -55,3 +56,10 @@ export default class SelectedChapters extends Vue {
     }
 }
 </script>
+
+<style scoped>
+hr {
+    opacity: 0.7;
+    border: 1px solid #efefef;
+}
+</style>

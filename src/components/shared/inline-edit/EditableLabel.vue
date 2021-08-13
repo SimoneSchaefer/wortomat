@@ -41,7 +41,7 @@ export default class EditableLabel extends Vue {
   }
 
   onInput(e) {
-      this.draft = e.target.innerText;
+      this.draft = e.target.innerText.replace('\n', '');
   }
 
   cancel() {
@@ -54,10 +54,3 @@ export default class EditableLabel extends Vue {
   }
 }
 </script>
-
-
-<style scoped>
-.label {
-    flex-grow: 1;
-}
-</style>

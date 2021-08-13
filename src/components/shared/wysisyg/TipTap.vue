@@ -14,9 +14,11 @@
                 <button class="button" @click="editor.chain().focus().toggleBlockquote().run()"><i class="fa fa-quote-right"></i></button>
             </div>
             <div class="button-group">
-                <button class="button" @click="editor.chain().focus().toggleHighlight({color: 'red' }).run()" :class="{ 'is-active': editor.isActive('highlight', { color: 'red' }) }"><i class="fa fa-exclamation-circle"></i></button>
-                <button class="button" @click="editor.chain().focus().toggleHighlight({color: 'yellow' }).run()" :class="{ 'is-active': editor.isActive('highlight', { color: 'yellow' }) }"><i class="fa fa-wrench"></i></button>
-                <button class="button" @click="editor.chain().focus().toggleHighlight({color: 'green' }).run()" :class="{ 'is-active': editor.isActive('highlight', { color: 'green' }) }"><i class="fa fa-lightbulb"></i></button>
+                <button class="button" @click="editor.chain().focus().toggleHighlight({backgroundColor: '#D32F2F', color: '#fff'}).run()" :class="{ 'is-active': editor.isActive('highlight', { backgroundColor: '#D32F2F', color: '#fff' }) }"><i class="fa fa-flag"></i></button>
+                <!--
+                    <button class="button" @click="editor.chain().focus().toggleHighlight({color: 'yellow' }).run()" :class="{ 'is-active': editor.isActive('highlight', { color: 'yellow' }) }"><i class="fa fa-wrench"></i></button>
+                    <button class="button" @click="editor.chain().focus().toggleHighlight({color: 'green' }).run()" :class="{ 'is-active': editor.isActive('highlight', { color: 'green' }) }"><i class="fa fa-lightbulb"></i></button>
+                -->
             </div>
             <div class="button-group last">
                 <button class="button" @click="editor.chain().focus().undo().run()"><i class="fa fa-undo"></i></button>
@@ -33,7 +35,7 @@
 <script>
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Highlight from '@tiptap/extension-highlight'
+import TodoMarker from './todo-marker'
 
 export default {
   components: {
@@ -59,7 +61,7 @@ export default {
       content: this.content,
       extensions: [
         StarterKit,
-        Highlight.configure({ multicolor: true })
+        TodoMarker.configure(),
       ],
     })
   },

@@ -22,6 +22,7 @@ import Badge from 'primevue/badge';
 import SpeedDial from 'primevue/speeddial';
 import AutoComplete from 'primevue/autocomplete';
 import Chip from 'primevue/chip';
+import Divider from 'primevue/divider';
 
 import draggable from 'vuedraggable'
 
@@ -55,6 +56,7 @@ const app = createApp(App)
     .component('SpeedDial', SpeedDial)
     .component('AutoComplete', AutoComplete)
     .component('Chip', Chip)
+    .component('Divider', Divider)
     .component('draggable', draggable)
 
 app.mount("#app");
