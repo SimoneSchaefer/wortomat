@@ -30,7 +30,9 @@ const novelOpened = (state: IState, payload: NovelModel) => {
 const itemsLoaded = (state, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) => {
     const {key, items } = payload;
     state.novelItems[key] = items;
-    console.log('itemsLoaded', state)
+    if (items.length) {
+        state.selection.set(key, itemIdsToSelect(key, [items[0]]))
+    }
 }
 
 const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) => {

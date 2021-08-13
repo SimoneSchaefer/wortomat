@@ -1,9 +1,9 @@
 <template>
     <div class="sheet">
-        <h1><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle"></EditableLabel></h1>
-        <b><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="Summary"></EditableLabel></b>
+        <h3><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></h3>
+        <b><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
         <EditableTags :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
-        <i><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="Detailed summary"></EditableLabel></i>
+        <i><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></i>
         <EditableText v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>

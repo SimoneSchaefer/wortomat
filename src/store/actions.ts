@@ -6,16 +6,7 @@ import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadIte
 
 const openNovel = (context, novelId: number) => {
     new NovelService().get(novelId).then(result => {
-      //const sortedChapters = result.data[NOVEL_ITEM_KEYS.CHAPTERS].sort((a, b) => (a.order > b.order) ? 1 : -1 ); //TODO handle by API
-      //result.data[NOVEL_ITEM_KEYS.CHAPTERS] = sortedChapters
       context.commit('novelOpened', result.data);
-      /*if (result.data[NOVEL_ITEM_KEYS.CHAPTERS].length) {
-        // TODO central selection handler to handle 'nothing-selected' case 
-        // - after opening a novel 
-        // - switching between tabs (keep selection?)
-        // - when selected element has been deleted
-        context.commit('itemsSelected', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: [result.data[NOVEL_ITEM_KEYS.CHAPTERS][0]] });
-      }*/
     });
  }
 
@@ -53,21 +44,16 @@ const selectItems = (context, item: { key: NOVEL_ITEM_KEYS, items: BaseModel[]})
     context.commit('itemsSelected', item)        
 }
 
-const addItem = (context, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel, reference?: { key: NOVEL_ITEM_KEYS, item: BaseModel}}) => {
-    const {key, novelId, item, reference } = payload;
-    createItemInBackend(key, novelId, item).then(result => {
+const addItem = (context, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel }) => {
+    const {key, novelId, item } = payload;
+    if (item.id) {
+      context.commit('itemAdded', { key: key, item: item });
+    } else {
+      createItemInBackend(key, novelId, item).then(result => {
         context.commit('itemAdded', { key: key, item: result.data });
-        context.commit('itemsSelected', { key: key, items: [result.data] });
-        if (reference) {
-          console.log('updating', reference)
-          const aha = [...reference.item[key]];
-          aha.push(result.data);
-          const override = {
-            [key]: aha
-          }
-          updateItem(context, { key: reference.key, oldItem: reference.item, overrideValues: override});         
-        }
-    });      
+        context.commit('itemsSelected', { key: key, items: [result.data] });       
+      });  
+    }       
   }
 
 const updateItem = (context, update: { key: NOVEL_ITEM_KEYS, oldItem: BaseModel, overrideValues}) => {

@@ -10,11 +10,11 @@ export default class MissingValueTolerantLabel extends Vue {
     @Prop() fallback!: string;
 
     get displayValue() {
-        return this.hasValue ? this.value : this.fallbackValue; 
+        return (this.hasValue ? this.value : this.fallback); 
     }
 
     get fallbackValue() {
-        return this.fallback ? this.fallback : 'No content yet';
+        return this.fallback?.length ? this.fallback : 'No content yet';
     }
 
     get hasValue() {

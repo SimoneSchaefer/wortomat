@@ -19,7 +19,7 @@ import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantL
 import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
 
 @Options({
-    components: { InlineEdit, MissingValueTolerantLabel},
+    components: { InlineEdit, MissingValueTolerantLabel },
     emits: [ 'update-label' ]
 })  
 export default class EditableLabel extends Vue {
@@ -29,7 +29,7 @@ export default class EditableLabel extends Vue {
   private draft: string | null = null;
 
   get placeHolder() {
-    return (this.placeHolderTitle || '') + ': No content yet. Click to edit';
+    return (this.placeHolderTitle || '');
   }
 
   onStartEdit() {

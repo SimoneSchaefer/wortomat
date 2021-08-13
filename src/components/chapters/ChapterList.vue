@@ -9,10 +9,10 @@
       <div class="item p-jc-between" v-on:click="selectChapter(element, $event)" v-bind:class="{ active: isSelected(element)}">
           <div class="p-d-flex">
             <div class="title">
-              <MissingValueTolerantLabel :value="element.title" fallbackValue="No title yet"></MissingValueTolerantLabel>
+              <MissingValueTolerantLabel :value="element.title" fallback="No title yet"></MissingValueTolerantLabel>
             </div>
             <div class="summary">
-              <MissingValueTolerantLabel :value="element.summary" fallbackValue="No summary yet"></MissingValueTolerantLabel>
+              <MissingValueTolerantLabel :value="element.summary" fallback="No summary yet"></MissingValueTolerantLabel>
             </div>
           </div>
           <div class="badges">

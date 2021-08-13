@@ -55,7 +55,6 @@ export default class InlineEdit extends Vue {
 .container {
     background-color: white;
     text-align: left;
-    flex-grow: 1;
     position: relative;
     border: 3px solid transparent;
     padding: 0.5rem;
@@ -81,6 +80,7 @@ export default class InlineEdit extends Vue {
 }
 .value {
     flex-grow: 1;
+    line-height: 40px;
 }
 div.backdrop {
     background-color: rgba(0, 0, 0, 0.404);
