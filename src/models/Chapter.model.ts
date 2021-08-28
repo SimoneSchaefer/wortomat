@@ -7,5 +7,4 @@ export class ChapterModel extends BaseModel {
     public extended_summary: string;
     public content: string; 
     public novelId: number;  
-    public tags: TagModel[];
 }

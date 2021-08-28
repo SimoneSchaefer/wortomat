@@ -1,8 +1,9 @@
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
+import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend } from "./store-api-adapter";
 
 const openNovel = (context, novelId: number) => {
     new NovelService().get(novelId).then(result => {
@@ -56,28 +57,26 @@ const addItem = (context, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item
     }       
   }
 
-const updateItem = (context, update: { key: NOVEL_ITEM_KEYS, oldItem: BaseModel, overrideValues}) => {
-    const {key, oldItem, overrideValues } = update;
-    updateItemInBackend(key, oldItem, overrideValues ).then(result => {
+const updateItem = (context, update: { key: NOVEL_ITEM_KEYS, novelId: number, oldItem: BaseModel, overrideValues}) => {
+    const {key, novelId, oldItem, overrideValues } = update;
+    updateItemInBackend(key, novelId, oldItem, overrideValues ).then(result => {
         context.commit('itemUpdated', { key: key, item: result.data })
     });      
 }
   
-const deleteItems = async (context, update: { key: NOVEL_ITEM_KEYS, items: BaseModel[] }) => {
-    const {key, items } = update;
-    const deleted = await deleteItemsInBackend(key, items);
+const deleteItems = async (context, update: { key: NOVEL_ITEM_KEYS, novelId: number, items: BaseModel[] }) => {
+    const {key, novelId, items } = update;
+    const deleted = await deleteItemsInBackend(key, novelId, items);
     context.commit('itemsDeleted', { key: key, items: deleted })
-  }
+}
 
-const updateOrder = async (context, update: { key: NOVEL_ITEM_KEYS, newOrder: BaseModel[] }) => {
-    const results = []
-    let counter = 0;
-    for (const item of update.newOrder) {
-      const newItem = await updateItemInBackend(NOVEL_ITEM_KEYS.CHAPTERS, item as BaseModel, { order: counter} );
-      results.push(newItem.data);
-      counter++;
-    }
-    context.commit('itemsLoaded', { key: update.key, items: results })
+const updateOrder = async (context, update: { key: NOVEL_ITEM_KEYS, novelId: number, newOrder: BaseModel[] }) => {
+  const newOrder = await updatePositionsInBackend(update.key, update.novelId, update.newOrder);
+  context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
+}
+
+  const filterTags = (context, update: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}) => {
+    context.commit('tagsFiltered', { key: update.key, tags: update.tags });
   }
 
   export default {
@@ -91,5 +90,6 @@ const updateOrder = async (context, update: { key: NOVEL_ITEM_KEYS, newOrder: Ba
     updateItem,
     deleteItems,
     updateOrder,
-    loadItems
+    loadItems,
+    filterTags
 }

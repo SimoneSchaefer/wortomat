@@ -1,6 +1,9 @@
 <template>
-    <div class="speed-dial">
-      <SpeedDial showIcon="fa fa-bars" hideIcon="pi pi-times" :radius="100" direction="up-right" type="quarter-circle" :model="menuItems" />     
+    <div class="menu">
+      <Button type="button" @click="toggle" class="p-button-raised p-button-rounded" icon="fa fa-bars"/>
+      <Menu ref="menu" :model="menuItems" :popup="true"/>
+
+
   </div>
 </template>
 
@@ -13,21 +16,29 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   components: {  }
 })
 export default class ChapterMenu extends Vue {
-
   addChapter() {
-    const chapter = new ChapterModel();
-    const novelId = this.$store.getters.openNovelId;
-    chapter.novelId = novelId;
-    const chapters = this.$store.state.currentNovel?.chapters || [];
-    const maxOrder = Math.max.apply(Math, chapters.map(function(o) { return o.order; }))
-    chapter.order = maxOrder;
-    this.$store.dispatch('addItem', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: novelId, item: chapter });
+    this.$store.dispatch('addItem', { 
+      key: NOVEL_ITEM_KEYS.CHAPTERS, 
+      novelId: this.$store.state.currentNovel?.id, 
+      item: new ChapterModel() 
+    });
   }
+
+  toggle(event) {
+    (this.$refs.menu as any).toggle(event);
+  }
+ 
   get menuItems() {
     return [
-    
     {
-        label: 'Delete',
+        label: 'Add chapter',
+        icon: 'fa fa-plus',
+        command: () => {
+          this.addChapter();
+        }
+    },
+    {
+        label: 'Delete selected',
         icon: 'fa fa-trash',
         command: () => {
             const selectedItems = this.$store.getters.currentChapters;
@@ -40,20 +51,17 @@ export default class ChapterMenu extends Vue {
                     header: 'Confirmation',
                     icon: 'pi pi-exclamation-triangle',
                     accept: () => {
-                        this.$store.dispatch('deleteItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: this.$store.getters.currentChapters} )
+                        this.$store.dispatch('deleteItems', { 
+                          key: NOVEL_ITEM_KEYS.CHAPTERS, 
+                          novelId: this.$store.state.currentNovel?.id,
+                          items: this.$store.getters.currentChapters
+                        })
                     }
                 })
             }
            
         }
-    }, {
-        label: 'Add',
-        icon: 'fa fa-plus',
-        command: () => {
-          this.addChapter();
-        }
-    },
-    ] 
+    }] 
   }
 }
 </script>
@@ -61,11 +69,16 @@ export default class ChapterMenu extends Vue {
 
 
 <style scoped>
-  .speed-dial {
+  .menu {
     position:fixed;
-    width:64px;
-    height:64px; 
     bottom: 20px; 
     left: 20px;
+    display: flex;
+    width: 20em;
+    height: 2.3em;
+  }
+
+  .menu Button {
+    margin-right: 1em;
   }
 </style>

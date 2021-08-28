@@ -1,8 +1,20 @@
 <template>
-  <router-view/>
-  <ConfirmDialog></ConfirmDialog>
-  <Toast />
+  <ErrorBoundary>
+    <router-view/>
+    <ConfirmDialog></ConfirmDialog>
+    <Toast />
+  </ErrorBoundary>
 </template>
+
+<script lang="ts">
+import { Options, Vue } from "vue-class-component";
+import ErrorBoundary  from '@/views/ErrorBoundary.vue';
+
+@Options({
+  components: { ErrorBoundary }
+})
+export default class App extends Vue {}
+</script>
 
 <style>
 body {

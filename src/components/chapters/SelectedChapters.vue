@@ -15,7 +15,7 @@ import SelectedChapter from '@/components/chapters/SelectedChapter.vue';
 })
 export default class SelectedChapters extends Vue {
   get currentChapters() {
-    return this.$store.getters.currentChapters;
+    return this.$store.getters.filteredChapters;
   }
 }
 </script>

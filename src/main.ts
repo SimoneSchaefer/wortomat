@@ -23,6 +23,7 @@ import SpeedDial from 'primevue/speeddial';
 import AutoComplete from 'primevue/autocomplete';
 import Chip from 'primevue/chip';
 import Divider from 'primevue/divider';
+import Menu from 'primevue/menu';
 
 import draggable from 'vuedraggable'
 
@@ -52,6 +53,7 @@ const app = createApp(App)
     .component('Message', Message)
     .component('ScrollPanel', ScrollPanel)
     .component('TabMenu', TabMenu)
+    .component('Menu', Menu)
     .component('Badge', Badge)
     .component('SpeedDial', SpeedDial)
     .component('AutoComplete', AutoComplete)

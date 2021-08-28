@@ -31,10 +31,7 @@ export default class NovelList extends Vue {
   @Prop() novels!: any 
 
   startAddMode() {
-    const novel = new NovelModel();
-    novel.id = Date.now();
-    novel.title = 'Ein Buch! ' + Math.random();
-    this.$store.dispatch('addNovel', novel);
+    this.$store.dispatch('addNovel', new NovelModel());
   }
 }
 </script>

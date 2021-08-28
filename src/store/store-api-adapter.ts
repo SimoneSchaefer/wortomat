@@ -24,26 +24,33 @@ export function createItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item:
     }
 }
 
-export async function deleteItemsInBackend(key: NOVEL_ITEM_KEYS, items: BaseModel[]) {
+export async function deleteItemsInBackend(key: NOVEL_ITEM_KEYS, novelId: number, items: BaseModel[]) {
     const results = [];
     for (const item of items) {
-        await deleteItemInBackend(key, item );
+        await deleteItemInBackend(key, novelId, item );
         results.push(item);
     } 
     return results;
 }
 
-export function deleteItemInBackend(key: NOVEL_ITEM_KEYS, item: BaseModel) {
+export function deleteItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel) {
     const serviceToUse = KEY_TO_SERVICE.get(key);
     if (serviceToUse) {
-        return serviceToUse.delete(item);
+        return serviceToUse.delete(novelId, item);
     }
 }
 
-export function updateItemInBackend(key: NOVEL_ITEM_KEYS, item: BaseModel, overrideValues: Record<string, unknown>) {
+export function updatePositionsInBackend(key: NOVEL_ITEM_KEYS, novelId: number, items: BaseModel[]) {
+    const serviceToUse = KEY_TO_SERVICE.get(key);
+    if (serviceToUse) {
+        return serviceToUse.updatePositions(novelId, items);
+    }
+}
+
+export function updateItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel, overrideValues: Record<string, unknown>) {
     const newItem = Object.assign({}, item, overrideValues);
     const serviceToUse = KEY_TO_SERVICE.get(key);
     if (serviceToUse) {
-        return serviceToUse.update(newItem);
+        return serviceToUse.update(novelId, newItem);
     }
 }

@@ -59,11 +59,12 @@ export default {
   mounted() {
     this.editor = new Editor({
       content: this.content,
+      autofocus: true,
       extensions: [
         StarterKit,
         TodoMarker.configure(),
       ],
-    })
+    });
   },
 
   beforeUnmount() {
@@ -72,9 +73,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .editor {
     border: 1px solid #d2d2d2;
+    height: 100%;
 }
 #editor-toolbar {
     background: #f8f9fa;
@@ -114,5 +116,23 @@ export default {
 .editor-content {
     position: relative;
     top: 40px;
+    height: 100%;
 }
+
+.editor-content > div {
+    padding: 0.5em;
+    height: 100%;
+}
+
+.editor-content > div > div {
+    height: 100%;
+    border: 1px solid gray;
+}
+.editor-content .ProseMirror {
+    height: 100%;
+}
+.editor-content .ProseMirror-focused {
+    outline:none;
+}
+
 </style>

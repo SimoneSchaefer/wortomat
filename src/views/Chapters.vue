@@ -2,6 +2,7 @@
   <Splitter style="height: 100%" stateKey="chapters-splitter">
     <SplitterPanel>
       <ScrollPanel>
+        <TagFilter></TagFilter>
         <ChapterList></ChapterList>
       </ScrollPanel>
     </SplitterPanel>
@@ -20,6 +21,7 @@ import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 import { Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import TagFilter from '@/components/shared/TagFilter.vue';
 import ChapterList from '@/components/chapters/ChapterList.vue';
 import ChapterMenu from '@/components/chapters/ChapterMenu.vue';
 import SelectedChapters from '@/components/chapters/SelectedChapters.vue';
@@ -34,7 +36,9 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
     EditableLabel, 
     ChapterList, 
     SelectedChapters, 
-    ChapterMenu }
+    ChapterMenu,
+    TagFilter 
+  }
 })
 export default class Chapters extends Vue {
   mounted() {

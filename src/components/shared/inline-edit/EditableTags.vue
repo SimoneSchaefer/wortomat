@@ -2,7 +2,7 @@
 <div class="editable-tags">
     <InlineEdit @start-edit="onStartEdit" @update="updateTags" @cancel="cancel">
         <template v-slot:editing>
-            <AutoComplete :multiple="true" v-model="tagsDraft" :suggestions="filteredTags" @complete="searchTags($event)">
+            <AutoComplete :multiple="true" v-model="tagsDraft" :suggestions="filteredTags" @complete="searchTags($event)" ref="editableRef" >
                 <template #item="slotProps">
                     <div v-if="slotProps.item.id">{{slotProps.item.name}}</div>
                     <div v-else>Add item: {{slotProps.item.name}}</div>
@@ -48,7 +48,11 @@ export default class EditableTags extends Vue {
     private filteredTags = [];
 
     onStartEdit() {
-        this.tagsDraft = [...this.tags];
+        this.tagsDraft = [...this.tags || []];
+
+        setTimeout(() => {
+            (this.$refs.editableRef as any).focus();
+        }, 0);
     }
 
     cancel() {

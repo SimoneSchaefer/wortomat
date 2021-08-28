@@ -5,7 +5,7 @@
         </template>
         <template #title>
             <div class="p-d-flex p-jc-between">
-                <EditableLabel v-bind:value="novel.title" @update-label="updateTitle"></EditableLabel>
+                <EditableLabel v-bind:value="novel.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel>
                 <div>
                     <router-link :to="'/write/' + novel.id + '/chapters'">
                         <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right"></Button>

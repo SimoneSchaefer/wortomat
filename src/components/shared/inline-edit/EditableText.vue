@@ -4,7 +4,7 @@
     :closeOnEscape="false" 
     :closable="false" 
     :draggable="false"
-    :style="{ 'width': 'calc(100% - 5em)', 'max-width': '80em', 'text-align': 'left'  }">
+    :style="{ 'width': 'calc(100% - 5em)', 'max-width': '80em', 'text-align': 'left', 'height': 'calc(100% - 5em)'  }">
         <TipTap :content="value" ref="editorRef"/>
         <template #footer>
             <Button label="Cancel" v-on:click="cancel"></Button>
@@ -72,6 +72,11 @@ export default class EditableLabel extends Vue {
 }
 </script>
 
+<style>
+.p-dialog-content {
+    height: 100%;
+}
+</style>
 
 <style scoped>
 .content {
