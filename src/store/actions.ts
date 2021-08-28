@@ -2,7 +2,7 @@ import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
-import { NOVEL_ITEM_KEYS } from "./keys";
+import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
 import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend } from "./store-api-adapter";
 
 const openNovel = (context, novelId: number) => {
@@ -33,6 +33,11 @@ const loadNovels = (context) => {
       context.commit('novelsLoaded', result.data)
     });  
 }
+
+const setView = (context, payload: { view: VIEWS, value: boolean}) => {
+  console.log('ACTION', payload)
+  context.commit('setView', { view: payload.view, value: payload.value });
+};
 
 
 const loadItems = (context, payload: { key: NOVEL_ITEM_KEYS, novelId: number }) => {
@@ -75,9 +80,9 @@ const updateOrder = async (context, update: { key: NOVEL_ITEM_KEYS, novelId: num
   context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
 }
 
-  const filterTags = (context, update: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}) => {
-    context.commit('tagsFiltered', { key: update.key, tags: update.tags });
-  }
+const filterTags = (context, update: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}) => {
+  context.commit('tagsFiltered', { key: update.key, tags: update.tags });
+}
 
   export default {
     openNovel,
@@ -91,5 +96,6 @@ const updateOrder = async (context, update: { key: NOVEL_ITEM_KEYS, novelId: num
     deleteItems,
     updateOrder,
     loadItems,
-    filterTags
+    filterTags,
+    setView
 }

@@ -1,9 +1,8 @@
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
-import { getCurrentSelection } from "./getters";
 import { IState } from "./istate";
-import { NOVEL_ITEM_KEYS } from "./keys";
+import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
 import { getChildItems, itemIdsToSelect, updateItemInStore } from "./store.helper";
 
 //// Novel mutations //// 
@@ -29,9 +28,15 @@ const novelOpened = (state: IState, payload: NovelModel) => {
 }
 
 const tagsFiltered = (state: IState, payload: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}) => {
-    console.log('MUTATION', payload)
     state.filteredTags.set(payload.key, payload.tags.map(tag => tag.id));
 }
+
+const setView = (state: IState, payload: { view: VIEWS, value: boolean}) => {
+    console.log('MUTATION', payload)
+    console.log('CURRENT', state.view)
+
+    state.view.set(payload.view, payload.value);
+};
 
 //// Novel items mutations ////
 const itemsLoaded = (state, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}) => {
@@ -72,6 +77,7 @@ const itemsDeleted = (state, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]
     novelDeleted,
     novelOpened,
     tagsFiltered,
+    setView,
 
     itemsLoaded,
     itemsSelected,

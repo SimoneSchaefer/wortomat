@@ -67,4 +67,11 @@ export default class TagFilter extends Vue {
    top: 1.5em;
 }
 
+.p-focus {
+    outline: none !important;
+    box-shadow: none;
+    border: none;
+
+}
+
 </style>

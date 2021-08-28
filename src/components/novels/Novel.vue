@@ -6,7 +6,7 @@
         <template #title>
             <div class="p-d-flex p-jc-between">
                 <EditableLabel v-bind:value="novel.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel>
-                <div>
+                <div class="option-buttons">
                     <router-link :to="'/write/' + novel.id + '/chapters'">
                         <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right"></Button>
                     </router-link>
@@ -57,3 +57,9 @@ export default class Novel extends Vue {
   }
 }
 </script>
+
+<style scoped>
+.option-buttons {
+    width: 5em;
+}
+</style>

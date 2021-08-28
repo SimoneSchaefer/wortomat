@@ -1,12 +1,10 @@
 <template>
     <div class="sheet">
         <h1><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></h1>
-        <EditableTags :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
-        <hr>
-        <b><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
-        <i><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></i>
-        <hr>
-        <EditableText v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
+        <EditableTags v-if="displayTags" :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
+        <b v-if="displaySummary"><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
+        <i v-if="displayExtendedSummary"><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></i>
+        <EditableText v-if="displayContent" v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>
 
@@ -17,7 +15,7 @@ import EditableText from '@/components/shared/inline-edit/EditableText.vue';
 import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
 import { Prop } from 'vue-property-decorator';
 import { ChapterModel } from '@/models/Chapter.model';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
 import { TagModel } from '@/models/Tag.model';
 
 @Options({
@@ -25,6 +23,19 @@ import { TagModel } from '@/models/Tag.model';
 })
 export default class SelectedChapters extends Vue {
     @Prop() chapter!: ChapterModel;
+
+    get displaySummary() {
+        return this.$store.state.view.get(VIEWS.SUMMARY);
+    }
+    get displayExtendedSummary() {
+        return this.$store.state.view.get(VIEWS.EXTENDED_SUMMARY);
+    }
+    get displayContent() {
+        return this.$store.state.view.get(VIEWS.CONTENT);
+    }
+    get displayTags() {
+        return this.$store.state.view.get(VIEWS.TAGS);
+    }
 
     updateTags(newTags: TagModel[]) {
         this.updateChapter({ tags: newTags});

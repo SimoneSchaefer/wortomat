@@ -5,7 +5,7 @@ import { novelIdOrRaise } from "./store.helper";
 const openNovelId = state => state.currentNovel?.id;
 const currentChapters = state => getCurrentSelection(state, NOVEL_ITEM_KEYS.CHAPTERS);
 const filteredChapters = state => getFilteredItems(state, NOVEL_ITEM_KEYS.CHAPTERS);
-const tags = state => state.novelItems[NOVEL_ITEM_KEYS.TAGS]
+const tags = state => state.novelItems[NOVEL_ITEM_KEYS.TAGS] || []
 
 export default {
     openNovelId,
@@ -20,11 +20,7 @@ function getFilteredItems(state: IState, key: NOVEL_ITEM_KEYS) {
     const allItems = state.novelItems[key] || [];
     const filteredTagIds = state.filteredTags.get(key) || [];
 
-    console.log('filteredTagsIds', filteredTagIds)
-
-    if (!filteredTagIds.length) {
-        return allItems;
-    }
+    if (!filteredTagIds.length) { return allItems;}
     return allItems.filter(item => {
         const includedTags = (item.tags ||[]).map(tag => tag.id);
         const notIncluded = filteredTagIds.find(tagId => !includedTags.includes(tagId));
