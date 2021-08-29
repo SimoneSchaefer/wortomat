@@ -82,6 +82,7 @@ export default class EditableLabel extends Vue {
     text-align: left;   
     border: 3px solid transparent;
     padding-top: 0.5em; 
+    padding-left: 0.5em;
     position: relative;
 }
 div.content:hover {

@@ -1,9 +1,13 @@
 <template>
     <div class="sheet">
-        <h1><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></h1>
-        <EditableTags v-if="displayTags" :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
+        <div class="meta">
+            <div class="header"><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></div>
+            <EditableTags v-if="displayTags" :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
+        </div>
+        <hr>
         <b v-if="displaySummary"><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
-        <i v-if="displayExtendedSummary"><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></i>
+        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></span>
+        <hr v-if="displaySummary || displayExtendedSummary">
         <EditableText v-if="displayContent" v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>
@@ -72,5 +76,9 @@ export default class SelectedChapters extends Vue {
 hr {
     opacity: 0.7;
     border: 1px solid #efefef;
+}
+
+.header {
+    font-size: 2em;
 }
 </style>
