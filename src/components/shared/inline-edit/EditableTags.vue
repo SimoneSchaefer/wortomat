@@ -51,7 +51,7 @@ export default class EditableTags extends Vue {
         this.tagsDraft = [...this.tags || []];
 
         setTimeout(() => {
-            (this.$refs.editableRef as any).focus();
+            (this.$refs.editableRef as HTMLInputElement).focus();
         }, 0);
     }
 

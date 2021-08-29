@@ -12,6 +12,7 @@ import { Options, Vue } from 'vue-class-component';
 import { ChapterModel } from '@/models/Chapter.model';
 import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import Menu from 'primevue/menu';
 @Options({
   components: { ConfirmDialog }
 })
@@ -25,7 +26,7 @@ export default class ChapterMenu extends Vue {
   }
 
   toggle(event: Event): void {
-    (this.$refs.menu as any).toggle(event);
+    (this.$refs.menu as Menu).toggle(event);
   }
 
   deleteSelected(): void {

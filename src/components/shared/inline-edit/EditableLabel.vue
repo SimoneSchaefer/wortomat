@@ -36,7 +36,7 @@ export default class EditableLabel extends Vue {
     this.draft = this.value;
 
     setTimeout(() => {
-        (this.$refs.editableRef as any).focus();
+        (this.$refs.editableRef as HTMLInputElement).focus();
     }, 0);
   }
 

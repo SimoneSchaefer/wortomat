@@ -10,13 +10,14 @@
 import { Options, Vue } from 'vue-class-component';
 import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
+import OverlayPanel from 'primevue/overlaypanel';
 @Options({
   components: { ConfirmDialog }
 })
 export default class ChapterMenu extends Vue { 
 
   toggle(event: Event): void {
-    (this.$refs.overlay as any).toggle(event);
+    (this.$refs.overlay as OverlayPanel).toggle(event);
   }
 
   deleteSelected(): void {
