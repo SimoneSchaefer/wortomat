@@ -24,40 +24,40 @@ import { TagModel } from '@/models/Tag.model';
 export default class SelectedChapters extends Vue {
     @Prop() chapter!: ChapterModel;
 
-    get displaySummary() {
+    get displaySummary(): boolean {
         return this.$store.state.view.get(VIEWS.SUMMARY);
     }
-    get displayExtendedSummary() {
+    get displayExtendedSummary(): boolean {
         return this.$store.state.view.get(VIEWS.EXTENDED_SUMMARY);
     }
-    get displayContent() {
+    get displayContent(): boolean {
         return this.$store.state.view.get(VIEWS.CONTENT);
     }
-    get displayTags() {
+    get displayTags(): boolean {
         return this.$store.state.view.get(VIEWS.TAGS);
     }
 
-    updateTags(newTags: TagModel[]) {
+    updateTags(newTags: TagModel[]): void {
         this.updateChapter({ tags: newTags});
     }
     
-    updateTitle(newValue: string) {
+    updateTitle(newValue: string): void {
         this.updateChapter({ title: newValue });   
     }  
 
-    updateSummary(newValue: string) {
+    updateSummary(newValue: string): void {
         this.updateChapter({ summary: newValue });   
     }   
     
-    updateExtendedSummary(newValue: string) {
+    updateExtendedSummary(newValue: string): void {
         this.updateChapter({ extended_summary: newValue });   
     }
 
-    updateContent(newValue: string) {
+    updateContent(newValue: string): void {
         this.updateChapter({ content: newValue });   
     }
 
-    private updateChapter(overrideValues) {
+    private updateChapter(overrideValues): void {
         this.$store.dispatch('updateItem', { 
             key: NOVEL_ITEM_KEYS.CHAPTERS, 
             novelId: this.$store.getters.openNovelId,

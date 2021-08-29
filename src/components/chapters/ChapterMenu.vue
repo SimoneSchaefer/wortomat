@@ -16,7 +16,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   components: { ConfirmDialog }
 })
 export default class ChapterMenu extends Vue {
-  addChapter() {
+  addChapter(): void {
     this.$store.dispatch('addItem', { 
       key: NOVEL_ITEM_KEYS.CHAPTERS, 
       novelId: this.$store.state.currentNovel?.id, 
@@ -24,11 +24,11 @@ export default class ChapterMenu extends Vue {
     });
   }
 
-  toggle(event) {
+  toggle(event: Event): void {
     (this.$refs.menu as any).toggle(event);
   }
 
-  deleteSelected() {
+  deleteSelected(): void {
     this.$store.dispatch('deleteItems', { 
       key: NOVEL_ITEM_KEYS.CHAPTERS, 
       novelId: this.$store.state.currentNovel?.id,
@@ -36,7 +36,7 @@ export default class ChapterMenu extends Vue {
     })
   }
  
-  get menuItems() {
+  get menuItems(): Array<{ label: string, icon: string, command: () => void}> {
     return [
       this.getAddMenuItem(),
       this.getDeleteMenuItem()

@@ -32,7 +32,7 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import TodoMarker from './todo-marker'
@@ -46,17 +46,17 @@ export default {
      content: String 
   },
 
-  getContent() {
+  getContent(): string {
       return this.editor.getHtml();
   },
 
-  data() {
+  data(): Record<string, unknown> {
     return {
       editor: null,
     }
   },
 
-  mounted() {
+  mounted(): void {
     this.editor = new Editor({
       content: this.content,
       autofocus: true,
@@ -67,7 +67,7 @@ export default {
     });
   },
 
-  beforeUnmount() {
+  beforeUnmount(): void {
     this.editor.destroy()
   },
 }

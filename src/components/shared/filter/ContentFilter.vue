@@ -15,11 +15,11 @@ import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
 })
 export default class ChapterMenu extends Vue { 
 
-  toggle(event) {
+  toggle(event: Event): void {
     (this.$refs.overlay as any).toggle(event);
   }
 
-  deleteSelected() {
+  deleteSelected(): void {
     this.$store.dispatch('deleteItems', { 
       key: NOVEL_ITEM_KEYS.CHAPTERS, 
       novelId: this.$store.state.currentNovel?.id,
@@ -27,7 +27,7 @@ export default class ChapterMenu extends Vue {
     })
   }
  
-  get menuItems() {
+  get menuItems(): Array<{ label: string, icon: string, command: () => void }> {
     return [
         this.getViewMenuItem(VIEWS.SUMMARY),
         this.getViewMenuItem(VIEWS.EXTENDED_SUMMARY),

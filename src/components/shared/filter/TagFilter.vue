@@ -23,29 +23,28 @@ export default class TagFilter extends Vue {
     selectedTags = [];
     filteredTags = [];    
 
-    mounted() {
+    mounted(): void {
         this.updateStore();
     }
 
-    get hasTags() {
+    get hasTags(): boolean {
         return this.$store.getters.tags.length > 0;
     }
 
-    updateStore() {
+    updateStore(): void {
         this.$store.dispatch('filterTags', {
             key: NOVEL_ITEM_KEYS.CHAPTERS,
             tags: [...this.selectedTags]
         });
     }
 
-    searchTags($event) {      
+    searchTags($event: { query: string }): void {      
         this.filteredTags = [...this.$store.getters.tags.filter(tag => tag.name.includes($event.query))];    
     }
 }
 </script>
 
 <style>
-
 .tagfilter .p-autocomplete {
     width: 100%;
 }

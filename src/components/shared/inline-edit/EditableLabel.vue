@@ -28,11 +28,11 @@ export default class EditableLabel extends Vue {
 
   private draft: string | null = null;
 
-  get placeHolder() {
+  get placeHolder(): string {
     return (this.placeHolderTitle || '');
   }
 
-  onStartEdit() {
+  onStartEdit(): void {
     this.draft = this.value;
 
     setTimeout(() => {
@@ -40,16 +40,16 @@ export default class EditableLabel extends Vue {
     }, 0);
   }
 
-  onInput(e) {
-      this.draft = e.target.innerText.replace('\n', '');
+  onInput(e: InputEvent): void {
+      this.draft = e.target['innerText'].replace('\n', '');
   }
 
-  cancel() {
+  cancel(): void {
       this.draft = this.value;
   }
 
   @Emit('update-label')
-  updateLabel() {
+  updateLabel(): string {
       return this.draft;
   }
 }

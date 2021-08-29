@@ -47,7 +47,7 @@ export default class EditableTags extends Vue {
     private tagsDraft = [];
     private filteredTags = [];
 
-    onStartEdit() {
+    onStartEdit(): void {
         this.tagsDraft = [...this.tags || []];
 
         setTimeout(() => {
@@ -55,12 +55,12 @@ export default class EditableTags extends Vue {
         }, 0);
     }
 
-    cancel() {
+    cancel(): void {
         this.tagsDraft = this.tags;
     }
 
     @Emit('update-tags')
-    async updateTags() {
+    async updateTags(): Promise<TagModel[]> {
         const newTags = [];
         for (let tag of this.tagsDraft) {
             if (!tag.id) {
@@ -74,7 +74,7 @@ export default class EditableTags extends Vue {
         return newTags;
     }
 
-    searchTags($event) {      
+    searchTags($event: { query: string }): void {      
         this.filteredTags = this.$store.getters.tags.filter(tag => tag.name.includes($event.query));
         if (!this.filteredTags.find(tag => tag.name === $event.query)) {
             this.filteredTags.splice(0, 0, { id: undefined, name: $event.query });

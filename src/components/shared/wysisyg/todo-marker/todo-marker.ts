@@ -7,7 +7,7 @@ import {
   } from '@tiptap/core'
   
   export interface HighlightOptions {
-    HTMLAttributes: Record<string, any>,
+    HTMLAttributes: Record<string, string>,
   }
   
   declare module '@tiptap/core' {

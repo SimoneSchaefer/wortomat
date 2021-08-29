@@ -29,19 +29,19 @@ export default class InlineEdit extends Vue {
     editing = false;
 
     @Emit('start-edit')
-    startEditMode() {
+    startEditMode(): void {
         this.editing = true;
     }
 
     @Emit('update')
-    update($event) {
+    update($event: Event): void {
         $event.preventDefault();
         $event.stopPropagation();
         this.editing = false;
     }
 
     @Emit('cancel')
-    cancel($event) {
+    cancel($event: Event): void {
         $event.preventDefault();
         $event.stopPropagation();
         this.editing = false;

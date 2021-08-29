@@ -28,9 +28,9 @@ import Novel from '@/components/novels/Novel.vue';
   }
 })  
 export default class NovelList extends Vue {
-  @Prop() novels!: any 
+  @Prop() novels!: Novel[]; 
 
-  startAddMode() {
+  startAddMode(): void {
     this.$store.dispatch('addNovel', new NovelModel());
   }
 }

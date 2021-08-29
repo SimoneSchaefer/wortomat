@@ -31,21 +31,21 @@ import EditableLabel from '../shared/inline-edit/EditableLabel.vue';
 export default class Novel extends Vue {
   @Prop() novel!: Novel 
 
-  updateTitle(title: string) {
+  updateTitle(title: string): void {
     this.updateNovelProperty('title', title)
   }
 
-  updateSummary(summary: string) {
+  updateSummary(summary: string): void {
     this.updateNovelProperty('summary', summary)
   }
 
-  updateNovelProperty(key: string, value: any) {
+  updateNovelProperty(key: string, value: string): void {
     const novel = Object.assign({}, this.novel);
     novel[key] = value;
     this.$store.dispatch('updateNovel', novel) 
   }
 
-  deleteNovel() {
+  deleteNovel(): void {
     this.$confirm.require({
         message: 'Are you sure you want to proceed?',
         header: 'Confirmation',

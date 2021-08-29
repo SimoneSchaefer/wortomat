@@ -47,34 +47,34 @@ export default class ChapterList extends Vue {
     this.$store.dispatch('updateOrder', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: this.$store.getters.openNovelId, newOrder: value});
   }
 
-  getTodoCount(chapter: ChapterModel) {
+  getTodoCount(chapter: ChapterModel): number {
     return this.getMarkerCount(chapter, 'yellow')
   }  
   
-  getFixmeCount(chapter: ChapterModel) {
+  getFixmeCount(chapter: ChapterModel): number {
     return this.getMarkerCount(chapter, '#D32F2F')
   }
 
-  getIdeaCount(chapter: ChapterModel) {
+  getIdeaCount(chapter: ChapterModel): number {
     return this.getMarkerCount(chapter, 'green')
   }
   
-  getMarkerCount(chapter: ChapterModel, color: string) {
+  getMarkerCount(chapter: ChapterModel, color: string): number {
     // TODO: make part of model?
     const regex = new RegExp(`data-background-color="${color}"`, 'g');
     const count = ((chapter.content || '').match(regex) || []).length;
     return count;
   }
 
-  isSelected(item: BaseModel) {
-    return this.$store.getters.currentChapters.find(chapter => chapter.id === item.id);
+  isSelected(item: BaseModel): boolean {
+    return !!this.$store.getters.currentChapters.find(chapter => chapter.id === item.id);
   }
 
-  selectChapter(selected: BaseModel, $event)  {
+  selectChapter(selected: BaseModel, $event: Event): void  {
     let selectedItems = [];
-    if ($event.shiftKey) {
+    if ($event['shiftKey']) {
       selectedItems = this.handleShift(selected);
-    } else if ($event.ctrlKey) {
+    } else if ($event['ctrlKey']) {
       selectedItems = this.handleCtrl(selected);
     } else {
       selectedItems = [selected];
