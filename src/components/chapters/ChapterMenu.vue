@@ -2,6 +2,7 @@
     <div class="menu">
       <Button type="button" @click="toggle" class="p-button-raised p-button-rounded" icon="fa fa-bars"/>
       <Menu ref="menu" :model="menuItems" :popup="true"/>
+      <ConfirmDialog ref="confirm" @accept="deleteSelected"></ConfirmDialog>
   </div>
 </template>
 
@@ -9,9 +10,10 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { ChapterModel } from '@/models/Chapter.model';
+import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
 @Options({
-  components: {  }
+  components: { ConfirmDialog }
 })
 export default class ChapterMenu extends Vue {
   addChapter() {
@@ -24,6 +26,14 @@ export default class ChapterMenu extends Vue {
 
   toggle(event) {
     (this.$refs.menu as any).toggle(event);
+  }
+
+  deleteSelected() {
+    this.$store.dispatch('deleteItems', { 
+      key: NOVEL_ITEM_KEYS.CHAPTERS, 
+      novelId: this.$store.state.currentNovel?.id,
+      items: this.$store.getters.currentChapters
+    })
   }
  
   get menuItems() {
@@ -45,18 +55,7 @@ export default class ChapterMenu extends Vue {
                 if (!selectedItems.length) {
                     this.$toast.add({severity:'error', summary: 'Action not possible', detail:'No chapters have been selected', life: 3000});
                 } else {
-                    this.$confirm.require({
-                        message: 'Are you sure you want to proceed?',
-                        header: 'Confirmation',
-                        icon: 'pi pi-exclamation-triangle',
-                        accept: () => {
-                            this.$store.dispatch('deleteItems', { 
-                              key: NOVEL_ITEM_KEYS.CHAPTERS, 
-                              novelId: this.$store.state.currentNovel?.id,
-                              items: this.$store.getters.currentChapters
-                            })
-                        }
-                    })
+                  (this.$refs.confirm as ConfirmDialog).getDecision();
                 }
               
             }

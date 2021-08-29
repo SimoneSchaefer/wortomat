@@ -15,6 +15,9 @@
   <ChapterMenu></ChapterMenu>
 </template>
 
+
+
+
 <script lang="ts">
 import ScrollPanel from 'primevue/scrollpanel';
 import Splitter from 'primevue/splitter';
@@ -45,5 +48,4 @@ export default class Chapters extends Vue {
     this.$store.dispatch('loadItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: this.$route.params.id }); 
   }
 }
-
 </script>

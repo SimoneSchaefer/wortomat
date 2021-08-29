@@ -11,9 +11,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/write/:id',
     component: () => import(/* webpackChunkName: "about" */ '../views/OpenedNovel.vue'),
     children: [{
-      path: 'chapters',
-      component: () => import(/* webpackChunkName: "about" */ '../views/Chapters.vue'),
-    }]
+        path: 'chapters',
+        component: () => import(/* webpackChunkName: "about" */ '../views/Chapters.vue'),
+      },{
+        path: 'tags',
+        component: () => import(/* webpackChunkName: "about" */ '../views/Tags.vue'),
+      }]
   },
   {
     path: '/about',
