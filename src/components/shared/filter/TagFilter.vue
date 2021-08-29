@@ -56,7 +56,7 @@ export default class TagFilter extends Vue {
 }
 
 .tagfilter .p-autocomplete:after {
-   content: "\f0b0"; 
+   content: "\f02c"; 
    font-family: "Font Awesome 5 Free";
    opacity: 0.5;
    font-weight: 900;

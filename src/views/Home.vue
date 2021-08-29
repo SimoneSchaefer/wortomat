@@ -13,7 +13,7 @@ import { NovelModel} from '@/models/Novel.model';
   },
 })
 export default class BooksOverview extends Vue {
-  mounted () {
+  mounted(): void {
     this.$store.dispatch('loadNovels', this.$route.params.id)
   }
 

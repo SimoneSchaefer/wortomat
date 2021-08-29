@@ -1,7 +1,7 @@
 import { NovelItemService } from './NovelItemService';
 
 export class TagService extends NovelItemService {
-    getAPIPath() {
+    getAPIPath(): string {
         return 'tags';
     }
 }

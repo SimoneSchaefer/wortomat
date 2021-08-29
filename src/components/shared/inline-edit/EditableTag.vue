@@ -24,15 +24,15 @@ export default class EditableTag extends Vue {
 
     @Prop() tag: TagModel;
     
-    get tags() {
+    get tags(): TagModel[] {
         return this.$store.getters.tags;
     }
 
-    confirm() {
+    confirm(): void {
         (this.$refs.confirm as ConfirmDialog).getDecision();
     }
 
-    remove() {
+    remove(): void {
         this.$store.dispatch('deleteItems', { 
             key: NOVEL_ITEM_KEYS.TAGS, 
             novelId: this.$store.state.currentNovel?.id,

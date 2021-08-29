@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import { Store } from 'vuex'
 import { State } from './store/store'
 

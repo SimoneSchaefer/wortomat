@@ -4,7 +4,7 @@ import { API } from './Axios';
 
 export abstract class NovelItemService {
 
-    abstract getAPIPath();
+    abstract getAPIPath(): string;
 
     public updatePositions(novelId: number, newOrder: BaseModel[]): Promise<AxiosResponse>{
         const sortedIds = newOrder.map(item => item.id);

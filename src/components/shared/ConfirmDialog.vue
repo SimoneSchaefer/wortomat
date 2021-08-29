@@ -13,7 +13,7 @@ export default class ConfirmDialog extends Vue {
     @Prop() header;
     private isVisible = false;
 
-    confirm() {
+    confirm(): void {
         if (this.isVisible) {
             this.$confirm.require({
                 message: this.message || 'Are you sure you want to proceed?',
@@ -30,18 +30,18 @@ export default class ConfirmDialog extends Vue {
     }
 
     @Emit()
-    accept() { 
+    accept(): boolean { 
         this.isVisible = false;
         return true; 
     }
 
     @Emit()
-    cancel() {
+    cancel(): boolean {
         this.isVisible = false;
         return false;
     }
 
-    getDecision() {
+    getDecision(): void {
         this.isVisible = true;
         this.confirm();        
   }  

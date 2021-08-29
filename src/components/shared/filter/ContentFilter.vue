@@ -1,6 +1,5 @@
 <template>
-    <Button type="button" @click="toggle" class="p-button-text" icon="fa fa-bars"/>
-
+    <Button type="button" @click="toggle" class="p-button-text" icon="fa fa-eye"/>
     <OverlayPanel ref="overlay">
         <Menu :model="menuItems"/>
     </OverlayPanel>

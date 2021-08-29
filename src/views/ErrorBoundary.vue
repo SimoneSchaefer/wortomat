@@ -7,9 +7,9 @@ import { Vue } from "vue-class-component";
 import { useToast } from "primevue/usetoast";
 
 export default class ErrorBoundary extends Vue {
-    errorCaptured(err, _vm, _info) {
+    errorCaptured(err: Error): boolean {
         const toast = useToast();
-        toast.add({severity:'error', summary: 'An error occurred', detail:err, life: 3000});
+        toast.add({severity:'error', summary: 'An error occurred', detail: err.message, life: 3000});
         return false;
     }
 }

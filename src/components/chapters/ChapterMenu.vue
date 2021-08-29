@@ -11,7 +11,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { ChapterModel } from '@/models/Chapter.model';
 import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 @Options({
   components: { ConfirmDialog }
 })
@@ -57,6 +57,7 @@ export default class ChapterMenu extends Vue {
     return {
       label: 'Delete selected',
       icon: 'fa fa-trash',
+      disabled: this.$store.getters.currentChapters.length === 0,
       command: () => {
         const selectedItems = this.$store.getters.currentChapters;
         if (!selectedItems.length) {

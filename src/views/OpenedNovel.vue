@@ -10,11 +10,11 @@
 <script lang="ts">
 import { Vue } from 'vue-class-component';
 export default class OpenedNovel extends Vue {
-  mounted() {
+  mounted(): void {
     this.$store.dispatch('openNovel', this.$route.params.id) 
   }
 
-  get menuItems() {
+  get menuItems(): Array<{ label: string, icon: string, to: string}> {
     return [
       {label: 'Home', icon: 'fa fa-home', to: '/'},
       {label: 'Chapters', icon: 'fa fa-book', to: 'chapters'},

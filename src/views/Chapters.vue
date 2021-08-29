@@ -44,7 +44,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   }
 })
 export default class Chapters extends Vue {
-  mounted() {
+  mounted(): void {
     this.$store.dispatch('loadItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: this.$route.params.id }); 
   }
 }

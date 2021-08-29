@@ -30,46 +30,45 @@ import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantL
     emits: [ 'update-text' ]
 })  
 export default class EditableLabel extends Vue {
-  @Prop() header!: string; 
-  @Prop() value!: string; 
+    @Prop() header!: string; 
+    @Prop() value!: string; 
 
-  private editing = false;
+    editing = false;
 
-  startEditMode() {
-    this.editing = true;
-  }
+    startEditMode(): void {
+        this.editing = true;
+    }
 
-  cancel() {
-      const updatedContent = this.getCurrentContent();
-      if (updatedContent !== this.value) {
-        this.$confirm.require({
-            message: 'Are you sure you want to proceed?',
-            header: 'Confirmation',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-                this.discard();
-            }
-        });
-      } else {
-        this.discard();
-      }    
-  }
+    cancel(): void {
+        const updatedContent = this.getCurrentContent();
+        if (updatedContent !== this.value) {
+            this.$confirm.require({
+                message: 'Are you sure you want to proceed?',
+                header: 'Confirmation',
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    this.discard();
+                }
+            });
+        } else { this.discard(); }    
+    }
 
-  private discard() {
-        this.editing = false;
-  }
+    @Emit('update-text')
+    updateText(): string {
+    const updatedContent = this.getCurrentContent();
+    this.editing = false;
+    return updatedContent;
+    }
 
-  @Emit('update-text')
-  updateText() {
-      const updatedContent = this.getCurrentContent();
-      this.editing = false;
-      return updatedContent;
-  }
 
-  private getCurrentContent() {
-      return (this.$refs.editorRef as any).editor.getHTML();
-  }
-}
+    private discard(): void {
+    this.editing = false;
+    }
+
+    private getCurrentContent(): string {
+    return (this.$refs.editorRef as any).editor.getHTML();
+    }
+    }
 </script>
 
 <style>
