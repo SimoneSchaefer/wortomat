@@ -2,7 +2,7 @@
     <div class="menu">
       <Button type="button" @click="toggle" class="p-button-raised p-button-rounded" icon="fa fa-bars"/>
       <Menu ref="menu" :model="menuItems" :popup="true"/>
-      <ConfirmDialog ref="confirm" @accept="deleteSelected"></ConfirmDialog>
+      <ConfirmDialog ref="confirm" @accept="deleteSelected" message="Are you sure you want to delete the selected chapters?"></ConfirmDialog>
   </div>
 </template>
 
@@ -37,50 +37,34 @@ export default class ChapterMenu extends Vue {
   }
  
   get menuItems() {
-    return [{
-      label: 'Modify',
-      items: [
-        {
-            label: 'Add chapter',
-            icon: 'fa fa-plus',
-            command: () => {
-              this.addChapter();
-            }
-        },
-        {
-            label: 'Delete selected',
-            icon: 'fa fa-trash',
-            command: () => {
-                const selectedItems = this.$store.getters.currentChapters;
-                if (!selectedItems.length) {
-                    this.$toast.add({severity:'error', summary: 'Action not possible', detail:'No chapters have been selected', life: 3000});
-                } else {
-                  (this.$refs.confirm as ConfirmDialog).getDecision();
-                }
-              
-            }
-        }
-      ]}, {
-      label: 'View', 
-      items: [
-        this.getViewMenuItem(VIEWS.SUMMARY),
-        this.getViewMenuItem(VIEWS.EXTENDED_SUMMARY),
-        this.getViewMenuItem(VIEWS.TAGS),
-        this.getViewMenuItem(VIEWS.CONTENT),
-      ]
-    }] 
+    return [
+      this.getAddMenuItem(),
+      this.getDeleteMenuItem()
+    ] 
   }
 
-  private getViewMenuItem(view: VIEWS) {
+  private getAddMenuItem() {
     return {
-        label: view,
-        icon: `fa fa-${this.$store.state.view.get(view) ? 'check-square' : 'minus-square'}`,
-        command: () => {
-          this.$store.dispatch('setView', { 
-            view: view,
-            value: !this.$store.state.view.get(view)
-          })
-        }
+      label: 'Add chapter',
+      icon: 'fa fa-plus',
+      command: () => {
+        this.addChapter();
+      }
+    }
+  }
+
+  private getDeleteMenuItem() {
+    return {
+      label: 'Delete selected',
+      icon: 'fa fa-trash',
+      command: () => {
+        const selectedItems = this.$store.getters.currentChapters;
+        if (!selectedItems.length) {
+            this.$toast.add({severity:'error', summary: 'Action not possible', detail:'No chapters have been selected', life: 3000});
+        } else {
+          (this.$refs.confirm as ConfirmDialog).getDecision();
+        }          
+      }
     }
   }
 }

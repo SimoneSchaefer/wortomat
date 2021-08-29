@@ -24,6 +24,7 @@ import AutoComplete from 'primevue/autocomplete';
 import Chip from 'primevue/chip';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
+import OverlayPanel from 'primevue/overlaypanel';
 
 import draggable from 'vuedraggable'
 
@@ -58,6 +59,7 @@ const app = createApp(App)
     .component('SpeedDial', SpeedDial)
     .component('AutoComplete', AutoComplete)
     .component('Chip', Chip)
+    .component('OverlayPanel', OverlayPanel)
     .component('Divider', Divider)
     .component('draggable', draggable)
 

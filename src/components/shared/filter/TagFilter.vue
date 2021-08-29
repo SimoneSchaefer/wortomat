@@ -1,6 +1,6 @@
 <template>
 <div class="tagfilter" v-if="hasTags">
-    <AutoComplete :multiple="true" :completeOnFocus="true" v-model="selectedTags" :suggestions="filteredTags" @complete="searchTags($event)" @item-unselect="updateStore($event)" @item-select="updateStore($event)">
+    <AutoComplete :multiple="true" :completeOnFocus="true" v-model="selectedTags" :suggestions="filteredTags" @complete="searchTags($event)" @item-unselect="updateStore($event)" @item-select="updateStore">
         <template #item="slotProps">
             {{ slotProps.item.name }}
         </template>
@@ -23,11 +23,15 @@ export default class TagFilter extends Vue {
     selectedTags = [];
     filteredTags = [];    
 
+    mounted() {
+        this.updateStore();
+    }
+
     get hasTags() {
         return this.$store.getters.tags.length > 0;
     }
 
-    updateStore(_$event) {
+    updateStore() {
         this.$store.dispatch('filterTags', {
             key: NOVEL_ITEM_KEYS.CHAPTERS,
             tags: [...this.selectedTags]
@@ -41,10 +45,6 @@ export default class TagFilter extends Vue {
 </script>
 
 <style>
-.tagfilter {
-    background-color: aliceblue;
-    border-bottom: 1px solid #efefef;
-}
 
 .tagfilter .p-autocomplete {
     width: 100%;
