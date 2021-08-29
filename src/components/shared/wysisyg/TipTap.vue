@@ -33,43 +33,38 @@
 </template>
 
 <script lang="ts">
+import { Options, Vue } from 'vue-class-component';
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import TodoMarker from './todo-marker'
+import { Prop } from 'vue-property-decorator';
 
-export default {
-  components: {
-    EditorContent,
-  },
 
-  props: {
-     content: String 
-  },
+@Options({
+  components: { EditorContent }
+})
+export default class TipTap extends Vue { 
+    @Prop() content: string;
+    editor: Editor = null;
 
-  getContent(): string {
-      return this.editor.getHtml();
-  },
-
-  data(): Record<string, unknown> {
-    return {
-      editor: null,
+    mounted(): void {
+        this.editor = new Editor({
+            content: this.content,
+            autofocus: true,
+            extensions: [
+                StarterKit,
+                TodoMarker.configure()
+            ],
+        });
     }
-  },
 
-  mounted(): void {
-    this.editor = new Editor({
-      content: this.content,
-      autofocus: true,
-      extensions: [
-        StarterKit,
-        TodoMarker.configure(),
-      ],
-    });
-  },
+    getContent(): string {
+        return this.editor.getHTML();
+    } 
 
-  beforeUnmount(): void {
-    this.editor.destroy()
-  },
+    beforeUnmount(): void {
+        this.editor.destroy()
+    }
 }
 </script>
 

@@ -66,9 +66,9 @@ export default class EditableLabel extends Vue {
     }
 
     private getCurrentContent(): string {
-    return (this.$refs.editorRef as any).editor.getHTML();
+        return (this.$refs.editorRef as TipTap).getContent();
     }
-    }
+}
 </script>
 
 <style>
