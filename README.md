@@ -8,6 +8,7 @@ Are you drowning in your own plot?
 
 Then wortomat might be just the tool for you :) 
 
+![Screenshot](/about/wortomat-screenshot.png)
 
 ## Current state
 
@@ -33,8 +34,6 @@ java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
 ```
 
 Open your browser on http://localhost:8085. 
-
-![Screenshot](/about/wortomat-screenshot.png)
 
 Happy writing!
 
