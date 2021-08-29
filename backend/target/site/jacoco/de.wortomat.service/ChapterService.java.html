@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="de"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChapterService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">backend</a> &gt; <a href="index.source.html" class="el_package">de.wortomat.service</a> &gt; <span class="el_source">ChapterService.java</span></div><h1>ChapterService.java</h1><pre class="source lang-java linenums">package de.wortomat.service;
+
+import de.wortomat.model.Chapter;
+import de.wortomat.repository.ChapterRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+<span class="fc" id="L13">public class ChapterService {</span>
+    @Autowired
+    ChapterRepository chapterRepository;
+
+    @Autowired
+    NovelService novelService;
+
+    public List&lt;Chapter&gt; get(Long novelId) {
+<span class="nc" id="L21">        return this.chapterRepository.findAllByNovelIdOrderByPosition(novelId);</span>
+    }
+
+    public Chapter create(Long novelId, Chapter chapter) {
+<span class="nc" id="L25">        chapter.setNovel(this.novelService.get(novelId));</span>
+<span class="nc" id="L26">        chapter.setPosition((getMaxPosition(novelId)));</span>
+<span class="nc" id="L27">        return this.chapterRepository.save(chapter);</span>
+    }
+
+    public Chapter update(Long novelId, Chapter chapter) {
+<span class="nc" id="L31">        chapter.setNovel(this.novelService.get(novelId));</span>
+<span class="nc" id="L32">        return this.chapterRepository.save(chapter);</span>
+    }
+    public void delete(Long _novelId, Long chapterId) {
+<span class="nc" id="L35">        this.chapterRepository.deleteById(chapterId);</span>
+<span class="nc" id="L36">    }</span>
+
+    public int getMaxPosition(Long novelId) {
+<span class="nc" id="L39">        Chapter maxPosition = this.chapterRepository.findTopByNovelIdOrderByPositionDesc(novelId);</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (maxPosition == null) {</span>
+<span class="nc" id="L41">            return 0;</span>
+        }
+<span class="nc" id="L43">        return maxPosition.getPosition() + 1;</span>
+    }
+
+    public List&lt;Chapter&gt; updatePositions(Long novelId, List&lt;Long&gt; updatedPositions) {
+<span class="nc" id="L47">        List&lt;Chapter&gt; newPositions = new ArrayList&lt;&gt;(updatedPositions.size());</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        for (int positionCounter = 0; positionCounter &lt; updatedPositions.size(); positionCounter++) {</span>
+<span class="nc" id="L49">            Chapter chapter = this.chapterRepository.findById((updatedPositions.get(positionCounter))).get();</span>
+<span class="nc" id="L50">            chapter.setPosition(positionCounter);</span>
+<span class="nc" id="L51">            newPositions.add(chapter);</span>
+        }
+<span class="nc" id="L53">        this.chapterRepository.saveAll(newPositions);</span>
+<span class="nc" id="L54">        return this.chapterRepository.findAllByNovelIdOrderByPosition(novelId);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

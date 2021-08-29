@@ -1,0 +1,14 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+backend,de.wortomat.service,ChapterService,93,3,4,0,19,1,8,1,6,1
+backend,de.wortomat.service,NovelService,28,3,0,0,6,1,5,1,5,1
+backend,de.wortomat.service,TagService,29,3,0,0,6,1,3,1,3,1
+backend,de.wortomat,WortomatApplication,5,26,0,0,2,6,1,3,1,3
+backend,de.wortomat,WortomatApplication.new WebMvcConfigurer() {...},0,11,0,0,0,3,0,2,0,2
+backend,de.wortomat.sqlite,SQLiteIdentityColumnSupport,9,0,0,0,4,0,4,0,4,0
+backend,de.wortomat.sqlite,SQLiteDialect,139,0,0,0,34,0,7,0,7,0
+backend,de.wortomat.controller,ChapterController,35,3,0,0,6,1,5,1,5,1
+backend,de.wortomat.controller,TagController,22,3,0,0,4,1,3,1,3,1
+backend,de.wortomat.controller,NovelController,31,3,0,0,6,1,5,1,5,1
+backend,de.wortomat.model,Chapter,364,3,64,0,8,1,52,1,20,1
+backend,de.wortomat.model,Tag,209,3,38,0,4,1,31,1,12,1
+backend,de.wortomat.model,Novel,278,3,48,0,6,1,40,1,16,1

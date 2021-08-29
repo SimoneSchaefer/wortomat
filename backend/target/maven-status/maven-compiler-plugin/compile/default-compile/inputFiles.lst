@@ -1,0 +1,15 @@
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/model/Chapter.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/model/Novel.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/model/Tag.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/WortomatApplication.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/repository/TagRepository.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/service/TagService.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/controller/ChapterController.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/repository/ChapterRepository.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/controller/TagController.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/service/ChapterService.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/controller/NovelController.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/sqlite/SQLiteIdentityColumnSupport.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/sqlite/SQLiteDialect.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/repository/NovelRepository.java
+/home/manuelswiercz/simone/wortomat/backend/src/main/java/de/wortomat/service/NovelService.java
