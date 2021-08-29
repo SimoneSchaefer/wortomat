@@ -11,7 +11,7 @@ const openNovel = (context, novelId: number) => {
     });
  }
 
- const addNovel = (context, novel: NovelModel) => {
+const addNovel = (context, novel: NovelModel) => {
     new NovelService().create(novel).then(result => {
       context.commit('novelAdded', result.data);
     });
@@ -35,7 +35,6 @@ const loadNovels = (context) => {
 }
 
 const setView = (context, payload: { view: VIEWS, value: boolean}) => {
-  console.log('ACTION', payload)
   context.commit('setView', { view: payload.view, value: payload.value });
 };
 

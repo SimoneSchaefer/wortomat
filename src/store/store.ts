@@ -19,6 +19,8 @@ export default new Vuex.Store<IState>({
       VIEWS.EXTENDED_SUMMARY, true
     ],[
       VIEWS.CONTENT, true
+    ],[
+      VIEWS.TAGS, true
     ]])
   },
   getters,

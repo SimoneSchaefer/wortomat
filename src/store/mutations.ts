@@ -32,9 +32,6 @@ const tagsFiltered = (state: IState, payload: { key: NOVEL_ITEM_KEYS, tags: TagM
 }
 
 const setView = (state: IState, payload: { view: VIEWS, value: boolean}) => {
-    console.log('MUTATION', payload)
-    console.log('CURRENT', state.view)
-
     state.view.set(payload.view, payload.value);
 };
 

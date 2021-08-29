@@ -37,6 +37,8 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   components: { draggable, MissingValueTolerantLabel}
 })
 export default class ChapterList extends Vue {
+  private lastChecked: BaseModel = null; 
+
   get chapters() {
     return this.$store.getters.filteredChapters || [];
   }
@@ -69,10 +71,40 @@ export default class ChapterList extends Vue {
   }
 
   selectChapter(selected: BaseModel, $event)  {
-    const selectedItems = $event.ctrlKey ? this.$store.getters.currentChapters : []
-    selectedItems.push(selected);
+    let selectedItems = [];
+    if ($event.shiftKey) {
+      selectedItems = this.handleShift(selected);
+    } else if ($event.ctrlKey) {
+      selectedItems = this.handleCtrl(selected);
+    } else {
+      selectedItems = [selected];
+    }
+    if (selectedItems.find(selectedItem => selectedItem.id === selected.id)) {
+      this.lastChecked = selected;
+    }
     this.$store.dispatch('selectItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, items: selectedItems });
-  }  
+  }
+
+  handleCtrl(selected: BaseModel): BaseModel[]  {
+    let selectedItems = this.$store.getters.currentChapters;
+    const index = selectedItems.findIndex(selectedItem => selectedItem.id === selected.id);
+    if (index >= 0) {
+      selectedItems.splice(index, 1);
+    } else {
+      selectedItems.push(selected);
+    }
+    return selectedItems;
+  }
+  
+  handleShift(selected: BaseModel): BaseModel[] {
+    if (!this.lastChecked) {
+      return [selected];
+    }
+    const start = selected.position;
+    const end = this.lastChecked.position;
+    const selectedItems = this.$store.getters.filteredChapters.slice(Math.min(start,end), Math.max(start,end)+ 1);
+    return selectedItems;
+  }
 }
 </script>
 
@@ -83,9 +115,14 @@ export default class ChapterList extends Vue {
   padding: 0.5em;
 }
 
-.item.active,.item:hover {
+.item.active {
   cursor: pointer;
   background-color: #bad8f6a6;
+}
+
+.item:hover {
+  cursor: pointer;
+  background-color: #d0e7ff7c;
 }
 
 .title {
