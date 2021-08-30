@@ -1,5 +1,6 @@
 package de.wortomat;
 
+import de.wortomat.service.FileService;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -18,13 +19,16 @@ public class WortomatApplication {
 	@Autowired
 	Environment env;
 
+	@Autowired
+	FileService fileService;
+
 	public static void main(String[] args) {
 		SpringApplication.run(WortomatApplication.class, args);
 	}
 
 	@Bean
 	public DataSource dataSource() {
-		File directory = new File(System.getProperty("user.home") + "/wortomat");
+		File directory = new File(fileService.getStorageLocation());
 		if (! directory.exists()){
 			directory.mkdir();
 		}
