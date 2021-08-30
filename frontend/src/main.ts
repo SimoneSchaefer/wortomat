@@ -25,9 +25,11 @@ import Chip from 'primevue/chip';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
 import OverlayPanel from 'primevue/overlaypanel';
+import SelectButton from 'primevue/selectbutton';
+import Checkbox from 'primevue/checkbox';
+import Fieldset from 'primevue/fieldset';
 
 import draggable from 'vuedraggable'
-
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -55,12 +57,15 @@ const app = createApp(App)
     .component('ScrollPanel', ScrollPanel)
     .component('TabMenu', TabMenu)
     .component('Menu', Menu)
+    .component('SelectButton', SelectButton)
     .component('Badge', Badge)
     .component('SpeedDial', SpeedDial)
     .component('AutoComplete', AutoComplete)
     .component('Chip', Chip)
     .component('OverlayPanel', OverlayPanel)
+    .component('Checkbox', Checkbox)
     .component('Divider', Divider)
+    .component('Fieldset', Fieldset)
     .component('draggable', draggable)
 
 app.mount("#app");
