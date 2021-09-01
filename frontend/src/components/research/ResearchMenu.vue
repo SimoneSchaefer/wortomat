@@ -11,13 +11,13 @@ import { BaseModel } from '@/models/Base.model';
 @Options({
   components: { NovelItemMenu }
 })
-export default class ChapterMenu extends Vue {
+export default class ResearchMenu extends Vue {
   get itemKey(): NOVEL_ITEM_KEYS {
-    return NOVEL_ITEM_KEYS.CHAPTERS;
+    return NOVEL_ITEM_KEYS.RESEARCH;
   }
 
   get items(): BaseModel[] {
-    return this.$store.getters.currentChapters;
+    return this.$store.getters.currentResearch;
   }
 }
 </script>

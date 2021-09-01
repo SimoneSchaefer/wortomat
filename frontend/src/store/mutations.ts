@@ -46,7 +46,7 @@ const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Base
 
 const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
-    state.selection.set(key, itemIdsToSelect(key, items))
+    state.selection.set(key, itemIdsToSelect(key, items));
 }
     
 const itemAdded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}): void => {
