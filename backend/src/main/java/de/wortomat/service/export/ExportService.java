@@ -12,6 +12,8 @@ public class ExportService {
 
     @Autowired
     HTMLExportService htmlExportService;
+    @Autowired
+    PDFExportService pdfExportService;
 
     public String export(Long novelId, ExportOptions exportOptions) throws IOException {
         ExportOptionsType type = exportOptions.type;
@@ -24,6 +26,7 @@ public class ExportService {
     private Exporter getExporter(ExportOptionsType type) {
         switch (type) {
             case HTML: return this.htmlExportService;
+            case PDF: return this.pdfExportService;
 
         }
         throw new IllegalArgumentException(String.format("unknown export format %s", type));

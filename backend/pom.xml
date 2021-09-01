@@ -49,13 +49,23 @@
 			<version>3.25.2</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.github.gwenn/sqlite-dialect -->
 		<dependency>
 			<groupId>com.github.gwenn</groupId>
 			<artifactId>sqlite-dialect</artifactId>
 			<version>0.1.2</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.5.10</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.itextpdf.tool</groupId>
+			<artifactId>xmlworker</artifactId>
+			<version>5.5.10</version>
+		</dependency>
 
 	</dependencies>
 
