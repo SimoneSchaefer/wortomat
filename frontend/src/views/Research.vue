@@ -1,7 +1,7 @@
 <template>
 <SplitView stateKey="research">
   <template v-slot:leftpanel>
-    RESEARCH
+    <ResearchList></ResearchList>
   </template>
   <template v-slot:content>
     RRRRESEARCH
@@ -15,6 +15,7 @@ import { Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import FilterMenu from '@/components/shared/filter/FilterMenu.vue';
 import ResearchMenu from '@/components/research/ResearchMenu.vue';
+import ResearchList from '@/components/research/ResearchList.vue';
 import SplitView from './SplitView.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
@@ -23,6 +24,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   components: { 
     EditableLabel, 
     ResearchMenu,
+    ResearchList,
     FilterMenu,
     SplitView
   }
