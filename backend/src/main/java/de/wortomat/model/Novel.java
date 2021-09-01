@@ -23,6 +23,10 @@ public class Novel {
     @OneToMany(mappedBy = "novel")
     private List<Chapter> chapters;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
+    private List<Research> research;
+
     @OneToMany(mappedBy = "novel")
     private List<Tag> tags;
 }

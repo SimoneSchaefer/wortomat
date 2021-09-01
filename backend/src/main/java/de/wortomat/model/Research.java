@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Chapter implements PositionAware {
+public class Research implements PositionAware{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -21,6 +21,9 @@ public class Chapter implements PositionAware {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column(columnDefinition = "TEXT")
+    private String[] images;
 
     private int position;
 
