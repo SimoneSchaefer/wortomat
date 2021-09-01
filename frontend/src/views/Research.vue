@@ -1,51 +1,39 @@
 <template>
-  <Splitter style="height: 100%" stateKey="chapters-splitter">
-    <SplitterPanel>
-      <ScrollPanel>        
-        <FilterMenu></FilterMenu>
-        RESEARCH!
-      </ScrollPanel>
-    </SplitterPanel>
-    <SplitterPanel class="bg-gray">
-      <ScrollPanel style="height: 100%">
-        SELECTED RESEARCH!
-      </ScrollPanel>
-    </SplitterPanel>
-  </Splitter>
-  <ChapterMenu></ChapterMenu>
+<SplitView stateKey="research">
+  <template v-slot:leftpanel>
+    RESEARCH
+  </template>
+  <template v-slot:content>
+    RRRRESEARCH
+  </template>
+</SplitView>
+<ChapterMenu></ChapterMenu>
 </template>
 
-
-
-
 <script lang="ts">
-import ScrollPanel from 'primevue/scrollpanel';
-import Splitter from 'primevue/splitter';
-import SplitterPanel from 'primevue/splitterpanel';
 import { Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import FilterMenu from '@/components/shared/filter/FilterMenu.vue';
 import ChapterList from '@/components/chapters/ChapterList.vue';
 import ChapterMenu from '@/components/chapters/ChapterMenu.vue';
 import SelectedChapters from '@/components/chapters/SelectedChapters.vue';
+import SplitView from './SplitView.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 
 @Options({
   components: { 
-    Splitter, 
-    SplitterPanel, 
-    ScrollPanel,
     EditableLabel, 
     ChapterList, 
     SelectedChapters, 
     ChapterMenu,
-    FilterMenu
+    FilterMenu,
+    SplitView
   }
 })
-export default class Chapters extends Vue {
+export default class Research extends Vue {
   mounted(): void {
-    this.$store.dispatch('loadItems', { key: NOVEL_ITEM_KEYS.CHAPTERS, novelId: this.$route.params.id }); 
+    this.$store.dispatch('loadItems', { key: NOVEL_ITEM_KEYS.RESEARCH, novelId: this.$route.params.id }); 
   }
 }
 </script>

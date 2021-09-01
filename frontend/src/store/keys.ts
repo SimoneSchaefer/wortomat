@@ -1,6 +1,7 @@
 
 export enum NOVEL_ITEM_KEYS {
     CHAPTERS = 'chapters',
+    RESEARCH = 'research',
     TAGS = 'tags'
 }
 

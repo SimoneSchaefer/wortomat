@@ -1,12 +1,14 @@
 import { BaseModel } from "@/models/Base.model";
 import { ChapterService } from "@/service/Chapter.service";
 import { NovelItemService } from "@/service/NovelItemService";
+import { ResearchService } from "@/service/Research.service";
 import { TagService } from "@/service/Tag.service";
 import { AxiosResponse } from "axios";
 import { NOVEL_ITEM_KEYS } from "./keys";
 
 export const KEY_TO_SERVICE: Map<string,NovelItemService>  = new Map<NOVEL_ITEM_KEYS,NovelItemService>([
     [NOVEL_ITEM_KEYS.CHAPTERS, new ChapterService()],
+    [NOVEL_ITEM_KEYS.RESEARCH, new ResearchService()],
     [NOVEL_ITEM_KEYS.TAGS, new TagService()]
 ])
 

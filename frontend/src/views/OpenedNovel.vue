@@ -18,6 +18,7 @@ export default class OpenedNovel extends Vue {
     return [
       {label: 'Home', icon: 'fa fa-home', to: '/'},
       {label: 'Chapters', icon: 'fa fa-book', to: 'chapters'},
+      {label: 'Research', icon: 'fa fa-flask', to: 'research'},
       {label: 'Tags', icon: 'fa fa-tags', to: 'tags'},
       {label: 'Export', icon: 'fa fa-file-export', to: 'export'}
     ]
