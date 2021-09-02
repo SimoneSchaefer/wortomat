@@ -4,7 +4,7 @@
     <ResearchList></ResearchList>
   </template>
   <template v-slot:content>
-    RRRRESEARCH
+    <ResearchSheetList></ResearchSheetList>
   </template>
 </SplitView>
 <ResearchMenu></ResearchMenu>
@@ -16,6 +16,7 @@ import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import FilterMenu from '@/components/shared/filter/FilterMenu.vue';
 import ResearchMenu from '@/components/research/ResearchMenu.vue';
 import ResearchList from '@/components/research/ResearchList.vue';
+import ResearchSheetList from '@/components/research/ResearchSheetList.vue';
 import SplitView from './SplitView.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
@@ -26,7 +27,8 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
     ResearchMenu,
     ResearchList,
     FilterMenu,
-    SplitView
+    SplitView,
+    ResearchSheetList
   }
 })
 export default class Research extends Vue {
