@@ -8,12 +8,14 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { VIEWS } from '@/store/keys';
+import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
 import OverlayPanel from 'primevue/overlaypanel';
+import { Prop } from 'vue-property-decorator';
 @Options({
   components: { }
 })
 export default class ContentFitler extends Vue { 
+  @Prop() itemKey: NOVEL_ITEM_KEYS;
 
   toggle(event: Event): void {
     (this.$refs.overlay as OverlayPanel).toggle(event);
@@ -31,14 +33,23 @@ export default class ContentFitler extends Vue {
   private getViewMenuItem(view: VIEWS) {
     return {
         label: view,
-        icon: `fa fa-${this.$store.state.view.get(view) ? 'check-square' : 'minus-square'}`,
+        icon: `fa fa-${this.isEnabled(view) ? 'check-square' : 'minus-square'}`,
         command: () => {
           this.$store.dispatch('setView', { 
+            key: this.itemKey,
             view: view,
-            value: !this.$store.state.view.get(view)
+            value: !this.isEnabled(view)
           })
         }
     }
+  }
+
+  private isEnabled(view: VIEWS): boolean {
+    const currentState = this.$store.state.view.get(this.itemKey).get(view);
+    if (currentState === undefined) {
+      return true;
+    }
+    return !!currentState;
   }
 }
 </script>

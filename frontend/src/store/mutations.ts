@@ -31,8 +31,10 @@ const tagsFiltered = (state: IState, payload: { key: NOVEL_ITEM_KEYS, tags: TagM
     state.filteredTags.set(payload.key, payload.tags.map(tag => tag.id));
 }
 
-const setView = (state: IState, payload: { view: VIEWS, value: boolean}): void => {
-    state.view.set(payload.view, payload.value);
+const setView = (state: IState, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, value: boolean}): void => {
+    const currentView = state.view.get(payload.key);
+    currentView.set(payload.view, payload.value);
+    state.view.set(payload.key, currentView);
 };
 
 //// Novel items mutations ////

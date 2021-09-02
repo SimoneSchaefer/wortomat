@@ -2,7 +2,7 @@
     <div class="menu">
       <Button type="button" @click="toggle" class="p-button-raised p-button-rounded" icon="fa fa-bars"/>
       <Menu ref="menu" :model="menuItems" :popup="true"/>
-      <ConfirmDialog ref="confirm" @accept="deleteSelected" message="Are you sure you want to delete the selected chapters?"></ConfirmDialog>
+      <ConfirmDialog ref="confirm" @accept="deleteSelected" message="Are you sure you want to delete the selected items?"></ConfirmDialog>
   </div>
 </template>
 

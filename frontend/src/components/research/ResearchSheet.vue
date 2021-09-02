@@ -32,16 +32,20 @@ export default class ResearchSheet extends Vue {
     @Prop() research!: ResearchModel;
 
     get displaySummary(): boolean {
-        return this.$store.state.view.get(VIEWS.SUMMARY);
+        return this.isEnabled(VIEWS.SUMMARY);
     }
     get displayExtendedSummary(): boolean {
-        return this.$store.state.view.get(VIEWS.EXTENDED_SUMMARY);
+        return this.isEnabled(VIEWS.EXTENDED_SUMMARY);
     }
     get displayContent(): boolean {
-        return this.$store.state.view.get(VIEWS.CONTENT);
+        return this.isEnabled(VIEWS.CONTENT);
     }
     get displayTags(): boolean {
-        return this.$store.state.view.get(VIEWS.TAGS);
+        return this.isEnabled(VIEWS.TAGS);
+    }
+
+    isEnabled(view: VIEWS): boolean {
+       return this.$store.state.view.get(NOVEL_ITEM_KEYS.RESEARCH).get(view);
     }
 
     updateTags(newTags: TagModel[]): void {

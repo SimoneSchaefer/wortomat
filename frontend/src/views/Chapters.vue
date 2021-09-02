@@ -21,7 +21,6 @@ import ChapterSheetList from '@/components/chapters/ChapterSheetList.vue';
 import SplitView from './SplitView.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
-
 @Options({
   components: { 
     EditableLabel, 

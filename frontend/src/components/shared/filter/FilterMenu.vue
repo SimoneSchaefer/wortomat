@@ -1,7 +1,7 @@
 <template>
     <div class="menu">
       <div class="content-filter">      
-        <ContentFilter></ContentFilter>
+        <ContentFilter :itemKey="itemKey"></ContentFilter>
       </div>
       <div class="tag-filter">      
         <TagFilter :itemKey="itemKey"></TagFilter>

@@ -4,7 +4,7 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import { IState } from './istate';
-import { VIEWS } from './keys';
+import { NOVEL_ITEM_KEYS, VIEWS } from './keys';
 
 export default new Vuex.Store<IState>({
   state: {
@@ -14,13 +14,27 @@ export default new Vuex.Store<IState>({
     novelItems: {},
     filteredTags: new Map(),
     view: new Map([[
-      VIEWS.SUMMARY, true
+      NOVEL_ITEM_KEYS.CHAPTERS, new Map<VIEWS,boolean>([[
+        VIEWS.SUMMARY, true
+      ], [
+        VIEWS.EXTENDED_SUMMARY, true
+      ],[
+        VIEWS.TAGS, true
+      ],[
+        VIEWS.CONTENT, true
+      ]
+    ])
     ],[
-      VIEWS.EXTENDED_SUMMARY, true
-    ],[
-      VIEWS.CONTENT, true
-    ],[
-      VIEWS.TAGS, true
+      NOVEL_ITEM_KEYS.RESEARCH, new Map<VIEWS,boolean>([[
+        VIEWS.SUMMARY, true
+      ], [
+        VIEWS.EXTENDED_SUMMARY, true
+      ],[
+        VIEWS.TAGS, true
+      ],[
+        VIEWS.CONTENT, true
+      ]
+    ])
     ]])
   },
   getters,

@@ -36,8 +36,8 @@ const loadNovels = (context: ActionContext<IState,IState>): void => {
     });  
 }
 
-const setView = (context: ActionContext<IState,IState>, payload: { view: VIEWS, value: boolean}): void => {
-  context.commit('setView', { view: payload.view, value: payload.value });
+const setView = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, value: boolean}): void => {
+  context.commit('setView', { key: payload.key, view: payload.view, value: payload.value });
 };
 
 

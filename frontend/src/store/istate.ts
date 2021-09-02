@@ -6,5 +6,5 @@ export interface IState {
     novelItems,
     selection: Map<NOVEL_ITEM_KEYS,Array<number>>,
     filteredTags: Map<NOVEL_ITEM_KEYS,Array<number>>,
-    view: Map<VIEWS,boolean>
+    view: Map<NOVEL_ITEM_KEYS, Map<VIEWS,boolean>>
 }
