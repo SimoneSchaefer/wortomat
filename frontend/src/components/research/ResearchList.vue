@@ -1,5 +1,5 @@
 <template>
-    <DragDropList :itemKey="itemKey" :selectedItemsKey="'currentResearch'" :filteredItemsKey="'filteredResearch'">
+    <DragDropList :novelItemKey="itemKey" :selectedItemsKey="'currentResearch'" :filteredItemsKey="'filteredResearch'">
     <template v-slot="slotProps">
       <div class="p-d-flex">
         <div class="title">

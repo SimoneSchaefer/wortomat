@@ -24,7 +24,7 @@ import { Prop } from 'vue-property-decorator';
   components: { draggable }
 })
 export default class DragDropList extends Vue {
-    @Prop() itemKey: NOVEL_ITEM_KEYS;
+    @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
     @Prop() /* TODO can't set the models themselves as properties as for some reason, the selected items are not refreshed correctly :(*/ 
     private selectedItemsKey: string;
@@ -36,11 +36,11 @@ export default class DragDropList extends Vue {
 
 
     get filteredItems(): BaseModel[] {
-        return this.$store.getters[this.filteredItemsKey] || []
+        return this.$store.getters[this.filteredItemsKey];
     }
 
     set filteredItems(value: BaseModel[]) {
-        this.$store.dispatch('updateOrder', { key: this.itemKey, novelId: this.$store.getters.openNovelId, newOrder: value});
+        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value});
     }  
     
     get selectedItems(): BaseModel[] {
@@ -67,8 +67,8 @@ export default class DragDropList extends Vue {
         }
         if (selectedItems.find(selectedItem => selectedItem.id === selected.id)) {
             this.lastChecked = selected;
-        }      
-        this.$store.dispatch('selectItems', { key: this.itemKey, items: selectedItems });
+        }     
+        this.$store.dispatch('selectItems', { key: this.novelItemKey, items: selectedItems });
     }
 
     handleCtrl(selected: BaseModel): BaseModel[]  {

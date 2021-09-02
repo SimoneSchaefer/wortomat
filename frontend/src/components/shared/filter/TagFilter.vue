@@ -16,10 +16,13 @@
 <script lang="ts">
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 @Options({
   components: {  }
 })
 export default class TagFilter extends Vue {
+    @Prop() itemKey: NOVEL_ITEM_KEYS;
+
     selectedTags = [];
     filteredTags = [];    
 
@@ -33,7 +36,7 @@ export default class TagFilter extends Vue {
 
     updateStore(): void {
         this.$store.dispatch('filterTags', {
-            key: NOVEL_ITEM_KEYS.CHAPTERS,
+            key: this.itemKey,
             tags: [...this.selectedTags]
         });
     }

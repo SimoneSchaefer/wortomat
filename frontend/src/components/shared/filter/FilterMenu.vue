@@ -4,7 +4,7 @@
         <ContentFilter></ContentFilter>
       </div>
       <div class="tag-filter">      
-        <TagFilter></TagFilter>
+        <TagFilter :itemKey="itemKey"></TagFilter>
       </div>
     </div>
 </template>
@@ -14,6 +14,8 @@
 import { Options, Vue } from 'vue-class-component';
 import TagFilter from '@/components/shared/filter/TagFilter.vue';
 import ContentFilter from '@/components/shared/filter/ContentFilter.vue';
+import { Prop } from 'vue-property-decorator';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 @Options({
   components: { 
@@ -21,9 +23,8 @@ import ContentFilter from '@/components/shared/filter/ContentFilter.vue';
     ContentFilter
   }
 })
-export default class ChapterMenu extends Vue { 
-
- 
+export default class FilterMenu extends Vue {
+  @Prop() itemKey: NOVEL_ITEM_KEYS;
 }
 </script>
 

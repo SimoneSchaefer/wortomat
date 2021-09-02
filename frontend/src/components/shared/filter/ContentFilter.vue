@@ -8,24 +8,15 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import ConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
+import { VIEWS } from '@/store/keys';
 import OverlayPanel from 'primevue/overlaypanel';
 @Options({
-  components: { ConfirmDialog }
+  components: { }
 })
-export default class ChapterMenu extends Vue { 
+export default class ContentFitler extends Vue { 
 
   toggle(event: Event): void {
     (this.$refs.overlay as OverlayPanel).toggle(event);
-  }
-
-  deleteSelected(): void {
-    this.$store.dispatch('deleteItems', { 
-      key: NOVEL_ITEM_KEYS.CHAPTERS, 
-      novelId: this.$store.state.currentNovel?.id,
-      items: this.$store.getters.currentChapters
-    })
   }
  
   get menuItems(): Array<{ label: string, icon: string, command: () => void }> {

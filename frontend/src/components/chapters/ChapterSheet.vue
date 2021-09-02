@@ -25,7 +25,7 @@ import { TagModel } from '@/models/Tag.model';
 @Options({
   components: { EditableLabel, EditableText, EditableTags }
 })
-export default class SelectedChapters extends Vue {
+export default class ChapterSheet extends Vue {
     @Prop() chapter!: ChapterModel;
 
     get displaySummary(): boolean {
