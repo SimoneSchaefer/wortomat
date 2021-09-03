@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Research implements PositionAware{
+public class Character implements PositionAware{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
