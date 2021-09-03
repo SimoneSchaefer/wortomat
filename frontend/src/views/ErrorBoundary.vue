@@ -8,6 +8,7 @@ import { useToast } from "primevue/usetoast";
 
 export default class ErrorBoundary extends Vue {
     errorCaptured(err: Error): boolean {
+        console.error(err);
         const toast = useToast();
         toast.add({severity:'error', summary: 'An error occurred', detail: err.message, life: 3000});
         return false;

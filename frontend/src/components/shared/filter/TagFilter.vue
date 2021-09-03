@@ -48,6 +48,9 @@ export default class TagFilter extends Vue {
 </script>
 
 <style>
+.tagfilter {
+    display: flex;
+}
 .tagfilter .p-autocomplete {
     width: 100%;
 }

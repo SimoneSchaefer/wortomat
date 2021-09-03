@@ -25,6 +25,17 @@ export default new Vuex.Store<IState>({
       ]
     ])
     ],[
+      NOVEL_ITEM_KEYS.CHARACTERS, new Map<VIEWS,boolean>([[
+        VIEWS.SUMMARY, true
+      ], [
+        VIEWS.EXTENDED_SUMMARY, true
+      ],[
+        VIEWS.TAGS, true
+      ],[
+        VIEWS.CONTENT, true
+      ]
+    ])
+    ],[
       NOVEL_ITEM_KEYS.RESEARCH, new Map<VIEWS,boolean>([[
         VIEWS.SUMMARY, true
       ], [

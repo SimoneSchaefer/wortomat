@@ -6,6 +6,8 @@ import { novelIdOrRaise } from "./store.helper";
 const openNovelId = (state : IState) : number => state.currentNovel?.id;
 const currentChapters = (state : IState): BaseModel[] => getCurrentSelection(state, NOVEL_ITEM_KEYS.CHAPTERS);
 const filteredChapters = (state : IState): BaseModel => getFilteredItems(state, NOVEL_ITEM_KEYS.CHAPTERS);
+const selectedCharacters = (state : IState): BaseModel[] => getCurrentSelection(state, NOVEL_ITEM_KEYS.CHARACTERS);
+const filteredCharacters = (state : IState): BaseModel => getFilteredItems(state, NOVEL_ITEM_KEYS.CHARACTERS);
 const currentResearch = (state : IState): BaseModel[] => getCurrentSelection(state, NOVEL_ITEM_KEYS.RESEARCH);
 const filteredResearch = (state : IState): BaseModel => getFilteredItems(state, NOVEL_ITEM_KEYS.RESEARCH);
 const tags = (state : IState): BaseModel[] => state.novelItems[NOVEL_ITEM_KEYS.TAGS] || []
@@ -16,6 +18,8 @@ export default {
     filteredChapters,
     currentResearch,
     filteredResearch,
+    selectedCharacters,
+    filteredCharacters,
     tags
 };
 

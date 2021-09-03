@@ -96,3 +96,9 @@ export default class EditableTags extends Vue {
     padding-right: 0.3em;
 }
 </style>
+
+<style>
+.editable-tags span.p-autocomplete {
+    display: block;
+}
+</style>

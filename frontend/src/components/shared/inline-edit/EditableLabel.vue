@@ -50,7 +50,7 @@ export default class EditableLabel extends Vue {
 
   @Emit('update-label')
   updateLabel(): string {
-      return this.draft;
+    return this.draft;
   }
 }
 </script>
