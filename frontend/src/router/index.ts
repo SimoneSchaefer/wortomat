@@ -9,19 +9,19 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/write/:id',
-    component: () => import(/* webpackChunkName: "about" */ '../views/OpenedNovel.vue'),
+    component: () => import(/* webpackChunkName: "OpenedNovel" */ '../views/OpenedNovel.vue'),
     children: [{
         path: 'chapters',
-        component: () => import(/* webpackChunkName: "about" */ '../views/Chapters.vue'),
+        component: () => import(/* webpackChunkName: "Chapters" */ '../views/Chapters.vue'),
       },{
         path: 'research',
-        component: () => import(/* webpackChunkName: "about" */ '../views/Research.vue'),
+        component: () => import(/* webpackChunkName: "Research" */ '../views/Research.vue'),
       },{
         path: 'tags',
-        component: () => import(/* webpackChunkName: "about" */ '../views/Tags.vue'),
+        component: () => import(/* webpackChunkName: "Tags" */ '../views/Tags.vue'),
       },{
         path: 'export',
-        component: () => import(/* webpackChunkName: "about" */ '../views/Export.vue'),
+        component: () => import(/* webpackChunkName: "Export" */ '../views/Export.vue'),
       }]
   }
 ]

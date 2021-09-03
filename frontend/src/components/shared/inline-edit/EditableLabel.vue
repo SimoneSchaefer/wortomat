@@ -54,3 +54,12 @@ export default class EditableLabel extends Vue {
   }
 }
 </script>
+
+<style scoped>
+.label {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    padding: 0 1em;
+}
+</style>

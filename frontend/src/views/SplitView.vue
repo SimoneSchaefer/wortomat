@@ -31,3 +31,9 @@ export default class SplitView extends Vue {
   @Prop() stateKey: string;
 }
 </script>
+
+<style>
+.p-scrollpanel-content {
+  overflow-x: hidden;
+}
+</style>
