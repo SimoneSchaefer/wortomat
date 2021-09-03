@@ -5,7 +5,7 @@
 	<artifactId>frontend</artifactId>
 
 	<parent>
-		<groupId>de.jonashackt</groupId>
+		<groupId>de.wortomat</groupId>
 		<artifactId>spring-boot-vuejs</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
