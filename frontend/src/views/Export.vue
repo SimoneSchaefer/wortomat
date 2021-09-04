@@ -33,7 +33,7 @@ import { Vue } from 'vue-class-component';
 import { ExportService, ExportType } from '@/service/ExportService';
 export default class Export extends Vue {
 
-  selectedIncludes = [];
+  selectedIncludes = ['includeSummary', 'includeExtendedSummary', 'includeContent'];
   selectedType = this.typeOptions[0];
 
   exportNovel(): void {

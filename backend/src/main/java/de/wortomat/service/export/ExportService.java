@@ -1,6 +1,6 @@
 package de.wortomat.service.export;
 
-import de.wortomat.service.FileService;
+import de.wortomat.service.StorageConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.io.IOException;
 @Service
 public class ExportService {
     @Autowired
-    FileService fileService;
+    StorageConfigService fileService;
 
     @Autowired
     HTMLExportService htmlExportService;

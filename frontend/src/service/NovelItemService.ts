@@ -1,10 +1,15 @@
 import { BaseModel } from '@/models/Base.model';
 import { AxiosResponse } from 'axios';
 import { API } from './Axios';
+import { BACKEND_URL } from './Env';
 
 export abstract class NovelItemService {
 
     abstract getAPIPath(): string;
+
+    public getBasePath(novelId: number): string {
+        return `${BACKEND_URL}/novels/${novelId}/${this.getAPIPath()}`;
+    }
 
     public updatePositions(novelId: number, newOrder: BaseModel[]): Promise<AxiosResponse>{
         const sortedIds = newOrder.map(item => item.id);

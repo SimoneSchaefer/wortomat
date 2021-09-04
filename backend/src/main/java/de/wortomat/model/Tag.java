@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Data
@@ -19,7 +18,7 @@ public class Tag {
     @ManyToOne
     private Novel novel;
 
-    @JsonIgnore
+    /*@JsonIgnore
     @ManyToMany
-    private List<Chapter> chapters;
+    private List<Chapter> chapters;*/
 }

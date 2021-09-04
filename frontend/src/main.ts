@@ -28,6 +28,7 @@ import OverlayPanel from 'primevue/overlaypanel';
 import SelectButton from 'primevue/selectbutton';
 import Checkbox from 'primevue/checkbox';
 import Fieldset from 'primevue/fieldset';
+import FileUpload from 'primevue/fileupload';
 
 import draggable from 'vuedraggable'
 
@@ -62,6 +63,7 @@ const app = createApp(App)
     .component('SpeedDial', SpeedDial)
     .component('AutoComplete', AutoComplete)
     .component('Chip', Chip)
+    .component('FileUpload', FileUpload)
     .component('OverlayPanel', OverlayPanel)
     .component('Checkbox', Checkbox)
     .component('Divider', Divider)

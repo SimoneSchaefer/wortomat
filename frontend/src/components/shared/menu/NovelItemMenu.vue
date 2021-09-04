@@ -63,7 +63,7 @@ export default class NovelItemMenu extends Vue {
         return {
             label: 'Delete selected',
             icon: 'fa fa-trash',
-            disabled: this.$store.getters.currentChapters.length === 0,
+            disabled: this.items.length === 0,
             command: () => {
             const selectedItems = this.items;
             if (!selectedItems.length) {

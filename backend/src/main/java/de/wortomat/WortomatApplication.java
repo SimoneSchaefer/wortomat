@@ -1,7 +1,6 @@
 package de.wortomat;
 
-import de.wortomat.service.FileService;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import de.wortomat.service.StorageConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
 
 @SpringBootApplication
 public class WortomatApplication {
@@ -20,14 +20,14 @@ public class WortomatApplication {
 	Environment env;
 
 	@Autowired
-	FileService fileService;
+	StorageConfigService fileService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(WortomatApplication.class, args);
 	}
 
 	@Bean
-	public DataSource dataSource() {
+	public DataSource dataSource() throws IOException {
 		File directory = new File(fileService.getStorageLocation());
 		if (! directory.exists()){
 			directory.mkdir();

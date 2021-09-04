@@ -22,10 +22,10 @@ public class Character implements PositionAware{
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition = "TEXT")
-    private String[] images;
-
     private int position;
+
+    @ManyToMany
+    private List<Image> images;
 
     @ManyToMany
     private List<Tag> tags;

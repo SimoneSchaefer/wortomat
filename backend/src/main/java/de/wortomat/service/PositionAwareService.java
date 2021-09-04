@@ -18,6 +18,10 @@ public abstract class PositionAwareService<T extends PositionAware> {
         return this.getRepository().findAllByNovelIdOrderByPosition(novelId);
     }
 
+    public T get(Long _novelId, Long itemItem) {
+        return this.getRepository().findById(itemItem).get();
+    }
+
     public T create(Long novelId, T positionAware) {
         positionAware.setNovel(this.novelService.get(novelId));
         positionAware.setPosition((getMaxPosition(novelId)));
