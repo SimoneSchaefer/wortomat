@@ -1,6 +1,8 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.Chapter;
+import de.wortomat.model.ChapterTag;
+import de.wortomat.model.CharacterTag;
 import de.wortomat.service.ChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,16 @@ public class ChapterController {
     @GetMapping
     public ResponseEntity<List<Chapter>> get(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.chapterService.get(novelId));
+    }
+
+    @GetMapping("tags")
+    public ResponseEntity<List<ChapterTag>> tags(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(this.chapterService.getTags(novelId));
+    }
+
+    @PostMapping("tags")
+    public ResponseEntity<ChapterTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody ChapterTag tag) {
+        return ResponseEntity.ok(this.chapterService.createTag(novelId, tag));
     }
 
     @DeleteMapping("{chapterId}")

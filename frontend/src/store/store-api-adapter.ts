@@ -19,7 +19,13 @@ export function loadItemsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Pro
     if (serviceToUse) {
         return serviceToUse.list(novelId);
     }
+}
 
+export function loadTagsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
+    const serviceToUse = KEY_TO_SERVICE.get(key);
+    if (serviceToUse) {
+        return serviceToUse.tags(novelId);
+    }
 }
 
 export function createItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {

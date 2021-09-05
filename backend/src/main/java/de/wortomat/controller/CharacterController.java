@@ -1,6 +1,8 @@
 package de.wortomat.controller;
 
+import de.wortomat.model.ChapterTag;
 import de.wortomat.model.Character;
+import de.wortomat.model.CharacterTag;
 import de.wortomat.model.Image;
 import de.wortomat.service.CharacterService;
 import de.wortomat.service.uploads.EntityType;
@@ -53,6 +55,16 @@ public class CharacterController {
     @PutMapping("updatePositions")
     public ResponseEntity<List<Character>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
         return ResponseEntity.ok(this.characterService.updatePositions(novelId, updatedPositions));
+    }
+
+    @GetMapping("tags")
+    public ResponseEntity<List<CharacterTag>> tags(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(this.characterService.getTags(novelId));
+    }
+
+    @PostMapping("tags")
+    public ResponseEntity<CharacterTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody CharacterTag tag) {
+        return ResponseEntity.ok(this.characterService.createTag(novelId, tag));
     }
 
     @PostMapping("{characterId}/upload")

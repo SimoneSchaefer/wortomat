@@ -1,4 +1,5 @@
 import { BaseModel } from '@/models/Base.model';
+import { TagModel } from '@/models/Tag.model';
 import { AxiosResponse } from 'axios';
 import { API } from './Axios';
 import { BACKEND_URL } from './Env';
@@ -7,8 +8,17 @@ export abstract class NovelItemService {
 
     abstract getAPIPath(): string;
 
+
     public getBasePath(novelId: number): string {
         return `${BACKEND_URL}/novels/${novelId}/${this.getAPIPath()}`;
+    }
+
+    public tags(novelId: number): Promise<AxiosResponse> {
+        return API.get(`/novels/${novelId}/${this.getAPIPath()}/tags`)
+    }
+
+    public createTag(novelId: number, tag: TagModel): Promise<AxiosResponse> {
+        return API.post(`/novels/${novelId}/${this.getAPIPath()}/tags`, tag)
     }
 
     public updatePositions(novelId: number, newOrder: BaseModel[]): Promise<AxiosResponse>{

@@ -1,8 +1,7 @@
 package de.wortomat.controller;
 
-import de.wortomat.model.Image;
-import de.wortomat.model.Location;
-import de.wortomat.model.Research;
+import de.wortomat.model.*;
+import de.wortomat.repository.tags.LocationTagRepository;
 import de.wortomat.service.LocationService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -44,7 +43,7 @@ public class LocationController {
         return ResponseEntity.ok(this.locationService.get(novelId));
     }
 
-    @DeleteMapping("{researchId}")
+    @DeleteMapping("{locationId}")
     public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("locationId") Long locationId) {
         this.locationService.delete(novelId, locationId);
         return ResponseEntity.ok().build();
@@ -55,6 +54,15 @@ public class LocationController {
         return ResponseEntity.ok(this.locationService.updatePositions(novelId, updatedPositions));
     }
 
+    @GetMapping("tags")
+    public ResponseEntity<List<LocationTag>> tags(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(this.locationService.getTags(novelId));
+    }
+
+    @PostMapping("tags")
+    public ResponseEntity<LocationTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody LocationTag tag) {
+        return ResponseEntity.ok(this.locationService.createTag(novelId, tag));
+    }
 
     @PostMapping("{locationId}/upload")
     public ResponseEntity<Image> upload(@PathVariable("novelId") Long novelId, @PathVariable("locationId") Long locationId, @RequestParam("upload[]") MultipartFile file) throws IOException {

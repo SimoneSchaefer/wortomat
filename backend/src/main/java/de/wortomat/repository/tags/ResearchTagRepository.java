@@ -1,8 +1,10 @@
-package de.wortomat.repository;
+package de.wortomat.repository.tags;
+
 
 import de.wortomat.model.ChapterTag;
+import de.wortomat.model.ResearchTag;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TagRepository  extends CrudRepository<ChapterTag,Long> {}
+public interface ResearchTagRepository extends TagRepository<ResearchTag, Long> {};

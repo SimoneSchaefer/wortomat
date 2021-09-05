@@ -27,6 +27,10 @@ const novelOpened = (state: IState, payload: NovelModel): void => {
     state.novelItems[NOVEL_ITEM_KEYS.TAGS] = payload.tags;
 }
 
+const tagsLoaded = (state: IState, payload: []): void => {
+    state.novelItems[NOVEL_ITEM_KEYS.TAGS] = payload;
+}
+
 const tagsFiltered = (state: IState, payload: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}): void => {
     state.filteredTags.set(payload.key, payload.tags.map(tag => tag.id));
 }
@@ -79,6 +83,7 @@ const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Bas
     setView,
 
     itemsLoaded,
+    tagsLoaded,
     itemsSelected,
     itemAdded,
     itemUpdated,

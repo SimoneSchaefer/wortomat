@@ -1,7 +1,9 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.Image;
+import de.wortomat.model.LocationTag;
 import de.wortomat.model.Research;
+import de.wortomat.model.ResearchTag;
 import de.wortomat.service.ResearchService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -52,6 +54,16 @@ public class ResearchController {
     @PutMapping("updatePositions")
     public ResponseEntity<List<Research>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
         return ResponseEntity.ok(this.researchService.updatePositions(novelId, updatedPositions));
+    }
+
+    @GetMapping("tags")
+    public ResponseEntity<List<ResearchTag>> tags(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(this.researchService.getTags(novelId));
+    }
+
+    @PostMapping("tags")
+    public ResponseEntity<ResearchTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody ResearchTag tag) {
+        return ResponseEntity.ok(this.researchService.createTag(novelId, tag));
     }
 
 

@@ -36,6 +36,7 @@ import { Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
 import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
+import { NovelItemService } from "@/service/NovelItemService";
 
 @Options({
     components: { InlineEdit, MissingValueTolerantLabel },
@@ -43,6 +44,7 @@ import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantL
 })
 export default class EditableTags extends Vue {
     @Prop() tags: TagModel[];
+    @Prop() service!: NovelItemService;
 
     private tagsDraft = [];
     private filteredTags = [];
@@ -65,7 +67,7 @@ export default class EditableTags extends Vue {
         for (let tag of this.tagsDraft) {
             if (!tag.id) {
                 tag.novelId = this.$store.state.currentNovel.id;
-                tag = await new TagService().create(this.$store.state.currentNovel.id, tag);
+                tag = await this.service.createTag(this.$store.state.currentNovel.id, tag);
                 tag = tag.data;
                 this.$store.dispatch('addItem', { key: NOVEL_ITEM_KEYS.TAGS, item: tag});
             }

@@ -7,7 +7,7 @@
 
             <div class="meta">
                 <div class="header"><EditableLabel v-bind:value="baseModel.name" @update-label="updateName" placeHolderTitle="No name added yet."></EditableLabel></div>
-                <EditableTags v-if="displayTags" :tags="baseModel.tags" @update-tags="updateTags"></EditableTags>
+                <EditableTags v-if="displayTags" :tags="baseModel.tags" @update-tags="updateTags" :service="service"></EditableTags>
             </div>
         </div>
         <hr>

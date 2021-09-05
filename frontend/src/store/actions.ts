@@ -3,7 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, loadTagsFromBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 
@@ -40,11 +40,13 @@ const setView = (context: ActionContext<IState,IState>, payload: { key: NOVEL_IT
   context.commit('setView', { key: payload.key, view: payload.view, value: payload.value });
 };
 
-
 const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number }): void => {
   loadItemsFromBackend( payload.key, payload.novelId).then(result => {
     context.commit('itemsLoaded', { key: payload.key, items: result.data });
-  }) 
+  });   
+  loadTagsFromBackend( payload.key, payload.novelId).then(result => {
+    context.commit('tagsLoaded', result.data);
+  }); 
 }
 
 const selectItems = (context: ActionContext<IState,IState>, item: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {

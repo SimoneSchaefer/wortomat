@@ -25,7 +25,7 @@ public class Chapter implements PositionAware {
     private int position;
 
     @ManyToMany
-    private List<ChapterTag> chapterTags;
+    private List<ChapterTag> tags;
 
     @JsonIgnore
     @ManyToOne
