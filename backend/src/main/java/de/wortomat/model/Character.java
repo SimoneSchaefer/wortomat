@@ -8,12 +8,12 @@ import java.util.List;
 
 @Entity
 @Data
-public class Character implements PositionAware{
+public class Character implements PositionAware, ImageAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String title;
+    private String name;
 
     private String summary;
 
@@ -28,7 +28,7 @@ public class Character implements PositionAware{
     private List<Image> images;
 
     @ManyToMany
-    private List<Tag> tags;
+    private List<CharacterTag> tags;
 
     @JsonIgnore
     @ManyToOne

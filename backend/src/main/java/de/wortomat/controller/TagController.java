@@ -1,6 +1,6 @@
 package de.wortomat.controller;
 
-import de.wortomat.model.Tag;
+import de.wortomat.model.ChapterTag;
 import de.wortomat.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +15,12 @@ public class TagController {
     private TagService tagService;
 
     @PostMapping
-    public ResponseEntity<Tag> create(@PathVariable("novelId") Long novelId, @RequestBody Tag tag) {
+    public ResponseEntity<ChapterTag> create(@PathVariable("novelId") Long novelId, @RequestBody ChapterTag tag) {
         return ResponseEntity.ok(this.tagService.create(novelId, tag));
     }
 
     @PutMapping
-    public ResponseEntity<Tag> update(@PathVariable("novelId") Long novelId, @RequestBody Tag tag) {
+    public ResponseEntity<ChapterTag> update(@PathVariable("novelId") Long novelId, @RequestBody ChapterTag tag) {
         return ResponseEntity.ok(this.tagService.update(novelId, tag));
     }
 

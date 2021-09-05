@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
-public class Tag {
+public class CharacterTag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -17,8 +17,4 @@ public class Tag {
     @JsonIgnore
     @ManyToOne
     private Novel novel;
-
-    /*@JsonIgnore
-    @ManyToMany
-    private List<Chapter> chapters;*/
 }

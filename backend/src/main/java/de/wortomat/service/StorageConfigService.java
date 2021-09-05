@@ -1,6 +1,7 @@
 package de.wortomat.service;
 
 import de.wortomat.service.export.ExportOptionsType;
+import de.wortomat.service.uploads.EntityType;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @Service
 public class StorageConfigService {
@@ -17,15 +19,15 @@ public class StorageConfigService {
     private final String UPLOAD_FOLDER = String.format("%s/%s", STORAGE_FOLDER, "uploads");
 
     public String getStorageLocation() throws IOException {
-        return getOrCreate(HOME_FOLDER);
+        return getOrCreate(STORAGE_FOLDER);
     }
 
-    public String getUploadFolder() throws IOException {
+    public String getBaseUploadFolder() throws IOException {
         return getOrCreate(UPLOAD_FOLDER);
     }
 
-    public String getUploadFolder(Long id) throws IOException {
-        return getOrCreate(String.format("%s/%d", getUploadFolder(), id));
+    public String getUploadFolder(Long novelId, Long itemId, EntityType entityType, Long imageId) throws IOException {
+        return getOrCreate(String.format("%s/%d/%s/%d/%d", getBaseUploadFolder(), novelId, entityType.name().toLowerCase(Locale.ROOT), itemId, imageId));
     }
 
     public String getExportFolder() throws IOException {

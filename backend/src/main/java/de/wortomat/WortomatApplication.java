@@ -13,6 +13,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @SpringBootApplication
 public class WortomatApplication {
@@ -28,10 +30,7 @@ public class WortomatApplication {
 
 	@Bean
 	public DataSource dataSource() throws IOException {
-		File directory = new File(fileService.getStorageLocation());
-		if (! directory.exists()){
-			directory.mkdir();
-		}
+		Files.createDirectories(Paths.get(fileService.getStorageLocation()));
 		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(env.getProperty("driverClassName"));
 		dataSource.setUrl(env.getProperty("url"));

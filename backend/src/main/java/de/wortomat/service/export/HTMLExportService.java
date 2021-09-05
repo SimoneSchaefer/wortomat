@@ -27,7 +27,7 @@ public class HTMLExportService implements Exporter {
         List<Chapter> chapters = this.chapterService.get(novelId);
         StringBuilder stringBuilder = new StringBuilder();
         for (Chapter chapter : chapters) {
-            stringBuilder.append(nullSafeHtmlElement(true, chapter.getTitle(), "<h1>%s</h1>"));
+            stringBuilder.append(nullSafeHtmlElement(true, chapter.getName(), "<h1>%s</h1>"));
             stringBuilder.append(nullSafeHtmlElement(exportOptions.includeSummary, chapter.getExtended_summary(), "<div><b>%s</b></div>"));
             stringBuilder.append(nullSafeHtmlElement(exportOptions.includeExtendedSummary, chapter.getExtended_summary(), "<div>%s</div>"));
             stringBuilder.append(nullSafeHtmlElement(exportOptions.includeContent, chapter.getContent(), "<div>%s</div>"));

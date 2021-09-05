@@ -8,27 +8,27 @@ import java.util.List;
 
 @Entity
 @Data
-public class Research implements PositionAware{
+public class Research implements PositionAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String title;
+    private String name;
 
     private String summary;
 
     private String extended_summary;
 
+    private int position;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition = "TEXT")
-    private String[] images;
-
-    private int position;
+    @ManyToMany
+    private List<Image> images;
 
     @ManyToMany
-    private List<Tag> tags;
+    private List<ResearchTag> tags;
 
     @JsonIgnore
     @ManyToOne

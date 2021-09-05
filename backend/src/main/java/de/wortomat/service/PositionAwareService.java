@@ -1,6 +1,5 @@
 package de.wortomat.service;
 
-import de.wortomat.model.Chapter;
 import de.wortomat.model.PositionAware;
 import de.wortomat.repository.PositionAwareRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,8 @@ public abstract class PositionAwareService<T extends PositionAware> {
         return this.getRepository().save(positionAware);
     }
 
-    public T update(Long novelId, T chapter) {
-        chapter.setNovel(this.novelService.get(novelId));
-        return this.getRepository().save(chapter);
+    public T update(Long novelId, T positionAware) {
+        return this.getRepository().save(positionAware);
     }
     public void delete(Long _novelId, Long chapterId) {
         this.getRepository().deleteById(chapterId);

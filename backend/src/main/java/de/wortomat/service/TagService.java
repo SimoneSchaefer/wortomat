@@ -1,7 +1,6 @@
 package de.wortomat.service;
 
-import de.wortomat.model.Chapter;
-import de.wortomat.model.Tag;
+import de.wortomat.model.ChapterTag;
 import de.wortomat.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,12 +13,12 @@ public class TagService {
     @Autowired
     TagRepository tagRepository;
 
-    public Tag create(Long novelId, Tag tag) {
+    public ChapterTag create(Long novelId, ChapterTag tag) {
         tag.setNovel(this.novelService.get(novelId));
         return this.tagRepository.save(tag);
     }
 
-    public Tag update(Long novelId, Tag tag) {
+    public ChapterTag update(Long novelId, ChapterTag tag) {
         tag.setNovel(this.novelService.get(novelId));
         return this.tagRepository.save(tag);
     }

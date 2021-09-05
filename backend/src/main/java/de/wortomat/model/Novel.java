@@ -13,7 +13,7 @@ public class Novel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
+    private String name;
 
     private String summary;
 
@@ -25,8 +25,21 @@ public class Novel {
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    private List<Character> characters;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
     private List<Research> research;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "novel")
-    private List<Tag> tags;
+    private List<ChapterTag> chapterTags;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
+    private List<CharacterTag> characterTags;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
+    private List<ResearchTag> researchTags;
 }
