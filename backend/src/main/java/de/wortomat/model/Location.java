@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Research implements PositionAware, ImageAware {
+public class Location implements PositionAware, ImageAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -28,7 +28,7 @@ public class Research implements PositionAware, ImageAware {
     private List<Image> images;
 
     @ManyToMany
-    private List<ResearchTag> tags;
+    private List<LocationTag> tags;
 
     @JsonIgnore
     @ManyToOne

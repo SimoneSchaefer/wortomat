@@ -31,4 +31,16 @@ export abstract class NovelItemService {
     public delete(novelId: number, item: BaseModel): Promise<AxiosResponse> {
         return API.delete(`/novels/${novelId}/${this.getAPIPath()}/${item.id}`)
     }
+
+    deleteImage(novelId: number, itemId: number, fileId: number) {
+        return API.delete(`${this.getBasePath(novelId)}/${itemId}/files/${fileId}`);
+    }
+
+    getUploadUrl(novelId: number, itemId: number) {
+        return `${this.getBasePath(novelId)}/${itemId}/upload`;
+    }
+
+    getImageUrl(novelId: number, itemId: number, fileId: number) {
+        return `${this.getBasePath(novelId)}/${itemId}/files/${fileId}`;
+    }
 }

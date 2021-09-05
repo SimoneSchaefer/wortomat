@@ -110,6 +110,7 @@ export interface ImageParam {
 .upload {
     padding: 1rem;
     display: flex;
+    justify-content: center;
 }
 
 .p-galleria {

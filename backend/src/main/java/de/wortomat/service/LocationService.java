@@ -1,33 +1,33 @@
 package de.wortomat.service;
 
-import de.wortomat.model.Research;
+import de.wortomat.model.Location;
+import de.wortomat.repository.LocationRepository;
 import de.wortomat.repository.PositionAwareRepository;
-import de.wortomat.repository.ResearchRepository;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.ImageAwareService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ResearchService extends PositionAwareService<Research> implements ImageAwareService<Research> {
+public class LocationService extends PositionAwareService<Location> implements ImageAwareService<Location> {
     @Autowired
-    ResearchRepository researchRepository;
+    LocationRepository locationRepository;
 
     @Autowired
     NovelService novelService;
 
     @Override
-    public PositionAwareRepository<Research,Long> getRepository() {
-        return this.researchRepository;
+    public PositionAwareRepository<Location,Long> getRepository() {
+        return this.locationRepository;
     }
 
-    public Research update(Long novelId, Research item) {
+    public Location update(Long novelId, Location item) {
         item.setNovel(novelService.get(novelId));
-        return this.researchRepository.save(item);
+        return this.locationRepository.save(item);
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.CHARACTER;
+        return EntityType.LOCATION;
     }
 }

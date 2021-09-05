@@ -3,7 +3,7 @@
     <template v-slot="slotProps">
       <div class="p-d-flex">
         <div class="title">
-          <MissingValueTolerantLabel :value="slotProps.item.title" fallback="No title yet"></MissingValueTolerantLabel>
+          <MissingValueTolerantLabel :value="slotProps.item.name" fallback="No title yet"></MissingValueTolerantLabel>
         </div>
         <div class="summary">
           <MissingValueTolerantLabel :value="slotProps.item.summary" fallback="No summary yet"></MissingValueTolerantLabel>

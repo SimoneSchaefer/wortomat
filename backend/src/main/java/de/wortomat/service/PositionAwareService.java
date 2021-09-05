@@ -28,6 +28,7 @@ public abstract class PositionAwareService<T extends PositionAware> {
     }
 
     public T update(Long novelId, T positionAware) {
+        positionAware.setNovel(this.novelService.get(novelId));
         return this.getRepository().save(positionAware);
     }
     public void delete(Long _novelId, Long chapterId) {

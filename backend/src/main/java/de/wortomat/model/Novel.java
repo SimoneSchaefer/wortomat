@@ -29,6 +29,10 @@ public class Novel {
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    private List<Location> locations;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
     private List<Research> research;
 
     @JsonIgnore
@@ -42,4 +46,8 @@ public class Novel {
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
     private List<ResearchTag> researchTags;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
+    private List<LocationTag> locationTags;
 }

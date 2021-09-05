@@ -1,88 +1,32 @@
 <template>
-    <div class="sheet">
-        <div class="meta">
-            <div class="header"><EditableLabel v-bind:value="chapter.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel></div>
-            <EditableTags v-if="displayTags" :tags="chapter.tags" @update-tags="updateTags"></EditableTags>
-        </div>
-        <hr>
-        <b v-if="displaySummary"><EditableLabel v-bind:value="chapter.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
-        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="chapter.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></span>
-        <hr v-if="displaySummary || displayExtendedSummary">
-        <EditableText v-if="displayContent" v-bind:value="chapter.content" v-bind:header="chapter.title" @update-text="updateContent"></EditableText>        
-    </div>
+    <NovelItemSheet 
+        :novelItemKey="novelItemKey" 
+        :baseModel="chapter" 
+        :includeImageUpload="false" 
+        :service="service"></NovelItemSheet>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
-import EditableText from '@/components/shared/inline-edit/EditableText.vue';
-import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
 import { Prop } from 'vue-property-decorator';
 import { ChapterModel } from '@/models/Chapter.model';
-import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
-import { TagModel } from '@/models/Tag.model';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { NovelItemService } from '@/service/NovelItemService';
+import { ChapterService } from '@/service/Chapter.service';
+import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 
 @Options({
-  components: { EditableLabel, EditableText, EditableTags }
+  components: { NovelItemSheet}
 })
 export default class ChapterSheet extends Vue {
     @Prop() chapter!: ChapterModel;
 
-    get displaySummary(): boolean {
-        return this.isEnabled(VIEWS.SUMMARY);
-    }
-    get displayExtendedSummary(): boolean {
-        return this.isEnabled(VIEWS.EXTENDED_SUMMARY);
-    }
-    get displayContent(): boolean {
-        return this.isEnabled(VIEWS.CONTENT);
-    }
-    get displayTags(): boolean {
-        return this.isEnabled(VIEWS.TAGS);
+    get novelItemKey(): NOVEL_ITEM_KEYS {
+        return NOVEL_ITEM_KEYS.CHAPTERS;
     }
 
-    isEnabled(view: VIEWS): boolean {
-       return this.$store.state.view.get(NOVEL_ITEM_KEYS.CHAPTERS).get(view);
-    }
-
-    updateTags(newTags: TagModel[]): void {
-        this.updateChapter({ tags: newTags});
-    }
-    
-    updateTitle(newValue: string): void {
-        this.updateChapter({ title: newValue });   
-    }  
-
-    updateSummary(newValue: string): void {
-        this.updateChapter({ summary: newValue });   
-    }   
-    
-    updateExtendedSummary(newValue: string): void {
-        this.updateChapter({ extended_summary: newValue });   
-    }
-
-    updateContent(newValue: string): void {
-        this.updateChapter({ content: newValue });   
-    }
-
-    private updateChapter(overrideValues): void {
-        this.$store.dispatch('updateItem', { 
-            key: NOVEL_ITEM_KEYS.CHAPTERS, 
-            novelId: this.$store.getters.openNovelId,
-            oldItem: this.chapter,
-            overrideValues: overrideValues
-        })  
+    get service(): NovelItemService {
+        return new ChapterService();
     }
 }
 </script>
-
-<style scoped>
-hr {
-    opacity: 0.7;
-    border: 1px solid #efefef;
-}
-
-.header {
-    font-size: 2em;
-}
-</style>
