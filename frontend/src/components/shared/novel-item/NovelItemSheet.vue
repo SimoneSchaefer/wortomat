@@ -42,13 +42,13 @@ export default class NovelItemSheet extends Vue {
     @Prop() novelItemKey!: NOVEL_ITEM_KEYS;
 
 
-    deleteImage(image: ImageParam) {
+    deleteImage(image: ImageParam): void {
         this.service.deleteImage(this.novelId, this.baseModel.id, image.imageId).then((response) => {
             this.updateImages(response.data.images);
         });
     }
 
-    uploadImage(image: { id: number, name: string }) {
+    uploadImage(image: { id: number, name: string }): void {
         const images = this.imagesOrEmpty;
         images.splice(0, 0, image);
         this.updateImages(images);
@@ -81,11 +81,11 @@ export default class NovelItemSheet extends Vue {
         return this.isEnabled(VIEWS.TAGS);
     }
 
-    getUploadUrl() {
+    getUploadUrl(): string {
         return this.service.getUploadUrl(this.novelId, this.baseModel.id);
     }
 
-    getImageUrl(fileId: number) {
+    getImageUrl(fileId: number): string {
         return this.service.getImageUrl(this.novelId, this.baseModel.id, fileId);
     }
 

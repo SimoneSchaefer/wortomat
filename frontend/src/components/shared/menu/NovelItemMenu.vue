@@ -87,6 +87,7 @@ export default class NovelItemMenu extends Vue {
     display: flex;
     width: 20em;
     height: 2.3em;
+    z-index: 9999;
   }
 
   .menu Button {

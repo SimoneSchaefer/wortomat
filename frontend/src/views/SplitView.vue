@@ -1,7 +1,7 @@
 <template>
   <Splitter style="height: 100%" :stateKey="stateKey">
     <SplitterPanel>
-      <ScrollPanel>        
+      <ScrollPanel style="height: 100%">        
         <slot name="leftpanel"></slot>
       </ScrollPanel>
     </SplitterPanel>
