@@ -29,7 +29,7 @@ export default class OpenedNovel extends Vue {
 
 <style scoped>
   .wrapper {
-    height: calc(100vh - 70px);
+    height: 100vh;
     overflow: hidden;
   }
 </style>

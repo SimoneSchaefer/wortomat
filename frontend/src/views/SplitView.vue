@@ -36,4 +36,17 @@ export default class SplitView extends Vue {
 .p-scrollpanel-content {
   overflow-x: hidden;
 }
+
+.p-scrollpanel-content {
+  padding-right: 0;
+}
+
+.p-scrollpanel-bar.p-scrollpanel-bar-y {
+  display: none;
+}
+
+.p-splitter .p-splitter-gutter {
+  border-right: 1px solid var(--splitter-background-color);
+}
+
 </style>

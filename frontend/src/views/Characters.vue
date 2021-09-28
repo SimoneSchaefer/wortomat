@@ -1,36 +1,15 @@
 <template>
-<SplitView stateKey="characters">
-  <template v-slot:leftpanel>
-    <FilterMenu :itemKey="itemKey"></FilterMenu>
-    <CharacterList></CharacterList>
-  </template>
-  <template v-slot:content>
-    <CharacterSheetList></CharacterSheetList>
-  </template>
-</SplitView>
-<CharacterMenu></CharacterMenu>
+  <NovelItems :novelItemKey="itemKey" :selectedItemsKey="'selectedCharacters'" :filteredItemsKey="'filteredCharacters'"></NovelItems>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
-import FilterMenu from '@/components/shared/filter/FilterMenu.vue';
-import CharacterMenu from '@/components/characters/CharacterMenu.vue';
-import CharacterList from '@/components/characters/CharacterList.vue';
-import CharacterSheetList from '@/components/characters/CharacterSheetList.vue';
-
-import SplitView from './SplitView.vue';
+import NovelItems from './NovelItems.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
-
 
 @Options({
   components: { 
-    EditableLabel, 
-    CharacterMenu,
-    CharacterList,
-    FilterMenu,
-    SplitView,
-    CharacterSheetList
+    NovelItems
   }
 })
 export default class Characters extends Vue {
