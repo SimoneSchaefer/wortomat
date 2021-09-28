@@ -24,12 +24,13 @@ import AutoComplete from 'primevue/autocomplete';
 import Chip from 'primevue/chip';
 import Divider from 'primevue/divider';
 import Menu from 'primevue/menu';
+import MenuBar from 'primevue/menubar';
 import OverlayPanel from 'primevue/overlaypanel';
 import SelectButton from 'primevue/selectbutton';
 import Checkbox from 'primevue/checkbox';
 import Fieldset from 'primevue/fieldset';
 import FileUpload from 'primevue/fileupload';
-
+import ProgressSpinner from 'primevue/progressspinner';
 import draggable from 'vuedraggable'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -58,6 +59,7 @@ const app = createApp(App)
     .component('ScrollPanel', ScrollPanel)
     .component('TabMenu', TabMenu)
     .component('Menu', Menu)
+    .component('MenuBar', MenuBar)
     .component('SelectButton', SelectButton)
     .component('Badge', Badge)
     .component('SpeedDial', SpeedDial)
@@ -67,6 +69,7 @@ const app = createApp(App)
     .component('OverlayPanel', OverlayPanel)
     .component('Checkbox', Checkbox)
     .component('Divider', Divider)
+    .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
     .component('draggable', draggable)
 

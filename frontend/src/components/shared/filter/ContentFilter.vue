@@ -1,21 +1,22 @@
 <template>
-    <Button type="button" @click="toggle" class="p-button-text" icon="fa fa-eye"/>
-    <OverlayPanel ref="overlay">
-        <Menu :model="menuItems"/>
-    </OverlayPanel>
+  <Button type="button" @click="toggle" class="p-button-text p-button-secondary" icon="fa fa-eye" label="View" />
+  <OverlayPanel ref="overlay">
+      <Menu :model="menuItems"/>
+  </OverlayPanel>
 </template>
-
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
-import OverlayPanel from 'primevue/overlaypanel';
 import { Prop } from 'vue-property-decorator';
+
+import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
+
+import OverlayPanel from 'primevue/overlaypanel';
 @Options({
   components: { }
 })
 export default class ContentFitler extends Vue { 
-  @Prop() itemKey: NOVEL_ITEM_KEYS;
+  @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
   toggle(event: Event): void {
     (this.$refs.overlay as OverlayPanel).toggle(event);
@@ -36,7 +37,7 @@ export default class ContentFitler extends Vue {
         icon: `fa fa-${this.isEnabled(view) ? 'check-square' : 'minus-square'}`,
         command: () => {
           this.$store.dispatch('setView', { 
-            key: this.itemKey,
+            key: this.novelItemKey,
             view: view,
             value: !this.isEnabled(view)
           })
@@ -45,7 +46,7 @@ export default class ContentFitler extends Vue {
   }
 
   private isEnabled(view: VIEWS): boolean {
-    const currentState = this.$store.state.view.get(this.itemKey).get(view);
+    const currentState = this.$store.state.view.get(this.novelItemKey).get(view);
     if (currentState === undefined) {
       return true;
     }

@@ -40,7 +40,7 @@ export default class DragDropList extends Vue {
     }
 
     set filteredItems(value: BaseModel[]) {
-        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value});
+        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
     }  
     
     get selectedItems(): BaseModel[] {

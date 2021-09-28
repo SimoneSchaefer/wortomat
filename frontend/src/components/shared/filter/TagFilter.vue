@@ -1,5 +1,5 @@
 <template>
-<div class="tagfilter" v-if="hasTags">
+<div class="tagfilter">
     <AutoComplete :multiple="true" :completeOnFocus="true" v-model="selectedTags" :suggestions="filteredTags" @complete="searchTags($event)" @item-unselect="updateStore($event)" @item-select="updateStore">
         <template #item="slotProps">
             {{ slotProps.item.name }}
@@ -21,7 +21,7 @@ import { Prop } from 'vue-property-decorator';
   components: {  }
 })
 export default class TagFilter extends Vue {
-    @Prop() itemKey: NOVEL_ITEM_KEYS;
+    @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
     selectedTags = [];
     filteredTags = [];    
@@ -36,7 +36,7 @@ export default class TagFilter extends Vue {
 
     updateStore(): void {
         this.$store.dispatch('filterTags', {
-            key: this.itemKey,
+            key: this.novelItemKey,
             tags: [...this.selectedTags]
         });
     }
@@ -50,6 +50,11 @@ export default class TagFilter extends Vue {
 <style>
 .tagfilter {
     display: flex;
+    flex-grow: 1;
+}
+.tagfilter ul {
+    margin-top: 0.3em !important;
+    margin-bottom: 0.3em !important;
 }
 .tagfilter .p-autocomplete {
     width: 100%;
@@ -69,7 +74,10 @@ export default class TagFilter extends Vue {
    font-style: normal;
    position: absolute;
    right:1.5em; 
-   top: 1.5em;
+   top: 1.0em;
+}
+.p-inputtext {
+    border: 1px solid var(--menu-border-color) !important;
 }
 
 .p-focus {

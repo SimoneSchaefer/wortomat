@@ -1,5 +1,5 @@
 <template>
-  <DragDropList :novelItemKey="itemKey" :selectedItemsKey="'currentChapters'" :filteredItemsKey="'filteredChapters'">
+  <DragDropList :novelItemKey="novelItemKey" :selectedItemsKey="selectedItemsKey" :filteredItemsKey="filteredItemsKey">
     <template v-slot="slotProps">
       <div class="p-d-flex">
         <div class="title">
@@ -16,48 +16,42 @@
       </div>
     </template>
   </DragDropList>
-
-
 </template>
 
 <script lang="ts">
-import { ChapterModel } from '@/models/Chapter.model';
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
+import draggable from 'vuedraggable'
+
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import DragDropList from '@/components/shared/lists/DragDropList.vue';
-import draggable from 'vuedraggable'
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { BaseModel } from '@/models/Base.model';
 
 @Options({
   components: { draggable, MissingValueTolerantLabel, DragDropList}
 })
-export default class ChapterList extends Vue {
-  get itemKey(): NOVEL_ITEM_KEYS {
-    return NOVEL_ITEM_KEYS.CHAPTERS;
-  }
+export default class NovelItemList extends Vue {
+  @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
-  getTodoCount(chapter: ChapterModel): number {
-    return this.getMarkerCount(chapter, 'yellow')
+  getTodoCount(novelItem: BaseModel): number {
+    return this.getMarkerCount(novelItem, 'yellow')
   }  
   
-  getFixmeCount(chapter: ChapterModel): number {
-    return this.getMarkerCount(chapter, '#D32F2F')
+  getFixmeCount(novelItem: BaseModel): number {
+    return this.getMarkerCount(novelItem, '#D32F2F')
   }
 
-  getIdeaCount(chapter: ChapterModel): number {
-    return this.getMarkerCount(chapter, 'green')
+  getIdeaCount(novelItem: BaseModel): number {
+    return this.getMarkerCount(novelItem, 'green')
   }
   
-  getMarkerCount(chapter: ChapterModel, color: string): number {
+  getMarkerCount(novelItem: BaseModel, color: string): number {
     // TODO: make part of model?
     const regex = new RegExp(`data-background-color="${color}"`, 'g');
-    const count = ((chapter.content || '').match(regex) || []).length;
+    const count = ((novelItem.content || '').match(regex) || []).length;
     return count;
   }
-
-  /*isSelected(item: BaseModel): boolean {
-    return !!this.$store.getters.currentChapters.find(chapter => chapter.id === item.id);
-  }*/
 }
 </script>
 

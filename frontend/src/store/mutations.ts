@@ -41,6 +41,10 @@ const setView = (state: IState, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, va
     state.view.set(payload.key, currentView);
 };
 
+const setLoading = (state: IState, payload: { loading: boolean}): void => {
+    state.loading = payload.loading;
+};
+
 //// Novel items mutations ////
 const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
@@ -81,6 +85,7 @@ const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Bas
     novelOpened,
     tagsFiltered,
     setView,
+    setLoading,
 
     itemsLoaded,
     tagsLoaded,

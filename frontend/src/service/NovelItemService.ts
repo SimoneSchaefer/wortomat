@@ -8,7 +8,6 @@ export abstract class NovelItemService {
 
     abstract getAPIPath(): string;
 
-
     public getBasePath(novelId: number): string {
         return `${BACKEND_URL}/novels/${novelId}/${this.getAPIPath()}`;
     }

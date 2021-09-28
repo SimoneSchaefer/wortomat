@@ -41,12 +41,15 @@ const setView = (context: ActionContext<IState,IState>, payload: { key: NOVEL_IT
 };
 
 const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number }): void => {
-  loadItemsFromBackend( payload.key, payload.novelId).then(result => {
-    context.commit('itemsLoaded', { key: payload.key, items: result.data });
-  });   
-  loadTagsFromBackend( payload.key, payload.novelId).then(result => {
-    context.commit('tagsLoaded', result.data);
-  }); 
+  context.commit('setLoading', { loading: true })
+  Promise.all([
+    loadItemsFromBackend( payload.key, payload.novelId),
+    loadTagsFromBackend( payload.key, payload.novelId)
+  ]).then(result => {
+    context.commit('itemsLoaded', { key: payload.key, items: result[0].data });
+    context.commit('tagsLoaded', result[1].data);
+    context.commit('setLoading', { loading: false })
+  });
 }
 
 const selectItems = (context: ActionContext<IState,IState>, item: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {

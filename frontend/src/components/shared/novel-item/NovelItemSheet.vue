@@ -1,21 +1,20 @@
 <template>
-    <div class="sheet" v-if="baseModel">
+    <div class="sheet" v-if="item">
         <div class="header-container">
             <div v-if="includeImageUpload">
                 <ImageGallery :imageUrls="images" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>
             </div>
 
             <div class="meta">
-                <div class="header"><EditableLabel v-bind:value="baseModel.name" @update-label="updateName" placeHolderTitle="No name added yet."></EditableLabel></div>
-                <EditableTags v-if="displayTags" :tags="baseModel.tags" @update-tags="updateTags" :service="service"></EditableTags>
+                <div class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" placeHolderTitle="No name added yet."></EditableLabel></div>
+                <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :service="service"></EditableTags>
             </div>
         </div>
         <hr>
-        <b v-if="displaySummary"><EditableLabel v-bind:value="baseModel.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
-        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="baseModel.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></span>
+        <b v-if="displaySummary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
+        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></span>
         <hr v-if="displaySummary || displayExtendedSummary">
-        <EditableText v-if="displayContent" v-bind:value="baseModel.content" v-bind:header="baseModel.title" @update-text="updateContent"></EditableText>        
-
+        <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent"></EditableText>        
     </div>
 </template>
 
@@ -36,14 +35,16 @@ import { TagModel } from '@/models/Tag.model';
   components: { EditableLabel, EditableText, EditableTags, NovelItemSheet, ImageGallery }
 })
 export default class NovelItemSheet extends Vue {
-    @Prop() includeImageUpload = true;
     @Prop() service!: NovelItemService;
-    @Prop() baseModel!: BaseModel;
+    @Prop() item!: BaseModel;
     @Prop() novelItemKey!: NOVEL_ITEM_KEYS;
 
+    get includeImageUpload() {
+        return Object.keys(this.item).includes('images');
+    }
 
     deleteImage(image: ImageParam): void {
-        this.service.deleteImage(this.novelId, this.baseModel.id, image.imageId).then((response) => {
+        this.service.deleteImage(this.novelId, this.item.id, image.imageId).then((response) => {
             this.updateImages(response.data.images);
         });
     }
@@ -55,7 +56,7 @@ export default class NovelItemSheet extends Vue {
     }
 
     get imagesOrEmpty() {
-        return [...this.baseModel['images'] || []];
+        return [...this.item['images'] || []];
     }
 
     get images(): Array<ImageParam> {
@@ -82,11 +83,11 @@ export default class NovelItemSheet extends Vue {
     }
 
     getUploadUrl(): string {
-        return this.service.getUploadUrl(this.novelId, this.baseModel.id);
+        return this.service.getUploadUrl(this.novelId, this.item.id);
     }
 
     getImageUrl(fileId: number): string {
-        return this.service.getImageUrl(this.novelId, this.baseModel.id, fileId);
+        return this.service.getImageUrl(this.novelId, this.item.id, fileId);
     }
 
     isEnabled(view: VIEWS): boolean {
@@ -126,7 +127,7 @@ export default class NovelItemSheet extends Vue {
         this.$store.dispatch('updateItem', { 
             key: this.novelItemKey, 
             novelId: this.novelId,
-            oldItem: this.baseModel,
+            oldItem: this.item,
             overrideValues: overrideValues
         })  
     }
