@@ -25,7 +25,6 @@ export default class NovelItemSheetList extends Vue {
     @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
     get items(): BaseModel[] {
-        console.log('ITEMS', this.novelItemKey, getCurrentSelection(this.$store.state, this.novelItemKey).map(bla => bla['name']))
         return getCurrentSelection(this.$store.state, this.novelItemKey);
     }
 

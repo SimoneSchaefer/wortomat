@@ -24,6 +24,7 @@ export default class App extends Vue {
 :root {
   --background-color: #fff;
   --font-color: #2c3e50;
+  --splitter-background-color: #d2d2d2;
   
   --tabmenu-background-color: #424242;
   --tabmenu-active-background-color: #efefef;  
@@ -45,32 +46,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.p-scrollpanel-bar {
-    background-color: #1976d2 !important;
-    opacity: 1 !important;
-    transition: background-color .3s !important;
-}
-
-.p-scrollpanel-content {
-  padding-right: 0px !important;
-}
-
 .p-orderlist-list {
   border-width: 0px !important;
 }
 .p-orderlist-list-item {
   box-shadow: none !important;
   padding: 0;
-}
-.p-splitter {
-  border-width: 0px !important;
-}
-.p-splitter-gutter {
-  background-color: #bad8f6 !important;
-}
-.p-splitter-gutter-handle {
-  background-color: #1976d2 !important;
-  opacity: 1 !important;
 }
 
 .bg-gray {
