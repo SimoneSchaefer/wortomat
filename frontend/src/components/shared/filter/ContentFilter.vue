@@ -1,5 +1,5 @@
 <template>
-  <Button type="button" @click="toggle" class="p-button-text p-button-secondary" icon="fa fa-eye" label="View" />
+  <Button type="button" @click="toggle" class="p-button-text p-button-secondary" icon="fa fa-search" label="View" />
   <OverlayPanel ref="overlay">
       <Menu :model="menuItems"/>
   </OverlayPanel>
@@ -55,8 +55,10 @@ export default class ContentFitler extends Vue {
 }
 </script>
 
-<style scoped>
-button {
-    height: 100%;
+<style>
+.p-overlaypanel .p-menu {
+  border: none !important;
+  position: relative;
+  top: -10px;
 }
 </style>

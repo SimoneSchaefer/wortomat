@@ -37,12 +37,14 @@ export default class OpenedNovel extends Vue {
 <style>
 
   #nav .p-tabmenu .p-tabmenu-nav {
-    background-color: var(--tabmenu-background-color);
     color: var(--tabmenu-font-color);
-    background-image: var(--tabmenu-background-image);
+    background: var(--tabmenu-background);
     padding-top: 0.5em;
+    overflow: hidden;
+    border: none;
   }
 
+  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem,
   #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
     background-color: transparent;
     color: var(--tabmenu-font-color);
@@ -50,11 +52,16 @@ export default class OpenedNovel extends Vue {
     border: none;
   }
 
+  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
+    padding-bottom: 1.2rem;
+  }
+
+  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight,
   #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
     border-color: transparent;
-    color: var(--tabmenu-active-font-color);
-    background-color: var(--tabmenu-active-background-color);
-    font-weight: 600;
+    color: var(--menu-font-color);
+    background: var(--menu-background);
+    font-weight: 800;
     box-shadow: none;
   }
 </style>
