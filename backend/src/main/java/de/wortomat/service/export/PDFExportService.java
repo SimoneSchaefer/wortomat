@@ -2,9 +2,9 @@ package de.wortomat.service.export;
 
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +20,9 @@ public class PDFExportService implements Exporter {
     @Override
     public void export(Long novelId, ExportOptions exportOptions, String filePath) throws IOException {
         try {
-            Document document = new Document();
+            Document document = new Document(PageSize.SMALL_PAPERBACK);
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filePath));
+
             document.open();
             XMLWorkerHelper.getInstance().parseXHtml(
                     writer,

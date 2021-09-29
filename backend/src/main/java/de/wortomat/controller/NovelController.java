@@ -28,7 +28,7 @@ public class NovelController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Novel>> novel() {
+    public ResponseEntity<List<Novel>> novels() {
         return ResponseEntity.ok(novelService.get());
     }
 

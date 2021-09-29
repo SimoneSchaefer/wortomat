@@ -1,5 +1,6 @@
 package de.wortomat.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.List;
 @Data
 public class Novel {
     @Id
+    @JsonFormat
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

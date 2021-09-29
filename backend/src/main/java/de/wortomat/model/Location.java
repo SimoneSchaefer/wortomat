@@ -33,4 +33,8 @@ public class Location implements PositionAware, ImageAware {
     @JsonIgnore
     @ManyToOne
     private Novel novel;
+
+    public void setNovel(Novel novel) {
+        this.novel = novel;
+    }
 }

@@ -45,8 +45,16 @@ public class FileHandlingService {
     public void deleteFromFolder(Long novelId, Long itemId, EntityType entityType, Long fileId) throws IOException {
         File folder = new File(storageService.getUploadFolder(novelId, itemId, entityType, fileId));
         if (folder.exists()) {
+            File[] allContents = folder.listFiles();
+            for (File file : allContents) {
+                file.delete();
+            }
+            File parentFolder = folder.getParentFile();
             if (!folder.delete()) {
                 System.out.println("could not delete folder");
+            }
+            if (parentFolder.listFiles().length == 0) {
+                parentFolder.delete();
             }
         }
     }
