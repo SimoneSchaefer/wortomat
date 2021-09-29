@@ -1,8 +1,10 @@
 <template>
+<div class="content-filter">
   <Button type="button" @click="toggle" class="p-button-text p-button-secondary" icon="fa fa-search" label="View" />
   <OverlayPanel ref="overlay">
       <Menu :model="menuItems"/>
   </OverlayPanel>
+</div>
 </template>
 
 <script lang="ts">
@@ -56,9 +58,16 @@ export default class ContentFitler extends Vue {
 </script>
 
 <style>
+button {
+  height: 100%;
+}
+.p-overlaypanel .p-overlaypanel-content {
+  padding: 0 !important;
+}
 .p-overlaypanel .p-menu {
   border: none !important;
   position: relative;
-  top: -10px;
+  top: -15px;
+  background-color: #fff;
 }
 </style>

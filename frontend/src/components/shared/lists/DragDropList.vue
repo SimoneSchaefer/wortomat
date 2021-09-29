@@ -6,9 +6,11 @@
     @end="drag=false" 
     item-key="id">
     <template #item="{element}">
-        <div class="item p-jc-between" v-on:click="selectItem(element, $event)" v-bind:class="{ active: isSelected(element)}">
-            <slot v-bind:item="element"></slot>
-        </div>
+        <div v-if="isVisible(element)">
+            <div class="item p-jc-between" v-on:click="selectItem(element, $event)" v-bind:class="{ active: isSelected(element)}">
+                <slot v-bind:item="element"></slot>
+            </div>
+        </div>      
     </template>
   </draggable>
 </template>
@@ -21,7 +23,7 @@ import draggable from 'vuedraggable'
 
 import { BaseModel } from '@/models/Base.model';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
-import { getCurrentSelection, getFilteredItems } from '@/store/getters';
+import { getAllItems, getCurrentSelection, getFilteredItems } from '@/store/getters';
 
 @Options({
   components: { draggable }
@@ -36,7 +38,7 @@ export default class DragDropList extends Vue {
     }
    
     get items(): BaseModel[] {
-        return this.filteredItems;
+        return getAllItems(this.$store.state, this.novelItemKey);
     }
 
     get filteredItems(): BaseModel[] {
@@ -47,6 +49,10 @@ export default class DragDropList extends Vue {
         this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
     } 
 
+
+    isVisible(item: BaseModel): boolean {
+        return !!this.filteredItems.find(filteredItem => filteredItem.id === item.id);
+    }
 
     isSelected(item: BaseModel): boolean {
         return !!this.selectedItems.find(chapter => chapter.id === item.id);
