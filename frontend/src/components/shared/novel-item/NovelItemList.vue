@@ -45,7 +45,7 @@ export default class NovelItemList extends Vue {
   }
 
   getIdeaCount(novelItem: BaseModel): number {
-    return this.getMarkerCount(novelItem, 'green')
+    return this.getMarkerCount(novelItem, 'blue')
   }
   
   getMarkerCount(novelItem: BaseModel, color: string): number {
@@ -73,6 +73,7 @@ export default class NovelItemList extends Vue {
 
 .itemlist {
   background: var(--item-list-background);
+  height: 100%;
 }
 
 </style>

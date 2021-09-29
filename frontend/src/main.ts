@@ -31,6 +31,7 @@ import Checkbox from 'primevue/checkbox';
 import Fieldset from 'primevue/fieldset';
 import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
+
 import draggable from 'vuedraggable'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -72,7 +73,6 @@ const app = createApp(App)
     .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
     .component('draggable', draggable)
-
 app.mount("#app");
 
 

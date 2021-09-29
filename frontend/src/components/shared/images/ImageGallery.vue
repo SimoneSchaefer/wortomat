@@ -1,14 +1,18 @@
 <template>
 <div class="file-container">
-    <Galleria :value="imageUrls" :showItemNavigators="true" :showThumbnails="false">
+    <Galleria :value="images" :showItemNavigators="true" :showThumbnails="false">
         <template #item="slotProps">
-            <div>
+            <div v-if="isDummy(slotProps.item)">
+                <img :src="`${slotProps.item.imageUrl}`" class="dummy-image" />
+            </div>
+            <div v-if="!isDummy(slotProps.item)">
                 <div class="file-options">
-                    <Button v-on:click="openImage(slotProps.item.imageUrl)" class="p-button-primary p-button-text" icon="fa fa-external-link-alt" title="Open image in new tab" :href="slotProps.item" target="_blank"></Button>
-                    <Button v-on:click="confirm" class="p-button-danger p-button-text" icon="fa fa-trash" title="Delete this image"></Button>
+                    <Button v-on:click="confirm" class="p-button-danger" icon="fa fa-trash" title="Delete this image"></Button>
                     <ConfirmDialog ref="confirm" @accept="deleteImage(slotProps.item)"></ConfirmDialog>
                 </div>
-                <img :src="`${slotProps.item.imageUrl}`" />
+                <a :href="slotProps.item.imageUrl" target="_blank" title="View in in new tab">
+                    <img :src="`${slotProps.item.imageUrl}`" v-bind:class="{ dummy: isDummy(slotProps.item) }" />
+                </a>
             </div>
         </template>
     </Galleria> 
@@ -24,7 +28,6 @@ import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
-import FileUpload from 'primevue/fileupload';
 
 
 @Options({
@@ -32,8 +35,23 @@ import FileUpload from 'primevue/fileupload';
   emits: [ 'delete-image', 'upload-image']
 })
 export default class CharacterSheet extends Vue {
-    @Prop() imageUrls!: Array<ImageParam>;
+    @Prop() imageUrls: Array<ImageParam>;
     @Prop() uploadUrl!: string;
+
+    get images() {
+        if (this.imageUrls.length) {
+            return this.imageUrls;
+        }
+        return [{
+                imageId: undefined,
+                imageUrl: '/assets/images/dummy-gallery-item.jpg' 
+        }];
+    }
+
+    isDummy(image: ImageParam) {
+        console.log('iosDummy? ', image)
+        return typeof image.imageId === 'undefined';
+    }
 
     customUpload(event) {
         let xhr = new XMLHttpRequest();
@@ -69,13 +87,11 @@ export default class CharacterSheet extends Vue {
 
     @Emit('upload-image')
     uploadImage(image): ImageParam {
-        console.log('UPLOADED', image)
         return image;
     }
 
     @Emit('delete-image')
     deleteImage(image: ImageParam): ImageParam {
-        console.log('EMIT DELETE')
         return image;
     }
 
@@ -91,16 +107,19 @@ export interface ImageParam {
 </script>
 
 <style>
+.dummy-image {
+    filter: grayscale(100%);
+}
 .file-container {
     width: calc(200px + 8rem);
 }
 .file-options {
+    position: absolute;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    background-color: rgb(59, 59, 59);
-    width: 100%;
-    padding: 1em 0;
+    right: 2.8rem;
+    padding: 0;
 }
 
 .file-options > * {
@@ -108,16 +127,25 @@ export interface ImageParam {
 }
 
 .upload {
-    padding: 1rem;
+    position: relative;
+    top: -1rem;
     display: flex;
     justify-content: center;
 }
 
-.p-galleria {
-    height: 270px;
+.p-galleria .p-galleria-item-container {
+    width: 20rem;
+    height: 14rem;
 }
-.p-galleria-item-container,.file-container  {
-    background-color: rgb(59, 59, 59);
+
+.p-galleria .p-galleria-item-nav .p-galleria-item-prev-icon, 
+.p-galleria .p-galleria-item-nav .p-galleria-item-next-icon {
+    color: rgb(132, 132, 132);
+}
+
+.p-galleria .p-galleria-item-nav.p-link:focus {
+    outline: none;
+    box-shadow: none;;
 }
 
 .p-galleria .p-galleria-item-container .p-galleria-item-nav {
@@ -127,8 +155,9 @@ export interface ImageParam {
 }
 
 .p-galleria img {
-    width: 200px;
-    height: 200px;
+    width: 14em;
+    height: 14em;
+    object-fit: cover;
 }
 
 
