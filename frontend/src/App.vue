@@ -84,6 +84,7 @@ body {
 
 .ProseMirror {
   border: none !important;
+  color: var(--font-color) !important;
 }
 
 .w-100 {
