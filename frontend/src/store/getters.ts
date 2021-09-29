@@ -23,10 +23,17 @@ export default {
     tags
 };
 
-export function getFilteredItems(state: IState, key: NOVEL_ITEM_KEYS) { 
+export function getAllItems(state: IState, key: NOVEL_ITEM_KEYS) {
     if (!novelIdOrRaise(state)) return [];
 
     const allItems = state.novelItems[key] || [];
+    return allItems;
+}
+
+export function getFilteredItems(state: IState, key: NOVEL_ITEM_KEYS) { 
+    if (!novelIdOrRaise(state)) return [];
+
+    const allItems = getAllItems(state, key);
     const filteredTagIds = state.filteredTags.get(key) || [];
 
     if (!filteredTagIds.length) { return allItems;}
