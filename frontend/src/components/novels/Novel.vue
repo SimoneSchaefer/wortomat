@@ -5,7 +5,7 @@
         </template>
         <template #title>
             <div class="p-d-flex p-jc-between">
-                <EditableLabel v-bind:value="novel.title" @update-label="updateTitle" placeHolderTitle="No title added yet."></EditableLabel>
+                <EditableLabel v-bind:value="novel.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>
                 <div class="option-buttons">
                     <router-link :to="'/write/' + novel.id + '/chapters'">
                         <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right"></Button>
@@ -15,7 +15,7 @@
             </div>        
         </template>
         <template #content>
-            <EditableLabel v-bind:value="novel.summary" @update-label="updateSummary" ></EditableLabel>
+            <EditableLabel v-bind:value="novel.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet." ></EditableLabel>
         </template>
     </Card>
 </template>
@@ -31,8 +31,8 @@ import EditableLabel from '../shared/inline-edit/EditableLabel.vue';
 export default class Novel extends Vue {
   @Prop() novel!: Novel 
 
-  updateTitle(title: string): void {
-    this.updateNovelProperty('title', title)
+  updateName(title: string): void {
+    this.updateNovelProperty('name', title)
   }
 
   updateSummary(summary: string): void {

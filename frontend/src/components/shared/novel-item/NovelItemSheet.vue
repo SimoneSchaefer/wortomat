@@ -149,6 +149,14 @@ hr {
     border-color: var(--sheet-separator-color);
 }
 
+.header-container {
+    display: flex;
+}
+
+.meta {
+    flex-grow: 1;
+}
+
 .header {
     font-size: 1.2rem;
     font-weight: bold;
