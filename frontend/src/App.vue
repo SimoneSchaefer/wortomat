@@ -37,9 +37,15 @@ export default class App extends Vue {
   --menu-border-color: #c1c1c1;
 
   --item-list-background: #f1f1f1 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwAgMAAAAqbBEUAAAACVBMVEUAAAD08vTs7uz/KWn3AAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAWpJREFUKJEdklEKhUEEhW2S+r2bYj+meKfMKq/ug5JOOB8wp03cq54yMJ/vXP6SnWDa3Y5Z0mvQ9KjOUscEsgmuI49QIJUn3rGD8YHwi6ehL3Rg8g7GGTmRUJ9jM24eBTKt3wwx3QD1q5yRKZqwkrl2RdkIuOdLUsbbCLeQRM6d4oA3PKTnhlSAS1wTVo9+YJ0Yd+Y/p53iZXF/OZDIbeu2jiGkCH0fveTmlcXpy9ZqD5BxuxNdvQ45SWtiMoKBiNZyniP5QKJ9Pss32FCkwumtRAXkyeyJaKywKCjnK9W6cDDT7PMFFFDPMOs1sR/gma1K4nwDtqy6Z8fuFb5HxFlEHXc3EKqk8/wJvO4rxxbyJERyMomPsQEp3u+QxcX1E28eehsPAjFP11JU5kXVU6hKUgrDMvjo4xgFtNpF6JBoLetJHvVRNQiL3mbL1/ddPkXduBgGy8/9HKvS/YOyqHvz0GlwM0W+nj75A9XmH3TRYwZXAAAAAElFTkSuQmCC);
+
   --sheet-list-background: #4a4a4a var(--noisy-image);
   --sheet-background: var(--item-list-background);
   --sheet-border: 1px solid #c1c1c1;
+  --sheet-separator-color: #c1c1c1;
+
+  --editable-background-editing: #dfdfdf;
+  --editable-background-input: #efefef;
+  --editable-background-hover: #dfdfdf;
 }
 
 html, body, div {

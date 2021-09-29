@@ -141,4 +141,13 @@ export default class NovelItemSheet extends Vue {
     padding: 1em;
     background: var(--sheet-background);
 }
+
+hr {
+    border-color: var(--sheet-separator-color);
+}
+
+.header {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
 </style>
