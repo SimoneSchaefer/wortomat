@@ -50,7 +50,7 @@ export default class TagFilter extends Vue {
 <style>
 .tagfilter {
     display: flex;
-    flex-grow: 1;
+    width: 30em;
 }
 .tagfilter ul {
     margin-top: 0.3em !important;

@@ -53,7 +53,6 @@ export default class InlineEdit extends Vue {
 
 <style scoped>
 .container {
-    background-color: white;
     text-align: left;
     position: relative;
     border: 3px solid transparent;
@@ -64,7 +63,6 @@ export default class InlineEdit extends Vue {
 }
 .container.editing,.container:hover {
     border: 3px solid transparent;
-    background: aliceblue;
 }
 .container.readonly:hover {
     cursor: pointer;

@@ -1,4 +1,5 @@
 <template>
+<div class="itemlist">
   <DragDropList :novelItemKey="novelItemKey">
     <template v-slot="slotProps">
       <div class="p-d-flex">
@@ -16,6 +17,7 @@
       </div>
     </template>
   </DragDropList>
+</div>
 </template>
 
 <script lang="ts">
@@ -67,5 +69,9 @@ export default class NovelItemList extends Vue {
   height: 1.2em;
   line-height: 1.2em;
   margin-left: 0.3em;
+}
+
+.itemlist {
+  background: var(--item-list-background);
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <NovelItems :novelItemKey="itemKey" :selectedItemsKey="'selectedCharacters'" :filteredItemsKey="'filteredCharacters'"></NovelItems>
+  <NovelItems :novelItemKey="itemKey"></NovelItems>
 </template>
 
 <script lang="ts">

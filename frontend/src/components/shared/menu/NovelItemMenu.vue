@@ -1,8 +1,11 @@
 <template>
-    <div class="menu">
-        <NovelItemFileMenu :novelItemKey="novelItemKey"></NovelItemFileMenu>
-        <div class="separator"></div>
-        <ContentFilter :novelItemKey="novelItemKey"></ContentFilter>
+    <div class="menubar">
+        <div class="menu">
+            <NovelItemFileMenu :novelItemKey="novelItemKey"></NovelItemFileMenu>
+            <div class="separator"></div>
+            <ContentFilter :novelItemKey="novelItemKey"></ContentFilter>
+        </div>
+       
         <TagFilter :novelItemKey="novelItemKey"></TagFilter>
     </div>
 </template>
@@ -30,15 +33,32 @@ export default class NovelItemMenu extends Vue {
 </script>
 
 
+<style>
+.menubar .menu .p-button.p-button-text.p-button-secondary {
+    color: var(--menu-font-color);
+}
+</style>
+
 
 <style scoped>
-.menu {
+.menubar {
     display: flex;
     width: 100%;
     height: 3em;
     z-index: 9999;
+    color: var(--menu-font-color);
+    background-image: var(--noisy-image);
     background-color: var(--menu-background-color);
-    border-bottom: 1px solid var(--menu-border-color)
+    border-bottom: 1px solid var(--menu-border-color);
+    justify-content: space-between;
+
+-webkit-box-shadow: 0px 5px 5px -5px #000000; 
+box-shadow: 0px 5px 5px -5px #000000;}
+
+
+
+.menu {
+    display: flex;  
 }
 
 .separator {
