@@ -2,19 +2,20 @@
 <div class="itemlist">
   <DragDropList :novelItemKey="novelItemKey">
     <template v-slot="slotProps">
-      <div class="p-d-flex">
+      <div class="p-d-flex item">
         <div class="title">
           <MissingValueTolerantLabel :value="slotProps.item.name" fallback="No title yet"></MissingValueTolerantLabel>
         </div>
         <div class="summary">
           <MissingValueTolerantLabel :value="slotProps.item.summary" fallback="No summary yet"></MissingValueTolerantLabel>
         </div>
-      </div>
-      <div class="badges">
+        <div class="badges">
         <Badge v-if="getTodoCount(slotProps.item)" :value="getTodoCount(slotProps.item)" severity="warning"></Badge>
         <Badge v-if="getFixmeCount(slotProps.item)" :value="getFixmeCount(slotProps.item)" severity="danger"></Badge>
         <Badge v-if="getIdeaCount(slotProps.item)" :value="getIdeaCount(slotProps.item)" severity="info"></Badge>
       </div>
+    </div>
+   
     </template>
   </DragDropList>
 </div>
@@ -69,6 +70,19 @@ export default class NovelItemList extends Vue {
   height: 1.2em;
   line-height: 1.2em;
   margin-left: 0.3em;
+}
+
+
+.p-d-flex {
+  flex-wrap: wrap;
+}
+
+.p-d-flex.item > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .itemlist {
