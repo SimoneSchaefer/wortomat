@@ -23,7 +23,7 @@ export default {
     tags
 };
 
-function getFilteredItems(state: IState, key: NOVEL_ITEM_KEYS) { 
+export function getFilteredItems(state: IState, key: NOVEL_ITEM_KEYS) { 
     if (!novelIdOrRaise(state)) return [];
 
     const allItems = state.novelItems[key] || [];
