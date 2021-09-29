@@ -87,7 +87,7 @@ export default class EditableLabel extends Vue {
 }
 div.content:hover {
     border: 3px solid transparent;
-    background: aliceblue;
+    background: var(--editable-background-hover);
     cursor: pointer;
 }
 div.content:hover:after {

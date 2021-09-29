@@ -60,12 +60,16 @@ export default class InlineEdit extends Vue {
 }
 .container.editing {
     z-index: 101;
+    background: var(--editable-background-editing);
 }
 .container.editing,.container:hover {
     border: 3px solid transparent;
 }
+
 .container.readonly:hover {
     cursor: pointer;
+    background: var(--editable-background-hover);
+
 }
 .container.readonly:hover:after {
    content: "\f304"; 
@@ -92,5 +96,11 @@ div.backdrop {
     height: 100%;
     width: 100%;
     z-index: 100;
+}
+</style>
+
+<style>
+.container.editing div[contenteditable="true"] {
+    background: var(--editable-background-input);
 }
 </style>
