@@ -2,10 +2,10 @@
 <SplitView :stateKey="novelItemKey">
   <template v-slot:leftpanel>
       <NovelItemMenu :novelItemKey="novelItemKey"></NovelItemMenu>
-      <NovelItemList :novelItemKey="novelItemKey" :selectedItemsKey="selectedItemsKey" :filteredItemsKey="filteredItemsKey"></NovelItemList>
+      <NovelItemList :novelItemKey="novelItemKey"></NovelItemList>
   </template>
   <template v-slot:content>
-    <NovelItemSheetList :novelItemKey="novelItemKey" :selectedItemsKey="selectedItemsKey" :filteredItemsKey="filteredItemsKey"></NovelItemSheetList>
+    <NovelItemSheetList :novelItemKey="novelItemKey"></NovelItemSheetList>
   </template>
 </SplitView>
 </template>

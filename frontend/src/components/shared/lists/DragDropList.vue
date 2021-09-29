@@ -14,11 +14,14 @@
 </template>
 
 <script lang="ts">
-import { BaseModel } from '@/models/Base.model';
 import { Options, Vue } from 'vue-class-component';
-import draggable from 'vuedraggable'
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { Prop } from 'vue-property-decorator';
+
+import draggable from 'vuedraggable'
+
+import { BaseModel } from '@/models/Base.model';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { getCurrentSelection, getFilteredItems } from '@/store/getters';
 
 @Options({
   components: { draggable }
@@ -26,34 +29,27 @@ import { Prop } from 'vue-property-decorator';
 export default class DragDropList extends Vue {
     @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
-    @Prop() /* TODO can't set the models themselves as properties as for some reason, the selected items are not refreshed correctly :(*/ 
-    private selectedItemsKey: string;
-    
-    @Prop()
-    private filteredItemsKey: string;
+    private lastChecked: BaseModel = null; // needed for CTRL handling
 
-    private lastChecked: BaseModel = null; 
-
-
-    get filteredItems(): BaseModel[] {
-        return this.$store.getters[this.filteredItemsKey];
-    }
-
-    set filteredItems(value: BaseModel[]) {
-        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
-    }  
-    
     get selectedItems(): BaseModel[] {
-        return this.$store.getters[this.selectedItemsKey] || []
+        return getCurrentSelection(this.$store.state, this.novelItemKey);
     }
    
     get items(): BaseModel[] {
         return this.filteredItems;
     }
 
+    get filteredItems(): BaseModel[] {
+        return getFilteredItems(this.$store.state, this.novelItemKey);
+    }
+
+    set filteredItems(value: BaseModel[]) {
+        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
+    } 
+
 
     isSelected(item: BaseModel): boolean {
-        return !!this.$store.getters[this.selectedItemsKey].find(chapter => chapter.id === item.id);
+        return !!this.selectedItems.find(chapter => chapter.id === item.id);
     }
 
     selectItem(selected: BaseModel, $event: Event): void  {
