@@ -1,7 +1,7 @@
 <template>
 <NovelItemMenu :novelItemKey="novelItemKey"></NovelItemMenu>
 <Splitter style="height: 100%" :stateKey="novelItemKey">
-  <SplitterPanel>
+  <SplitterPanel class="split-content-left">
     <ScrollPanel style="height: 100%">        
       <NovelItemList :novelItemKey="novelItemKey"></NovelItemList>
     </ScrollPanel>
@@ -45,15 +45,15 @@ export default class NovelItems extends Vue {
 
 <style>
 .p-scrollpanel-content {
-  overflow-x: hidden;
-}
-
-.p-scrollpanel-content {
   padding-right: 0;
 }
 
-.p-scrollpanel-bar.p-scrollpanel-bar-y {
-  display: none;
+.split-content-left .p-scrollpanel-bar.p-scrollpanel-bar-y {
+  background: #d1d1d1a9;
+}
+
+.split-content-right .p-scrollpanel-bar.p-scrollpanel-bar-y {
+  background: #797979;
 }
 
 .p-splitter .p-splitter-gutter {

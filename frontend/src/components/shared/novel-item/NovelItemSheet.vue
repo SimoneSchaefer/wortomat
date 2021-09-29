@@ -138,7 +138,10 @@ export default class NovelItemSheet extends Vue {
 .sheet {
     border: var(--sheet-border);
     margin: 3em;
-    padding: 1em;
+    padding: 5em;
+    position: relative;
+    top: 1em;
+    bottom: 3em;
     background: var(--sheet-background);
 }
 

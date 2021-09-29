@@ -26,7 +26,7 @@ export default class Spinner extends Vue {
   justify-content: center;
   align-content: center;
   align-items: center;
-  background-color: var(--background-color);
+  background-color: var(--spinner-background-color);
   opacity: 0.3;
 }
 
