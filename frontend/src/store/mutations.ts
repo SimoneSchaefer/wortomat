@@ -24,7 +24,6 @@ const novelDeleted = (state: IState, payload: NovelModel): void => {
 
 const novelOpened = (state: IState, payload: NovelModel): void => {
     state.currentNovel = payload;
-    state.novelItems[NOVEL_ITEM_KEYS.TAGS] = payload.tags;
 }
 
 const tagsLoaded = (state: IState, payload: []): void => {

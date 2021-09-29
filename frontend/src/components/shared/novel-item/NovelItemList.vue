@@ -74,4 +74,5 @@ export default class NovelItemList extends Vue {
 .itemlist {
   background: var(--item-list-background);
 }
+
 </style>

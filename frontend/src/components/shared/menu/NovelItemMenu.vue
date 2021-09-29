@@ -47,8 +47,7 @@ export default class NovelItemMenu extends Vue {
     height: 3em;
     z-index: 9999;
     color: var(--menu-font-color);
-    background-image: var(--noisy-image);
-    background-color: var(--menu-background-color);
+    background: var(--menu-background);
     border-bottom: 1px solid var(--menu-border-color);
     justify-content: space-between;
 
