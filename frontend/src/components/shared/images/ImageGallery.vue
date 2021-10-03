@@ -49,7 +49,6 @@ export default class CharacterSheet extends Vue {
     }
 
     isDummy(image: ImageParam) {
-        console.log('iosDummy? ', image)
         return typeof image.imageId === 'undefined';
     }
 
