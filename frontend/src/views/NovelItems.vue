@@ -48,6 +48,10 @@ export default class NovelItems extends Vue {
   padding-right: 0;
 }
 
+.split-content-left {
+  background: var(--item-list-background);
+}
+
 .split-content-left .p-scrollpanel-bar.p-scrollpanel-bar-y {
   background: #d1d1d1a9;
 }
