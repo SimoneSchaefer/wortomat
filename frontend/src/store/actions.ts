@@ -31,8 +31,10 @@ const deleteNovel = (context: ActionContext<IState,IState>, novel: NovelModel): 
 }
 
 const loadNovels = (context: ActionContext<IState,IState>): void => {
+    context.commit('setLoading', { loading: true })
     new NovelService().getAll().then(result => {
       context.commit('novelsLoaded', result.data)
+      context.commit('setLoading', { loading: false })
     });  
 }
 

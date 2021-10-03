@@ -3,7 +3,7 @@
   <DragDropList :novelItemKey="novelItemKey">
     <template v-slot="slotProps">
       <div class="p-d-flex item">
-        <div class="title">
+        <div class="title"> {{ slotProps.item.id }}
           <MissingValueTolerantLabel :value="slotProps.item.name" fallback="No title yet"></MissingValueTolerantLabel>
         </div>
         <div class="summary">

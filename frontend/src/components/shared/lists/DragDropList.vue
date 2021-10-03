@@ -1,6 +1,6 @@
 <template>
   <draggable 
-    v-model="filteredItems" 
+    v-model="items" 
     group="items" 
     @start="drag=true" 
     @end="drag=false" 
@@ -41,13 +41,14 @@ export default class DragDropList extends Vue {
         return getAllItems(this.$store.state, this.novelItemKey);
     }
 
+    set items(value: BaseModel[]) {
+        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
+    } 
+
+
     get filteredItems(): BaseModel[] {
         return getFilteredItems(this.$store.state, this.novelItemKey);
     }
-
-    set filteredItems(value: BaseModel[]) {
-        this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
-    } 
 
 
     isVisible(item: BaseModel): boolean {
