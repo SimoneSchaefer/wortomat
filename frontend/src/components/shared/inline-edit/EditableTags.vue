@@ -77,8 +77,8 @@ export default class EditableTags extends Vue {
     }
 
     searchTags($event: { query: string }): void {      
-        this.filteredTags = this.$store.getters.tags.filter(tag => tag.name.includes($event.query));
-        if (!this.filteredTags.find(tag => tag.name === $event.query)) {
+        this.filteredTags = this.$store.getters.tags.filter(tag => tag.name.toLocaleLowerCase().includes($event.query.toLocaleLowerCase()));
+        if (!this.filteredTags.find(tag => tag.name.toLocaleLowerCase() === $event.query.toLocaleLowerCase())) {
             this.filteredTags.splice(0, 0, { id: undefined, name: $event.query });
         }
     }

@@ -9,6 +9,13 @@
         <div class="summary">
           <MissingValueTolerantLabel :value="slotProps.item.summary" fallback="No summary yet"></MissingValueTolerantLabel>
         </div>
+        <div class="tags">
+          <div v-for="tag in slotProps.item.tags" :key="tag.id" class="tag-chip">
+            <Chip>
+                {{ tag.name }}
+            </Chip>
+          </div>
+        </div>
         <div class="badges">
         <Badge v-if="getTodoCount(slotProps.item)" :value="getTodoCount(slotProps.item)" severity="warning"></Badge>
         <Badge v-if="getFixmeCount(slotProps.item)" :value="getFixmeCount(slotProps.item)" severity="danger"></Badge>
@@ -62,6 +69,20 @@ export default class NovelItemList extends Vue {
 .title {
   font-weight: bold;
   padding-right: 0.5em;
+}
+
+.tags {
+  margin-left: 1rem;
+  font-size: 0.8rem;
+  display: flex;
+}
+
+.tags > * {
+  margin-right: 0.2rem;
+}
+
+.p-chip {
+  font-size: 0.8rem;
 }
 
 .badges .p-badge {

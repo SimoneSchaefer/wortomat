@@ -34,6 +34,7 @@ export default class App extends Vue {
   
   --tabmenu-background: var(--dark-background);
   --tabmenu-font-color: #efefef;  
+  --tabmenu-height: 3.2em;
 
   --menu-background: var(--middle-background);
   --menu-font-color: #626262;

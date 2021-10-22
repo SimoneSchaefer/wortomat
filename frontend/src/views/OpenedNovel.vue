@@ -42,6 +42,7 @@ export default class OpenedNovel extends Vue {
     padding-top: 0.5em;
     overflow: hidden;
     border: none;
+    height: var(--tabmenu-height);
   }
 
   #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem,

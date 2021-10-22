@@ -1,6 +1,7 @@
 <template>
 <NovelItemMenu :novelItemKey="novelItemKey"></NovelItemMenu>
-<Splitter style="height: 100%" :stateKey="novelItemKey">
+<div class="split-panel">
+  <Splitter style="height: 100%" :stateKey="novelItemKey">
   <SplitterPanel class="split-content-left">
     <ScrollPanel style="height: 100%">        
       <NovelItemList :novelItemKey="novelItemKey"></NovelItemList>
@@ -12,6 +13,8 @@
     </ScrollPanel>
   </SplitterPanel>
 </Splitter>
+</div>
+
 </template>
 
 <script lang="ts">
@@ -43,7 +46,15 @@ export default class NovelItems extends Vue {
 }
 </script>
 
+
+<style scoped>
+.split-panel {
+  height: calc(100vh - 3em - 3.2em);
+}
+</style>
+
 <style>
+
 .p-scrollpanel-content {
   padding-right: 0;
 }
