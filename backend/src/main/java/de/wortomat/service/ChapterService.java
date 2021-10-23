@@ -25,7 +25,7 @@ public class ChapterService extends PositionAwareService<Chapter>{
     ChapterTagRepository chapterTagRepository;
 
     public List<ChapterTag> getTags(Long novelId) {
-        return this.chapterTagRepository.findAllByNovelId(novelId);
+        return this.chapterTagRepository.findAllByNovelIdOrderByNameAsc(novelId);
     }
 
     public ChapterTag createTag(Long novelId, ChapterTag tag) {

@@ -34,4 +34,9 @@ public class Chapter implements PositionAware {
     @ManyToOne
     private Novel novel;
 
+    /*@JsonIgnore
+    @ManyToOne
+    private TimelineEvent timelineEvent;*/
+
+
 }

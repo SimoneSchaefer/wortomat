@@ -1,10 +1,12 @@
 package de.wortomat.service;
 
+import de.wortomat.model.NovelItemTag;
 import de.wortomat.model.PositionAware;
 import de.wortomat.repository.PositionAwareRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public abstract class PositionAwareService<T extends PositionAware> {
@@ -14,7 +16,11 @@ public abstract class PositionAwareService<T extends PositionAware> {
     public abstract PositionAwareRepository<T,Long> getRepository();
 
     public List<T> get(Long novelId) {
-        return this.getRepository().findAllByNovelIdOrderByPosition(novelId);
+        List<T> result = this.getRepository().findAllByNovelIdOrderByPosition(novelId);
+        for (T item : result) {
+            item.getTags().sort(Comparator.comparing(NovelItemTag::getName));
+        }
+        return result;
     }
 
     public T get(Long _novelId, Long itemItem) {

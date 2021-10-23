@@ -1,8 +1,7 @@
 package de.wortomat.controller;
 
-import de.wortomat.model.Chapter;
-import de.wortomat.model.ChapterTag;
-import de.wortomat.service.ChapterService;
+import de.wortomat.model.TimelineEvent;
+import de.wortomat.service.TimelineEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,45 +9,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/novels/{novelId}/chapters/")
+@RequestMapping("/novels/{novelId}/timeline/")
 @CrossOrigin(origins = "*")
-public class ChapterController {
+public class TimelineEventController {
     @Autowired
-    private ChapterService chapterService;
+    private TimelineEventService timelineEventService;
 
     @PostMapping
-    public ResponseEntity<Chapter> create(@PathVariable("novelId") Long novelId, @RequestBody Chapter chapter) {
-        return ResponseEntity.ok(this.chapterService.create(novelId, chapter));
+    public ResponseEntity<TimelineEvent> create(@PathVariable("novelId") Long novelId, @RequestBody TimelineEvent timelineEvent) {
+        return ResponseEntity.ok(this.timelineEventService.create(novelId, timelineEvent));
     }
 
     @PutMapping
-    public ResponseEntity<Chapter> update(@PathVariable("novelId") Long novelId, @RequestBody Chapter chapter) {
-        return ResponseEntity.ok(this.chapterService.update(novelId, chapter));
+    public ResponseEntity<TimelineEvent> update(@PathVariable("novelId") Long novelId, @RequestBody TimelineEvent timelineEvent) {
+        return ResponseEntity.ok(this.timelineEventService.update(novelId, timelineEvent));
+    }
+
+    @PutMapping("addChapter")
+    public ResponseEntity<TimelineEvent> addChapterReference(
+            @PathVariable("novelId") Long novelId,
+            @RequestParam("timelineEventId") Long timelineEventId,
+            @RequestParam("chapterId") Long chapterId) {
+        return ResponseEntity.ok(this.timelineEventService.addChapterReference(novelId, timelineEventId, chapterId));
+    }
+
+    @PutMapping("addResearch")
+    public ResponseEntity<TimelineEvent> addResearchReference(
+            @PathVariable("novelId") Long novelId,
+            @RequestParam("timelineEventId") Long timelineEventId,
+            @RequestParam("researchId") Long researchId) {
+        return ResponseEntity.ok(this.timelineEventService.addResearchReference(novelId, timelineEventId, researchId));
     }
 
     @GetMapping
-    public ResponseEntity<List<Chapter>> get(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.chapterService.get(novelId));
-    }
-
-    @GetMapping("tags")
-    public ResponseEntity<List<ChapterTag>> tags(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.chapterService.getTags(novelId));
-    }
-
-    @PostMapping("tags")
-    public ResponseEntity<ChapterTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody ChapterTag tag) {
-        return ResponseEntity.ok(this.chapterService.createTag(novelId, tag));
-    }
-
-    @DeleteMapping("{chapterId}")
-    public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("chapterId") Long chapterId) {
-        this.chapterService.delete(novelId, chapterId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("updatePositions")
-    public ResponseEntity<List<Chapter>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
-        return ResponseEntity.ok(this.chapterService.updatePositions(novelId, updatedPositions));
+    public ResponseEntity<List<TimelineEvent>> get(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(this.timelineEventService.getAll(novelId));
     }
 }

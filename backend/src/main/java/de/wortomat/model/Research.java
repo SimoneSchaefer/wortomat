@@ -34,6 +34,11 @@ public class Research implements PositionAware, ImageAware {
     @ManyToOne
     private Novel novel;
 
+    /*
+    @JsonIgnore
+    @ManyToOne
+    private TimelineEvent timelineEvent;*/
+
     public void setNovel(Novel novel) {
         this.novel = novel;
     }

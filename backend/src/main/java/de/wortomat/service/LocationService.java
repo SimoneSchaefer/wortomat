@@ -41,7 +41,7 @@ public class LocationService extends PositionAwareService<Location> implements I
     }
 
     public List<LocationTag> getTags(Long novelId) {
-        return this.locationTagRepository.findAllByNovelId(novelId);
+        return this.locationTagRepository.findAllByNovelIdOrderByNameAsc(novelId);
     }
 
     @Override

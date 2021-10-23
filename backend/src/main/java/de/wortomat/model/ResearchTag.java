@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
-public class ResearchTag {
+public class ResearchTag implements NovelItemTag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

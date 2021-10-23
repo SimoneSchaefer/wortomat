@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Data
 @Setter
 @Getter
-public class ChapterTag {
+public class ChapterTag implements NovelItemTag {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

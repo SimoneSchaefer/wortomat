@@ -1,2 +1,5 @@
-package de.wortomat.model;public interface NovelItemTag {
+package de.wortomat.model;
+
+public interface NovelItemTag {
+    String getName();
 }

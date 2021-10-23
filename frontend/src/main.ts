@@ -32,6 +32,7 @@ import Fieldset from 'primevue/fieldset';
 import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
 import Timeline from 'primevue/timeline';
+import Dropdown from 'primevue/dropdown';
 
 import draggable from 'vuedraggable'
 
@@ -74,6 +75,7 @@ const app = createApp(App)
     .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
     .component('Timeline', Timeline)
+    .component('Dropdown', Dropdown)
     .component('draggable', draggable)
 app.mount("#app");
 

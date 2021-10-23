@@ -34,7 +34,7 @@ public class CharacterService extends PositionAwareService<Character> implements
     }
 
     public List<CharacterTag> getTags(Long novelId) {
-        return this.characterTagRepository.findAllByNovelId(novelId);
+        return this.characterTagRepository.findAllByNovelIdOrderByNameAsc(novelId);
     }
 
     public CharacterTag createTag(Long novelId, CharacterTag tag) {

@@ -6,6 +6,10 @@ import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
 import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, loadTagsFromBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+import { ChapterModel } from "@/models/Chapter.model";
+import { TimelineService } from "@/service/TimelineService";
+import { ResearchModel } from "@/models/Research.model";
 
 const openNovel = (context: ActionContext<IState,IState>, novelId: number): void => {
     new NovelService().get(novelId).then(result => {
@@ -70,6 +74,19 @@ const addItem = (context: ActionContext<IState,IState>, payload: { key: NOVEL_IT
     }       
   }
 
+
+
+  const addChapterReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, chapter: ChapterModel }): void => {
+    new TimelineService().addChapterReference(payload.novelId, payload.event, payload.chapter).then(result => {
+      context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
+    });   
+  }
+  const addResearchReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, research: ResearchModel }): void => {
+    new TimelineService().addResearchReference(payload.novelId, payload.event, payload.research).then(result => {
+      context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
+    });   
+  }
+
 const updateItem = (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, novelId: number, oldItem: BaseModel, overrideValues}): void => {
     const {key, novelId, oldItem, overrideValues } = update;
     updateItemInBackend(key, novelId, oldItem, overrideValues ).then(result => {
@@ -105,5 +122,7 @@ const filterTags = (context: ActionContext<IState,IState>, update: { key: NOVEL_
     updateOrder,
     loadItems,
     filterTags,
-    setView
+    setView,
+    addChapterReference,
+    addResearchReference
 }

@@ -1,20 +1,17 @@
+import { API } from './Axios';
 import { NovelItemService } from './NovelItemService';
 
 export class TimelineService extends NovelItemService {
     
-    /*get(id: number): Promise<AxiosResponse> {
-        return API.get(this.getBaseUri(id))
-    }
-    
-    update(id: number, timelineEventModel: TimelineEventModel): Promise<AxiosResponse> {
-        return API.put(this.getBaseUri(id), timelineEventModel)
-    } 
-
-    create(id: number, timelineEventModel: TimelineEventModel): Promise<AxiosResponse> {
-        return API.post(this.getBaseUri(id), timelineEventModel)
-    }*/
-
     getAPIPath() {
      return `timeline`;
+    }
+
+    addChapterReference(novelId, timelineEvent, chapter) {
+        return API.put(`${super.getBasePath(novelId)}/addChapter?timelineEventId=${timelineEvent.id}&chapterId=${chapter.id}`);
+    }
+
+    addResearchReference(novelId, timelineEvent, research) {
+        return API.put(`${super.getBasePath(novelId)}/addResearch?timelineEventId=${timelineEvent.id}&researchId=${research.id}`);
     }
 }

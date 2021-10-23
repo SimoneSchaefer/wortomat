@@ -2,7 +2,7 @@
   <div class="plot">
     <div class="vertical-menu">
           <Button title="Add new timeline event"
-              class="p-button-secondary"
+              class="p-button-secondary add-button"
               icon="fa fa-plus fa-2x"
               type="button"
               @click="add" />    
@@ -37,7 +37,44 @@
               </ScrollPanel>
           </Splitterpanel>
           <Splitterpanel class="split-content-right">
-            {{ selectedItem }}  
+            <ScrollPanel style="height: 100%">
+
+            <div v-if="selectedItem">
+              Select referenced chapter
+              <Dropdown v-model="selectedChapterReference" :options="chapters" optionLabel="name" placeholder="Select a chapter" :filter="true">
+                <template #option="slotProps">
+                <div class="p-dropdown-car-option">
+                  <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
+                  <span v-else><i>No name given</i></span>
+                </div>
+              </template>
+              </Dropdown>
+              <Button title="Add reference to selected Chapter"
+                class="p-button-secondary add-button"
+                icon="fa fa-plus"
+                type="button"
+                @click="addChapterReference" /> 
+
+
+             Select referenced research
+              <Dropdown v-model="selectedResearchReference" :options="research" optionLabel="name" placeholder="Select a research" :filter="true">
+                <template #option="slotProps">
+                <div class="p-dropdown-car-option">
+                  <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
+                  <span v-else><i>No name given</i></span>
+                </div>
+              </template>
+              </Dropdown>
+              <Button title="Add reference to selected research"
+                class="p-button-secondary add-button"
+                icon="fa fa-plus"
+                type="button"
+                @click="addResearchReference" /> 
+
+                            {{ selectedItem }} 
+
+            </div> 
+            </ScrollPanel>
           </Splitterpanel>
 
         </Splitter>
@@ -54,7 +91,7 @@ import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import EditTimelineEvent from "@/components/timeline/EditableTimelineEvent.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
-import { getCurrentSelection, getSortedEvents } from "@/store/getters";
+import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/getters";
 
 @Options({
   components: {
@@ -65,6 +102,9 @@ import { getCurrentSelection, getSortedEvents } from "@/store/getters";
   },
 })
 export default class Plot extends Vue {
+  selectedChapterReference = null; 
+  selectedResearchReference = null; 
+
   add() {
     this.$store.dispatch("addItem", {
       key: this.novelItemKey,
@@ -80,6 +120,14 @@ export default class Plot extends Vue {
       key: NOVEL_ITEM_KEYS.TIMELINE,
       novelId: this.$route.params.id,
     });
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.CHAPTERS,
+      novelId: this.$route.params.id,
+    });
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.RESEARCH,
+      novelId: this.$route.params.id,
+    });
   }
 
   select(item): void {
@@ -91,9 +139,34 @@ export default class Plot extends Vue {
     this.updateItem(item, { eventDate: newValue });   
   }  
 
+  addChapterReference() {
+        this.$store.dispatch('addChapterReference', { 
+          novelId: this.novelId,
+          event: this.selectedItem,
+          chapter: this.selectedChapterReference
+      }) 
+
+  }
+  addResearchReference() {
+        this.$store.dispatch('addResearchReference', { 
+          novelId: this.novelId,
+          event: this.selectedItem,
+          research: this.selectedResearchReference
+      }) 
+
+  }
+
+  get chapters() {
+    let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.CHAPTERS);
+    return chapters;
+  }
+  get research() {
+    let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH);
+    return chapters;
+  }
+
   get selectedItem() {
-    console.log('SELECTED', this.$store.state)
-    return getCurrentSelection(this.$store.state, this.novelItemKey);
+    return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{}])[0];
   }
 
   private updateItem(item, overrideValues): void {
@@ -120,7 +193,9 @@ export default class Plot extends Vue {
 </script>
 
 <style>
-
+.add-button {
+  border-top: 1px solid #2d2b2b !important;
+}
 .split-panel {
   height: 100%;
 }
@@ -133,14 +208,20 @@ export default class Plot extends Vue {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 5em;
+  width: 4em;
   background: var(--tabmenu-background);
   border-right: 1px solid #2d2b2b;
 }
 .vertical-menu button {
-  height: 5em;
-  width: 5em !important;
+  height: 4em;
+  width: 4em !important;
   display: block;
+}
+
+.vertical-menu .p-button.p-button-secondary, .p-buttonset.p-button-secondary > .p-button, .p-splitbutton.p-button-secondary > .p-button {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #2d2b2b;
 }
 
 .timeline {

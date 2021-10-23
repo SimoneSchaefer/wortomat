@@ -8,5 +8,5 @@ import java.util.List;
 
 @NoRepositoryBean
 public interface TagRepository<T, Long> extends CrudRepository<T, Long> {
-    List<T> findAllByNovelId(@Param("novelId") Long novelId);
+    List<T> findAllByNovelIdOrderByNameAsc(@Param("novelId") Long novelId);
 }

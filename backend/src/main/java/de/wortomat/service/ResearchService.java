@@ -40,7 +40,7 @@ public class ResearchService extends PositionAwareService<Research> implements I
     }
 
     public List<ResearchTag> getTags(Long novelId) {
-        return this.researchTagRepository.findAllByNovelId(novelId);
+        return this.researchTagRepository.findAllByNovelIdOrderByNameAsc(novelId);
     }
 
     @Override

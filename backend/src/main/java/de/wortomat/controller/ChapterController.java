@@ -2,7 +2,6 @@ package de.wortomat.controller;
 
 import de.wortomat.model.Chapter;
 import de.wortomat.model.ChapterTag;
-import de.wortomat.model.CharacterTag;
 import de.wortomat.service.ChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
