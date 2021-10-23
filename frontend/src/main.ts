@@ -31,6 +31,7 @@ import Checkbox from 'primevue/checkbox';
 import Fieldset from 'primevue/fieldset';
 import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
+import Timeline from 'primevue/timeline';
 
 import draggable from 'vuedraggable'
 
@@ -72,6 +73,7 @@ const app = createApp(App)
     .component('Divider', Divider)
     .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
+    .component('Timeline', Timeline)
     .component('draggable', draggable)
 app.mount("#app");
 

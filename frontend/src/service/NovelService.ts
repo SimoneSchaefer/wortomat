@@ -9,7 +9,7 @@ export class NovelService {
     }
     
     get(id: number): Promise<AxiosResponse> {
-        return API.get(`/novels/${id}?_embed=tags&_sort=order&_order=asc`)
+        return API.get(`/novels/${id}`)
     }
     
     update(novel: NovelModel): Promise<AxiosResponse> {

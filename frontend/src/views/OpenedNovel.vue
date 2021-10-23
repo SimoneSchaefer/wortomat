@@ -21,7 +21,8 @@ export default class OpenedNovel extends Vue {
       {label: 'Characters', icon: 'fa fa-users', to: 'characters'},
       {label: 'Research', icon: 'fa fa-flask', to: 'research'},
       // {label: 'Tags', icon: 'fa fa-tags', to: 'tags'},
-      {label: 'Export', icon: 'fa fa-file-export', to: 'export'}
+      {label: 'Export', icon: 'fa fa-file-export', to: 'export'},
+      {label: 'Plot', icon: 'fa fa-file-export', to: 'plot'}
     ]
   }
 }
@@ -29,7 +30,7 @@ export default class OpenedNovel extends Vue {
 
 <style scoped>
   .wrapper {
-    height: 100vh;
+    height: calc(100vh - var(--tabmenu-height));
     overflow: hidden;
   }
 </style>

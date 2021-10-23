@@ -39,6 +39,7 @@ export default class App extends Vue {
   --menu-background: var(--middle-background);
   --menu-font-color: #626262;
   --menu-border-color: #c1c1c1;
+  --menu-height: 3em;
 
   --editor-toolbar-background: var(--middle-background);
   --editor-content-background: var(--light-background);

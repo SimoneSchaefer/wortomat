@@ -4,10 +4,12 @@ import { CharacterService } from "@/service/Character.service";
 import { NovelItemService } from "@/service/NovelItemService";
 import { ResearchService } from "@/service/Research.service";
 import { TagService } from "@/service/Tag.service";
+import { TimelineService } from "@/service/TimelineService";
 import { AxiosResponse } from "axios";
 import { NOVEL_ITEM_KEYS } from "./keys";
 
 export const KEY_TO_SERVICE: Map<string,NovelItemService>  = new Map<NOVEL_ITEM_KEYS,NovelItemService>([
+    [NOVEL_ITEM_KEYS.TIMELINE, new TimelineService()],
     [NOVEL_ITEM_KEYS.CHAPTERS, new ChapterService()],
     [NOVEL_ITEM_KEYS.CHARACTERS, new CharacterService()],
     [NOVEL_ITEM_KEYS.RESEARCH, new ResearchService()],
@@ -22,6 +24,9 @@ export function loadItemsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Pro
 }
 
 export function loadTagsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
+    if (key === NOVEL_ITEM_KEYS.TIMELINE) {
+        key = NOVEL_ITEM_KEYS.CHAPTERS; //TODO
+    }
     const serviceToUse = KEY_TO_SERVICE.get(key);
     if (serviceToUse) {
         return serviceToUse.tags(novelId);

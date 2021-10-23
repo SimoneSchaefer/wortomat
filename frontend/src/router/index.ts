@@ -25,7 +25,12 @@ const routes: Array<RouteRecordRaw> = [
       },{
         path: 'export',
         component: () => import(/* webpackChunkName: "Export" */ '../views/Export.vue'),
-      }]
+      },
+      {
+        path: 'plot',
+        component: () => import(/* webpackChunkName: "Plot" */ '../views/Plot.vue')
+      }
+    ]
   }
 ]
 

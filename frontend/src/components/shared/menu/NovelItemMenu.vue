@@ -44,7 +44,7 @@ export default class NovelItemMenu extends Vue {
 .menubar {
     display: flex;
     width: 100%;
-    height: 3em;
+    height: var(--menu-height);
     z-index: 9999;
     color: var(--menu-font-color);
     background: var(--menu-background);
