@@ -2,11 +2,11 @@
 <InlineEdit @start-edit="onStartEdit" @update="updateLabel" @cancel="cancel">
     <template v-slot:editing>
         <div class="label" contenteditable="true" @input="onInput" ref="editableRef" >
-            {{ value }}
+            {{ formattedDate }}
         </div>
     </template>
     <template v-slot:readonly>
-        <MissingValueTolerantLabel :value="value" :fallback="placeHolder"></MissingValueTolerantLabel>
+        <MissingValueTolerantLabel :value="formattedDate" :fallback="placeHolder"></MissingValueTolerantLabel>
     </template>
 </InlineEdit>
 </template>
@@ -23,13 +23,20 @@ import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
     emits: [ 'update-label' ]
 })  
 export default class EditableDate extends Vue {
-  @Prop() value!: string; 
+  @Prop() value; 
   @Prop() placeHolderTitle!: string; 
 
   private draft: string | null = null;
 
   get placeHolder(): string {
     return (this.placeHolderTitle || '');
+  }
+
+  get formattedDate(): string {
+      if (!this.value) {
+          return null;          
+      }
+      return this.value.split('T')[0];
   }
 
   onStartEdit(): void {
@@ -50,6 +57,10 @@ export default class EditableDate extends Vue {
 
   @Emit('update-label')
   updateLabel(): string {
+    const dateRegex = /[0-9]{4}-[0-9]{2}-[0-9]{2}/;
+    if (!this.draft.match(dateRegex)) {
+        this.$toast.add({severity:'error', summary: 'Wrong format', detail:'Format YYYY-MM-DD', life: 3000});
+    }
     return this.draft;
   }
 }

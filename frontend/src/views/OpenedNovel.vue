@@ -22,7 +22,7 @@ export default class OpenedNovel extends Vue {
       {label: 'Research', icon: 'fa fa-flask', to: 'research'},
       // {label: 'Tags', icon: 'fa fa-tags', to: 'tags'},
       {label: 'Export', icon: 'fa fa-file-export', to: 'export'},
-      {label: 'Plot', icon: 'fa fa-file-export', to: 'plot'}
+      {label: 'Timeline', icon: 'fa fa-clock', to: 'plot'}
     ]
   }
 }

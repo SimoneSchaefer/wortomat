@@ -20,13 +20,14 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import { Emit } from "vue-property-decorator";
+import { Emit, Prop } from "vue-property-decorator";
 
 @Options({
     emits: ['start-edit', 'update', 'cancel']
 })  
 export default class InlineEdit extends Vue {
     editing = false;
+    @Prop() currentValue;
 
     @Emit('start-edit')
     startEditMode(): void {
@@ -83,7 +84,7 @@ export default class InlineEdit extends Vue {
    top: 0.5em;
 }
 .options {
-    width: 130px;
+    width: 6em;
 }
 .value {
     flex-grow: 1;

@@ -23,6 +23,20 @@ export default {
     tags
 };
 
+export function getSortedEvents(state: IState) {
+    const allItems = state.novelItems[NOVEL_ITEM_KEYS.TIMELINE] || [];
+    allItems.sort(function(a, b) {
+        if (a.eventDate < b.eventDate) {
+          return -1;
+        }
+        if (a.eventDate > b.eventDate) {
+          return 1;
+        }      
+        return 0;
+      });
+    return allItems;
+}
+
 export function getAllItems(state: IState, key: NOVEL_ITEM_KEYS) {
     if (!novelIdOrRaise(state)) return [];
 

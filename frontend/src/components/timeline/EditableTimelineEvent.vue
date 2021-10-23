@@ -4,9 +4,9 @@
         <div class="event-name">
             <EditableLabel v-bind:value="item.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>
         </div>
-        <div class="event-date">
+      <!--  <div class="event-date">
             <EditableDate v-bind:value="item.eventDate" @update-label="updateEventDate" placeHolderTitle="No eventDate added yet."></EditableDate>
-        </div>
+        </div>-->
     </div>
     <!--<div class="event-details">
         <EditableLabel v-bind:value="item.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel>
@@ -64,6 +64,7 @@ export default class EditTimelineEvent extends Vue {
 }
 </script>
 
+
 <style scoped>
 .timeline-event {
     background-color: white;
@@ -73,8 +74,8 @@ export default class EditTimelineEvent extends Vue {
     justify-content: space-between;
     border: 1px solid #2d2b2b;
     position: relative;
-    top: -1em;
 }
+
 
 
 .event-meta {

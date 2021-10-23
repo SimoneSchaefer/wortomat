@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'plot',
-        component: () => import(/* webpackChunkName: "Plot" */ '../views/Plot.vue')
+        component: () => import(/* webpackChunkName: "Plot" */ '../views/Timeline.vue')
       }
     ]
   }
