@@ -26,6 +26,9 @@ export default {
 export function getSortedEvents(state: IState) {
     const allItems = state.novelItems[NOVEL_ITEM_KEYS.TIMELINE] || [];
     allItems.sort(function(a, b) {
+        if (a.eventDate === null) {
+            return 1; //put items without date to the end
+        }
         if (a.eventDate < b.eventDate) {
           return -1;
         }

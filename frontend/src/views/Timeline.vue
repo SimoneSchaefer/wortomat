@@ -19,17 +19,17 @@
               <ScrollPanel style="height: 100%">
                 <Timeline :value="events" align="left" class="customized-timeline">
                   <template #opposite="slotProps">
-                    <div  @click="select(slotProps.item)">
+                    <div @click="select(slotProps.item)" v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
                       <EditableDate v-bind:value="slotProps.item.eventDate" @update-label="updateEventDate(slotProps.item, $event)" placeHolderTitle="No date added yet."></EditableDate>
                     </div>
                   </template>
                   <template #marker="slotProps">
-                    <div class="custom-marker" @click="select(slotProps.item)" title="Click to select">
+                    <div class="custom-marker" @click="select(slotProps.item)" title="Click to select"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
                       <i class="fa fa-clock"></i>
                       </div>
                   </template>
                   <template #content="slotProps">
-                    <div  @click="select(slotProps.item)">
+                    <div  @click="select(slotProps.item)"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
                       <EditTimelineEvent :item="slotProps.item"></EditTimelineEvent>
                     </div>
                   </template>
@@ -39,40 +39,56 @@
           <Splitterpanel class="split-content-right">
             <ScrollPanel style="height: 100%">
 
-            <div v-if="selectedItem">
-              Select referenced chapter
-              <Dropdown v-model="selectedChapterReference" :options="chapters" optionLabel="name" placeholder="Select a chapter" :filter="true">
-                <template #option="slotProps">
-                <div class="p-dropdown-car-option">
-                  <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
-                  <span v-else><i>No name given</i></span>
+            <div v-if="selectedItem" class="selected-item">
+              <Fieldset legend="Referenced chapters">
+                <div class="add-reference-form">
+                  <Dropdown v-model="selectedChapterReference" :options="chapters" optionLabel="name" placeholder="Select a chapter" :filter="true">
+                  <template #option="slotProps">
+                  <div class="p-dropdown-car-option">
+                    <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
+                    <span v-else><i>No name given</i></span>
+                  </div>
+                </template>
+                </Dropdown>
+                <Button title="Add reference to selected Chapter"
+                  class="p-button-secondary add-button"
+                  icon="fa fa-plus"
+                  label="Add reference"
+                  type="button"
+                  @click="addChapterReference" />
                 </div>
-              </template>
-              </Dropdown>
-              <Button title="Add reference to selected Chapter"
-                class="p-button-secondary add-button"
-                icon="fa fa-plus"
-                type="button"
-                @click="addChapterReference" /> 
+              </Fieldset>
 
+              <Accordion :multiple="true">
+                <AccordionTab :header="chapter.name" v-for="chapter in selectedItem.chapters" :key="chapter.id">
+                  <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
+                </AccordionTab>
+              </Accordion>
 
-             Select referenced research
-              <Dropdown v-model="selectedResearchReference" :options="research" optionLabel="name" placeholder="Select a research" :filter="true">
-                <template #option="slotProps">
-                <div class="p-dropdown-car-option">
-                  <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
-                  <span v-else><i>No name given</i></span>
+              <Fieldset legend="Referenced research items" style="margin-top: 1em;">
+                <div class="add-reference-form">
+                  <Dropdown v-model="selectedResearchReference" :options="research" optionLabel="name" placeholder="Select a research item" :filter="true">
+                  <template #option="slotProps">
+                  <div class="p-dropdown-option">
+                    <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
+                    <span v-else><i>No name given</i></span>
+                  </div>
+                </template>
+                </Dropdown>
+                <Button title="Add reference to selected research"
+                  class="p-button-secondary add-button"
+                  icon="fa fa-plus"
+                  label="Add reference"
+                  type="button"
+                  @click="addResearchReference" />
                 </div>
-              </template>
-              </Dropdown>
-              <Button title="Add reference to selected research"
-                class="p-button-secondary add-button"
-                icon="fa fa-plus"
-                type="button"
-                @click="addResearchReference" /> 
-
-                            {{ selectedItem }} 
-
+              </Fieldset>
+            
+              <Accordion :multiple="true">
+                <AccordionTab :header="research.name" v-for="research in selectedItem.research" :key="research.id">
+                  <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
+                </AccordionTab>
+              </Accordion>
             </div> 
             </ScrollPanel>
           </Splitterpanel>
@@ -87,11 +103,14 @@
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { Options, Vue } from "vue-class-component";
 import NovelItems from "./NovelItems.vue";
+import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import EditTimelineEvent from "@/components/timeline/EditableTimelineEvent.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/getters";
+import { ChapterService } from "@/service/Chapter.service";
+import { ResearchService } from "@/service/Research.service";
 
 @Options({
   components: {
@@ -99,6 +118,7 @@ import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/gette
     EditableLabel,
     EditableDate,
     EditTimelineEvent,
+    NovelItemSheet
   },
 })
 export default class Plot extends Vue {
@@ -113,6 +133,19 @@ export default class Plot extends Vue {
     });
     var container = this.$el.querySelector(".p-scrollpanel-content");
     container.scrollTop = container.scrollHeight;
+  }
+
+  get chapterNovelItemKey() {
+    return NOVEL_ITEM_KEYS.CHAPTERS;
+  }
+  get researchNovelItemKey() {
+    return NOVEL_ITEM_KEYS.RESEARCH;
+  }
+  get chapterService() {
+    return new ChapterService();
+  }
+  get researchService() {
+    return new ResearchService();
   }
 
   mounted(): void {
@@ -156,6 +189,10 @@ export default class Plot extends Vue {
 
   }
 
+  selected(item) {
+    return this.selectedItem?.id === item.id;
+  }
+
   get chapters() {
     let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.CHAPTERS);
     return chapters;
@@ -166,7 +203,7 @@ export default class Plot extends Vue {
   }
 
   get selectedItem() {
-    return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{}])[0];
+    return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{ id: undefined}])[0];
   }
 
   private updateItem(item, overrideValues): void {
@@ -193,6 +230,17 @@ export default class Plot extends Vue {
 </script>
 
 <style>
+
+.add-reference-form {
+  margin-top: 1em;
+}
+.selected-item {
+  margin: 1em;
+}
+
+.selected-event {
+  background-color: pink;
+}
 .add-button {
   border-top: 1px solid #2d2b2b !important;
 }
@@ -278,6 +326,8 @@ export default class Plot extends Vue {
 <style>
 .p-timeline {
   padding-top: 2em;
+    padding-bottom: 70px;
+
 }
 
 .p-timeline-event .p-timeline-event-separator .p-timeline-event-connector {

@@ -33,7 +33,8 @@ import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
 import Timeline from 'primevue/timeline';
 import Dropdown from 'primevue/dropdown';
-
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
 import draggable from 'vuedraggable'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -74,6 +75,8 @@ const app = createApp(App)
     .component('Divider', Divider)
     .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
+    .component('Accordion', Accordion)
+    .component('AccordionTab', AccordionTab)
     .component('Timeline', Timeline)
     .component('Dropdown', Dropdown)
     .component('draggable', draggable)

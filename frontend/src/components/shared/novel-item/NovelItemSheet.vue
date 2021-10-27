@@ -91,7 +91,10 @@ export default class NovelItemSheet extends Vue {
     }
 
     isEnabled(view: VIEWS): boolean {
-       return this.$store.state.view.get(this.novelItemKey).get(view);
+        if (this.$store.state.view?.get(this.novelItemKey) === undefined) {
+            return true;
+        }
+       return this.$store.state.view?.get(this.novelItemKey)?.get(view);
     }
 
     updateImages(images: Array<{ id: number, name: string }>): void {
@@ -117,7 +120,6 @@ export default class NovelItemSheet extends Vue {
     updateContent(newValue: string): void {
         this.updateItem({ content: newValue });   
     }
-
 
     private get novelId(): number {
         return this.$store.getters.openNovelId;
