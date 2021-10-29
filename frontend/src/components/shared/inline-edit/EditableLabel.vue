@@ -1,5 +1,5 @@
 <template>
-<InlineEdit @start-edit="onStartEdit" @update="updateLabel" @cancel="cancel">
+<InlineEdit @start-edit="onStartEdit" @update="updateLabel" @cancel="cancel" :validationRegex="validationRegex" :currentValue="draft">
     <template v-slot:editing>
         <div class="label" contenteditable="true" @input="onInput" ref="editableRef" >
             {{ value }}
@@ -25,6 +25,7 @@ import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
 export default class EditableLabel extends Vue {
   @Prop() value!: string; 
   @Prop() placeHolderTitle!: string; 
+  @Prop() validationRegex: RegExp;
 
   private draft: string | null = null;
 

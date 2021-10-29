@@ -1,54 +1,78 @@
 <template>
-    <div class="container w-100" v-bind:class=" { editing: editing, readonly: !editing}" title="Click to edit">
+    <div class="container w-100" 
+        :title="editing ? '' : 'Click to edit'" 
+        v-bind:class=" { editing: editing, readonly: !editing }" 
+        v-on:click="editModeActivated">
         <div class="editing p-d-flex p-jc-between" v-if="editing">
-            <div class="value" v-on:keydown.esc="cancel" v-on:keydown.enter="update">
+            <div class="value" v-on:keydown.esc="cancel" v-on:keydown.enter="validateAndUpdate">
                 <slot name="editing"></slot>
             </div>
             <div class="options">
-                <Button class="p-button p-button-text" icon="pi pi-check" v-on:click="update"></Button>            
-                <Button class="p-button p-button-text" icon="pi pi-times" v-on:click="cancel"></Button>            
+                <AppButton color="success" icon="fa fa-check" title="Save" v-on:click="validateAndUpdate"></AppButton>            
+                <AppButton color="danger" icon="fa fa-times" title="Cancel" v-on:click="cancel"></AppButton>            
             </div>
         </div>
-        <div v-else v-on:click="startEditMode()" >
+        <div v-else class="readonly">
             <slot name="readonly"></slot>
         </div>
     </div>
-     <!-- TODO add backdrop in main vue for reuse, use state to trigger visibility -->
-    <div class="backdrop" v-if="editing"></div>
-
 </template>
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
+import AppButton from "@/components/shared/Button.vue";
 
 @Options({
+    components: { AppButton },
     emits: ['start-edit', 'update', 'cancel']
 })  
 export default class InlineEdit extends Vue {
     editing = false;
-    @Prop() currentValue;
+    @Prop() currentValue: string;
+    @Prop() validationRegex: RegExp;
+
+    validateAndUpdate($event: Event): void {
+        this.stopEvent($event);
+        if (!this.validationRegex) {
+            this.update($event);
+        }
+        if (this.currentValue.match(this.validationRegex)) {
+            this.update($event);
+        }
+    }
+
+    editModeActivated(): void {
+        if (this.editing) {
+            return;
+        }
+        this.startEditMode();
+    }
 
     @Emit('start-edit')
     startEditMode(): void {
+        this.$store.dispatch('setModalOpen', { isOpen: true })
         this.editing = true;
     }
 
     @Emit('update')
     update($event: Event): void {
-        $event.preventDefault();
-        $event.stopPropagation();
+        this.stopEvent($event);
         this.editing = false;
     }
 
     @Emit('cancel')
     cancel($event: Event): void {
+        this.stopEvent($event);
+        this.editing = false;
+        this.$store.commit('setModalOpen', {isOpen: false})
+    }
+
+    private stopEvent($event: Event) {
         $event.preventDefault();
         $event.stopPropagation();
-        this.editing = false;
     }
 }
-
 </script>
 
 
@@ -60,48 +84,41 @@ export default class InlineEdit extends Vue {
     padding: 0.5rem;
 }
 .container.editing {
-    z-index: 101;
+    z-index: var(--z-inline-edit);
     background: var(--editable-background-editing);
-}
-.container.editing,.container:hover {
-    border: 3px solid transparent;
 }
 
 .container.readonly:hover {
-    cursor: pointer;
+    cursor: url("/assets/cursors/edit.png"), auto;
     background: var(--editable-background-hover);
+}
 
-}
-.container.readonly:hover:after {
-   content: "\f304"; 
-   font-family: "Font Awesome 5 Free";
-   opacity: 0.5;
-   font-weight: 900;
-   font-size: 1rem;
-   font-style: normal;
-   position: absolute;
-   right:1em; 
-   top: 0.5em;
-}
 .options {
-    width: 6em;
+    width: 5em;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
 }
 .value {
     flex-grow: 1;
 }
-div.backdrop {
-    background-color: rgba(0, 0, 0, 0.404);
-    position: fixed; 
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: 100;
-}
+
 </style>
 
 <style>
-.container.editing div[contenteditable="true"] {
+.container  .editing {
+    border: 2px solid #1d1d1d;
+}
+.container .editing div[contenteditable="true"] {
     background: var(--editable-background-input);
+}
+
+.container.editing .options button {
+    width: 3em !important;
+}
+
+.container.editing .options button:first-child {
+    border-left: 1px solid #1d1d1d;
+    border-right: 1px solid #1d1d1d;
 }
 </style>

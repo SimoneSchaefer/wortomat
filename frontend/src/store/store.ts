@@ -9,6 +9,7 @@ import { NOVEL_ITEM_KEYS, VIEWS } from './keys';
 export default new Vuex.Store<IState>({
   state: {
     loading: false,
+    modalIsOpen: false,
     novels: [],
     currentNovel: new NovelModel(),
     selection: new Map(),

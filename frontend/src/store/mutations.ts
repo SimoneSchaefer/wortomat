@@ -44,6 +44,11 @@ const setLoading = (state: IState, payload: { loading: boolean}): void => {
     state.loading = payload.loading;
 };
 
+const setModalOpen = (state: IState, payload: { isOpen: boolean }): void => {
+    console.log('SET MODAL OPEN ', payload)
+    state.modalIsOpen = payload.isOpen;
+};
+
 //// Novel items mutations ////
 const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
@@ -85,7 +90,7 @@ const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Bas
     tagsFiltered,
     setView,
     setLoading,
-
+    setModalOpen,
     itemsLoaded,
     tagsLoaded,
     itemsSelected,

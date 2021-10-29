@@ -1,5 +1,12 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Home from '../views/Home.vue'
+import OpenedNovel from '../views/OpenedNovel.vue'
+import Chapters from '../views/Chapters.vue'
+import Characters from '../views/Characters.vue'
+import Research from '../views/Research.vue'
+import Tags from '../views/Tags.vue'
+import Export from '../views/Export.vue'
+import Timeline from '../views/Timeline.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -9,26 +16,26 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/write/:id',
-    component: () => import(/* webpackChunkName: "OpenedNovel" */ '../views/OpenedNovel.vue'),
+    component: OpenedNovel,
     children: [{
         path: 'chapters',
-        component: () => import(/* webpackChunkName: "Chapters" */ '../views/Chapters.vue'),
+        component: Chapters,
       },{
         path: 'characters',
-        component: () => import(/* webpackChunkName: "Characters" */ '../views/Characters.vue'),
+        component: Characters,
       },{
         path: 'research',
-        component: () => import(/* webpackChunkName: "Research" */ '../views/Research.vue'),
+        component: Research,
       },{
         path: 'tags',
-        component: () => import(/* webpackChunkName: "Tags" */ '../views/Tags.vue'),
+        component: Tags,
       },{
         path: 'export',
-        component: () => import(/* webpackChunkName: "Export" */ '../views/Export.vue'),
+        component: Export,
       },
       {
         path: 'plot',
-        component: () => import(/* webpackChunkName: "Plot" */ '../views/Timeline.vue')
+        component: Timeline
       }
     ]
   }

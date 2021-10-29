@@ -62,6 +62,10 @@ const selectItems = (context: ActionContext<IState,IState>, item: { key: NOVEL_I
     context.commit('itemsSelected', item)        
 }
 
+const setModalOpen = (context: ActionContext<IState,IState>, payload: { isOpen: boolean}): void => {
+  context.commit('setModalOpen', payload)        
+}
+
 const addItem = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel }): void => {
     const {key, novelId, item } = payload;
     if (item.id) {
@@ -124,5 +128,6 @@ const filterTags = (context: ActionContext<IState,IState>, update: { key: NOVEL_
     filterTags,
     setView,
     addChapterReference,
-    addResearchReference
+    addResearchReference,
+    setModalOpen
 }

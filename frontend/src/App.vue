@@ -1,6 +1,8 @@
 <template>
   <ErrorBoundary>
     <Spinner></Spinner>
+    <Backdrop />
+
     <router-view/>
     <ConfirmDialog></ConfirmDialog>
     <Toast />
@@ -11,12 +13,12 @@
 import { Options, Vue } from "vue-class-component";
 import ErrorBoundary  from '@/views/ErrorBoundary.vue';
 import Spinner  from '@/components/shared/Spinner.vue';
+import Backdrop  from '@/components/shared/Backdrop.vue';
 
 @Options({
-  components: { ErrorBoundary, Spinner }
+  components: { ErrorBoundary, Spinner, Backdrop }
 })
-export default class App extends Vue {
-}
+export default class App extends Vue {}
 </script>
 
 <style>
@@ -56,6 +58,10 @@ export default class App extends Vue {
   --editable-background-editing: #dfdfdf;
   --editable-background-input: #efefef;
   --editable-background-hover: #dfdfdf;
+
+  /* z-indexes */
+  --z-modal-backdrop: 5;
+  --z-inline-edit: 101;
 }
 
 html, body, div {

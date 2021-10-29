@@ -24,12 +24,12 @@
                     </div>
                   </template>
                   <template #marker="slotProps">
-                    <div class="custom-marker" @click="select(slotProps.item)" title="Click to select"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
+                      <div class="custom-marker" @click="select(slotProps.item)" title="Click to select"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
                       <i class="fa fa-clock"></i>
                       </div>
                   </template>
                   <template #content="slotProps">
-                    <div  @click="select(slotProps.item)"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
+                    <div class="timeline-event-container"  @click="select(slotProps.item)"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
                       <EditTimelineEvent :item="slotProps.item"></EditTimelineEvent>
                     </div>
                   </template>
@@ -42,10 +42,10 @@
             <div v-if="selectedItem" class="selected-item">
               <Fieldset legend="Referenced chapters">
                 <div class="add-reference-form">
-                  <Dropdown v-model="selectedChapterReference" :options="chapters" optionLabel="name" placeholder="Select a chapter" :filter="true">
+                  <Dropdown v-model="selectedChapterReference" :options="chapters" placeholder="Select a chapter" optionLabel="name"  :filter="true">
                   <template #option="slotProps">
                   <div class="p-dropdown-car-option">
-                    <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
+                    <span v-if="slotProps.option.name">{{slotProps.option.name}} - {{slotProps.option.summary}} </span>
                     <span v-else><i>No name given</i></span>
                   </div>
                 </template>
@@ -240,6 +240,7 @@ export default class Plot extends Vue {
 
 .selected-event {
   background-color: pink;
+  height: 100%;
 }
 .add-button {
   border-top: 1px solid #2d2b2b !important;
@@ -250,6 +251,10 @@ export default class Plot extends Vue {
 .plot {
   display: flex;
   width: 100%;
+}
+
+.timeline-event-container {
+  padding: 0.5em 2em;
 }
 
 .vertical-menu {
@@ -282,10 +287,13 @@ export default class Plot extends Vue {
 }
 .custom-marker {
   display: flex;
+  z-index: 2;
   background-color: #2d2b2b;
   border-radius: 50%;
   width: 1.5em;
   height: 1.5em;
+  position: absolute;
+  top: 0.5em;
   cursor: pointer;
 
   justify-content: center;
@@ -296,16 +304,18 @@ export default class Plot extends Vue {
 }
 
 .p-timeline-event-opposite {
-  width: 12em;
-  max-width: 12em;
+  width: 15em;
+  max-width: 15em;
   flex-grow: 1;
   text-align: right;
+  padding: 0 !important;
 
 }
 
 .p-timeline-event-content {
   flex-grow: 2;
   position: relative;
+  padding: 0 !important;
 }
 
 .p-timeline-event-content:before {
@@ -314,7 +324,7 @@ export default class Plot extends Vue {
   width: 5em;
   height: 10px;
   left: 0;
-  top: 0;
+  top: 0.5em;
   border-bottom: 1px solid #2d2b2b;
 }
 
@@ -324,13 +334,19 @@ export default class Plot extends Vue {
 </style>
 
 <style>
+.p-scrollpanel-wrapper {
+  z-index: inherit;
+}
 .p-timeline {
   padding-top: 2em;
-    padding-bottom: 70px;
-
+  padding-bottom: 70px;
 }
 
 .p-timeline-event .p-timeline-event-separator .p-timeline-event-connector {
   background-color: #2d2b2b;
+}
+
+.p-timeline-event-separator {
+  width: 3em;
 }
 </style>
