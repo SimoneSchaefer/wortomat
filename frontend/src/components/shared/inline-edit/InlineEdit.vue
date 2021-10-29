@@ -1,9 +1,9 @@
 <template>
-    <div class="container w-100" 
+    <div class="inline-edit w-100" 
         :title="editing ? '' : 'Click to edit'" 
         v-bind:class=" { editing: editing, readonly: !editing }" 
         v-on:click="editModeActivated">
-        <div class="editing p-d-flex p-jc-between" v-if="editing">
+        <div v-if="editing" class="p-d-flex p-jc-between editing">
             <div class="value" v-on:keydown.esc="cancel" v-on:keydown.enter="validateAndUpdate">
                 <slot name="editing"></slot>
             </div>
@@ -32,6 +32,23 @@ export default class InlineEdit extends Vue {
     @Prop() currentValue: string;
     @Prop() validationRegex: RegExp;
 
+    @Emit('start-edit')
+    startEditMode(): void {
+        this.toggleEditMode(true);
+    }
+
+    @Emit('update')
+    update($event: Event): void {
+        this.stopEvent($event);
+        this.toggleEditMode(false);
+    }
+
+    @Emit('cancel')
+    cancel($event: Event): void {
+        this.stopEvent($event);
+        this.toggleEditMode(false);
+    }
+
     validateAndUpdate($event: Event): void {
         this.stopEvent($event);
         if (!this.validationRegex) {
@@ -49,26 +66,12 @@ export default class InlineEdit extends Vue {
         this.startEditMode();
     }
 
-    @Emit('start-edit')
-    startEditMode(): void {
-        this.$store.dispatch('setModalOpen', { isOpen: true })
-        this.editing = true;
+    private toggleEditMode(active: boolean): void {
+        this.$store.dispatch('setModalOpen', { isOpen: active })
+        this.editing = active;
     }
 
-    @Emit('update')
-    update($event: Event): void {
-        this.stopEvent($event);
-        this.editing = false;
-    }
-
-    @Emit('cancel')
-    cancel($event: Event): void {
-        this.stopEvent($event);
-        this.editing = false;
-        this.$store.commit('setModalOpen', {isOpen: false})
-    }
-
-    private stopEvent($event: Event) {
+    private stopEvent($event: Event): void {
         $event.preventDefault();
         $event.stopPropagation();
     }
@@ -77,19 +80,21 @@ export default class InlineEdit extends Vue {
 
 
 <style scoped>
-.container {
+.inline-edit {
     text-align: left;
     position: relative;
     border: 3px solid transparent;
     padding: 0.5rem;
 }
-.container.editing {
+
+.inline-edit.editing {
     z-index: var(--z-inline-edit);
     background: var(--editable-background-editing);
+    padding: 0;
 }
 
-.container.readonly:hover {
-    cursor: url("/assets/cursors/edit.png"), auto;
+.inline-edit.readonly:hover {
+    cursor: url("/assets/cursors/edit.png"), pointer;
     background: var(--editable-background-hover);
 }
 
@@ -106,18 +111,18 @@ export default class InlineEdit extends Vue {
 </style>
 
 <style>
-.container  .editing {
+.inline-edit  .editing {
     border: 2px solid #1d1d1d;
 }
-.container .editing div[contenteditable="true"] {
+.inline-edit .editing div[contenteditable="true"] {
     background: var(--editable-background-input);
 }
 
-.container.editing .options button {
+.inline-edit.editing .options button {
     width: 3em !important;
 }
 
-.container.editing .options button:first-child {
+.inline-edit.editing .options button:first-child {
     border-left: 1px solid #1d1d1d;
     border-right: 1px solid #1d1d1d;
 }

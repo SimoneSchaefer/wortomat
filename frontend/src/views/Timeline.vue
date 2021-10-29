@@ -19,7 +19,7 @@
               <ScrollPanel style="height: 100%">
                 <Timeline :value="events" align="left" class="customized-timeline">
                   <template #opposite="slotProps">
-                    <div @click="select(slotProps.item)" v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
+                    <div @click="select(slotProps.item)" class="event-date" v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
                       <EditableDate v-bind:value="slotProps.item.eventDate" @update-label="updateEventDate(slotProps.item, $event)" placeHolderTitle="No date added yet."></EditableDate>
                     </div>
                   </template>
@@ -293,7 +293,7 @@ export default class Plot extends Vue {
   width: 1.5em;
   height: 1.5em;
   position: absolute;
-  top: 0.5em;
+  top: 1.5em;
   cursor: pointer;
 
   justify-content: center;
@@ -309,6 +309,7 @@ export default class Plot extends Vue {
   flex-grow: 1;
   text-align: right;
   padding: 0 !important;
+  display: flex;
 
 }
 
@@ -324,16 +325,27 @@ export default class Plot extends Vue {
   width: 5em;
   height: 10px;
   left: 0;
-  top: 0.5em;
+  top: 1.5em;
   border-bottom: 1px solid #2d2b2b;
 }
 
 .split-content-right {
     background: var(--item-list-background);
 }
+
+.event-date {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
 </style>
 
 <style>
+
+.p-timeline-event:hover {
+  background-color: pink;
+  cursor: pointer;
+}
 .p-scrollpanel-wrapper {
   z-index: inherit;
 }

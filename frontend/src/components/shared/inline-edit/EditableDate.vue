@@ -3,6 +3,7 @@
         :value="formattedDate" 
         :placeHolderTitle="placeHolder" 
         :validationRegex="validationRegex" 
+        formatInfo="Format yyyy-mm-dd"
         @updateLabel="updateLabel"/>
 </template>
 
