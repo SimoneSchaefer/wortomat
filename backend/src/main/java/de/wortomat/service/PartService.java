@@ -7,9 +7,12 @@ import de.wortomat.repository.ChapterRepository;
 import de.wortomat.repository.PartsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PartService {
@@ -23,17 +26,11 @@ public class PartService {
 
 
     public List<Part> get(Long novelId) {
-        List<Part> parts = this.getRepository().findAllByNovelIdOrderByPosition(novelId);
-        /*for (Part part : parts) {
-            System.out.println(part);
-            List chapters = part.getChapters();
-            System.out.println(chapters);
-
-            List<Chapter> manual = chapterRepository.findAllByPartId(part.getId());
-            System.out.println(manual);
-        }*/
-        return parts;
-
+        List<Part> allParts = this.getRepository().findAllByNovelIdOrderByPosition(novelId);
+        for (Part part : allParts) {
+            part.getChapters().sort(Comparator.comparing(Chapter::getPosition));
+        }
+        return allParts;
     }
 
     public Part get(Long _novelId, Long itemItem) {
@@ -62,6 +59,37 @@ public class PartService {
         return maxPosition.getPosition() + 1;
     }
 
+
+    @Transactional
+    public List<Part> moveChild(Long novelId, Long childId, Long newParentId, int newPosition) {
+        Chapter chapter = this.chapterRepository.findById(childId).get();
+
+        if (chapter.getPart().getId().equals(newParentId)) { // chapter has been moved within its parent
+            moveChildWithinParent(chapter, newPosition);
+        } else {
+            Part oldParent = chapter.getPart();
+            Part newParent = this.partsRepository.findById(newParentId).get();
+
+            // remove from old parent: all following chapters need to move one up
+            oldParent.getChapters().remove(chapter);
+            oldParent.getChapters().stream()
+                    .filter(chapter1 -> chapter1.getPosition() >= chapter.getPosition())
+                    .forEach(chapter1 -> chapter1.setPosition(chapter1.getPosition() - 1));
+
+            // add to new parent: all chapters behind the new chapter must move one down
+            newParent.getChapters().stream()
+                    .filter(chapter1 -> chapter1.getPosition() >= newPosition)
+                    .forEach(chapter1 -> chapter1.setPosition(chapter1.getPosition() + 1));
+            newParent.getChapters().add(newPosition, chapter);
+            chapter.setPart(newParent);
+            this.partsRepository.save(oldParent);
+            this.partsRepository.save(newParent);
+        }
+        chapter.setPosition(newPosition);
+        this.chapterRepository.save(chapter);
+        return this.getRepository().findAllByNovelIdOrderByPosition(novelId);
+    }
+
     public List<Part> updatePositions(Long novelId, List<Long> updatedPositions) {
         List<Part> newPositions = new ArrayList<>(updatedPositions.size());
         for (int positionCounter = 0; positionCounter < updatedPositions.size(); positionCounter++) {
@@ -71,6 +99,34 @@ public class PartService {
         }
         this.getRepository().saveAll(newPositions);
         return this.getRepository().findAllByNovelIdOrderByPosition(novelId);
+    }
+
+
+    private void moveChildWithinParent(Chapter chapter, int newPosition) {
+        boolean movedUp = chapter.getPosition() > newPosition;
+        if (movedUp) {
+            this.moveChildUp(chapter, newPosition);
+        } else {
+            moveChildDown(chapter, newPosition);
+        }
+    }
+
+    private void moveChildUp(Chapter chapter, int newPosition) {
+        //moved up within the part -> increase position AFTER new position + 1
+        List<Chapter> allConcernedChapters  = chapter.getPart().getChapters().stream()
+                .filter(chapter1 -> chapter1.getPosition() >= newPosition)
+                .collect(Collectors.toList());
+        allConcernedChapters.forEach(chapter1 -> chapter1.setPosition(chapter1.getPosition() + 1));
+        this.chapterRepository.saveAll(allConcernedChapters);
+    }
+
+    private void moveChildDown(Chapter chapter, int newPosition) {
+        // moved down within the part -> move all chapters that are BEFORE the chapter NOW 1 position up
+        List<Chapter> allConcernedChapters  = chapter.getPart().getChapters().stream()
+                .filter(chapter1 -> chapter1.getPosition() > chapter.getPosition() && chapter1.getPosition() <= newPosition) // chapters that were AFTER the chapter before and now are before
+                .collect(Collectors.toList());
+        allConcernedChapters.forEach(chapter1 -> chapter1.setPosition(chapter1.getPosition() - 1));
+        this.chapterRepository.saveAll(allConcernedChapters);
     }
 
     private PartsRepository getRepository() {

@@ -3,7 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, loadTagsFromBackend, KEY_TO_CHILD } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, loadTagsFromBackend, KEY_TO_CHILD, moveChildInBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
@@ -117,6 +117,23 @@ const deleteItems = async (context: ActionContext<IState,IState>, update: { key:
     context.commit('itemsDeleted', { key: key, items: deleted })
 }
 
+
+
+
+const moveChild = async (context: ActionContext<IState,IState>, update: { 
+  key: NOVEL_ITEM_KEYS, 
+  novelId: number, 
+  childToMove: number,
+  newParentId: number,
+  newPosition: number
+  }): Promise<void> => {
+    const newOrder = await moveChildInBackend(update.key, update.novelId, update.childToMove, update.newParentId, update.newPosition);
+    context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
+  //const newOrder = await updatePositionsInBackend(update.key, update.novelId, update.newOrder);
+  //context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
+}
+
+
 const updateOrder = async (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, novelId: number, newOrder: BaseModel[] }): Promise<void> => {
   const newOrder = await updatePositionsInBackend(update.key, update.novelId, update.newOrder);
   context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
@@ -137,6 +154,7 @@ const filterTags = (context: ActionContext<IState,IState>, update: { key: NOVEL_
     updateItem,
     deleteItems,
     updateOrder,
+    moveChild,
     loadItems,
     filterTags,
     setView,

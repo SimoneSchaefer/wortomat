@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/novels/{novelId}/parts/")
@@ -23,6 +24,18 @@ public class PartController {
     @PutMapping
     public ResponseEntity<Part> update(@PathVariable("novelId") Long novelId, @RequestBody Part part) {
         return ResponseEntity.ok(this.partService.update(novelId, part));
+    }
+
+    @PutMapping("moveChild")
+    public ResponseEntity<?> moveChild(@PathVariable("novelId") Long novelId, @RequestBody Map<String, String> updatedPositions) {
+        System.out.println("updatedPositions" + updatedPositions);
+        this.partService.moveChild(
+                novelId,
+                Long.parseLong(updatedPositions.get("childId")),
+                Long.parseLong(updatedPositions.get("newParentId")),
+                Integer.parseInt(updatedPositions.get("newPosition")));
+
+        return ResponseEntity.ok(this.partService.get(novelId));
     }
 
     @GetMapping

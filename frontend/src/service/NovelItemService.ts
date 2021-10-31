@@ -25,6 +25,14 @@ export abstract class NovelItemService {
         return API.put(`novels/${novelId}/${this.getAPIPath()}/updatePositions`, sortedIds)
     }
 
+    public moveChild(novelId: number, childId: number, newParentId: number, newPosition: number): Promise<AxiosResponse>{
+        return API.put(`novels/${novelId}/${this.getAPIPath()}/moveChild/`, {
+            childId: childId,
+            newParentId: newParentId,
+            newPosition: newPosition
+        })
+    }
+
     public list(novelId: number): Promise<AxiosResponse> {
         return API.get(`/novels/${novelId}/${this.getAPIPath()}/`)
     }

@@ -17,16 +17,47 @@
         <SplitterPanel class="split-content-left">
           <div class="tree-view">
             <ScrollPanel style="height: 100%">
-              <Accordion lazy>
+               <!-- <draggable 
+                      v-model="items" 
+                      group="parts" 
+                      @start="drag=true" 
+                      @end="drag=false" 
+                      item-key="id">
+                      <template #item="{element}">
+                        <div class="item p-jc-between part-draggable">
+                           {{ element.name }}
+                        </div>                         
+                      </template>
+                </draggable>-->
+
+
+              <Accordion lazy multiple>
+                 
                 <AccordionTab v-for="item of items" :key="item.id">
                   <template #header>
                     <div class="accordion-header">
                       <EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" placeHolderTitle="No name added yet."></EditableLabel>
+                      ({{ item.id }})
                       <div class="menu" @click="addChild(item)"><i class="fa fa-bars"></i></div>
                     </div>
                   </template>
 
-                  <div class="tree-view-item" >
+                  <draggable class="list-group"
+                    :id="`parent-${item.id}`"
+                    :data-source="`parent-${item.id}`"
+                    :list="item.chapters"
+                    :item-key="`parent-${item.id}`"
+                    group="a"                 
+                    @end="childMoved" >
+                      <template #item="{element}">
+                        <div class="item p-jc-between parent-draggable" :id="`child-${element.id}`">
+                           {{ element.id }} -  {{ element.name }} - ({{ element.position}})
+                        </div>                         
+                      </template>
+                  </draggable>
+
+
+                  <!--<div class="tree-view-item" >
                     <a v-for="child of item.chapters" href="#" 
                       class="tree-view-item-child"
                       @click="selectChild(child)"  
@@ -36,7 +67,7 @@
                       - 
                       <MissingValueTolerantLabel :value="child.summary" fallback="No summary added yet"></MissingValueTolerantLabel>
                     </a>          
-                  </div>
+                  </div>-->
                 </AccordionTab>
               </Accordion>         
             </ScrollPanel>
@@ -68,6 +99,7 @@ import { BaseModel } from '@/models/Base.model';
 import { getAllItems } from '@/store/getters';
 import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 
+import draggable from 'vuedraggable'
 
 @Options({
   components: {
@@ -78,7 +110,8 @@ import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
     WLink,
     EditableLabel,
     MissingValueTolerantLabel,
-    NovelItemSheet
+    NovelItemSheet,
+    draggable
   }
 })
 export default class Chapters extends mixins(UpdatableItemMixin) {
@@ -87,10 +120,33 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   mounted(): void {
     this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
   }
+
+  childMoved($event): void {
+    console.log('EVENT', $event)
+    const childId = $event.clone.id.replace('child-', '');
+    const parentFrom = $event.from.id.replace('parent-', '');
+    const parentTo = $event.to.id.replace('parent-', '');
+    const oldPosition = $event.oldIndex;
+    const newPosition = $event.newIndex;
+
+    console.log('childId', childId, 'parentTo', parentTo)
+
+    this.$store.dispatch('moveChild', { 
+      key: this.parentKey, 
+      novelId: this.$route.params.id,
+      childToMove: childId,
+      newParentId: parentTo,
+      newPosition: newPosition
+    }); 
+  }
      
   get items(): BaseModel[] {
       return getAllItems(this.$store.state, this.parentKey);
   }
+
+  set items(value: BaseModel[]) {
+      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
+  } 
 
   get selectedItems(): number[] {
     return this.$store.state.selection.get(this.childKey) || [];
@@ -263,5 +319,11 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   width: 5em !important;
   height: 5em;
   z-index: 9999;
+}
+
+
+.part-draggable {
+  padding: 0.5em;
+  border-bottom: 1px solid gray;
 }
 </style>
