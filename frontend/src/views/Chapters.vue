@@ -6,8 +6,13 @@
         <div class="chapters-menu-item">
           <b>Options</b>
         </div>
-        <a class="chapters-menu-item link" @click="addParent">
-          Add Part      
+        <div class="chapters-menu-item ">
+          <WButton class="link" @click="addParent" label="Add part" />
+        </div>
+
+        <a class="chapters-menu-item">
+          <Dropdown v-model="selectedPart" :options="items" placeholder="Select a part" optionLabel="name" :filter="true" />
+          <WButton class="link" @click="addChild" label="Add chapter" :disabled="selectedPart === null" />
         </a>
       </div>
     </Sidebar>
@@ -17,28 +22,11 @@
         <SplitterPanel class="split-content-left">
           <div class="tree-view">
             <ScrollPanel style="height: 100%">
-               <!-- <draggable 
-                      v-model="items" 
-                      group="parts" 
-                      @start="drag=true" 
-                      @end="drag=false" 
-                      item-key="id">
-                      <template #item="{element}">
-                        <div class="item p-jc-between part-draggable">
-                           {{ element.name }}
-                        </div>                         
-                      </template>
-                </draggable>-->
-
-
-              <Accordion lazy multiple>
-                 
+              <Accordion lazy multiple :activeIndex="activeIndex">                 
                 <AccordionTab v-for="item of items" :key="item.id">
                   <template #header>
                     <div class="accordion-header">
                       <EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" placeHolderTitle="No name added yet."></EditableLabel>
-                      ({{ item.id }})
-                      <div class="menu" @click="addChild(item)"><i class="fa fa-bars"></i></div>
                     </div>
                   </template>
 
@@ -50,24 +38,18 @@
                     group="a"                 
                     @end="childMoved" >
                       <template #item="{element}">
-                        <div class="item p-jc-between parent-draggable" :id="`child-${element.id}`">
-                           {{ element.id }} -  {{ element.name }} - ({{ element.position}})
+                        <div class="item p-jc-between tree-view-item" :id="`child-${element.id}`">
+                          <a href="#" 
+                            class="tree-view-item-child"
+                            @click="selectChild(element)"  
+                            :key="element.id"
+                            :class="{ selected: isSelected(element) }">
+                            <MissingValueTolerantLabel :value="element.name" fallback="No name added yet"></MissingValueTolerantLabel>&nbsp;
+                            <i><MissingValueTolerantLabel :value="element.summary" fallback="No summary added yet"></MissingValueTolerantLabel></i>
+                          </a>       
                         </div>                         
                       </template>
                   </draggable>
-
-
-                  <!--<div class="tree-view-item" >
-                    <a v-for="child of item.chapters" href="#" 
-                      class="tree-view-item-child"
-                      @click="selectChild(child)"  
-                      :key="child.id"
-                      :class="{ selected: isSelected(child) }">
-                      <MissingValueTolerantLabel :value="child.name" fallback="No name added yet"></MissingValueTolerantLabel>
-                      - 
-                      <MissingValueTolerantLabel :value="child.summary" fallback="No summary added yet"></MissingValueTolerantLabel>
-                    </a>          
-                  </div>-->
                 </AccordionTab>
               </Accordion>         
             </ScrollPanel>
@@ -116,20 +98,17 @@ import draggable from 'vuedraggable'
 })
 export default class Chapters extends mixins(UpdatableItemMixin) {
   sidebarVisible = false;
+  activeIndex = [];
+  selectedPart = null;
 
   mounted(): void {
     this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
   }
 
   childMoved($event): void {
-    console.log('EVENT', $event)
     const childId = $event.clone.id.replace('child-', '');
-    const parentFrom = $event.from.id.replace('parent-', '');
     const parentTo = $event.to.id.replace('parent-', '');
-    const oldPosition = $event.oldIndex;
     const newPosition = $event.newIndex;
-
-    console.log('childId', childId, 'parentTo', parentTo)
 
     this.$store.dispatch('moveChild', { 
       key: this.parentKey, 
@@ -168,14 +147,19 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
       });
     }
 
-   addChild(parent): void {
-     const child = new BaseModel();
-     child.parentId = parent.id;
+   addChild(): void {
+      const child = new BaseModel();
+      child.parentId = this.selectedPart.id;
       this.$store.dispatch('addItem', { 
           key: this.childKey, 
           novelId: this.novelId, 
           item: child,
       });
+
+      const parentIndex = this.items.findIndex(part => part.id === this.selectedPart.id);
+      if (!this.activeIndex.includes(parentIndex)) {
+        this.activeIndex.push(parentIndex);
+      }
     }
 
         
@@ -197,9 +181,9 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
         });
     }
 
-    createChild(parentId: number) {
+    createChild() {
       const model = new BaseModel();
-      model['partId'] = parentId;
+      model['partId'] = this.selectedPart.id;
         this.$store.dispatch('addItem', { 
             key: this.childKey, 
             novelId: this.novelId, 
@@ -246,6 +230,18 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   padding: 1em;
   width: 100%;
   border-bottom: 1px solid darkgray;
+  display: flex;
+  align-items: flex-end;
+  justify-content: right;
+  flex-wrap: nowrap;
+}
+
+.chapters-menu-item button,
+.chapters-menu-item button:hover {
+  background-color: transparent;
+  color: black;
+  border: none;
+  outline: none;
 }
 
 .chapters-menu-item.link:hover {
