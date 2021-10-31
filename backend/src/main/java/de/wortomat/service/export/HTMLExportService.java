@@ -24,14 +24,15 @@ public class HTMLExportService implements Exporter {
     }
 
     public String generateHTML(Long novelId, ExportOptions exportOptions) {
-        List<Chapter> chapters = this.chapterService.get(novelId);
         StringBuilder stringBuilder = new StringBuilder();
+        /*List<Chapter> chapters = this.chapterService.get(novelId);
+
         for (Chapter chapter : chapters) {
             stringBuilder.append(nullSafeHtmlElement(true, chapter.getName(), "<h1>%s</h1>"));
             stringBuilder.append(nullSafeHtmlElement(exportOptions.includeSummary, chapter.getExtended_summary(), "<div><b>%s</b></div>"));
             stringBuilder.append(nullSafeHtmlElement(exportOptions.includeExtendedSummary, chapter.getExtended_summary(), "<div>%s</div>"));
             stringBuilder.append(nullSafeHtmlElement(exportOptions.includeContent, chapter.getContent(), "<div>%s</div>"));
-        }
+        }*/
         return stringBuilder.toString();
     }
 

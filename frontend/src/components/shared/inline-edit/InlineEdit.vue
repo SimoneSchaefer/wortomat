@@ -1,8 +1,8 @@
 <template>
     <div class="inline-edit w-100" 
         :title="editing ? '' : 'Click to edit'" 
-        v-bind:class=" { editing: editing, readonly: !editing }" 
-        v-on:click="editModeActivated">
+        :class=" { editing: editing, readonly: !editing }" 
+        @click="editModeActivated">
         <div v-if="editing" class="p-d-flex p-jc-between editing">
             <div class="value" v-on:keydown.esc="cancel" v-on:keydown.enter="validateAndUpdate">
                 <slot name="editing"></slot>
@@ -52,14 +52,15 @@ export default class InlineEdit extends Vue {
     validateAndUpdate($event: Event): void {
         this.stopEvent($event);
         if (!this.validationRegex) {
-            this.update($event);
+            return this.update($event);
         }
         if (this.currentValue.match(this.validationRegex)) {
-            this.update($event);
+            return this.update($event);
         }
     }
 
-    editModeActivated(): void {
+    editModeActivated($event): void {
+        this.stopEvent($event);
         if (this.editing) {
             return;
         }
@@ -107,10 +108,6 @@ export default class InlineEdit extends Vue {
 .value {
     flex-grow: 1;
 }
-
-</style>
-
-<style>
 .inline-edit  .editing {
     border: 2px solid #1d1d1d;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="plot">
-    <div class="vertical-menu">
+   <!-- <div class="vertical-menu">
           <Button title="Add new timeline event"
               class="p-button-secondary add-button"
               icon="fa fa-plus fa-2x"
@@ -11,7 +11,7 @@
               icon="fa fa-trash fa-2x"
               type="button"
     />
-    </div>
+    </div>-->
     <div class="timeline">
       <div class="split-panel">
         <Splitter style="height: 100%" stateKey="timeline">
@@ -36,11 +36,9 @@
                 </Timeline>
               </ScrollPanel>
           </Splitterpanel>
-          <Splitterpanel class="split-content-right">
+          <Splitterpanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
-
-            <div v-if="selectedItem" class="selected-item">
-              <Fieldset legend="Referenced chapters">
+              <div class="reference-options">
                 <div class="add-reference-form">
                   <Dropdown v-model="selectedChapterReference" :options="chapters" placeholder="Select a chapter" optionLabel="name"  :filter="true">
                   <template #option="slotProps">
@@ -53,19 +51,11 @@
                 <Button title="Add reference to selected Chapter"
                   class="p-button-secondary add-button"
                   icon="fa fa-plus"
-                  label="Add reference"
+                  label="Add"
                   type="button"
                   @click="addChapterReference" />
                 </div>
-              </Fieldset>
 
-              <Accordion :multiple="true">
-                <AccordionTab :header="chapter.name" v-for="chapter in selectedItem.chapters" :key="chapter.id">
-                  <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
-                </AccordionTab>
-              </Accordion>
-
-              <Fieldset legend="Referenced research items" style="margin-top: 1em;">
                 <div class="add-reference-form">
                   <Dropdown v-model="selectedResearchReference" :options="research" optionLabel="name" placeholder="Select a research item" :filter="true">
                   <template #option="slotProps">
@@ -78,17 +68,23 @@
                 <Button title="Add reference to selected research"
                   class="p-button-secondary add-button"
                   icon="fa fa-plus"
-                  label="Add reference"
+                  label="Add"
                   type="button"
                   @click="addResearchReference" />
                 </div>
-              </Fieldset>
-            
-              <Accordion :multiple="true">
-                <AccordionTab :header="research.name" v-for="research in selectedItem.research" :key="research.id">
-                  <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
-                </AccordionTab>
-              </Accordion>
+
+              </div>
+
+            <div v-if="selectedItem" class="selected-item">
+              <div class="sheet-list" v-for="chapter in selectedItem.chapters" :key="chapter.id">
+                <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
+              </div>
+
+              <div class="sheet-list" v-for="research in selectedItem.research" :key="research.id">
+                <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
+              </div>
+
+           
             </div> 
             </ScrollPanel>
           </Splitterpanel>
@@ -231,6 +227,16 @@ export default class Plot extends Vue {
 
 <style>
 
+.reference-options {
+  display: flex;
+  justify-content: space-between;
+  background: var(--editor-toolbar-background);
+}
+
+.sheet-list {
+  background: var(--sheet-list-background)
+}
+
 .add-reference-form {
   margin-top: 1em;
 }
@@ -257,29 +263,9 @@ export default class Plot extends Vue {
   padding: 0.5em 2em;
 }
 
-.vertical-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 4em;
-  background: var(--tabmenu-background);
-  border-right: 1px solid #2d2b2b;
-}
-.vertical-menu button {
-  height: 4em;
-  width: 4em !important;
-  display: block;
-}
-
-.vertical-menu .p-button.p-button-secondary, .p-buttonset.p-button-secondary > .p-button, .p-splitbutton.p-button-secondary > .p-button {
-  background-color: transparent;
-  border: none;
-  border-bottom: 1px solid #2d2b2b;
-}
-
 .timeline {
   flex-grow: 2;
-  height: calc(100vh - var(--tabmenu-height));
+  height: calc(100vh);
 }
 
 .timeline-wrapper {
@@ -304,8 +290,8 @@ export default class Plot extends Vue {
 }
 
 .p-timeline-event-opposite {
-  width: 15em;
-  max-width: 15em;
+  width: 13em;
+  max-width: 13em;
   flex-grow: 1;
   text-align: right;
   padding: 0 !important;
@@ -329,9 +315,6 @@ export default class Plot extends Vue {
   border-bottom: 1px solid #2d2b2b;
 }
 
-.split-content-right {
-    background: var(--item-list-background);
-}
 
 .event-date {
   display: flex;
@@ -347,7 +330,7 @@ export default class Plot extends Vue {
   cursor: pointer;
 }
 .p-scrollpanel-wrapper {
-  z-index: inherit;
+  z-index: inherit !important;
 }
 .p-timeline {
   padding-top: 2em;

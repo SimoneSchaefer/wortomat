@@ -9,4 +9,9 @@ public class RouteController {
     public String redirect() {
         return "forward:/";
     }
+
+    @GetMapping("/**/{path:[^/assets/*]*}")
+    public String assets() {
+        return "forward:/";
+    }
 }

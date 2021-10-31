@@ -1,6 +1,7 @@
 package de.wortomat.repository.tags;
 
 
+import de.wortomat.model.Chapter;
 import de.wortomat.model.ChapterTag;
 import org.springframework.stereotype.Repository;
 

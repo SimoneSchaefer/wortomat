@@ -13,7 +13,7 @@ export default new Vuex.Store<IState>({
     novels: [],
     currentNovel: new NovelModel(),
     selection: new Map(),
-    novelItems: {},
+    novelItems: new Map(),
     filteredTags: new Map(),
     view: new Map([[
       NOVEL_ITEM_KEYS.CHAPTERS, new Map<VIEWS,boolean>([[

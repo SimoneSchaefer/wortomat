@@ -5,4 +5,5 @@ export class BaseModel {
     public position: number;
     public status: STATUS;
     public content: string;
+    public parentId?: number;
 }

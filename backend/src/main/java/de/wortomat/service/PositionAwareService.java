@@ -18,7 +18,7 @@ public abstract class PositionAwareService<T extends PositionAware> {
     public List<T> get(Long novelId) {
         List<T> result = this.getRepository().findAllByNovelIdOrderByPosition(novelId);
         for (T item : result) {
-            item.getTags().sort(Comparator.comparing(NovelItemTag::getName));
+            // item.getTags().sort(Comparator.comparing(NovelItemTag::getName));
         }
         return result;
     }
@@ -28,13 +28,13 @@ public abstract class PositionAwareService<T extends PositionAware> {
     }
 
     public T create(Long novelId, T positionAware) {
-        positionAware.setNovel(this.novelService.get(novelId));
+        // positionAware.setNovel(this.novelService.get(novelId));
         positionAware.setPosition((getMaxPosition(novelId)));
         return this.getRepository().save(positionAware);
     }
 
     public T update(Long novelId, T positionAware) {
-        positionAware.setNovel(this.novelService.get(novelId));
+        // positionAware.setNovel(this.novelService.get(novelId));
         return this.getRepository().save(positionAware);
     }
     public void delete(Long _novelId, Long chapterId) {

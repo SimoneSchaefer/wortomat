@@ -81,6 +81,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+i[class^="fa"]:before {
+	display: inline-block;
+	text-decoration: none;
+}
+
 .p-dialog.p-component, 
 .p-dialog.p-component .p-dialog-header,
 .p-dialog.p-component .p-dialog-content, 

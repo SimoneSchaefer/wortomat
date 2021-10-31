@@ -6,7 +6,7 @@ import { BACKEND_URL } from './Env';
 
 export abstract class NovelItemService {
 
-    abstract getAPIPath(): string;
+    abstract getAPIPath(parentId?: number): string;
 
     public getBasePath(novelId: number): string {
         return `${BACKEND_URL}/novels/${novelId}/${this.getAPIPath()}`;
@@ -30,11 +30,11 @@ export abstract class NovelItemService {
     }
    
     public update(novelId: number, item: BaseModel): Promise<AxiosResponse> {
-        return API.put(`/novels/${novelId}/${this.getAPIPath()}/`, item)
+        return API.put(`/novels/${novelId}/${this.getAPIPath(item.parentId)}/`, item)
     } 
 
-    public create(novelId: number, item: BaseModel): Promise<AxiosResponse> {
-        return API.post(`/novels/${novelId}/${this.getAPIPath()}/`, item)
+    public create(novelId: number, item: BaseModel, parentId?: number): Promise<AxiosResponse> {
+        return API.post(`/novels/${novelId}/${this.getAPIPath(parentId)}/`, item)
     }
 
     public delete(novelId: number, item: BaseModel): Promise<AxiosResponse> {

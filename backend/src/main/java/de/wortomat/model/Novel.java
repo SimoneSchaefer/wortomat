@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Novel {
+public class Novel implements GroupingNovelItem {
     @Id
     @JsonFormat
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class Novel {
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
-    private List<Chapter> chapters;
+    private List<Part> parts;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
@@ -52,4 +52,14 @@ public class Novel {
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
     private List<LocationTag> locationTags;
+
+    @Override
+    public void setParent(GroupingNovelItem parent) {
+        throw new IllegalStateException("can not set parent for novel");
+    }
+
+    // @Override
+    public List<? extends NovelItemTag> getTags() {
+        throw new IllegalStateException("can not access tags for novel");
+    }
 }

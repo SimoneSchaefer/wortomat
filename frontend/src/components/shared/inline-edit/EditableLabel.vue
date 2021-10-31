@@ -72,6 +72,7 @@ export default class EditableLabel extends Vue {
 
   @Emit('update-label')
   updateLabel(): string {
+      console.log('UPDATE LABEL')
     return this.draft;
   }
 }

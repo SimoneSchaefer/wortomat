@@ -1,69 +1,40 @@
 <template>
-  <div id="nav">
-    <TabMenu :model="menuItems" />    
-  </div>
-  <div class="wrapper">
+  <div class="opened-novel">
+    <VerticalMenu :menuItems="menuItems"></VerticalMenu>    
     <router-view></router-view>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
+import VerticalMenu from '@/components/navigation/VerticalMenu.vue';
+import { MenuModel } from '@/models/Menu.model';
+
+@Options({
+  components: { VerticalMenu }
+})
 export default class OpenedNovel extends Vue {
   mounted(): void {
+    console.log('OPEN NOVEL', this.$route.params.id)
     this.$store.dispatch('openNovel', this.$route.params.id) 
   }
 
-  get menuItems(): Array<{ label: string, icon: string, to: string}> {
+  get menuItems(): Array<MenuModel> {
     return [
       {label: 'Home', icon: 'fa fa-home', to: '/'},
+      {label: 'Timeline', icon: 'fa fa-clock', to: 'plot'},
       {label: 'Chapters', icon: 'fa fa-book', to: 'chapters'},
       {label: 'Characters', icon: 'fa fa-users', to: 'characters'},
       {label: 'Research', icon: 'fa fa-flask', to: 'research'},
-      // {label: 'Tags', icon: 'fa fa-tags', to: 'tags'},
       {label: 'Export', icon: 'fa fa-file-export', to: 'export'},
-      {label: 'Timeline', icon: 'fa fa-clock', to: 'plot'}
     ]
   }
 }
 </script>
 
 <style scoped>
-  .wrapper {
-    height: calc(100vh - var(--tabmenu-height));
-    overflow: hidden;
-  }
-</style>
-
-<style>
-
-  #nav .p-tabmenu .p-tabmenu-nav {
-    color: var(--tabmenu-font-color);
-    background: var(--tabmenu-background);
-    padding-top: 0.5em;
-    overflow: hidden;
-    border: none;
-    height: var(--tabmenu-height);
-  }
-
-  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem,
-  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
-    background-color: transparent;
-    color: var(--tabmenu-font-color);
-    font-weight: normal;
-    border: none;
-  }
-
-  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
-    padding-bottom: 1.2rem;
-  }
-
-  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight,
-  #nav .p-tabmenu .p-tabmenu-nav .p-tabmenuitem.p-highlight .p-menuitem-link {
-    border-color: transparent;
-    color: var(--menu-font-color);
-    background: var(--menu-background);
-    font-weight: 800;
-    box-shadow: none;
-  }
+.opened-novel {
+  height: 100vh; 
+  display: flex;
+}
 </style>

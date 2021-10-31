@@ -58,9 +58,7 @@ export default class ContentFitler extends Vue {
 </script>
 
 <style>
-button {
-  height: 100%;
-}
+
 .p-overlaypanel .p-overlaypanel-content {
   padding: 0 !important;
 }

@@ -2,19 +2,25 @@ import { BaseModel } from "@/models/Base.model";
 import { ChapterService } from "@/service/Chapter.service";
 import { CharacterService } from "@/service/Character.service";
 import { NovelItemService } from "@/service/NovelItemService";
+import { PartService } from "@/service/Parts.service";
 import { ResearchService } from "@/service/Research.service";
 import { TagService } from "@/service/Tag.service";
 import { TimelineService } from "@/service/TimelineService";
 import { AxiosResponse } from "axios";
 import { NOVEL_ITEM_KEYS } from "./keys";
 
-export const KEY_TO_SERVICE: Map<string,NovelItemService>  = new Map<NOVEL_ITEM_KEYS,NovelItemService>([
+export const KEY_TO_SERVICE: Map<NOVEL_ITEM_KEYS,NovelItemService>  = new Map<NOVEL_ITEM_KEYS,NovelItemService>([
     [NOVEL_ITEM_KEYS.TIMELINE, new TimelineService()],
     [NOVEL_ITEM_KEYS.CHAPTERS, new ChapterService()],
+    [NOVEL_ITEM_KEYS.PARTS, new PartService()],
     [NOVEL_ITEM_KEYS.CHARACTERS, new CharacterService()],
     [NOVEL_ITEM_KEYS.RESEARCH, new ResearchService()],
     [NOVEL_ITEM_KEYS.TAGS, new TagService()]
-])
+]);
+
+export const KEY_TO_CHILD: Map<NOVEL_ITEM_KEYS,NOVEL_ITEM_KEYS>  = new Map<NOVEL_ITEM_KEYS,NOVEL_ITEM_KEYS>([
+    [NOVEL_ITEM_KEYS.PARTS, NOVEL_ITEM_KEYS.CHAPTERS],
+]);
 
 export function loadItemsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
     const serviceToUse = KEY_TO_SERVICE.get(key);
@@ -33,10 +39,10 @@ export function loadTagsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Prom
     }
 }
 
-export function createItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {
+export function createItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel, parentId?: number): Promise<AxiosResponse> {
     const serviceToUse = KEY_TO_SERVICE.get(key);
     if (serviceToUse) {
-        return serviceToUse.create(novelId, item);
+        return serviceToUse.create(novelId, item, parentId);
     }
 }
 

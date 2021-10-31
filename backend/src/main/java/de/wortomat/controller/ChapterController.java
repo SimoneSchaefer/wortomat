@@ -10,26 +10,32 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/novels/{novelId}/chapters/")
+@RequestMapping("/novels/{novelId}/parts/{partId}/chapters/")
 @CrossOrigin(origins = "*")
 public class ChapterController {
     @Autowired
     private ChapterService chapterService;
 
     @PostMapping
-    public ResponseEntity<Chapter> create(@PathVariable("novelId") Long novelId, @RequestBody Chapter chapter) {
-        return ResponseEntity.ok(this.chapterService.create(novelId, chapter));
+    public ResponseEntity<Chapter> create(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("partId") Long partId,
+            @RequestBody Chapter chapter) {
+        return ResponseEntity.ok(this.chapterService.create(novelId, partId, chapter));
     }
 
     @PutMapping
-    public ResponseEntity<Chapter> update(@PathVariable("novelId") Long novelId, @RequestBody Chapter chapter) {
-        return ResponseEntity.ok(this.chapterService.update(novelId, chapter));
+    public ResponseEntity<Chapter> update(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("partId") Long partId,
+            @RequestBody Chapter chapter) {
+        return ResponseEntity.ok(this.chapterService.update(novelId, partId, chapter));
     }
 
-    @GetMapping
+    /*@GetMapping
     public ResponseEntity<List<Chapter>> get(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.chapterService.get(novelId));
-    }
+    }*/
 
     @GetMapping("tags")
     public ResponseEntity<List<ChapterTag>> tags(@PathVariable("novelId") Long novelId) {
@@ -47,8 +53,8 @@ public class ChapterController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("updatePositions")
+    /*@PutMapping("updatePositions")
     public ResponseEntity<List<Chapter>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
         return ResponseEntity.ok(this.chapterService.updatePositions(novelId, updatedPositions));
-    }
+    }*/
 }

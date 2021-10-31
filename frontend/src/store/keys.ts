@@ -1,5 +1,6 @@
 
 export enum NOVEL_ITEM_KEYS {
+    PARTS = 'parts',
     CHAPTERS = 'chapters',
     RESEARCH = 'research',
     CHARACTERS = 'characters',

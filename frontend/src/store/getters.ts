@@ -10,7 +10,7 @@ const selectedCharacters = (state : IState): BaseModel[] => getCurrentSelection(
 const filteredCharacters = (state : IState): BaseModel => getFilteredItems(state, NOVEL_ITEM_KEYS.CHARACTERS);
 const currentResearch = (state : IState): BaseModel[] => getCurrentSelection(state, NOVEL_ITEM_KEYS.RESEARCH);
 const filteredResearch = (state : IState): BaseModel => getFilteredItems(state, NOVEL_ITEM_KEYS.RESEARCH);
-const tags = (state : IState): BaseModel[] => state.novelItems[NOVEL_ITEM_KEYS.TAGS] || []
+const tags = (state : IState): BaseModel[] => state.novelItems.get(NOVEL_ITEM_KEYS.TAGS) || []
 
 export default {
     openNovelId,
@@ -24,7 +24,7 @@ export default {
 };
 
 export function getSortedEvents(state: IState) {
-    const allItems = state.novelItems[NOVEL_ITEM_KEYS.TIMELINE] || [];
+    const allItems = state.novelItems.get(NOVEL_ITEM_KEYS.TIMELINE) || [];
     allItems.sort(function(a, b) {
         if (a.eventDate === null) {
             return 1; //put items without date to the end
@@ -43,7 +43,7 @@ export function getSortedEvents(state: IState) {
 export function getAllItems(state: IState, key: NOVEL_ITEM_KEYS) {
     if (!novelIdOrRaise(state)) return [];
 
-    const allItems = state.novelItems[key] || [];
+    const allItems = state.novelItems.get(key) || [];
     return allItems;
 }
 

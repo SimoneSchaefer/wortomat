@@ -1,9 +1,10 @@
 <template>
-    <div v-for="item in items" :key="item.id">
+    <div v-for="item in selected" :key="item.id">
         <NovelItemSheet 
-            :novelItemKey="novelItemKey" 
+            :novelItemKey="childKey" 
             :item="item" 
-            :service="service"></NovelItemSheet>
+            :service="service">
+        </NovelItemSheet>
     </div>
 </template>
 
@@ -22,14 +23,27 @@ import { KEY_TO_SERVICE } from '@/store/store-api-adapter';
   components: { EditableLabel, NovelItemSheet }
 })
 export default class NovelItemSheetList extends Vue {
-    @Prop() novelItemKey: NOVEL_ITEM_KEYS;
-
-    get items(): BaseModel[] {
-        return getCurrentSelection(this.$store.state, this.novelItemKey);
-    }
+    @Prop() parentKey: NOVEL_ITEM_KEYS;
+    @Prop() childKey: NOVEL_ITEM_KEYS;
 
     get service(): NovelItemService {
-        return KEY_TO_SERVICE.get(this.novelItemKey);
+        return KEY_TO_SERVICE.get(this.childKey);
     }
+
+    get selectedItems(): number[] {
+        return this.$store.state.selection.get(this.childKey) || [];
+    }
+
+    get selected(): BaseModel[] {
+        const ids = this.selectedItems;
+        const all = this.$store.state.novelItems.get(this.parentKey) || [];
+
+        let allChapters = [];
+        for (let part of all) {
+            allChapters = allChapters.concat((part[this.childKey] || []).filter(chapter => ids.includes(chapter.id)));
+        }
+        return allChapters;
+    }
+
 }
 </script>

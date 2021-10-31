@@ -1,5 +1,5 @@
 <template>
-<NovelItemMenu :novelItemKey="novelItemKey"></NovelItemMenu>
+<!--<NovelItemMenu :novelItemKey="novelItemKey"></NovelItemMenu>-->
 <div class="split-panel">
   <Splitter style="height: 100%" :stateKey="novelItemKey">
   <SplitterPanel class="split-content-left">
@@ -49,7 +49,8 @@ export default class NovelItems extends Vue {
 
 <style scoped>
 .split-panel {
-  height: calc(100vh - var(--menu-height) - var(--tabmenu-height));
+  height: 100%;
+  flex-grow: 1;
 }
 </style>
 

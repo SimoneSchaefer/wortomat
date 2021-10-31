@@ -1,7 +1,9 @@
 package de.wortomat.model;
 
 
-public interface PositionAware extends NovelItem{
+import java.util.List;
+
+public interface PositionAware {
     int getPosition();
     void setPosition(int position);
 }

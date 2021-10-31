@@ -6,7 +6,7 @@ import store from './store/store'
 import PrimeVue from 'primevue/config';
 import Button from 'primevue/button';
 import Splitter from 'primevue/splitter';
-import Splitterpanel from 'primevue/splitterpanel';
+import SplitterPanel from 'primevue/splitterpanel';
 import Card from 'primevue/card';
 import Galleria from 'primevue/galleria';
 import Dialog from 'primevue/dialog';
@@ -35,6 +35,7 @@ import Timeline from 'primevue/timeline';
 import Dropdown from 'primevue/dropdown';
 import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
+import Sidebar from 'primevue/sidebar';
 import draggable from 'vuedraggable'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -51,7 +52,7 @@ const app = createApp(App)
     .use(ConfirmationService)
     .use(ToastService)
     .component('Button', Button)
-    .component('Splitterpanel', Splitterpanel)
+    .component('SplitterPanel', SplitterPanel)
     .component('Splitter', Splitter)
     .component('Card', Card)
     .component('OrderList', OrderList)
@@ -79,8 +80,10 @@ const app = createApp(App)
     .component('AccordionTab', AccordionTab)
     .component('Timeline', Timeline)
     .component('Dropdown', Dropdown)
+    .component('Sidebar', Sidebar)
     .component('draggable', draggable)
-app.mount("#app");
+
+ app.mount("#app");
 
 
 

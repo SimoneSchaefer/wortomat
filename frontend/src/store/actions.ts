@@ -3,7 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, loadTagsFromBackend } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, loadTagsFromBackend, KEY_TO_CHILD } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
@@ -12,9 +12,11 @@ import { TimelineService } from "@/service/TimelineService";
 import { ResearchModel } from "@/models/Research.model";
 
 const openNovel = (context: ActionContext<IState,IState>, novelId: number): void => {
-    new NovelService().get(novelId).then(result => {
+  context.commit('novelOpened', { id: novelId });
+
+    /*new NovelService().get(novelId).then(result => {
       context.commit('novelOpened', result.data);
-    });
+    });*/
  }
 
 const addNovel = (context: ActionContext<IState,IState>, novel: NovelModel): void => {
@@ -50,13 +52,21 @@ const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_
   context.commit('setLoading', { loading: true })
   Promise.all([
     loadItemsFromBackend( payload.key, payload.novelId),
-    loadTagsFromBackend( payload.key, payload.novelId)
+    // loadTagsFromBackend( payload.key, payload.novelId)
   ]).then(result => {
+    const loadedItems = result[0].data;
+    if (KEY_TO_CHILD.has(payload.key)) {
+      for (const parent of loadedItems) {
+        parent[KEY_TO_CHILD.get(payload.key)].map(child => child.parentId = parent.id);
+      }
+    }
     context.commit('itemsLoaded', { key: payload.key, items: result[0].data });
-    context.commit('tagsLoaded', result[1].data);
+    //context.commit('tagsLoaded', result[1].data);
     context.commit('setLoading', { loading: false })
   });
 }
+
+
 
 const selectItems = (context: ActionContext<IState,IState>, item: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     context.commit('itemsSelected', item)        
@@ -68,10 +78,12 @@ const setModalOpen = (context: ActionContext<IState,IState>, payload: { isOpen: 
 
 const addItem = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel }): void => {
     const {key, novelId, item } = payload;
+  
     if (item.id) {
       context.commit('itemAdded', { key: key, item: item });
     } else {
-      createItemInBackend(key, novelId, item).then(result => {
+      createItemInBackend(key, novelId, item, item.parentId).then(result => {
+        result.data.parentId = item.parentId;
         context.commit('itemAdded', { key: key, item: result.data });
         context.commit('itemsSelected', { key: key, items: [result.data] });       
       });  
@@ -94,6 +106,7 @@ const addItem = (context: ActionContext<IState,IState>, payload: { key: NOVEL_IT
 const updateItem = (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, novelId: number, oldItem: BaseModel, overrideValues}): void => {
     const {key, novelId, oldItem, overrideValues } = update;
     updateItemInBackend(key, novelId, oldItem, overrideValues ).then(result => {
+        result.data.parentId = oldItem.parentId;
         context.commit('itemUpdated', { key: key, item: result.data })
     });      
 }
