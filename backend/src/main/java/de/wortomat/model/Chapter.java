@@ -3,16 +3,13 @@ package de.wortomat.model;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Data
-public class Chapter implements PositionAwareNovelItem {
+public class Chapter implements NovelItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -37,7 +34,15 @@ public class Chapter implements PositionAwareNovelItem {
     private Part part;
 
     @Override
+    @JsonIgnore
+    public GroupingNovelItem getParent() {
+        return this.getPart();
+    }
+
+    @Override
     public void setParent(GroupingNovelItem parent) {
         this.part = (Part) parent;
     }
+
+
 }

@@ -1,6 +1,6 @@
 {
     "vertical_menu": {
-        "home": "Home",
+        "home": "Novel overview",
         "timeline": "Timeline",
         "characters": "Characters",
         "chapters": "Chapters",
@@ -10,16 +10,23 @@
     "side_bar": {
         "open_menu": "Open menu",
         "add_parent": {
-            "parts": "Add Part"
+            "parts": "Create Part",
+            "research_groups": "Create Research Group"
         },
         "add_child": {
-            "parts": "Add chapter"
+            "parts": "Add chapter",
+            "research_groups": "Add research item"
         },
         "select_parent": {
-            "parts": "Select part"
+            "parts": "Select part",
+            "research_groups": "Select Research Group"
+
         }
     },
-    "some_key": "some value"
+    "fallback_labels": {
+        "no_name": "No name added yet",
+        "no_summary": "No summary added yet"
+    }
 }
 
 

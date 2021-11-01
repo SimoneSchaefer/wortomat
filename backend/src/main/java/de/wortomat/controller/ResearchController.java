@@ -1,9 +1,6 @@
 package de.wortomat.controller;
 
-import de.wortomat.model.Image;
-import de.wortomat.model.LocationTag;
-import de.wortomat.model.Research;
-import de.wortomat.model.ResearchTag;
+import de.wortomat.model.*;
 import de.wortomat.service.ResearchService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -18,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/novels/{novelId}/research/")
+@RequestMapping("/novels/{novelId}/research-groups/{groupId}/research")
 @CrossOrigin(origins = "*")
 public class ResearchController {
     @Autowired
@@ -31,18 +28,19 @@ public class ResearchController {
     private FileResponseCreator fileResponseCreator;
 
     @PostMapping
-    public ResponseEntity<Research> create(@PathVariable("novelId") Long novelId, @RequestBody Research research) {
-        return ResponseEntity.ok(this.researchService.create(novelId, research));
+    public ResponseEntity<NovelItem> create(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Research research) {
+        return ResponseEntity.ok(this.researchService.create(novelId, groupId, research));
     }
 
     @PutMapping
-    public ResponseEntity<Research> update(@PathVariable("novelId") Long novelId, @RequestBody Research research) {
-        return ResponseEntity.ok(this.researchService.update(novelId, research));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Research>> get(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.researchService.get(novelId));
+    public ResponseEntity<NovelItem> update(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Research research) {
+        return ResponseEntity.ok(this.researchService.update(novelId, groupId, research));
     }
 
     @DeleteMapping("{researchId}")
@@ -51,12 +49,7 @@ public class ResearchController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("updatePositions")
-    public ResponseEntity<List<Research>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
-        return ResponseEntity.ok(this.researchService.updatePositions(novelId, updatedPositions));
-    }
-
-    @GetMapping("tags")
+    /*@GetMapping("tags")
     public ResponseEntity<List<ResearchTag>> tags(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.researchService.getTags(novelId));
     }
@@ -64,7 +57,7 @@ public class ResearchController {
     @PostMapping("tags")
     public ResponseEntity<ResearchTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody ResearchTag tag) {
         return ResponseEntity.ok(this.researchService.createTag(novelId, tag));
-    }
+    }*/
 
 
     @PostMapping("{researchId}/upload")

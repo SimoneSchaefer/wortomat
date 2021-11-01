@@ -4,6 +4,7 @@ import { CharacterService } from "@/service/Character.service";
 import { NovelItemService } from "@/service/NovelItemService";
 import { PartService } from "@/service/Parts.service";
 import { ResearchService } from "@/service/Research.service";
+import { ResearchGroupService } from "@/service/ResearchGroupService";
 import { TagService } from "@/service/Tag.service";
 import { TimelineService } from "@/service/TimelineService";
 import { AxiosResponse } from "axios";
@@ -14,12 +15,14 @@ export const KEY_TO_SERVICE: Map<NOVEL_ITEM_KEYS,NovelItemService>  = new Map<NO
     [NOVEL_ITEM_KEYS.CHAPTERS, new ChapterService()],
     [NOVEL_ITEM_KEYS.PARTS, new PartService()],
     [NOVEL_ITEM_KEYS.CHARACTERS, new CharacterService()],
+    [NOVEL_ITEM_KEYS.RESEARCH_GROUPS, new ResearchGroupService()],
     [NOVEL_ITEM_KEYS.RESEARCH, new ResearchService()],
     [NOVEL_ITEM_KEYS.TAGS, new TagService()]
 ]);
 
 export const KEY_TO_CHILD: Map<NOVEL_ITEM_KEYS,NOVEL_ITEM_KEYS>  = new Map<NOVEL_ITEM_KEYS,NOVEL_ITEM_KEYS>([
     [NOVEL_ITEM_KEYS.PARTS, NOVEL_ITEM_KEYS.CHAPTERS],
+    [NOVEL_ITEM_KEYS.RESEARCH_GROUPS, NOVEL_ITEM_KEYS.RESEARCH],
 ]);
 
 export function loadItemsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {

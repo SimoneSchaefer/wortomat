@@ -1,5 +1,6 @@
 package de.wortomat.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Research implements PositionAware, ImageAware {
+public class Research implements NovelItem, ImageAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -32,14 +33,18 @@ public class Research implements PositionAware, ImageAware {
 
     @JsonIgnore
     @ManyToOne
-    private Novel novel;
+    @JsonIdentityReference(alwaysAsId = true)
+    private ResearchGroup researchGroup;
 
-    /*
+    @Override
     @JsonIgnore
-    @ManyToOne
-    private TimelineEvent timelineEvent;*/
-
-    public void setNovel(Novel novel) {
-        this.novel = novel;
+    public GroupingNovelItem getParent() {
+        return this.getResearchGroup();
     }
+
+    @Override
+    public void setParent(GroupingNovelItem parent) {
+        this.researchGroup = (ResearchGroup) parent;
+    }
+
 }

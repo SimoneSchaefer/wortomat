@@ -84,21 +84,21 @@ export default class WSidebarMenu extends Vue {
 }
 
 .w-sidebar-menu {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  align-items: flex-start;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    align-items: flex-start;
 }
 
 .w-sidebar-menu-item {
-  padding: 1em;
-  width: 100%;
-  border-bottom: 1px solid darkgray;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: stretch;
+    padding: 1em;
+    width: 100%;
+    border-bottom: 1px solid darkgray;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: stretch;
 }
 
 .w-sidebar-menu-item button {

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Part implements GroupingNovelItem {
+public class ResearchGroup implements GroupingNovelItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -21,12 +21,12 @@ public class Part implements GroupingNovelItem {
     @ManyToOne
     private Novel novel;
 
-    @OneToMany(mappedBy = "part")
-    private List<Chapter> chapters;
+    @OneToMany(mappedBy = "researchGroup")
+    private List<Research> research;
 
     @Override
     @JsonIgnore
     public List getChildren() {
-        return this.getChapters();
+        return this.getResearch();
     }
 }

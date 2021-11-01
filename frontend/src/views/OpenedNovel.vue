@@ -15,15 +15,14 @@ import { MenuModel } from '@/models/Menu.model';
 })
 export default class OpenedNovel extends Vue {
   mounted(): void {
-    console.log('OPEN NOVEL', this.$route.params.id)
     this.$store.dispatch('openNovel', this.$route.params.id) 
   }
 
   get menuItems(): Array<MenuModel> {
     return [
-      {label: 'home', icon: 'fa fa-home', to: '/'},
+      {label: 'home', icon: 'fa fa-book', to: '/'},
       {label: 'timeline', icon: 'fa fa-clock', to: 'plot'},
-      {label: 'chapters', icon: 'fa fa-book', to: 'chapters'},
+      {label: 'chapters', icon: 'fa fa-book-open', to: 'chapters'},
       {label: 'characters', icon: 'fa fa-users', to: 'characters'},
       {label: 'research', icon: 'fa fa-flask', to: 'research'},
       {label: 'export', icon: 'fa fa-file-export', to: 'export'},

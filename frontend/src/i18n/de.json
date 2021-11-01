@@ -1,0 +1,31 @@
+{
+    "vertical_menu": {
+        "home": "Buchübersicht",
+        "timeline": "Zeitstrahl",
+        "characters": "Charaktere",
+        "chapters": "Kapitel",
+        "research": "Recherche",
+        "export": "Export"
+    },
+    "side_bar": {
+        "open_menu": "Menu öffnen",
+        "add_parent": {
+            "parts": "Buchteil erstellen",
+            "research-groups": "Recherche-Gruppe erstellen"
+        },
+        "add_child": {
+            "parts": "Kapitel hinzufügen",
+            "research-groups": "Recherche anlegen"
+        },
+        "select_parent": {
+            "parts": "Buchteil auswählen",
+            "research-groups": "Recherche-Gruppe auswählen"
+        }
+    },
+    "fallback_labels": {
+        "no_name": "Noch kein Name hinzugefügt",
+        "no_summary": "Noch keine Zusammenfassung hinzugefügt"
+    }
+}
+
+

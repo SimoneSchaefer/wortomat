@@ -1,8 +1,7 @@
 import { NovelItemService } from './NovelItemService';
 
 export class ResearchService extends NovelItemService {
-
-    getAPIPath(): string {
-        return 'research';
+    getAPIPath(parentId): string {
+        return `research-groups/${parentId}/research`;
     }
 }

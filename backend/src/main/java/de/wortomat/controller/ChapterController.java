@@ -32,11 +32,6 @@ public class ChapterController {
         return ResponseEntity.ok(this.chapterService.update(novelId, partId, chapter));
     }
 
-    /*@GetMapping
-    public ResponseEntity<List<Chapter>> get(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.chapterService.get(novelId));
-    }*/
-
     @GetMapping("tags")
     public ResponseEntity<List<ChapterTag>> tags(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.chapterService.getTags(novelId));
@@ -52,9 +47,4 @@ public class ChapterController {
         this.chapterService.delete(novelId, chapterId);
         return ResponseEntity.ok().build();
     }
-
-    /*@PutMapping("updatePositions")
-    public ResponseEntity<List<Chapter>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
-        return ResponseEntity.ok(this.chapterService.updatePositions(novelId, updatedPositions));
-    }*/
 }

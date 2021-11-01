@@ -22,6 +22,16 @@ public class ChapterService {
     @Autowired
     ChapterTagRepository chapterTagRepository;
 
+    // @Override
+    GroupingItemService<Part, Chapter> getParentService() {
+        return partService;
+    }
+
+    // @Override
+    Chapter getMaxPositionItem(Long parentId) {
+        return null;
+    }
+
     public Chapter create(Long novelId, Long partId, Chapter chapter) {
         return ensureParent(chapter, novelId, partId);
     }
@@ -47,23 +57,12 @@ public class ChapterService {
     }
 
     public int getMaxPosition(Long partId) {
-        PositionAware maxPosition = this.getRepository().findTopByPartIdOrderByPositionDesc(partId);
+        Chapter maxPosition = this.getRepository().findTopByPartIdOrderByPositionDesc(partId);
         if (maxPosition == null) {
             return 0;
         }
         return maxPosition.getPosition() + 1;
     }
-
-    /*public List<T> updatePositions(Long novelId, List<Long> updatedPositions) {
-        List<T> newPositions = new ArrayList<>(updatedPositions.size());
-        for (int positionCounter = 0; positionCounter < updatedPositions.size(); positionCounter++) {
-            T positionAware = this.getRepository().findById((updatedPositions.get(positionCounter))).get();
-            positionAware.setPosition(positionCounter);
-            newPositions.add(positionAware);
-        }
-        this.getRepository().saveAll(newPositions);
-        return this.getRepository().findAllByNovelIdOrderByPosition(novelId);
-    }*/
 
     public List<ChapterTag> getTags(Long novelId) {
         return this.chapterTagRepository.findAllByNovelIdOrderByNameAsc(novelId);

@@ -1,23 +1,27 @@
 <template>
-  <NovelItems :novelItemKey="itemKey"></NovelItems>
+  <GroupingNovelItem :parentKey="parentKey" :childKey="childKey"></GroupingNovelItem>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import NovelItems from './NovelItems.vue';
+import GroupingNovelItem from './GroupingNovelItem.vue';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 @Options({
   components: { 
-    NovelItems
+    GroupingNovelItem
   }
 })
-export default class Characters extends Vue {
+export default class Research extends Vue {
   mounted(): void {
-    this.$store.dispatch('loadItems', { key: this.itemKey, novelId: this.$route.params.id }); 
+    this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
   }
 
-  get itemKey(): NOVEL_ITEM_KEYS {
+  get parentKey(): NOVEL_ITEM_KEYS {
+    return NOVEL_ITEM_KEYS.RESEARCH_GROUPS;
+  }
+  
+  get childKey(): NOVEL_ITEM_KEYS {
     return NOVEL_ITEM_KEYS.RESEARCH;
   }
 }

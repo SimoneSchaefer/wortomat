@@ -156,7 +156,7 @@ export default class Plot extends Vue {
       novelId: this.$route.params.id,
     });
     this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.RESEARCH,
+      key: NOVEL_ITEM_KEYS.RESEARCH_GROUPS,
       novelId: this.$route.params.id,
     });
   }
@@ -192,12 +192,21 @@ export default class Plot extends Vue {
   }
 
   get chapters() {
-    let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS).map(part => part.chapters);
-    return chapters;
+    let flatList = [];
+    let groups = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS); //.map(part => part.research);
+    for (let group of groups) {
+      flatList = flatList.concat(group.chapters);
+    }
+    return flatList;
   }
+
   get research() {
-    let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH);
-    return chapters;
+    let flatList = [];
+    let groups = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH_GROUPS); //.map(part => part.research);
+    for (let group of groups) {
+      flatList = flatList.concat(group.research);
+    }
+    return flatList;
   }
 
   get selectedItem() {
