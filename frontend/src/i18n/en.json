@@ -1,0 +1,25 @@
+{
+    "vertical_menu": {
+        "home": "Home",
+        "timeline": "Timeline",
+        "characters": "Characters",
+        "chapters": "Chapters",
+        "research": "Research",
+        "export": "Export"
+    },
+    "side_bar": {
+        "open_menu": "Open menu",
+        "add_parent": {
+            "parts": "Add Part"
+        },
+        "add_child": {
+            "parts": "Add chapter"
+        },
+        "select_parent": {
+            "parts": "Select part"
+        }
+    },
+    "some_key": "some value"
+}
+
+

@@ -37,6 +37,8 @@ import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Sidebar from 'primevue/sidebar';
 import draggable from 'vuedraggable'
+import VueI18n, { createI18n } from 'vue-i18n'
+
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -45,10 +47,20 @@ import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 
+
+import { messages, defaultLocale} from '@/i18n'
+
+const i18n = createI18n({
+    locale: defaultLocale, // set locale
+    fallbackLocale: 'en',
+    messages // set locale messages
+})
+
 const app = createApp(App)
     .use(router)
     .use(PrimeVue)
     .use(store)
+    .use(i18n)
     .use(ConfirmationService)
     .use(ToastService)
     .component('Button', Button)
@@ -84,6 +96,7 @@ const app = createApp(App)
     .component('draggable', draggable)
 
  app.mount("#app");
+
 
 
 

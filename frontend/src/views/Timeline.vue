@@ -1,21 +1,23 @@
 <template>
   <div class="plot">
-   <!-- <div class="vertical-menu">
+    <div class="sidebar-opener">
           <Button title="Add new timeline event"
               class="p-button-secondary add-button"
               icon="fa fa-plus fa-2x"
               type="button"
-              @click="add" />    
+              @click="add" />  
+              <!--  
           <Button title="Delete selected event"
               class="p-button-secondary"
               icon="fa fa-trash fa-2x"
-              type="button"
-    />
-    </div>-->
+              type="button"-->
+    
+    </div>
+
     <div class="timeline">
       <div class="split-panel">
         <Splitter style="height: 100%" stateKey="timeline">
-          <Splitterpanel class="split-content-left">      
+          <SplitterPanel class="split-content-left">      
               <ScrollPanel style="height: 100%">
                 <Timeline :value="events" align="left" class="customized-timeline">
                   <template #opposite="slotProps">
@@ -35,8 +37,8 @@
                   </template>
                 </Timeline>
               </ScrollPanel>
-          </Splitterpanel>
-          <Splitterpanel class="split-content-right sheet-list">
+          </SplitterPanel>
+          <SplitterPanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
               <div class="reference-options">
                 <div class="add-reference-form">
@@ -87,7 +89,7 @@
            
             </div> 
             </ScrollPanel>
-          </Splitterpanel>
+          </SplitterPanel>
 
         </Splitter>
       </div>
@@ -150,7 +152,7 @@ export default class Plot extends Vue {
       novelId: this.$route.params.id,
     });
     this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.CHAPTERS,
+      key: NOVEL_ITEM_KEYS.PARTS,
       novelId: this.$route.params.id,
     });
     this.$store.dispatch("loadItems", {
@@ -190,7 +192,7 @@ export default class Plot extends Vue {
   }
 
   get chapters() {
-    let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.CHAPTERS);
+    let chapters = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS).map(part => part.chapters);
     return chapters;
   }
   get research() {
@@ -229,7 +231,6 @@ export default class Plot extends Vue {
 
 .reference-options {
   display: flex;
-  justify-content: space-between;
   background: var(--editor-toolbar-background);
 }
 
@@ -270,6 +271,16 @@ export default class Plot extends Vue {
 
 .timeline-wrapper {
   margin-top: 1em;
+}
+
+
+.sidebar-opener {
+  position: fixed; 
+  right: 0;
+  top: 50px;
+  width: 5em !important;
+  height: 5em;
+  z-index: 9999;
 }
 .custom-marker {
   display: flex;

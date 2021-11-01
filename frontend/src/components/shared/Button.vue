@@ -19,6 +19,8 @@ export default class Button extends Vue {
     @Prop() title: string;
     @Prop() label : string;
     @Prop() color: 'primary' | 'secondary' | 'danger' | 'success' = 'primary';
+    @Prop() type: 'button' | 'text' = 'button';
+    @Prop() rounded = false;
 
     @Emit('click') 
     click($event) {
@@ -26,7 +28,7 @@ export default class Button extends Vue {
     }
 
     get cssClass() {
-        return `p-button-${this.color}`;
+        return `p-button-${this.type} p-button-${this.color} ${this.rounded ? 'p-button-rounded' : ''}`;
     }
 }
 </script>

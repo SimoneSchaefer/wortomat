@@ -2,7 +2,7 @@
     <router-link
         :to="menuItem.to"
         v-slot="{ href, isActive }" >
-        <a class="navigation-link" :class="{ active: isActive }" :title="menuItem.label" :href="href">
+        <a class="navigation-link" :class="{ active: isActive }" :title="$t(`vertical_menu.${menuItem.label}`)" :href="href">
             <i v-bind:class="getIconClass(isActive)"></i>
         </a>
     </router-link>

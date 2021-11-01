@@ -1,5 +1,4 @@
 <template>
-<!--<NovelItemMenu :novelItemKey="novelItemKey"></NovelItemMenu>-->
 <div class="split-panel">
   <Splitter style="height: 100%" :stateKey="novelItemKey">
   <SplitterPanel class="split-content-left">
@@ -9,10 +8,12 @@
   </SplitterPanel>
   <SplitterPanel class="split-content-right">
     <ScrollPanel style="height: 100%">
-      <NovelItemSheetList :novelItemKey="novelItemKey"></NovelItemSheetList>
+      <NovelItemSheetList :parentKey="novelItemKey" :childKey="novelItemKey"></NovelItemSheetList>
     </ScrollPanel>
   </SplitterPanel>
 </Splitter>
+<Button class="sidebar-opener" icon="fa fa-3x fa-bars" @click="addItem" />
+
 </div>
 
 </template>
@@ -29,6 +30,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import NovelItemMenu from '@/components/shared/menu/NovelItemMenu.vue';
 import NovelItemList from '@/components/shared/novel-item/NovelItemList.vue';
 import NovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
+import { BaseModel } from '@/models/Base.model';
 
 
 @Options({
@@ -43,6 +45,16 @@ import NovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetLis
 })
 export default class NovelItems extends Vue {
     @Prop() novelItemKey: NOVEL_ITEM_KEYS;
+    sidebarVisible = false;
+
+
+    addItem(): void {
+        this.$store.dispatch('addItem', { 
+            key: this.novelItemKey, 
+            novelId: this.$store.state.currentNovel?.id, 
+            item: new BaseModel() 
+        });
+    }
 }
 </script>
 
@@ -51,6 +63,17 @@ export default class NovelItems extends Vue {
 .split-panel {
   height: 100%;
   flex-grow: 1;
+}
+
+
+
+.sidebar-opener {
+  position: fixed; 
+  right: 0;
+  top: 0;
+  width: 5em !important;
+  height: 5em;
+  z-index: 9999;
 }
 </style>
 
@@ -81,5 +104,6 @@ export default class NovelItems extends Vue {
   position: relative;
   top: -1px;
 }
+
 
 </style>

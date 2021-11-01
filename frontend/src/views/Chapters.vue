@@ -1,28 +1,13 @@
 <template>
   <div class="chapters-view">
-    <Button class="sidebar-opener" icon="fa fa-3x fa-bars" @click="sidebarVisible = true" />
-    <Sidebar v-model:visible="sidebarVisible" position="right">
-      <div class="chapters-menu">
-        <div class="chapters-menu-item">
-          <b>Options</b>
-        </div>
-        <div class="chapters-menu-item ">
-          <WButton class="link" @click="addParent" label="Add part" />
-        </div>
-
-        <a class="chapters-menu-item">
-          <Dropdown v-model="selectedPart" :options="items" placeholder="Select a part" optionLabel="name" :filter="true" />
-          <WButton class="link" @click="addChild" label="Add chapter" :disabled="selectedPart === null" />
-        </a>
-      </div>
-    </Sidebar>
+    <w-sidebar-menu :parentKey="parentKey" :childKey="childKey"></w-sidebar-menu>
     
     <div class="chapters-content">
       <Splitter style="height: 100%" :stateKey="parentKey">
         <SplitterPanel class="split-content-left">
           <div class="tree-view">
             <ScrollPanel style="height: 100%">
-              <Accordion lazy multiple :activeIndex="activeIndex">                 
+              <Accordion multiple :activeIndex="activeIndex">                 
                 <AccordionTab v-for="item of items" :key="item.id">
                   <template #header>
                     <div class="accordion-header">
@@ -73,7 +58,7 @@ import WLink from '@/components/shared/Link.vue';
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 
-import NovelItemMenu from '@/components/shared/menu/NovelItemMenu.vue';
+import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import NovelItemList from '@/components/shared/novel-item/NovelItemList.vue';
 import NovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
@@ -85,7 +70,7 @@ import draggable from 'vuedraggable'
 
 @Options({
   components: {
-    NovelItemMenu,
+    WSidebarMenu,
     NovelItemList,
     NovelItemSheetList,
     WButton,
@@ -97,9 +82,7 @@ import draggable from 'vuedraggable'
   }
 })
 export default class Chapters extends mixins(UpdatableItemMixin) {
-  sidebarVisible = false;
   activeIndex = [];
-  selectedPart = null;
 
   mounted(): void {
     this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
@@ -132,35 +115,19 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   }
 
   isSelected(item: BaseModel) {
-    return !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
+    const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
+    if (isSelected) {
+      const parentIndex = this.items.findIndex(parent => parent.id === item.parentId);
+      if (!this.activeIndex.includes(parentIndex)) {
+        this.activeIndex.push(parentIndex);
+      }
+    }
+    return isSelected;
   }
 
   selectChild(item: BaseModel) {
     this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
   }
-
-   addParent(): void {
-      this.$store.dispatch('addItem', { 
-          key: this.parentKey, 
-          novelId: this.novelId, 
-          item: new BaseModel() 
-      });
-    }
-
-   addChild(): void {
-      const child = new BaseModel();
-      child.parentId = this.selectedPart.id;
-      this.$store.dispatch('addItem', { 
-          key: this.childKey, 
-          novelId: this.novelId, 
-          item: child,
-      });
-
-      const parentIndex = this.items.findIndex(part => part.id === this.selectedPart.id);
-      if (!this.activeIndex.includes(parentIndex)) {
-        this.activeIndex.push(parentIndex);
-      }
-    }
 
         
     updateName(item, newValue: string): void {
@@ -172,24 +139,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
       );   
     }  
 
-
-    createParent() {
-        this.$store.dispatch('addItem', { 
-            key: this.parentKey, 
-            novelId: this.novelId, 
-            item: new BaseModel() 
-        });
-    }
-
-    createChild() {
-      const model = new BaseModel();
-      model['partId'] = this.selectedPart.id;
-        this.$store.dispatch('addItem', { 
-            key: this.childKey, 
-            novelId: this.novelId, 
-            item: new BaseModel() 
-        });
-    }
 
   get parentKey(): NOVEL_ITEM_KEYS {
     return NOVEL_ITEM_KEYS.PARTS;
@@ -216,37 +165,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
 .chapters-view {
   display: flex;
   width: 100%;
-}
-
-.chapters-menu {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  align-items: flex-start;
-}
-
-.chapters-menu-item {
-  padding: 1em;
-  width: 100%;
-  border-bottom: 1px solid darkgray;
-  display: flex;
-  align-items: flex-end;
-  justify-content: right;
-  flex-wrap: nowrap;
-}
-
-.chapters-menu-item button,
-.chapters-menu-item button:hover {
-  background-color: transparent;
-  color: black;
-  border: none;
-  outline: none;
-}
-
-.chapters-menu-item.link:hover {
-  cursor: pointer;
-  background-color: #efefef;
 }
 
 .tree-view {
@@ -305,16 +223,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   width: 2em;
   opacity: 0.5;
   text-align: right;
-}
-
-
-.sidebar-opener {
-  position: fixed; 
-  right: 0;
-  top: 0;
-  width: 5em !important;
-  height: 5em;
-  z-index: 9999;
 }
 
 

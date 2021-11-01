@@ -17,7 +17,7 @@ import { getCurrentSelection } from '@/store/getters';
 import { Prop } from 'vue-property-decorator';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { NovelItemService } from '@/service/NovelItemService';
-import { KEY_TO_SERVICE } from '@/store/store-api-adapter';
+import { KEY_TO_CHILD, KEY_TO_SERVICE } from '@/store/store-api-adapter';
 
 @Options({
   components: { EditableLabel, NovelItemSheet }
@@ -38,11 +38,15 @@ export default class NovelItemSheetList extends Vue {
         const ids = this.selectedItems;
         const all = this.$store.state.novelItems.get(this.parentKey) || [];
 
-        let allChapters = [];
-        for (let part of all) {
-            allChapters = allChapters.concat((part[this.childKey] || []).filter(chapter => ids.includes(chapter.id)));
+        if (KEY_TO_CHILD.has(this.parentKey)) {
+            let allChapters = [];
+            for (let part of all) {
+                allChapters = allChapters.concat((part[this.childKey] || []).filter(chapter => ids.includes(chapter.id)));
+            }
+            return allChapters;
+        } else {
+            return all.filter(item => ids.includes(item.id));
         }
-        return allChapters;
     }
 
 }

@@ -75,7 +75,7 @@ body {
   overflow: hidden;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   color: var(--font-color);
-  background: var(--middle-background);
+  background: var(--dark-background);
   height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
