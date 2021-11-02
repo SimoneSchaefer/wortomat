@@ -1,6 +1,6 @@
 <template>
   <div class="chapters-view">
-    <w-sidebar-menu :parentKey="parentKey" :childKey="childKey"></w-sidebar-menu>
+    <WSidebarMenu :parentKey="parentKey" :childKey="childKey" />
     
     <div class="chapters-content">
       <Splitter style="height: 100%" :stateKey="parentKey">
@@ -165,7 +165,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
 .tree-view {
   background-color: white;
   height: 100%;
-  box-shadow: rgba(0, 0, 0, 0.07) 0px 1px 2px, rgba(0, 0, 0, 0.07) 0px 2px 4px, rgba(0, 0, 0, 0.07) 0px 4px 8px, rgba(0, 0, 0, 0.07) 0px 8px 16px, rgba(0, 0, 0, 0.07) 0px 16px 32px, rgba(0, 0, 0, 0.07) 0px 32px 64px;
 }
 
 .tree-view-item {
@@ -185,7 +184,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
 
 .tree-view.children {
   width: 20em;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
 }
 
 .tree-view-children-header {

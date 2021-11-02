@@ -3,9 +3,6 @@ import { NOVEL_ITEM_KEYS } from "@/store/keys"
 import { Vue } from "vue-class-component";
 
 export default abstract class UpdateItemMixin extends Vue {
-    abstract parentKey: NOVEL_ITEM_KEYS;
-    abstract childKey: NOVEL_ITEM_KEYS;
-
     get novelId(): number {
         return this.$store.getters.openNovelId;
     }   

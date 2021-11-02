@@ -82,7 +82,7 @@ export default class InlineEdit extends Vue {
 
 <style scoped>
 .inline-edit {
-    text-align: left;
+    /*text-align: left;*/
     position: relative;
     border: 3px solid transparent;
     padding: 0.5rem;

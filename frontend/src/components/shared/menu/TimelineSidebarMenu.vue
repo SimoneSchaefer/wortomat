@@ -5,11 +5,6 @@
         <div class="w-sidebar-menu-item ">
           <WButton class="link" @click="addParent" :label="$t(`side_bar.add_parent.${parentKey}`)" />
         </div>
-
-        <div class="w-sidebar-menu-item">
-            <Dropdown v-model="selectedParent" :options="parents" :placeholder="$t(`side_bar.select_parent.${parentKey}`)" optionLabel="name" :filter="true" />
-            <WButton color="primary" @click="addChild" :label="$t(`side_bar.add_child.${parentKey}`)" :disabled="selectedParent === null" />
-        </div>
       </div>
     </Sidebar>    
 </template>
@@ -22,36 +17,25 @@ import { Prop } from "vue-property-decorator";
 import { BaseModel } from "@/models/Base.model";
 import { getAllItems } from "@/store/getters";
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import { TimelineEventModel } from "@/models/TimelineEvent";
 
 @Options({
   components: { WButton, WSidebarOpener }
 })
-export default class WSidebarMenu extends Vue {
+export default class WTimelineSidebarMenu extends Vue {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
 
     sidebarVisible = false;
     selectedParent = null;
 
-
-
     addParent(): void {
-      this.$store.dispatch('addItem', { 
-          key: this.parentKey, 
-          novelId: this.novelId, 
-          item: new BaseModel() 
-      });
-      this.hideSidebar();
-    }
-
-    addChild(): void {
-        const child = new BaseModel();
-        child.parentId = this.selectedParent.id;
-        this.$store.dispatch('addItem', { 
-            key: this.childKey, 
-            novelId: this.novelId, 
-            item: child,
+        this.$store.dispatch("addItem", {
+        key: this.parentKey,
+        novelId: this.$store.state.currentNovel?.id,
+        item: new TimelineEventModel(),
         });
+        // var container = this.$el.querySelector(".p-scrollpanel-content");
+        // container.scrollTop = container.scrollHeight;
         this.hideSidebar();
     }
          
@@ -70,26 +54,4 @@ export default class WSidebarMenu extends Vue {
 </script>
 
 <style scoped>
-
-.w-sidebar-menu {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    background-color: white;
-    align-items: flex-start;
-}
-
-.w-sidebar-menu-item {
-    padding: 1em;
-    width: 100%;
-    border-bottom: 1px solid darkgray;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: stretch;
-}
-
-.w-sidebar-menu-item button {
-    margin: 1em 0;
-}
 </style>

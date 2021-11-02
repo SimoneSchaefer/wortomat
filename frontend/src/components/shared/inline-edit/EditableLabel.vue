@@ -98,7 +98,6 @@ export default class EditableLabel extends Vue {
 
 .error-label {
     font-size: x-small;
-    text-align: right;
     padding-right: 1em;
 }
 </style>

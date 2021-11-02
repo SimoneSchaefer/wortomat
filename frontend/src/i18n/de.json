@@ -11,7 +11,8 @@
         "open_menu": "Menu öffnen",
         "add_parent": {
             "parts": "Buchteil erstellen",
-            "research-groups": "Recherche-Gruppe erstellen"
+            "research-groups": "Recherche-Gruppe erstellen",
+            "timeline": "Ereignis erstellen"
         },
         "add_child": {
             "parts": "Kapitel hinzufügen",

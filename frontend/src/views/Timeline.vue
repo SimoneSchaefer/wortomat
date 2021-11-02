@@ -1,24 +1,17 @@
 <template>
+  <WTimelineSidebarMenu :parentKey="parentKey"/>
   <div class="plot">
-    <div class="sidebar-opener">
-          <Button title="Add new timeline event"
-              class="p-button-secondary add-button"
-              icon="fa fa-plus fa-2x"
-              type="button"
-              @click="add" />  
-              <!--  
-          <Button title="Delete selected event"
-              class="p-button-secondary"
-              icon="fa fa-trash fa-2x"
-              type="button"-->
-    
-    </div>
-
     <div class="timeline">
-      <div class="split-panel">
         <Splitter style="height: 100%" stateKey="timeline">
-          <SplitterPanel class="split-content-left">      
+          <SplitterPanel>      
               <ScrollPanel style="height: 100%">
+                <WTimeline 
+                  :events="events" 
+                  :selectedEvent="selectedItem"
+                  @update-date="updateDate"
+                  @update-name="updateName"
+                  @select="select"></WTimeline>
+
                 <Timeline :value="events" align="left" class="customized-timeline">
                   <template #opposite="slotProps">
                     <div @click="select(slotProps.item)" class="event-date" v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
@@ -93,7 +86,6 @@
 
         </Splitter>
       </div>
-    </div>
   </div>
 </template>
 
@@ -104,11 +96,13 @@ import NovelItems from "./NovelItems.vue";
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
+import WTimelineSidebarMenu from "@/components/shared/menu/TimelineSidebarMenu.vue";
 import EditTimelineEvent from "@/components/timeline/EditableTimelineEvent.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/getters";
 import { ChapterService } from "@/service/Chapter.service";
 import { ResearchService } from "@/service/Research.service";
+import WTimeline from "@/components/timeline/Timeline.vue";
 
 @Options({
   components: {
@@ -116,7 +110,9 @@ import { ResearchService } from "@/service/Research.service";
     EditableLabel,
     EditableDate,
     EditTimelineEvent,
-    NovelItemSheet
+    NovelItemSheet,
+    WTimelineSidebarMenu,
+    WTimeline
   },
 })
 export default class Plot extends Vue {
@@ -133,6 +129,9 @@ export default class Plot extends Vue {
     container.scrollTop = container.scrollHeight;
   }
 
+  get parentKey() {
+    return NOVEL_ITEM_KEYS.TIMELINE;
+  }
   get chapterNovelItemKey() {
     return NOVEL_ITEM_KEYS.CHAPTERS;
   }
@@ -166,7 +165,11 @@ export default class Plot extends Vue {
   }
 
 
-  updateEventDate(item, newValue: string): void {
+  updateName(item, newValue: string): void {
+    this.updateItem(item, { name: newValue });   
+  } 
+
+  updateDate(item, newValue: string): void {
     this.updateItem(item, { eventDate: newValue });   
   }  
 
