@@ -7,7 +7,7 @@
         </div>
 
         <div class="w-sidebar-menu-item">
-            <Dropdown v-model="selectedParent" :options="parents" :placeholder="$t(`side_bar.select_parent.${parentKey}`)" optionLabel="name" :filter="true" />
+            <WNovelItemDropdown :items="parents" @change="onChange" :novelItemKey="parentKey" :placeHolder="`side_bar.select_parent.${parentKey}`"></WNovelItemDropdown>
             <WButton color="primary" @click="addChild" :label="$t(`side_bar.add_child.${parentKey}`)" :disabled="selectedParent === null" />
         </div>
       </div>
@@ -16,15 +16,19 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
+import { Prop } from "vue-property-decorator";
+
 import WButton from '@/components/shared/Button.vue';
 import WSidebarOpener from '@/components/shared/menu/SidebarOpener.vue';
-import { Prop } from "vue-property-decorator";
+import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
+import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
+
 import { BaseModel } from "@/models/Base.model";
 import { getAllItems } from "@/store/getters";
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 
 @Options({
-  components: { WButton, WSidebarOpener }
+  components: { WButton, WSidebarOpener, WMissingValueTolerantLabel, WNovelItemDropdown}
 })
 export default class WSidebarMenu extends Vue {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
@@ -33,7 +37,10 @@ export default class WSidebarMenu extends Vue {
     sidebarVisible = false;
     selectedParent = null;
 
-
+    onChange($event) {
+        this.selectedParent = $event;
+        console.log('selected parent', this.selectedParent);
+    }
 
     addParent(): void {
       this.$store.dispatch('addItem', { 
@@ -53,6 +60,11 @@ export default class WSidebarMenu extends Vue {
             item: child,
         });
         this.hideSidebar();
+    }
+
+    get selectedForChildCreation() {
+        console.log('selectedForChildCreation', this.selectedParent);
+        return this.selectedParent;
     }
          
     get parents(): BaseModel[] {

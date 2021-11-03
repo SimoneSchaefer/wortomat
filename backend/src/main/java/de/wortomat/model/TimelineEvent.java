@@ -1,5 +1,7 @@
 package de.wortomat.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -27,9 +29,12 @@ public class TimelineEvent {
     private Novel novel;
 
     @ManyToMany
+    @JsonIdentityReference(alwaysAsId = true)
     private List<Chapter> chapters;
 
     @ManyToMany
+    @JsonIdentityReference(alwaysAsId = true)
+    @JsonFormat
     private List<Research> research;
 
     public void setNovel(Novel novel) {

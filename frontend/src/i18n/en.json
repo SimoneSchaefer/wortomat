@@ -24,8 +24,17 @@
         }
     },
     "fallback_labels": {
-        "no_name": "No name added yet",
+        "no_name": {
+            "research_groups":  "Unnamed research group",
+            "research": "Unnamed research item",
+            "parts": "Unnamed part",
+            "chapters": "Unnamed chapter"
+        },
         "no_summary": "No summary added yet"
+    },
+    "timeline": {
+        "select_research": "Select research",
+        "select_chapter": "Select chapter"
     }
 }
 

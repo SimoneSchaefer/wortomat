@@ -11,38 +11,14 @@
                   @update-date="updateDate"
                   @update-name="updateName"
                   @select="select"></WTimeline>
-
-                <Timeline :value="events" align="left" class="customized-timeline">
-                  <template #opposite="slotProps">
-                    <div @click="select(slotProps.item)" class="event-date" v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
-                      <EditableDate v-bind:value="slotProps.item.eventDate" @update-label="updateEventDate(slotProps.item, $event)" placeHolderTitle="No date added yet."></EditableDate>
-                    </div>
-                  </template>
-                  <template #marker="slotProps">
-                      <div class="custom-marker" @click="select(slotProps.item)" title="Click to select"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
-                      <i class="fa fa-clock"></i>
-                      </div>
-                  </template>
-                  <template #content="slotProps">
-                    <div class="timeline-event-container"  @click="select(slotProps.item)"  v-bind:class="{ 'selected-event': selected(slotProps.item)}" >
-                      <EditTimelineEvent :item="slotProps.item"></EditTimelineEvent>
-                    </div>
-                  </template>
-                </Timeline>
               </ScrollPanel>
           </SplitterPanel>
           <SplitterPanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
               <div class="reference-options">
                 <div class="add-reference-form">
-                  <Dropdown v-model="selectedChapterReference" :options="chapters" placeholder="Select a chapter" optionLabel="name"  :filter="true">
-                  <template #option="slotProps">
-                  <div class="p-dropdown-car-option">
-                    <span v-if="slotProps.option.name">{{slotProps.option.name}} - {{slotProps.option.summary}} </span>
-                    <span v-else><i>No name given</i></span>
-                  </div>
-                </template>
-                </Dropdown>
+                <WNovelItemDropdown :items="chapters" @change="onChapterChange" :novelItemKey="chapterNovelItemKey" placeHolder="timeline.select_chapter"></WNovelItemDropdown>
+
                 <Button title="Add reference to selected Chapter"
                   class="p-button-secondary add-button"
                   icon="fa fa-plus"
@@ -52,14 +28,9 @@
                 </div>
 
                 <div class="add-reference-form">
-                  <Dropdown v-model="selectedResearchReference" :options="research" optionLabel="name" placeholder="Select a research item" :filter="true">
-                  <template #option="slotProps">
-                  <div class="p-dropdown-option">
-                    <span v-if="slotProps.option.name">{{slotProps.option.name}}</span>
-                    <span v-else><i>No name given</i></span>
-                  </div>
-                </template>
-                </Dropdown>
+               
+                <WNovelItemDropdown :items="research" @change="onResearchChange" :novelItemKey="researchNovelItemKey" placeHolder="timeline.select_research"></WNovelItemDropdown>
+
                 <Button title="Add reference to selected research"
                   class="p-button-secondary add-button"
                   icon="fa fa-plus"
@@ -71,11 +42,11 @@
               </div>
 
             <div v-if="selectedItem" class="selected-item">
-              <div class="sheet-list" v-for="chapter in selectedItem.chapters" :key="chapter.id">
+              <div class="sheet-list" v-for="chapter in getChaptersForEvent(selectedItem)" :key="chapter.id">
                 <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
               </div>
 
-              <div class="sheet-list" v-for="research in selectedItem.research" :key="research.id">
+              <div class="sheet-list" v-for="research in getResearchForEvent(selectedItem)" :key="research.id">
                 <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
               </div>
 
@@ -103,6 +74,7 @@ import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/gette
 import { ChapterService } from "@/service/Chapter.service";
 import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
+import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 
 @Options({
   components: {
@@ -112,12 +84,51 @@ import WTimeline from "@/components/timeline/Timeline.vue";
     EditTimelineEvent,
     NovelItemSheet,
     WTimelineSidebarMenu,
-    WTimeline
+    WTimeline,
+    WNovelItemDropdown
   },
 })
 export default class Plot extends Vue {
   selectedChapterReference = null; 
-  selectedResearchReference = null; 
+  selectedResearchReference = null;
+
+  getChaptersForEvent(event: TimelineEventModel) {
+    // TODO: get only list of IDs from backend
+    let flatList = [];
+    for (const part of getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS)) {
+      flatList = flatList.concat(part.chapters);
+    }
+    const eventChapters = [];
+    for (const chapter of event.chapters) {
+      eventChapters.push(flatList.find(otherChapter => otherChapter.id === chapter['id']));
+    }
+    return eventChapters;
+  }
+  getResearchForEvent(event: TimelineEventModel) {
+    // TODO: get only list of IDs from backend
+    let flatList = [];
+    for (const group of getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH_GROUPS)) {
+      flatList = flatList.concat(group.research);
+    }
+
+    const eventResearch = [];
+    for (const research of event.research) {
+      const bla = flatList.find(otherresearch => otherresearch.id === research['id']);
+      if (bla) {
+      eventResearch.push(flatList.find(otherresearch => otherresearch.id === research['id']));
+
+      }
+    }
+
+    return eventResearch || [];
+  }
+  
+  onChapterChange($event) {
+    this.selectedChapterReference = $event;
+  }  
+  onResearchChange($event) {
+    this.selectedResearchReference = $event;
+  }
 
   add() {
     this.$store.dispatch("addItem", {
@@ -165,12 +176,13 @@ export default class Plot extends Vue {
   }
 
 
-  updateName(item, newValue: string): void {
-    this.updateItem(item, { name: newValue });   
+  updateName(update: { newValue: string, item: TimelineEventModel }): void {
+    this.updateItem(update.item, { name: update.newValue });   
   } 
 
-  updateDate(item, newValue: string): void {
-    this.updateItem(item, { eventDate: newValue });   
+  updateDate(update: { newValue: string, item: TimelineEventModel }): void {
+    console.log('UPDATE DAE', update)
+    this.updateItem(update.item, { name: update.newValue });   
   }  
 
   addChapterReference() {

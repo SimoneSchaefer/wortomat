@@ -27,13 +27,17 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     public T get(Long novelId, Long itemItem) {
-        return this.getParentRepository().findById(itemItem).get();
+        T item = this.getParentRepository().findById(itemItem).get();
+        // item.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
+        return item;
     }
 
     public T create(Long novelId, T positionAware) {
         positionAware.setNovel(this.novelService.get(novelId));
         positionAware.setPosition((getMaxPosition(novelId)));
-        return this.getParentRepository().save(positionAware);
+
+        T item = this.getParentRepository().save(positionAware);
+        return get(novelId, item.getId());
     }
 
     public T update(Long novelId, T positionAware) {

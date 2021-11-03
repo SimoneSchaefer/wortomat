@@ -60,7 +60,7 @@ const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_
         parent[KEY_TO_CHILD.get(payload.key)].map(child => child.parentId = parent.id);
       }
     }
-    context.commit('itemsLoaded', { key: payload.key, items: result[0].data });
+    context.commit('itemsLoaded', { key: payload.key, items: loadedItems });
     //context.commit('tagsLoaded', result[1].data);
     context.commit('setLoading', { loading: false })
   });

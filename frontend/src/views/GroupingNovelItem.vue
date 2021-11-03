@@ -11,7 +11,7 @@
                 <AccordionTab v-for="item of items" :key="item.id">
                   <template #header>
                     <div class="accordion-header">
-                      <EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="$t('fallback_labels.no_name')"></EditableLabel>
+                      <EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="$t(`fallback_labels.no_name.${parentKey}`)"></EditableLabel>
                     </div>
                   </template>
 
@@ -29,7 +29,7 @@
                             @click="selectChild(element)"  
                             :key="element.id"
                             :class="{ selected: isSelected(element) }">
-                            <MissingValueTolerantLabel :value="element.name" :fallback="$t('fallback_labels.no_name')"></MissingValueTolerantLabel>&nbsp;
+                            <MissingValueTolerantLabel :value="element.name" :fallback="$t(`fallback_labels.no_name.${childKey}`)"></MissingValueTolerantLabel>&nbsp;
                             <i><MissingValueTolerantLabel :value="element.summary" :fallback="$t('fallback_labels.no_summary')"></MissingValueTolerantLabel></i>
                           </a>       
                         </div>                         

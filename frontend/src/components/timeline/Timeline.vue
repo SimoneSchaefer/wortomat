@@ -3,9 +3,9 @@
 <div v-for="(event, $index) of events" :key="event.id">
     <div class="w-timeline-event" v-bind:class="{ 'w-timeline-selected-event': selected(event)}">
         <div class="w-timeline-details w-timeline-details-left">
-             <div v-if="$index % 2 === 0" class="w-timeline-details-frame">
+             <div v-if="true && $index % 2 === 0" class="w-timeline-details-frame">
                 <div class="w-timeline-event-date">
-                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="No date added yet."></EditableDate>
+                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate($newValue, event)" placeHolderTitle="No date added yet."></EditableDate>
                  </div>
                  <div class="w-timeline-separator">
                     <div class="w-timeline-connector">&nbsp;</div>
@@ -17,10 +17,10 @@
 
             </div>
         </div>
-        <div class="w-timeline-details w-timeline-details-right" >
-             <div v-if="$index % 2 !== 0"  class="w-timeline-details-frame">
+        <div v-if="false" class="w-timeline-details w-timeline-details-right" >
+             <div v-if="false && $index % 2 !== 0"  class="w-timeline-details-frame">
                   <div class="w-timeline-event-date">
-                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="No date added yet."></EditableDate>
+                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate($newValue, event)" placeHolderTitle="No date added yet."></EditableDate>
                  </div>
                  <div class="w-timeline-separator">
                     <div class="w-timeline-connector">&nbsp;</div>
@@ -63,13 +63,13 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
     }
 
     @Emit('update-date')
-    updateDate(item: TimelineEventModel): TimelineEventModel {
-        return item;
+    updateDate(newValue: string, item: TimelineEventModel): { item: TimelineEventModel, newValue: string } {
+        return { item, newValue };
     }
 
     @Emit('update-name')
-    updateName(item: TimelineEventModel): TimelineEventModel {
-        return item;
+    updateName(newValue: string, item: TimelineEventModel): { item: TimelineEventModel, newValue: string } {
+        return { item, newValue };
     }
 
     selected(item: TimelineEventModel) {
@@ -161,7 +161,7 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
 }
 
 .w-timeline-details {
-    width: 50%;
+    width: 100%;
     top: -2em;
     position: relative;
 }
