@@ -257,6 +257,10 @@ export default class Plot extends Vue {
 
 <style>
 
+.p-scrollpanel-wrapper {
+  z-index: inherit !important;
+}
+
 .reference-options {
   display: flex;
   background: var(--editor-toolbar-background);
@@ -266,9 +270,6 @@ export default class Plot extends Vue {
   background: var(--sheet-list-background)
 }
 
-.add-reference-form {
-  margin-top: 1em;
-}
 .selected-item {
   margin: 1em;
 }
@@ -301,15 +302,6 @@ export default class Plot extends Vue {
   margin-top: 1em;
 }
 
-
-.sidebar-opener {
-  position: fixed; 
-  right: 0;
-  top: 50px;
-  width: 5em !important;
-  height: 5em;
-  z-index: 9999;
-}
 .custom-marker {
   display: flex;
   z-index: 2;
@@ -328,33 +320,6 @@ export default class Plot extends Vue {
   color: white;
 }
 
-.p-timeline-event-opposite {
-  width: 13em;
-  max-width: 13em;
-  flex-grow: 1;
-  text-align: right;
-  padding: 0 !important;
-  display: flex;
-
-}
-
-.p-timeline-event-content {
-  flex-grow: 2;
-  position: relative;
-  padding: 0 !important;
-}
-
-.p-timeline-event-content:before {
-  content: '';
-  position:absolute;
-  width: 5em;
-  height: 10px;
-  left: 0;
-  top: 1.5em;
-  border-bottom: 1px solid #2d2b2b;
-}
-
-
 .event-date {
   display: flex;
   align-items: center;
@@ -362,25 +327,3 @@ export default class Plot extends Vue {
 }
 </style>
 
-<style>
-
-.p-timeline-event:hover {
-  background-color: pink;
-  cursor: pointer;
-}
-.p-scrollpanel-wrapper {
-  z-index: inherit !important;
-}
-.p-timeline {
-  padding-top: 2em;
-  padding-bottom: 70px;
-}
-
-.p-timeline-event .p-timeline-event-separator .p-timeline-event-connector {
-  background-color: #2d2b2b;
-}
-
-.p-timeline-event-separator {
-  width: 3em;
-}
-</style>

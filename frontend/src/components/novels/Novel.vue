@@ -1,7 +1,7 @@
 <template>
     <Card class="h-100">
         <template #header>
-            <Galleria :value="novel.covers" :numVisible="5"></Galleria>
+            <!--<ImageGallery :imageUrls="novel.covers" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>-->
         </template>
         <template #title>
             <div class="p-d-flex p-jc-between">
@@ -24,12 +24,23 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import EditableLabel from '../shared/inline-edit/EditableLabel.vue';
+import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
+import { NovelService } from '@/service/NovelService';
 
 @Options({
-    components: { EditableLabel }
+    components: { EditableLabel, ImageGallery }
 })  
 export default class Novel extends Vue {
   @Prop() novel!: Novel 
+
+
+    /*getUploadUrl(): string {
+        return this.service.getUploadUrl(this.novelId, this.item.id);
+    }
+
+    get service() {
+        return new NovelService();
+    }*/
 
   updateName(title: string): void {
     this.updateNovelProperty('name', title)

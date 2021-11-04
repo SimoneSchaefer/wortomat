@@ -1,6 +1,6 @@
 <template>
-    <WSidebarOpener icon="fa fa-2x fa-bars" @click="sidebarVisible = true" />
-    <Sidebar v-model:visible="sidebarVisible" position="left">
+    <WSidebarOpener icon="fa fa-2x fa-plus" @click="addParent" />
+    <!--<Sidebar v-model:visible="sidebarVisible" position="left">
       <div class="w-sidebar-menu">
         <div class="w-sidebar-menu-item ">
           <WButton class="link" @click="addParent" :label="$t(`side_bar.add_parent.${parentKey}`)" />
@@ -11,7 +11,7 @@
             <WButton color="primary" @click="addChild" :label="$t(`side_bar.add_child.${parentKey}`)" :disabled="selectedParent === null" />
         </div>
       </div>
-    </Sidebar>    
+    </Sidebar>    -->
 </template>
 
 <script lang="ts">
@@ -63,7 +63,6 @@ export default class WSidebarMenu extends Vue {
     }
 
     get selectedForChildCreation() {
-        console.log('selectedForChildCreation', this.selectedParent);
         return this.selectedParent;
     }
          

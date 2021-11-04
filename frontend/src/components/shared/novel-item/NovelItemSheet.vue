@@ -126,7 +126,6 @@ export default class NovelItemSheet extends Vue {
     }
 
     private updateItem(overrideValues): void {
-        console.log('UPDATING ITEM', this.item)
         this.$store.dispatch('updateItem', { 
             key: this.novelItemKey, 
             novelId: this.novelId,
