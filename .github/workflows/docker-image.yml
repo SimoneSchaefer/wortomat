@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Wortomat CI
 
 on:
   push:
@@ -11,12 +11,16 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    container: cypress/browsers:node12.18.3-chrome87-ff82
     steps:
+
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag wortomat:latest
-    - name: Run the application
-      run: docker run -p 8085:8085 wortomat:latest
-    - name: Run cypress
-    - 
+    
+    - run: docker build . --file Dockerfile --tag wortomat:latest
+
+    - run: docker run -p 8085:8085 wortomat:latest
+
+    - uses: cypress-io/github-action@v2
+      with:
+        browser: chrome        
+
