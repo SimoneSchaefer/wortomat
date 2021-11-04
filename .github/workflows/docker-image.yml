@@ -15,4 +15,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag wortomat:$(date +%s)
+      run: docker build . --file Dockerfile --tag wortomat:latest
+    - name: Run the application
+      run: docker run -p 8085:8085 wortomat:latest
+    - name: Run cypress
+    - 
