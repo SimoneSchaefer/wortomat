@@ -2,10 +2,10 @@
 <div class="novels">
   <div class="p-grid">
     <div class="p-col-3">
-      <Card class="dummy-novel h-100">
+      <Card class="dummy-novel novel-card h-100">
         <template #content>
           <div class="p-d-flex p-ai-center p-jc-center">
-            <Button label="Start a novel" class="p-button-text p-button-lg add-button" icon="pi pi-plus" v-on:click="startAddMode()"></Button>
+            <Button data-cy="add-novel" label="Start a novel" class="p-button-text p-button-lg add-button" icon="pi pi-plus" v-on:click="startAddMode()"></Button>
           </div>
         </template>
       </Card>

@@ -1,5 +1,5 @@
 <template>
-    <Card class="h-100">
+    <Card class="novel-card h-100">
         <template #header>
             <!--<ImageGallery :imageUrls="novel.covers" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>-->
         </template>
