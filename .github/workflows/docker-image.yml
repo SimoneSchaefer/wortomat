@@ -17,7 +17,7 @@ jobs:
     
     - run: docker build . --file Dockerfile --tag wortomat:latest
 
-    - run: docker run -p 8085:8085 wortomat:latest
+    - run: docker run -d -p 8085:8085 wortomat:latest
 
     - uses: cypress-io/github-action@v2
       with:
