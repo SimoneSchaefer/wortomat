@@ -13,37 +13,37 @@ export default class ConfirmDialog extends Vue {
     @Prop() header;
     private isVisible = false;
 
-    confirm(): void {
+    confirm(additionalData): void {
         if (this.isVisible) {
             this.$confirm.require({
-                message: this.message || 'Are you sure you want to proceed?',
-                header: this.header || 'Please confirm',
+                message: this.$t(this.message || 'confirm_proceed'),
+                header: this.header || 'please_confirm',
                 icon: 'pi pi-exclamation-triangle',
                 accept: () => {
-                    this.accept();
+                    this.accept(additionalData);
                 }, 
                 reject: () => {
-                    this.cancel();
+                    this.cancel(additionalData);
                 }
             })
         }        
     }
 
     @Emit()
-    accept(): boolean { 
+    accept(additionalData): boolean { 
         this.isVisible = false;
-        return true; 
+        return additionalData; 
     }
 
     @Emit()
-    cancel(): boolean {
+    cancel(additionalData): boolean {
         this.isVisible = false;
-        return false;
+        return additionalData;
     }
 
-    getDecision(): void {
+    getDecision(additionalData = {}): void {
         this.isVisible = true;
-        this.confirm();        
+        this.confirm(additionalData);        
   }  
 }
 </script>

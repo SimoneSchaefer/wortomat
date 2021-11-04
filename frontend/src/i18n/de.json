@@ -23,6 +23,23 @@
             "research_groups": "Recherche-Gruppe auswählen"
         }
     },
+    "add_parent": {
+        "parts": "Buchteil erstellen",
+        "research_groups": "Recherche-Gruppe erstellen",
+        "timeline": "Ereignis erstellen"
+    },
+    "add_child": {
+        "parts": "Kapitel hinzufügen",
+        "research_groups": "Recherche anlegen"
+    },
+    "remove_parent": {
+        "parts": "Buchteil löschen",
+        "research_groups": "Recherchegruppe löschen"
+    },
+    "remove_child": {
+        "parts": "Kapitel löschen",
+        "research_groups": "Recherche löschen"
+    },
     "fallback_labels": {
         "no_name": {
             "research_groups":  "Unbenannte Gruppe",
@@ -35,7 +52,12 @@
     "timeline": {
         "select_research": "Recherche auswählen",
         "select_chapter": "Kapitel auswählen"
-    }
+    },
+    "delete_confirm": "Bist du sicher, dass du das gewählte Element löschen möchtest?",
+    "confirm_proceed": "Bist du sicher, dass du fortfahren möchtest?",
+    "please_confirm": "Bitte bestätigen",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
 }
 
 

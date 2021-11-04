@@ -44,7 +44,7 @@ export default class NovelList extends Vue {
   margin: 3em;
 }
 .dummy-novel {
-  height: 500px;
+  height: 300px;
   display: flex;
   justify-content: center;
   align-content: center;

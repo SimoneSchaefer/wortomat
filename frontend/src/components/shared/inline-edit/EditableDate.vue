@@ -25,7 +25,9 @@ export default class EditableDate extends Vue {
     @Prop() placeHolderTitle!: string; 
 
     @Emit('update-label')
-    updateLabel($event): string {
+    updateLabel($event, $bla): string {
+        console.log('WTF', $event, 'BLA', $bla)
+
         return $event;
     }
 

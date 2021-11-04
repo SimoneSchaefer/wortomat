@@ -79,7 +79,10 @@ const findParent = (state: IState, itemKey: NOVEL_ITEM_KEYS, item: BaseModel ) =
 const itemAdded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}): void => {
     const { key, item } = payload;
     const parent = findParent(state, key, item );
-    if (parent) {        
+    if (parent) { 
+        if (!parent[key]) {
+            parent[key] = [];
+        }
         parent[key].push(item);
     } else {
         const items = state.novelItems.get(key) as BaseModel[] || [];
@@ -100,9 +103,18 @@ const itemUpdated = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseM
 }
 
 const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
-    const {key, items } = payload;
+    const { key, items } = payload;
     const itemIds = items.map(item => item.id);
-    state.novelItems.set(key, getChildItems(state, key).filter(i => !itemIds.includes(i.id)));
+    if (KEY_TO_CHILD.has(key)) {
+        state.novelItems.set(key, getChildItems(state, key).filter(i => !itemIds.includes(i.id)));
+    } else {
+        const allParentItems = state.novelItems.get(getParentKey(key));
+        for (const item of items) {
+            const parentItem = allParentItems.find(parent => parent.id === item.parentId);
+            const childIndex = parentItem[key].findIndex(child => child.id === item.id);
+            parentItem[key].splice(childIndex, 1);
+        }
+    }
 }
   
   export default {

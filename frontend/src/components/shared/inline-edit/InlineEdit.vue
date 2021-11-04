@@ -8,8 +8,8 @@
                 <slot name="editing"></slot>
             </div>
             <div class="options">
-                <AppButton color="success" icon="fa fa-check" title="Save" v-on:click="validateAndUpdate"></AppButton>            
-                <AppButton color="danger" icon="fa fa-times" title="Cancel" v-on:click="cancel"></AppButton>            
+                <AppButton color="success" icon="fa fa-check" title="save" v-on:click="validateAndUpdate"></AppButton>            
+                <AppButton color="danger" icon="fa fa-times" title="cancel" v-on:click="cancel"></AppButton>            
             </div>
         </div>
         <div v-else class="readonly">

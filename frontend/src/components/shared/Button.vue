@@ -1,6 +1,6 @@
 <template>
     <Button type="button"
-        :title="title"
+        :title="title ? $t(title) : ''"
         :class="cssClass"
         :icon="icon"
         :label="label"

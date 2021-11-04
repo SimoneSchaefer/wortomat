@@ -23,6 +23,22 @@
 
         }
     },
+    "add_parent": {
+        "parts": "Create Part",
+        "research_groups": "Create Research Group"
+    },
+    "add_child": {
+        "parts": "Add chapter",
+        "research_groups": "Add research item"
+    },
+    "remove_parent": {
+        "parts": "Delete part",
+        "research_groups": "Delete Research Group"
+    },
+    "remove_child": {
+        "parts": "Delete chapter",
+        "research_groups": "Delete research item"
+    },
     "fallback_labels": {
         "no_name": {
             "research_groups":  "Unnamed research group",
@@ -35,7 +51,12 @@
     "timeline": {
         "select_research": "Select research",
         "select_chapter": "Select chapter"
-    }
+    },
+    "delete_confirm": "Are you sure you want to delete this item?",
+    "confirm_proceed": "Are you sure you want to proceed?",
+    "please_confirm": "Please confirm",
+    "save": "Save",
+    "cancel": "Cancel"
 }
 
 

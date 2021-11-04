@@ -100,7 +100,11 @@ export default class Plot extends Vue {
     }
     const eventChapters = [];
     for (const chapter of event.chapters) {
-      eventChapters.push(flatList.find(otherChapter => otherChapter.id === chapter['id']));
+      const arg = flatList.find(otherChapter => otherChapter.id === chapter['id']);
+      if (arg) {
+        eventChapters.push(arg);
+      }
+      
     }
     return eventChapters;
   }
@@ -182,7 +186,7 @@ export default class Plot extends Vue {
 
   updateDate(update: { newValue: string, item: TimelineEventModel }): void {
     console.log('UPDATE DAE', update)
-    this.updateItem(update.item, { name: update.newValue });   
+    this.updateItem(update.item, { eventDate: update.newValue });   
   }  
 
   addChapterReference() {

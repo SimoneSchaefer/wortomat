@@ -29,11 +29,9 @@ public class TimelineEvent {
     private Novel novel;
 
     @ManyToMany
-    @JsonIdentityReference(alwaysAsId = true)
     private List<Chapter> chapters;
 
     @ManyToMany
-    @JsonIdentityReference(alwaysAsId = true)
     @JsonFormat
     private List<Research> research;
 

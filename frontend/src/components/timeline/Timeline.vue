@@ -1,33 +1,18 @@
 <template>
 <div class="w-timeline">
-<div v-for="(event, $index) of events" :key="event.id">
+<div v-for="(event) of events" :key="event.id">
     <div class="w-timeline-event" v-bind:class="{ 'w-timeline-selected-event': selected(event)}">
         <div class="w-timeline-details w-timeline-details-left">
-             <div v-if="true && $index % 2 === 0" class="w-timeline-details-frame">
+             <div class="w-timeline-details-frame">
                 <div class="w-timeline-event-date">
-                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate($newValue, event)" placeHolderTitle="No date added yet."></EditableDate>
+                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="No date added yet."></EditableDate>
                  </div>
                  <div class="w-timeline-separator">
                     <div class="w-timeline-connector">&nbsp;</div>
                     <div class="w-timeline-marker" @click="select(event)">&nbsp;</div>
                  </div>
                 <div class="w-timeline-event-name">
-                    <EditableLabel v-bind:value="event.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>
-                </div>
-
-            </div>
-        </div>
-        <div v-if="false" class="w-timeline-details w-timeline-details-right" >
-             <div v-if="false && $index % 2 !== 0"  class="w-timeline-details-frame">
-                  <div class="w-timeline-event-date">
-                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate($newValue, event)" placeHolderTitle="No date added yet."></EditableDate>
-                 </div>
-                 <div class="w-timeline-separator">
-                    <div class="w-timeline-connector">&nbsp;</div>
-                    <div class="w-timeline-marker"  @click="select(event)">&nbsp;</div>
-                 </div>                
-                 <div class="w-timeline-event-name">
-                    <EditableLabel v-bind:value="event.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>
+                    <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" placeHolderTitle="No title added yet."></EditableLabel>
                 </div>
             </div>
         </div>
@@ -63,12 +48,12 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
     }
 
     @Emit('update-date')
-    updateDate(newValue: string, item: TimelineEventModel): { item: TimelineEventModel, newValue: string } {
+    updateDate(item: TimelineEventModel, newValue: string): { item: TimelineEventModel, newValue: string } {
         return { item, newValue };
     }
 
     @Emit('update-name')
-    updateName(newValue: string, item: TimelineEventModel): { item: TimelineEventModel, newValue: string } {
+    updateName(item: TimelineEventModel, newValue: string): { item: TimelineEventModel, newValue: string } {
         return { item, newValue };
     }
 
@@ -87,7 +72,7 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
 
 .w-timeline {
     padding: 3em;
-    background-color:#ececec;
+    height: 100%;;
 }
 
 .w-timeline-event {
@@ -109,6 +94,7 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
 
 .w-timeline-details-frame {
     position: relative;
+    margin-bottom: 1em;
 }
 .w-timeline-event-date,
 .w-timeline-event-name {
@@ -173,5 +159,9 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
 .w-timeline-details-right {
     text-align: left;
     border-left: 2px solid #e0e0e0;
+}
+
+.p-scrollpanel-left {
+     background-color:#ececec;
 }
 </style>

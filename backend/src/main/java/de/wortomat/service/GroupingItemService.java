@@ -46,6 +46,7 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     public void delete(Long _novelId, Long chapterId) {
+        this.getChildRepository().deleteAll((List)this.get(_novelId, chapterId).getChildren());
         this.getParentRepository().deleteById(chapterId);
     }
 
