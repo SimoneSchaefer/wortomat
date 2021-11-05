@@ -5,55 +5,7 @@
     <div class="chapters-content">
       <Splitter style="height: 100%" :stateKey="parentKey">
         <SplitterPanel class="split-content-left">
-          <div class="tree-view">
-            <WConfirmDialog ref="confirmChild" @accept="deleteChild" message="delete_confirm"></WConfirmDialog>
-            <WConfirmDialog ref="confirmParent" @accept="deleteParent" message="delete_confirm"></WConfirmDialog>
-
-            <ScrollPanel style="height: 100%">
-              <Accordion multiple :activeIndex="activeIndex">                 
-                <AccordionTab v-for="item of items" :key="item.id">
-
-                  <template #header>
-                    <div class="accordion-header">
-                      <EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="$t(`fallback_labels.no_name.${parentKey}`)"></EditableLabel>
-                      <div class="group-options" :class="{ hidden: modalOpen }">
-                        <WButton type="text" color="primary" :title="`add_child.${parentKey}`" icon="fa fa-plus" @click="addChild(item, $event)"></WButton>
-                        <WButton type="text" color="danger" :title="`remove_parent.${parentKey}`" icon="fa fa-trash" @click="confirmDeleteParent(item, $event)"></WButton>
-
-                      </div>
-                    </div>
-                  </template>
-
-                  <draggable class="list-group"
-                    :id="`parent-${item.id}`"
-                    :data-source="`parent-${item.id}`"
-                    :list="item[childKey]"
-                    :item-key="`parent-${item.id}`"
-                    group="a"                 
-                    @end="childMoved" >
-                      <template #item="{element}">
-                        <div class="tree-view-item" :id="`child-${element.id}`" :class="{ selected: isSelected(element) }">
-                          <div><a href="#" 
-                            class="tree-view-item-child"
-                            @click="selectChild(element)"  
-                            :key="element.id"
-                            >
-                            <MissingValueTolerantLabel :value="element.name" :fallback="$t(`fallback_labels.no_name.${childKey}`)"></MissingValueTolerantLabel>&nbsp;
-                            <i><MissingValueTolerantLabel :value="element.summary" :fallback="$t('fallback_labels.no_summary')"></MissingValueTolerantLabel></i>
-                          </a>  
-                          </div>
-                          <div class="child-options">
-
-                          <WButton type="text" color="danger" :title="`remove_child.${parentKey}`" icon="fa fa-trash" @click="confirmDeleteChild(element, $event)"></WButton>     
-
-                          </div>
-                        </div>                         
-                      </template>
-                  </draggable>
-                </AccordionTab>
-              </Accordion>         
-            </ScrollPanel>
-          </div> 
+          <WTreeview :parentKey="parentKey" :childKey="childKey" :parentItems="items"></WTreeview>
         </SplitterPanel>
         <SplitterPanel class="split-content-right">
           <ScrollPanel style="height: 100%">
@@ -84,6 +36,7 @@ import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 import draggable from 'vuedraggable'
 import { Prop } from 'vue-property-decorator';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
+import WTreeview from '@/components/tree-view/Treeview.vue';
 
 @Options({
   components: {
@@ -96,6 +49,7 @@ import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
     MissingValueTolerantLabel,
     NovelItemSheet,
     WConfirmDialog,
+    WTreeview,
     draggable
   }
 })
@@ -105,28 +59,10 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
     
     activeIndex = [];
 
-  mounted(): void {
-    this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
-  }
+    mounted(): void {
+      this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
+    }
 
-
-  confirmDeleteParent(item, $event): void {
-    $event.stopPropagation();
-    (this.$refs.confirmParent as WConfirmDialog).getDecision(item);
-  }
-
-  confirmDeleteChild(item, $event): void {
-    $event.stopPropagation();
-    (this.$refs.confirmChild as WConfirmDialog).getDecision(item);
-  }
-
-  deleteParent(item: BaseModel) {
-    this.$store.dispatch('deleteItems', { 
-        key: this.parentKey, 
-        novelId: this.$store.state.currentNovel?.id,
-        items: [item]
-    });
-  }
 
   deleteChild(item: BaseModel) {
     const parentId = (this.items.find(parent => parent[this.childKey].find(child => child.id === item.id)))?.id; 
