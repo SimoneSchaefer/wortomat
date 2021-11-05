@@ -1,7 +1,9 @@
-import { InlineEdit } from "./InlineEdit";
+import { Confirm } from "./components/Confirm";
+import { InlineEdit } from "./components/InlineEdit";
 
 export class NovelList {
     private inlineEdit = new InlineEdit();
+    private confirm = new Confirm();
 
     addNovel() {
         this.novelCards.then($items => {
@@ -28,19 +30,36 @@ export class NovelList {
         this.content(index).find('.readonly').should('contain.text', expectedSummary);
     }
 
-    updateName(index: number, newName: string) {
-        this.inlineEdit.updateInput(this.title(index), newName);
-        this.hasTitle(index, newName);
+    updateName(index: number, newName: string, confirm = true) {
+        this.inlineEdit.updateInput(this.title(index), newName, confirm);
+        if (confirm) {
+            if (newName.length) this.hasTitle(index, newName);
+            else this.hasDummyTitle(index);
+        }
+
     }
 
-    updateSummary(index: number, newName: string) {
-        this.inlineEdit.updateInput(this.content(index), newName);
-        this.hasSummary(index, newName);
+    updateSummary(index: number, newName: string, confirm = true) {
+        this.inlineEdit.updateInput(this.content(index), newName, confirm);
+        if (confirm) {
+            if (newName.length) this.hasSummary(index, newName);
+            else this.hasDummySummary(1);
+        }
     }
 
     openNovel(index: number) {
         this.novelCards.eq(index).find('.option-buttons .p-button').eq(0).click();
         cy.get('.chapters-view').should('be.visible');
+    }
+
+    deleteNovel(index: number, confirm: boolean) {
+        this.novelCards.then($items => {
+            this.novelCards.eq(index).find('.option-buttons .p-button').eq(1).click();
+            confirm ? this.confirm.confirm() : this.confirm.cancel();
+
+            const expectedLength = confirm ? $items.length - 1 : $items.length;
+            this.novelCards.should('have.length', expectedLength);
+        });      
     }
 
     title(index: number) {
