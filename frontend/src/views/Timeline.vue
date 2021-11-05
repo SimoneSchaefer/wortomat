@@ -278,9 +278,7 @@ export default class Plot extends Vue {
   background-color: pink;
   height: 100%;
 }
-.add-button {
-  border-top: 1px solid #2d2b2b !important;
-}
+
 .split-panel {
   height: 100%;
 }

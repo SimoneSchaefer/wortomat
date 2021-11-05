@@ -1,7 +1,7 @@
 <template>
 <div class="novels">
   <div class="p-grid">
-    <div class="p-col-3">
+    <div class="p-col-4">
       <Card class="dummy-novel novel-card h-100">
         <template #content>
           <div class="p-d-flex p-ai-center p-jc-center">
@@ -11,7 +11,7 @@
       </Card>
     </div>
 
-    <div class="p-col-3" v-for="novel in novels" :key="novel.id">
+    <div class="p-col-4" v-for="novel in novels" :key="novel.id">
       <Novel v-bind:novel="novel"></Novel>
     </div>
   </div>
@@ -44,7 +44,7 @@ export default class NovelList extends Vue {
   margin: 3em;
 }
 .dummy-novel {
-  height: 300px;
+  height: 400px;
   display: flex;
   justify-content: center;
   align-content: center;
