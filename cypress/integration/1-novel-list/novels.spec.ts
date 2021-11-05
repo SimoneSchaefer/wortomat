@@ -28,20 +28,20 @@ describe('novels', () => {
 
   it('can set novel name', () => {
     novelList.novelCards.should('have.length', 2);
-    novelList.updateName(1, TITLE);
+    novelList.updateName(1, '', TITLE);
   });
 
   it('can set summary', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasTitle(1, TITLE)
-    novelList.updateSummary(1, SUMMARY);
+    novelList.updateSummary(1, '', SUMMARY);
   });
 
   it('can cancel update name', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasTitle(1, TITLE)
     novelList.hasSummary(1, SUMMARY);
-    novelList.updateName(1, TITLE_2, false);
+    novelList.updateName(1, TITLE, TITLE_2, false);
     novelList.hasTitle(1, TITLE)
     novelList.hasSummary(1, SUMMARY);
   });
@@ -50,7 +50,7 @@ describe('novels', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasTitle(1, TITLE)
     novelList.hasSummary(1, SUMMARY);
-    novelList.updateSummary(1, SUMMARY_2, false);
+    novelList.updateSummary(1, SUMMARY, SUMMARY_2, false);
     novelList.hasTitle(1, TITLE)
     novelList.hasSummary(1, SUMMARY);
   });
@@ -59,28 +59,28 @@ describe('novels', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasTitle(1, TITLE)
     novelList.hasSummary(1, SUMMARY);
-    novelList.updateName(1, TITLE_2);
+    novelList.updateName(1, TITLE, TITLE_2);
   });
 
   it('can update summary', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasTitle(1, TITLE_2)
     novelList.hasSummary(1, SUMMARY);
-    novelList.updateSummary(1, SUMMARY_2);
+    novelList.updateSummary(1, SUMMARY, SUMMARY_2);
   });
 
   it('can delete name', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasTitle(1, TITLE_2)
     novelList.hasSummary(1, SUMMARY_2);
-    novelList.updateName(1, '');
+    novelList.updateName(1, TITLE_2, '');
   });
 
   it('can delete summary', () => {
     novelList.novelCards.should('have.length', 2);
     novelList.hasDummyTitle(1);
     novelList.hasSummary(1, SUMMARY_2);
-    novelList.updateSummary(1, '');
+    novelList.updateSummary(1, SUMMARY_2, '');
   });
 
   it('can open novel', () => {

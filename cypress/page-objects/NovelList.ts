@@ -30,20 +30,24 @@ export class NovelList {
         this.content(index).find('.readonly').should('contain.text', expectedSummary);
     }
 
-    updateName(index: number, newName: string, confirm = true) {
-        this.inlineEdit.updateInput(this.title(index), newName, confirm);
+    updateName(index: number, oldValue: string, newName: string, confirm = true) {
+        this.inlineEdit.updateInput(this.title(index), oldValue, newName, confirm);
         if (confirm) {
             if (newName.length) this.hasTitle(index, newName);
             else this.hasDummyTitle(index);
+        } else {
+            if (oldValue.length) this.hasTitle(index, oldValue);
         }
 
     }
 
-    updateSummary(index: number, newName: string, confirm = true) {
-        this.inlineEdit.updateInput(this.content(index), newName, confirm);
+    updateSummary(index: number, oldValue: string, newName: string, confirm = true) {
+        this.inlineEdit.updateInput(this.content(index), oldValue, newName, confirm);
         if (confirm) {
             if (newName.length) this.hasSummary(index, newName);
             else this.hasDummySummary(1);
+        } else {
+            if (oldValue.length) this.hasSummary(index, oldValue);
         }
     }
 

@@ -1,5 +1,5 @@
 export class InlineEdit {
-    updateInput(parent: Cypress.Chainable, newValue: string, confirm = true) {
+    updateInput(parent: Cypress.Chainable, oldValue: string, newValue: string, confirm = true) {
         parent = parent.find('.inline-edit')
             .click()
             .find('.editable').clear();
