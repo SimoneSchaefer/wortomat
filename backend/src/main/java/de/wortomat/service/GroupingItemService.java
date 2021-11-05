@@ -1,5 +1,6 @@
 package de.wortomat.service;
 
+import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.GroupingNovelItem;
 import de.wortomat.model.NovelItem;
 import de.wortomat.repository.GroupingItemRepository;
@@ -27,8 +28,8 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     public T get(Long novelId, Long itemItem) {
-        T item = this.getParentRepository().findById(itemItem).get();
-        // item.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
+        T item = this.getParentRepository().findById(itemItem).orElseThrow(NotFoundException::new);
+        item.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
         return item;
     }
 
@@ -45,9 +46,9 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
         return this.getParentRepository().save(positionAware);
     }
 
-    public void delete(Long _novelId, Long chapterId) {
-        this.getChildRepository().deleteAll((List)this.get(_novelId, chapterId).getChildren());
-        this.getParentRepository().deleteById(chapterId);
+    public void delete(Long _novelId, Long parentId) {
+        this.getChildRepository().deleteAll((List)this.get(_novelId, parentId).getChildren());
+        this.getParentRepository().deleteById(parentId);
     }
 
 

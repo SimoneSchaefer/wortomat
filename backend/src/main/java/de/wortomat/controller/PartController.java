@@ -48,9 +48,4 @@ public class PartController {
         this.partService.delete(novelId, partId);
         return ResponseEntity.ok().build();
     }
-
-    @PutMapping("updatePositions")
-    public ResponseEntity<List<Part>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
-        return ResponseEntity.ok(this.partService.updatePositions(novelId, updatedPositions));
-    }
 }

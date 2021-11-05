@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class Part implements GroupingNovelItem {
     private Novel novel;
 
     @OneToMany(mappedBy = "part")
-    private List<Chapter> chapters;
+    private List<Chapter> chapters = Collections.emptyList();
 
     @Override
     @JsonIgnore

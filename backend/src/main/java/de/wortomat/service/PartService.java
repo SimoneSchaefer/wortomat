@@ -22,20 +22,6 @@ public class PartService extends GroupingItemService<Part, Chapter>{
     @Autowired
     private ChapterRepository chapterRepository;
 
-
-
-
-    public List<Part> updatePositions(Long novelId, List<Long> updatedPositions) {
-        List<Part> newPositions = new ArrayList<>(updatedPositions.size());
-        for (int positionCounter = 0; positionCounter < updatedPositions.size(); positionCounter++) {
-            Part positionAware = this.getParentRepository().findById((updatedPositions.get(positionCounter))).get();
-            positionAware.setPosition(positionCounter);
-            newPositions.add(positionAware);
-        }
-        this.getParentRepository().saveAll(newPositions);
-        return this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
-    }
-
     @Override
     protected GroupingItemRepository<Part, Long> getParentRepository() {
         return this.partsRepository;
