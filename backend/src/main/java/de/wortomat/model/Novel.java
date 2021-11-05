@@ -56,12 +56,14 @@ public class Novel implements GroupingNovelItem {
     private List<LocationTag> locationTags;
 
     // @Override
+    @JsonIgnore
     public List<? extends NovelItemTag> getTags() {
         /*throw new IllegalStateException("can not access tags for novel");*/
         return Collections.emptyList();
     }
 
     @Override
+    @JsonIgnore
     public List<? extends NovelItem> getChildren() {
         return Collections.emptyList();
     }

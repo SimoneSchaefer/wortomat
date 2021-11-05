@@ -1,7 +1,5 @@
 package de.wortomat.service;
 
-import de.wortomat.model.ChapterTag;
-import de.wortomat.model.CharacterTag;
 import de.wortomat.model.Location;
 import de.wortomat.model.LocationTag;
 import de.wortomat.repository.LocationRepository;
