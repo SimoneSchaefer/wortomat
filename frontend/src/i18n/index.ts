@@ -8,4 +8,4 @@ export const messages = {
   [Locales.DE]: de,
 };
 
-export const defaultLocale = Locales.DE;
+export const defaultLocale = Locales.EN;

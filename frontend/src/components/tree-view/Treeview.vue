@@ -21,6 +21,7 @@
                 <template #item="{element}">
                     <WTreeviewListItem 
                         @select="selectChild"
+                        @deleteChild="deleteChild"
                         :selected="isSelected(item)"
                         :element="element" 
                         :parentKey="parentKey" 
