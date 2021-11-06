@@ -5,7 +5,7 @@
     <div class="chapters-content">
       <Splitter style="height: 100%" :stateKey="parentKey">
         <SplitterPanel class="split-content-left">
-          <WTreeview :parentKey="parentKey" :childKey="childKey" :parentItems="items"></WTreeview>
+          <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
         </SplitterPanel>
         <SplitterPanel class="split-content-right">
           <ScrollPanel style="height: 100%">
@@ -98,24 +98,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
         item: child,
     });
   }
-
-  get modalOpen() {
-    return this.$store.state.modalIsOpen;
-  }
-
-  childMoved($event): void {
-    const childId = $event.clone.id.replace('child-', '');
-    const parentTo = $event.to.id.replace('parent-', '');
-    const newPosition = $event.newIndex;
-
-    this.$store.dispatch('moveChild', { 
-      key: this.parentKey, 
-      novelId: this.$route.params.id,
-      childToMove: childId,
-      newParentId: parentTo,
-      newPosition: newPosition
-    }); 
-  }
      
   get items(): BaseModel[] {
       return getAllItems(this.$store.state, this.parentKey);
@@ -143,17 +125,10 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   selectChild(item: BaseModel) {
     this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
   }
+}
 
         
-    updateName(item, newValue: string): void {
-        this.updateItem(
-          this.parentKey, 
-          item, 
-          { name: newValue }
-
-      );   
-    }  
-}
+    
 </script>
 
 <style>

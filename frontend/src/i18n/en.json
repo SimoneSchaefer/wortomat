@@ -8,6 +8,7 @@
         "export": "Export"
     },
     "side_bar": {
+        "add_item": "Create new group",
         "open_menu": "Open menu",
         "add_parent": {
             "parts": "Create Part",

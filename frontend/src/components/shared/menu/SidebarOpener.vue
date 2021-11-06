@@ -1,5 +1,5 @@
 <template>
-    <WButton class="w-sidebar-opener" color="primary" title="side_bar.open_menu" icon="fa fa-2x fa-bars" @click="click" />
+    <WButton class="w-sidebar-opener" color="primary" title="side_bar.add_item" icon="fa fa-2x fa-bars" @click="click" />
 </template>
 
 

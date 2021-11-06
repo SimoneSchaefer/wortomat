@@ -1,10 +1,10 @@
 <template>
-    <Accordion multiple :activeIndex="activeIndex">                 
+    <Accordion multiple :activeIndex="activeIndex" @tab-close="closeGroup">                 
         <AccordionTab v-for="item of items" :key="item.id">
             <template #header>
                 <WTreeviewHeader 
                     :parentKey="parentKey" 
-                    :item="item" 
+                    :item="item"                     
                     @addChild="addChild"
                     @updateParentName="updateName"
                     @deleteParent="deleteParent">
@@ -16,13 +16,13 @@
                 :data-source="`parent-${item.id}`"
                 :list="item[childKey]"
                 :item-key="`parent-${item.id}`"
-                group="a"                 
+                group="children"                 
                 @end="childMoved" >
                 <template #item="{element}">
                     <WTreeviewListItem 
                         @select="selectChild"
                         @deleteChild="deleteChild"
-                        :selected="isSelected(item)"
+                        :selected="isSelected(element)"
                         :element="element" 
                         :parentKey="parentKey" 
                         :childKey="childKey">
@@ -36,39 +36,36 @@
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import draggable from 'vuedraggable'
 
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
 
-import WButton from '@/components/shared/Button.vue';
-import WLink from '@/components/shared/Link.vue';
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
-import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
-import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 
 @Options({
   components: {
-    WButton,
-    WLink,
-    EditableLabel,
-    MissingValueTolerantLabel,
-    WConfirmDialog,
     WTreeviewHeader,
     WTreeviewListItem,
-    draggable
   }
 })
-export default class Chapters extends mixins(UpdatableItemMixin) {
+export default class Treeview extends mixins(UpdatableItemMixin) {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
     @Prop() childKey: NOVEL_ITEM_KEYS;
-    @Prop() parentItems: BaseModel[];
+    @Prop() items: BaseModel[];
     
     activeIndex = [];
+
+    closeGroup($event) {
+      console.log('CLOSE GROUP', $event, this.activeIndex)
+      const index = this.activeIndex.findIndex(val => val === $event.index)
+      console.log('EVENT', $event)
+      if (index > -1) this.activeIndex.splice(index, 1);
+
+      console.log('activeIndex now: ', this.activeIndex)
+    }
 
     deleteParent(item: BaseModel) {
         this.$store.dispatch('deleteItems', { 
@@ -103,7 +100,7 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
     }
 
   addChild(selectedParent: BaseModel, $event): void {
-    // $event.stopPropagation();
+    $event.stopPropagation();
     const child = new BaseModel();
     child.parentId = selectedParent.id;
     this.$store.dispatch('addItem', { 
@@ -111,10 +108,12 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
         novelId: this.novelId, 
         item: child,
     });
-  }
-
-  get modalOpen() {
-    return this.$store.state.modalIsOpen;
+    
+    const parentIndex = this.items.findIndex(parent => parent.id === selectedParent.id);
+    if (!this.activeIndex.includes(parentIndex)) {
+      this.activeIndex.splice(0, 0, parentIndex);
+    }
+    this.activeIndex = [...this.activeIndex];
   }
 
   childMoved($event): void {
@@ -130,26 +129,11 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
       newPosition: newPosition
     }); 
   }
-     
-  get items(): BaseModel[] {
-      return getAllItems(this.$store.state, this.parentKey);
-  }
-
-  set items(value: BaseModel[]) {
-      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
-  } 
-
-  get selectedItems(): number[] {
-    return this.$store.state.selection.get(this.childKey) || [];
-  }
 
   isSelected(item: BaseModel) {
     const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
     if (isSelected) {
-      const parentIndex = this.items.findIndex(parent => parent.id === item.parentId);
-      if (!this.activeIndex.includes(parentIndex)) {
-        this.activeIndex.push(parentIndex);
-      }
+      this.openParentIfNecessary(item);
     }
     return isSelected;
   }
@@ -158,15 +142,16 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
     this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
   }
 
-        
-    updateName(newValue: string, item: BaseModel): void {
-        this.updateItem(
-          this.parentKey, 
-          item, 
-          { name: newValue }
-
-      );   
-    }  
+  get selectedItems(): number[] {
+    return this.$store.state.selection.get(this.childKey) || [];
+  }
+  
+  private openParentIfNecessary(item: BaseModel) {
+    const parentIndex = this.items.findIndex(parent => parent.id === item.parentId);
+    if (!this.activeIndex.includes(parentIndex)) {
+      this.activeIndex.push(parentIndex);
+    }
+  }
 }
 </script>
 

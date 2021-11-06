@@ -53,28 +53,11 @@ describe('parts', () => {
 
         chapters.deleteItem(0);
         chapters.assertHeaders([TITLE]);  
-    });    
-    
-    it('can add child', () => {
+    });
+
+    it('can add new part', () => {
         chapters.assertHeaders([TITLE]);  
-
-        chapters.addChild(0);
-        chapters.addChild(0);
-        chapters.assertChildren(0, ['', '']);
+        chapters.addItem();
+        chapters.assertHeaders([ TITLE, '']);  
     });
-
-    it('can cancel remove child', () => {
-        chapters.toggleAccordion(0);
-        chapters.assertChildren(0, ['', '']);
-        chapters.removeChild(0, 0, false);
-        chapters.assertChildren(0, ['', '']);
-    });
-
-    it('can remove child', () => {
-        chapters.toggleAccordion(0);
-        chapters.assertChildren(0, ['', '']);
-        chapters.removeChild(0, 0, true);
-        chapters.assertChildren(0, ['']);
-    });
-
 });

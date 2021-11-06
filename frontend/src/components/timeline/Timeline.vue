@@ -1,35 +1,34 @@
 <template>
 <div class="w-timeline">
-<div v-for="(event) of events" :key="event.id">
-    <div class="w-timeline-event" v-bind:class="{ 'w-timeline-selected-event': selected(event)}">
-        <div class="w-timeline-details w-timeline-details-left">
-             <div class="w-timeline-details-frame">
-                <div class="w-timeline-event-date">
-                    <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="No date added yet."></EditableDate>
-                 </div>
-                 <div class="w-timeline-separator">
-                    <div class="w-timeline-connector">&nbsp;</div>
-                    <div class="w-timeline-marker" @click="select(event)">&nbsp;</div>
-                 </div>
-                <div class="w-timeline-event-name">
-                    <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" placeHolderTitle="No title added yet."></EditableLabel>
+    <div v-for="(event) of events" :key="event.id">
+        <div class="w-timeline-event" v-bind:class="{ 'w-timeline-selected-event': selected(event)}">
+            <div class="w-timeline-details w-timeline-details-left">
+                <div class="w-timeline-details-frame">
+                    <div class="w-timeline-event-date">
+                        <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="No date added yet."></EditableDate>
+                    </div>
+                    <div class="w-timeline-separator">
+                        <div class="w-timeline-connector">&nbsp;</div>
+                        <div class="w-timeline-marker" @click="select(event)">&nbsp;</div>
+                    </div>
+                    <div class="w-timeline-event-name">
+                        <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" placeHolderTitle="No title added yet."></EditableLabel>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
  
 </template>
 
 <script lang="ts">
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
-import { Options, mixins } from "vue-class-component";
+import { Options, mixins, Vue } from "vue-class-component";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { Emit, Prop } from "vue-property-decorator";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
-import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 
 @Options({
   components: {
@@ -38,7 +37,7 @@ import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
   },
   emits: [ 'select', 'update-date', 'update-name']
 })
-export default class WTimeline extends mixins(UpdatableItemMixin) {
+export default class WTimeline extends Vue {
     @Prop() events: TimelineEventModel[];
     @Prop() selectedEvent: TimelineEventModel;
     
@@ -60,7 +59,6 @@ export default class WTimeline extends mixins(UpdatableItemMixin) {
     selected(item: TimelineEventModel) {
         return (this.selectedEvent?.id === item.id);
     }
-
 
     get novelItemKey() {
         return NOVEL_ITEM_KEYS.TIMELINE;

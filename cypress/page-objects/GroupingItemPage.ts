@@ -36,6 +36,10 @@ export class GroupingItemPage {
         cy.get('.group-options').eq(index).find('.p-button-primary').click( {force: true});
     }
 
+    renameSelectedChild(oldName: string, newName: string, confirm = true) {
+        this.inlineEdit.updateInput('.sheet .header-container .meta .header', oldName, newName, confirm);
+    }
+
     removeChild(parentIndex: number, childIndex: number, confirm = true) {
         this.children(parentIndex).eq(childIndex).find('.p-button-danger').click();
         if (confirm) this.confirm.confirm();
@@ -44,6 +48,19 @@ export class GroupingItemPage {
 
     toggleAccordion(index: number) {
         cy.get('a.p-accordion-header-link > span').eq(index).click();
+    }
+
+    childSelected(parentIndex: number, childIndex: number) {
+        this.children(parentIndex).its('length').then($numberOfChildren => {
+            for (let i = 0; i < $numberOfChildren; i++) {
+                const expected = childIndex === i ? 'have.class' : 'not.have.class';
+                this.children(parentIndex).eq(i).should(expected, 'selected');
+            }
+        });
+    }
+
+    sheethasTitle(expectedTitle: string) {
+        cy.get('.sheet .header-container .meta .header').should('have.text', expectedTitle);
     }
     
 
