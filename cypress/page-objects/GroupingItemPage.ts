@@ -81,7 +81,7 @@ export class GroupingItemPage {
     }
 
     renameItem(index: number, oldValue: string, newName: string, confirm = true) {
-        this.inlineEdit.updateInput(this.headers.eq(index), oldValue, newName, confirm);
+        this.inlineEdit.updateInput(this.headerSelector(index), oldValue, newName, confirm);
         if (confirm) {
             if (newName.length) this.assertHeader(index, newName);
             else this.hasDummyHeader(1);
@@ -89,6 +89,10 @@ export class GroupingItemPage {
             if (oldValue.length) this.assertHeader(index, oldValue);
         }
         
+    }
+
+    headerSelector(index: number): string {
+        return `.chapters-content .p-accordion-header:eq(${index})`;
     }
 
     get headers() {

@@ -31,7 +31,7 @@ export class NovelList {
     }
 
     updateName(index: number, oldValue: string, newName: string, confirm = true) {
-        this.inlineEdit.updateInput(this.title(index), oldValue, newName, confirm);
+        this.inlineEdit.updateInput(this.titleSelector(index), oldValue, newName, confirm);
         if (confirm) {
             if (newName.length) this.hasTitle(index, newName);
             else this.hasDummyTitle(index);
@@ -42,7 +42,7 @@ export class NovelList {
     }
 
     updateSummary(index: number, oldValue: string, newName: string, confirm = true) {
-        this.inlineEdit.updateInput(this.content(index), oldValue, newName, confirm);
+        this.inlineEdit.updateInput(this.contentSelector(index), oldValue, newName, confirm);
         if (confirm) {
             if (newName.length) this.hasSummary(index, newName);
             else this.hasDummySummary(1);
@@ -66,11 +66,20 @@ export class NovelList {
         });      
     }
 
-    title(index: number) {
-        return this.novelCards.eq(index).find('.p-card-title');
+    title(index: number): Cypress.Chainable {
+        return cy.get(this.titleSelector(index));
     }
-    content(index: number) {
-        return this.novelCards.eq(index).find('.p-card-content');
+
+    content(index: number): Cypress.Chainable {
+        return cy.get(this.contentSelector(index));
+    }
+
+    titleSelector(index: number): string {
+        return `.novel-card:eq(${index}) .p-card-title`; 
+    }
+
+    contentSelector(index: number): string {
+        return `.novel-card:eq(${index}) .p-card-content`; 
     }
 
     get novelCards(): Cypress.Chainable {

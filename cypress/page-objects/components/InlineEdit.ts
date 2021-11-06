@@ -1,13 +1,14 @@
 export class InlineEdit {
-    updateInput(parent: Cypress.Chainable, oldValue: string, newValue: string, confirm = true) {
-        parent = parent.find('.inline-edit')
-            .click()
-            .find('.editable').clear();
+    updateInput(parentSelector: string, oldValue: string, newValue: string, confirm = true) {
+        cy.get(parentSelector).find('.inline-edit').click().find('.editable').clear();
         if (newValue.length) {
-            parent = parent.type(newValue);
+            cy.get(parentSelector).find('.inline-edit').find('.editable').type(newValue);
         }
         const button = confirm ? '.p-button-success' : '.p-button-danger';
-        parent.parentsUntil('.inline-edit')
-            .find(`.options ${button}`).click();
+        cy.get(parentSelector).find(`.options ${button}`).click();
+
+        const expectedText = confirm ? newValue : oldValue;
+        cy.get(parentSelector).find('.readonly').should('contain.text', expectedText);
+      
     }
 }
