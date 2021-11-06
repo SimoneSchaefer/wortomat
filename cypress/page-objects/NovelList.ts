@@ -55,7 +55,6 @@ export class NovelList {
 
     openNovel(index: number) {
         this.novelCards.eq(index).find('.option-buttons .p-button').eq(0).click();
-        new Chapters().displaysInfoBox('You haven\'t created any parts yet.');
     }
 
     deleteNovel(index: number, confirm: boolean) {

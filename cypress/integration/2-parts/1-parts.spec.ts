@@ -24,6 +24,8 @@ describe('parts', () => {
 
     it('can add parts', () => {
         chapters.assertHeaders([]);
+        new Chapters().displaysInfoBox('You haven\'t created any parts yet.');
+
         chapters.addItem();
         chapters.assertHeaders(['']);
 
