@@ -3,6 +3,7 @@ package de.wortomat.service;
 
 import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Novel;
+import de.wortomat.model.ResearchGroup;
 import de.wortomat.repository.NovelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

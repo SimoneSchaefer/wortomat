@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +23,7 @@ public class ResearchGroup implements GroupingNovelItem {
     private Novel novel;
 
     @OneToMany(mappedBy = "researchGroup")
-    private List<Research> research;
+    private List<Research> research = new ArrayList<>();
 
     @Override
     @JsonIgnore

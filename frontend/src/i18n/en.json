@@ -67,6 +67,20 @@
             "content_1": "By the way: To change a part's name, click on its name.",
             "content_2": "",
             "content_3": ""
+        },
+        "research_groups": {
+            "title": "Welcome",
+            "introduction_1": "By opening wortomat you made the first step towards writing your novel! ✊",
+            "content_1": "This is the 'research' view. Put here anything that you need to look into - historical events, technology or whatever you need.",
+            "content_2": "You haven't created any research groups yet. Use the + button in the menu on the bottom left to create one.",
+            "content_3": ""
+        }, 
+        "research": {
+            "title": "Creating research items",
+            "introduction_1": "Create a new research item by clicking the '+' button next to a research group's name.",
+            "content_1": "By the way: To change a group's name, click on its name.",
+            "content_2": "",
+            "content_3": ""
         }
     },
     "delete_confirm": "Are you sure you want to delete this item?",
