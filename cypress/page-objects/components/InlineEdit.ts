@@ -1,6 +1,7 @@
 export class InlineEdit {
     updateInput(parentSelector: string, oldValue: string, newValue: string, confirm = true) {
-        cy.get(parentSelector).find('.inline-edit').click().find('.editable').clear();
+        cy.get(parentSelector).find('.inline-edit .readonly').click();
+        cy.get(parentSelector).find('.inline-edit .editable').clear();
         if (newValue.length) {
             cy.get(parentSelector).find('.inline-edit').find('.editable').type(newValue);
         }
