@@ -7,6 +7,7 @@
     <ConfirmDialog></ConfirmDialog>
     <Toast />
   </ErrorBoundary>
+
 </template>
 
 <script lang="ts">
@@ -107,6 +108,10 @@ i[class^="fa"]:before {
 
 .h-100 {
   height: 100%;
+}
+
+.p-scrollpanel-bar {
+  background-color: purple !important;
 }
 
 </style>

@@ -29,6 +29,8 @@ describe('parts', () => {
 
         chapters.addItem();
         chapters.assertHeaders(['', '']);  
+
+        chapters.displaysInfoBox('Create a new chapter');
     });
 
     it('can cancel update part name', () => {

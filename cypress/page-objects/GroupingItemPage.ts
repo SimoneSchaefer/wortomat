@@ -40,6 +40,10 @@ export class GroupingItemPage {
         this.inlineEdit.updateInput('.sheet .header-container .meta .header', oldName, newName, confirm);
     }
 
+    displaysInfoBox(expectedText: string) {
+        cy.get('.help-note').should('contain.text', expectedText);
+    }
+
     removeChild(parentIndex: number, childIndex: number, confirm = true) {
         this.children(parentIndex).eq(childIndex).find('.p-button-danger').click();
         if (confirm) this.confirm.confirm();
@@ -109,10 +113,10 @@ export class GroupingItemPage {
     }
 
     headerSelector(index: number): string {
-        return `.chapters-content .p-accordion-header:eq(${index})`;
+        return `.p-accordion-header:eq(${index})`;
     }
 
     get headers() {
-        return cy.get('.chapters-content .p-accordion-header');
+        return cy.get('.p-accordion-header');
     }
 }

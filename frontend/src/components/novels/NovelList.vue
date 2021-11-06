@@ -1,8 +1,7 @@
 <template>
 <div class="novels">
-  <div class="p-grid">
-    <div class="p-col-4">
-      <Card class="dummy-novel novel-card h-100">
+    <div class="novel">
+      <Card class="dummy-novel novel-card h-100" id="v-tour-step-1">
         <template #content>
           <div class="p-d-flex p-ai-center p-jc-center">
             <Button data-cy="add-novel" label="Start a novel" class="p-button-text p-button-lg add-button" icon="pi pi-plus" v-on:click="startAddMode()"></Button>
@@ -11,10 +10,9 @@
       </Card>
     </div>
 
-    <div class="p-col-4" v-for="novel in novels" :key="novel.id">
+    <div class="novel" v-for="novel in novels" :key="novel.id">
       <Novel v-bind:novel="novel"></Novel>
     </div>
-  </div>
 </div>
 </template>
 
@@ -42,9 +40,19 @@ export default class NovelList extends Vue {
 <style scoped>
 .novels {
   margin: 3em;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
+
+.novel {
+  margin: 3em;
+  height: 20em;
+  width: 30em;
+}
+
 .dummy-novel {
-  height: 400px;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-content: center;

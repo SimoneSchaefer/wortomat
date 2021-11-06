@@ -53,6 +53,22 @@
         "select_research": "Select research",
         "select_chapter": "Select chapter"
     },
+    "intro": {
+        "parts": {
+            "title": "Welcome",
+            "introduction_1": "By opening wortomat you made the first step towards writing your novel! ✊",
+            "content_1": "This is the 'parts' view. Parts group multiple chapters together.",
+            "content_2": "You haven't created any parts yet. Use the + button in the menu on the bottom left to create one.",
+            "content_3": ""
+        }, 
+        "chapters": {
+            "title": "Creating chapters",
+            "introduction_1": "Create a new chapter by clicking the '+' button next to a part name.",
+            "content_1": "By the way: To change a part's name, click on its name.",
+            "content_2": "",
+            "content_3": ""
+        }
+    },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",
     "please_confirm": "Please confirm",

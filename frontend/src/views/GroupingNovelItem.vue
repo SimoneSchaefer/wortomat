@@ -1,59 +1,45 @@
 <template>
-  <div class="chapters-view">
-    <WSidebarMenu :parentKey="parentKey" :childKey="childKey" />
-    
-    <div class="chapters-content">
-      <Splitter style="height: 100%" :stateKey="parentKey">
-        <SplitterPanel class="split-content-left">
-          <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
-        </SplitterPanel>
-        <SplitterPanel class="split-content-right">
-          <ScrollPanel style="height: 100%">
-            <NovelItemSheetList :childKey="childKey" :parentKey="parentKey" />
-          </ScrollPanel>
-        </SplitterPanel>
-      </Splitter> 
-    </div>
+  <WSidebarMenu :parentKey="parentKey" :childKey="childKey" />    
+  <div v-if="!items.length" class="empty">
+    <WHelpNote :itemKey="parentKey"></WHelpNote>
+  </div>
+  <div v-else class="grouping-item-view">
+    <Splitter style="height: 100%" :stateKey="parentKey">
+      <SplitterPanel class="split-content-left">
+        <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
+      </SplitterPanel>
+      <SplitterPanel class="split-content-right">
+        <ScrollPanel style="height: 100%">
+          <WNovelItemSheetList :childKey="childKey" :parentKey="parentKey" />
+        </ScrollPanel>
+      </SplitterPanel>
+    </Splitter> 
   </div>
 </template>
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
-import WButton from '@/components/shared/Button.vue';
-import WLink from '@/components/shared/Link.vue';
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
-import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-
-import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
-import NovelItemList from '@/components/shared/novel-item/NovelItemList.vue';
-import NovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
-import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
-import { BaseModel } from '@/models/Base.model';
-import { getAllItems } from '@/store/getters';
-import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
-
-import draggable from 'vuedraggable'
 import { Prop } from 'vue-property-decorator';
-import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
+
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { getAllItems } from '@/store/getters';
+import { BaseModel } from '@/models/Base.model';
+
+import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
+import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
+import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
+import WHelpNote from '@/components/HelpNote.vue';
 
 @Options({
   components: {
     WSidebarMenu,
-    NovelItemList,
-    NovelItemSheetList,
-    WButton,
-    WLink,
-    EditableLabel,
-    MissingValueTolerantLabel,
-    NovelItemSheet,
-    WConfirmDialog,
+    WNovelItemSheetList,
     WTreeview,
-    draggable
+    WHelpNote
   }
 })
-export default class Chapters extends mixins(UpdatableItemMixin) {
+export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
     @Prop() childKey: NOVEL_ITEM_KEYS;
     
@@ -98,18 +84,6 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
         item: child,
     });
   }
-     
-  get items(): BaseModel[] {
-      return getAllItems(this.$store.state, this.parentKey);
-  }
-
-  set items(value: BaseModel[]) {
-      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
-  } 
-
-  get selectedItems(): number[] {
-    return this.$store.state.selection.get(this.childKey) || [];
-  }
 
   isSelected(item: BaseModel) {
     const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
@@ -125,100 +99,34 @@ export default class Chapters extends mixins(UpdatableItemMixin) {
   selectChild(item: BaseModel) {
     this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
   }
-}
 
-        
-    
+
+     
+  get items(): BaseModel[] {
+      return getAllItems(this.$store.state, this.parentKey);
+  }
+
+  set items(value: BaseModel[]) {
+      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
+  } 
+
+  get selectedItems(): number[] {
+    return this.$store.state.selection.get(this.childKey) || [];
+  }
+}       
 </script>
 
-<style>
-.p-scrollpanel-bar {
-  background-color: purple !important;
-}
-</style>
-
-
 <style scoped>
-
-.p-accordion-header .group-options,
-.hidden.group-options {
-  display: none;  
-}
-
-.p-accordion-header:hover .group-options {
-  display: flex; 
-}
-
-.chapters-content {
+.grouping-item-view {
   width: 100%;
-}
-.chapters-view {
-  display: flex;
-  width: 100%;
-}
-
-.tree-view {
-  background-color: white;
   height: 100%;
 }
 
-.tree-view-item {
+.empty {
   display: flex;
   width: 100%;
-  cursor: grab;
-  justify-content: space-between;
-}
-
-.tree-view-item-header {
-  font-weight: bold;
-  display: flex;
-}
-.tree-view-item-child {
-  padding-left: 1em;
-}
-.tree-view .tree-view-item-child a{
-  padding: 0.5em;
-}
-
-.tree-view.children {
-  width: 20em;
-}
-
-.tree-view-children-header {
-  font-weight: bold;
-}
-
-
-.tree-view-item a {
-  text-decoration: none;
-  display: block;
-  width: 100%;
-  padding: 0.8em;
-}
-
-.tree-view-item:hover {
-  background-color: pink;
-}
-
-.selected {
-  background-color: pink;
-}
-
-.accordion-header {
-  display: flex;
-  width: 100%;
+  height: 100%;
+  justify-content: center;
   align-items: center;
-}
-
-.accordion-header .menu {
-  width: 2em;
-  opacity: 0.5;
-  text-align: right;
-}
-
-
-.part-draggable {
-  padding: 0.5em;
-  border-bottom: 1px solid gray;
 }
 </style>

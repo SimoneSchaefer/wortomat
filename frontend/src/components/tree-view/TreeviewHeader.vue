@@ -71,12 +71,7 @@ export default class TreeviewHeader extends Vue {
 
 
 <style scoped>
-.p-accordion-header .group-options,
-.hidden.group-options {
-  display: none;  
-}
-
-.p-accordion-header:hover .group-options {
+.p-accordion-header .group-options {
   display: flex; 
 }
 

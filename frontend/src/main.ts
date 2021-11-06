@@ -37,8 +37,7 @@ import Accordion from 'primevue/accordion';
 import AccordionTab from 'primevue/accordiontab';
 import Sidebar from 'primevue/sidebar';
 import draggable from 'vuedraggable'
-import VueI18n, { createI18n } from 'vue-i18n'
-
+import { createI18n } from 'vue-i18n'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -46,7 +45,7 @@ import 'primevue/resources/themes/saga-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
-
+import 'vue3-tour/dist/vue3-tour.css'
 
 import { messages, defaultLocale} from '@/i18n'
 

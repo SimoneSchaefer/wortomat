@@ -1,5 +1,7 @@
+import { Chapters } from "./Chapters";
 import { Confirm } from "./components/Confirm";
 import { InlineEdit } from "./components/InlineEdit";
+import { GroupingItemPage } from "./GroupingItemPage";
 
 export class NovelList {
     private inlineEdit = new InlineEdit();
@@ -53,7 +55,7 @@ export class NovelList {
 
     openNovel(index: number) {
         this.novelCards.eq(index).find('.option-buttons .p-button').eq(0).click();
-        cy.get('.chapters-view').should('be.visible');
+        new Chapters().displaysInfoBox('You haven\'t created any parts yet.');
     }
 
     deleteNovel(index: number, confirm: boolean) {
