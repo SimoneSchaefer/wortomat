@@ -4,7 +4,7 @@ import { Chapters } from "../../page-objects/Chapters";
 import { NovelList } from "../../page-objects/NovelList";
 
 
-describe('novels', () => {
+describe('parts', () => {
     const novelList = new NovelList();
     const chapters = new Chapters();
 
