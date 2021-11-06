@@ -23,8 +23,10 @@ jobs:
     - name: Build with Maven
       run: mvn clean install 
 
+    - run: mkdir app && mv backend/target/backend-0.0.1-SNAPSHOT.jar app/wortomat.jar
+
     - name: Run application
-      run: java -jar target/backend-0.0.1-SNAPSHOT.jar
+      run: java -jar app/wortomat.jar
 
     - uses: cypress-io/github-action@v2
       with:
@@ -43,12 +45,10 @@ jobs:
       with:
         name: cypress-videos
         path: cypress/videos
-    
-    - run: mkdir staging && cp target/*.jar staging
-    
+        
     - uses: actions/upload-artifact@v2
       with:
-        name: Package
-        path: staging
+        name: Wortomat
+        path: app
     
 
