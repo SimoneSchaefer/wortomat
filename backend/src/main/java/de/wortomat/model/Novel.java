@@ -62,6 +62,12 @@ public class Novel implements GroupingNovelItem {
         return Collections.emptyList();
     }
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
     @Override
     @JsonIgnore
     public List<? extends NovelItem> getChildren() {
@@ -69,7 +75,9 @@ public class Novel implements GroupingNovelItem {
     }
 
     @Override
-    public void setNovel(Novel novel) {
+    public void setNovel(Novel novel) { }
 
-    }
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
 }

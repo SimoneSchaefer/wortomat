@@ -36,6 +36,12 @@ public class Location implements NovelItem, ImageAware {
     @JsonIdentityReference(alwaysAsId = true)
     private LocationGroup locationGroup;
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
     @Override
     @JsonIgnore
     public GroupingNovelItem getParent() {
@@ -46,4 +52,8 @@ public class Location implements NovelItem, ImageAware {
     public void setParent(GroupingNovelItem parent) {
         this.locationGroup = (LocationGroup) parent;
     }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
 }

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/novels/{novelId}/location-groups/{groupId}/locations/")
+@RequestMapping("/novels/{novelId}/location-groups/{groupId}/location/")
 @CrossOrigin(origins = "*")
 public class LocationController {
     @Autowired
@@ -44,7 +44,7 @@ public class LocationController {
         return ResponseEntity.ok(this.locationService.update(novelId, groupId, location));
     }
 
-    @DeleteMapping("{researchId}")
+    @DeleteMapping("{locationId}")
     public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("locationId") Long locationId) {
         this.locationService.delete(novelId, locationId);
         return ResponseEntity.ok().build();

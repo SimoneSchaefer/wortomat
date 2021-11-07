@@ -3,7 +3,7 @@
     <div class="accordion-header">
         <WEditableLabel 
             :value="item.name" 
-            :placeHolderTitle="$t(`fallback_labels.no_name.${parentKey}`)"
+            :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
             @update-label="updateParentName(item, $event)" >
         </WEditableLabel>
         <div class="group-options" :class="{ hidden: modalOpen }">

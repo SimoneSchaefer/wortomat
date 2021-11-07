@@ -23,11 +23,26 @@ public class LocationGroup implements GroupingNovelItem {
     private Novel novel;
 
     @OneToMany(mappedBy = "locationGroup")
-    private List<Location> chapters = Collections.emptyList();
+    private List<Location> locations = Collections.emptyList();
+
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
 
     @Override
     @JsonIgnore
     public List getChildren() {
-        return this.getChapters();
+        return this.getLocations();
     }
+
+    @Override
+    public void setNovel(Novel novel) {
+        this.novel = novel;
+    }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
 }

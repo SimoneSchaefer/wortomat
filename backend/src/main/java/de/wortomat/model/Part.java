@@ -25,9 +25,24 @@ public class Part implements GroupingNovelItem {
     @OneToMany(mappedBy = "part")
     private List<Chapter> chapters = Collections.emptyList();
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
+    @Override
+    public void setNovel(Novel novel) {
+        this.novel = novel;
+    }
+
     @Override
     @JsonIgnore
     public List getChildren() {
-        return this.getChapters();
+        return this.chapters;
     }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
 }

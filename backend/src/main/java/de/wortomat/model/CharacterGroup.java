@@ -25,9 +25,24 @@ public class CharacterGroup implements GroupingNovelItem {
     @OneToMany(mappedBy = "characterGroup")
     private List<Character> characters = Collections.emptyList();
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
     @Override
     @JsonIgnore
     public List getChildren() {
-        return this.getCharacters();
+        return this.characters;
     }
+
+    @Override
+    public void setNovel(Novel novel) {
+        this.novel = novel;
+    }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
 }

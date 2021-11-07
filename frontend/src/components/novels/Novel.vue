@@ -5,17 +5,19 @@
         </template>
         <template #title>
             <div class="p-d-flex p-jc-between">
-                <EditableLabel v-bind:value="novel.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>
-                <div class="option-buttons">
-                    <router-link :to="'/write/' + novel.id + '/chapters'">
-                        <Button class="p-button-text" icon="pi pi-folder-open" iconPos="right"></Button>
-                    </router-link>
-                    <Button v-on:click="deleteNovel()" class="p-button-text p-button-danger" icon="pi pi-trash" iconPos="right" title="Delete"></Button>
-                </div>  
+                <EditableLabel v-bind:value="novel.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>                
             </div>        
         </template>
         <template #content>
             <EditableLabel v-bind:value="novel.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet." ></EditableLabel>
+        </template>
+        <template #footer>
+             <div class="option-buttons">
+                    <router-link :to="'/write/' + novel.id + '/chapters'">
+                        <Button class="p-button-primary" label="Open this novel"></Button>
+                    </router-link>
+                    <Button v-on:click="deleteNovel()" class="p-button-danger" title="Delete" label="Delete this novel"></Button>
+                </div> 
         </template>
     </Card>
 </template>
@@ -71,6 +73,12 @@ export default class Novel extends Vue {
 
 <style scoped>
 .option-buttons {
-    width: 5em;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.option-buttons > * {
+    margin-left: 1em;;
 }
 </style>

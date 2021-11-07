@@ -57,7 +57,7 @@ public class CharacterController {
         return ResponseEntity.ok(this.chapterService.createTag(novelId, tag));
     }*/
 
-    @DeleteMapping("{chapterId}")
+    @DeleteMapping("{characterId}")
     public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("characterId") Long characterId) {
         this.chapterService.delete(novelId, characterId);
         return ResponseEntity.ok().build();

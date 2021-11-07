@@ -6,13 +6,13 @@
             </div>
 
             <div class="meta">
-                <div class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" placeHolderTitle="No name added yet."></EditableLabel></div>
+                <div class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel></div>
                 <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :service="service"></EditableTags>
             </div>
         </div>
         <hr>
-        <b v-if="displaySummary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet."></EditableLabel></b>
-        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" placeHolderTitle="No detailed summary added yet."></EditableLabel></span>
+        <b v-if="displaySummary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" :placeHolderTitle="`fallback_labels.no_summary.${novelItemKey}`"></EditableLabel></b>
+        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" :placeHolderTitle="`fallback_labels.no_summary.${novelItemKey}`"></EditableLabel></span>
         <hr v-if="displaySummary || displayExtendedSummary">
         <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent"></EditableText>        
     </div>

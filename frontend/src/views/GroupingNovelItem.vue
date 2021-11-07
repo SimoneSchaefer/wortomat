@@ -5,7 +5,7 @@
   </div>
   <div v-else class="grouping-item-view">
     <Splitter style="height: 100%" :stateKey="parentKey">
-      <SplitterPanel class="split-content-left">
+      <SplitterPanel class="split-content-left" :size="30">
         <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
       </SplitterPanel>
       <SplitterPanel class="split-content-right">

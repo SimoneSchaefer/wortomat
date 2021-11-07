@@ -36,6 +36,12 @@ public class Research implements NovelItem, ImageAware {
     @JsonIdentityReference(alwaysAsId = true)
     private ResearchGroup researchGroup;
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
     @Override
     @JsonIgnore
     public GroupingNovelItem getParent() {
@@ -46,5 +52,8 @@ public class Research implements NovelItem, ImageAware {
     public void setParent(GroupingNovelItem parent) {
         this.researchGroup = (ResearchGroup) parent;
     }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
 
 }

@@ -45,7 +45,7 @@ export default class EditableLabel extends Vue {
   private draft: string | null = null;
 
   get placeHolder(): string {
-    return (this.placeHolderTitle || '');
+    return (this.$t(this.placeHolderTitle) || '');
   }
 
   get hasError() {

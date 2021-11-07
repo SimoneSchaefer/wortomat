@@ -33,6 +33,15 @@ public class Chapter implements NovelItem {
     @JsonIdentityReference(alwaysAsId = true)
     private Part part;
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
     @Override
     @JsonIgnore
     public GroupingNovelItem getParent() {

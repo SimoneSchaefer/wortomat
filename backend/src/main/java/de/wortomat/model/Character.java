@@ -36,6 +36,12 @@ public class Character implements NovelItem, ImageAware {
     @JsonIdentityReference(alwaysAsId = true)
     private CharacterGroup characterGroup;
 
+    @Override()
+    public Long getId() { return this.id; }
+
+    @Override()
+    public int getPosition() { return this.position; }
+
     @Override
     @JsonIgnore
     public GroupingNovelItem getParent() {
@@ -46,4 +52,8 @@ public class Character implements NovelItem, ImageAware {
     public void setParent(GroupingNovelItem parent) {
         this.characterGroup = (CharacterGroup) parent;
     }
+
+    @Override()
+    public void setPosition(int position) { this.position = position; }
+
 }
