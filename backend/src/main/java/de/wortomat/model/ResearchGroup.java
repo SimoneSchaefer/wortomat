@@ -41,7 +41,7 @@ public class ResearchGroup implements GroupingNovelItem {
     public void setNovel(Novel novel) {
         this.novel = novel;
     }
-    
+
     @Override()
     public void setPosition(int position) { this.position = position; }
 

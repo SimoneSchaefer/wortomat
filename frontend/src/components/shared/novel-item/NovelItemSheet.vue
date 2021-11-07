@@ -11,8 +11,8 @@
             </div>
         </div>
         <hr>
-        <b v-if="displaySummary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" :placeHolderTitle="`fallback_labels.no_summary.${novelItemKey}`"></EditableLabel></b>
-        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" :placeHolderTitle="`fallback_labels.no_summary.${novelItemKey}`"></EditableLabel></span>
+        <b v-if="displaySummary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
+        <span v-if="displayExtendedSummary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
         <hr v-if="displaySummary || displayExtendedSummary">
         <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent"></EditableText>        
     </div>

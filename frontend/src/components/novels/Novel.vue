@@ -5,11 +5,11 @@
         </template>
         <template #title>
             <div class="p-d-flex p-jc-between">
-                <EditableLabel v-bind:value="novel.name" @update-label="updateName" placeHolderTitle="No title added yet."></EditableLabel>                
+                <EditableLabel v-bind:value="novel.name" @update-label="updateName" placeHolderTitle="fallback_labels.no_name.novel"></EditableLabel>                
             </div>        
         </template>
         <template #content>
-            <EditableLabel v-bind:value="novel.summary" @update-label="updateSummary" placeHolderTitle="No summary added yet." ></EditableLabel>
+            <EditableLabel v-bind:value="novel.summary" @update-label="updateSummary" placeHolderTitle="fallback_labels.no_summary" ></EditableLabel>
         </template>
         <template #footer>
              <div class="option-buttons">

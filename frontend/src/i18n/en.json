@@ -31,15 +31,21 @@
     },
     "add_child": {
         "parts": "Add chapter",
-        "research_groups": "Add research item"
+        "research_groups": "Add research item",
+        "character_groups": "Add character",
+        "location_groups": "Add location"
     },
     "remove_parent": {
         "parts": "Delete part",
-        "research_groups": "Delete Research Group"
+        "research_groups": "Delete Research Group",
+        "location_groups": "Delete Location Group",
+        "character_groups": "Delete Character Group"
     },
     "remove_child": {
         "parts": "Delete chapter",
-        "research_groups": "Delete research item"
+        "research_groups": "Delete research item",
+        "character_groups": "Delete character",
+        "location_groups": "Delete location"
     },
     "fallback_labels": {
         "no_name": {
@@ -50,10 +56,12 @@
             "characters":  "Unnamed character",
             "character_groups":  "Unnamed character group",
             "locations": "Unnamed location",
-            "location_groups":  "Unnamed location group"
+            "location_groups":  "Unnamed location group",
+            "novel": "Unnamed novel"
 
         },
-        "no_summary": "No summary added yet"
+        "no_summary": "No summary added yet",
+        "no_extended_summary": "No detailed summary added yet"
     },
     "timeline": {
         "select_research": "Select research",
