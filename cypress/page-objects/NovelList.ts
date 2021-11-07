@@ -15,7 +15,7 @@ export class NovelList {
     }
 
     hasDummyTitle(index: number) {
-        this.title(index).find('.dummy').should('contain.text', 'No title')
+        this.title(index).find('.dummy').should('contain.text', 'Unnamed novel')
     }
 
     hasDummySummary(index: number) {
