@@ -41,7 +41,7 @@ export class GroupingItemPage {
     }
 
     displaysInfoBox(expectedText: string) {
-        cy.get('.help-note').should('contain.text', expectedText);
+        cy.get('.help-note').find('iframe').its('0.contentDocument.body').should('contain.text', expectedText);
     }
 
     removeChild(parentIndex: number, childIndex: number, confirm = true) {

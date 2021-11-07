@@ -15,8 +15,8 @@ export const novelItemsSpecDefinition: NovelItemSpec[] = [{
         hasImage: false,
         unnamedParentText: 'Unnamed part',
         unnamedChildText: 'Unnamed chapter',
-        emptyParentInfo: 'to create a new part',
-        emptyChildInfo: 'Create a new chapter by'
+        emptyParentInfo: 'reate a new part',
+        emptyChildInfo: 'reate a new chapter'
     },{
         specName: 'characters',
         index: 2,
@@ -24,22 +24,22 @@ export const novelItemsSpecDefinition: NovelItemSpec[] = [{
         unnamedParentText: 'Unnamed character group',
         unnamedChildText: 'Unnamed character',
         emptyParentInfo: 'reate a new character group',
-        emptyChildInfo: 'Create a new character by'
+        emptyChildInfo: 'reate a new character'
     },{
         specName: 'research',
         index: 3,
         hasImage: false,
         unnamedParentText: 'Unnamed research group',
         unnamedChildText: 'Unnamed research item',
-        emptyParentInfo: 'You haven\'t created any research groups yet',
-        emptyChildInfo: 'Create a new research item by '
+        emptyParentInfo: 'reate a new research group',
+        emptyChildInfo: 'reate a new research item'
     },{
         specName: 'locations',
         index: 4,
         hasImage: false,
         unnamedParentText: 'Unnamed location group',
         unnamedChildText: 'Unnamed location',
-        emptyParentInfo: 'Create a new location group by',
-        emptyChildInfo: 'Create a new location by'
+        emptyParentInfo: 'reate a new location group',
+        emptyChildInfo: 'reate a new location'
     }
 ]

@@ -59,64 +59,6 @@
         "select_research": "Select research",
         "select_chapter": "Select chapter"
     },
-    "intro": {
-        "parts": {
-            "title": "Welcome to your novel",
-            "introduction_1": "By opening wortomat you made the first step towards writing your novel! ✊",
-            "content_1": "This is the 'parts' view. This is where your actual writing is done. Parts group multiple chapters together.",
-            "content_2": "Let's get started! Use the + button in the menu on the bottom left to create a new part.",
-            "content_3": ""
-        }, 
-        "chapters": {
-            "title": "Creating chapters",
-            "introduction_1": "Create a new chapter by clicking the '+' button next to a part name.",
-            "content_1": "By the way: To change a part's name, click on its name.",
-            "content_2": "",
-            "content_3": ""
-        },
-        "research_groups": {
-            "title": "The Research view",
-            "introduction_1": "By opening wortomat you made the first step towards writing your novel! ✊",
-            "content_1": "This is the 'research' view. Put here anything that you need to look into - historical events, some technology background or whatever you need.",
-            "content_2": "You haven't created any research groups yet. Use the + button in the menu on the bottom left to create one.",
-            "content_3": ""
-        }, 
-        "research": {
-            "title": "Creating research items",
-            "introduction_1": "Create a new research item by clicking the '+' button next to a research group's name.",
-            "content_1": "By the way: To change a group's name, click on its name.",
-            "content_2": "",
-            "content_3": ""
-        }, 
-        "characters": {
-            "title": "Creating characters",
-            "introduction_1": "Create a new character by clicking the '+' button next to a character group's name.",
-            "content_1": "By the way: To change a group's name, click on its name.",
-            "content_2": "",
-            "content_3": ""
-        },
-        "character_groups": {
-            "title": "Where your characters come to life",
-            "introduction_1": "Reliable characters are the key to a successful novel. Make sure to invest some time to get to know them.",
-            "content_1": "What is their motivation? Are they shy, are they ambitious?",
-            "content_2": "Create a new character group by clicking the '+' button in the menu on the bottom left.",
-            "content_3": ""
-        }, 
-        "locations": {
-            "title": "Creating locations",
-            "introduction_1": "No matter where your story takes place - if you write Science Fiction or a Thriller. Having a detailed overview over your locations will help you to describe them more atmospheric to your readers!",
-            "content_1": "Create a new location by clicking the '+' button in the menu on the bottom left.",
-            "content_2": "",
-            "content_3": ""
-        },
-        "location_groups": {
-            "title": "Where will your novel takes us?",
-            "introduction_1": "No matter where your story takes place - if you write Science Fiction or a Thriller. Having a detailed overview over your locations will help you to describe them more atmospheric to your readers!",
-            "content_1": "Create a new location group by clicking the '+' button in the menu on the bottom left.",
-            "content_2": "",
-            "content_3": ""
-        }
-    },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",
     "please_confirm": "Please confirm",

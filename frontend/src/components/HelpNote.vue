@@ -1,16 +1,8 @@
 <template>
-    <Card class="help-note">
-        <template #title>
-          <p>{{ $t(`intro.${itemKey}.title`)}}</p>
-          <hr />
-        </template>
-        <template #content>
-          <p>{{ $t(`intro.${itemKey}.introduction_1`)}}</p>
-          <p>{{ $t(`intro.${itemKey}.content_1`)}}</p>
-          <p>{{ $t(`intro.${itemKey}.content_2`)}}</p>
-          <p>{{ $t(`intro.${itemKey}.content_3`)}}</p>
-        </template>
-      </Card>     
+    <div class="help-note">
+        <iframe style="font-family: Roboto"        
+          :src="`/assets/help-notes/en/${itemKey}.html`" /> <!-- TODO consider user's language -->
+    </div>     
 </template>
 
 <script lang="ts">
@@ -24,8 +16,19 @@ export default class HelpNote extends  Vue {
 </script>
 
 <style scoped>
+iframe {
+  width: 100%;
+  height: 30em;
+  border: none;
+}
 .help-note {
+  height: 30em;
+  min-width: 40em;
   max-width: 50em;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 1em;
+
 }
 
 p {
