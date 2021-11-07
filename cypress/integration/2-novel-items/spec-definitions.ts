@@ -35,7 +35,7 @@ export const novelItemsSpecDefinition: NovelItemSpec[] = [{
         emptyChildInfo: 'Create a new research item by '
     },{
         specName: 'locations',
-        index: 3,
+        index: 4,
         hasImage: false,
         unnamedParentText: 'Unnamed location group',
         unnamedChildText: 'Unnamed location',
