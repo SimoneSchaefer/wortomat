@@ -29,11 +29,11 @@ public class Novel implements GroupingNovelItem {
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
-    private List<Character> characters;
+    private List<CharacterGroup> characters;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
-    private List<Location> locations;
+    private List<LocationGroup> locations;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")

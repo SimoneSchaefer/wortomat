@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import OpenedNovel from '../views/OpenedNovel.vue'
 import Chapters from '../views/Chapters.vue'
 import Characters from '../views/Characters.vue'
+import Locations from '../views/Locations.vue'
 import Research from '../views/Research.vue'
 import Tags from '../views/Tags.vue'
 import Export from '../views/Export.vue'
@@ -26,6 +27,9 @@ const routes: Array<RouteRecordRaw> = [
       },{
         path: 'research',
         component: Research,
+      },{
+        path: 'location',
+        component: Locations,
       },{
         path: 'tags',
         component: Tags,

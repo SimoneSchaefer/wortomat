@@ -18,11 +18,11 @@ export default class Characters extends Vue {
   }
 
   get parentKey(): NOVEL_ITEM_KEYS {
-    return NOVEL_ITEM_KEYS.CHARACTER_GROUPS;
+    return NOVEL_ITEM_KEYS.LOCATION_GROUPS;
   }
   
   get childKey(): NOVEL_ITEM_KEYS {
-    return NOVEL_ITEM_KEYS.CHARACTERS;
+    return NOVEL_ITEM_KEYS.LOCATIONS;
   }
 }
 </script>

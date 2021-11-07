@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/novels/{novelId}/locations/")
+@RequestMapping("/novels/{novelId}/location-groups/{groupId}/locations/")
 @CrossOrigin(origins = "*")
 public class LocationController {
     @Autowired
@@ -29,31 +29,28 @@ public class LocationController {
     private FileResponseCreator fileResponseCreator;
 
     @PostMapping
-    public ResponseEntity<Location> create(@PathVariable("novelId") Long novelId, @RequestBody Location research) {
-        return ResponseEntity.ok(this.locationService.create(novelId, research));
+    public ResponseEntity<NovelItem> create(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Location location) {
+        return ResponseEntity.ok(this.locationService.create(novelId, groupId, location));
     }
 
     @PutMapping
-    public ResponseEntity<Location> update(@PathVariable("novelId") Long novelId, @RequestBody Location research) {
-        return ResponseEntity.ok(this.locationService.update(novelId, research));
+    public ResponseEntity<NovelItem> update(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Location location) {
+        return ResponseEntity.ok(this.locationService.update(novelId, groupId, location));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Location>> get(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.locationService.get(novelId));
-    }
-
-    @DeleteMapping("{locationId}")
+    @DeleteMapping("{researchId}")
     public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("locationId") Long locationId) {
         this.locationService.delete(novelId, locationId);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("updatePositions")
-    public ResponseEntity<List<Location>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
-        return ResponseEntity.ok(this.locationService.updatePositions(novelId, updatedPositions));
-    }
-
+   /*
     @GetMapping("tags")
     public ResponseEntity<List<LocationTag>> tags(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.locationService.getTags(novelId));
@@ -62,7 +59,7 @@ public class LocationController {
     @PostMapping("tags")
     public ResponseEntity<LocationTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody LocationTag tag) {
         return ResponseEntity.ok(this.locationService.createTag(novelId, tag));
-    }
+    }*/
 
     @PostMapping("{locationId}/upload")
     public ResponseEntity<Image> upload(@PathVariable("novelId") Long novelId, @PathVariable("locationId") Long locationId, @RequestParam("upload[]") MultipartFile file) throws IOException {

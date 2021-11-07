@@ -22,6 +22,7 @@ export default class Spinner extends Vue {
   position: fixed;
   pointer-events: none;
   z-index: 999;
+  top: 0;
   height: 100%;
   width: 100%;
   display: flex;

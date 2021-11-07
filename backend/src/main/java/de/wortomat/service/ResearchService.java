@@ -1,5 +1,6 @@
 package de.wortomat.service;
 
+import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Research;
 import de.wortomat.model.ResearchGroup;
 import de.wortomat.repository.NovelItemRepository;
@@ -24,7 +25,7 @@ public class ResearchService extends NovelItemService<ResearchGroup, Research>  
 
     @Override
     public Research get(Long novelId, Long itemId) {
-        return this.researchRepository.findById(itemId).get();
+        return this.researchRepository.findById(itemId).orElseThrow(NotFoundException::new);
     }
 
     @Override

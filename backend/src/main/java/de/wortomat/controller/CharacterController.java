@@ -1,9 +1,8 @@
 package de.wortomat.controller;
 
-import de.wortomat.model.ChapterTag;
 import de.wortomat.model.Character;
-import de.wortomat.model.CharacterTag;
 import de.wortomat.model.Image;
+import de.wortomat.model.NovelItem;
 import de.wortomat.service.CharacterService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -15,10 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
-@RequestMapping("/novels/{novelId}/characters/")
+@RequestMapping("/novels/{novelId}/character-groups/{groupId}/characters/")
 @CrossOrigin(origins = "*")
 public class CharacterController {
     @Autowired
@@ -30,41 +28,39 @@ public class CharacterController {
     @Autowired
     private FileResponseCreator fileResponseCreator;
 
+    @Autowired
+    private CharacterService chapterService;
 
     @PostMapping
-    public ResponseEntity<Character> create(@PathVariable("novelId") Long novelId, @RequestBody Character character) {
-        return ResponseEntity.ok(this.characterService.create(novelId, character));
+    public ResponseEntity<NovelItem> create(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Character character) {
+        return ResponseEntity.ok(this.chapterService.create(novelId, groupId, character));
     }
 
     @PutMapping
-    public ResponseEntity<Character> update(@PathVariable("novelId") Long novelId, @RequestBody Character character) {
-        return ResponseEntity.ok(this.characterService.update(novelId, character));
+    public ResponseEntity<Character> update(
+            @PathVariable("novelId") Long novelId,
+            @PathVariable("groupId") Long groupId,
+            @RequestBody Character chapter) {
+        return ResponseEntity.ok(this.chapterService.update(novelId, groupId, chapter));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Character>> get(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.characterService.get(novelId));
-    }
-
-    @DeleteMapping("{chapterId}")
-    public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("chapterId") Long chapterId) {
-        this.characterService.delete(novelId, chapterId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("updatePositions")
-    public ResponseEntity<List<Character>> updatePosition(@PathVariable("novelId") Long novelId, @RequestBody List<Long> updatedPositions) {
-        return ResponseEntity.ok(this.characterService.updatePositions(novelId, updatedPositions));
-    }
-
-    @GetMapping("tags")
+   /* @GetMapping("tags")
     public ResponseEntity<List<CharacterTag>> tags(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.characterService.getTags(novelId));
+        return ResponseEntity.ok(this.chapterService.getTags(novelId));
     }
 
     @PostMapping("tags")
     public ResponseEntity<CharacterTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody CharacterTag tag) {
-        return ResponseEntity.ok(this.characterService.createTag(novelId, tag));
+        return ResponseEntity.ok(this.chapterService.createTag(novelId, tag));
+    }*/
+
+    @DeleteMapping("{chapterId}")
+    public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("characterId") Long characterId) {
+        this.chapterService.delete(novelId, characterId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("{characterId}/upload")

@@ -12,7 +12,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
     GroupingNovelItem
   }
 })
-export default class Research extends Vue {
+export default class Chapters extends Vue {
   mounted(): void {
     this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
   }

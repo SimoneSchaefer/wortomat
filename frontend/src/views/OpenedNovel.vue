@@ -20,12 +20,13 @@ export default class OpenedNovel extends Vue {
 
   get menuItems(): Array<MenuModel> {
     return [
-      {label: 'home', icon: 'fa fa-book', to: '/'},
-      {label: 'chapters', icon: 'fa fa-book-open', to: 'chapters'},
-      {label: 'characters', icon: 'fa fa-users', to: 'characters'},
-      {label: 'research', icon: 'fa fa-flask', to: 'research'},
-      {label: 'timeline', icon: 'fa fa-clock', to: 'plot'},
-      {label: 'export', icon: 'fa fa-file-export', to: 'export'},
+      { label: 'home', icon: 'fa fa-book', to: '/' },
+      { label: 'chapters', icon: 'fa fa-book-open', to: 'chapters' },
+      { label: 'characters', icon: 'fa fa-users', to: 'characters' },
+      { label: 'research', icon: 'fa fa-flask', to: 'research' },
+      { label: 'location', icon: 'fa fa-map', to: 'location' },
+      { label: 'timeline', icon: 'fa fa-clock', to: 'plot' },
+      { label: 'export', icon: 'fa fa-file-export', to: 'export' },
     ]
   }
 }

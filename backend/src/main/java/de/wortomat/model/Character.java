@@ -1,5 +1,6 @@
 package de.wortomat.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class Character implements PositionAware, ImageAware {
+public class Character implements NovelItem, ImageAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -19,10 +20,10 @@ public class Character implements PositionAware, ImageAware {
 
     private String extended_summary;
 
+    private int position;
+
     @Column(columnDefinition = "TEXT")
     private String content;
-
-    private int position;
 
     @ManyToMany
     private List<Image> images;
@@ -32,5 +33,17 @@ public class Character implements PositionAware, ImageAware {
 
     @JsonIgnore
     @ManyToOne
-    private Novel novel;
+    @JsonIdentityReference(alwaysAsId = true)
+    private CharacterGroup characterGroup;
+
+    @Override
+    @JsonIgnore
+    public GroupingNovelItem getParent() {
+        return this.getCharacterGroup();
+    }
+
+    @Override
+    public void setParent(GroupingNovelItem parent) {
+        this.characterGroup = (CharacterGroup) parent;
+    }
 }

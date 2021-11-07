@@ -1,49 +1,50 @@
 package de.wortomat.service;
 
+import de.wortomat.model.*;
 import de.wortomat.model.Character;
-import de.wortomat.model.CharacterTag;
 import de.wortomat.repository.CharacterRepository;
-import de.wortomat.repository.PositionAwareRepository;
-import de.wortomat.repository.tags.CharacterTagRepository;
+import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.repository.ResearchRepository;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.ImageAwareService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class CharacterService extends PositionAwareService<Character> implements ImageAwareService<Character> {
+public class CharacterService extends NovelItemService<CharacterGroup, Character> implements ImageAwareService<Character> {
     @Autowired
-    CharacterRepository characterRepository;
-
-    @Autowired
-    CharacterTagRepository characterTagRepository;
+    CharacterRepository researchRepository;
 
     @Autowired
-    NovelService novelService;
-
-    @Override
-    public PositionAwareRepository<Character,Long> getRepository() {
-        return this.characterRepository;
-    }
-
-    public Character update(Long novelId, Character item) {
-        item.setNovel(novelService.get(novelId));
-        return this.characterRepository.save(item);
-    }
-
-    public List<CharacterTag> getTags(Long novelId) {
-        return this.characterTagRepository.findAllByNovelIdOrderByNameAsc(novelId);
-    }
-
-    public CharacterTag createTag(Long novelId, CharacterTag tag) {
-        tag.setNovel(novelService.get(novelId));
-        return this.characterTagRepository.save(tag);
-    }
+    CharacterGroupService characterGroupService;
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.CHARACTER;
+        return EntityType.RESEARCH;
+    }
+
+    @Override
+    public Character get(Long novelId, Long itemId) {
+        return this.researchRepository.findById(itemId).get();
+    }
+
+    @Override
+    public Character update(Long novelId, Character item) {
+        return this.researchRepository.save(item);
+    }
+
+    @Override
+    GroupingItemService<CharacterGroup, Character> getParentService() {
+        return this.characterGroupService;
+    }
+
+    @Override
+    NovelItemRepository<Character, Long> getRepository() {
+        return this.researchRepository;
+    }
+
+    @Override
+    Character getMaxPositionItem(Long parentId) {
+        return this.researchRepository.findTopByCharacterGroupIdOrderByPositionDesc(parentId);
     }
 }

@@ -1,49 +1,50 @@
 package de.wortomat.service;
 
+import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Location;
-import de.wortomat.model.LocationTag;
+import de.wortomat.model.LocationGroup;
 import de.wortomat.repository.LocationRepository;
-import de.wortomat.repository.PositionAwareRepository;
-import de.wortomat.repository.tags.LocationTagRepository;
+import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.ImageAwareService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class LocationService extends PositionAwareService<Location> implements ImageAwareService<Location> {
+public class LocationService extends NovelItemService<LocationGroup, Location>  implements ImageAwareService<Location> {
     @Autowired
     LocationRepository locationRepository;
 
     @Autowired
-    NovelService novelService;
-
-    @Autowired
-    LocationTagRepository locationTagRepository;
-
-    @Override
-    public PositionAwareRepository<Location,Long> getRepository() {
-        return this.locationRepository;
-    }
-
-    public Location update(Long novelId, Location item) {
-        item.setNovel(novelService.get(novelId));
-        return this.locationRepository.save(item);
-    }
-
-    public LocationTag createTag(Long novelId, LocationTag tag) {
-        tag.setNovel(novelService.get(novelId));
-        return this.locationTagRepository.save(tag);
-    }
-
-    public List<LocationTag> getTags(Long novelId) {
-        return this.locationTagRepository.findAllByNovelIdOrderByNameAsc(novelId);
-    }
+    LocationGroupService locationGroupService;
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.LOCATION;
+        return EntityType.RESEARCH;
+    }
+
+    @Override
+    public Location get(Long novelId, Long itemId) {
+        return this.locationRepository.findById(itemId).orElseThrow(NotFoundException::new);
+    }
+
+    @Override
+    public Location update(Long novelId, Location item) {
+        return this.locationRepository.save(item);
+    }
+
+    @Override
+    GroupingItemService<LocationGroup, Location> getParentService() {
+        return this.locationGroupService;
+    }
+
+    @Override
+    NovelItemRepository<Location, Long> getRepository() {
+        return this.locationRepository;
+    }
+
+    @Override
+    Location getMaxPositionItem(Long parentId) {
+        return this.locationRepository.findTopByLocationGroupIdOrderByPositionDesc(parentId);
     }
 }

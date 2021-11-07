@@ -57,7 +57,7 @@ public class ResearchController {
     @PostMapping("tags")
     public ResponseEntity<ResearchTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody ResearchTag tag) {
         return ResponseEntity.ok(this.researchService.createTag(novelId, tag));
-    }*/
+    }}*/
 
 
     @PostMapping("{researchId}/upload")

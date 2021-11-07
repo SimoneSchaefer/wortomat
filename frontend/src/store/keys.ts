@@ -4,7 +4,10 @@ export enum NOVEL_ITEM_KEYS {
     CHAPTERS = 'chapters',
     RESEARCH_GROUPS = 'research_groups',
     RESEARCH = 'research',
+    CHARACTER_GROUPS = 'character_groups',
     CHARACTERS = 'characters',
+    LOCATION_GROUPS = 'location_groups',
+    LOCATIONS = 'locations',
     TAGS = 'tags',
     TIMELINE = 'timeline'
 }

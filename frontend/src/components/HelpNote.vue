@@ -24,6 +24,10 @@ export default class HelpNote extends  Vue {
 </script>
 
 <style scoped>
+.help-note {
+  max-width: 50em;
+}
+
 p {
   padding: 1em 1em 0 1em;
 }
