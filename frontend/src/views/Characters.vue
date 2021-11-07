@@ -13,10 +13,6 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   }
 })
 export default class Characters extends Vue {
-  mounted(): void {
-    this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
-  }
-
   get parentKey(): NOVEL_ITEM_KEYS {
     return NOVEL_ITEM_KEYS.CHARACTER_GROUPS;
   }
