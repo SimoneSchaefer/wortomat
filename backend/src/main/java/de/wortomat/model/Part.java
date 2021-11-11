@@ -36,6 +36,10 @@ public class Part implements GroupingNovelItem {
         this.novel = novel;
     }
 
+    public List<Chapter> getChapters() {
+        return this.chapters;
+    }
+
     @Override
     @JsonIgnore
     public List getChildren() {

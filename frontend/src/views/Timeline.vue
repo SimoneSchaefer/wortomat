@@ -1,7 +1,10 @@
 <template>
-  <WTimelineSidebarMenu :parentKey="parentKey"/>
+  <WSidebarMenu :parentKey="parentKey"/>
   <div class="plot">
-    <div class="timeline">
+    <div v-if="!events.length" class="empty">
+      <WHelpNote :itemKey="parentKey"></WHelpNote>
+    </div>
+    <div v-else class="timeline">
         <Splitter style="height: 100%" stateKey="timeline">
           <SplitterPanel>      
               <ScrollPanel style="height: 100%">
@@ -10,7 +13,8 @@
                   :selectedEvent="selectedItem"
                   @update-date="updateDate"
                   @update-name="updateName"
-                  @select="select"></WTimeline>
+                  @select="select"
+                  @deleteEvent="deleteEvent($event)"></WTimeline>
               </ScrollPanel>
           </SplitterPanel>
           <SplitterPanel class="split-content-right sheet-list">
@@ -67,7 +71,7 @@ import NovelItems from "./NovelItems.vue";
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
-import WTimelineSidebarMenu from "@/components/shared/menu/TimelineSidebarMenu.vue";
+import WSidebarMenu from "@/components/shared/menu/SidebarMenu.vue";
 import EditTimelineEvent from "@/components/timeline/EditableTimelineEvent.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/getters";
@@ -75,6 +79,7 @@ import { ChapterService } from "@/service/Chapter.service";
 import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
+import WHelpNote from '@/components/HelpNote.vue';
 
 @Options({
   components: {
@@ -83,9 +88,10 @@ import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
     EditableDate,
     EditTimelineEvent,
     NovelItemSheet,
-    WTimelineSidebarMenu,
+    WSidebarMenu,
     WTimeline,
-    WNovelItemDropdown
+    WNovelItemDropdown,
+    WHelpNote
   },
 })
 export default class Plot extends Vue {
@@ -96,10 +102,10 @@ export default class Plot extends Vue {
     // TODO: get only list of IDs from backend
     let flatList = [];
     for (const part of getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS)) {
-      flatList = flatList.concat(part.chapters);
+      if (part.chapters?.length) flatList = flatList.concat(part.chapters);
     }
     const eventChapters = [];
-    for (const chapter of event.chapters) {
+    for (const chapter of (event.chapters || [])) {
       const arg = flatList.find(otherChapter => otherChapter.id === chapter['id']);
       if (arg) {
         eventChapters.push(arg);
@@ -112,11 +118,11 @@ export default class Plot extends Vue {
     // TODO: get only list of IDs from backend
     let flatList = [];
     for (const group of getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH_GROUPS)) {
-      flatList = flatList.concat(group.research);
+      if (group.research?.length) flatList = flatList.concat(group.research);
     }
 
     const eventResearch = [];
-    for (const research of event.research) {
+    for (const research of (event.research || [])) {
       const bla = flatList.find(otherresearch => otherresearch.id === research['id']);
       if (bla) {
       eventResearch.push(flatList.find(otherresearch => otherresearch.id === research['id']));
@@ -179,13 +185,21 @@ export default class Plot extends Vue {
     this.$store.dispatch('selectItems', { key: this.novelItemKey, items: [item ] });
   }
 
+  deleteEvent(event: TimelineEventModel) {
+    console.log('DELETE EVENT', event)
+    this.$store.dispatch('deleteItems', { 
+        key: this.novelItemKey, 
+        novelId: this.$store.state.currentNovel?.id,
+        items: [event]
+    });
+  }
+
 
   updateName(update: { newValue: string, item: TimelineEventModel }): void {
     this.updateItem(update.item, { name: update.newValue });   
   } 
 
   updateDate(update: { newValue: string, item: TimelineEventModel }): void {
-    console.log('UPDATE DAE', update)
     this.updateItem(update.item, { eventDate: update.newValue });   
   }  
 
@@ -257,7 +271,16 @@ export default class Plot extends Vue {
 
 <style>
 
+.empty {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
 .p-scrollpanel-wrapper {
+
   z-index: inherit !important;
 }
 

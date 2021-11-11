@@ -1,18 +1,26 @@
 <template>
 <div class="w-timeline">
+    <WConfirmDialog ref="confirm" @accept="deleteEvent"></WConfirmDialog>
     <div v-for="(event) of events" :key="event.id">
         <div class="w-timeline-event" v-bind:class="{ 'w-timeline-selected-event': selected(event)}">
             <div class="w-timeline-details w-timeline-details-left">
                 <div class="w-timeline-details-frame">
-                    <div class="w-timeline-event-date">
-                        <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="No date added yet."></EditableDate>
+                    <div class="w-timeline-event-upper-part">
+                        <div class="w-timeline-event-date">
+                            <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="fallback_labels.no_date"></EditableDate>
+                        </div>                           
+                        <div class="w-timeline-options">
+                            <WButton color="primary" type="text" icon="fa fa-plus" title="timeline.add_reference"/>
+                            <WButton @click="confirm(event)" color="danger" type="text" icon="fa fa-trash" title="timeline.delete_event"/>
+                        </div>
                     </div>
+                    
                     <div class="w-timeline-separator">
                         <div class="w-timeline-connector">&nbsp;</div>
                         <div class="w-timeline-marker" @click="select(event)">&nbsp;</div>
                     </div>
                     <div class="w-timeline-event-name">
-                        <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" placeHolderTitle="No title added yet."></EditableLabel>
+                        <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel>
                     </div>
                 </div>
             </div>
@@ -24,18 +32,23 @@
 
 <script lang="ts">
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
-import { Options, mixins, Vue } from "vue-class-component";
+import { Options, Vue } from "vue-class-component";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { Emit, Prop } from "vue-property-decorator";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
+import WButton from '@/components/shared/Button.vue';
+import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
+import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 
 @Options({
   components: {
       EditableDate,
-      EditableLabel
+      EditableLabel,
+      WButton,
+      WConfirmDialog
   },
-  emits: [ 'select', 'update-date', 'update-name']
+  emits: [ 'select', 'update-date', 'update-name', 'delete-event']
 })
 export default class WTimeline extends Vue {
     @Prop() events: TimelineEventModel[];
@@ -56,6 +69,15 @@ export default class WTimeline extends Vue {
         return { item, newValue };
     }
 
+    @Emit('delete-event')
+    deleteEvent(item: { event: TimelineEventModel }): TimelineEventModel {
+        return item.event;
+    }
+    
+    confirm(event: TimelineEventModel): void {
+        (this.$refs.confirm as ConfirmDialog).getDecision({ event: event});
+    }
+
     selected(item: TimelineEventModel) {
         return (this.selectedEvent?.id === item.id);
     }
@@ -71,11 +93,25 @@ export default class WTimeline extends Vue {
 .w-timeline {
     padding: 3em;
     height: 100%;;
+    background: var(--light-background)
 }
 
 .w-timeline-event {
     display: flex;
     min-height: 4em;
+}
+
+.w-timeline-event-upper-part {
+    display: flex;
+    justify-content: space-between;
+}
+
+.w-timeline-event-upper-part .w-timeline-event-date{
+    flex-grow: 1;
+}
+
+.w-timeline-event-upper-part .w-timeline-options{
+    display: flex;
 }
 
 .w-timeline-selected-event .w-timeline-details-frame {
@@ -94,13 +130,13 @@ export default class WTimeline extends Vue {
     position: relative;
     margin-bottom: 1em;
 }
-.w-timeline-event-date,
+.w-timeline-event-upper-part,
 .w-timeline-event-name {
     box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
 }
 
 
-.w-timeline-details-left .w-timeline-event-date,
+.w-timeline-details-left .w-timeline-event-upper-part,
 .w-timeline-details-left .w-timeline-event-name {
     margin-right: 1em;
     background-color: #fff;
@@ -126,7 +162,7 @@ export default class WTimeline extends Vue {
     cursor: pointer;
     width: 1em;
     height: 1em;
-    background-color: rgba(150, 206, 255, 0.733);
+    background-color: rgba(150, 206, 255);
     border-radius: 50%;
     z-index: 5;
 }
@@ -139,7 +175,7 @@ export default class WTimeline extends Vue {
 }
 
 .w-timeline-connector {
-    background-color: rgba(150, 206, 255, 0.733);
+    background-color: rgba(150, 206, 255);
     height: 5px;   
     flex-grow: 2;
 }
@@ -151,7 +187,6 @@ export default class WTimeline extends Vue {
 }
 
 .w-timeline-details-left {
-    text-align: right;
     border-right: 2px solid #d2d2d2;
 }
 .w-timeline-details-right {

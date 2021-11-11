@@ -13,6 +13,10 @@ export default abstract class UpdateItemMixin extends Vue {
         this.updateItem(this.parentKey, item, { name: newValue });   
     }
 
+    updateSummary(newValue: string, item: BaseModel): void {
+        this.updateItem(this.parentKey, item, { summary: newValue });   
+    } 
+
     updateItem (itemKey: NOVEL_ITEM_KEYS, oldItem: BaseModel, overrideValues ) {
         this.$store.dispatch('updateItem', { 
             key: itemKey, 

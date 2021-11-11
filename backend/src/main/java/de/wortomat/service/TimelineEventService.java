@@ -33,7 +33,6 @@ public class TimelineEventService {
         return this.timelineEventRepository.save(timelineEvent);
     }
 
-
     public TimelineEvent addChapterReference(Long novelId, Long timelineEventId, Long chapterId) {
         TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).get();
         Chapter chapter = this.chapterService.getRepository().findById(chapterId).get();
@@ -53,6 +52,15 @@ public class TimelineEventService {
         TimelineEvent bla = this.timelineEventRepository.save(timelineEvent);
         TimelineEvent blubb = this.timelineEventRepository.findById(timelineEventId).get();
         return blubb;
+    }
+
+    public void delete(Long novelId, Long eventId) {
+        this.timelineEventRepository.deleteById(eventId);
+    }
+
+    public void deleteAll(Long novelId) {
+        List<TimelineEvent> allItems = this.timelineEventRepository.findAllByNovelIdOrderByEventDate(novelId);
+        this.timelineEventRepository.deleteAll(allItems);
     }
 
     public List<TimelineEvent> getAll(Long novelId) {

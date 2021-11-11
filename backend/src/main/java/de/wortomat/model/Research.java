@@ -56,4 +56,6 @@ public class Research implements NovelItem, ImageAware {
     @Override()
     public void setPosition(int position) { this.position = position; }
 
+    @Override
+    public List<Image> getImages() { return this.images; }
 }

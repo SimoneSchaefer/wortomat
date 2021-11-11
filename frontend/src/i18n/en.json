@@ -57,15 +57,19 @@
             "character_groups":  "Unnamed character group",
             "locations": "Unnamed location",
             "location_groups":  "Unnamed location group",
-            "novel": "Unnamed novel"
+            "novel": "Unnamed novel",
+            "timeline": "Unnamed event"
 
         },
         "no_summary": "No summary added yet",
-        "no_extended_summary": "No detailed summary added yet"
+        "no_extended_summary": "No detailed summary added yet",
+        "no_date": "No date added yet"
     },
     "timeline": {
         "select_research": "Select research",
-        "select_chapter": "Select chapter"
+        "select_chapter": "Select chapter",
+        "add_reference": "Add a chapter of research reference",
+        "delete_event": "Delete this timeline event"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",

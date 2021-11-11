@@ -89,12 +89,18 @@ const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Bas
     if (KEY_TO_CHILD.has(key)) {
         state.novelItems.set(key, getChildItems(state, key).filter(i => !itemIds.includes(i.id)));
     } else {
-        const allParentItems = state.novelItems.get(getParentKey(key));
-        for (const item of items) {
-            const parentItem = allParentItems.find(parent => parent.id === item.parentId);
-            const childIndex = parentItem[key].findIndex(child => child.id === item.id);
-            parentItem[key].splice(childIndex, 1);
+        if (key === NOVEL_ITEM_KEYS.TIMELINE) { // TODO generic handling for flat hierarchies
+            state.novelItems.set(key, state.novelItems.get(key).filter(i => !itemIds.includes(i.id)));
+        } else {
+            const allParentItems = state.novelItems.get(getParentKey(key));
+            for (const item of items) {
+                const parentItem = allParentItems.find(parent => parent.id === item.parentId);
+                const childIndex = parentItem[key].findIndex(child => child.id === item.id);
+                parentItem[key].splice(childIndex, 1);
+            }
         }
+        
+       
     }
 }
   

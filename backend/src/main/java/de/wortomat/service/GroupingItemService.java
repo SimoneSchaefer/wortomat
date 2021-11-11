@@ -51,6 +51,11 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
         this.getParentRepository().deleteById(parentId);
     }
 
+    public void deleteAll(Long novelId) {
+        List<T> allItems = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
+        this.getParentRepository().deleteAll(allItems);
+    }
+
 
     @Transactional
     public List<T> moveChild(Long novelId, Long childId, Long newParentId, int newPosition) {

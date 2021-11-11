@@ -2,15 +2,19 @@ package de.wortomat.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class Novel implements GroupingNovelItem {
     @Id
     @JsonFormat
@@ -25,34 +29,42 @@ public class Novel implements GroupingNovelItem {
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<Part> parts;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<CharacterGroup> characters;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<LocationGroup> locations;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<ResearchGroup> researchGroups;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<ChapterTag> chapterTags;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<CharacterTag> characterTags;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<ResearchTag> researchTags;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
     private List<LocationTag> locationTags;
 
     // @Override
@@ -80,4 +92,16 @@ public class Novel implements GroupingNovelItem {
     @Override()
     public void setPosition(int position) { this.position = position; }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Novel novel = (Novel) o;
+        return Objects.equals(id, novel.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }

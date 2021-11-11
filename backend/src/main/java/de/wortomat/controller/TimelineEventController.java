@@ -26,6 +26,12 @@ public class TimelineEventController {
         return ResponseEntity.ok(this.timelineEventService.update(novelId, timelineEvent));
     }
 
+    @DeleteMapping("{timelineEventId}")
+    public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("timelineEventId") Long timelineEventId) {
+        this.timelineEventService.delete(novelId, timelineEventId);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("addChapter")
     public ResponseEntity<TimelineEvent> addChapterReference(
             @PathVariable("novelId") Long novelId,

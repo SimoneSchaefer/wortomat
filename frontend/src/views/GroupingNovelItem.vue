@@ -6,7 +6,9 @@
   <div v-else class="grouping-item-view">
     <Splitter style="height: 100%" :stateKey="parentKey">
       <SplitterPanel class="split-content-left" :size="30">
-        <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
+        <ScrollPanel style="height: 100%">
+          <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
+        </ScrollPanel>
       </SplitterPanel>
       <SplitterPanel class="split-content-right">
         <ScrollPanel style="height: 100%">
@@ -65,7 +67,6 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
       }
 
     }
-    console.log('AAAA', parent)
     item.parentId = parent?.id || undefined;
     this.$store.dispatch('deleteItems', { 
         key: this.childKey, 

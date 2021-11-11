@@ -38,7 +38,9 @@ export abstract class NovelItemService {
     }
    
     public update(novelId: number, item: BaseModel): Promise<AxiosResponse> {
-        return API.put(`/novels/${novelId}/${this.getAPIPath(item.parentId)}/`, item)
+        const parentId = item.parentId;
+        delete item['parentId'];
+        return API.put(`/novels/${novelId}/${this.getAPIPath(parentId)}/`, item)
     } 
 
     public create(novelId: number, item: BaseModel, parentId?: number): Promise<AxiosResponse> {

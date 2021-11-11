@@ -45,6 +45,13 @@ public class TimelineEvent {
         return research.stream().map(research -> research.getId()).collect(Collectors.toList());
     }*/
 
+    /*public List<Chapter> getChapters() {
+        return this.chapters;
+    }
+    public List<Research> getResearch() {
+        return this.research;
+    }*/
+
     public void setNovel(Novel novel) {
         this.novel = novel;
     }
