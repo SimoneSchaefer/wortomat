@@ -4,7 +4,6 @@
         <a href="#" class="tree-view-item-child"
             @click="select(element)"  
             :key="element.id">
-            {{ element.id }}  -  {{ element.parentId }}
             <WMissingValueTolerantLabel 
                 :value="element.name" 
                 :fallback="$t(`fallback_labels.no_name.${childKey}`)">
