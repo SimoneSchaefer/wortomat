@@ -59,12 +59,8 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     activeIndex = [];
 
     closeGroup($event) {
-      console.log('CLOSE GROUP', $event, this.activeIndex)
       const index = this.activeIndex.findIndex(val => val === $event.index)
-      console.log('EVENT', $event)
       if (index > -1) this.activeIndex.splice(index, 1);
-
-      console.log('activeIndex now: ', this.activeIndex)
     }
 
     deleteParent(item: BaseModel) {
@@ -82,7 +78,6 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
         let parent = null;
         for (const group of getAllItems(this.$store.state, this.parentKey)) {
         // flatList = flatList.concat(group.research);
-        console.log('checking group', group, 'item is ', item)
         const findChild = group[this.childKey].find(child => child.id === item.id);
         if (findChild) {
             parent = group;
@@ -90,7 +85,6 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
         }
 
         }
-        console.log('AAAA', parent)
         item.parentId = parent?.id || undefined;
         this.$store.dispatch('deleteItems', { 
             key: this.childKey, 

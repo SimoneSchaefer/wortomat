@@ -10,9 +10,14 @@
                             <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="fallback_labels.no_date"></EditableDate>
                         </div>                           
                         <div class="w-timeline-options">
-                            <WButton color="primary" type="text" icon="fa fa-plus" title="timeline.add_reference"/>
+                            <WButton @click="displayDialog = event.id" color="primary" type="text" icon="fa fa-plus" title="timeline.add_reference"/>
                             <WButton @click="confirm(event)" color="danger" type="text" icon="fa fa-trash" title="timeline.delete_event"/>
                         </div>
+                          <WReferenceDialog 
+                            :event="event" 
+                            :visible="displayDialog === event.id" 
+                            @cancel="cancelReference"
+                            @save="saveReference(event, $event)"></WReferenceDialog>
                     </div>
                     
                     <div class="w-timeline-separator">
@@ -40,19 +45,26 @@ import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import WButton from '@/components/shared/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
+import { ChapterService } from "@/service/Chapter.service";
+import { ResearchService } from "@/service/Research.service";
+import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
+import WReferenceDialog from '@/components/timeline/ReferenceDialog.vue';
 
 @Options({
   components: {
       EditableDate,
       EditableLabel,
       WButton,
-      WConfirmDialog
+      WConfirmDialog,
+      WNovelItemDropdown,
+      WReferenceDialog
   },
-  emits: [ 'select', 'update-date', 'update-name', 'delete-event']
+  emits: [ 'select', 'update-date', 'update-name', 'delete-event', 'add-reference']
 })
 export default class WTimeline extends Vue {
     @Prop() events: TimelineEventModel[];
     @Prop() selectedEvent: TimelineEventModel;
+    displayDialog = -1;
     
     @Emit('select')
     select(item: TimelineEventModel): TimelineEventModel {
@@ -73,6 +85,16 @@ export default class WTimeline extends Vue {
     deleteEvent(item: { event: TimelineEventModel }): TimelineEventModel {
         return item.event;
     }
+
+    @Emit('add-reference')
+    saveReference(event: TimelineEventModel, reference: { chapters: [], research: []}) {
+        this.displayDialog = -1;
+        return { event, reference };        
+    }
+
+    cancelReference() {
+        this.displayDialog = -1;
+    }
     
     confirm(event: TimelineEventModel): void {
         (this.$refs.confirm as ConfirmDialog).getDecision({ event: event});
@@ -84,6 +106,22 @@ export default class WTimeline extends Vue {
 
     get novelItemKey() {
         return NOVEL_ITEM_KEYS.TIMELINE;
+    }
+
+    get chapterNovelItemKey() {
+        return NOVEL_ITEM_KEYS.CHAPTERS;
+    }
+
+    get researchNovelItemKey() {
+        return NOVEL_ITEM_KEYS.RESEARCH;
+    }
+
+    get chapterService() {
+        return new ChapterService();
+    }
+    
+    get researchService() {
+        return new ResearchService();
     }
 }
 </script>

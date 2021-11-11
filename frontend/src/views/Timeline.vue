@@ -1,5 +1,7 @@
 <template>
   <WSidebarMenu :parentKey="parentKey"/>
+
+
   <div class="plot">
     <div v-if="!events.length" class="empty">
       <WHelpNote :itemKey="parentKey"></WHelpNote>
@@ -14,51 +16,22 @@
                   @update-date="updateDate"
                   @update-name="updateName"
                   @select="select"
+                  @addReference="addReference"
                   @deleteEvent="deleteEvent($event)"></WTimeline>
               </ScrollPanel>
           </SplitterPanel>
           <SplitterPanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
-              <div class="reference-options">
-                <div class="add-reference-form">
-                <WNovelItemDropdown :items="chapters" @change="onChapterChange" :novelItemKey="chapterNovelItemKey" placeHolder="timeline.select_chapter"></WNovelItemDropdown>
-
-                <Button title="Add reference to selected Chapter"
-                  class="p-button-secondary add-button"
-                  icon="fa fa-plus"
-                  label="Add"
-                  type="button"
-                  @click="addChapterReference" />
+              <div v-if="selectedItem" class="selected-item">
+                <div class="sheet-list" v-for="chapter in getChaptersForEvent(selectedItem)" :key="chapter.id">
+                  <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
                 </div>
-
-                <div class="add-reference-form">
-               
-                <WNovelItemDropdown :items="research" @change="onResearchChange" :novelItemKey="researchNovelItemKey" placeHolder="timeline.select_research"></WNovelItemDropdown>
-
-                <Button title="Add reference to selected research"
-                  class="p-button-secondary add-button"
-                  icon="fa fa-plus"
-                  label="Add"
-                  type="button"
-                  @click="addResearchReference" />
-                </div>
-
-              </div>
-
-            <div v-if="selectedItem" class="selected-item">
-              <div class="sheet-list" v-for="chapter in getChaptersForEvent(selectedItem)" :key="chapter.id">
-                <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
-              </div>
-
-              <div class="sheet-list" v-for="research in getResearchForEvent(selectedItem)" :key="research.id">
-                <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
-              </div>
-
-           
-            </div> 
+                <div class="sheet-list" v-for="research in getResearchForEvent(selectedItem)" :key="research.id">
+                  <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
+                </div>           
+              </div> 
             </ScrollPanel>
           </SplitterPanel>
-
         </Splitter>
       </div>
   </div>
@@ -72,7 +45,6 @@ import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import WSidebarMenu from "@/components/shared/menu/SidebarMenu.vue";
-import EditTimelineEvent from "@/components/timeline/EditableTimelineEvent.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/getters";
 import { ChapterService } from "@/service/Chapter.service";
@@ -80,13 +52,14 @@ import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WHelpNote from '@/components/HelpNote.vue';
+import { ChapterModel } from "@/models/Chapter.model";
+import { ResearchModel } from "@/models/Research.model";
 
 @Options({
   components: {
     NovelItems,
     EditableLabel,
     EditableDate,
-    EditTimelineEvent,
     NovelItemSheet,
     WSidebarMenu,
     WTimeline,
@@ -203,19 +176,31 @@ export default class Plot extends Vue {
     this.updateItem(update.item, { eventDate: update.newValue });   
   }  
 
-  addChapterReference() {
+
+  addReference($event) {
+    const event = $event.event;
+    console.log('add references for ', $event)
+    for (const chapter of $event.reference.chapters) {
+      this.addChapterReference(event, chapter);
+    }
+    for (const research of $event.reference.research) {
+      this.addResearchReference(event, research);
+    }
+
+  }
+  addChapterReference(event: TimelineEventModel, chapter: ChapterModel) {
         this.$store.dispatch('addChapterReference', { 
           novelId: this.novelId,
-          event: this.selectedItem,
-          chapter: this.selectedChapterReference
+          event: event,
+          chapter: chapter
       }) 
 
   }
-  addResearchReference() {
+  addResearchReference(event: TimelineEventModel, research: ResearchModel) {
         this.$store.dispatch('addResearchReference', { 
           novelId: this.novelId,
-          event: this.selectedItem,
-          research: this.selectedResearchReference
+          event: event,
+          research: research
       }) 
 
   }
