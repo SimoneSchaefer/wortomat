@@ -1,3 +1,6 @@
+import { BaseModel } from '@/models/Base.model';
+import { TimelineEventModel } from '@/models/TimelineEvent';
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { API } from './Axios';
 import { NovelItemService } from './NovelItemService';
 
@@ -7,11 +10,10 @@ export class TimelineService extends NovelItemService {
      return `timeline`;
     }
 
-    addChapterReference(novelId, timelineEvent, chapter) {
-        return API.put(`${super.getBasePath(novelId)}/addChapter?timelineEventId=${timelineEvent.id}&chapterId=${chapter.id}`);
+    addReference(novelId: number, timelineEvent: TimelineEventModel, item: BaseModel, key: NOVEL_ITEM_KEYS) {
+        return API.put(`${super.getBasePath(novelId)}/addReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${key}`);
     }
-
-    addResearchReference(novelId, timelineEvent, research) {
-        return API.put(`${super.getBasePath(novelId)}/addResearch?timelineEventId=${timelineEvent.id}&researchId=${research.id}`);
+    deleteReference(novelId: number, timelineEvent: TimelineEventModel, item: BaseModel, key: NOVEL_ITEM_KEYS) {
+        return API.delete(`${super.getBasePath(novelId)}/deleteReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${key}`);
     }
 }

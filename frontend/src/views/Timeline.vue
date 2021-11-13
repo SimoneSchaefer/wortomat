@@ -3,7 +3,7 @@
 
 
   <div class="plot">
-    <div v-if="!events.length" class="empty">
+    <div v-if="!events.length && !isLoading()" class="empty">
       <WHelpNote :itemKey="parentKey"></WHelpNote>
     </div>
     <div v-else class="timeline">
@@ -16,7 +16,6 @@
                   @update-date="updateDate"
                   @update-name="updateName"
                   @select="select"
-                  @addReference="addReference"
                   @deleteEvent="deleteEvent($event)"></WTimeline>
               </ScrollPanel>
           </SplitterPanel>
@@ -39,9 +38,10 @@
 
 <script lang="ts">
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
-import { Options, Vue } from "vue-class-component";
+import { mixins, Options, Vue } from "vue-class-component";
 import NovelItems from "./NovelItems.vue";
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
+import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import WSidebarMenu from "@/components/shared/menu/SidebarMenu.vue";
@@ -67,51 +67,7 @@ import { ResearchModel } from "@/models/Research.model";
     WHelpNote
   },
 })
-export default class Plot extends Vue {
-  selectedChapterReference = null; 
-  selectedResearchReference = null;
-
-  getChaptersForEvent(event: TimelineEventModel) {
-    // TODO: get only list of IDs from backend
-    let flatList = [];
-    for (const part of getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS)) {
-      if (part.chapters?.length) flatList = flatList.concat(part.chapters);
-    }
-    const eventChapters = [];
-    for (const chapter of (event.chapters || [])) {
-      const arg = flatList.find(otherChapter => otherChapter.id === chapter['id']);
-      if (arg) {
-        eventChapters.push(arg);
-      }
-      
-    }
-    return eventChapters;
-  }
-  getResearchForEvent(event: TimelineEventModel) {
-    // TODO: get only list of IDs from backend
-    let flatList = [];
-    for (const group of getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH_GROUPS)) {
-      if (group.research?.length) flatList = flatList.concat(group.research);
-    }
-
-    const eventResearch = [];
-    for (const research of (event.research || [])) {
-      const bla = flatList.find(otherresearch => otherresearch.id === research['id']);
-      if (bla) {
-      eventResearch.push(flatList.find(otherresearch => otherresearch.id === research['id']));
-
-      }
-    }
-
-    return eventResearch || [];
-  }
-  
-  onChapterChange($event) {
-    this.selectedChapterReference = $event;
-  }  
-  onResearchChange($event) {
-    this.selectedResearchReference = $event;
-  }
+export default class Plot extends mixins(TimelineEventMixin) {
 
   add() {
     this.$store.dispatch("addItem", {
@@ -121,6 +77,10 @@ export default class Plot extends Vue {
     });
     var container = this.$el.querySelector(".p-scrollpanel-content");
     container.scrollTop = container.scrollHeight;
+  }
+
+  isLoading(): boolean {
+    return this.$store.state.loading;
   }
 
   get parentKey() {
@@ -159,7 +119,6 @@ export default class Plot extends Vue {
   }
 
   deleteEvent(event: TimelineEventModel) {
-    console.log('DELETE EVENT', event)
     this.$store.dispatch('deleteItems', { 
         key: this.novelItemKey, 
         novelId: this.$store.state.currentNovel?.id,
@@ -177,7 +136,7 @@ export default class Plot extends Vue {
   }  
 
 
-  addReference($event) {
+  /*addReference($event) {
     const event = $event.event;
     console.log('add references for ', $event)
     for (const chapter of $event.reference.chapters) {
@@ -187,23 +146,8 @@ export default class Plot extends Vue {
       this.addResearchReference(event, research);
     }
 
-  }
-  addChapterReference(event: TimelineEventModel, chapter: ChapterModel) {
-        this.$store.dispatch('addChapterReference', { 
-          novelId: this.novelId,
-          event: event,
-          chapter: chapter
-      }) 
-
-  }
-  addResearchReference(event: TimelineEventModel, research: ResearchModel) {
-        this.$store.dispatch('addResearchReference', { 
-          novelId: this.novelId,
-          event: event,
-          research: research
-      }) 
-
-  }
+  }*/
+ 
 
   selected(item) {
     return this.selectedItem?.id === item.id;

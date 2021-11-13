@@ -10,14 +10,13 @@
                             <EditableDate v-bind:value="event.eventDate" @update-label="updateDate(event, $event)" placeHolderTitle="fallback_labels.no_date"></EditableDate>
                         </div>                           
                         <div class="w-timeline-options">
-                            <WButton @click="displayDialog = event.id" color="primary" type="text" icon="fa fa-plus" title="timeline.add_reference"/>
+                            <WButton @click="displayDialog = event.id" color="primary" type="text" icon="fa fa-link" title="timeline.manage_references"/>
                             <WButton @click="confirm(event)" color="danger" type="text" icon="fa fa-trash" title="timeline.delete_event"/>
                         </div>
                           <WReferenceDialog 
                             :event="event" 
                             :visible="displayDialog === event.id" 
-                            @cancel="cancelReference"
-                            @save="saveReference(event, $event)"></WReferenceDialog>
+                            @close="cancelReference"></WReferenceDialog>
                     </div>
                     
                     <div class="w-timeline-separator">
@@ -86,11 +85,15 @@ export default class WTimeline extends Vue {
         return item.event;
     }
 
-    @Emit('add-reference')
+    /*@Emit('add-reference')
     saveReference(event: TimelineEventModel, reference: { chapters: [], research: []}) {
-        this.displayDialog = -1;
         return { event, reference };        
     }
+
+    @Emit('delete-reference')
+    deleteReference(event: TimelineEventModel, item: Bas) {
+        return { event, reference };        
+    }*/
 
     cancelReference() {
         this.displayDialog = -1;

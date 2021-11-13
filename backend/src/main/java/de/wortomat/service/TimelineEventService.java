@@ -1,5 +1,6 @@
 package de.wortomat.service;
 
+import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Chapter;
 import de.wortomat.model.Research;
 import de.wortomat.model.TimelineEvent;
@@ -33,25 +34,39 @@ public class TimelineEventService {
         return this.timelineEventRepository.save(timelineEvent);
     }
 
+    public TimelineEvent deleteChapterReference(Long novelId, Long timelineEventId, Long chapterId) {
+        TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).orElseThrow(NotFoundException::new);
+        Chapter chapter = this.chapterService.getRepository().findById(chapterId).orElseThrow(NotFoundException::new);
+
+        timelineEvent.getChapters().remove(chapter);
+        return this.timelineEventRepository.save(timelineEvent);
+    }
+
+    public TimelineEvent deleteResearchReference(Long novelId, Long timelineEventId, Long researchId) {
+        TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).orElseThrow(NotFoundException::new);
+        Research research = this.researchService.getRepository().findById(researchId).orElseThrow(NotFoundException::new);
+
+        timelineEvent.getResearch().remove(research);
+        return this.timelineEventRepository.save(timelineEvent);
+    }
+
+
     public TimelineEvent addChapterReference(Long novelId, Long timelineEventId, Long chapterId) {
-        TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).get();
-        Chapter chapter = this.chapterService.getRepository().findById(chapterId).get();
+        TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).orElseThrow(NotFoundException::new);
+        Chapter chapter = this.chapterService.getRepository().findById(chapterId).orElseThrow(NotFoundException::new);
 
         timelineEvent.setNovel(novelService.get(novelId));
         timelineEvent.getChapters().add(chapter);
-        TimelineEvent bla = this.timelineEventRepository.save(timelineEvent);
-        TimelineEvent blubb = this.timelineEventRepository.findById(timelineEventId).get();
-        return blubb;
+        return this.timelineEventRepository.save(timelineEvent);
     }
+
     public TimelineEvent addResearchReference(Long novelId, Long timelineEventId, Long researchId) {
-        TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).get();
-        Research research = this.researchService.getRepository().findById(researchId).get();
+        TimelineEvent timelineEvent = this.timelineEventRepository.findById(timelineEventId).orElseThrow(NotFoundException::new);
+        Research research = this.researchService.getRepository().findById(researchId).orElseThrow(NotFoundException::new);
 
         timelineEvent.setNovel(novelService.get(novelId));
         timelineEvent.getResearch().add(research);
-        TimelineEvent bla = this.timelineEventRepository.save(timelineEvent);
-        TimelineEvent blubb = this.timelineEventRepository.findById(timelineEventId).get();
-        return blubb;
+        return this.timelineEventRepository.save(timelineEvent);
     }
 
     public void delete(Long novelId, Long eventId) {

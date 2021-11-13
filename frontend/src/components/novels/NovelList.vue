@@ -53,7 +53,7 @@ export default class NovelList extends Vue {
 .novel {
   margin: 3em;
   height: 20em;
-  width: 30em;
+  width: 25em;
 }
 
 .dummy-novel {

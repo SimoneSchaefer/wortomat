@@ -68,7 +68,15 @@
     "timeline": {
         "select_research": "Select research",
         "select_chapter": "Select chapter",
-        "add_reference": "Add a chapter of research reference",
+        "manage_references": "Add or delete references",
+        "select_reference_type": {
+            "select_item_type": "Select reference type",
+            "chapters": "Chapter",
+            "research": "Reseach",
+            "add_locally": "Add this reference",
+            "close": "Close",
+            "delete": "Delete this reference"
+        },
         "delete_event": "Delete this timeline event"
     },
     "delete_confirm": "Are you sure you want to delete this item?",

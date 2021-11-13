@@ -92,8 +92,8 @@ i[class^="fa"]:before {
 .p-dialog.p-component .p-dialog-content, 
 .p-dialog.p-component .p-dialog-footer 
 {
-  background: var(--modal-background);
-  color: #d2d2d2;
+  /*background: var(--modal-background);
+  color: #d2d2d2;*/
 }
 
 

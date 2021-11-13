@@ -7,9 +7,7 @@ import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadIte
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
-import { ChapterModel } from "@/models/Chapter.model";
 import { TimelineService } from "@/service/TimelineService";
-import { ResearchModel } from "@/models/Research.model";
 import { SelectionService } from "@/service/Selection.service";
 
 
@@ -120,16 +118,24 @@ const updateOrder = async (context: ActionContext<IState,IState>, update: { key:
   context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
 }
 
-const addChapterReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, chapter: ChapterModel }): void => {
-  new TimelineService().addChapterReference(payload.novelId, payload.event, payload.chapter).then(result => {
+const addReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, item: BaseModel, key: NOVEL_ITEM_KEYS }): void => {
+  new TimelineService().addReference(payload.novelId, payload.event, payload.item, payload.key).then(result => {
     context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
   });   
 }
+
+const deleteReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, item: BaseModel, key: NOVEL_ITEM_KEYS }): void => {
+  new TimelineService().deleteReference(payload.novelId, payload.event, payload.item, payload.key).then(result => {
+    context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
+  });   
+}
+
+/*
 const addResearchReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, research: ResearchModel }): void => {
   new TimelineService().addResearchReference(payload.novelId, payload.event, payload.research).then(result => {
     context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
   });   
-}
+}*/
 
 const filterTags = (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}): void => {
   context.commit('tagsFiltered', { key: update.key, tags: update.tags });
@@ -165,8 +171,8 @@ export default {
     loadItems,
     filterTags,
     setView,
-    addChapterReference,
-    addResearchReference,
+    addReference,
+    deleteReference,
     setModalOpen
 }
 

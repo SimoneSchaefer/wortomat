@@ -32,21 +32,33 @@ public class TimelineEventController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("addChapter")
-    public ResponseEntity<TimelineEvent> addChapterReference(
-            @PathVariable("novelId") Long novelId,
-            @RequestParam("timelineEventId") Long timelineEventId,
-            @RequestParam("chapterId") Long chapterId) {
-        return ResponseEntity.ok(this.timelineEventService.addChapterReference(novelId, timelineEventId, chapterId));
+    @DeleteMapping("deleteReference")
+    public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId,
+                                    @RequestParam("timelineEventId") Long timelineEventId,
+                                    @RequestParam("itemId") Long itemId,
+                                    @RequestParam("type") String type) {
+        if ("chapters".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.deleteChapterReference(novelId, timelineEventId, itemId));
+        } else if("research".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.deleteResearchReference(novelId, timelineEventId, itemId));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-    @PutMapping("addResearch")
-    public ResponseEntity<TimelineEvent> addResearchReference(
+    @PutMapping("addReference")
+    public ResponseEntity<TimelineEvent> addReference(
             @PathVariable("novelId") Long novelId,
             @RequestParam("timelineEventId") Long timelineEventId,
-            @RequestParam("researchId") Long researchId) {
-        return ResponseEntity.ok(this.timelineEventService.addResearchReference(novelId, timelineEventId, researchId));
+            @RequestParam("itemId") Long itemId,
+            @RequestParam("type") String type) {
+        if ("chapters".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.addChapterReference(novelId, timelineEventId, itemId));
+        } else if("research".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.addResearchReference(novelId, timelineEventId, itemId));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
+
 
     @GetMapping
     public ResponseEntity<List<TimelineEvent>> get(@PathVariable("novelId") Long novelId) {

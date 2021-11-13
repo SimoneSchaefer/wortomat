@@ -1,9 +1,10 @@
 <template>
     <Button type="button"
+        :disabled="disabled"
         :title="title ? $t(title) : ''"
         :class="cssClass"
         :icon="icon"
-        :label="label"
+        :label="label ? $t(label) : ''"
         @click="click($event)" />
 </template>
 
@@ -18,6 +19,7 @@ export default class Button extends Vue {
     @Prop() icon: string;
     @Prop() title: string;
     @Prop() label : string;
+    @Prop() disabled = false;
     @Prop() color: 'primary' | 'secondary' | 'danger' | 'success' = 'primary';
     @Prop() type: 'button' | 'text' = 'button';
     @Prop() rounded = false;

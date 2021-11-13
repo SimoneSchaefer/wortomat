@@ -32,7 +32,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   emits: ['change']
 })
 export default class WSidebarMenu extends Vue {
-    selectedItem: BaseModel  = null;
+    @Prop() selectedItem: BaseModel  = null;
     @Prop() novelItemKey: NOVEL_ITEM_KEYS;
     @Prop() items: BaseModel;
     @Prop() placeHolder: string;
@@ -42,7 +42,6 @@ export default class WSidebarMenu extends Vue {
     }
 
     set selected($event) {    
-        this.selectedItem = $event;    
         this.$emit('change', $event);
     }
 }

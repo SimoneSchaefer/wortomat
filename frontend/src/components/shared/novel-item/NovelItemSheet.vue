@@ -7,7 +7,7 @@
 
             <div class="meta">
                 <div class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel></div>
-                <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :service="service"></EditableTags>
+                <!--<EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :service="service"></EditableTags>-->
             </div>
         </div>
         <hr>
