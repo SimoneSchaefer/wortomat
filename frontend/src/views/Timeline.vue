@@ -9,7 +9,7 @@
     <div v-else class="timeline">
         <Splitter style="height: 100%" stateKey="timeline">
           <SplitterPanel>      
-              <ScrollPanel style="height: 100%">
+              <ScrollPanel style="height: 100%" class="scroll-timeline">
                 <WTimeline 
                   :events="events" 
                   :selectedEvent="selectedItem"
@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
-import { mixins, Options, Vue } from "vue-class-component";
+import { mixins, Options } from "vue-class-component";
 import NovelItems from "./NovelItems.vue";
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
@@ -46,14 +46,12 @@ import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import WSidebarMenu from "@/components/shared/menu/SidebarMenu.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
-import { getAllItems, getCurrentSelection, getSortedEvents } from "@/store/getters";
+import { getCurrentSelection, getSortedEvents } from "@/store/getters";
 import { ChapterService } from "@/service/Chapter.service";
 import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WHelpNote from '@/components/HelpNote.vue';
-import { ChapterModel } from "@/models/Chapter.model";
-import { ResearchModel } from "@/models/Research.model";
 
 @Options({
   components: {
@@ -68,6 +66,21 @@ import { ResearchModel } from "@/models/Research.model";
   },
 })
 export default class Plot extends mixins(TimelineEventMixin) {
+
+  mounted(): void {
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.TIMELINE,
+      novelId: this.$route.params.id,
+    });
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.PARTS,
+      novelId: this.$route.params.id,
+    });
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.RESEARCH_GROUPS,
+      novelId: this.$route.params.id,
+    });
+  }
 
   add() {
     this.$store.dispatch("addItem", {
@@ -99,20 +112,6 @@ export default class Plot extends mixins(TimelineEventMixin) {
     return new ResearchService();
   }
 
-  mounted(): void {
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.TIMELINE,
-      novelId: this.$route.params.id,
-    });
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.PARTS,
-      novelId: this.$route.params.id,
-    });
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.RESEARCH_GROUPS,
-      novelId: this.$route.params.id,
-    });
-  }
 
   select(item): void {
     this.$store.dispatch('selectItems', { key: this.novelItemKey, items: [item ] });
@@ -135,41 +134,10 @@ export default class Plot extends mixins(TimelineEventMixin) {
     this.updateItem(update.item, { eventDate: update.newValue });   
   }  
 
-
-  /*addReference($event) {
-    const event = $event.event;
-    console.log('add references for ', $event)
-    for (const chapter of $event.reference.chapters) {
-      this.addChapterReference(event, chapter);
-    }
-    for (const research of $event.reference.research) {
-      this.addResearchReference(event, research);
-    }
-
-  }*/
- 
-
   selected(item) {
     return this.selectedItem?.id === item.id;
   }
-
-  get chapters() {
-    let flatList = [];
-    let groups = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.PARTS); //.map(part => part.research);
-    for (let group of groups) {
-      flatList = flatList.concat(group.chapters);
-    }
-    return flatList;
-  }
-
-  get research() {
-    let flatList = [];
-    let groups = getAllItems(this.$store.state, NOVEL_ITEM_KEYS.RESEARCH_GROUPS); //.map(part => part.research);
-    for (let group of groups) {
-      flatList = flatList.concat(group.research);
-    }
-    return flatList;
-  }
+ 
 
   get selectedItem() {
     return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{ id: undefined}])[0];
@@ -206,6 +174,10 @@ export default class Plot extends mixins(TimelineEventMixin) {
   height: 100%;
   justify-content: center;
   align-items: center;
+}
+
+.scroll-timeline {
+  background: var(--light-background)
 }
 
 .p-scrollpanel-wrapper {

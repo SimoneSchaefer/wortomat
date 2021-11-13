@@ -81,22 +81,12 @@ export default class EditableLabel extends Vue {
 .content {
     text-align: left;   
     border: 3px solid transparent;
-    padding-top: 0.5em; 
-    padding-left: 0.5em;
-    position: relative;
+    padding: 1em;
 }
 div.content:hover {
     border: 3px solid transparent;
-    background: var(--editable-background-hover);
     cursor: pointer;
-}
-div.content:hover:after {
-   content: "\f304"; 
-   font-family: "Font Awesome 5 Free";
-   opacity: 0.5;
-   font-weight: 900;
-   position: absolute;
-   right:1em; 
-   top: 0.5em;
+    cursor: url("/assets/cursors/edit.png"), pointer;
+    background: var(--editable-background-hover);
 }
 </style>

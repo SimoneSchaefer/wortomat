@@ -10,7 +10,7 @@
     <div class="existing-references">
       <div v-for="chapter of getChaptersForEvent(event)" v-bind:key="chapter.id" class="existing-reference">
           <div><i class="fa fa-book-open"></i>&nbsp;<WMissingValueTolerantLabel :value="chapter.name" :fallback="$t(`fallback_labels.no_name.${chapterNovelItemKey}`)"></WMissingValueTolerantLabel></div>
-          <div><WButton color="danger"
+          <div><WButton color="danger" type="text"
             @click="deleteReference(chapter, chapterNovelItemKey)" 
             :title="`timeline.select_reference_type.delete`" 
             icon="fa fa-trash" />
@@ -18,7 +18,7 @@
       </div>      
       <div v-for="research of getResearchForEvent(event)" v-bind:key="research.id" class="existing-reference">
           <div><i class="fa fa-flask"></i>&nbsp;<WMissingValueTolerantLabel :value="research.name" :fallback="$t(`fallback_labels.no_name.${researchNovelItemKey}`)"></WMissingValueTolerantLabel></div>
-          <div><WButton color="danger"
+          <div><WButton color="danger" type="text"
             @click="deleteReference(research, researchNovelItemKey)" 
             :title="`timeline.select_reference_type.delete`" 
             icon="fa fa-trash" />
@@ -57,7 +57,7 @@
       </WNovelItemDropdown>
 
       <div class="option-groups">
-        <WButton :disabled="!validReference" 
+        <WButton :disabled="!validReference" type="text"
           @click="addReference" 
           :title="`timeline.select_reference_type.add_locally`" 
           icon="fa fa-plus" />

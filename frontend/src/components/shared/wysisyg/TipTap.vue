@@ -38,139 +38,61 @@ export default class TipTap extends Vue {
             ],
         });
 
-        this.menuItems = [
-            this.headingMenu,
-            this.formatMenu,
-            this.listMenu,
-            this.markersMenu,
-            this.undoMenu,
-            this.redoMenu,
-            this.clearMenu
-        ]
-    }
-
-    get undoMenu() {
-        return {
-            label: 'undo',
-            icon: 'fa fa-undo',
-            command: () => { this.runCommand('undo')}
-        }
-    }
-
-    get redoMenu() {
-        return {
-            label: 'redo',
-            icon: 'fa fa-redo',
-            command: () => { this.runCommand('redo')}
-        }
-    }
-
-    get clearMenu() {
-        return {
-            label: 'Clear format',
-            icon: 'fa fa-eraser',
-            command: () => { this.runCommand('unsetAllMarks'), this.runCommand('clearNodes')}
-        }
-    }
-
-
-    get markersMenu() {
-        return {
-            label: 'Markers',
-            icon: 'fa fa-flag',
-            items: [{
-                label: 'TODO',
-                icon: 'fa fa-clipboard-list',
-                command: () => this.runCommand('toggleHighlight', { backgroundColor: 'yellow', color: '#000'})
-            }, {
-                label: 'Idea',
-                icon: 'fa fa-lightbulb',
-                command: () => this.runCommand('toggleHighlight', { backgroundColor: 'blue', color: '#fff'})
-            }, {
-                label: 'Fix me',
-                icon: 'fa fa-band-aid',
-                command: () => this.runCommand('toggleHighlight', { backgroundColor: '#D32F2F', color: '#fff'})
-            }]
-        }
-    }
-
-    get headingMenu() {
-        return {
-            label: 'Headings',
-            icon: 'fa fa-heading',
-            items: [{
-                label: '1',
+        this.menuItems = [{
                 icon: 'fa fa-heading',
                 command: () => this.runCommand('toggleHeading', { level: 1})
             }, {
-                label: '2',
-                icon: 'fa fa-heading',
-                command: () => this.runCommand('toggleHeading', { level: 2 })
+                icon: 'fa fa-bold',
+                command: () => this.runCommand('toggleBold')
             }, {
-                label: '3',
-                icon: 'fa fa-heading',
-                command: () => this.runCommand('toggleHeading', { level: 3 })
+                icon: 'fa fa-italic',
+                command: () => this.runCommand('toggleItalic')
             }, {
-                label: '4',
-                icon: 'fa fa-heading',
-                command: () => this.runCommand('toggleHeading', { level: 4 })
+                icon: 'fa fa-strikethrough',
+                command: () => this.runCommand('toggleStrike')
             }, {
-                label: '5',
-                icon: 'fa fa-heading',
-                command: () => this.runCommand('toggleHeading', { level: 5 })
+                icon: 'fa fa-code',
+                command: () => this.runCommand('toggleCode')
             }, {
-                label: '6',
-                icon: 'fa fa-heading',
-                command: () => this.runCommand('toggleHeading', { level: 6 })
-            }]
-        }
+                icon: 'fa fa-quote-right',
+                command: () => this.runCommand('toggleBlockquote')
+            }, {
+                separator: true
+            },{
+                icon: 'fa fa-list-ol',
+                command: () => this.runCommand('toggleOrderedList')
+            }, {
+                icon: 'fa fa-list-ul',
+                command: () => this.runCommand('toggleBulletList')
+            }, {
+                separator: true
+            }, {
+                icon: 'fa fa-clipboard-list',
+                command: () => this.runCommand('toggleHighlight', { backgroundColor: 'yellow', color: '#000'})
+            }, {
+                icon: 'fa fa-lightbulb',
+                command: () => this.runCommand('toggleHighlight', { backgroundColor: 'blue', color: '#fff'})
+            }, {
+                icon: 'fa fa-band-aid',
+                command: () => this.runCommand('toggleHighlight', { backgroundColor: '#D32F2F', color: '#fff'})
+            }, {
+                separator: true
+            }, {
+                icon: 'fa fa-undo',
+                command: () => { this.runCommand('undo')}
+            }, {
+                icon: 'fa fa-redo',
+                command: () => { this.runCommand('redo')}
+            }, {
+                icon: 'fa fa-eraser',
+                command: () => { this.runCommand('unsetAllMarks'), this.runCommand('clearNodes')
+            }
+        }]
     }
 
+    
 
-
-    get formatMenu() {
-        return {
-                label: 'Format',
-                icon: 'fa fa-paragraph',
-                items: [{
-                    label: 'bold',
-                    icon: 'fa fa-bold',
-                    command: () => this.runCommand('toggleBold')
-                }, {
-                    label: 'italic',
-                    icon: 'fa fa-italic',
-                    command: () => this.runCommand('toggleItalic')
-                }, {
-                    label: 'strike',
-                    icon: 'fa fa-strikethrough',
-                    command: () => this.runCommand('toggleStrike')
-                }, {
-                    label: 'code',
-                    icon: 'fa fa-code',
-                    command: () => this.runCommand('toggleCode')
-                }, {
-                    label: 'quote',
-                    icon: 'fa fa-quote-right',
-                    command: () => this.runCommand('toggleBlockquote')
-                }]
-        }
-    }
-
-    get listMenu() {
-        return {
-                label: 'Lists',
-                icon: 'fa fa-list',
-                items: [{
-                    label: 'ordered',
-                    icon: 'fa fa-list-ol',
-                    command: () => this.runCommand('toggleOrderedList')
-                }, {
-                    label: 'unordered',
-                    icon: 'fa fa-list-ul',
-                    command: () => this.runCommand('toggleBulletList')
-                }]
-        }
-    }
+   
 
     runCommand(command: string, args?) {
         this.editor.chain().focus()[command](args).run()

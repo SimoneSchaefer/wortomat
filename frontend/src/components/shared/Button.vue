@@ -21,7 +21,7 @@ export default class Button extends Vue {
     @Prop() label : string;
     @Prop() disabled = false;
     @Prop() color: 'primary' | 'secondary' | 'danger' | 'success' = 'primary';
-    @Prop() type: 'button' | 'text' = 'button';
+    @Prop() type: 'button' | 'text' = 'text';
     @Prop() rounded = false;
 
     @Emit('click') 
