@@ -110,6 +110,7 @@ public class PartServiceTest {
         Part part = PartFactory.createMockPart();
         when(novelRepository.findById(novel.getId())).thenReturn(Optional.of(novel));
         when(partsRepository.save(part)).thenReturn(part);
+        when(partsRepository.findById(part.getId())).thenReturn(Optional.of(part));
 
         Part savedPart = partService.update(novel.getId(), part);
         Assertions.assertEquals(savedPart, part);
