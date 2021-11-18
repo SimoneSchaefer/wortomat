@@ -5,6 +5,7 @@ public interface NovelItem {
     int getPosition();
     void setPosition(int position);
 
+    Long getParentId();
     GroupingNovelItem getParent();
     void setParent(GroupingNovelItem item);
 

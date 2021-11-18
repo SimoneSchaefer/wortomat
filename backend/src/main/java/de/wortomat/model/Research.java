@@ -43,6 +43,11 @@ public class Research implements NovelItem, ImageAware {
     public int getPosition() { return this.position; }
 
     @Override
+    public Long getParentId() {
+        return getParent().getId();
+    }
+
+    @Override
     @JsonIgnore
     public GroupingNovelItem getParent() {
         return this.getResearchGroup();

@@ -39,13 +39,18 @@ public class Chapter implements NovelItem {
     @JsonIdentityReference(alwaysAsId = true)
     private Part part;
 
-    @Override()
+    @Override
+    public Long getParentId() {
+        return getParent().getId();
+    }
+
+    @Override
     public Long getId() { return this.id; }
 
-    @Override()
+    @Override
     public int getPosition() { return this.position; }
 
-    @Override()
+    @Override
     public void setPosition(int position) { this.position = position; }
 
     @Override

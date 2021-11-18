@@ -58,4 +58,9 @@ public class Location implements NovelItem, ImageAware {
 
     @Override
     public List<Image> getImages() { return this.images; }
+
+    @Override
+    public Long getParentId() {
+        return getParent().getId();
+    }
 }
