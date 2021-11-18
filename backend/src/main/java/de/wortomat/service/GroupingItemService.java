@@ -43,7 +43,8 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
 
     public T update(Long novelId, T positionAware) {
         positionAware.setNovel(this.novelService.get(novelId));
-        return this.getParentRepository().save(positionAware);
+        this.getParentRepository().save(positionAware);
+        return this.get(novelId, positionAware.getId());
     }
 
     public void delete(Long _novelId, Long parentId) {
