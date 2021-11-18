@@ -109,9 +109,7 @@ export interface ImageParam {
 .dummy-image {
     filter: grayscale(100%);
 }
-.file-container {
-    width: calc(200px + 8rem);
-}
+
 .file-options {
     position: absolute;
     display: flex;
