@@ -52,7 +52,6 @@ const setView = (state: IState, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, va
 const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
     state.novelItems.set(key, items);
-    selectItemIfNecessary(state, key);
 }
 
     
@@ -107,13 +106,6 @@ const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Bas
 const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
     state.selection.set(key, itemIdsToSelect(key, items));
-}
-
-const selectItemIfNecessary = (state: IState, key: NOVEL_ITEM_KEYS): void => {
-    const items = state.selection.get(key) || [];
-    if (items.length && !state.selection.get(key)?.length) {
-        state.selection.set(key, [items[0]]);
-    }
 }
 
 const getParentKey = ( itemKey : NOVEL_ITEM_KEYS ): NOVEL_ITEM_KEYS => {
