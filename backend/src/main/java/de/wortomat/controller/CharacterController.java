@@ -65,18 +65,18 @@ public class CharacterController {
 
     @PostMapping("{characterId}/upload")
     public ResponseEntity<Image> upload(@PathVariable("novelId") Long novelId, @PathVariable("characterId") Long characterId, @RequestParam("upload[]") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(imageAwareNovelItemService.saveForNovelItem(file, characterService, novelId, characterId, EntityType.CHARACTER));
+        return ResponseEntity.ok(imageAwareNovelItemService.saveForNovelItem(file, characterService, novelId, characterId, EntityType.CHARACTERS));
     }
 
     @GetMapping("{characterId}/files/{fileId}")
     @ResponseBody
     public ResponseEntity<Resource> getFile(@PathVariable("novelId") Long novelId, @PathVariable("characterId") Long characterId, @PathVariable("fileId") Long fileId) throws IOException {
-        return fileResponseCreator.generateHttpFileResponse(imageAwareNovelItemService.load(novelId, characterId, EntityType.CHARACTER, fileId));
+        return fileResponseCreator.generateHttpFileResponse(imageAwareNovelItemService.load(novelId, characterId, EntityType.CHARACTERS, fileId));
     }
 
     @DeleteMapping("{characterId}/files/{fileId}")
     public ResponseEntity<Character> deleteFile(@PathVariable("novelId") Long novelId, @PathVariable("characterId") Long characterId, @PathVariable("fileId") Long fileId) throws IOException {
-        imageAwareNovelItemService.delete(characterService, novelId, characterId, EntityType.CHARACTER, fileId);
+        imageAwareNovelItemService.delete(characterService, novelId, characterId, EntityType.CHARACTERS, fileId);
         return ResponseEntity.ok(characterService.get(novelId, characterId));
     }
 

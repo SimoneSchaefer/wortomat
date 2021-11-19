@@ -25,8 +25,8 @@ export default abstract class TimelineEventMixin extends Vue {
     private filterItems(event: TimelineEventModel, parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS) {
         const flatList = this.getFlatList(parentKey);
         const eventItems = [];
-        for (const item of (event[childKey] || [])) {
-            const arg = flatList.find(otherItem => otherItem.id === item.id);
+        for (const item of (event['references'][childKey.toUpperCase()] || [])) {
+            const arg = flatList.find(otherItem => otherItem.id === item);
             if (arg) { eventItems.push(arg); }            
         }
         return eventItems;
