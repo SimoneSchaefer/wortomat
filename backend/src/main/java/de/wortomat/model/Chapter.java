@@ -28,7 +28,7 @@ public class Chapter implements NovelItem {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private int position;
+    private Integer position;
 
     @ManyToMany
     @ToString.Exclude
@@ -43,15 +43,6 @@ public class Chapter implements NovelItem {
     public Long getParentId() {
         return getParent().getId();
     }
-
-    @Override
-    public Long getId() { return this.id; }
-
-    @Override
-    public int getPosition() { return this.position; }
-
-    @Override
-    public void setPosition(int position) { this.position = position; }
 
     @Override
     @JsonIgnore

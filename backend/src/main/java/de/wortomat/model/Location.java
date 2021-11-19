@@ -20,7 +20,7 @@ public class Location implements NovelItem, ImageAware {
 
     private String extended_summary;
 
-    private int position;
+    private Integer position;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -36,12 +36,6 @@ public class Location implements NovelItem, ImageAware {
     @JsonIdentityReference(alwaysAsId = true)
     private LocationGroup locationGroup;
 
-    @Override()
-    public Long getId() { return this.id; }
-
-    @Override()
-    public int getPosition() { return this.position; }
-
     @Override
     @JsonIgnore
     public GroupingNovelItem getParent() {
@@ -52,12 +46,6 @@ public class Location implements NovelItem, ImageAware {
     public void setParent(GroupingNovelItem parent) {
         this.locationGroup = (LocationGroup) parent;
     }
-
-    @Override()
-    public void setPosition(int position) { this.position = position; }
-
-    @Override
-    public List<Image> getImages() { return this.images; }
 
     @Override
     public Long getParentId() {

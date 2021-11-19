@@ -20,7 +20,7 @@ public class Research implements NovelItem, ImageAware {
 
     private String extended_summary;
 
-    private int position;
+    private Integer position;
 
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -35,12 +35,6 @@ public class Research implements NovelItem, ImageAware {
     @ManyToOne
     @JsonIdentityReference(alwaysAsId = true)
     private ResearchGroup researchGroup;
-
-    @Override()
-    public Long getId() { return this.id; }
-
-    @Override()
-    public int getPosition() { return this.position; }
 
     @Override
     public Long getParentId() {
@@ -57,10 +51,4 @@ public class Research implements NovelItem, ImageAware {
     public void setParent(GroupingNovelItem parent) {
         this.researchGroup = (ResearchGroup) parent;
     }
-
-    @Override()
-    public void setPosition(int position) { this.position = position; }
-
-    @Override
-    public List<Image> getImages() { return this.images; }
 }

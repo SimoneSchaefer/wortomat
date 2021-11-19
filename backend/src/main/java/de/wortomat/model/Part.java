@@ -16,7 +16,7 @@ public class Part implements GroupingNovelItem {
 
     private String name;
 
-    private int position;
+    private Integer position;
 
     @JsonIgnore
     @ManyToOne
@@ -25,13 +25,7 @@ public class Part implements GroupingNovelItem {
     @OneToMany(mappedBy = "part")
     private List<Chapter> chapters = Collections.emptyList();
 
-    @Override()
-    public Long getId() { return this.id; }
-
-    @Override()
-    public int getPosition() { return this.position; }
-
-    @Override
+     @Override
     public void setNovel(Novel novel) {
         this.novel = novel;
     }
@@ -45,8 +39,4 @@ public class Part implements GroupingNovelItem {
     public List getChildren() {
         return this.chapters;
     }
-
-    @Override()
-    public void setPosition(int position) { this.position = position; }
-
 }

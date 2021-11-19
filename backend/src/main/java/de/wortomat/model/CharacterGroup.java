@@ -16,7 +16,7 @@ public class CharacterGroup implements GroupingNovelItem {
 
     private String name;
 
-    private int position;
+    private Integer position;
 
     @JsonIgnore
     @ManyToOne
@@ -28,9 +28,6 @@ public class CharacterGroup implements GroupingNovelItem {
     @Override()
     public Long getId() { return this.id; }
 
-    @Override()
-    public int getPosition() { return this.position; }
-
     @Override
     @JsonIgnore
     public List getChildren() {
@@ -41,8 +38,4 @@ public class CharacterGroup implements GroupingNovelItem {
     public void setNovel(Novel novel) {
         this.novel = novel;
     }
-
-    @Override()
-    public void setPosition(int position) { this.position = position; }
-
 }

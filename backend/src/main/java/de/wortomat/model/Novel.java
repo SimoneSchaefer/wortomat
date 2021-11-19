@@ -25,7 +25,7 @@ public class Novel implements GroupingNovelItem {
 
     private String summary;
 
-    private int position;
+    private Integer position;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
@@ -74,12 +74,6 @@ public class Novel implements GroupingNovelItem {
         return Collections.emptyList();
     }
 
-    @Override()
-    public Long getId() { return this.id; }
-
-    @Override()
-    public int getPosition() { return this.position; }
-
     @Override
     @JsonIgnore
     public List<? extends NovelItem> getChildren() {
@@ -88,9 +82,6 @@ public class Novel implements GroupingNovelItem {
 
     @Override
     public void setNovel(Novel novel) { }
-
-    @Override()
-    public void setPosition(int position) { this.position = position; }
 
     @Override
     public boolean equals(Object o) {
