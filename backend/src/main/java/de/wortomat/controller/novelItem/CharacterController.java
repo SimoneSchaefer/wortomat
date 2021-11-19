@@ -1,4 +1,4 @@
-package de.wortomat.controller;
+package de.wortomat.controller.novelItem;
 
 import de.wortomat.model.Character;
 import de.wortomat.model.Image;
