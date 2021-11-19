@@ -1,22 +1,15 @@
 package de.wortomat.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.*;
-import java.util.ArrayList;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
 @Data
 public class ResearchGroup extends GroupingNovelItem {
     @OneToMany(mappedBy = "parent")
-    private List<Research> research = new ArrayList<>();
-
-    @Override
-    @JsonIgnore
-    public List getChildren() {
-        return this.getResearch();
-    }
-
+    private List<Research> children = Collections.emptyList();
 }
