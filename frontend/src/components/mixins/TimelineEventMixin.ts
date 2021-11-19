@@ -14,16 +14,16 @@ export default abstract class TimelineEventMixin extends Vue {
         return this.filterItems(event, NOVEL_ITEM_KEYS.PARTS, NOVEL_ITEM_KEYS.CHAPTERS);
     }
 
-    protected getFlatList(parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS): BaseModel[]{
+    protected getFlatList(parentKey: NOVEL_ITEM_KEYS): BaseModel[]{
         let flatList = [];
         for (const group of getAllItems(this.$store.state, parentKey)) {
-            flatList = flatList.concat(group[childKey]);
+            flatList = flatList.concat(group['children']);
         }
         return flatList;
     }
 
     private filterItems(event: TimelineEventModel, parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS) {
-        const flatList = this.getFlatList(parentKey, childKey);
+        const flatList = this.getFlatList(parentKey);
         const eventItems = [];
         for (const item of (event[childKey] || [])) {
             const arg = flatList.find(otherItem => otherItem.id === item.id);

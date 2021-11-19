@@ -1,7 +1,7 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.CharacterGroup;
-import de.wortomat.service.CharacterGroupService;
+import de.wortomat.service.groupingNovelItem.CharacterGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

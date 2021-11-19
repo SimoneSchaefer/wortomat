@@ -1,10 +1,12 @@
-package de.wortomat.service;
+package de.wortomat.service.novelItem;
 
 import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Research;
 import de.wortomat.model.ResearchGroup;
 import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.repository.ResearchRepository;
+import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
+import de.wortomat.service.groupingNovelItem.ResearchGroupService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.ImageAwareService;
 import org.springframework.beans.factory.annotation.Autowired;

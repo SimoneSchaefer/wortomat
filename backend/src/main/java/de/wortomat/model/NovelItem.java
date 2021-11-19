@@ -37,6 +37,6 @@ public abstract class NovelItem<T extends GroupingNovelItem> implements INovelIt
 
     @Override
     public Long getParentId() {
-        return getParent().getId();
+        return getParent() == null ? null : getParent().getId();
     }
 }

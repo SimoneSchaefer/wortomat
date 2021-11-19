@@ -1,10 +1,11 @@
-package de.wortomat.service;
+package de.wortomat.service.novelItem;
 
 import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Chapter;
 import de.wortomat.model.Research;
 import de.wortomat.model.TimelineEvent;
 import de.wortomat.repository.TimelineEventRepository;
+import de.wortomat.service.NovelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

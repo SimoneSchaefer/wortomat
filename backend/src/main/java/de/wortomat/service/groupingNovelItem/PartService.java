@@ -1,4 +1,4 @@
-package de.wortomat.service;
+package de.wortomat.service.groupingNovelItem;
 
 import de.wortomat.model.Chapter;
 import de.wortomat.model.Part;

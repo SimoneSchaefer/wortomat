@@ -1,9 +1,11 @@
-package de.wortomat.service;
+package de.wortomat.service.novelItem;
 
 import de.wortomat.model.Character;
 import de.wortomat.model.CharacterGroup;
 import de.wortomat.repository.CharacterRepository;
 import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.service.groupingNovelItem.CharacterGroupService;
+import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.ImageAwareService;
 import org.springframework.beans.factory.annotation.Autowired;

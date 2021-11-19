@@ -10,6 +10,7 @@ import de.wortomat.model.Part;
 import de.wortomat.repository.ChapterRepository;
 import de.wortomat.repository.NovelRepository;
 import de.wortomat.repository.PartsRepository;
+import de.wortomat.service.groupingNovelItem.PartService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

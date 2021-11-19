@@ -1,7 +1,7 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.ResearchGroup;
-import de.wortomat.service.ResearchGroupService;
+import de.wortomat.service.groupingNovelItem.ResearchGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

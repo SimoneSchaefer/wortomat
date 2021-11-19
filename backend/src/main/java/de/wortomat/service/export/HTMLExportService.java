@@ -1,7 +1,6 @@
 package de.wortomat.service.export;
 
-import de.wortomat.model.Chapter;
-import de.wortomat.service.ChapterService;
+import de.wortomat.service.novelItem.ChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 
 @Service
 public class HTMLExportService implements Exporter {

@@ -1,7 +1,7 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.*;
-import de.wortomat.service.LocationService;
+import de.wortomat.service.novelItem.LocationService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
 import de.wortomat.service.uploads.ImageAwareNovelItemService;
