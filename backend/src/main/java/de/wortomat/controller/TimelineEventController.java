@@ -1,7 +1,7 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.TimelineEvent;
-import de.wortomat.service.TimelineEventService;
+import de.wortomat.service.novelItem.TimelineEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

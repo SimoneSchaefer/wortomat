@@ -3,9 +3,12 @@ package de.wortomat.service;
 
 import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Novel;
-import de.wortomat.model.ResearchGroup;
 import de.wortomat.repository.NovelRepository;
-import de.wortomat.repository.PartsRepository;
+import de.wortomat.service.groupingNovelItem.CharacterGroupService;
+import de.wortomat.service.groupingNovelItem.LocationGroupService;
+import de.wortomat.service.groupingNovelItem.PartService;
+import de.wortomat.service.groupingNovelItem.ResearchGroupService;
+import de.wortomat.service.novelItem.TimelineEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

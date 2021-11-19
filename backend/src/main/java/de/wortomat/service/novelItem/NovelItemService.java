@@ -1,8 +1,9 @@
-package de.wortomat.service;
+package de.wortomat.service.novelItem;
 
 import de.wortomat.model.IGroupingNovelItem;
 import de.wortomat.model.INovelItem;
 import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 
 import java.util.List;
 

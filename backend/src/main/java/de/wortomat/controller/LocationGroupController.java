@@ -1,7 +1,7 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.LocationGroup;
-import de.wortomat.service.LocationGroupService;
+import de.wortomat.service.groupingNovelItem.LocationGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

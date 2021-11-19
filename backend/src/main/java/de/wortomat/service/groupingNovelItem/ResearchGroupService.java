@@ -1,4 +1,4 @@
-package de.wortomat.service;
+package de.wortomat.service.groupingNovelItem;
 
 import de.wortomat.model.Research;
 import de.wortomat.model.ResearchGroup;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ResearchGroupService extends GroupingNovelItemService<ResearchGroup, Research>{
+public class ResearchGroupService extends GroupingNovelItemService<ResearchGroup, Research> {
 
     @Autowired
     private ResearchGroupRepository researchGroupRepository;

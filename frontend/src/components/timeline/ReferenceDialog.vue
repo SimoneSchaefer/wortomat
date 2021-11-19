@@ -167,7 +167,6 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     const itemIds: number[] = this.event[childKey].map(c => c['id']);
     return this.getFlatList(
       parentKey, 
-      childKey
     ).filter(chapter => !itemIds.includes(chapter.id));
   }
 }

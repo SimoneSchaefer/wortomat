@@ -1,10 +1,11 @@
-package de.wortomat.service;
+package de.wortomat.service.groupingNovelItem;
 
 import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.IGroupingNovelItem;
 import de.wortomat.model.INovelItem;
 import de.wortomat.repository.GroupingItemRepository;
 import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.service.NovelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
