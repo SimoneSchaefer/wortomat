@@ -1,39 +1,15 @@
 package de.wortomat.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import java.util.Collections;
 import java.util.List;
 
 @Entity
 @Data
-public class LocationGroup implements GroupingNovelItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private Integer position;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
-
-    @OneToMany(mappedBy = "locationGroup")
-    private List<Location> locations = Collections.emptyList();
-
-    @Override
-    @JsonIgnore
-    public List getChildren() {
-        return this.getLocations();
-    }
-
-    @Override
-    public void setNovel(Novel novel) {
-        this.novel = novel;
-    }
-
+public class LocationGroup extends GroupingNovelItem<Location> {
+    @OneToMany(mappedBy = "parent")
+    private List<Location> children = Collections.emptyList();
 }

@@ -53,7 +53,7 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
 
 
   deleteChild(item: BaseModel) {
-    const parentId = (this.items.find(parent => parent[this.childKey].find(child => child.id === item.id)))?.id; 
+    const parentId = (this.items.find(parent => parent['children'].find(child => child.id === item.id)))?.id; 
     // TODO cleanup data structure mess
     let flatList = [];
     let parent = null;

@@ -55,9 +55,9 @@ public class PartServiceTest {
 
         List<Part> resultParts = partService.get(novel.getId());
         Assertions.assertEquals(allParts, resultParts);
-        Assertions.assertEquals(1, allParts.get(0).getChapters().get(0).getPosition());
-        Assertions.assertEquals(2, allParts.get(0).getChapters().get(1).getPosition());
-        Assertions.assertEquals(3, allParts.get(0).getChapters().get(2).getPosition());
+        Assertions.assertEquals(1, allParts.get(0).getChildren().get(0).getPosition());
+        Assertions.assertEquals(2, allParts.get(0).getChildren().get(1).getPosition());
+        Assertions.assertEquals(3, allParts.get(0).getChildren().get(2).getPosition());
 
         verify(partsRepository).findAllByNovelIdOrderByPosition(novel.getId());
     }
@@ -71,9 +71,9 @@ public class PartServiceTest {
 
         Part resultPart = partService.get(novel.getId(), part.getId());
         Assertions.assertEquals(part, resultPart);
-        Assertions.assertEquals(1, resultPart.getChapters().get(0).getPosition());
-        Assertions.assertEquals(2, resultPart.getChapters().get(1).getPosition());
-        Assertions.assertEquals(3, resultPart.getChapters().get(2).getPosition());
+        Assertions.assertEquals(1, resultPart.getChildren().get(0).getPosition());
+        Assertions.assertEquals(2, resultPart.getChildren().get(1).getPosition());
+        Assertions.assertEquals(3, resultPart.getChildren().get(2).getPosition());
 
         verify(partsRepository).findById(part.getId());
     }
@@ -142,7 +142,7 @@ public class PartServiceTest {
         chapter2.setPosition(1);
         Chapter chapter3 = ChapterFactory.createMockChapter();
         chapter3.setPosition(2);
-        part.setChapters(Arrays.asList(chapter1, chapter2, chapter3));
+        part.setChildren(Arrays.asList(chapter1, chapter2, chapter3));
         return part;
     }
 }

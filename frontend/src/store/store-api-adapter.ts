@@ -41,9 +41,9 @@ export function loadItemsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Pro
 }
 
 export function loadTagsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
-    if (key === NOVEL_ITEM_KEYS.TIMELINE) {
+    /*if (key === NOVEL_ITEM_KEYS.TIMELINE) {
         key = NOVEL_ITEM_KEYS.CHAPTERS; //TODO
-    }
+    }*/
     const serviceToUse = KEY_TO_SERVICE.get(key);
     if (serviceToUse) {
         return serviceToUse.tags(novelId);

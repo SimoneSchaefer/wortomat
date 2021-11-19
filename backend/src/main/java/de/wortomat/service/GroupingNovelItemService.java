@@ -1,8 +1,8 @@
 package de.wortomat.service;
 
 import de.wortomat.exceptions.NotFoundException;
-import de.wortomat.model.GroupingNovelItem;
-import de.wortomat.model.NovelItem;
+import de.wortomat.model.IGroupingNovelItem;
+import de.wortomat.model.INovelItem;
 import de.wortomat.repository.GroupingItemRepository;
 import de.wortomat.repository.NovelItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,25 +12,26 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class GroupingItemService <T extends GroupingNovelItem, S extends NovelItem> {
+public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>> {
+
     protected abstract GroupingItemRepository<T, Long> getParentRepository();
-    protected abstract NovelItemRepository<S, Long> getChildRepository();
+    protected abstract NovelItemRepository<S> getChildRepository();
 
     @Autowired
     protected NovelService novelService;
 
     public List<T> get(Long novelId) {
         List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
-        for (GroupingNovelItem part : allParts) {
-            part.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
+        for (T parent : allParts) {
+            sortChildren(parent);
         }
         return allParts;
     }
 
-    public T get(Long novelId, Long itemItem) {
-        T item = this.getParentRepository().findById(itemItem).orElseThrow(NotFoundException::new);
-        item.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
-        return item;
+    public T get(Long novelId, Long itemId) {
+        T parent = this.getParentRepository().findById(itemId).orElseThrow(NotFoundException::new);
+        sortChildren(parent);
+        return parent;
     }
 
     public T create(Long novelId, T positionAware) {
@@ -48,7 +49,7 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     public void delete(Long _novelId, Long parentId) {
-        this.getChildRepository().deleteAll((List)this.get(_novelId, parentId).getChildren());
+        this.getChildRepository().deleteAll(this.get(_novelId, parentId).getChildren());
         this.getParentRepository().deleteById(parentId);
     }
 
@@ -60,7 +61,7 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
 
     @Transactional
     public List<T> moveChild(Long novelId, Long childId, Long newParentId, int newPosition) {
-        S child = this.getChildRepository().findById(childId).get();
+        S child = this.getChildRepository().findById(childId).orElseThrow(NotFoundException::new);
 
         if (child.getParent().getId().equals(newParentId)) {
             moveChildWithinParent(child, newPosition);
@@ -73,8 +74,8 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     private void moveChildToOtherParent(S child, int newPosition, Long newParentId) {
-        T oldParent = this.getParentRepository().findById(child.getParent().getId()).get();
-        T newParent = this.getParentRepository().findById(newParentId).get();
+        T oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
+        T newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
 
         oldParent.getChildren().remove(child);
         oldParent.getChildren().stream()
@@ -84,7 +85,7 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
         newParent.getChildren().stream()
                 .filter(otherChild -> otherChild.getPosition() >= newPosition)
                 .forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() + 1));
-        ((List)newParent.getChildren()).add(newPosition, child); // TODO: fix generics confusion
+        (newParent.getChildren()).add(newPosition, child);
         child.setParent(newParent);
         this.getParentRepository().save(oldParent);
         this.getParentRepository().save(newParent);
@@ -92,20 +93,20 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
 
     private void moveChildWithinParent(S child, int newPosition) {
         boolean movedUp = child.getPosition() > newPosition;
-        List updatedChildren = movedUp ? moveChildUp(child, newPosition) : moveChildDown(child, newPosition); // TODO: fix generics confusion
+        List<S> updatedChildren = movedUp ? moveChildUp(child, newPosition) : moveChildDown(child, newPosition); // TODO: fix generics confusion
         getChildRepository().saveAll(updatedChildren);
     }
 
-    private List<? extends NovelItem> moveChildUp(S child, int newPosition) {
-        List<? extends NovelItem> allConcernedChildren  = child.getParent().getChildren().stream()
+    private List<S> moveChildUp(S child, int newPosition) {
+        List<S> allConcernedChildren  = child.getParent().getChildren().stream()
                 .filter(otherChild -> otherChild.getPosition() >= newPosition)
                 .collect(Collectors.toList());
         allConcernedChildren.forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() + 1));
         return allConcernedChildren;
     }
 
-    private List<? extends NovelItem>  moveChildDown(S child, int newPosition) {
-        List<? extends NovelItem> allConcernedChildren  = child.getParent().getChildren().stream()
+    private List<S>  moveChildDown(S child, int newPosition) {
+        List<S> allConcernedChildren  = child.getParent().getChildren().stream()
                 .filter(otherChild -> otherChild.getPosition() > child.getPosition() && otherChild.getPosition() <= newPosition)
                 .collect(Collectors.toList());
         allConcernedChildren.forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() - 1));
@@ -113,10 +114,14 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     private int getMaxPosition(Long novelId) {
-        GroupingNovelItem maxPosition = this.getParentRepository().findTopByNovelIdOrderByPositionDesc(novelId);
+        T maxPosition = this.getParentRepository().findTopByNovelIdOrderByPositionDesc(novelId);
         if (maxPosition == null) {
             return 0;
         }
         return maxPosition.getPosition() + 1;
+    }
+
+    private void sortChildren(T parent) {
+        parent.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
     }
 }

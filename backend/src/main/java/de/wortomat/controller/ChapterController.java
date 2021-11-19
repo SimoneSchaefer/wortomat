@@ -1,7 +1,7 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.Chapter;
-import de.wortomat.model.NovelItem;
+import de.wortomat.model.INovelItem;
 import de.wortomat.service.ChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +15,7 @@ public class ChapterController {
     private ChapterService chapterService;
 
     @PostMapping
-    public ResponseEntity<NovelItem> create(
+    public ResponseEntity<INovelItem> create(
             @PathVariable("novelId") Long novelId,
             @PathVariable("partId") Long partId,
             @RequestBody Chapter chapter) {
@@ -23,7 +23,7 @@ public class ChapterController {
     }
 
     @PutMapping
-    public ResponseEntity<NovelItem> update(
+    public ResponseEntity<INovelItem> update(
             @PathVariable("novelId") Long novelId,
             @PathVariable("partId") Long partId,
             @RequestBody Chapter chapter) {

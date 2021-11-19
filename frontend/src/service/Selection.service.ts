@@ -12,9 +12,9 @@ export class SelectionService {
             if (!KEY_TO_CHILD.has(key)) {
                 itemToSelect = loadedItems[0];
             } else {
-                const firstParentWithChildren = loadedItems.find(item => item[KEY_TO_CHILD.get(key)]?.length)
+                const firstParentWithChildren = loadedItems.find(item => item['children']?.length)
                 if (firstParentWithChildren) {
-                    const children = firstParentWithChildren[KEY_TO_CHILD.get(key)];
+                    const children = firstParentWithChildren['children'];
                     if (children?.length) {
                         itemToSelect = children[0];
                     }

@@ -1,10 +1,9 @@
 package de.wortomat.service;
 
-import de.wortomat.model.*;
 import de.wortomat.model.Character;
+import de.wortomat.model.CharacterGroup;
 import de.wortomat.repository.CharacterRepository;
 import de.wortomat.repository.NovelItemRepository;
-import de.wortomat.repository.ResearchRepository;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.ImageAwareService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,17 +33,12 @@ public class CharacterService extends NovelItemService<CharacterGroup, Character
     }
 
     @Override
-    GroupingItemService<CharacterGroup, Character> getParentService() {
+    GroupingNovelItemService<CharacterGroup, Character> getParentService() {
         return this.characterGroupService;
     }
 
     @Override
-    NovelItemRepository<Character, Long> getRepository() {
+    NovelItemRepository<Character> getRepository() {
         return this.researchRepository;
-    }
-
-    @Override
-    Character getMaxPositionItem(Long parentId) {
-        return this.researchRepository.findTopByCharacterGroupIdOrderByPositionDesc(parentId);
     }
 }

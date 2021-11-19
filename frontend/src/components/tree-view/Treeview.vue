@@ -14,7 +14,7 @@
             <draggable class="list-group"
                 :id="`parent-${item.id}`"
                 :data-source="`parent-${item.id}`"
-                :list="item[childKey]"
+                :list="item['children']"
                 :item-key="`parent-${item.id}`"
                 group="children"                 
                 @end="childMoved" >
@@ -72,13 +72,13 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     }
 
     deleteChild(item: BaseModel) {
-        const parentId = (this.items.find(parent => parent[this.childKey].find(child => child.id === item.id)))?.id; 
+        const parentId = (this.items.find(parent => parent['children'].find(child => child.id === item.id)))?.id; 
         // TODO cleanup data structure mess
         let flatList = [];
         let parent = null;
         for (const group of getAllItems(this.$store.state, this.parentKey)) {
         // flatList = flatList.concat(group.research);
-        const findChild = group[this.childKey].find(child => child.id === item.id);
+        const findChild = group['children'].find(child => child.id === item.id);
         if (findChild) {
             parent = group;
             break;

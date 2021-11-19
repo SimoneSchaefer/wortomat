@@ -1,11 +1,24 @@
 package de.wortomat.model;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 
-public interface GroupingNovelItem extends PositionAwareNovelItem {
-    Long getId();
+import javax.persistence.*;
 
-    List<? extends NovelItem> getChildren();
+@MappedSuperclass
+@Getter
+@Setter
+public abstract class GroupingNovelItem<C extends INovelItem<?>> implements IGroupingNovelItem<C> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    void setNovel(Novel novel);
+    private String name;
+
+    private Integer position;
+
+    @JsonIgnore
+    @ManyToOne
+    private Novel novel;
 }

@@ -15,7 +15,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Novel implements GroupingNovelItem {
+public class Novel implements IGroupingNovelItem {
     @Id
     @JsonFormat
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,7 +76,7 @@ public class Novel implements GroupingNovelItem {
 
     @Override
     @JsonIgnore
-    public List<? extends NovelItem> getChildren() {
+    public List<? extends INovelItem> getChildren() {
         return Collections.emptyList();
     }
 

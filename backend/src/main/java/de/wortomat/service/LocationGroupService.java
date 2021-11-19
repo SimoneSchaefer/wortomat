@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LocationGroupService extends GroupingItemService<LocationGroup, Location>{
+public class LocationGroupService extends GroupingNovelItemService<LocationGroup, Location>{
 
     @Autowired
     private LocationGroupRepository locationGroupRepository;
@@ -21,7 +21,7 @@ public class LocationGroupService extends GroupingItemService<LocationGroup, Loc
     }
 
     @Override
-    protected NovelItemRepository<Location, Long> getChildRepository() {
+    protected NovelItemRepository<Location> getChildRepository() {
         return this.locationRepository;
     }
 }
