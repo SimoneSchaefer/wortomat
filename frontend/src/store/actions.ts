@@ -67,7 +67,6 @@ const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_
     // loadTagsFromBackend( payload.key, payload.novelId) // TODO
   ]).then(result => {
     const loadedItems = result[0].data;
-    setParentIdOnChildren(key, loadedItems);
     context.commit('itemsLoaded', { key: key, items: loadedItems });
     //context.commit('tagsLoaded', result[1].data);
     selectFirstItemIfNecessary(context, key, loadedItems) ;
@@ -148,13 +147,6 @@ const selectFirstItemIfNecessary = (context: ActionContext<IState,IState>, key: 
   }  
 }
 
-const setParentIdOnChildren = (key: NOVEL_ITEM_KEYS, parentItems: BaseModel[])  => {
-  if (KEY_TO_CHILD.has(key)) {
-    for (const parent of parentItems) {
-      parent[KEY_TO_CHILD.get(key)].map(child => child.parentId = parent.id);
-    }
-  }
-}
 
 export default {
     openNovel,

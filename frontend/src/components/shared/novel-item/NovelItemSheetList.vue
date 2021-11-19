@@ -33,7 +33,7 @@ export default class NovelItemSheetList extends Vue {
     @Prop() childKey: NOVEL_ITEM_KEYS;
 
     get hasChildItems(): boolean {
-      return !!(getAllItems(this.$store.state, this.parentKey).find(parent => (parent[this.childKey] || []).length ));
+      return !!(getAllItems(this.$store.state, this.parentKey).find(parent => (parent['children'] || []).length ));
     }
 
     get service(): NovelItemService {
@@ -47,16 +47,11 @@ export default class NovelItemSheetList extends Vue {
     get selected(): BaseModel[] {
         const ids = this.selectedItems;
         const all = this.$store.state.novelItems.get(this.parentKey) || [];
-
-        if (KEY_TO_CHILD.has(this.parentKey)) {
-            let allChapters = [];
-            for (let part of all) {
-                allChapters = allChapters.concat((part[this.childKey] || []).filter(chapter => ids.includes(chapter.id)));
-            }
-            return allChapters;
-        } else {
-            return all.filter(item => ids.includes(item.id));
+        let allChapters = [];
+        for (let part of all) {
+            allChapters = allChapters.concat((part['children'] || []).filter(chapter => ids.includes(chapter.id)));
         }
+        return allChapters;        
     }
 
 }

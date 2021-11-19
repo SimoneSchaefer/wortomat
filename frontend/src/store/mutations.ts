@@ -56,12 +56,12 @@ const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Base
 }
 
     
-const itemAdded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}): void => {
+const itemAdded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel }): void => {
     const { key, item } = payload;
     const parent = findParent(state, key, item );
     if (parent) { 
-        if (!parent[key]) { parent[key] = []; }
-        parent[key].push(item);
+        if (!parent['children']) { parent['children'] = []; }
+        parent['children'].push(item);
     } else {
         const items = state.novelItems.get(key) as BaseModel[] || [];
         items.push(item);
@@ -73,11 +73,11 @@ const itemAdded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseMod
 }
   
 const itemUpdated = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}):void => {
-    const {key, item } = payload;
+    const { key, item } = payload;
     const parent = findParent(state, key, item );
     if (parent) {
-        const index = findItem(item, parent[key]);
-        parent[key].splice(index, 1, item);
+        const index = findItem(item, parent['children']);
+        parent['children'].splice(index, 1, item);
     } else {
         updateItemInStore(item, state.novelItems.get(key) as BaseModel[]);
     }
@@ -95,8 +95,8 @@ const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Bas
             const allParentItems = state.novelItems.get(getParentKey(key));
             for (const item of items) {
                 const parentItem = allParentItems.find(parent => parent.id === item.parentId);
-                const childIndex = parentItem[key].findIndex(child => child.id === item.id);
-                parentItem[key].splice(childIndex, 1);
+                const childIndex = parentItem['children'].findIndex(child => child.id === item.id);
+                parentItem['children'].splice(childIndex, 1);
             }
         }
         
