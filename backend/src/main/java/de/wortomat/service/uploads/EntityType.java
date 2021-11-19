@@ -1,8 +1,8 @@
 package de.wortomat.service.uploads;
 
 public enum EntityType {
-    CHARACTER,
+    CHARACTERS,
     RESEARCH,
-    LOCATION,
-    CHAPTER
+    LOCATIONS,
+    CHAPTERS
 }
