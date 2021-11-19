@@ -2,33 +2,20 @@ package de.wortomat.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Data
-public class Location implements NovelItem, ImageAware {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private String summary;
-
-    private String extended_summary;
-
-    private Integer position;
-
-    @Column(columnDefinition = "TEXT")
-    private String content;
+@ToString
+@Getter
+@Setter
+@RequiredArgsConstructor
+public class Location extends NovelItem implements ImageAware {
 
     @ManyToMany
-    private List<Image> images;
-
-    @ManyToMany
+    @ToString.Exclude
     private List<LocationTag> tags;
 
     @JsonIgnore

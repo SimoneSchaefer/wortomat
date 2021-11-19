@@ -76,7 +76,7 @@ public class Novel implements GroupingNovelItem {
 
     @Override
     @JsonIgnore
-    public List<? extends NovelItem> getChildren() {
+    public List<? extends INovelItem> getChildren() {
         return Collections.emptyList();
     }
 

@@ -3,33 +3,16 @@ package de.wortomat.model;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
+@ToString
 @Getter
 @Setter
-@ToString
 @RequiredArgsConstructor
-public class Chapter implements NovelItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private String summary;
-
-    private String extended_summary;
-
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    private Integer position;
-
+public class Chapter extends NovelItem {
     @ManyToMany
     @ToString.Exclude
     private List<ChapterTag> tags;
@@ -53,18 +36,5 @@ public class Chapter implements NovelItem {
     @Override
     public void setParent(GroupingNovelItem parent) {
         this.part = (Part) parent;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Chapter chapter = (Chapter) o;
-        return Objects.equals(id, chapter.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return 0;
     }
 }

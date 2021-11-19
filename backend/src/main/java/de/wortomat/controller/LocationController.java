@@ -1,7 +1,6 @@
 package de.wortomat.controller;
 
 import de.wortomat.model.*;
-import de.wortomat.repository.tags.LocationTagRepository;
 import de.wortomat.service.LocationService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/novels/{novelId}/location-groups/{groupId}/location/")
@@ -29,7 +27,7 @@ public class LocationController {
     private FileResponseCreator fileResponseCreator;
 
     @PostMapping
-    public ResponseEntity<NovelItem> create(
+    public ResponseEntity<INovelItem> create(
             @PathVariable("novelId") Long novelId,
             @PathVariable("groupId") Long groupId,
             @RequestBody Location location) {
@@ -37,7 +35,7 @@ public class LocationController {
     }
 
     @PutMapping
-    public ResponseEntity<NovelItem> update(
+    public ResponseEntity<INovelItem> update(
             @PathVariable("novelId") Long novelId,
             @PathVariable("groupId") Long groupId,
             @RequestBody Location location) {

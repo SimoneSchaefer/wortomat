@@ -2,7 +2,7 @@ package de.wortomat.service;
 
 import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.GroupingNovelItem;
-import de.wortomat.model.NovelItem;
+import de.wortomat.model.INovelItem;
 import de.wortomat.repository.GroupingItemRepository;
 import de.wortomat.repository.NovelItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class GroupingItemService <T extends GroupingNovelItem, S extends NovelItem> {
+public abstract class GroupingItemService <T extends GroupingNovelItem, S extends INovelItem> {
     protected abstract GroupingItemRepository<T, Long> getParentRepository();
     protected abstract NovelItemRepository<S, Long> getChildRepository();
 
@@ -22,14 +22,14 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     public List<T> get(Long novelId) {
         List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
         for (GroupingNovelItem part : allParts) {
-            part.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
+            part.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
         }
         return allParts;
     }
 
     public T get(Long novelId, Long itemItem) {
         T item = this.getParentRepository().findById(itemItem).orElseThrow(NotFoundException::new);
-        item.getChildren().sort(Comparator.comparing(NovelItem::getPosition));
+        item.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
         return item;
     }
 
@@ -96,16 +96,16 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
         getChildRepository().saveAll(updatedChildren);
     }
 
-    private List<? extends NovelItem> moveChildUp(S child, int newPosition) {
-        List<? extends NovelItem> allConcernedChildren  = child.getParent().getChildren().stream()
+    private List<? extends INovelItem> moveChildUp(S child, int newPosition) {
+        List<? extends INovelItem> allConcernedChildren  = child.getParent().getChildren().stream()
                 .filter(otherChild -> otherChild.getPosition() >= newPosition)
                 .collect(Collectors.toList());
         allConcernedChildren.forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() + 1));
         return allConcernedChildren;
     }
 
-    private List<? extends NovelItem>  moveChildDown(S child, int newPosition) {
-        List<? extends NovelItem> allConcernedChildren  = child.getParent().getChildren().stream()
+    private List<? extends INovelItem>  moveChildDown(S child, int newPosition) {
+        List<? extends INovelItem> allConcernedChildren  = child.getParent().getChildren().stream()
                 .filter(otherChild -> otherChild.getPosition() > child.getPosition() && otherChild.getPosition() <= newPosition)
                 .collect(Collectors.toList());
         allConcernedChildren.forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() - 1));

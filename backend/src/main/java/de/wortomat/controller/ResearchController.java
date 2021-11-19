@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/novels/{novelId}/research-groups/{groupId}/research")
@@ -28,7 +27,7 @@ public class ResearchController {
     private FileResponseCreator fileResponseCreator;
 
     @PostMapping
-    public ResponseEntity<NovelItem> create(
+    public ResponseEntity<INovelItem> create(
             @PathVariable("novelId") Long novelId,
             @PathVariable("groupId") Long groupId,
             @RequestBody Research research) {
@@ -36,7 +35,7 @@ public class ResearchController {
     }
 
     @PutMapping
-    public ResponseEntity<NovelItem> update(
+    public ResponseEntity<INovelItem> update(
             @PathVariable("novelId") Long novelId,
             @PathVariable("groupId") Long groupId,
             @RequestBody Research research) {

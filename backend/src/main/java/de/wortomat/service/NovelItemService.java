@@ -1,18 +1,17 @@
 package de.wortomat.service;
 
-import de.wortomat.model.Chapter;
 import de.wortomat.model.GroupingNovelItem;
-import de.wortomat.model.NovelItem;
+import de.wortomat.model.INovelItem;
 import de.wortomat.repository.NovelItemRepository;
 
 import java.util.List;
 
-public abstract class NovelItemService<T extends GroupingNovelItem, S extends NovelItem> {
+public abstract class NovelItemService<T extends GroupingNovelItem, S extends INovelItem> {
     abstract GroupingItemService<T, S> getParentService();
     abstract NovelItemRepository<S, Long> getRepository();
     abstract S getMaxPositionItem(Long parentId);
 
-    public NovelItem create(Long novelId, Long partId, S chapter) {
+    public INovelItem create(Long novelId, Long partId, S chapter) {
         return ensureParent(chapter, novelId, partId);
     }
 
