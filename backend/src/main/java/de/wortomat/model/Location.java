@@ -2,13 +2,20 @@ package de.wortomat.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.*;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+@GeneratePojoBuilder
 public class Location implements NovelItem, ImageAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -20,27 +27,23 @@ public class Location implements NovelItem, ImageAware {
 
     private String extended_summary;
 
-    private int position;
+    private Integer position;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToMany
+    @ToString.Exclude
     private List<Image> images;
 
     @ManyToMany
+    @ToString.Exclude
     private List<LocationTag> tags;
 
     @JsonIgnore
     @ManyToOne
     @JsonIdentityReference(alwaysAsId = true)
     private LocationGroup locationGroup;
-
-    @Override()
-    public Long getId() { return this.id; }
-
-    @Override()
-    public int getPosition() { return this.position; }
 
     @Override
     @JsonIgnore
@@ -53,14 +56,24 @@ public class Location implements NovelItem, ImageAware {
         this.locationGroup = (LocationGroup) parent;
     }
 
-    @Override()
-    public void setPosition(int position) { this.position = position; }
-
     @Override
     public List<Image> getImages() { return this.images; }
 
     @Override
     public Long getParentId() {
         return getParent().getId();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Location location = (Location) o;
+        return Objects.equals(id, location.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 }

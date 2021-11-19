@@ -5,7 +5,7 @@ import java.util.List;
 public interface GroupingNovelItem extends PositionAwareNovelItem {
     Long getId();
 
-    List<? extends NovelItem> getChildren();
+    List<NovelItem> getChildren();
 
     void setNovel(Novel novel);
 }

@@ -3,6 +3,7 @@ package de.wortomat.model;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@GeneratePojoBuilder
 public class Chapter implements NovelItem {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,7 +30,7 @@ public class Chapter implements NovelItem {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    private int position;
+    private Integer position;
 
     @ManyToMany
     @ToString.Exclude
@@ -43,15 +45,6 @@ public class Chapter implements NovelItem {
     public Long getParentId() {
         return getParent().getId();
     }
-
-    @Override
-    public Long getId() { return this.id; }
-
-    @Override
-    public int getPosition() { return this.position; }
-
-    @Override
-    public void setPosition(int position) { this.position = position; }
 
     @Override
     @JsonIgnore

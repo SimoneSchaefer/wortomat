@@ -1,17 +1,21 @@
 package de.wortomat.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.*;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+@GeneratePojoBuilder
 public class TimelineEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,9 +34,11 @@ public class TimelineEvent {
     private Novel novel;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Chapter> chapters;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Research> research;
 
     /*@JsonInclude(JsonInclude.Include.ALWAYS)
@@ -54,5 +60,18 @@ public class TimelineEvent {
 
     public void setNovel(Novel novel) {
         this.novel = novel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        TimelineEvent that = (TimelineEvent) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 }

@@ -2,8 +2,8 @@ package de.wortomat.model;
 
 public interface NovelItem {
     Long getId();
-    int getPosition();
-    void setPosition(int position);
+    Integer getPosition();
+    void setPosition(Integer position);
 
     Long getParentId();
     GroupingNovelItem getParent();

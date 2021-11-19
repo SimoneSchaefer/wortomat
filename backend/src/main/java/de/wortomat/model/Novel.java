@@ -3,6 +3,7 @@ package de.wortomat.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import net.karneim.pojobuilder.GeneratePojoBuilder;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@GeneratePojoBuilder
 public class Novel implements GroupingNovelItem {
     @Id
     @JsonFormat
@@ -25,7 +27,7 @@ public class Novel implements GroupingNovelItem {
 
     private String summary;
 
-    private int position;
+    private Integer position;
 
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
@@ -74,23 +76,14 @@ public class Novel implements GroupingNovelItem {
         return Collections.emptyList();
     }
 
-    @Override()
-    public Long getId() { return this.id; }
-
-    @Override()
-    public int getPosition() { return this.position; }
-
     @Override
     @JsonIgnore
-    public List<? extends NovelItem> getChildren() {
+    public List<NovelItem> getChildren() {
         return Collections.emptyList();
     }
 
     @Override
     public void setNovel(Novel novel) { }
-
-    @Override()
-    public void setPosition(int position) { this.position = position; }
 
     @Override
     public boolean equals(Object o) {
