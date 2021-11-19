@@ -1,6 +1,6 @@
 package de.wortomat.model;
 
-public interface INovelItem<T extends GroupingNovelItem> {
+public interface INovelItem<T extends IGroupingNovelItem> {
     Long getId();
     Integer getPosition();
     void setPosition(Integer position);

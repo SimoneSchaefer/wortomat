@@ -9,7 +9,7 @@ import javax.persistence.*;
 @MappedSuperclass
 @Getter
 @Setter
-public abstract class GroupingNovelItem implements IGroupingNovelItem {
+public abstract class GroupingNovelItem<C extends INovelItem<?>> implements IGroupingNovelItem<C> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

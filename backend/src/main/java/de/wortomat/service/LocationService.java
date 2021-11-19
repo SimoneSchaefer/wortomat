@@ -34,17 +34,13 @@ public class LocationService extends NovelItemService<LocationGroup, Location>  
     }
 
     @Override
-    GroupingItemService<LocationGroup, Location> getParentService() {
+    GroupingNovelItemService<LocationGroup, Location> getParentService() {
         return this.locationGroupService;
     }
 
     @Override
-    NovelItemRepository<Location, Long> getRepository() {
+    NovelItemRepository<Location> getRepository() {
         return this.locationRepository;
     }
 
-    @Override
-    Location getMaxPositionItem(Long parentId) {
-        return this.locationRepository.findTopByParentOrderByPositionDesc(parentId);
-    }
 }

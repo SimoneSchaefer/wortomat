@@ -33,17 +33,12 @@ public class CharacterService extends NovelItemService<CharacterGroup, Character
     }
 
     @Override
-    GroupingItemService<CharacterGroup, Character> getParentService() {
+    GroupingNovelItemService<CharacterGroup, Character> getParentService() {
         return this.characterGroupService;
     }
 
     @Override
-    NovelItemRepository<Character, Long> getRepository() {
+    NovelItemRepository<Character> getRepository() {
         return this.researchRepository;
-    }
-
-    @Override
-    Character getMaxPositionItem(Long parentId) {
-        return this.researchRepository.findTopByParentOrderByPositionDesc(parentId);
     }
 }

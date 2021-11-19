@@ -34,17 +34,12 @@ public class ResearchService extends NovelItemService<ResearchGroup, Research>  
     }
 
     @Override
-    GroupingItemService<ResearchGroup, Research> getParentService() {
+    GroupingNovelItemService<ResearchGroup, Research> getParentService() {
         return this.researchGroupService;
     }
 
     @Override
-    NovelItemRepository<Research, Long> getRepository() {
+    NovelItemRepository<Research> getRepository() {
         return this.researchRepository;
-    }
-
-    @Override
-    Research getMaxPositionItem(Long parentId) {
-        return this.researchRepository.findTopByParentOrderByPositionDesc(parentId);
     }
 }

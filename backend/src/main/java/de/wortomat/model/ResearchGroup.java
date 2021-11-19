@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class ResearchGroup extends GroupingNovelItem {
+public class ResearchGroup extends GroupingNovelItem<Research> {
     @OneToMany(mappedBy = "parent")
     private List<Research> children = Collections.emptyList();
 }

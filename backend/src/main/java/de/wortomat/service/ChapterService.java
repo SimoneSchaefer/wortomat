@@ -15,17 +15,12 @@ public class ChapterService extends NovelItemService<Part, Chapter>  {
     PartService partService;
 
     @Override
-    GroupingItemService<Part, Chapter> getParentService() {
+    GroupingNovelItemService<Part, Chapter> getParentService() {
         return this.partService;
     }
 
     @Override
-    NovelItemRepository<Chapter, Long> getRepository() {
+    NovelItemRepository<Chapter> getRepository() {
         return this.chapterRepository;
-    }
-
-    @Override
-    Chapter getMaxPositionItem(Long parentId) {
-        return this.chapterRepository.findTopByParentOrderByPositionDesc(parentId);
     }
 }

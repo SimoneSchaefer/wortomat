@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CharacterGroupService extends GroupingItemService<CharacterGroup, Character>{
+public class CharacterGroupService extends GroupingNovelItemService<CharacterGroup, Character>{
 
     @Autowired
     private CharacterGroupRepository partsRepository;
@@ -24,7 +24,7 @@ public class CharacterGroupService extends GroupingItemService<CharacterGroup, C
     }
 
     @Override
-    protected NovelItemRepository<Character, Long> getChildRepository() {
+    protected NovelItemRepository<Character> getChildRepository() {
         return this.chapterRepository;
     }
 }
