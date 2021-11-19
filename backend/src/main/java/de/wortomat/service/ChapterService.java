@@ -26,6 +26,6 @@ public class ChapterService extends NovelItemService<Part, Chapter>  {
 
     @Override
     Chapter getMaxPositionItem(Long parentId) {
-        return this.chapterRepository.findTopByPartIdOrderByPositionDesc(parentId);
+        return this.chapterRepository.findTopByParentOrderByPositionDesc(parentId);
     }
 }

@@ -45,6 +45,6 @@ public class ResearchService extends NovelItemService<ResearchGroup, Research>  
 
     @Override
     Research getMaxPositionItem(Long parentId) {
-        return this.researchRepository.findTopByResearchGroupIdOrderByPositionDesc(parentId);
+        return this.researchRepository.findTopByParentOrderByPositionDesc(parentId);
     }
 }

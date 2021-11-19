@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class Part extends GroupingNovelItem {
 
-    @OneToMany(mappedBy = "part")
+    @OneToMany(mappedBy = "parent")
     private List<Chapter> chapters = Collections.emptyList();
 
     public List<Chapter> getChapters() {

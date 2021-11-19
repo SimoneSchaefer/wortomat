@@ -1,5 +1,6 @@
 package de.wortomat.service;
 
+import de.wortomat.model.GroupingNovelItem;
 import de.wortomat.model.IGroupingNovelItem;
 import de.wortomat.model.INovelItem;
 import de.wortomat.repository.NovelItemRepository;
@@ -25,14 +26,14 @@ public abstract class NovelItemService<T extends IGroupingNovelItem, S extends I
 
 
     private S ensureParent(S chapter, Long novelId, Long partId) {
-        T part = getParentService().get(novelId, partId);
+        GroupingNovelItem part = (GroupingNovelItem) getParentService().get(novelId, partId);
         chapter.setParent(part);
         if (chapter.getId() == null) {
             chapter.setPosition((getMaxPosition(part.getId())));
         }
         this.getRepository().save(chapter);
         ((List)part.getChildren()).add(chapter);
-        getParentService().update(novelId, part);
+        getParentService().update(novelId, (T) part);
         return chapter;
     }
 

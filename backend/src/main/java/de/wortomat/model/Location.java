@@ -1,10 +1,12 @@
 package de.wortomat.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import java.util.List;
 
 @Entity
@@ -12,30 +14,9 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class Location extends NovelItem implements ImageAware {
+public class Location extends NovelItem<LocationGroup> implements ImageAware {
 
     @ManyToMany
     @ToString.Exclude
     private List<LocationTag> tags;
-
-    @JsonIgnore
-    @ManyToOne
-    @JsonIdentityReference(alwaysAsId = true)
-    private LocationGroup locationGroup;
-
-    @Override
-    @JsonIgnore
-    public IGroupingNovelItem getParent() {
-        return this.getLocationGroup();
-    }
-
-    @Override
-    public void setParent(IGroupingNovelItem parent) {
-        this.locationGroup = (LocationGroup) parent;
-    }
-
-    @Override
-    public Long getParentId() {
-        return getParent().getId();
-    }
 }

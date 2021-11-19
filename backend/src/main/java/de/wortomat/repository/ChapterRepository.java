@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface ChapterRepository extends NovelItemRepository<Chapter, Long> {
-    Chapter findTopByPartIdOrderByPositionDesc(Long partId);
-    List<Chapter> findAllByPartId(Long partId);
+    Chapter findTopByParentOrderByPositionDesc(Long partId);
+    List<Chapter> findAllByParent(Long partId);
 };

@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Data
 public class ResearchGroup extends GroupingNovelItem {
-    @OneToMany(mappedBy = "researchGroup")
+    @OneToMany(mappedBy = "parent")
     private List<Research> research = new ArrayList<>();
 
     @Override

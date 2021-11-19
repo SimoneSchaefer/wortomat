@@ -1,6 +1,7 @@
 package de.wortomat.service;
 
 import de.wortomat.exceptions.NotFoundException;
+import de.wortomat.model.GroupingNovelItem;
 import de.wortomat.model.IGroupingNovelItem;
 import de.wortomat.model.INovelItem;
 import de.wortomat.repository.GroupingItemRepository;
@@ -85,7 +86,7 @@ public abstract class GroupingItemService <T extends IGroupingNovelItem, S exten
                 .filter(otherChild -> otherChild.getPosition() >= newPosition)
                 .forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() + 1));
         ((List)newParent.getChildren()).add(newPosition, child); // TODO: fix generics confusion
-        child.setParent(newParent);
+        child.setParent((GroupingNovelItem) newParent);
         this.getParentRepository().save(oldParent);
         this.getParentRepository().save(newParent);
     }

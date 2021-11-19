@@ -45,6 +45,6 @@ public class LocationService extends NovelItemService<LocationGroup, Location>  
 
     @Override
     Location getMaxPositionItem(Long parentId) {
-        return this.locationRepository.findTopByLocationGroupIdOrderByPositionDesc(parentId);
+        return this.locationRepository.findTopByParentOrderByPositionDesc(parentId);
     }
 }

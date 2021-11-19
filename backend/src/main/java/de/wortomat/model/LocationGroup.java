@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Data
 public class LocationGroup extends GroupingNovelItem {
-    @OneToMany(mappedBy = "locationGroup")
+    @OneToMany(mappedBy = "parent")
     private List<Location> locations = Collections.emptyList();
 
     @Override

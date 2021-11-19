@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class CharacterGroup extends GroupingNovelItem {
 
-    @OneToMany(mappedBy = "characterGroup")
+    @OneToMany(mappedBy = "parent")
     private List<Character> characters = Collections.emptyList();
 
     @Override

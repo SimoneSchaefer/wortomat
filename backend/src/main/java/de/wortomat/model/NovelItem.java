@@ -11,7 +11,7 @@ import java.util.List;
 @MappedSuperclass
 @Getter
 @Setter
-public abstract class NovelItem implements INovelItem {
+public abstract class NovelItem<T extends GroupingNovelItem> implements INovelItem<T> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -24,27 +24,16 @@ public abstract class NovelItem implements INovelItem {
 
     private Integer position;
 
+    @JsonIgnore
+    @ManyToOne
+    @JsonIdentityReference(alwaysAsId = true)
+    private T parent;
+
     @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToMany
     private List<Image> images;
-
-    @JsonIgnore
-    @ManyToOne
-    @JsonIdentityReference(alwaysAsId = true)
-    private CharacterGroup characterGroup;
-
-    @Override
-    @JsonIgnore
-    public IGroupingNovelItem getParent() {
-        return this.characterGroup;
-    }
-
-    @Override
-    public void setParent(IGroupingNovelItem parent) {
-        this.characterGroup = (CharacterGroup) parent;
-    }
 
     @Override
     public Long getParentId() {
