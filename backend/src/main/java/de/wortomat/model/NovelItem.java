@@ -37,12 +37,12 @@ public abstract class NovelItem implements INovelItem {
 
     @Override
     @JsonIgnore
-    public GroupingNovelItem getParent() {
+    public IGroupingNovelItem getParent() {
         return this.characterGroup;
     }
 
     @Override
-    public void setParent(GroupingNovelItem parent) {
+    public void setParent(IGroupingNovelItem parent) {
         this.characterGroup = (CharacterGroup) parent;
     }
 

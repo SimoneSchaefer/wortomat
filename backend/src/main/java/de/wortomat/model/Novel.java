@@ -15,7 +15,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class Novel implements GroupingNovelItem {
+public class Novel implements IGroupingNovelItem {
     @Id
     @JsonFormat
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Character extends NovelItem implements ImageAware {
     @ManyToMany
+    @ToString.Exclude
     private List<CharacterTag> tags;
 
     @JsonIgnore
@@ -23,12 +24,12 @@ public class Character extends NovelItem implements ImageAware {
 
     @Override
     @JsonIgnore
-    public GroupingNovelItem getParent() {
+    public IGroupingNovelItem getParent() {
         return this.getCharacterGroup();
     }
 
     @Override
-    public void setParent(GroupingNovelItem parent) {
+    public void setParent(IGroupingNovelItem parent) {
         this.characterGroup = (CharacterGroup) parent;
     }
 

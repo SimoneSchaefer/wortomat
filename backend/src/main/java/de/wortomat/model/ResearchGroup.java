@@ -9,22 +9,9 @@ import java.util.List;
 
 @Entity
 @Data
-public class ResearchGroup implements GroupingNovelItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private Integer position;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
-
+public class ResearchGroup extends GroupingNovelItem {
     @OneToMany(mappedBy = "researchGroup")
     private List<Research> research = new ArrayList<>();
-
 
     @Override
     @JsonIgnore
@@ -32,8 +19,4 @@ public class ResearchGroup implements GroupingNovelItem {
         return this.getResearch();
     }
 
-    @Override
-    public void setNovel(Novel novel) {
-        this.novel = novel;
-    }
 }

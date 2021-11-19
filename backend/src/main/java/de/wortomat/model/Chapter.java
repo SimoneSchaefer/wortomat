@@ -29,12 +29,12 @@ public class Chapter extends NovelItem {
 
     @Override
     @JsonIgnore
-    public GroupingNovelItem getParent() {
+    public IGroupingNovelItem getParent() {
         return this.getPart();
     }
 
     @Override
-    public void setParent(GroupingNovelItem parent) {
+    public void setParent(IGroupingNovelItem parent) {
         this.part = (Part) parent;
     }
 }

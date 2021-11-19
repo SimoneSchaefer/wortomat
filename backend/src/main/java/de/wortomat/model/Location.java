@@ -25,12 +25,12 @@ public class Location extends NovelItem implements ImageAware {
 
     @Override
     @JsonIgnore
-    public GroupingNovelItem getParent() {
+    public IGroupingNovelItem getParent() {
         return this.getLocationGroup();
     }
 
     @Override
-    public void setParent(GroupingNovelItem parent) {
+    public void setParent(IGroupingNovelItem parent) {
         this.locationGroup = (LocationGroup) parent;
     }
 

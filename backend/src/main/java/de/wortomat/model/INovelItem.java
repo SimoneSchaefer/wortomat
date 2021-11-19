@@ -6,7 +6,7 @@ public interface INovelItem {
     void setPosition(Integer position);
 
     Long getParentId();
-    GroupingNovelItem getParent();
-    void setParent(GroupingNovelItem item);
+    IGroupingNovelItem getParent();
+    void setParent(IGroupingNovelItem item);
 
 }

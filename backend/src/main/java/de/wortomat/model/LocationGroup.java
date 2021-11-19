@@ -9,19 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
-public class LocationGroup implements GroupingNovelItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private Integer position;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
-
+public class LocationGroup extends GroupingNovelItem {
     @OneToMany(mappedBy = "locationGroup")
     private List<Location> locations = Collections.emptyList();
 
@@ -30,10 +18,4 @@ public class LocationGroup implements GroupingNovelItem {
     public List getChildren() {
         return this.getLocations();
     }
-
-    @Override
-    public void setNovel(Novel novel) {
-        this.novel = novel;
-    }
-
 }

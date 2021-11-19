@@ -9,26 +9,10 @@ import java.util.List;
 
 @Entity
 @Data
-public class Part implements GroupingNovelItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private Integer position;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
+public class Part extends GroupingNovelItem {
 
     @OneToMany(mappedBy = "part")
     private List<Chapter> chapters = Collections.emptyList();
-
-     @Override
-    public void setNovel(Novel novel) {
-        this.novel = novel;
-    }
 
     public List<Chapter> getChapters() {
         return this.chapters;

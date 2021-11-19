@@ -1,7 +1,7 @@
 package de.wortomat.service;
 
 import de.wortomat.exceptions.NotFoundException;
-import de.wortomat.model.GroupingNovelItem;
+import de.wortomat.model.IGroupingNovelItem;
 import de.wortomat.model.INovelItem;
 import de.wortomat.repository.GroupingItemRepository;
 import de.wortomat.repository.NovelItemRepository;
@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class GroupingItemService <T extends GroupingNovelItem, S extends INovelItem> {
+public abstract class GroupingItemService <T extends IGroupingNovelItem, S extends INovelItem> {
     protected abstract GroupingItemRepository<T, Long> getParentRepository();
     protected abstract NovelItemRepository<S, Long> getChildRepository();
 
@@ -21,7 +21,7 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
 
     public List<T> get(Long novelId) {
         List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
-        for (GroupingNovelItem part : allParts) {
+        for (IGroupingNovelItem part : allParts) {
             part.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
         }
         return allParts;
@@ -113,7 +113,7 @@ public abstract class GroupingItemService <T extends GroupingNovelItem, S extend
     }
 
     private int getMaxPosition(Long novelId) {
-        GroupingNovelItem maxPosition = this.getParentRepository().findTopByNovelIdOrderByPositionDesc(novelId);
+        IGroupingNovelItem maxPosition = this.getParentRepository().findTopByNovelIdOrderByPositionDesc(novelId);
         if (maxPosition == null) {
             return 0;
         }

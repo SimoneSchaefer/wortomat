@@ -1,12 +1,12 @@
 package de.wortomat.service;
 
-import de.wortomat.model.GroupingNovelItem;
+import de.wortomat.model.IGroupingNovelItem;
 import de.wortomat.model.INovelItem;
 import de.wortomat.repository.NovelItemRepository;
 
 import java.util.List;
 
-public abstract class NovelItemService<T extends GroupingNovelItem, S extends INovelItem> {
+public abstract class NovelItemService<T extends IGroupingNovelItem, S extends INovelItem> {
     abstract GroupingItemService<T, S> getParentService();
     abstract NovelItemRepository<S, Long> getRepository();
     abstract S getMaxPositionItem(Long parentId);

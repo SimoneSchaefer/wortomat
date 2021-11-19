@@ -9,24 +9,10 @@ import java.util.List;
 
 @Entity
 @Data
-public class CharacterGroup implements GroupingNovelItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private Integer position;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
+public class CharacterGroup extends GroupingNovelItem {
 
     @OneToMany(mappedBy = "characterGroup")
     private List<Character> characters = Collections.emptyList();
-
-    @Override()
-    public Long getId() { return this.id; }
 
     @Override
     @JsonIgnore
@@ -34,8 +20,4 @@ public class CharacterGroup implements GroupingNovelItem {
         return this.characters;
     }
 
-    @Override
-    public void setNovel(Novel novel) {
-        this.novel = novel;
-    }
 }
