@@ -24,7 +24,7 @@ export default abstract class SelectionMixin extends Vue {
     }
 
     handleCtrl(selected: BaseModel): BaseModel[]  {
-        let selectedItems = []; // this.selectedItems;
+        const selectedItems = []; // this.selectedItems;
         const index = selectedItems.findIndex(selectedItem => selectedItem.id === selected.id);
         if (index >= 0) {
             selectedItems.splice(index, 1);
