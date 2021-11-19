@@ -114,13 +114,13 @@ import {
   
     addInputRules() {
       return [
-        markInputRule(inputRegex, this.type),
+        markInputRule({ find: inputRegex, type: this.type} ),
       ]
     },
   
     addPasteRules() {
       return [
-        markPasteRule(inputRegex, this.type),
+        markPasteRule({ find: inputRegex, type: this.type} ),
       ]
     },
   })
