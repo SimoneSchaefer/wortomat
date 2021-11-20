@@ -29,7 +29,7 @@ public class TimelineEvent {
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
-    private List<Chapter> chapters;
+    private List<Chapter> chapters = new ArrayList<>();
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)

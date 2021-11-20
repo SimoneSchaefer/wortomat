@@ -31,7 +31,14 @@ public class TimelineEventService {
     }
 
     public TimelineEvent update(Long novelId, TimelineEvent timelineEvent) {
+        TimelineEvent before = timelineEventRepository.findById(timelineEvent.getId()).orElseThrow(NotFoundException::new);
+
+        timelineEvent.setChapters(before.getChapters());
+        timelineEvent.setResearch(before.getResearch());
+        timelineEvent.setLocations(before.getLocations());
+        timelineEvent.setCharacters(before.getCharacters());
         timelineEvent.setNovel(novelService.get(novelId));
+
         return this.timelineEventRepository.save(timelineEvent);
     }
 
