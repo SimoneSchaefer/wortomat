@@ -83,7 +83,7 @@ export default class NovelItemSheet extends Vue {
     }
 
     getUploadUrl(): string {
-        return this.service.getUploadUrl(this.novelId, this.item.id);
+        return this.service.getUploadUrl(this.novelId, this.item.parentId, this.item.id);
     }
 
     getImageUrl(fileId: number): string {

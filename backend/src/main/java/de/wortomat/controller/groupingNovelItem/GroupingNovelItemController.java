@@ -1,7 +1,7 @@
 package de.wortomat.controller.groupingNovelItem;
 
-import de.wortomat.model.GroupingNovelItem;
-import de.wortomat.model.NovelItem;
+import de.wortomat.model.IGroupingNovelItem;
+import de.wortomat.model.INovelItem;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-public abstract class GroupingNovelItemController<T extends GroupingNovelItem<S>, S extends NovelItem<T>> {
+public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S>, S extends INovelItem<T>> {
     abstract protected GroupingNovelItemService<T, S> getService();
 
     @PostMapping

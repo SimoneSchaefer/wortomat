@@ -34,9 +34,12 @@ import {
   
   export const TodoMarker = Mark.create<HighlightOptions>({
     name: 'TodoMarker',
-  
-    defaultOptions: {
-      HTMLAttributes: {},
+
+    addOptions() {
+      return {
+        multicolor: false,
+        HTMLAttributes: {},
+      }
     },
   
     addAttributes() {

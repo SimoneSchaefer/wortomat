@@ -1,78 +1,29 @@
 package de.wortomat.controller.novelItem;
 
-import de.wortomat.model.*;
+import de.wortomat.model.Research;
+import de.wortomat.model.ResearchGroup;
+import de.wortomat.service.novelItem.NovelItemService;
 import de.wortomat.service.novelItem.ResearchService;
 import de.wortomat.service.uploads.EntityType;
-import de.wortomat.service.uploads.FileResponseCreator;
-import de.wortomat.service.uploads.ImageAwareNovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/novels/{novelId}/research-groups/{groupId}/research")
 @CrossOrigin(origins = "*")
-public class ResearchController {
+public class ResearchController extends NovelItemController<Research, ResearchGroup>  {
     @Autowired
     private ResearchService researchService;
 
-    @Autowired
-    private ImageAwareNovelItemService imageAwareNovelItemService;
-
-    @Autowired
-    private FileResponseCreator fileResponseCreator;
-
-    @PostMapping
-    public ResponseEntity<INovelItem> create(
-            @PathVariable("novelId") Long novelId,
-            @PathVariable("groupId") Long groupId,
-            @RequestBody Research research) {
-        return ResponseEntity.ok(this.researchService.create(novelId, groupId, research));
+    @Override
+    protected NovelItemService<ResearchGroup, Research> getService() {
+        return researchService;
     }
 
-    @PutMapping
-    public ResponseEntity<INovelItem> update(
-            @PathVariable("novelId") Long novelId,
-            @PathVariable("groupId") Long groupId,
-            @RequestBody Research research) {
-        return ResponseEntity.ok(this.researchService.update(novelId, groupId, research));
-    }
-
-    @DeleteMapping("{researchId}")
-    public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("researchId") Long researchId) {
-        this.researchService.delete(novelId, researchId);
-        return ResponseEntity.ok().build();
-    }
-
-    /*@GetMapping("tags")
-    public ResponseEntity<List<ResearchTag>> tags(@PathVariable("novelId") Long novelId) {
-        return ResponseEntity.ok(this.researchService.getTags(novelId));
-    }
-
-    @PostMapping("tags")
-    public ResponseEntity<ResearchTag> createTag(@PathVariable("novelId") Long novelId, @RequestBody ResearchTag tag) {
-        return ResponseEntity.ok(this.researchService.createTag(novelId, tag));
-    }}*/
-
-
-    @PostMapping("{researchId}/upload")
-    public ResponseEntity<Image> upload(@PathVariable("novelId") Long novelId, @PathVariable("researchId") Long researchId, @RequestParam("upload[]") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(imageAwareNovelItemService.saveForNovelItem(file, researchService, novelId, researchId, EntityType.RESEARCH));
-    }
-
-    @GetMapping("{researchId}/files/{fileId}")
-    @ResponseBody
-    public ResponseEntity<Resource> getFile(@PathVariable("novelId") Long novelId, @PathVariable("researchId") Long researchId, @PathVariable("fileId") Long fileId) throws IOException {
-        return fileResponseCreator.generateHttpFileResponse(imageAwareNovelItemService.load(novelId, researchId, EntityType.RESEARCH, fileId));
-    }
-
-    @DeleteMapping("{researchId}/files/{fileId}")
-    public ResponseEntity<Research> deleteFile(@PathVariable("novelId") Long novelId, @PathVariable("researchId") Long researchId, @PathVariable("fileId") Long fileId) throws IOException {
-        imageAwareNovelItemService.delete(researchService, novelId, researchId, EntityType.RESEARCH, fileId);
-        return ResponseEntity.ok(researchService.get(novelId, researchId));
+    @Override
+    protected EntityType getEntityType() {
+        return EntityType.RESEARCH;
     }
 }

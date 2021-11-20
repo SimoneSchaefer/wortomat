@@ -1,9 +1,9 @@
 package de.wortomat.service.uploads;
 
-import de.wortomat.model.ImageAware;
-import de.wortomat.service.uploads.EntityType;
+import de.wortomat.model.IGroupingNovelItem;
+import de.wortomat.model.INovelItem;
 
-public interface ImageAwareService<T extends ImageAware> {
+public interface ImageAwareService<S extends INovelItem<T>, T extends IGroupingNovelItem<S>> {
 
     EntityType getEntityType();
     T get(Long novelId, Long itemId);

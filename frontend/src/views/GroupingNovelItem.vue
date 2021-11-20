@@ -59,7 +59,6 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
     let parent = null;
     for (const group of getAllItems(this.$store.state, this.parentKey)) {
       // flatList = flatList.concat(group.research);
-      console.log('checking group', group, 'item is ', item)
       const findChild = group[this.childKey].find(child => child.id === item.id);
       if (findChild) {
         parent = group;

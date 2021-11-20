@@ -1,16 +1,11 @@
 package de.wortomat.service.uploads;
 
-import de.wortomat.model.Image;
-import de.wortomat.model.ImageAware;
 import de.wortomat.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Service
 public class ImageAwareNovelItemService {
@@ -28,7 +23,6 @@ public class ImageAwareNovelItemService {
      * <pre>~/wortomat/uploads/<novelId>/<entityType>/<itemId>/<fileId>/fileName</pre>
      *
      * @param file the file to be store
-     * @param service the service used to store the entity the file belongs to
      * @param novelId the novelId
      * @param itemId the character/research... id
      * @param entityType the entity type, will be part of the created folder path
@@ -36,19 +30,19 @@ public class ImageAwareNovelItemService {
      * @return the stored image
      * @throws IOException if the file could not be stored on the file system
      */
-    @Transactional(rollbackFor = IOException.class)
+    /*@Transactional(rollbackFor = IOException.class)
     public <T extends ImageAware> Image saveForNovelItem(
             MultipartFile file,
-            ImageAwareService<T> service,
             Long novelId,
+            Long parentId,
             Long itemId,
             EntityType entityType) throws IOException {
 
         Image image = saveFileMetaDataInRepository(file);
-        addImageToNovelItem(service, novelId, itemId, image);
+        addImageToNovelItem(novelId, parentId, itemId, image);
         this.fileHandlingService.storeFileInFolder(novelId, itemId, entityType, image, file);
         return image;
-    }
+    }*/
 
 
     /**
@@ -90,7 +84,7 @@ public class ImageAwareNovelItemService {
      *
      * @throws IOException if there was any issue accessing the file (besides when it is missing)
      */
-    @Transactional(rollbackFor = IOException.class)
+   /* @Transactional(rollbackFor = IOException.class)
     public  <T extends ImageAware> void delete(
             ImageAwareService<T> service,
             Long novelId,
@@ -102,9 +96,9 @@ public class ImageAwareNovelItemService {
         imageToDelete.ifPresent(image -> this.fileRepository.delete(image));
 
         fileHandlingService.deleteFromFolder(novelId, itemId, entityType, fileId);
-    }
+    }*/
 
-    private <T extends ImageAware> void deletefromNovelItem(
+   /* private <T extends ImageAware> void deletefromNovelItem(
             ImageAwareService<T> service,
             Long novelId,
             Long itemId,
@@ -112,10 +106,10 @@ public class ImageAwareNovelItemService {
         T item = service.get(novelId, itemId);
         item.getImages().remove(imageToDelete);
         service.update(novelId, item);
-    }
+    }*/
 
-    private <T extends ImageAware> void addImageToNovelItem(ImageAwareService<T> service, Long novelId, Long itemId, Image image) {
-        T item = service.get(novelId, itemId);
+    /*private <T extends ImageAware> void addImageToNovelItem(Long novelId, Long parntId, Long itemId, Image image) {
+        S item = get(novelId, parentId, itemId);
         item.getImages().add(image);
         service.update(novelId, item);
     }
@@ -125,5 +119,5 @@ public class ImageAwareNovelItemService {
         image.setFileName(file.getOriginalFilename());
         image = fileRepository.save(image);
         return image;
-    }
+    }*/
 }

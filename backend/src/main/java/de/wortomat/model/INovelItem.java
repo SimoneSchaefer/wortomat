@@ -1,5 +1,7 @@
 package de.wortomat.model;
 
+import java.util.List;
+
 public interface INovelItem<T extends IGroupingNovelItem> {
     Long getId();
     Integer getPosition();
@@ -9,4 +11,5 @@ public interface INovelItem<T extends IGroupingNovelItem> {
     T getParent();
     void setParent(T item);
 
+    <E> List<E> getImages();
 }
