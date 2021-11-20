@@ -1,13 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Home from '../views/Home.vue'
-import OpenedNovel from '../views/OpenedNovel.vue'
-import Chapters from '../views/Chapters.vue'
-import Characters from '../views/Characters.vue'
-import Locations from '../views/Locations.vue'
-import Research from '../views/Research.vue'
-import Tags from '../views/Tags.vue'
-import Export from '../views/Export.vue'
-import Timeline from '../views/Timeline.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -17,29 +9,25 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/write/:id',
-    component: OpenedNovel,
+    component: () => import('../views/OpenedNovel.vue'),
     children: [{
         path: 'chapters',
-        component: Chapters,
+        component: () => import('../views/Chapters.vue'),
       },{
         path: 'characters',
-        component: Characters,
+        component: () => import('../views/Characters.vue'),
       },{
         path: 'research',
-        component: Research,
+        component: () => import('../views/Research.vue'),
       },{
         path: 'location',
-        component: Locations,
-      },{
-        path: 'tags',
-        component: Tags,
-      },{
+        component: () => import('../views/Locations.vue'),
+      }, {
         path: 'export',
-        component: Export,
-      },
-      {
+        component: () => import('../views/Export.vue'),
+      }, {
         path: 'plot',
-        component: Timeline
+        component: () => import('../views/Timeline.vue')
       }
     ]
   }
