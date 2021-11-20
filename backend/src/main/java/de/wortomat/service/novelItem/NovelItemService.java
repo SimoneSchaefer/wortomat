@@ -28,7 +28,6 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
 
     abstract GroupingNovelItemService<T, S> getParentService();
     abstract NovelItemRepository<S> getRepository();
-    abstract EntityType getEntityType();
 
     /**
      * Stores the new item in the database as child of the specified parent

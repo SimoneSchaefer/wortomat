@@ -6,7 +6,6 @@ import de.wortomat.repository.LocationRepository;
 import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import de.wortomat.service.groupingNovelItem.LocationGroupService;
-import de.wortomat.service.uploads.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +16,6 @@ public class LocationService extends NovelItemService<LocationGroup, Location> {
 
     @Autowired
     LocationGroupService locationGroupService;
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.RESEARCH;
-    }
 
     @Override
     GroupingNovelItemService<LocationGroup, Location> getParentService() {
