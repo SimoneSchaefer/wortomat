@@ -28,15 +28,17 @@ import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
+import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 
 @Options({
   components: { ConfirmDialog },
   emits: [ 'delete-image', 'upload-image']
 })
-export default class CharacterSheet extends Vue {
+export default class ImageGallery extends Vue {
     @Prop() imageUrls: Array<ImageParam>;
     @Prop() uploadUrl!: string;
+    @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
     get images() {
         if (this.imageUrls.length) {
@@ -44,7 +46,7 @@ export default class CharacterSheet extends Vue {
         }
         return [{
                 imageId: undefined,
-                imageUrl: '/assets/images/dummy-gallery-item.jpg' 
+                imageUrl: `/assets/images/dummy-gallery-item/${this.novelItemKey}.jpg`
         }];
     }
 
@@ -64,13 +66,11 @@ export default class CharacterSheet extends Vue {
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    console.log(':) :) :) ', xhr);
                     this.$emit('upload-image', JSON.parse(xhr.response));
                 }
                 else {
-                    console.log(':( :( :(');
+                    this.$toast.add({severity:'error', summary: 'Could not upload image', life: 10000});
                 }
-
                 (this.$refs.fileupload as any).clear();
             }
         };
