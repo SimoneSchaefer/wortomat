@@ -122,6 +122,10 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
   height: 100%;
 }
 
+.split-content-right {
+  background: var(--dark-background);
+}
+
 .empty {
   display: flex;
   width: 100%;

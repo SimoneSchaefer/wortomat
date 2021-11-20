@@ -2,7 +2,7 @@
     <div class="sheet" v-if="item">
         <div class="header-container">
             <div v-if="includeImageUpload">
-                <ImageGallery :imageUrls="images" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>
+                <ImageGallery :novelItemKey="novelItemKey" :imageUrls="images" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>
             </div>
 
             <div class="meta">
