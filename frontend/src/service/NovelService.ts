@@ -13,7 +13,6 @@ export class NovelService {
     }
     
     update(novel: NovelModel): Promise<AxiosResponse> {
-        console.log('UPDATE NOVEL')
         return API.put(`/novels/`, novel)
     } 
 

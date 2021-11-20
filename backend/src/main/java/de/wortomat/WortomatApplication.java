@@ -9,12 +9,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
 
 import javax.sql.DataSource;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 @SpringBootApplication
 public class WortomatApplication {
@@ -29,10 +33,19 @@ public class WortomatApplication {
 	}
 
 	@Bean
+	public Docket api() {
+		return new Docket(DocumentationType.SWAGGER_2)
+				.select()
+				.apis(RequestHandlerSelectors.any())
+				.paths(PathSelectors.any())
+				.build();
+	}
+
+	@Bean
 	public DataSource dataSource() throws IOException {
 		Files.createDirectories(Paths.get(fileService.getStorageLocation()));
 		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName(env.getProperty("driverClassName"));
+		dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("driverClassName")));
 		dataSource.setUrl(env.getProperty("url"));
 		return dataSource;
 	}
