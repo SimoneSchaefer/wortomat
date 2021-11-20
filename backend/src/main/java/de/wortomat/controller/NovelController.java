@@ -2,7 +2,6 @@ package de.wortomat.controller;
 
 import de.wortomat.model.Novel;
 import de.wortomat.service.NovelService;
-import de.wortomat.service.uploads.ImageAwareNovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +13,6 @@ import java.util.List;
 @RequestMapping("/novels/")
 @CrossOrigin
 public class NovelController {
-
-    @Autowired
-    private ImageAwareNovelItemService imageAwareNovelItemService;
-
     @Autowired
     NovelService novelService;
 

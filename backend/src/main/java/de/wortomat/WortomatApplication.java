@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 @SpringBootApplication
 public class WortomatApplication {
@@ -44,7 +45,7 @@ public class WortomatApplication {
 	public DataSource dataSource() throws IOException {
 		Files.createDirectories(Paths.get(fileService.getStorageLocation()));
 		final DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName(env.getProperty("driverClassName"));
+		dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("driverClassName")));
 		dataSource.setUrl(env.getProperty("url"));
 		return dataSource;
 	}
