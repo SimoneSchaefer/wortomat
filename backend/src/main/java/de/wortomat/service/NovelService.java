@@ -46,6 +46,12 @@ public class NovelService {
 
     @Transactional
     public Novel create(Novel novel) {
+        List<Novel> novels = this.novelRepository.findByOrderByPositionAsc();
+        int position = 0;
+        if (novels.size() > 0) {
+            position = novels.get(novels.size() - 1).getPosition();
+        }
+        novel.setPosition(position);
         return this.novelRepository.save(novel);
     }
 
