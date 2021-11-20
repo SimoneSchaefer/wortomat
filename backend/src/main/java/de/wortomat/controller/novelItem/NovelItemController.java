@@ -46,7 +46,7 @@ public abstract  class NovelItemController<S extends INovelItem<T>, T extends IG
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("{childId}/upload")
+    @PostMapping("{childId}/files/upload")
     public ResponseEntity<Image> upload(
             @PathVariable("novelId") Long novelId,
             @PathVariable("groupId") Long groupId,

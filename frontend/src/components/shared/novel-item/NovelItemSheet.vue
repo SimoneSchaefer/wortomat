@@ -44,7 +44,7 @@ export default class NovelItemSheet extends Vue {
     }
 
     deleteImage(image: ImageParam): void {
-        this.service.deleteImage(this.novelId, this.item.id, image.imageId).then((response) => {
+        this.service.deleteImage(this.novelId, this.item.parentId, this.item.id, image.imageId).then((response) => {
             this.updateImages(response.data.images);
         });
     }
@@ -87,7 +87,7 @@ export default class NovelItemSheet extends Vue {
     }
 
     getImageUrl(fileId: number): string {
-        return this.service.getImageUrl(this.novelId, this.item.id, fileId);
+        return this.service.getImageUrl(this.novelId, this.item.parentId, this.item.id, fileId);
     }
 
     isEnabled(view: VIEWS): boolean {
