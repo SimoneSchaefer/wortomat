@@ -6,7 +6,6 @@ import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.repository.ResearchRepository;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import de.wortomat.service.groupingNovelItem.ResearchGroupService;
-import de.wortomat.service.uploads.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +16,6 @@ public class ResearchService extends NovelItemService<ResearchGroup, Research> {
 
     @Autowired
     ResearchGroupService researchGroupService;
-
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.RESEARCH;
-    }
 
     @Override
     GroupingNovelItemService<ResearchGroup, Research> getParentService() {

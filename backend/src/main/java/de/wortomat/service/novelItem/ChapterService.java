@@ -1,11 +1,11 @@
 package de.wortomat.service.novelItem;
 
-import de.wortomat.model.*;
+import de.wortomat.model.Chapter;
+import de.wortomat.model.Part;
 import de.wortomat.repository.ChapterRepository;
 import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import de.wortomat.service.groupingNovelItem.PartService;
-import de.wortomat.service.uploads.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +25,5 @@ public class ChapterService extends NovelItemService<Part, Chapter>  {
     @Override
     NovelItemRepository<Chapter> getRepository() {
         return this.chapterRepository;
-    }
-
-    @Override
-    EntityType getEntityType() {
-        return EntityType.CHAPTERS;
     }
 }
