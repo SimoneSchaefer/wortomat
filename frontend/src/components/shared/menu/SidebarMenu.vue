@@ -39,7 +39,6 @@ export default class WSidebarMenu extends Vue {
 
     onChange($event) {
         this.selectedParent = $event;
-        console.log('selected parent', this.selectedParent);
     }
 
     addParent(): void {

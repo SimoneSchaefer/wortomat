@@ -3,6 +3,7 @@ package de.wortomat.service.export;
 public enum ExportOptionsType {
         HTML,
         PDF,
-        WORD
+        WORD,
+        PDF_LATEX
 
 }

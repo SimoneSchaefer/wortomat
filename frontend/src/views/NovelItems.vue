@@ -1,19 +1,18 @@
 <template>
 <div class="split-panel">
   <Splitter style="height: 100%" :stateKey="novelItemKey">
-  <SplitterPanel class="split-content-left">
-    <ScrollPanel style="height: 100%">        
-      <NovelItemList :novelItemKey="novelItemKey"></NovelItemList>
-    </ScrollPanel>
-  </SplitterPanel>
-  <SplitterPanel class="split-content-right">
-    <ScrollPanel style="height: 100%">
-      <NovelItemSheetList :parentKey="novelItemKey" :childKey="novelItemKey"></NovelItemSheetList>
-    </ScrollPanel>
-  </SplitterPanel>
-</Splitter>
-<Button class="sidebar-opener" icon="fa fa-3x fa-bars" @click="addItem" />
-
+    <SplitterPanel class="split-content-left">
+      <ScrollPanel style="height: 100%">        
+        <NovelItemList :novelItemKey="novelItemKey"></NovelItemList>
+      </ScrollPanel>
+    </SplitterPanel>
+    <SplitterPanel class="split-content-right">
+      <ScrollPanel style="height: 100%">
+        <NovelItemSheetList :parentKey="novelItemKey" :childKey="novelItemKey"></NovelItemSheetList>
+      </ScrollPanel>
+    </SplitterPanel>
+  </Splitter>
+  <Button class="sidebar-opener" icon="fa fa-3x fa-bars" @click="addItem" />
 </div>
 
 </template>
@@ -27,7 +26,6 @@ import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
-import NovelItemMenu from '@/components/shared/menu/NovelItemMenu.vue';
 import NovelItemList from '@/components/shared/novel-item/NovelItemList.vue';
 import NovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import { BaseModel } from '@/models/Base.model';
@@ -38,7 +36,6 @@ import { BaseModel } from '@/models/Base.model';
     Splitter, 
     SplitterPanel, 
     ScrollPanel,
-    NovelItemMenu,
     NovelItemList,
     NovelItemSheetList,
   }
@@ -64,9 +61,6 @@ export default class NovelItems extends Vue {
   height: 100%;
   flex-grow: 1;
 }
-
-
-
 .sidebar-opener {
   position: fixed; 
   right: 0;

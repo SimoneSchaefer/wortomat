@@ -54,7 +54,8 @@ export default class Export extends Vue {
     return [ 
       { type: ExportType.HTML, name: 'HTML'},
       { type: ExportType.PDF, name: 'PDF'},
-      { type: ExportType.DOC, name: 'DOC'}
+      { type: ExportType.PDF_LATEX, name: 'PDF_LATEX'}, // requires pandoc, pdflatex, texlive-science
+     // { type: ExportType.DOC, name: 'DOC'}
     ]
   }
 
