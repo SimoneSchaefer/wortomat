@@ -6,10 +6,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import WButton from '@/components/shared/Button.vue';
-import { Emit, Prop } from "vue-property-decorator";
-import { BaseModel } from "@/models/Base.model";
-import { getAllItems } from "@/store/getters";
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import { Emit } from "vue-property-decorator";
 
 @Options({
   components: { WButton },

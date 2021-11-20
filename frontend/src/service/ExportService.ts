@@ -4,6 +4,7 @@ import { API } from './Axios';
 export enum ExportType {
     HTML = "HTML",
     PDF = "PDF",
+    PDF_LATEX = "PDF_LATEX",
     DOC = "DOC"
 }
 
