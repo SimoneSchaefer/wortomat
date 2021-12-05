@@ -1,7 +1,24 @@
 <template>
     <div class="editor" v-if="editor">
         <div id="editor-toolbar">
-            <Menubar :model="menuItems" />         
+            <div class="tools">
+                <button @click="runCommand('toggleBold')" :class="{ 'is-active': editor.isActive('bold') }"><i class="fa fa-bold"></i></button>
+                <button @click="runCommand('toggleItalic')" :class="{ 'is-active': editor.isActive('italic') }"><i class="fa fa-italic"></i></button>
+                <button @click="runCommand('toggleStrike')" :class="{ 'is-active': editor.isActive('strike') }"><i class="fa fa-strikethrough"></i></button>
+                <button @click="runCommand('toggleCode')" :class="{ 'is-active': editor.isActive('code') }"><i class="fa fa-code"></i></button>
+                <button @click="runCommand('toggleHeading', { level: 1})" :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"><i class="fa fa-heading"></i></button>
+                <button @click="runCommand('toggleBulletList')" :class="{ 'is-active': editor.isActive('bulletList') }"><i class="fa fa-list-ul"></i></button>
+                <button @click="runCommand('toggleOrderedList')" :class="{ 'is-active': editor.isActive('orderedList') }"><i class="fa fa-list-ol"></i></button>
+                <button @click="runCommand('toggleBlockquote')" :class="{ 'is-active': editor.isActive('blockquote') }"><i class="fa fa-quote-right"></i></button>
+                <button @click="runCommand('toggleHighlight', markerColors['idea'])" :class="{ 'is-active': editor.isActive('TodoMarker', markerColors['idea'])}"><i class="fa fa-lightbulb"></i></button>
+                <button @click="runCommand('toggleHighlight', markerColors['fixme'])" :class="{ 'is-active': editor.isActive('TodoMarker', markerColors['fixme'])}"><i class="fa fa-band-aid"></i></button>
+                <button @click="runCommand('toggleHighlight', markerColors['todo'])" :class="{ 'is-active': editor.isActive('TodoMarker', markerColors['todo'])}"><i class="fa fa-clipboard-list"></i></button>
+            </div>
+            <div class="other">
+                <button @click="runCommand('unsetAllMarks') && this.runCommand('clearNodes')"><i class="fa fa-eraser"></i></button>
+                <button @click="runCommand('undo')"><i class="fa fa-undo"></i></button>
+                <button @click="runCommand('redo')" class="last"><i class="fa fa-redo"></i></button>
+            </div>
         </div>
         <div class="editor-content">
             <editor-content :editor="editor" />
@@ -11,21 +28,27 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
+
 import TodoMarker from './todo-marker'
-import { Prop } from 'vue-property-decorator';
-import Menubar from 'primevue/menubar';
 
 
 @Options({
-  components: { EditorContent, Menubar }
+  components: { EditorContent }
 })
 export default class TipTap extends Vue { 
     @Prop() content: string;
     editor: Editor = null;
 
     menuItems = [];
+
+    markerColors = {
+        "todo": { backgroundColor: 'yellow', color: 'black'},
+        "fixme": { backgroundColor: 'red', color: 'white'},
+        "idea": { backgroundColor: 'blue', color: 'white'},
+    }
 
 
     mounted(): void {
@@ -37,62 +60,7 @@ export default class TipTap extends Vue {
                 TodoMarker.configure()
             ],
         });
-
-        this.menuItems = [{
-                icon: 'fa fa-heading',
-                command: () => this.runCommand('toggleHeading', { level: 1})
-            }, {
-                icon: 'fa fa-bold',
-                command: () => this.runCommand('toggleBold')
-            }, {
-                icon: 'fa fa-italic',
-                command: () => this.runCommand('toggleItalic')
-            }, {
-                icon: 'fa fa-strikethrough',
-                command: () => this.runCommand('toggleStrike')
-            }, {
-                icon: 'fa fa-code',
-                command: () => this.runCommand('toggleCode')
-            }, {
-                icon: 'fa fa-quote-right',
-                command: () => this.runCommand('toggleBlockquote')
-            }, {
-                separator: true
-            },{
-                icon: 'fa fa-list-ol',
-                command: () => this.runCommand('toggleOrderedList')
-            }, {
-                icon: 'fa fa-list-ul',
-                command: () => this.runCommand('toggleBulletList')
-            }, {
-                separator: true
-            }, {
-                icon: 'fa fa-clipboard-list',
-                command: () => this.runCommand('toggleHighlight', { backgroundColor: 'yellow', color: '#000'})
-            }, {
-                icon: 'fa fa-lightbulb',
-                command: () => this.runCommand('toggleHighlight', { backgroundColor: 'blue', color: '#fff'})
-            }, {
-                icon: 'fa fa-band-aid',
-                command: () => this.runCommand('toggleHighlight', { backgroundColor: '#D32F2F', color: '#fff'})
-            }, {
-                separator: true
-            }, {
-                icon: 'fa fa-undo',
-                command: () => { this.runCommand('undo')}
-            }, {
-                icon: 'fa fa-redo',
-                command: () => { this.runCommand('redo')}
-            }, {
-                icon: 'fa fa-eraser',
-                command: () => { this.runCommand('unsetAllMarks'), this.runCommand('clearNodes')
-            }
-        }]
-    }
-
-    
-
-   
+    }   
 
     runCommand(command: string, args?) {
         this.editor.chain().focus()[command](args).run()
@@ -116,19 +84,46 @@ export default class TipTap extends Vue {
     flex-direction: column;
 }
 #editor-toolbar {
-    border-bottom: 1px solid #dee2e6;
+    border: 1px solid #495057e0;
     height:40px;
     display: flex;
+    justify-content: space-between;
     position: sticky;
     align-self: flex-start;
     z-index: 999;
     width: 100%;
     top: 0;
-    background: var(--editor-toolbar-background);
+    background: var(--light-background);
 }
+
+#editor-toolbar .tools, 
+#editor-toolbar .other {
+    display: flex;
+}
+
+#editor-toolbar .other button:first-child {
+    border-left: 1px solid #495057e0;
+}
+
 
 #editor-toolbar .p-menubar {
     background: none;
+}
+
+#editor-toolbar button {
+    border: 0;
+    outline: none;
+    color: #495057e0;
+    background: var(--light-background);
+    width: 4em;
+}
+
+#editor-toolbar button:not(.last) {
+    border-right: 1px solid rgb(51, 51, 51);
+}
+
+#editor-toolbar button.is-active {
+    color: #6ba6e0;
 }
 
 #editor-toolbar .button-group {
@@ -148,7 +143,7 @@ export default class TipTap extends Vue {
     display: inline-block;
     padding: 3px 5px;
     width: 28px;
-    color: #495057;
+    color: #495057e0;
 }
 
 #editor-toolbar .button.is-active {
@@ -158,6 +153,9 @@ export default class TipTap extends Vue {
 .editor-content {
     flex-grow: 1;
     background: var(--editor-content-background);
+    border: 1px solid #495057e0;
+    border-top: none;
+
 }
 
 .editor-content > div {
