@@ -17,7 +17,9 @@
             <div class="other">
                 <button @click="runCommand('unsetAllMarks') && this.runCommand('clearNodes')"><i class="fa fa-eraser"></i></button>
                 <button @click="runCommand('undo')"><i class="fa fa-undo"></i></button>
-                <button @click="runCommand('redo')" class="last"><i class="fa fa-redo"></i></button>
+                <button @click="runCommand('redo')" ><i class="fa fa-redo"></i></button>
+                <button @click="cancel"><i class="fa fa-times"></i></button>
+                <button @click="save" class="last"><i class="fa fa-save"></i></button>
             </div>
         </div>
         <div class="editor-content">
@@ -28,7 +30,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { Emit, Prop } from 'vue-property-decorator';
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 
@@ -36,7 +38,8 @@ import TodoMarker from './todo-marker'
 
 
 @Options({
-  components: { EditorContent }
+  components: { EditorContent },
+  emits: [ 'save', 'cancel']
 })
 export default class TipTap extends Vue { 
     @Prop() content: string;
@@ -60,7 +63,18 @@ export default class TipTap extends Vue {
                 TodoMarker.configure()
             ],
         });
-    }   
+    }  
+    
+    @Emit('save') 
+    save() {
+        return this.editor.getHTML();
+    }
+
+        
+    @Emit('cancel') 
+    cancel() {
+        return true;
+    }
 
     runCommand(command: string, args?) {
         this.editor.chain().focus()[command](args).run()
@@ -78,7 +92,6 @@ export default class TipTap extends Vue {
 
 <style>
 .editor {
-    border: 1px solid #d2d2d2;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -88,12 +101,13 @@ export default class TipTap extends Vue {
     height:40px;
     display: flex;
     justify-content: space-between;
-    position: sticky;
+    position: fixed;
+
     align-self: flex-start;
     z-index: 999;
     width: 100%;
     top: 0;
-    background: var(--light-background);
+    background: var(--dark-background);
 }
 
 #editor-toolbar .tools, 
@@ -113,13 +127,13 @@ export default class TipTap extends Vue {
 #editor-toolbar button {
     border: 0;
     outline: none;
-    color: #495057e0;
-    background: var(--light-background);
+    color: #cececee0;
+    background: var(--dark-background);
     width: 4em;
 }
 
 #editor-toolbar button:not(.last) {
-    border-right: 1px solid rgb(51, 51, 51);
+    border-right: 1px solid #cececee0;
 }
 
 #editor-toolbar button.is-active {
@@ -153,8 +167,9 @@ export default class TipTap extends Vue {
 .editor-content {
     flex-grow: 1;
     background: var(--editor-content-background);
-    border: 1px solid #495057e0;
     border-top: none;
+    position: relative;
+    top: 3.5em;
 
 }
 
