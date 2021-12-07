@@ -1,8 +1,5 @@
 package de.wortomat.service.export;
 
-import club.caliope.udc.DocumentConverter;
-import club.caliope.udc.InputFormat;
-import club.caliope.udc.OutputFormat;
 import de.wortomat.model.NovelItem;
 import de.wortomat.model.Part;
 import de.wortomat.service.groupingNovelItem.PartService;
@@ -15,7 +12,6 @@ import org.springframework.util.FileCopyUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
@@ -59,7 +55,7 @@ public class PDFLatexExportService implements Exporter {
         Files.write(Paths.get(chapterFile.getPath()), html.getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
         File latexChapterFile = File.createTempFile("wortomat", ".tex");
 
-        System.out.println("chapterFile: " + chapterFile.getPath() + "("+Files.exists(Path.of(chapterFile.getPath()))+")" + ", latex File: " + latexChapterFile.getPath() + "("+Files.exists(Path.of(latexChapterFile.getPath()))+")");
+        // System.out.println("chapterFile: " + chapterFile.getPath() + "("+Files.exists(Path.of(chapterFile.getPath()))+")" + ", latex File: " + latexChapterFile.getPath() + "("+Files.exists(Path.of(latexChapterFile.getPath()))+")");
 
         /*ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("/usr/bin/pandoc " + chapterFile.getPath() + " -f html -t latex -s -o " + latexChapterFile.getPath());
@@ -74,7 +70,7 @@ public class PDFLatexExportService implements Exporter {
             throw new IOException(e);
         }*/
         // Path workDirectory = Files.createTempDirectory("wortomat");
-        new DocumentConverter()
+        /*new DocumentConverter()
 
                 .fromFile(chapterFile, InputFormat.HTML)
                 .toFile(latexChapterFile, OutputFormat.LATEX)
@@ -82,7 +78,8 @@ public class PDFLatexExportService implements Exporter {
                 // .workingDirectory(new File(workDirectory.toUri())) // TODO
                 .convert();
 
-        return Files.readString(Path.of(latexChapterFile.getPath()));
+        return Files.readString(latexChapterFile.getPath());*/
+        return "";
         /*stringBuilder.append(loadLatexTemplate());
 
         List<Part> parts = this.partService.get(novelId);

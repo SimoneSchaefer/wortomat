@@ -76,7 +76,7 @@ export default class TreeviewHeader extends Vue {
     }  
 
     getFixmeCount(): number {
-        return this.getMarkerCount('#D32F2F')
+        return this.getMarkerCount('red')
     }
 
     getIdeaCount(): number {

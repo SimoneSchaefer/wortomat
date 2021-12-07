@@ -1,15 +1,13 @@
 <template>
     <Dialog v-model:visible="editing" 
+    contentClass="text-editor"
+    :showHeader="false"
     :modal="true" 
     :closeOnEscape="false" 
     :closable="false" 
     :draggable="false"
     :style="{ 'width': 'calc(100% - 5em)', 'max-width': '80em', 'text-align': 'left', 'height': 'calc(100% - 5em)'  }">
-        <TipTap :content="value" ref="editorRef"/>
-        <template #footer>
-            <Button label="Cancel" v-on:click="cancel"></Button>
-            <Button label="Save" v-on:click="updateText"></Button>
-        </template>
+        <TipTap :content="value" ref="editorRef" @save="updateText" @cancel="cancel"/>
     </Dialog>
     <div class="content" v-on:click="startEditMode()">
         <div v-if="value?.length" v-html="value"></div>
@@ -54,10 +52,9 @@ export default class EditableLabel extends Vue {
     }
 
     @Emit('update-text')
-    updateText(): string {
-    const updatedContent = this.getCurrentContent();
+    updateText(content: string): string {
     this.editing = false;
-    return updatedContent;
+    return content;
     }
 
 
@@ -75,6 +72,14 @@ export default class EditableLabel extends Vue {
 .p-dialog-content {
     height: 100%;
 }
+
+.p-dialog .p-dialog-content.text-editor {
+    background: var(--editor-content-background);
+    margin: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
 </style>
 
 <style scoped>

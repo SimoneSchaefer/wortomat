@@ -47,36 +47,35 @@ import {
         color: {
           default: null,
           parseHTML: element => {
-            return {
-              color: element.getAttribute('data-color') || element.style.color,
-            }
+            return element.getAttribute('data-color') || element.style.color
           },
           renderHTML: attributes => {
             if (!attributes.color) {
               return {}
             }
+
+            console.log('RENDER', attributes)
   
             return {
               'data-color': attributes.color,
-              style: `background-color: ${attributes.backgroundColor}; color: ${attributes.color}`,
+              style: `color: ${attributes.color}`,
             }
           },
         },
         backgroundColor: {
           default: null,
           parseHTML: element => {
-            return {
-              backgroundColor: element.getAttribute('data-background-color') || element.style.backgroundColor,
-            }
+            return element.getAttribute('data-background-color') || element.style.backgroundColor
           },
           renderHTML: attributes => {
             if (!attributes.backgroundColor) {
               return {}
             }
-  
+            console.log('RENDER', attributes)
+
             return {
               'data-background-color': attributes.backgroundColor,
-              style: `background-color: ${attributes.backgroundColor}; color: ${attributes.color}`,
+              style: `background-color: ${attributes.backgroundColor}`,
             }
           },
         }
