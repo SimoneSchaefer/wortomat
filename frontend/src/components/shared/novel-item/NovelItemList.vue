@@ -31,7 +31,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import draggable from 'vuedraggable'
+import draggable from 'vue-draggable-next'
 
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import DragDropList from '@/components/shared/lists/DragDropList.vue';

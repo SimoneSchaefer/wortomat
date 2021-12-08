@@ -40,7 +40,8 @@ import AccordionTab from 'primevue/accordiontab';
 import Sidebar from 'primevue/sidebar';
 
 
-import draggable from 'vuedraggable'
+// import draggable from 'vue-draggable-next'
+import { VueDraggableNext } from 'vue-draggable-next'
 import { createI18n } from 'vue-i18n'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -94,7 +95,7 @@ const app = createApp(App)
     .component('Timeline', Timeline)
     .component('Dropdown', Dropdown)
     .component('Sidebar', Sidebar)
-    .component('draggable', draggable)
+    .component('draggable', VueDraggableNext)
 
  app.mount("#app");
 

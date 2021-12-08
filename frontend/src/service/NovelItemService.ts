@@ -33,6 +33,14 @@ export abstract class NovelItemService {
         })
     }
 
+    public moveParent(novelId: number, parentId: number, oldPosition: number, newPosition: number): Promise<AxiosResponse>{
+        return API.put(`novels/${novelId}/${this.getAPIPath()}/moveParent/`, {
+            parentId: parentId,
+            oldPosition: oldPosition,
+            newPosition: newPosition
+        })
+    }
+
     public list(novelId: number): Promise<AxiosResponse> {
         return API.get(`/novels/${novelId}/${this.getAPIPath()}/`)
     }

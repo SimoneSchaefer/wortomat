@@ -1,36 +1,30 @@
 <template>
-    <Accordion multiple :activeIndex="activeIndex" @tab-close="closeGroup">                 
-        <AccordionTab v-for="item of items" :key="item.id">
-            <template #header>
-                <WTreeviewHeader 
-                    :parentKey="parentKey" 
-                    :item="item"                     
-                    @addChild="addChild"
-                    @updateParentName="updateName"
-                    @deleteParent="deleteParent">
-                </WTreeviewHeader>
-            </template>
-
-            <draggable class="list-group"
-                :id="`parent-${item.id}`"
-                :data-source="`parent-${item.id}`"
-                :list="item['children']"
-                :item-key="`parent-${item.id}`"
-                group="children"                 
-                @end="childMoved" >
-                <template #item="{element}">
-                    <WTreeviewListItem 
-                        @select="selectChild"
-                        @deleteChild="deleteChild"
-                        :selected="isSelected(element)"
-                        :element="element" 
-                        :parentKey="parentKey" 
-                        :childKey="childKey">
-                    </WTreeviewListItem>                   
-                </template>
-            </draggable>
-        </AccordionTab>
-    </Accordion> 
+  <div class="tree">
+      <draggable :list="items" group="parents"
+        class="list-group"
+        ghost-class="ghost"
+        @change="parentMoved">
+        <div class="list-group-item" v-for="item in items" :key="item.id">
+          <WTreeviewHeader 
+            :parentKey="parentKey" 
+            :item="item"                     
+            @addChild="addChild"
+            @updateParentName="updateName"
+            @deleteParent="deleteParent">
+          </WTreeviewHeader>
+          <draggable :list="item['children']" class="list-group" ghost-class="ghost"  group="children" @end="childMoved" :id="`parent-${item.id}`">   
+            <WTreeviewListItem v-for="child in item['children']" :key="child.id"
+                @select="selectChild"
+                @deleteChild="deleteChild"
+                :selected="isSelected(child)"
+                :element="child" 
+                :parentKey="parentKey" 
+                :childKey="childKey">
+            </WTreeviewListItem>    
+          </draggable>
+        </div>
+      </draggable>
+  </div>
 </template>
 
 <script lang="ts">
@@ -54,7 +48,7 @@ import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 export default class Treeview extends mixins(UpdatableItemMixin) {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
     @Prop() childKey: NOVEL_ITEM_KEYS;
-    @Prop() items: BaseModel[];
+    @Prop() items: BaseModel[] = [];
     
     activeIndex = [];
 
@@ -69,6 +63,14 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
             novelId: this.$store.state.currentNovel?.id,
             items: [item]
         });
+    }
+
+    parentMove($event) {
+      console.log('DRAG DROP PARENT CHANGE', $event)
+    }
+
+    childMove($event) {
+      console.log('DRAG DROP CHILD CHANGE', $event)
     }
 
     deleteChild(item: BaseModel) {
@@ -115,6 +117,8 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     const parentTo = $event.to.id.replace('parent-', '');
     const newPosition = $event.newIndex;
 
+    console.log('Moving ' + childId + ' to ' + parentTo + ', poisition: ' + newPosition)
+
     this.$store.dispatch('moveChild', { 
       key: this.parentKey, 
       novelId: this.$route.params.id,
@@ -122,6 +126,20 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
       newParentId: parentTo,
       newPosition: newPosition
     }); 
+  }
+
+  parentMoved($event): void {
+    const parentId = $event.moved.element.id;
+    const newIndex = $event.moved.newIndex;
+    const oldIndex = $event.moved.oldIndex;
+
+    this.$store.dispatch('moveParent', { 
+      key: this.parentKey, 
+      novelId: this.$route.params.id,
+      parentId: parentId,
+      oldPosition: oldIndex,
+      newPosition: newIndex
+    });
   }
 
   isSelected(item: BaseModel) {
@@ -152,5 +170,12 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
 <style>
 .p-scrollpanel-bar {
   background-color: purple !important;
+}
+</style>
+
+<style scoped>
+.list-group {
+  width: 100%;
+  padding-right: 1em;
 }
 </style>

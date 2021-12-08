@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>> {
 
@@ -61,57 +60,54 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
 
 
     @Transactional
+    public List<T> moveParent(Long novelId, Long parentId, Integer oldPosition, Integer newPosition) {
+        List<T> allParents = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
+        T parentToMove = this.getParentRepository().findById(parentId).orElseThrow(NotFoundException::new);
+        allParents.remove(parentToMove);
+        allParents.add(newPosition, parentToMove);
+
+        for (int i = 0; i < allParents.size(); i++) {
+            allParents.get(i).setPosition(i);
+        }
+        getParentRepository().saveAll(allParents);
+        return this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
+    }
+
+
+    @Transactional
     public List<T> moveChild(Long novelId, Long childId, Long newParentId, int newPosition) {
         S child = this.getChildRepository().findById(childId).orElseThrow(NotFoundException::new);
-
         if (child.getParent().getId().equals(newParentId)) {
             moveChildWithinParent(child, newPosition);
         } else {
             moveChildToOtherParent(child, newPosition, newParentId);
         }
-        child.setPosition(newPosition);
-        this.getChildRepository().save(child);
         return this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
     }
 
     private void moveChildToOtherParent(S child, int newPosition, Long newParentId) {
         T oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
         T newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
-
         oldParent.getChildren().remove(child);
-        oldParent.getChildren().stream()
-                .filter(otherChild -> otherChild.getPosition() >= child.getPosition())
-                .forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() - 1));
-
-        newParent.getChildren().stream()
-                .filter(otherChild -> otherChild.getPosition() >= newPosition)
-                .forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() + 1));
-        (newParent.getChildren()).add(newPosition, child);
-        child.setParent(newParent);
+        newParent.getChildren().add(newPosition, child);
+        updatePositions(oldParent.getChildren());
+        updatePositions(newParent.getChildren());
         this.getParentRepository().save(oldParent);
         this.getParentRepository().save(newParent);
     }
 
     private void moveChildWithinParent(S child, int newPosition) {
-        boolean movedUp = child.getPosition() > newPosition;
-        List<S> updatedChildren = movedUp ? moveChildUp(child, newPosition) : moveChildDown(child, newPosition); // TODO: fix generics confusion
-        getChildRepository().saveAll(updatedChildren);
+        List<S> children = child.getParent().getChildren();
+        children.remove(child);
+        children.add(newPosition, child);
+        updatePositions(children);
     }
 
-    private List<S> moveChildUp(S child, int newPosition) {
-        List<S> allConcernedChildren  = child.getParent().getChildren().stream()
-                .filter(otherChild -> otherChild.getPosition() >= newPosition)
-                .collect(Collectors.toList());
-        allConcernedChildren.forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() + 1));
-        return allConcernedChildren;
-    }
-
-    private List<S>  moveChildDown(S child, int newPosition) {
-        List<S> allConcernedChildren  = child.getParent().getChildren().stream()
-                .filter(otherChild -> otherChild.getPosition() > child.getPosition() && otherChild.getPosition() <= newPosition)
-                .collect(Collectors.toList());
-        allConcernedChildren.forEach(otherChild -> otherChild.setPosition(otherChild.getPosition() - 1));
-        return allConcernedChildren;
+    private void updatePositions(List<S> novelItems) {
+        for (int i = 0; i < novelItems.size(); i++) {
+            novelItems.get(i).setPosition(i);
+        }
+        this.getChildRepository().saveAll(novelItems);
     }
 
     private int getMaxPosition(Long novelId) {
