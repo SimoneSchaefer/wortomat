@@ -148,7 +148,7 @@ export default class NovelItemSheet extends Vue {
 }
 
 hr {
-    border-color: var(--sheet-separator-color);
+    border-color: #c8c8c875;
 }
 
 .header-container {
