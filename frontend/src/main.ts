@@ -35,12 +35,11 @@ import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
 import Timeline from 'primevue/timeline';
 import Dropdown from 'primevue/dropdown';
-import Accordion from 'primevue/accordion';
-import AccordionTab from 'primevue/accordiontab';
 import Sidebar from 'primevue/sidebar';
 
 
-import draggable from 'vuedraggable'
+// import draggable from 'vue-draggable-next'
+import { VueDraggableNext } from 'vue-draggable-next'
 import { createI18n } from 'vue-i18n'
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -89,12 +88,10 @@ const app = createApp(App)
     .component('Divider', Divider)
     .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
-    .component('Accordion', Accordion)
-    .component('AccordionTab', AccordionTab)
     .component('Timeline', Timeline)
     .component('Dropdown', Dropdown)
     .component('Sidebar', Sidebar)
-    .component('draggable', draggable)
+    .component('draggable', VueDraggableNext)
 
  app.mount("#app");
 

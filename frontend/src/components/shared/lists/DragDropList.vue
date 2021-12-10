@@ -19,7 +19,7 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
-import draggable from 'vuedraggable'
+import draggable from 'vue-draggable-next'
 
 import { BaseModel } from '@/models/Base.model';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';

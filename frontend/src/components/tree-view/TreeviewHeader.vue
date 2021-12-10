@@ -1,6 +1,7 @@
 <template>
     <WConfirmDialog ref="confirmDeleteParent" @accept="deleteParent" message="delete_confirm"></WConfirmDialog>
     <div class="accordion-header">
+        <div class="toggle-button fa"  v-bind:class="{ 'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen }" @click="toggle"></div>
         <WEditableLabel 
             :value="item.name" 
             :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
@@ -36,16 +37,22 @@ import WEditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
     WEditableLabel,
     WConfirmDialog,
   },
-  emits: ['delete-parent', 'update-parent-name', 'add-child']
+  emits: ['delete-parent', 'update-parent-name', 'add-child', 'toggle']
 })
 export default class TreeviewHeader extends Vue {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
     @Prop() childKey: NOVEL_ITEM_KEYS;
     @Prop() item: BaseModel;
+    @Prop() open: boolean;
 
     confirmDeleteParent(item, $event): void {
         $event.stopPropagation();
         (this.$refs.confirmDeleteParent as WConfirmDialog).getDecision(item);
+    }
+
+    @Emit('toggle')
+    toggle() {
+        return !this.open;
     }
 
     @Emit('delete-parent')
@@ -63,6 +70,10 @@ export default class TreeviewHeader extends Vue {
         return this.item;
     }
 
+    get isOpen() {
+        return this.open;
+    }
+
     get modalOpen() {
         return this.$store.state.modalIsOpen;
     }   
@@ -71,19 +82,31 @@ export default class TreeviewHeader extends Vue {
 
 
 <style scoped>
-.p-accordion-header .group-options {
-  display: flex; 
-}
-
 .accordion-header {
   display: flex;
   width: 100%;
   align-items: center;
+  font-weight: 600;
+  background: var(--middle-background);
+  border-bottom: 1px solid rgba(53, 53, 53, 0.178);
+  padding-right:1.5em;
 }
 
 .accordion-header .menu {
   width: 2em;
   opacity: 0.5;
   text-align: right;
+}
+
+.accordion-header .group-options {
+  display: flex; 
+}
+
+.toggle-button {
+    padding: 1em;
+}
+
+.toggle-button:hover {
+    cursor: pointer;
 }
 </style>

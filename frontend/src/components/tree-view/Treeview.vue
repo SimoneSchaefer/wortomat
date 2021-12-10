@@ -1,36 +1,23 @@
 <template>
-    <Accordion multiple :activeIndex="activeIndex" @tab-close="closeGroup">                 
-        <AccordionTab v-for="item of items" :key="item.id">
-            <template #header>
-                <WTreeviewHeader 
-                    :parentKey="parentKey" 
-                    :item="item"                     
-                    @addChild="addChild"
-                    @updateParentName="updateName"
-                    @deleteParent="deleteParent">
-                </WTreeviewHeader>
-            </template>
-
-            <draggable class="list-group"
-                :id="`parent-${item.id}`"
-                :data-source="`parent-${item.id}`"
-                :list="item['children']"
-                :item-key="`parent-${item.id}`"
-                group="children"                 
-                @end="childMoved" >
-                <template #item="{element}">
-                    <WTreeviewListItem 
-                        @select="selectChild"
-                        @deleteChild="deleteChild"
-                        :selected="isSelected(element)"
-                        :element="element" 
-                        :parentKey="parentKey" 
-                        :childKey="childKey">
-                    </WTreeviewListItem>                   
-                </template>
-            </draggable>
-        </AccordionTab>
-    </Accordion> 
+  <div class="tree">
+      <draggable :list="items" group="parents"
+        class="list-group"
+        ghost-class="ghost"
+        @change="parentMoved">
+        <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
+          <w-tree-view-parent 
+            :item="item" 
+            :parentKey="parentKey" 
+            :childKey="childKey"
+            :open="isOpen(item)"
+            @toggle="toggle($event, item)"
+            @updateParentName="updateName($event, item)"
+            @addChild="addChild(item)"
+            @deleteParent="deleteParent"
+            @deleteChild="deleteChild"></w-tree-view-parent>        
+        </div>
+      </draggable>
+  </div>
 </template>
 
 <script lang="ts">
@@ -42,33 +29,32 @@ import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
-import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
-import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
+import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 
 @Options({
-  components: {
-    WTreeviewHeader,
-    WTreeviewListItem,
-  }
+  components: { WTreeViewParent}
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
     @Prop() childKey: NOVEL_ITEM_KEYS;
-    @Prop() items: BaseModel[];
-    
-    activeIndex = [];
+    @Prop() items: BaseModel[] = [];
 
-    closeGroup($event) {
-      const index = this.activeIndex.findIndex(val => val === $event.index)
-      if (index > -1) this.activeIndex.splice(index, 1);
+    toggleState = new Map<number, boolean>();
+    
+    toggle(open: boolean, parent: BaseModel) {
+      this.toggleState.set(parent.id, open);
+    }
+
+    isOpen(parent: BaseModel) {
+      return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
     }
 
     deleteParent(item: BaseModel) {
-        this.$store.dispatch('deleteItems', { 
-            key: this.parentKey, 
-            novelId: this.$store.state.currentNovel?.id,
-            items: [item]
-        });
+      this.$store.dispatch('deleteItems', { 
+          key: this.parentKey, 
+          novelId: this.$store.state.currentNovel?.id,
+          items: [item]
+      });
     }
 
     deleteChild(item: BaseModel) {
@@ -77,13 +63,12 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
         let flatList = [];
         let parent = null;
         for (const group of getAllItems(this.$store.state, this.parentKey)) {
-        // flatList = flatList.concat(group.research);
-        const findChild = group['children'].find(child => child.id === item.id);
-        if (findChild) {
-            parent = group;
-            break;
-        }
-
+          // flatList = flatList.concat(group.research);
+          const findChild = group['children'].find(child => child.id === item.id);
+          if (findChild) {
+              parent = group;
+              break;
+          }
         }
         item.parentId = parent?.id || undefined;
         this.$store.dispatch('deleteItems', { 
@@ -94,7 +79,6 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     }
 
   addChild(selectedParent: BaseModel, $event): void {
-    $event.stopPropagation();
     const child = new BaseModel();
     child.parentId = selectedParent.id;
     this.$store.dispatch('addItem', { 
@@ -102,12 +86,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
         novelId: this.novelId, 
         item: child,
     });
-    
-    const parentIndex = this.items.findIndex(parent => parent.id === selectedParent.id);
-    if (!this.activeIndex.includes(parentIndex)) {
-      this.activeIndex.splice(0, 0, parentIndex);
-    }
-    this.activeIndex = [...this.activeIndex];
+    this.toggleState.set(selectedParent.id, true);
   }
 
   childMoved($event): void {
@@ -124,33 +103,27 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     }); 
   }
 
-  isSelected(item: BaseModel) {
-    const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
-    if (isSelected) {
-      this.openParentIfNecessary(item);
-    }
-    return isSelected;
+  parentMoved($event): void {
+    const parentId = $event.moved.element.id;
+    const newIndex = $event.moved.newIndex;
+    const oldIndex = $event.moved.oldIndex;
+
+    this.$store.dispatch('moveParent', { 
+      key: this.parentKey, 
+      novelId: this.$route.params.id,
+      parentId: parentId,
+      oldPosition: oldIndex,
+      newPosition: newIndex
+    });
   }
 
-  selectChild(item: BaseModel) {
-    this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
-  }
 
-  get selectedItems(): number[] {
-    return this.$store.state.selection.get(this.childKey) || [];
-  }
-  
-  private openParentIfNecessary(item: BaseModel) {
-    const parentIndex = this.items.findIndex(parent => parent.id === item.parentId);
-    if (!this.activeIndex.includes(parentIndex)) {
-      this.activeIndex.push(parentIndex);
-    }
-  }
 }
 </script>
 
-<style>
-.p-scrollpanel-bar {
-  background-color: purple !important;
+
+<style scoped>
+.list-group {
+  width: 100%;
 }
 </style>

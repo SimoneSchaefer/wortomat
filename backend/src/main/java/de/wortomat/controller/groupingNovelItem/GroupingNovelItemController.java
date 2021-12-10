@@ -33,6 +33,17 @@ public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S
         return ResponseEntity.ok(this.getService().get(novelId));
     }
 
+    @PutMapping("moveParent")
+    public ResponseEntity<List<T>> moveParent(@PathVariable("novelId") Long novelId, @RequestBody Map<String, String> updatedPositions) {
+        this.getService().moveParent(
+                novelId,
+                Long.parseLong(updatedPositions.get("parentId")),
+                Integer.parseInt(updatedPositions.get("oldPosition")),
+                Integer.parseInt(updatedPositions.get("newPosition")));
+        return ResponseEntity.ok(this.getService().get(novelId));
+    }
+
+
     @GetMapping
     public ResponseEntity<List<T>> get(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.getService().get(novelId));

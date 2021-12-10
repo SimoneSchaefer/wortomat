@@ -86,6 +86,12 @@ export function moveChildInBackend(key: NOVEL_ITEM_KEYS, novelId: number, childI
         return serviceToUse.moveChild(novelId, childId, newParent, newPosition);
     }
 }
+export function moveParentInBackend(key: NOVEL_ITEM_KEYS, novelId: number, parentId: number, oldPosition: number, newPosition: number): Promise<AxiosResponse> {
+    const serviceToUse = KEY_TO_SERVICE.get(key);
+    if (serviceToUse) {
+        return serviceToUse.moveParent(novelId, parentId, oldPosition, newPosition);
+    }
+}
 
 export function updateItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel, overrideValues: Record<string, unknown>): Promise<AxiosResponse> {
     const newItem = Object.assign({}, item, overrideValues);

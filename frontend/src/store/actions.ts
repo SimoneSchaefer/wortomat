@@ -3,7 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
@@ -112,6 +112,17 @@ const moveChild = async (context: ActionContext<IState,IState>, update: {
     context.commit('itemsLoaded', { key: update.key, items: newOrder.data });
 }
 
+const moveParent = async (context: ActionContext<IState,IState>, update: { 
+  key: NOVEL_ITEM_KEYS, 
+  novelId: number, 
+  parentId: number,
+  oldPosition: number
+  newPosition: number
+  }): Promise<void> => {
+    const newOrder = await moveParentInBackend(update.key, update.novelId, update.parentId, update.oldPosition, update.newPosition);
+    context.commit('itemsLoaded', { key: update.key, items: newOrder.data });
+}
+
 const updateOrder = async (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, novelId: number, newOrder: BaseModel[] }): Promise<void> => {
   const newOrder = await updatePositionsInBackend(update.key, update.novelId, update.newOrder);
   context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
@@ -159,6 +170,7 @@ export default {
     updateItem,
     deleteItems,
     updateOrder,
+    moveParent,
     moveChild,
     loadItems,
     filterTags,

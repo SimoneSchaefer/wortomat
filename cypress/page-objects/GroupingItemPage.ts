@@ -51,7 +51,7 @@ export class GroupingItemPage {
     }
 
     toggleAccordion(index: number) {
-        cy.get('a.p-accordion-header-link > span').eq(index).click();
+        cy.get('a.accordion-header-link > span').eq(index).click();
     }
 
     childSelected(parentIndex: number, childIndex: number) {
@@ -89,7 +89,7 @@ export class GroupingItemPage {
     }
 
     children(index: number): Cypress.Chainable {
-        return cy.get('.p-accordion-content').eq(index).find('.tree-view-item');
+        return cy.get('.list-group-item').eq(index).find('.tree-view-item');
     }
 
     deleteItem(index: number, confirm = true) {
@@ -113,10 +113,10 @@ export class GroupingItemPage {
     }
 
     headerSelector(index: number): string {
-        return `.p-accordion-header:eq(${index})`;
+        return `.accordion-header:eq(${index})`;
     }
 
     get headers() {
-        return cy.get('.p-accordion-header');
+        return cy.get('.accordion-header');
     }
 }
