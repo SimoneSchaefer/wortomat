@@ -41,6 +41,10 @@ public class TimelineEventController {
             return ResponseEntity.ok(this.timelineEventService.deleteChapterReference(novelId, timelineEventId, itemId));
         } else if("research".equals(type)) {
             return ResponseEntity.ok(this.timelineEventService.deleteResearchReference(novelId, timelineEventId, itemId));
+        }else if("locations".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.deleteLocationReference(novelId, timelineEventId, itemId));
+        }else if("characters".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.deleteCharacterReference(novelId, timelineEventId, itemId));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -55,6 +59,10 @@ public class TimelineEventController {
             return ResponseEntity.ok(this.timelineEventService.addChapterReference(novelId, timelineEventId, itemId));
         } else if("research".equals(type)) {
             return ResponseEntity.ok(this.timelineEventService.addResearchReference(novelId, timelineEventId, itemId));
+        } else if("locations".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.addLocationReference(novelId, timelineEventId, itemId));
+        } else if("characters".equals(type)) {
+            return ResponseEntity.ok(this.timelineEventService.addCharacterReference(novelId, timelineEventId, itemId));
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }

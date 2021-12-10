@@ -67,12 +67,16 @@
     },
     "timeline": {
         "select_research": "Select research",
-        "select_chapter": "Select chapter",
+        "select_chapters": "Select chapter",
+        "select_characters": "Select character",
+        "select_locations": "Select location",
         "manage_references": "Add or delete references",
         "select_reference_type": {
             "select_item_type": "Select reference type",
             "chapters": "Chapter",
-            "research": "Reseach",
+            "characters": "Character",
+            "locations": "Location",
+            "research": "Research",
             "add_locally": "Add this reference",
             "close": "Close",
             "delete": "Delete this reference"

@@ -140,13 +140,6 @@ const deleteReference = (context: ActionContext<IState,IState>, payload: { novel
   });   
 }
 
-/*
-const addResearchReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, research: ResearchModel }): void => {
-  new TimelineService().addResearchReference(payload.novelId, payload.event, payload.research).then(result => {
-    context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
-  });   
-}*/
-
 const filterTags = (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}): void => {
   context.commit('tagsFiltered', { key: update.key, tags: update.tags });
 }

@@ -78,6 +78,14 @@ export default class Plot extends mixins(TimelineEventMixin) {
       key: NOVEL_ITEM_KEYS.RESEARCH_GROUPS,
       novelId: this.$route.params.id,
     });
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.LOCATION_GROUPS,
+      novelId: this.$route.params.id,
+    });
+    this.$store.dispatch("loadItems", {
+      key: NOVEL_ITEM_KEYS.CHARACTER_GROUPS,
+      novelId: this.$route.params.id,
+    });
   }
 
   add() {

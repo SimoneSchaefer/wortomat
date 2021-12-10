@@ -29,7 +29,7 @@ export default class VerticalMenu extends Vue {
   width: 45m;
   flex-shrink: 0;
   background: var(--tabmenu-background);
-  border-right: 3px solid #2d2b2b;
+  border-right: 3px solid #2d2b2b94;
 }
 
 </style>

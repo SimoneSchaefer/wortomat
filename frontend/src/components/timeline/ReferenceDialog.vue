@@ -5,30 +5,27 @@
         <h3>{{ $t("timeline.manage_references") }}</h3>
         <WButton @click="close" type="text" icon="fa fa-times" title="timeline.select_reference_type.close"/>
       </div>
-
     </template>
+
     <div class="existing-references">
-      <div v-for="chapter of getChaptersForEvent(event)" v-bind:key="chapter.id" class="existing-reference">
-          <div><i class="fa fa-book-open"></i>&nbsp;<WMissingValueTolerantLabel :value="chapter.name" :fallback="$t(`fallback_labels.no_name.${chapterNovelItemKey}`)"></WMissingValueTolerantLabel></div>
-          <div><WButton color="danger" type="text"
-            @click="deleteReference(chapter, chapterNovelItemKey)" 
+      <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
+        <div v-for="eventReference of getExistingEventReferences(referenceType)" v-bind:key="eventReference.id" class="existing-reference">
+          <div class="details">
+            <i class="type-indicator" v-bind:class="`fa fa-${getIconForType(referenceType)}`"></i>
+            <WMissingValueTolerantLabel :value="eventReference.name" :fallback="$t(`fallback_labels.no_name.${referenceType}`)"></WMissingValueTolerantLabel>
+          </div>
+          <WButton color="danger" type="text"
+            @click="deleteReference(eventReference, referenceType)" 
             :title="`timeline.select_reference_type.delete`" 
             icon="fa fa-trash" />
-          </div>
-      </div>      
-      <div v-for="research of getResearchForEvent(event)" v-bind:key="research.id" class="existing-reference">
-          <div><i class="fa fa-flask"></i>&nbsp;<WMissingValueTolerantLabel :value="research.name" :fallback="$t(`fallback_labels.no_name.${researchNovelItemKey}`)"></WMissingValueTolerantLabel></div>
-          <div><WButton color="danger" type="text"
-            @click="deleteReference(research, researchNovelItemKey)" 
-            :title="`timeline.select_reference_type.delete`" 
-            icon="fa fa-trash" />
-          </div>
+        </div>
       </div>
     </div>
+
     <div class="add-reference-form">
       <Dropdown
-        v-model="selectedItemType"
-        :options="itemTypes"
+        v-model="selectedReferenceType"
+        :options="allowedReferences"
         optionLabel="name"
         :placeholder="$t('timeline.select_reference_type.select_item_type')">
         <template #value="slotProps">
@@ -41,24 +38,17 @@
         </template>
       </Dropdown>
 
-      <WNovelItemDropdown v-if="selectedItemType === chapterNovelItemKey"
-        @change="selectedChapter = $event"
-        :items="chapters"
-        :selectedItem="selectedChapter"
-        :novelItemKey="chapterNovelItemKey"
-        placeHolder="timeline.select_chapter" >
+      <WNovelItemDropdown v-if="selectedReferenceType"
+        @change="selectReferenceItem($event)"
+        :items="selectableReferenceItems"
+        :selectedItem="selectedReferenceItem"
+        :novelItemKey="selectedReferenceType"
+        :placeHolder="`timeline.select_${selectedReferenceType}`" >
       </WNovelItemDropdown>
 
-      <WNovelItemDropdown v-if="selectedItemType === researchNovelItemKey"
-        @change="selectedResearch = $event"
-        :items="research"
-        :selectedItem="selectedResearch"
-        :novelItemKey="researchNovelItemKey"
-        placeHolder="timeline.select_research" >
-      </WNovelItemDropdown>
 
       <div class="option-groups">
-        <WButton :disabled="!validReference" type="text"
+        <WButton :disabled="!selectedReferenceItem" type="text"
           @click="addReference" 
           :title="`timeline.select_reference_type.add_locally`" 
           icon="fa fa-plus" />
@@ -74,8 +64,6 @@ import { Emit, Prop } from "vue-property-decorator";
 
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { BaseModel } from "@/models/Base.model";
-import { ChapterModel } from "@/models/Chapter.model";
-import { ResearchModel } from "@/models/Research.model";
 
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
@@ -84,6 +72,7 @@ import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
+import { KEY_TO_CHILD } from "@/store/store-api-adapter";
 
 @Options({
   components: {
@@ -100,13 +89,53 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   @Prop() event: TimelineEventModel;
   @Prop() displayDialog = false;
 
-  selectedItemType = null;
-  selectedResearch : ResearchModel = null;
-  selectedChapter : ChapterModel = null;
+  allowedReferences = [
+    NOVEL_ITEM_KEYS.CHAPTERS,
+    NOVEL_ITEM_KEYS.RESEARCH,
+    NOVEL_ITEM_KEYS.LOCATIONS,
+    NOVEL_ITEM_KEYS.CHARACTERS,
+  ]
+  selectedReferenceType: NOVEL_ITEM_KEYS = null;
+  selectedReferenceItems = new Map();
+
 
   @Emit("close")
   close() {
     return true;
+  }
+
+  selectReferenceItem(baseModel: BaseModel) {
+    this.selectedReferenceItems.set(this.selectedReferenceType, baseModel);
+  }
+
+  getExistingEventReferences(key: NOVEL_ITEM_KEYS) {
+    return this.referencedItems(this.getParentKey(key), key);
+  }
+
+  getIconForType(key: NOVEL_ITEM_KEYS) {
+    switch (key) { 
+      case NOVEL_ITEM_KEYS.CHAPTERS:
+        return 'book-open'
+      case NOVEL_ITEM_KEYS.CHARACTERS:
+        return 'users'
+      case NOVEL_ITEM_KEYS.LOCATIONS:
+        return 'map'
+      case NOVEL_ITEM_KEYS.RESEARCH:
+        return 'flask'     
+    }
+    return 'question-mark';
+  }
+
+  get selectedReferenceItem() {
+    return this.selectedReferenceItems.get(this.selectedReferenceType);
+  }
+
+  get selectableReferenceItems() {
+    return this.referencedItems(this.getParentKey(this.selectedReferenceType), this.selectedReferenceType, false);
+  }
+
+  getParentKey(childKey: NOVEL_ITEM_KEYS) {
+    return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
   }
 
   deleteReference(item: BaseModel, key: NOVEL_ITEM_KEYS) {
@@ -119,56 +148,29 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   }
 
   addReference() {
-    if (!this.validReference) return;
-    const item = this.selectedItemType === NOVEL_ITEM_KEYS.CHAPTERS ? this.selectedChapter : this.selectedResearch;
+    const item = this.selectedReferenceItem;
     this.$store.dispatch('addReference', { 
       novelId: this.novelId,
       event: this.event,
       item: item,
-      key: this.selectedItemType
+      key: this.selectedReferenceType
     });  
-    this.selectedChapter = null;
-    this.selectedResearch = null;       
-  }
-
-  get validReference() {
-    return (this.selectedItemType === NOVEL_ITEM_KEYS.CHAPTERS && this.selectedChapter) ||
-            (this.selectedItemType === NOVEL_ITEM_KEYS.RESEARCH && this.selectedResearch);    
-  }
-
-  get itemTypes(): NOVEL_ITEM_KEYS[] {
-    return [NOVEL_ITEM_KEYS.CHAPTERS, NOVEL_ITEM_KEYS.RESEARCH];
-  }
-
-  get chapters() {
-    return this.referencedItems(NOVEL_ITEM_KEYS.PARTS, NOVEL_ITEM_KEYS.CHAPTERS)
-  }
-
-  get research() {
-    return this.referencedItems(NOVEL_ITEM_KEYS.RESEARCH_GROUPS, NOVEL_ITEM_KEYS.RESEARCH)
+    this.selectedReferenceItems = new Map();      
   }
 
   get novelItemKey() {
     return NOVEL_ITEM_KEYS.TIMELINE;
   }
 
-  get chapterNovelItemKey() {
-    return NOVEL_ITEM_KEYS.CHAPTERS;
-  }
-
-  get researchNovelItemKey() {
-    return NOVEL_ITEM_KEYS.RESEARCH;
-  }
-
   private get novelId(): number {
       return this.$store.getters.openNovelId;
   }
 
-  private referencedItems(parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS) {
+  private referencedItems(parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS, mustInclude = true) {
     const itemIds: number[] = this.event['references'][childKey.toUpperCase()];
     return this.getFlatList(
       parentKey, 
-    ).filter(chapter => !itemIds.includes(chapter.id));
+    ).filter(child => itemIds.includes(child.id) === mustInclude);
   }
 }
 </script>
@@ -194,6 +196,15 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     margin: 1em;
 }
 
+.type-indicator {
+  opacity: 0.8;
+  padding-right: 1em;
+}
+
+.existing-references {
+  border-top: 1px solid #e2e2e2;
+}
+
 .existing-reference {
   padding: 1em;
   display: flex;
@@ -204,8 +215,8 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   border-bottom: 1px solid #e2e2e2;
 }
 
-.existing-references .existing-reference:first-child {
-  border-top: 1px solid #e2e2e2;
+.existing-reference .details {
+  display: flex;
+  align-items: center;
 }
-
 </style>
