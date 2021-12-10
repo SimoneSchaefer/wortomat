@@ -26,8 +26,14 @@ export default {
 export function getSortedEvents(state: IState) {
     const allItems = state.novelItems.get(NOVEL_ITEM_KEYS.TIMELINE) || [];
     allItems.sort(function(a, b) {
+        if (a.eventDate === null && b.eventDate === null) {
+            return a.id < b.id;
+        }
         if (a.eventDate === null) {
-            return 1; //put items without date to the end
+            return -1;
+        }
+        if (b.eventDate === null) {
+            return 1;
         }
         if (a.eventDate < b.eventDate) {
           return -1;
@@ -35,7 +41,6 @@ export function getSortedEvents(state: IState) {
         if (a.eventDate > b.eventDate) {
           return 1;
         }      
-        return 0;
       });
     return allItems;
 }
