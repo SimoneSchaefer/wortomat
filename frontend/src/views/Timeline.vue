@@ -21,13 +21,12 @@
           </SplitterPanel>
           <SplitterPanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
-              <div v-if="selectedItem" class="selected-item">
-                <div class="sheet-list" v-for="chapter in getChaptersForEvent(selectedItem)" :key="chapter.id">
-                  <NovelItemSheet :novelItemKey="chapterNovelItemKey" :item="chapter" :service="chapterService"></NovelItemSheet>
-                </div>
-                <div class="sheet-list" v-for="research in getResearchForEvent(selectedItem)" :key="research.id">
-                  <NovelItemSheet :novelItemKey="researchNovelItemKey" :item="research" :service="researchService"></NovelItemSheet>
-                </div>           
+              <div v-if="selectedItem" class="selected-item sheet-list">   
+                <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
+                  <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
+                    <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="chapterService"></NovelItemSheet>
+                  </div>
+                </div>       
               </div> 
             </ScrollPanel>
           </SplitterPanel>
@@ -51,6 +50,7 @@ import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WHelpNote from '@/components/HelpNote.vue';
+import { KEY_TO_CHILD } from "@/store/store-api-adapter";
 
 @Options({
   components: {
@@ -64,6 +64,13 @@ import WHelpNote from '@/components/HelpNote.vue';
   },
 })
 export default class Plot extends mixins(TimelineEventMixin) {
+
+  allowedReferences = [
+    NOVEL_ITEM_KEYS.CHAPTERS,
+    NOVEL_ITEM_KEYS.RESEARCH,
+    NOVEL_ITEM_KEYS.LOCATIONS,
+    NOVEL_ITEM_KEYS.CHARACTERS,
+  ]
 
   mounted(): void {
     this.$store.dispatch("loadItems", {
@@ -96,6 +103,24 @@ export default class Plot extends mixins(TimelineEventMixin) {
     });
     var container = this.$el.querySelector(".p-scrollpanel-content");
     container.scrollTop = container.scrollHeight;
+  }
+
+
+  getExistingEventReferences(event: TimelineEventModel, key: NOVEL_ITEM_KEYS) {
+    return this.referencedItems(event, this.getParentKey(key), key);
+  }
+
+  // TODO move to store getters or mixins?
+  private referencedItems(event: TimelineEventModel, parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS, mustInclude = true) {
+    const itemIds: number[] = event['references'][childKey.toUpperCase()];
+    return this.getFlatList(
+      parentKey, 
+    ).filter(child => itemIds.includes(child.id) === mustInclude);
+  }
+
+
+  getParentKey(childKey: NOVEL_ITEM_KEYS) {
+    return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
   }
 
   isLoading(): boolean {
