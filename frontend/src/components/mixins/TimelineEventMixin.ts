@@ -22,7 +22,7 @@ export default abstract class TimelineEventMixin extends Vue {
         return flatList;
     }
 
-    private filterItems(event: TimelineEventModel, parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS) {
+    protected filterItems(event: TimelineEventModel, parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS) {
         const flatList = this.getFlatList(parentKey);
         const eventItems = [];
         for (const item of (event['references'][childKey.toUpperCase()] || [])) {
