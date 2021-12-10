@@ -39,7 +39,6 @@
 <script lang="ts">
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { mixins, Options } from "vue-class-component";
-import NovelItems from "./NovelItems.vue";
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
@@ -55,7 +54,6 @@ import WHelpNote from '@/components/HelpNote.vue';
 
 @Options({
   components: {
-    NovelItems,
     EditableLabel,
     EditableDate,
     NovelItemSheet,
