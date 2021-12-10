@@ -113,6 +113,7 @@ export default class TreeviewHeader extends Vue {
   display: flex;
   padding-right: 1.5em;
   background: var(--light-background);
+  border-right: 1px solid rgba(80, 80, 80, 0.39);
 }
 
 .tree-view-item-child {
@@ -144,7 +145,8 @@ export default class TreeviewHeader extends Vue {
   background-color: pink;
 }
 
-.selected {
+.tree-view-item.selected {
+  background: none;
   background-color: pink;
 }
 </style>
