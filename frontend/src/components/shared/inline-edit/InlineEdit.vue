@@ -80,7 +80,15 @@ export default class InlineEdit extends Vue {
 </script>
 
 
+<style>
+.readonly  .underline {
+    border-bottom: 2px dotted rgba(99, 99, 99, 0.445);
+}
+</style>
+
 <style scoped>
+
+
 .inline-edit {
     /*text-align: left;*/
     position: relative;

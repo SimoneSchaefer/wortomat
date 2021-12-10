@@ -96,6 +96,10 @@ i[class^="fa"]:before {
   color: #d2d2d2;*/
 }
 
+a {
+  text-decoration: none !important;
+}
+
 
 .ProseMirror {
   border: none !important;

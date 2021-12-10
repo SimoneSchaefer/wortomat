@@ -20,7 +20,7 @@
         </div>
     </template>
     <template v-slot:readonly>
-        <MissingValueTolerantLabel :value="value" :fallback="placeHolder"></MissingValueTolerantLabel>
+        <MissingValueTolerantLabel  class="underline" :value="value" :fallback="placeHolder"></MissingValueTolerantLabel>
     </template>
 </InlineEdit>
 </template>
