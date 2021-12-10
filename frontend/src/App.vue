@@ -118,16 +118,21 @@ a {
   background-color: purple !important;
 }
 
+.p-scrollpanel-bar.p-scrollpanel-bar-y {
+  width: 5px;
+}
+
 .p-splitter .p-splitter-gutter {
-  background-color: purple !important;
+  background-color: rgba(71, 1, 71, 0.89) !important;
 }
 
 .p-splitter .p-splitter-gutter-handle {
-    background-color: rgb(56, 0, 56) !important;
+    background-color: purple !important;
 }
 
 .split-content-left .p-scrollpanel-content {
   background: var(--middle-background);
+  padding: 0 12px;
 }
 
 </style>

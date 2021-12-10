@@ -90,8 +90,8 @@ export default class TreeviewHeader extends Vue {
   background: var(--middle-background);
   border-bottom: 1px solid rgba(53, 53, 53, 0.178);
   border-top: 1px solid rgba(53, 53, 53, 0.178);
-  padding-right:1.5em;
-    border-right: 1px solid rgba(80, 80, 80, 0.39);
+  padding-right:1em;
+  border-right: 1px solid rgba(80, 80, 80, 0.39);
 
 }
 
