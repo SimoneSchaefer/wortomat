@@ -35,8 +35,6 @@ import FileUpload from 'primevue/fileupload';
 import ProgressSpinner from 'primevue/progressspinner';
 import Timeline from 'primevue/timeline';
 import Dropdown from 'primevue/dropdown';
-import Accordion from 'primevue/accordion';
-import AccordionTab from 'primevue/accordiontab';
 import Sidebar from 'primevue/sidebar';
 
 
@@ -90,8 +88,6 @@ const app = createApp(App)
     .component('Divider', Divider)
     .component('ProgressSpinner', ProgressSpinner)
     .component('Fieldset', Fieldset)
-    .component('Accordion', Accordion)
-    .component('AccordionTab', AccordionTab)
     .component('Timeline', Timeline)
     .component('Dropdown', Dropdown)
     .component('Sidebar', Sidebar)

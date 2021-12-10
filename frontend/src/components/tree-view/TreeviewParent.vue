@@ -1,22 +1,23 @@
 <template>
-    <WConfirmDialog ref="confirmDeleteParent" @accept="deleteParent" message="delete_confirm"></WConfirmDialog>
-    <div class="accordion-header">
-        <WEditableLabel 
-            :value="item.name" 
-            :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
-            @update-label="updateParentName(item, $event)" >
-        </WEditableLabel>
-        <div class="group-options" :class="{ hidden: modalOpen }">
-            <WButton type="text" color="primary" icon="fa fa-plus" 
-                :title="`add_child.${parentKey}`" 
-                @click="addChild">
-            </WButton>
-            <WButton type="text" color="danger" icon="fa fa-trash" 
-                :title="`remove_parent.${parentKey}`" 
-                @click="confirmDeleteParent(item, $event)">
-            </WButton>
-        </div>
-    </div>
+    <WTreeviewHeader 
+        :parentKey="parentKey" 
+        :item="item"    
+        :open="isOpen"  
+        @toggle="toggle"               
+        @addChild="addChild"
+        @updateParentName="updateParentName($event)"
+        @deleteParent="deleteParent">
+    </WTreeviewHeader>
+    <draggable v-if="open" :list="item['children']" class="list-group" ghost-class="ghost"  group="children" @end="childMoved($event)" :id="`parent-${item.id}`">   
+        <WTreeviewListItem v-for="child in item['children']" :key="child.id"
+            @select="selectChild"
+            @deleteChild="deleteChild"
+            :selected="isSelected(child)"
+            :element="child" 
+            :parentKey="parentKey" 
+            :childKey="childKey">
+        </WTreeviewListItem>    
+    </draggable>
 </template>
 
 <script lang="ts">
@@ -30,31 +31,37 @@ import WButton from '@/components/shared/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import WEditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 
+import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
+import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
+
 @Options({
   components: {
     WButton,
     WEditableLabel,
     WConfirmDialog,
+    WTreeviewListItem,
+    WTreeviewHeader    
   },
-  emits: ['delete-parent', 'update-parent-name', 'add-child']
+  emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle']
 })
-export default class TreeviewHeader extends Vue {
+export default class TreeviewParent extends Vue {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
     @Prop() childKey: NOVEL_ITEM_KEYS;
     @Prop() item: BaseModel;
-
-    confirmDeleteParent(item, $event): void {
-        $event.stopPropagation();
-        (this.$refs.confirmDeleteParent as WConfirmDialog).getDecision(item);
-    }
+    @Prop() open: boolean;
 
     @Emit('delete-parent')
     deleteParent() {
         return this.item;
     }
 
+    @Emit('delete-child')
+    deleteChild(child) {
+        return child;
+    }
+
     @Emit('update-parent-name')
-    updateParentName(_item: BaseModel, newValue: string) {
+    updateParentName(newValue: string) {
         return newValue;
     }
 
@@ -63,27 +70,46 @@ export default class TreeviewHeader extends Vue {
         return this.item;
     }
 
+    @Emit('child-moved')
+    childMoved($event) {
+        return $event;
+    }
+
+    @Emit('toggle')
+    toggle($event) {
+        return $event;
+    }
+
+
+    isSelected(item: BaseModel) {
+        const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
+        if (isSelected) {
+            this.openParentIfNecessary();
+        }
+        return isSelected;
+    }
+    
+    selectChild(item: BaseModel) {
+        this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
+    }
+
+
+    get isOpen() {
+        return this.open;
+    }
+    get selectedItems(): number[] {
+        return this.$store.state.selection.get(this.childKey) || [];
+    }
+  
+    private openParentIfNecessary() {
+        if(!open) {
+            this.$emit('toggle', true);
+        }
+    }
+
     get modalOpen() {
         return this.$store.state.modalIsOpen;
     }   
 }
 </script>
 
-
-<style scoped>
-.p-accordion-header .group-options {
-  display: flex; 
-}
-
-.accordion-header {
-  display: flex;
-  width: 100%;
-  align-items: center;
-}
-
-.accordion-header .menu {
-  width: 2em;
-  opacity: 0.5;
-  text-align: right;
-}
-</style>

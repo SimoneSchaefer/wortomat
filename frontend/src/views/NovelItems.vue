@@ -89,8 +89,12 @@ export default class NovelItems extends Vue {
 }
 
 .p-splitter .p-splitter-gutter {
-  background-color: var(--splitter-background-color);
-  border-right: 1px solid var(--splitter-border-color);
+  background-color: rgba(53, 53, 53, 0.178);
+  border-right: 1px solid rgba(53, 53, 53, 0.178);
+}
+
+.p-scrollpanel-bar {
+  background-color: purple !important;
 }
 
 .split-content-right {
