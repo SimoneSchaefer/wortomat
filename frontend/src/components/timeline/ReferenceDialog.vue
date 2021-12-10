@@ -52,6 +52,7 @@
       <WNovelItemDropdown v-if="selectedItemType === researchNovelItemKey"
         @change="selectedResearch = $event"
         :items="research"
+        :selectedItem="selectedResearch"
         :novelItemKey="researchNovelItemKey"
         placeHolder="timeline.select_research" >
       </WNovelItemDropdown>
