@@ -4,7 +4,7 @@
         class="list-group"
         ghost-class="ghost"
         @change="parentMoved">
-        <div class="list-group-item" v-for="item in items" :key="item.id">
+        <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
           <w-tree-view-parent 
             :item="item" 
             :parentKey="parentKey" 
@@ -46,15 +46,15 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     }
 
     isOpen(parent: BaseModel) {
-      return this.toggleState.get(parent.id) || false;
+      return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
     }
 
     deleteParent(item: BaseModel) {
-        this.$store.dispatch('deleteItems', { 
-            key: this.parentKey, 
-            novelId: this.$store.state.currentNovel?.id,
-            items: [item]
-        });
+      this.$store.dispatch('deleteItems', { 
+          key: this.parentKey, 
+          novelId: this.$store.state.currentNovel?.id,
+          items: [item]
+      });
     }
 
     deleteChild(item: BaseModel) {
@@ -63,13 +63,12 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
         let flatList = [];
         let parent = null;
         for (const group of getAllItems(this.$store.state, this.parentKey)) {
-        // flatList = flatList.concat(group.research);
-        const findChild = group['children'].find(child => child.id === item.id);
-        if (findChild) {
-            parent = group;
-            break;
-        }
-
+          // flatList = flatList.concat(group.research);
+          const findChild = group['children'].find(child => child.id === item.id);
+          if (findChild) {
+              parent = group;
+              break;
+          }
         }
         item.parentId = parent?.id || undefined;
         this.$store.dispatch('deleteItems', { 
@@ -87,12 +86,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
         novelId: this.novelId, 
         item: child,
     });
-    
-    /*const parentIndex = this.items.findIndex(parent => parent.id === selectedParent.id);
-    if (!this.activeIndex.includes(parentIndex)) {
-      this.activeIndex.splice(0, 0, parentIndex);
-    }
-    this.activeIndex = [...this.activeIndex];*/
+    this.toggleState.set(selectedParent.id, true);
   }
 
   childMoved($event): void {
