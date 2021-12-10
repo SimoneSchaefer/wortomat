@@ -112,6 +112,7 @@ export default class TreeviewHeader extends Vue {
 .tree-view-item {
   display: flex;
   padding-right: 1.5em;
+  background: var(--light-background);
 }
 
 .tree-view-item-child {
