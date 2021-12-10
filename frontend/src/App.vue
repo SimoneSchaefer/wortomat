@@ -132,7 +132,7 @@ a {
 
 .split-content-left .p-scrollpanel-content {
   background: var(--middle-background);
-  padding: 0 12px;
+  padding: 0 12px 0 0;
 }
 
 </style>
