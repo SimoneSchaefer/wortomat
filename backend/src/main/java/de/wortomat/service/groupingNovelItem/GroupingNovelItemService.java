@@ -88,6 +88,8 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     private void moveChildToOtherParent(S child, int newPosition, Long newParentId) {
         T oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
         T newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
+
+        child.setParent(newParent);
         oldParent.getChildren().remove(child);
         newParent.getChildren().add(newPosition, child);
         updatePositions(oldParent.getChildren());
