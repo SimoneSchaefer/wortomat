@@ -20,7 +20,7 @@ describe('Novel items', () => {
 
 
 
-    for (let spec of novelItemsSpecDefinition.slice(0, 1)) { // TODO
+    for (let spec of novelItemsSpecDefinition) {
         describe(spec.specName, () => {
             beforeEach(() => {
                 cy.visit('');
