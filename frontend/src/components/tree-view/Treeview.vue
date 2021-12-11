@@ -13,6 +13,7 @@
             @toggle="toggle($event, item)"
             @updateParentName="updateName($event, item)"
             @addChild="addChild(item)"
+            @childMoved="childMoved($event)"
             @deleteParent="deleteParent"
             @deleteChild="deleteChild"></w-tree-view-parent>        
         </div>
