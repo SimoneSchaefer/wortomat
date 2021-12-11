@@ -9,6 +9,8 @@ describe('Novel items', () => {
     const groupingItemPage = new GroupingItemPage();
     const TITLE = 'group name 1';
     const CHILD_TITLE = 'child name 1';
+    const CHILD_SUMMARY = 'something is happening here';
+    const EXTENDED_CHILD_SUMMARY = 'some additional details go here.';
 
     before(() => {
         cy.visit('');
@@ -16,7 +18,7 @@ describe('Novel items', () => {
         novelList.addNovel();
     });
 
-    for (let spec of novelItemsSpecDefinition) {
+    for (let spec of novelItemsSpecDefinition.slice(0, 1)) { // TODO
         describe(spec.specName, () => {
             beforeEach(() => {
                 cy.visit('');
@@ -97,6 +99,8 @@ describe('Novel items', () => {
                 groupingItemPage.assertHeaders([TITLE, spec.unnamedParentText]);  
                 groupingItemPage.childSelected(0, 0);
                 groupingItemPage.sheethasTitle(CHILD_TITLE);
+                groupingItemPage.sheethasSummary(spec.missingSummaryChildText);
+                groupingItemPage.sheethasExtendedSummary(spec.missingExtendedSummaryChildText);
             });
         
             it('can cancel remove child', () => {

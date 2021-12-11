@@ -40,6 +40,23 @@ export class GroupingItemPage {
         this.inlineEdit.updateInput('.sheet .header-container .meta .header', oldName, newName, confirm);
     }
 
+    updateSummaryForSelectedChild(oldValue: string, newValue: string, confirm = true) {
+        this.inlineEdit.updateInput('.sheet .header-container .meta .summary', oldValue, newValue, confirm);
+    }
+
+    updateExtendedSummaryForSelectedChild(oldValue: string, newValue: string, confirm = true) {
+        this.inlineEdit.updateInput('.sheet .header-container .meta .extended-summary', oldValue, newValue, confirm);
+    }
+
+    updateContentForSelectedChild(oldValue: string, newValue: string) {
+        cy.get('.sheet .content').should('contain.text', oldValue);
+        cy.get('.sheet .content').click();
+        cy.get('.ProseMirror').clear().type(newValue);
+        cy.get('.other .last').click();
+        cy.get('.ProseMirror').should('not.exist');
+        cy.get('.sheet .content').should('contain.text', newValue);
+    }
+
     displaysInfoBox(expectedText: string) {
         cy.get('.help-note').find('iframe').its('0.contentDocument.body').should('contain.text', expectedText);
     }
@@ -65,6 +82,17 @@ export class GroupingItemPage {
 
     sheethasTitle(expectedTitle: string) {
         cy.get('.sheet .header-container .meta .header').should('have.text', expectedTitle);
+    }
+    
+    sheethasSummary(expectedTitle: string) {
+        cy.get('.sheet .header-container .meta .summary').should('have.text', expectedTitle);
+    }
+    
+    sheethasExtendedSummary(expectedTitle: string) {
+        cy.get('.sheet .header-container .meta .extended-summary').should('have.text', expectedTitle);
+    }
+    sheethasContent(expectedTitle: string) {
+        cy.get('.sheet .content').should('have.text', expectedTitle);
     }
     
 
