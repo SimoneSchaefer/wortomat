@@ -80,8 +80,16 @@ public class PDFLatexExportService implements Exporter {
         ProcessBuilder processBuilder = new ProcessBuilder().directory(new File(workDirectory));
         processBuilder.command("pdflatex", latexFilePath);
         Process process= processBuilder.start();
+        String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+
+        processBuilder.inheritIO();
+        String output2 = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+
+
         try {
             int exitVal = process.waitFor();
+            System.out.println("output:::" + output);
+            System.out.println("output2:::" + output2);
             System.out.println("EXIT VAL IS " + exitVal + ", copying from "+ latexFilePath.replace(".tex", ".pdf") + " to " + exportPath);
             Files.deleteIfExists(Paths.get(exportPath));
             String expectedPdfFileName = Paths.get(exportPath).getFileName().toString();
@@ -106,7 +114,7 @@ public class PDFLatexExportService implements Exporter {
         processBuilder.inheritIO();
 
         System.out.println("WTF::::" + workDirectory+"template.tex");
-        processBuilder.command("pandoc", "--template=template.tex", htmlFile, "-f", "html", "-t", "latex", "-o", latexFile);
+        processBuilder.command("pandoc", "--template=template.tex", "--top-level-division=chapter", htmlFile, "-f", "html", "-t", "latex", "-o", latexFile);
         // processBuilder.command("pandoc", htmlFile, "-f", "html", "-t", "latex", "-s", "-o", latexFile);
          Process process= processBuilder.start();
         String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
