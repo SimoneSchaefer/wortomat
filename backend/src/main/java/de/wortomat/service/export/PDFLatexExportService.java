@@ -8,6 +8,7 @@ import de.wortomat.model.Part;
 import de.wortomat.service.StorageConfigService;
 import de.wortomat.service.groupingNovelItem.PartService;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -32,23 +33,44 @@ public class PDFLatexExportService implements Exporter {
     @Autowired
     StorageConfigService storageService;
 
-    @Value("classpath:export/pdflatex-template.tex")
-    private Resource resource;
+    @Value("classpath:export/template.tex")
+    private Resource template;
+    @Value("classpath:export/sidecap.sty")
+    private Resource sidecap;
+    @Value("classpath:export/siunitx.sty")
+    private Resource units;
 
     @Autowired
     HTMLExportService htmlExportService;
 
     @Override
     public void export (Long novelId, ExportOptions exportOptions, String filePath ) throws IOException {
-        String workDirectory = storageService.getExportFolder() + "/"+ new Date().getTime() + "/";
+        String workDirectory = storageService.getExportFolder() + "/tmp-"+ new Date().getTime() + "/";
+        Files.createDirectory(Paths.get(workDirectory));
+
+        loadLatexTemplate(workDirectory);
+        loadLatexLibraries(workDirectory);
+
         String toExport = generateLatex(novelId, exportOptions, filePath, workDirectory);
         compilePDF(toExport, filePath, workDirectory);
-        FileUtils.deleteDirectory(new File(workDirectory));
+      //  FileUtils.deleteDirectory(new File(workDirectory));
     }
 
-    private String loadLatexTemplate() throws IOException {
+    private void loadLatexTemplate(String workingDirectory) {
+        copyResourceToWorkingDirectory(template, workingDirectory);
+    }
+
+    private void loadLatexLibraries(String workingDirectory) {
+        copyResourceToWorkingDirectory(sidecap, workingDirectory);
+        copyResourceToWorkingDirectory(units, workingDirectory);
+    }
+
+    private void copyResourceToWorkingDirectory(Resource resource, String workingDirectory) {
         try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-            return FileCopyUtils.copyToString(reader);
+            String templateContent = FileCopyUtils.copyToString(reader);
+            Path templatePath = Paths.get(workingDirectory, resource.getFilename()).toAbsolutePath();
+            Files.createFile(templatePath);
+            Files.write(templatePath.toAbsolutePath(), templateContent.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -74,7 +96,6 @@ public class PDFLatexExportService implements Exporter {
 
         String htmlFile = "input.html";
         String latexFile = Paths.get(exportFilePath).getFileName().toString().replace(".pdf", ".latex");
-        Files.createDirectory(Paths.get(workDirectory));
 
         String html = htmlExportService.generateHTML(novelId, exportOptions);
         Files.createFile(Paths.get(workDirectory + htmlFile));
@@ -82,11 +103,16 @@ public class PDFLatexExportService implements Exporter {
 
 
         ProcessBuilder processBuilder = new ProcessBuilder().directory(new File(workDirectory));
-        processBuilder.command("pandoc", htmlFile, "-f", "html", "-t", "latex", "-s", "-o", latexFile);
-        Process process= processBuilder.start();
+        processBuilder.inheritIO();
+
+        System.out.println("WTF::::" + workDirectory+"template.tex");
+        processBuilder.command("pandoc", "--template=template.tex", htmlFile, "-f", "html", "-t", "latex", "-o", latexFile);
+        // processBuilder.command("pandoc", htmlFile, "-f", "html", "-t", "latex", "-s", "-o", latexFile);
+         Process process= processBuilder.start();
+        String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
         try {
             int exitVal = process.waitFor();
-            System.out.println("EXIT VAL IS " + exitVal);
+            System.out.println("EXIT VAL IS " + exitVal + ", outout: " + output);
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
