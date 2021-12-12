@@ -52,10 +52,7 @@ import {
           renderHTML: attributes => {
             if (!attributes.color) {
               return {}
-            }
-
-            console.log('RENDER', attributes)
-  
+            }  
             return {
               'data-color': attributes.color,
               style: `color: ${attributes.color}`,
@@ -71,8 +68,6 @@ import {
             if (!attributes.backgroundColor) {
               return {}
             }
-            console.log('RENDER', attributes)
-
             return {
               'data-background-color': attributes.backgroundColor,
               style: `background-color: ${attributes.backgroundColor}`,

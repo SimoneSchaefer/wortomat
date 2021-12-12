@@ -52,7 +52,7 @@ export class GroupingItemPage {
         cy.get('.sheet .content').should('contain.text', oldValue);
         cy.get('.sheet .content').click();
         cy.get('.ProseMirror').clear().type(newValue);
-        cy.get('.other .last').click();
+        cy.get('.other .p-button-success').click();
         cy.get('.ProseMirror').should('not.exist');
         cy.get('.sheet .content').should('contain.text', newValue);
     }

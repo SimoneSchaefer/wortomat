@@ -83,6 +83,25 @@
         },
         "delete_event": "Delete this timeline event"
     },
+    "editor": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "heading": "Headline",
+        "ol": "ordered list",
+        "ul": "bullet list",
+        "strike": "strikethrough",
+        "code": "code", 
+        "quote": "quote",
+        "redo": "Redo",
+        "undo": "Undo", 
+        "clear": "Clear all formatting",
+        "highlight_idea": "Mark as idea",
+        "highlight_fixme": "Mark as FIXME",
+        "highlight_todo": "Mark as TODO",
+        "cancel": "Discard changes",
+        "save": "Save changes"
+
+    },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",
     "please_confirm": "Please confirm",
