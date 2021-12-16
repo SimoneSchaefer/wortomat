@@ -3,8 +3,10 @@ package de.wortomat.service.export;
 import club.caliope.udc.DocumentConverter;
 import club.caliope.udc.InputFormat;
 import club.caliope.udc.OutputFormat;
+import de.wortomat.model.Novel;
 import de.wortomat.model.NovelItem;
 import de.wortomat.model.Part;
+import de.wortomat.service.NovelService;
 import de.wortomat.service.StorageConfigService;
 import de.wortomat.service.groupingNovelItem.PartService;
 import org.apache.commons.io.FileUtils;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +32,9 @@ public class PDFLatexExportService implements Exporter {
 
     @Autowired
     PartService partService;
+
+    @Autowired
+    NovelService novelService;
 
     @Autowired
     StorageConfigService storageService;
@@ -124,16 +130,14 @@ public class PDFLatexExportService implements Exporter {
         } catch (InterruptedException e) {
             throw new IOException(e);
         }
-        return latexFile;
-    }
+        File latex = new File(workDirectory + latexFile);
+        String latexContent = FileUtils.readFileToString(latex,  StandardCharsets.UTF_8);
 
-    private String nullSafeLatexElement(boolean include, String contentItem, String format) {
-        if (!include) {
-            return "";
-        }
-        if (contentItem == null) {
-            return "";
-        }
-        return String.format(format, contentItem);
+        Novel novel = novelService.get(novelId);
+        latexContent = latexContent.replace("\\chapter{", "\\chapter*{");
+        latexContent = latexContent.replace("___title___", novel.getName() == null ? "" : novel.getName());
+        latexContent = latexContent.replace("___author___", novel.getAuthor() == null ? "" : novel.getAuthor());
+        FileUtils.write(latex, latexContent,  StandardCharsets.UTF_8);
+        return latexFile;
     }
 }
