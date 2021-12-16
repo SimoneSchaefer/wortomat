@@ -9,6 +9,7 @@ public class NovelFactory {
         Novel novel = new Novel();
         novel.setId(new Random().nextLong());
         novel.setPosition(new Random().nextInt());
+        novel.setAuthor(FactoryUtils.createRandomString());
         novel.setName(FactoryUtils.createRandomString());
         novel.setSummary(FactoryUtils.createRandomString());
         return novel;
