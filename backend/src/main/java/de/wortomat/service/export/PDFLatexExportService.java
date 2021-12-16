@@ -53,7 +53,7 @@ public class PDFLatexExportService implements Exporter {
 
         String toExport = generateLatex(novelId, exportOptions, filePath, workDirectory);
         compilePDF(toExport, filePath, workDirectory);
-      //  FileUtils.deleteDirectory(new File(workDirectory));
+        FileUtils.deleteDirectory(new File(workDirectory));
     }
 
     private void loadLatexTemplate(String workingDirectory) {
