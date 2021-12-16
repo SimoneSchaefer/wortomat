@@ -7,7 +7,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx,sidecap,tikz}
 \usepackage{siunitx} % automatic number formatting, decimal point alignment
-
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
 % To get lining figures in tables set by siunitx, which apparently uses the
 % \mathrm font instead of \mathnormal
 \SetMathAlphabet{\mathrm}{normal}{U}{eur}{m}{n}
@@ -130,13 +131,15 @@
 \mbox{}\vspace{2in}
 \noindent
 \begin{flushright}
-{\LARGE\itshape{}a}\hspace{1.5em}{\HUGE\scshape{}Book}\\[2\baselineskip]
-{\LARGE\itshape{}of}\hspace{1.5em}{\Huge\scshape{}Fascinating Facts}
+{\HUGE\scshape{}___title___}
 \end{flushright}
 
 \vspace{6\baselineskip}
-\hfill{\Large\scshape{}Abner Stract}
+\hfill{\Large\scshape{}___author___}
 
-\cleartorecto\tableofcontents*
+% \cleartorecto\tableofcontents*
 
 \mainmatter
+
+$body$
+\end{document}

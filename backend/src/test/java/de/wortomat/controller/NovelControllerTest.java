@@ -108,8 +108,9 @@ public class NovelControllerTest {
         return String.format("{\"id\":%d," +
                 "\"name\":\"%s\"," +
                 "\"summary\":\"%s\"," +
-                "\"position\":%d}",
-                novel.getId(), novel.getName(), novel.getSummary(), novel.getPosition());
+                "\"position\":%d," +
+                "\"author\":\"%s\"}",
+                novel.getId(), novel.getName(), novel.getSummary(), novel.getPosition(), novel.getAuthor());
     }
 
 }

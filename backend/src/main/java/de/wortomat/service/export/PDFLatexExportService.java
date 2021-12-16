@@ -1,8 +1,16 @@
 package de.wortomat.service.export;
 
+import club.caliope.udc.DocumentConverter;
+import club.caliope.udc.InputFormat;
+import club.caliope.udc.OutputFormat;
+import de.wortomat.model.Novel;
 import de.wortomat.model.NovelItem;
 import de.wortomat.model.Part;
+import de.wortomat.service.NovelService;
+import de.wortomat.service.StorageConfigService;
 import de.wortomat.service.groupingNovelItem.PartService;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -10,10 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Date;
 
 
 @Service
@@ -22,96 +33,111 @@ public class PDFLatexExportService implements Exporter {
     @Autowired
     PartService partService;
 
-    @Value("classpath:export/pdflatex-template.tex")
-    private Resource resource;
+    @Autowired
+    NovelService novelService;
+
+    @Autowired
+    StorageConfigService storageService;
+
+    @Value("classpath:export/template.tex")
+    private Resource template;
+    @Value("classpath:export/sidecap.sty")
+    private Resource sidecap;
+    @Value("classpath:export/siunitx.sty")
+    private Resource units;
 
     @Autowired
     HTMLExportService htmlExportService;
 
     @Override
     public void export (Long novelId, ExportOptions exportOptions, String filePath ) throws IOException {
-        String toExport = generateLatex(novelId, exportOptions);
-        Files.write(Paths.get(filePath), toExport.getBytes(), StandardOpenOption.WRITE);
+        String workDirectory = storageService.getExportFolder() + "/tmp-"+ new Date().getTime() + "/";
+        Files.createDirectory(Paths.get(workDirectory));
+
+        loadLatexTemplate(workDirectory);
+        loadLatexLibraries(workDirectory);
+
+        String toExport = generateLatex(novelId, exportOptions, filePath, workDirectory);
+        compilePDF(toExport, filePath, workDirectory);
+        FileUtils.deleteDirectory(new File(workDirectory));
     }
 
-    private String loadLatexTemplate() throws IOException {
+    private void loadLatexTemplate(String workingDirectory) {
+        copyResourceToWorkingDirectory(template, workingDirectory);
+    }
+
+    private void loadLatexLibraries(String workingDirectory) {
+        copyResourceToWorkingDirectory(sidecap, workingDirectory);
+        copyResourceToWorkingDirectory(units, workingDirectory);
+    }
+
+    private void copyResourceToWorkingDirectory(Resource resource, String workingDirectory) {
         try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-            return FileCopyUtils.copyToString(reader);
+            String templateContent = FileCopyUtils.copyToString(reader);
+            Path templatePath = Paths.get(workingDirectory, resource.getFilename()).toAbsolutePath();
+            Files.createFile(templatePath);
+            Files.write(templatePath.toAbsolutePath(), templateContent.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private File createTmpChapterContentFile(NovelItem<Part> chapter) throws IOException {
-        File chapterFile = File.createTempFile("wortomat", ".html");
-        Files.write(Paths.get(chapterFile.getPath()), chapter.getContent().getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
-        // chapterFile.deleteOnExit();
-        return chapterFile;
-    }
+    private void compilePDF(String latexFilePath, String exportPath, String workDirectory) throws IOException {
+        ProcessBuilder processBuilder = new ProcessBuilder().directory(new File(workDirectory));
+        processBuilder.command("pdflatex", latexFilePath);
+        Process process= processBuilder.start();
+        String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 
-    private String generateLatex(Long novelId, ExportOptions exportOptions) throws IOException {
-        String html = htmlExportService.generateHTML(novelId, exportOptions);
-        File chapterFile = File.createTempFile("wortomat", ".html");
-        Files.write(Paths.get(chapterFile.getPath()), html.getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
-        File latexChapterFile = File.createTempFile("wortomat", ".tex");
+        processBuilder.inheritIO();
+        String output2 = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
 
-        // System.out.println("chapterFile: " + chapterFile.getPath() + "("+Files.exists(Path.of(chapterFile.getPath()))+")" + ", latex File: " + latexChapterFile.getPath() + "("+Files.exists(Path.of(latexChapterFile.getPath()))+")");
 
-        /*ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("/usr/bin/pandoc " + chapterFile.getPath() + " -f html -t latex -s -o " + latexChapterFile.getPath());
-        Process process= processBuilder.start();*/
-
-        // System.out.println("process..." + process.);
-
-       /* try {
+        try {
             int exitVal = process.waitFor();
-            System.out.println("EXIT VAL IS " + exitVal);
+            System.out.println("output:::" + output);
+            System.out.println("output2:::" + output2);
+            System.out.println("EXIT VAL IS " + exitVal + ", copying from "+ latexFilePath.replace(".tex", ".pdf") + " to " + exportPath);
+            Files.deleteIfExists(Paths.get(exportPath));
+            String expectedPdfFileName = Paths.get(exportPath).getFileName().toString();
+            // FileUtils.copyFile(new File(workDirectory, "output.pdf"), new File(workDirectory, expectedPdfFileName));
+            FileUtils.copyFileToDirectory(new File(workDirectory, expectedPdfFileName), new File(storageService.getExportFolder()));
         } catch (InterruptedException e) {
             throw new IOException(e);
-        }*/
-        // Path workDirectory = Files.createTempDirectory("wortomat");
-        /*new DocumentConverter()
-
-                .fromFile(chapterFile, InputFormat.HTML)
-                .toFile(latexChapterFile, OutputFormat.LATEX)
-                .addOption("-s")
-                // .workingDirectory(new File(workDirectory.toUri())) // TODO
-                .convert();
-
-        return Files.readString(latexChapterFile.getPath());*/
-        return "";
-        /*stringBuilder.append(loadLatexTemplate());
-
-        List<Part> parts = this.partService.get(novelId);
-        for (Part part : parts) {
-            for (Chapter chapter : part.getChildren()) {
-                File chapterFile = createTmpChapterContentFile(chapter);
-                File latexChapterFile = File.createTempFile("wortomat", ".tex");
-
-                System.out.println("chapterFile: " + chapterFile.getPath() + "("+Files.exists(Path.of(chapterFile.getPath()))+")" + ", latex File: " + latexChapterFile.getPath() + "("+Files.exists(Path.of(latexChapterFile.getPath()))+")");
-                Path workDirectory = Files.createTempDirectory("wortomat");
-                new DocumentConverter()
-                        .fromFile(chapterFile, InputFormat.HTML)
-                        .toFile(latexChapterFile, OutputFormat.LATEX)
-                        // .workingDirectory(new File(workDirectory.toUri())) // TODO
-                        .convert();
-                stringBuilder.append(nullSafeLatexElement(true, chapter.getName(), "\\chapter{%s}\n"));
-                // stringBuilder.append(nullSafeLatexElement(exportOptions.includeSummary, chapter.getExtended_summary(), "\\b{%s}"));
-               // stringBuilder.append(nullSafeLatexElement(exportOptions.includeExtendedSummary, chapter.getExtended_summary(), "<div>%s</div>"));
-                stringBuilder.append(nullSafeLatexElement(exportOptions.includeContent, Files.readString(latexChapterFile.toPath()), "%s\n"));
-            }
         }
-        stringBuilder.append("\\end{document}");
-        return stringBuilder.toString();*/
     }
 
-    private String nullSafeLatexElement(boolean include, String contentItem, String format) {
-        if (!include) {
-            return "";
+    private String generateLatex(Long novelId, ExportOptions exportOptions, String exportFilePath, String workDirectory) throws IOException {
+
+        String htmlFile = "input.html";
+        String latexFile = Paths.get(exportFilePath).getFileName().toString().replace(".pdf", ".latex");
+
+        String html = htmlExportService.generateHTML(novelId, exportOptions);
+        Files.createFile(Paths.get(workDirectory + htmlFile));
+        Files.write(Paths.get(workDirectory + htmlFile), html.getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE);
+
+
+        ProcessBuilder processBuilder = new ProcessBuilder().directory(new File(workDirectory));
+        processBuilder.inheritIO();
+
+        System.out.println("WTF::::" + workDirectory+"template.tex");
+        processBuilder.command("pandoc", "--template=template.tex", "--top-level-division=chapter", htmlFile, "-f", "html", "-t", "latex", "-o", latexFile);
+        // processBuilder.command("pandoc", htmlFile, "-f", "html", "-t", "latex", "-s", "-o", latexFile);
+         Process process= processBuilder.start();
+        String output = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+        try {
+            int exitVal = process.waitFor();
+            System.out.println("EXIT VAL IS " + exitVal + ", outout: " + output);
+        } catch (InterruptedException e) {
+            throw new IOException(e);
         }
-        if (contentItem == null) {
-            return "";
-        }
-        return String.format(format, contentItem);
+        File latex = new File(workDirectory + latexFile);
+        String latexContent = FileUtils.readFileToString(latex,  StandardCharsets.UTF_8);
+
+        Novel novel = novelService.get(novelId);
+        latexContent = latexContent.replace("\\chapter{", "\\chapter*{");
+        latexContent = latexContent.replace("___title___", novel.getName() == null ? "" : novel.getName());
+        latexContent = latexContent.replace("___author___", novel.getAuthor() == null ? "" : novel.getAuthor());
+        FileUtils.write(latex, latexContent,  StandardCharsets.UTF_8);
+        return latexFile;
     }
 }

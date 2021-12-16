@@ -36,7 +36,7 @@ public class StorageConfigService {
 
     public String getExportFile(ExportOptionsType type) throws IOException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
-        String filePath = String.format("%s/%s.%s", getExportFolder(), format.format(new Date()), type);
+        String filePath = String.format("%s/%s.%s", getExportFolder(), format.format(new Date()), type.getFileEnding());
         Files.createFile(Paths.get(filePath));
         return filePath;
     }

@@ -99,6 +99,7 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     }
 
     private void moveChildWithinParent(S child, int newPosition) {
+        sortChildren(child.getParent());
         List<S> children = child.getParent().getChildren();
         children.remove(child);
         children.add(newPosition, child);
