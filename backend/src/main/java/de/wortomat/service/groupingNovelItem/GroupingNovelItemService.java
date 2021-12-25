@@ -80,15 +80,14 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         if (child.getParent().getId().equals(newParentId)) {
             moveChildWithinParent(child, newPosition);
         } else {
-            moveChildToOtherParent(child, newPosition, newParentId);
+            moveChildToOtherParent(novelId, child, newPosition, newParentId);
         }
         return this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
     }
 
-    private void moveChildToOtherParent(S child, int newPosition, Long newParentId) {
-        T oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
-        T newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
-
+    private void moveChildToOtherParent(Long novelId, S child, int newPosition, Long newParentId) {
+        T oldParent = this.get(novelId, child.getParentId());
+        T newParent = this.get(novelId, newParentId);
         child.setParent(newParent);
         oldParent.getChildren().remove(child);
         newParent.getChildren().add(newPosition, child);
