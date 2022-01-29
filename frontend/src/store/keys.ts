@@ -1,16 +1,16 @@
 
 export enum NOVEL_ITEM_KEYS {
-    NOVELS = 'novels',
-    PARTS = 'parts',
-    CHAPTERS = 'chapters',
-    RESEARCH_GROUPS = 'research_groups',
-     RESEARCH = 'research',
-    CHARACTER_GROUPS = 'character_groups',
-     CHARACTERS = 'characters',
-    LOCATION_GROUPS = 'location_groups',
-     LOCATIONS = 'locations',
-    TAGS = 'tags',
-    TIMELINE = 'timeline'
+    NOVELS = 'NOVELS',
+    PARTS = 'PARTS',
+    CHAPTERS = 'CHAPTERS',
+    RESEARCH_GROUPS = 'RESEARCH_GROUPS',
+    RESEARCH = 'RESEARCH',
+    CHARACTER_GROUPS = 'CHARACTER_GROUPS',
+    CHARACTERS = 'CHARACTERS',
+    LOCATION_GROUPS = 'LOCATION_GROUPS',
+    LOCATIONS = 'LOCATIONS',
+    TAGS = 'TAGS',
+    TIMELINE = 'TIMELINE'
 }
 
 export enum VIEWS {

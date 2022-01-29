@@ -29,6 +29,7 @@ import EditableText from '@/components/shared/inline-edit/EditableText.vue';
 import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
 import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
 import { NovelItemService } from '@/service/NovelItemService';
+import { DisplaySettingsKeys, DisplaySettingsService } from '@/service/DisplaySettingsService';
 import { TagModel } from '@/models/Tag.model';
 
 @Options({
@@ -38,9 +39,10 @@ export default class NovelItemSheet extends Vue {
     @Prop() service!: NovelItemService;
     @Prop() item!: BaseModel;
     @Prop() novelItemKey!: NOVEL_ITEM_KEYS;
+    private displaySettingService = new DisplaySettingsService();
 
     get includeImageUpload() {
-        return Object.keys(this.item).includes('images');
+        return this.displaySettingService.isVisible(this.novelItemKey, DisplaySettingsKeys.SHOW_IMAGES);
     }
 
     deleteImage(image: ImageParam): void {
