@@ -1,9 +1,13 @@
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 
 export class DisplaySettingsService {
-    private currentSettings: Map<NOVEL_ITEM_KEYS, Map<DisplaySettingsKeys, boolean>>;
-    private overrideValues = new Map([
-        [NOVEL_ITEM_KEYS.CHAPTERS, new Map([
+    // private currentSettings: Map<NOVEL_ITEM_KEYS, Map<DisplaySettingsKeys, boolean>>;
+    readonly LOCAL_STORAGE_KEY = 'WORTOMAT_DISPLAY_SETTINGS';
+
+   /* private overrideValues = {
+        NOVEL_ITEM_KEYS.CHAPTERS = {
+
+        }
             [ DisplaySettingsKeys.SHOW_IMAGES, false]
         ])],
         [NOVEL_ITEM_KEYS.CHARACTERS, new Map([
@@ -18,47 +22,53 @@ export class DisplaySettingsService {
             [ DisplaySettingsKeys.SHOW_TAGS, false],
             [ DisplaySettingsKeys.SHOW_EXTENDED_SUMMARY, false]
         ])],
-    ]); 
+    ]); */
 
 
     public isVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys): boolean {
-        this.initializeIfNecessary();
-        return this.currentSettings.get(novelItemKey).get(settingKey) === true;
+        return this.currentSettings[novelItemKey][settingKey] === true;
     }
 
-    private initializeIfNecessary() {
-        if (this.currentSettings) {
-            return this.currentSettings;
+    public setVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys, visible: boolean) {
+        console.log('updating visiblity');
+        const currentSettings = this.currentSettings;
+        currentSettings[novelItemKey][settingKey] = visible;
+        this.storeSettings(currentSettings);
+    }
+
+    private storeSettings(values: Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>) {
+        localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
+    }
+
+    private get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>> {
+        const inLocalStorage = localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS');
+        if (!inLocalStorage) {
+            this.storeSettings(this.initializeWithDefaultValues());
+            localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(this.initializeWithDefaultValues()));
         }
-        this.currentSettings = this.initializeWithDefaultValues();
-        return this.currentSettings;
+        console.log('getting current settings');
+        return JSON.parse(localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS'));    
     }
 
-    private initializeWithDefaultValues() {
+
+    private initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>  {
         const allNovelItemKeys = this.getAllEnumValues(NOVEL_ITEM_KEYS);
         const allDisplaySettingKeys = this.getAllEnumValues(DisplaySettingsKeys);
 
-        const defaultAllTrue = new Map();
+        const defaultAllTrue = {};
         allDisplaySettingKeys.forEach((displaySettingKey: string) => {
-            defaultAllTrue.set(displaySettingKey, true);    
+            defaultAllTrue[displaySettingKey] = true;    
         });
 
-        const allSettings = new Map();
+        const allSettings: Record<string, Record<string, boolean>> = {};
         allNovelItemKeys.forEach((novelItemKey) => {
-            const defaultValues = new Map(defaultAllTrue);
-            const actualValues = new Map([
-                ...defaultValues.entries(), 
-                ...this.overrides(novelItemKey).entries()]);
-            allSettings.set(novelItemKey, actualValues);
+            const defaultValues = Object.assign({}, defaultAllTrue);
+            allSettings[novelItemKey] = defaultValues;
         })
         return allSettings;
     }
 
-    private overrides(novelItemKey: NOVEL_ITEM_KEYS) {
-        return this.overrideValues.get(novelItemKey) || new Map();        
-    }
-
-    private getAllEnumValues(enumType) {
+    getAllEnumValues(enumType) {
         const allValues = [];
         for (const value in enumType) {
             if (isNaN(Number(value))) allValues.push(value)

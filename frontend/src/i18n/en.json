@@ -26,39 +26,39 @@
         }
     },
     "add_parent": {
-        "parts": "Create Part",
-        "research_groups": "Create Research Group"
+        "PARTS": "Create Part",
+        "RESEARCH_GROUPS": "Create Research Group"
     },
     "add_child": {
-        "parts": "Add chapter",
-        "research_groups": "Add research item",
-        "character_groups": "Add character",
-        "location_groups": "Add location"
+        "PARTS": "Add chapter",
+        "RESEARCH_GROUPS": "Add research item",
+        "CHARACTER_GROUPS": "Add character",
+        "LOCATION_GROUPS": "Add location"
     },
     "remove_parent": {
-        "parts": "Delete part",
-        "research_groups": "Delete Research Group",
-        "location_groups": "Delete Location Group",
-        "character_groups": "Delete Character Group"
+        "PARTS": "Delete part",
+        "RESEARCH_GROUPS": "Delete Research Group",
+        "LOCATION_GROUPS": "Delete Location Group",
+        "CHARACTER_GROUPS": "Delete Character Group"
     },
     "remove_child": {
         "parts": "Delete chapter",
-        "research_groups": "Delete research item",
-        "character_groups": "Delete character",
-        "location_groups": "Delete location"
+        "RESEARCH_GROUPS": "Delete research item",
+        "CHARACTER_GROUPS": "Delete character",
+        "LOCATION_GROUPS": "Delete location"
     },
     "fallback_labels": {
         "no_name": {
-            "research_groups":  "Unnamed research group",
-            "research": "Unnamed research item",
-            "parts": "Unnamed part",
-            "chapters": "Unnamed chapter",
-            "characters":  "Unnamed character",
-            "character_groups":  "Unnamed character group",
-            "locations": "Unnamed location",
-            "location_groups":  "Unnamed location group",
-            "novel": "Unnamed novel",
-            "timeline": "Unnamed event"
+            "RESEARCH_GROUPS":  "Unnamed research group",
+            "RESEARCH": "Unnamed research item",
+            "PARTS": "Unnamed part",
+            "CHAPTERS": "Unnamed chapter",
+            "CHARACTERS":  "Unnamed character",
+            "CHARACTER_GROUPS":  "Unnamed character group",
+            "LOCATIONS": "Unnamed location",
+            "LOCATION_GROUPS":  "Unnamed location group",
+            "NOVEL": "Unnamed novel",
+            "TIMELINE": "Unnamed event"
 
         },
         "no_summary": "No summary added yet",
@@ -101,6 +101,14 @@
         "cancel": "Discard changes",
         "save": "Save changes"
 
+    },
+    "display_settings": {
+        "SHOW_TITLE": "Show title",
+        "SHOW_SUMMARY": "Show summary",
+        "SHOW_EXTENDED_SUMMARY": "Show extended summary",
+        "SHOW_TAGS": "Show tags",
+        "SHOW_IMAGES": "Show images",
+        "SHOW_CONTENT": "Show content"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",

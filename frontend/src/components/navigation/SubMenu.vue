@@ -17,7 +17,10 @@
 
   <Sidebar v-model:visible="display_settings_visible" position="right">
       <h1>Display settings</h1>
-      - coming soon - 
+      <div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey" class="toggle-switch">
+        <InputSwitch v-bind:modelValue="isVisible(displaySettingKey)" @input="toggleDisplaySetting($event, displaySettingKey)"></InputSwitch>
+        <div class="label">{{ $t(`display_settings.${displaySettingKey}` ) }}</div>
+      </div>
   </Sidebar>
 
   <Sidebar v-model:visible="filter_visible" position="right">
@@ -39,6 +42,7 @@ import { MenuModel } from '@/models/Menu.model'
 import Navlink from '@/components/navigation/Navlink.vue'
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
+import { DisplaySettingsKeys, DisplaySettingsService } from '@/service/DisplaySettingsService';
 
 
 type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';
@@ -48,6 +52,8 @@ type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_setting
 })
 export default class SubMenu extends Vue {
     @Prop() parentKey: NOVEL_ITEM_KEYS;
+    @Prop() childKey: NOVEL_ITEM_KEYS;
+    private displaySettingService = new DisplaySettingsService();
 
     filter_visible = false;
     export_visible = false;
@@ -58,6 +64,20 @@ export default class SubMenu extends Vue {
         this.export_visible = false;
         this.display_settings_visible = false;
         this[flag] = true;
+    }
+
+    toggleDisplaySetting($event, displaySettingKey: DisplaySettingsKeys) {
+        console.log('OHA', $event, displaySettingKey)
+        this.displaySettingService.setVisible(this.childKey, displaySettingKey, $event);
+    }
+
+    get displaySettingKeys() {
+        return this.displaySettingService.getAllEnumValues(DisplaySettingsKeys);
+    }
+
+    isVisible(displaySettingsKey: DisplaySettingsKeys) {
+        console.log('VISIBLE? ' + displaySettingsKey)
+        return this.displaySettingService.isVisible(this.childKey, displaySettingsKey);
     }
 
 
@@ -124,4 +144,14 @@ export default class SubMenu extends Vue {
   border-bottom: 1px solid #2d2b2b;
 }
 
+
+.toggle-switch {
+    line-height: 3.0em;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-switch .label {
+    margin-left: 1em;;
+}
 </style>

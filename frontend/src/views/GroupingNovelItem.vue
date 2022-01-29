@@ -17,7 +17,7 @@
       </SplitterPanel>
     </Splitter> 
   </div>
-  <WSubMenu :parentKey="parentKey"></WSubMenu>
+  <WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>
 
 </template>
 
