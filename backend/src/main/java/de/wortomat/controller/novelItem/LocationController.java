@@ -2,6 +2,7 @@ package de.wortomat.controller.novelItem;
 
 import de.wortomat.model.Location;
 import de.wortomat.model.LocationGroup;
+import de.wortomat.model.LocationTag;
 import de.wortomat.service.novelItem.LocationService;
 import de.wortomat.service.novelItem.NovelItemService;
 import de.wortomat.service.uploads.EntityType;
@@ -13,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/novels/{novelId}/location-groups/{groupId}/location/")
 @CrossOrigin(origins = "*")
-public class LocationController extends NovelItemController<Location, LocationGroup> {
+public class LocationController extends NovelItemController<Location, LocationGroup, LocationTag> {
     @Autowired
     private LocationService locationService;
 
     @Override
-    protected NovelItemService<LocationGroup, Location> getService() {
+    protected NovelItemService<LocationGroup, Location, LocationTag> getService() {
         return locationService;
     }
 

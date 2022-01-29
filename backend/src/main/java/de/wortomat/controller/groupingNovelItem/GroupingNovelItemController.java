@@ -1,16 +1,23 @@
 package de.wortomat.controller.groupingNovelItem;
 
-import de.wortomat.model.IGroupingNovelItem;
-import de.wortomat.model.INovelItem;
+import de.wortomat.model.*;
+import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.repository.NovelItemTagRepository;
+import de.wortomat.service.NovelService;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S>, S extends INovelItem<T>> {
-    abstract protected GroupingNovelItemService<T, S> getService();
+public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S>, S extends INovelItem<T>, U extends INovelItemTag> {
+    abstract protected GroupingNovelItemService<T, S, U> getService();
+    // abstract NovelItemRepository<S> getRepository();
+
+    @Autowired
+    NovelService novelService;
 
     @PostMapping
     public ResponseEntity<T> create(@PathVariable("novelId") Long novelId, @RequestBody T parent) {
@@ -44,6 +51,7 @@ public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S
     }
 
 
+
     @GetMapping
     public ResponseEntity<List<T>> get(@PathVariable("novelId") Long novelId) {
         return ResponseEntity.ok(this.getService().get(novelId));
@@ -53,5 +61,19 @@ public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S
     public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("parentId") Long parentId) {
         this.getService().delete(novelId, parentId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("tags")
+    public ResponseEntity<List<?>> getTags(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(getService().getTags(novelId));
+    }
+
+
+    @PostMapping("tags")
+    public ResponseEntity createTag(
+            @PathVariable("novelId") Long novelId,
+            @RequestBody U tag) {
+        Object stored = getService().createTag(novelId, tag);
+        return ResponseEntity.ok(stored);
     }
 }

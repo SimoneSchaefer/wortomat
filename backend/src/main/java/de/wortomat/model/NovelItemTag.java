@@ -1,5 +1,26 @@
 package de.wortomat.model;
 
-public interface NovelItemTag {
-    String getName();
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+
+@MappedSuperclass
+@Getter
+@Setter
+public class NovelItemTag<T extends INovelItem<?>> implements INovelItemTag {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @JsonIgnore
+    @ManyToOne
+    private Novel novel;
+
+    private String name;
+
+    public void setNovel(Novel novel) {
+        this.novel = novel;
+    }
 }

@@ -2,6 +2,7 @@ package de.wortomat.service.novelItem;
 
 import de.wortomat.model.Location;
 import de.wortomat.model.LocationGroup;
+import de.wortomat.model.LocationTag;
 import de.wortomat.repository.LocationRepository;
 import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LocationService extends NovelItemService<LocationGroup, Location> {
+public class LocationService extends NovelItemService<LocationGroup, Location, LocationTag> {
     @Autowired
     LocationRepository locationRepository;
 
@@ -18,7 +19,7 @@ public class LocationService extends NovelItemService<LocationGroup, Location> {
     LocationGroupService locationGroupService;
 
     @Override
-    GroupingNovelItemService<LocationGroup, Location> getParentService() {
+    GroupingNovelItemService<LocationGroup, Location, LocationTag> getParentService() {
         return this.locationGroupService;
     }
 

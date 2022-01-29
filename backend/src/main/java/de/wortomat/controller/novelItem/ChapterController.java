@@ -1,6 +1,7 @@
 package de.wortomat.controller.novelItem;
 
 import de.wortomat.model.Chapter;
+import de.wortomat.model.ChapterTag;
 import de.wortomat.model.Part;
 import de.wortomat.service.novelItem.ChapterService;
 import de.wortomat.service.novelItem.NovelItemService;
@@ -13,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/novels/{novelId}/parts/{groupId}/chapters/")
 @CrossOrigin(origins = "*")
-public class ChapterController extends NovelItemController<Chapter, Part>  {
+public class ChapterController extends NovelItemController<Chapter, Part, ChapterTag>  {
     @Autowired
     private ChapterService chapterService;
 
     @Override
-    protected NovelItemService<Part, Chapter> getService() {
+    protected NovelItemService<Part, Chapter, ChapterTag> getService() {
         return chapterService;
     }
 

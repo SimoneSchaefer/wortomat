@@ -10,7 +10,7 @@
                 <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
                 <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
 
-                <!--<EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :service="service"></EditableTags>-->
+                <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :novelItemKey="novelItemKey"></EditableTags>
             </div>
         </div>
         <hr>

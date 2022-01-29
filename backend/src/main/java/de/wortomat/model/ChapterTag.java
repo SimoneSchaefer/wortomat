@@ -11,18 +11,4 @@ import javax.persistence.*;
 @Data
 @Setter
 @Getter
-public class ChapterTag implements NovelItemTag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
-
-    public void setNovel(Novel novel) {
-        this.novel = novel;
-    }
-}
+public class ChapterTag extends NovelItemTag<Chapter> {}

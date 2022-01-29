@@ -2,6 +2,7 @@ package de.wortomat.controller.novelItem;
 
 import de.wortomat.model.Character;
 import de.wortomat.model.CharacterGroup;
+import de.wortomat.model.CharacterTag;
 import de.wortomat.service.novelItem.CharacterService;
 import de.wortomat.service.novelItem.NovelItemService;
 import de.wortomat.service.uploads.EntityType;
@@ -13,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/novels/{novelId}/character-groups/{groupId}/characters/")
 @CrossOrigin(origins = "*")
-public class CharacterController extends NovelItemController<Character, CharacterGroup> {
+public class CharacterController extends NovelItemController<Character, CharacterGroup, CharacterTag> {
     @Autowired
     private CharacterService characterService;
 
     @Override
-    protected NovelItemService<CharacterGroup, Character> getService() {
+    protected NovelItemService<CharacterGroup, Character, CharacterTag> getService() {
         return characterService;
     }
 

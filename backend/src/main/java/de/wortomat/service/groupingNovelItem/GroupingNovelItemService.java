@@ -1,10 +1,10 @@
 package de.wortomat.service.groupingNovelItem;
 
 import de.wortomat.exceptions.NotFoundException;
-import de.wortomat.model.IGroupingNovelItem;
-import de.wortomat.model.INovelItem;
+import de.wortomat.model.*;
 import de.wortomat.repository.GroupingItemRepository;
 import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.repository.NovelItemTagRepository;
 import de.wortomat.service.NovelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 
-public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>> {
+public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>, U extends INovelItemTag> {
 
     protected abstract GroupingItemRepository<T, Long> getParentRepository();
     protected abstract NovelItemRepository<S> getChildRepository();
-
+    NovelItemTagRepository getTagRepository() { // TODO make abstract
+        return null;
+    }
     @Autowired
     protected NovelService novelService;
 
@@ -56,6 +58,18 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     public void deleteAll(Long novelId) {
         List<T> allItems = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
         this.getParentRepository().deleteAll(allItems);
+    }
+
+    public List<S> getTags(Long novelId) {
+        return getTagRepository().findByNovelIdOrderByName(novelId);
+    }
+
+    public Object createTag( Long novelId, U tag) {
+        Novel novel = novelService.get(novelId);
+        tag.setNovel(novel);
+        NovelItemTagRepository repo = getTagRepository();
+        NovelItemTag stored = (NovelItemTag) repo.save(tag);
+        return stored;
     }
 
 

@@ -71,7 +71,7 @@ public class Novel implements IGroupingNovelItem {
 
     // @Override
     @JsonIgnore
-    public List<? extends NovelItemTag> getTags() {
+    public List<? extends INovelItemTag> getTags() {
         /*throw new IllegalStateException("can not access tags for novel");*/
         return Collections.emptyList();
     }

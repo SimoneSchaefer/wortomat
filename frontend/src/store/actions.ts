@@ -3,7 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend, loadTagsFromBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
@@ -64,11 +64,11 @@ const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_
 
   Promise.all([
     loadItemsFromBackend( key, novelId),
-    // loadTagsFromBackend( payload.key, payload.novelId) // TODO
+    loadTagsFromBackend( payload.key, payload.novelId) // TODO
   ]).then(result => {
     const loadedItems = result[0].data;
     context.commit('itemsLoaded', { key: key, items: loadedItems });
-    //context.commit('tagsLoaded', result[1].data);
+    context.commit('tagsLoaded', result[1].data);
     selectFirstItemIfNecessary(context, key, loadedItems) ;
     setLoading(context, false);
   });

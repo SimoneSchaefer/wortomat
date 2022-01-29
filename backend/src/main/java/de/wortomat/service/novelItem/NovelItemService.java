@@ -1,11 +1,11 @@
 package de.wortomat.service.novelItem;
 
 import de.wortomat.exceptions.NotFoundException;
-import de.wortomat.model.IGroupingNovelItem;
-import de.wortomat.model.INovelItem;
-import de.wortomat.model.Image;
+import de.wortomat.model.*;
 import de.wortomat.repository.FileRepository;
 import de.wortomat.repository.NovelItemRepository;
+import de.wortomat.repository.NovelItemTagRepository;
+import de.wortomat.service.NovelService;
 import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileHandlingService;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>> {
+public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>, U extends INovelItemTag> {
 
     @Autowired
     FileHandlingService fileHandlingService;
@@ -26,8 +26,14 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
     @Autowired
     FileRepository fileRepository;
 
-    abstract GroupingNovelItemService<T, S> getParentService();
+    @Autowired
+    NovelService novelService;
+
+    abstract GroupingNovelItemService<T, S, U> getParentService();
     abstract NovelItemRepository<S> getRepository();
+    NovelItemTagRepository getTagRepository() {
+        return null;
+    }
 
     /**
      * Stores the new item in the database as child of the specified parent
@@ -67,6 +73,14 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
     public S get(Long novelId, Long partId, Long itemId) {
         return this.getRepository().findById(itemId).orElseThrow(NotFoundException::new);
     }
+
+    /*public Object createTag( Long novelId, U tag) {
+        Novel novel = novelService.get(novelId);
+        tag.setNovel(novel);
+        NovelItemTagRepository repo = getTagRepository();
+        NovelItemTag stored = (NovelItemTag) repo.save(tag);
+        return stored;
+    }*/
 
     /**
      * Copies an uploaded file to the wortomat upload folder
