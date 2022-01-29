@@ -24,7 +24,7 @@
               <div v-if="selectedItem" class="selected-item sheet-list">   
                 <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
                   <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
-                    <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="chapterService"></NovelItemSheet>
+                    <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="getService(referenceType)"></NovelItemSheet>
                   </div>
                 </div>       
               </div> 
@@ -50,7 +50,7 @@ import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WHelpNote from '@/components/HelpNote.vue';
-import { KEY_TO_CHILD } from "@/store/store-api-adapter";
+import { KEY_TO_CHILD, KEY_TO_SERVICE } from "@/store/store-api-adapter";
 
 @Options({
   components: {
@@ -71,6 +71,10 @@ export default class Plot extends mixins(TimelineEventMixin) {
     NOVEL_ITEM_KEYS.LOCATIONS,
     NOVEL_ITEM_KEYS.CHARACTERS,
   ]
+
+  getService(referenceType: NOVEL_ITEM_KEYS) {
+    return KEY_TO_SERVICE.get(referenceType);
+  }
 
   mounted(): void {
     this.$store.dispatch("loadItems", {
