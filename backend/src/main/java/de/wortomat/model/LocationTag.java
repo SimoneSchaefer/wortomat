@@ -7,14 +7,4 @@ import javax.persistence.*;
 
 @Entity
 @Data
-public class LocationTag implements NovelItemTag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    @JsonIgnore
-    @ManyToOne
-    private Novel novel;
-}
+public class LocationTag extends NovelItemTag<Location> {}

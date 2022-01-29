@@ -37,6 +37,7 @@ import { Emit, Prop } from "vue-property-decorator";
 import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import { NovelItemService } from "@/service/NovelItemService";
+import { KEY_TO_CHILD, KEY_TO_SERVICE } from "@/store/store-api-adapter";
 
 @Options({
     components: { InlineEdit, MissingValueTolerantLabel },
@@ -44,7 +45,7 @@ import { NovelItemService } from "@/service/NovelItemService";
 })
 export default class EditableTags extends Vue {
     @Prop() tags: TagModel[];
-    @Prop() service!: NovelItemService;
+    @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
     private tagsDraft = [];
     private filteredTags = [];
@@ -63,17 +64,25 @@ export default class EditableTags extends Vue {
 
     @Emit('update-tags')
     async updateTags(): Promise<TagModel[]> {
+        const parentKey = this.getParentKey(this.novelItemKey);
+        const service = KEY_TO_SERVICE.get(parentKey);
         const newTags = [];
+        const novelId = this.$store.state.currentNovel.id;
         for (let tag of this.tagsDraft) {
+            tag.novelId = novelId;
             if (!tag.id) {
-                tag.novelId = this.$store.state.currentNovel.id;
-                tag = await this.service.createTag(this.$store.state.currentNovel.id, tag);
+                tag = await service.createTag(novelId, tag);
                 tag = tag.data;
-                this.$store.dispatch('addItem', { key: NOVEL_ITEM_KEYS.TAGS, item: tag});
+                this.$store.commit('itemAdded', { key: NOVEL_ITEM_KEYS.TAGS, item: tag });
             }
             newTags.push(tag)
         }
         return newTags;
+    }
+
+
+    getParentKey(childKey: NOVEL_ITEM_KEYS) {
+        return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
     }
 
     searchTags($event: { query: string }): void {      

@@ -1,8 +1,6 @@
 package de.wortomat.controller.novelItem;
 
-import de.wortomat.model.IGroupingNovelItem;
-import de.wortomat.model.INovelItem;
-import de.wortomat.model.Image;
+import de.wortomat.model.*;
 import de.wortomat.service.novelItem.NovelItemService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -14,8 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-public abstract  class NovelItemController<S extends INovelItem<T>, T extends IGroupingNovelItem<S>> {
-    abstract protected NovelItemService<T, S> getService();
+public abstract  class NovelItemController<S extends INovelItem<T>, T extends IGroupingNovelItem<S>, U extends INovelItemTag> {
+    abstract protected NovelItemService<T, S, U> getService();
     abstract protected EntityType getEntityType();
 
     @Autowired
