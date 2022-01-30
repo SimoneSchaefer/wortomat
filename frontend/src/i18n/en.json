@@ -57,7 +57,7 @@
             "CHARACTER_GROUPS":  "Unnamed character group",
             "LOCATIONS": "Unnamed location",
             "LOCATION_GROUPS":  "Unnamed location group",
-            "NOVEL": "Unnamed novel",
+            "novel": "Unnamed novel",
             "TIMELINE": "Unnamed event"
 
         },
