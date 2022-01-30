@@ -29,7 +29,7 @@ export class GroupingItemPage {
     }
 
     addItem() {
-        cy.get('.w-sidebar-opener').click();
+        cy.get('.vertical-menu button').eq(0).click();
     }
 
     addChild(index: number) {
