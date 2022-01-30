@@ -36,7 +36,7 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Timeline from 'primevue/timeline';
 import Dropdown from 'primevue/dropdown';
 import Sidebar from 'primevue/sidebar';
-
+import InputSwitch from 'primevue/inputswitch';
 
 // import draggable from 'vue-draggable-next'
 import { VueDraggableNext } from 'vue-draggable-next'
@@ -77,6 +77,7 @@ const app = createApp(App)
     .component('TabMenu', TabMenu)
     .component('Menu', Menu)
     .component('MenuBar', MenuBar)
+    .component('InputSwitch', InputSwitch)
     .component('SelectButton', SelectButton)
     .component('Badge', Badge)
     .component('SpeedDial', SpeedDial)

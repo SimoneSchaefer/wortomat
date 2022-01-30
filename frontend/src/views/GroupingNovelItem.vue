@@ -1,5 +1,5 @@
 <template>
-  <WSidebarMenu :parentKey="parentKey" :childKey="childKey" />    
+  <!--<WSidebarMenu :parentKey="parentKey" :childKey="childKey" />    -->
   <div v-if="!items.length" class="empty">
     <WHelpNote :itemKey="parentKey"></WHelpNote>
   </div>
@@ -17,6 +17,8 @@
       </SplitterPanel>
     </Splitter> 
   </div>
+  <WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>
+
 </template>
 
 <script lang="ts">
@@ -32,13 +34,15 @@ import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
 import WHelpNote from '@/components/HelpNote.vue';
+import WSubMenu from '@/components/navigation/SubMenu.vue';
 
 @Options({
   components: {
     WSidebarMenu,
     WNovelItemSheetList,
     WTreeview,
-    WHelpNote
+    WHelpNote,
+    WSubMenu
   }
 })
 export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
@@ -123,7 +127,7 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
 }
 
 .split-content-right {
-  background: var(--dark-background);
+  background: var(--very-dark-background);
 }
 
 .empty {
