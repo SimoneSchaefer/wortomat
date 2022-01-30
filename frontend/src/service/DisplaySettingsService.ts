@@ -1,29 +1,7 @@
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 
 export class DisplaySettingsService {
-    // private currentSettings: Map<NOVEL_ITEM_KEYS, Map<DisplaySettingsKeys, boolean>>;
     readonly LOCAL_STORAGE_KEY = 'WORTOMAT_DISPLAY_SETTINGS';
-
-   /* private overrideValues = {
-        NOVEL_ITEM_KEYS.CHAPTERS = {
-
-        }
-            [ DisplaySettingsKeys.SHOW_IMAGES, false]
-        ])],
-        [NOVEL_ITEM_KEYS.CHARACTERS, new Map([
-            [ DisplaySettingsKeys.SHOW_TAGS, false],
-            [ DisplaySettingsKeys.SHOW_EXTENDED_SUMMARY, false]
-        ])],
-        [NOVEL_ITEM_KEYS.RESEARCH, new Map([
-            [ DisplaySettingsKeys.SHOW_TAGS, false],
-            [ DisplaySettingsKeys.SHOW_EXTENDED_SUMMARY, false]
-        ])],
-        [NOVEL_ITEM_KEYS.LOCATIONS, new Map([
-            [ DisplaySettingsKeys.SHOW_TAGS, false],
-            [ DisplaySettingsKeys.SHOW_EXTENDED_SUMMARY, false]
-        ])],
-    ]); */
-
 
     public isVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys): boolean {
         return this.currentSettings[novelItemKey][settingKey] === true;
@@ -34,13 +12,14 @@ export class DisplaySettingsService {
         const currentSettings = this.currentSettings;
         currentSettings[novelItemKey][settingKey] = visible;
         this.storeSettings(currentSettings);
+        return currentSettings;
     }
 
     private storeSettings(values: Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>) {
         localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
     }
 
-    private get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>> {
+    get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>> {
         const inLocalStorage = localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS');
         if (!inLocalStorage) {
             this.storeSettings(this.initializeWithDefaultValues());
@@ -51,7 +30,7 @@ export class DisplaySettingsService {
     }
 
 
-    private initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>  {
+    initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>  {
         const allNovelItemKeys = this.getAllEnumValues(NOVEL_ITEM_KEYS);
         const allDisplaySettingKeys = this.getAllEnumValues(DisplaySettingsKeys);
 

@@ -9,6 +9,7 @@ import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { TimelineService } from "@/service/TimelineService";
 import { SelectionService } from "@/service/Selection.service";
+import { DisplaySettingsKeys, DisplaySettingsService } from "@/service/DisplaySettingsService";
 
 
 const setLoading = (context: ActionContext<IState,IState>, loading: boolean) => {
@@ -101,6 +102,12 @@ const deleteItems = async (context: ActionContext<IState,IState>, update: { key:
     context.commit('itemsDeleted', { key: key, items: deleted })
 }
 
+const updateDisplaySettings = (context: ActionContext<IState, IState>, update: { novelItemKey: NOVEL_ITEM_KEYS, displaySettingKey: DisplaySettingsKeys, value: boolean}) => {
+  const { novelItemKey, displaySettingKey, value} = update;
+  const newSettings = new DisplaySettingsService().setVisible(novelItemKey, displaySettingKey, value);
+  context.commit('displaySettingsUpdated', newSettings);
+}
+
 const moveChild = async (context: ActionContext<IState,IState>, update: { 
   key: NOVEL_ITEM_KEYS, 
   novelId: number, 
@@ -170,6 +177,7 @@ export default {
     setView,
     addReference,
     deleteReference,
-    setModalOpen
+    setModalOpen,
+    updateDisplaySettings
 }
 

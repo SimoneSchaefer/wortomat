@@ -1,6 +1,7 @@
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
+import { DisplaySettingsKeys } from "@/service/DisplaySettingsService";
 import { IState } from "./istate";
 import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
 import { KEY_TO_CHILD } from "./store-api-adapter";
@@ -30,6 +31,11 @@ const novelUpdated = (state: IState, payload: NovelModel): void => {
 const novelDeleted = (state: IState, payload: NovelModel): void => {
     updateItemInStore(payload, state.novels, true)  
 };
+
+const displaySettingsUpdated = (state: IState, payload: Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>): void => {
+    state.displaySettings = payload;
+}
+
 
 const novelOpened = (state: IState, payload: NovelModel): void => {
     state.currentNovel = payload;
@@ -136,5 +142,6 @@ const findParent = (state: IState, itemKey: NOVEL_ITEM_KEYS, item: BaseModel ) =
     itemsSelected,
     itemAdded,
     itemUpdated,
-    itemsDeleted
+    itemsDeleted,
+    displaySettingsUpdated
 };

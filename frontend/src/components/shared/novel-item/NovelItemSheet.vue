@@ -6,10 +6,9 @@
             </div>
 
             <div class="meta">
-                <div class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel></div>
+                <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel></div>
                 <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
                 <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
-
                 <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :novelItemKey="novelItemKey"></EditableTags>
             </div>
         </div>
@@ -41,10 +40,6 @@ export default class NovelItemSheet extends Vue {
     @Prop() novelItemKey!: NOVEL_ITEM_KEYS;
     private displaySettingService = new DisplaySettingsService();
 
-    get includeImageUpload() {
-        return this.displaySettingService.isVisible(this.novelItemKey, DisplaySettingsKeys.SHOW_IMAGES);
-    }
-
     deleteImage(image: ImageParam): void {
         this.service.deleteImage(this.novelId, this.item.parentId, this.item.id, image.imageId).then((response) => {
             this.updateImages(response.data.images);
@@ -71,17 +66,25 @@ export default class NovelItemSheet extends Vue {
         }); 
     }
 
+
+    get includeImageUpload() {
+        return this.isEnabled(DisplaySettingsKeys.SHOW_IMAGES);
+    }
+
+    get displayTitle(): boolean {
+        return this.isEnabled(DisplaySettingsKeys.SHOW_TITLE);
+    }
     get displaySummary(): boolean {
-        return this.isEnabled(VIEWS.SUMMARY);
+        return this.isEnabled(DisplaySettingsKeys.SHOW_SUMMARY);
     }
     get displayExtendedSummary(): boolean {
-        return this.isEnabled(VIEWS.EXTENDED_SUMMARY);
+        return this.isEnabled(DisplaySettingsKeys.SHOW_EXTENDED_SUMMARY);
     }
     get displayContent(): boolean {
-        return this.isEnabled(VIEWS.CONTENT);
+        return this.isEnabled(DisplaySettingsKeys.SHOW_CONTENT);
     }
     get displayTags(): boolean {
-        return this.isEnabled(VIEWS.TAGS);
+        return this.isEnabled(DisplaySettingsKeys.SHOW_TAGS);
     }
 
     getUploadUrl(): string {
@@ -92,11 +95,8 @@ export default class NovelItemSheet extends Vue {
         return this.service.getImageUrl(this.novelId, this.item.parentId, this.item.id, fileId);
     }
 
-    isEnabled(view: VIEWS): boolean {
-        if (this.$store.state.view?.get(this.novelItemKey) === undefined) {
-            return true;
-        }
-       return this.$store.state.view?.get(this.novelItemKey)?.get(view);
+    isEnabled(view: DisplaySettingsKeys): boolean {
+       return this.$store.state.displaySettings[this.novelItemKey][view];
     }
 
     updateImages(images: Array<{ id: number, name: string }>): void {

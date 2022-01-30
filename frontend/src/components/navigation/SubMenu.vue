@@ -67,8 +67,7 @@ export default class SubMenu extends Vue {
     }
 
     toggleDisplaySetting($event, displaySettingKey: DisplaySettingsKeys) {
-        console.log('OHA', $event, displaySettingKey)
-        this.displaySettingService.setVisible(this.childKey, displaySettingKey, $event);
+        this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
     }
 
     get displaySettingKeys() {
@@ -76,8 +75,7 @@ export default class SubMenu extends Vue {
     }
 
     isVisible(displaySettingsKey: DisplaySettingsKeys) {
-        console.log('VISIBLE? ' + displaySettingsKey)
-        return this.displaySettingService.isVisible(this.childKey, displaySettingsKey);
+        return this.$store.state.displaySettings[this.childKey][displaySettingsKey] === true;
     }
 
 

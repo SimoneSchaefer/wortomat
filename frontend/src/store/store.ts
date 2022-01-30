@@ -5,6 +5,7 @@ import mutations from './mutations';
 import actions from './actions';
 import { IState } from './istate';
 import { NOVEL_ITEM_KEYS, VIEWS } from './keys';
+import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 
 export default new Vuex.Store<IState>({
   state: {
@@ -15,6 +16,7 @@ export default new Vuex.Store<IState>({
     selection: new Map(),
     novelItems: new Map(),
     filteredTags: new Map(),
+    displaySettings: new DisplaySettingsService().currentSettings,
     view: new Map([[
       NOVEL_ITEM_KEYS.CHAPTERS, new Map<VIEWS,boolean>([[
         VIEWS.SUMMARY, true
