@@ -1,4 +1,4 @@
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from "@/store/keys";
 
 export class DisplaySettingsService {
     readonly LOCAL_STORAGE_KEY = 'WORTOMAT_DISPLAY_SETTINGS';
@@ -64,13 +64,4 @@ export class DisplaySettings {
     show_tags = true;
     show_image = true;
     show_content = true;
-}
-
-export enum DisplaySettingsKeys {
-    SHOW_TITLE = 'SHOW_TITLE',
-    SHOW_SUMMARY = 'SHOW_SUMMARY',
-    SHOW_EXTENDED_SUMMARY = 'SHOW_EXTENDED_SUMMARY',
-    SHOW_TAGS = 'SHOW_TAGS',
-    SHOW_IMAGES = 'SHOW_IMAGES',
-    SHOW_CONTENT = 'SHOW_CONTENT'
 }

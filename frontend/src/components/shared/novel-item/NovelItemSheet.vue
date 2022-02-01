@@ -1,7 +1,7 @@
 <template>
     <div class="sheet" v-if="item">
         <div class="header-container">
-            <div v-if="includeImageUpload">
+            <div v-if="displayImages">
                 <ImageGallery :novelItemKey="novelItemKey" :imageUrls="images" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>
             </div>
 
@@ -26,9 +26,9 @@ import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGaller
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import EditableText from '@/components/shared/inline-edit/EditableText.vue';
 import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
-import { NOVEL_ITEM_KEYS, VIEWS } from '@/store/keys';
+import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from '@/store/keys';
 import { NovelItemService } from '@/service/NovelItemService';
-import { DisplaySettingsKeys, DisplaySettingsService } from '@/service/DisplaySettingsService';
+import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import { TagModel } from '@/models/Tag.model';
 
 @Options({
@@ -67,7 +67,7 @@ export default class NovelItemSheet extends Vue {
     }
 
 
-    get includeImageUpload() {
+    get displayImages() {
         return this.isEnabled(DisplaySettingsKeys.SHOW_IMAGES);
     }
 

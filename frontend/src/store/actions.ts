@@ -2,14 +2,14 @@ import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
-import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
+import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from "./keys";
 import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend, loadTagsFromBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { TimelineService } from "@/service/TimelineService";
 import { SelectionService } from "@/service/Selection.service";
-import { DisplaySettingsKeys, DisplaySettingsService } from "@/service/DisplaySettingsService";
+import { DisplaySettingsService } from "@/service/DisplaySettingsService";
 
 
 const setLoading = (context: ActionContext<IState,IState>, loading: boolean) => {
@@ -49,15 +49,6 @@ const loadNovels = (context: ActionContext<IState,IState>): void => {
     setLoading(context, false);
   });  
 }
-
-
-const setView = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, value: boolean}): void => {
-  context.commit('setView', { 
-    key: payload.key, 
-    view: payload.view, 
-    value: payload.value 
-  });
-};
 
 const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number }): void => {
   const { key, novelId } = payload;
@@ -174,7 +165,6 @@ export default {
     moveChild,
     loadItems,
     filterTags,
-    setView,
     addReference,
     deleteReference,
     setModalOpen,

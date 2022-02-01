@@ -38,11 +38,10 @@
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
-import { MenuModel } from '@/models/Menu.model'
 import Navlink from '@/components/navigation/Navlink.vue'
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
-import { DisplaySettingsKeys, DisplaySettingsService } from '@/service/DisplaySettingsService';
+import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 
 
 type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';

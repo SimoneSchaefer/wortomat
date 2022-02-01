@@ -1,9 +1,8 @@
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
-import { DisplaySettingsKeys } from "@/service/DisplaySettingsService";
 import { IState } from "./istate";
-import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
+import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from "./keys";
 import { KEY_TO_CHILD } from "./store-api-adapter";
 import { findItem, getChildItems, itemIdsToSelect, updateItemInStore } from "./store.helper";
 
@@ -48,12 +47,6 @@ const tagsLoaded = (state: IState, payload: []): void => {
 const tagsFiltered = (state: IState, payload: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}): void => {
     state.filteredTags.set(payload.key, payload.tags.map(tag => tag.id));
 }
-
-const setView = (state: IState, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, value: boolean}): void => {
-    const currentView = state.view.get(payload.key);
-    currentView.set(payload.view, payload.value);
-    state.view.set(payload.key, currentView);
-};
 
 const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
@@ -134,7 +127,6 @@ const findParent = (state: IState, itemKey: NOVEL_ITEM_KEYS, item: BaseModel ) =
     novelDeleted,
     novelOpened,
     tagsFiltered,
-    setView,
     setLoading,
     setModalOpen,
     itemsLoaded,

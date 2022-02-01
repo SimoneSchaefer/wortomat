@@ -13,9 +13,12 @@ export enum NOVEL_ITEM_KEYS {
     TIMELINE = 'TIMELINE'
 }
 
-export enum VIEWS {
-    SUMMARY = 'summary',
-    EXTENDED_SUMMARY = 'extended_summary',
-    CONTENT = 'content',
-    TAGS = 'tags'
+
+export enum DisplaySettingsKeys {
+    SHOW_TITLE = 'SHOW_TITLE',
+    SHOW_SUMMARY = 'SHOW_SUMMARY',
+    SHOW_EXTENDED_SUMMARY = 'SHOW_EXTENDED_SUMMARY',
+    SHOW_TAGS = 'SHOW_TAGS',
+    SHOW_IMAGES = 'SHOW_IMAGES',
+    SHOW_CONTENT = 'SHOW_CONTENT'
 }
