@@ -44,7 +44,7 @@ import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
 import WSidebarMenu from "@/components/shared/menu/SidebarMenu.vue";
 import { TimelineEventModel } from "@/models/TimelineEvent";
-import { getCurrentSelection, getSortedEvents } from "@/store/getters";
+import { getSortedEvents } from "@/store/getters";
 import { ChapterService } from "@/service/Chapter.service";
 import { ResearchService } from "@/service/Research.service";
 import WTimeline from "@/components/timeline/Timeline.vue";
@@ -175,7 +175,8 @@ export default class Plot extends mixins(TimelineEventMixin) {
  
 
   get selectedItem() {
-    return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{ id: undefined}])[0];
+    return undefined;
+    // return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{ id: undefined}])[0];
   }
 
   private updateItem(item, overrideValues): void {

@@ -30,7 +30,7 @@ const routes: Array<RouteRecordRaw> = [
       },{
         path: 'location',
         component: Locations,
-      }/*,{
+      },{
         path: 'tags',
         component: Tags,
       },{
@@ -40,7 +40,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'plot',
         component: Timeline
-      }*/
+      }
     ]
   }
 ]
