@@ -15,8 +15,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { mixins, Options } from "vue-class-component";
 
 import WButton from '@/components/shared/Button.vue';
 import WSidebarOpener from '@/components/shared/menu/SidebarOpener.vue';
@@ -25,15 +24,12 @@ import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerant
 
 import { BaseModel } from "@/models/Base.model";
 import { getAllItems } from "@/store/getters";
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import NovelItemKeyAwareMixin from "@/components/mixins/NovelItemKeyAwareMixin";
 
 @Options({
   components: { WButton, WSidebarOpener, WMissingValueTolerantLabel, WNovelItemDropdown}
 })
-export default class WSidebarMenu extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
-
+export default class WSidebarMenu extends mixins(NovelItemKeyAwareMixin) {
     sidebarVisible = false;
     selectedParent = null;
 

@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { BaseModel } from '@/models/Base.model';
 
@@ -26,30 +26,33 @@ import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGaller
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import EditableText from '@/components/shared/inline-edit/EditableText.vue';
 import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
-import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from '@/store/keys';
+import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
+import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import { NovelItemService } from '@/service/NovelItemService';
-import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import { TagModel } from '@/models/Tag.model';
+import { CHILD_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
 
 @Options({
   components: { EditableLabel, EditableText, EditableTags, NovelItemSheet, ImageGallery }
 })
-export default class NovelItemSheet extends Vue {
+export default class NovelItemSheet extends mixins(DisplaySettingsAwareMixin, UpdatableItemMixin) {
     @Prop() service!: NovelItemService;
     @Prop() item!: BaseModel;
-    @Prop() novelItemKey!: NOVEL_ITEM_KEYS;
-    private displaySettingService = new DisplaySettingsService();
+
+    protected get key(): CHILD_ITEM_KEYS {
+        return PARENT_TO_CHILD.get(this.$store.state.activeParentKey);
+    }
 
     deleteImage(image: ImageParam): void {
         this.service.deleteImage(this.novelId, this.item.parentId, this.item.id, image.imageId).then((response) => {
-            this.updateImages(response.data.images);
+            this.updateImages(this.item, response.data.images);
         });
     }
 
     uploadImage(image: { id: number, name: string }): void {
         const images = this.imagesOrEmpty;
         images.splice(0, 0, image);
-        this.updateImages(images);
+        this.updateImages(this.item, images);
     }
 
     get imagesOrEmpty() {
@@ -65,27 +68,7 @@ export default class NovelItemSheet extends Vue {
             return obj;
         }); 
     }
-
-
-    get displayImages() {
-        return this.isEnabled(DisplaySettingsKeys.SHOW_IMAGES);
-    }
-
-    get displayTitle(): boolean {
-        return this.isEnabled(DisplaySettingsKeys.SHOW_TITLE);
-    }
-    get displaySummary(): boolean {
-        return this.isEnabled(DisplaySettingsKeys.SHOW_SUMMARY);
-    }
-    get displayExtendedSummary(): boolean {
-        return this.isEnabled(DisplaySettingsKeys.SHOW_EXTENDED_SUMMARY);
-    }
-    get displayContent(): boolean {
-        return this.isEnabled(DisplaySettingsKeys.SHOW_CONTENT);
-    }
-    get displayTags(): boolean {
-        return this.isEnabled(DisplaySettingsKeys.SHOW_TAGS);
-    }
+ 
 
     getUploadUrl(): string {
         return this.service.getUploadUrl(this.novelId, this.item.parentId, this.item.id);
@@ -94,47 +77,8 @@ export default class NovelItemSheet extends Vue {
     getImageUrl(fileId: number): string {
         return this.service.getImageUrl(this.novelId, this.item.parentId, this.item.id, fileId);
     }
+ 
 
-    isEnabled(view: DisplaySettingsKeys): boolean {
-       return this.$store.state.displaySettings[this.novelItemKey][view];
-    }
-
-    updateImages(images: Array<{ id: number, name: string }>): void {
-        this.updateItem({ images: images});
-    }    
-
-    updateTags(newTags: TagModel[]): void {
-        this.updateItem({ tags: newTags});
-    }
-    
-    updateName(newValue: string): void {
-        this.updateItem({ name: newValue });   
-    }  
-
-    updateSummary(newValue: string): void {
-        this.updateItem({ summary: newValue });   
-    }   
-    
-    updateExtendedSummary(newValue: string): void {
-        this.updateItem({ extended_summary: newValue });   
-    }
-
-    updateContent(newValue: string): void {
-        this.updateItem({ content: newValue });   
-    }
-
-    private get novelId(): number {
-        return this.$store.getters.openNovelId;
-    }
-
-    private updateItem(overrideValues): void {
-        this.$store.dispatch('updateItem', { 
-            key: this.novelItemKey, 
-            novelId: this.novelId,
-            oldItem: this.item,
-            overrideValues: overrideValues
-        })  
-    }
 }
 </script>
 

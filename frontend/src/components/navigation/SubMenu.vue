@@ -39,7 +39,7 @@ import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
 import Navlink from '@/components/navigation/Navlink.vue'
-import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from '@/store/keys';
+import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 
@@ -65,15 +65,15 @@ export default class SubMenu extends Vue {
         this[flag] = true;
     }
 
-    toggleDisplaySetting($event, displaySettingKey: DisplaySettingsKeys) {
+    toggleDisplaySetting($event, displaySettingKey: DISPLAY_SETTINGS_KEYS) {
         this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
     }
 
     get displaySettingKeys() {
-        return this.displaySettingService.getAllEnumValues(DisplaySettingsKeys);
+        return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
     }
 
-    isVisible(displaySettingsKey: DisplaySettingsKeys) {
+    isVisible(displaySettingsKey: DISPLAY_SETTINGS_KEYS) {
         return this.$store.state.displaySettings[this.childKey][displaySettingsKey] === true;
     }
 

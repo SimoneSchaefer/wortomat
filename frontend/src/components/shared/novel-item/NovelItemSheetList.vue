@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 import { BaseModel } from '@/models/Base.model';
@@ -24,20 +24,20 @@ import { NovelItemService } from '@/service/NovelItemService';
 import { KEY_TO_CHILD, KEY_TO_SERVICE } from '@/store/store-api-adapter';
 import { getAllItems } from '@/store/getters';
 import WHelpNote from '@/components/HelpNote.vue';
+import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
+import { ChapterService } from '@/service/Chapter.service';
 
 @Options({
   components: { EditableLabel, NovelItemSheet, WHelpNote }
 })
-export default class NovelItemSheetList extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
-
+export default class NovelItemSheetList extends mixins(NovelItemKeyAwareMixin)  {
     get hasChildItems(): boolean {
       return !!(getAllItems(this.$store.state, this.parentKey).find(parent => (parent['children'] || []).length ));
     }
 
     get service(): NovelItemService {
-        return KEY_TO_SERVICE.get(this.childKey);
+        // return KEY_TO_SERVICE.get(this.childKey);
+        return new ChapterService();
     }
 
     get selectedItems(): number[] {

@@ -2,7 +2,7 @@ import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
-import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from "./keys";
+import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
 import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend, loadTagsFromBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
@@ -50,6 +50,10 @@ const loadNovels = (context: ActionContext<IState,IState>): void => {
   });  
 }
 
+const setActiveParentKey = (context: ActionContext<IState, IState>, payload: { parentKey: PARENT_ITEM_KEYS }): void => {
+  context.commit('parentItemKeySelected', payload.parentKey );
+}
+
 const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number }): void => {
   const { key, novelId } = payload;
   setLoading(context, true);
@@ -93,7 +97,7 @@ const deleteItems = async (context: ActionContext<IState,IState>, update: { key:
     context.commit('itemsDeleted', { key: key, items: deleted })
 }
 
-const updateDisplaySettings = (context: ActionContext<IState, IState>, update: { novelItemKey: NOVEL_ITEM_KEYS, displaySettingKey: DisplaySettingsKeys, value: boolean}) => {
+const updateDisplaySettings = (context: ActionContext<IState, IState>, update: { novelItemKey: NOVEL_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}) => {
   const { novelItemKey, displaySettingKey, value} = update;
   const newSettings = new DisplaySettingsService().setVisible(novelItemKey, displaySettingKey, value);
   context.commit('displaySettingsUpdated', newSettings);
@@ -152,6 +156,7 @@ const selectFirstItemIfNecessary = (context: ActionContext<IState,IState>, key: 
 
 export default {
     openNovel,
+    setActiveParentKey,
     addNovel,
     updateNovel,
     deleteNovel,

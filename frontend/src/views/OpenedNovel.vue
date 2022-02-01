@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+
 import VerticalMenu from '@/components/navigation/VerticalMenu.vue';
 import { MenuModel } from '@/models/Menu.model';
 

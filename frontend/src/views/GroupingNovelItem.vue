@@ -1,13 +1,12 @@
 <template>
-  <!--<WSidebarMenu :parentKey="parentKey" :childKey="childKey" />    -->
-  <div v-if="!items.length" class="empty">
+  <div v-if="!items.length && !loading" class="empty">
     <WHelpNote :itemKey="parentKey"></WHelpNote>
   </div>
   <div v-else class="grouping-item-view">
     <Splitter style="height: 100%" :stateKey="parentKey">
       <SplitterPanel class="split-content-left" :size="30">
         <ScrollPanel style="height: 100%">
-          <WTreeview :parentKey="parentKey" :childKey="childKey" :items="items"></WTreeview>
+          <WTreeview :items="items"></WTreeview>
         </ScrollPanel>
       </SplitterPanel>
       <SplitterPanel class="split-content-right">
@@ -17,15 +16,13 @@
       </SplitterPanel>
     </Splitter> 
   </div>
-  <WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>
+  <!--<WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>-->
 
 </template>
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
 
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
 
@@ -34,7 +31,8 @@ import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
 import WHelpNote from '@/components/HelpNote.vue';
-import WSubMenu from '@/components/navigation/SubMenu.vue';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
+// import WSubMenu from '@/components/navigation/SubMenu.vue';
 
 @Options({
   components: {
@@ -42,51 +40,20 @@ import WSubMenu from '@/components/navigation/SubMenu.vue';
     WNovelItemSheetList,
     WTreeview,
     WHelpNote,
-    WSubMenu
+   //  WSubMenu
   }
 })
 export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
     
-    activeIndex = [];
+  activeIndex = [];
 
-    mounted(): void {
-      this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
-    }
-
-
-  deleteChild(item: BaseModel) {
-    const parentId = (this.items.find(parent => parent['children'].find(child => child.id === item.id)))?.id; 
-    // TODO cleanup data structure mess
-    let flatList = [];
-    let parent = null;
-    for (const group of getAllItems(this.$store.state, this.parentKey)) {
-      // flatList = flatList.concat(group.research);
-      const findChild = group[this.childKey].find(child => child.id === item.id);
-      if (findChild) {
-        parent = group;
-        break;
-      }
-
-    }
-    item.parentId = parent?.id || undefined;
-    this.$store.dispatch('deleteItems', { 
-        key: this.childKey, 
-        novelId: this.$store.state.currentNovel?.id,
-        items: [item]
-    });
+  protected get key(): PARENT_ITEM_KEYS {
+    return this.$store.state.activeParentKey;
   }
 
-  addChild(selectedParent: BaseModel, $event): void {
-    $event.stopPropagation();
-    const child = new BaseModel();
-    child.parentId = selectedParent.id;
-    this.$store.dispatch('addItem', { 
-        key: this.childKey, 
-        novelId: this.novelId, 
-        item: child,
-    });
+  mounted(): void {
+    this.$store.dispatch('setActiveParentKey', { key: this.parentKey }); 
+    this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
   }
 
   isSelected(item: BaseModel) {
@@ -105,6 +72,9 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
   }
 
 
+  get loading(): boolean {
+    return this.$store.state.loading;
+  }
      
   get items(): BaseModel[] {
       return getAllItems(this.$store.state, this.parentKey);

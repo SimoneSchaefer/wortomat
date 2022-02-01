@@ -25,61 +25,44 @@
 import { mixins, Options } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
+import { CHILD_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
 
 @Options({
   components: { WTreeViewParent}
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
-    @Prop() items: BaseModel[] = [];
+  @Prop() items: BaseModel[] = [];
 
-    toggleState = new Map<number, boolean>();
-    
-    toggle(open: boolean, parent: BaseModel) {
-      this.toggleState.set(parent.id, open);
-    }
+  protected get key(): CHILD_ITEM_KEYS {
+    return PARENT_TO_CHILD.get(this.$store.state.activeParentKey);
+  }
 
-    isOpen(parent: BaseModel) {
-      return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
-    }
+  toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store
+  
+  toggle(open: boolean, parent: BaseModel) {
+    this.toggleState.set(parent.id, open);
+  }
 
-    deleteParent(item: BaseModel) {
-      this.$store.dispatch('deleteItems', { 
-          key: this.parentKey, 
-          novelId: this.$store.state.currentNovel?.id,
-          items: [item]
-      });
-    }
+  isOpen(parent: BaseModel) {
+    return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
+  }
 
-    deleteChild(item: BaseModel) {
-        const parentId = (this.items.find(parent => parent['children'].find(child => child.id === item.id)))?.id; 
-        // TODO cleanup data structure mess
-        let flatList = [];
-        let parent = null;
-        for (const group of getAllItems(this.$store.state, this.parentKey)) {
-          // flatList = flatList.concat(group.research);
-          const findChild = group['children'].find(child => child.id === item.id);
-          if (findChild) {
-              parent = group;
-              break;
-          }
-        }
-        item.parentId = parent?.id || undefined;
-        this.$store.dispatch('deleteItems', { 
-            key: this.childKey, 
-            novelId: this.$store.state.currentNovel?.id,
-            items: [item]
-        });
-    }
+  deleteParent(item: BaseModel) {
+    this.deleteItem(PARENT_TO_CHILD.get(this.parentKey), item);
+  }
 
-  addChild(selectedParent: BaseModel, $event): void {
+  deleteChild(item: BaseModel) {
+    const parent = this.findParentForChild(item);
+    item.parentId = parent?.id || undefined;
+    this.deleteItem(this.childKey, item);
+  }
+
+  addChild(selectedParent: BaseModel): void {
     const child = new BaseModel();
     child.parentId = selectedParent.id;
     this.$store.dispatch('addItem', { 
@@ -118,7 +101,22 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     });
   }
 
+  private findParentForChild(item: BaseModel) {
+    for (const group of getAllItems(this.$store.state, this.parentKey)) {
+      const hasChild = group['children'].find(child => child.id === item.id);
+      if (hasChild) {
+          return group;
+      }
+    }
+  }
 
+  private deleteItem(key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel) {
+    this.$store.dispatch('deleteItems', { 
+      key: key, 
+      novelId: this.$store.state.currentNovel?.id,
+      items: [item]
+    });
+  }
 }
 </script>
 

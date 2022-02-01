@@ -1,13 +1,13 @@
-import { DisplaySettingsKeys, NOVEL_ITEM_KEYS } from "@/store/keys";
+import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from "@/store/keys";
 
 export class DisplaySettingsService {
     readonly LOCAL_STORAGE_KEY = 'WORTOMAT_DISPLAY_SETTINGS';
 
-    public isVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys): boolean {
+    public isVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS): boolean {
         return this.currentSettings[novelItemKey][settingKey] === true;
     }
 
-    public setVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys, visible: boolean) {
+    public setVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS, visible: boolean) {
         console.log('updating visiblity');
         const currentSettings = this.currentSettings;
         currentSettings[novelItemKey][settingKey] = visible;
@@ -15,11 +15,11 @@ export class DisplaySettingsService {
         return currentSettings;
     }
 
-    private storeSettings(values: Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>) {
+    private storeSettings(values: Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
         localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
     }
 
-    get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>> {
+    get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> {
         const inLocalStorage = localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS');
         if (!inLocalStorage) {
             this.storeSettings(this.initializeWithDefaultValues());
@@ -30,9 +30,9 @@ export class DisplaySettingsService {
     }
 
 
-    initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>  {
+    initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>  {
         const allNovelItemKeys = this.getAllEnumValues(NOVEL_ITEM_KEYS);
-        const allDisplaySettingKeys = this.getAllEnumValues(DisplaySettingsKeys);
+        const allDisplaySettingKeys = this.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
 
         const defaultAllTrue = {};
         allDisplaySettingKeys.forEach((displaySettingKey: string) => {

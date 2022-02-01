@@ -5,6 +5,7 @@ import mutations from './mutations';
 import actions from './actions';
 import { IState } from './istate';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
+import { PARENT_ITEM_KEYS } from './keys';
 
 export default new Vuex.Store<IState>({
   state: {
@@ -12,8 +13,9 @@ export default new Vuex.Store<IState>({
     modalIsOpen: false,
     novels: [],
     currentNovel: new NovelModel(),
-    selection: new Map(),
+    activeParentKey: PARENT_ITEM_KEYS.PARTS,
     novelItems: new Map(),
+    selection: new Map(),
     filteredTags: new Map(),
     displaySettings: new DisplaySettingsService().currentSettings
   },
