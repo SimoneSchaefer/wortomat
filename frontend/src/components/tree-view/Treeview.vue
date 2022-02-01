@@ -31,6 +31,7 @@ import { BaseModel } from '@/models/Base.model';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 import { childKeyForParentKey, CHILD_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
+import { findParentForChild } from '@/store/store.helper';
 
 @Options({
   components: { WTreeViewParent}
@@ -57,7 +58,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
 
   deleteChild(item: BaseModel) {
-    const parent = this.findParentForChild(item);
+    const parent = findParentForChild(this.$store.state, childKeyForParentKey(this.$store.state.activeParentKey), item);
     item.parentId = parent?.id || undefined;
     this.deleteItem(this.childKey, item);
   }
@@ -99,15 +100,6 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
       oldPosition: oldIndex,
       newPosition: newIndex
     });
-  }
-
-  private findParentForChild(item: BaseModel) {
-    for (const group of getAllItems(this.$store.state, this.parentKey)) {
-      const hasChild = group['children'].find(child => child.id === item.id);
-      if (hasChild) {
-          return group;
-      }
-    }
   }
 
   private deleteItem(key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel) {

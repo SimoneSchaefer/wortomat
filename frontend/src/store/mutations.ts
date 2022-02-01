@@ -112,8 +112,7 @@ const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Ba
 
 
 const childItemAdded = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel): void => {
-    const parent = findParentForChild(state, key, item);
-    if (!parent['children']) { parent['children'] = []; }
+    const parent = state.novelItems.get(parentKeyForChildKey(key)).find(parent => parent.id === item.parentId);
     parent['children'].push(item);
 };
 
