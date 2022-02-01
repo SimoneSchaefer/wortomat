@@ -16,7 +16,7 @@
       </SplitterPanel>
     </Splitter> 
   </div>
-  <!--<WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>-->
+  <WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>
 
 </template>
 
@@ -25,14 +25,15 @@ import { mixins, Options } from 'vue-class-component';
 
 import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 
-import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
 import WHelpNote from '@/components/HelpNote.vue';
-import { PARENT_ITEM_KEYS } from '@/store/keys';
-// import WSubMenu from '@/components/navigation/SubMenu.vue';
+import WSubMenu from '@/components/navigation/SubMenu.vue';
+import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
+import { Prop } from 'vue-property-decorator';
 
 @Options({
   components: {
@@ -40,10 +41,11 @@ import { PARENT_ITEM_KEYS } from '@/store/keys';
     WNovelItemSheetList,
     WTreeview,
     WHelpNote,
-   //  WSubMenu
+    WSubMenu
   }
 })
-export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
+export default class GroupingNovelItem extends mixins(NovelItemKeyAwareMixin) {
+  @Prop() novelItemKey: PARENT_ITEM_KEYS;
     
   activeIndex = [];
 
@@ -52,8 +54,8 @@ export default class GroupingNovelItem extends mixins(UpdatableItemMixin) {
   }
 
   mounted(): void {
-    this.$store.dispatch('setActiveParentKey', { key: this.parentKey }); 
-    this.$store.dispatch('loadItems', { key: this.parentKey, novelId: this.$route.params.id }); 
+    this.$store.dispatch('setActiveParentKey', { parentKey: this.novelItemKey }); 
+    this.$store.dispatch('loadItems', { key: this.novelItemKey, novelId: this.$route.params.id }); 
   }
 
   isSelected(item: BaseModel) {

@@ -3,8 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { IState } from "./istate";
 import { CHILD_ITEM_KEYS, DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from "./keys";
-import { KEY_TO_CHILD } from "./store-api-adapter";
-import { findItem, getChildItems, itemIdsToSelect, updateItemInStore } from "./store.helper";
+import { itemIdsToSelect, updateItemInStore } from "./store.helper";
 
 
 const setLoading = (state: IState, payload: { loading: boolean}): void => {
@@ -32,6 +31,7 @@ const novelDeleted = (state: IState, payload: NovelModel): void => {
 };
 
 const parentItemKeySelected = (state: IState, payload: PARENT_ITEM_KEYS): void => {
+    console.log('MUTATE, parentItemKey', payload)
     state.activeParentKey = payload;
 };
 
@@ -166,5 +166,6 @@ const findParent = (state: IState, itemKey: CHILD_ITEM_KEYS, item: BaseModel ) =
     itemAdded,
     itemUpdated,
     itemsDeleted,
-    displaySettingsUpdated
+    displaySettingsUpdated,
+    parentItemKeySelected
 };

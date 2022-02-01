@@ -60,7 +60,7 @@ const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_
 
   Promise.all([
     loadItemsFromBackend( key, novelId),
-    loadTagsFromBackend( payload.key, payload.novelId) // TODO
+    loadTagsFromBackend( payload.key, payload.novelId)
   ]).then(result => {
     const loadedItems = result[0].data;
     context.commit('itemsLoaded', { key: key, items: loadedItems });

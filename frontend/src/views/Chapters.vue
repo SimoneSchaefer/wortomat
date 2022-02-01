@@ -1,5 +1,5 @@
 <template>
-  <GroupingNovelItem :parentKey="parentKey"></GroupingNovelItem>
+  <GroupingNovelItem :novelItemKey="parentKey"></GroupingNovelItem>
 </template>
 
 <script lang="ts">
