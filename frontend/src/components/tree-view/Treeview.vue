@@ -53,7 +53,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
 
   deleteParent(item: BaseModel) {
-    this.deleteItem(childKeyForParentKey(this.parentKey), item);
+    this.deleteItem(this.parentKey, item);
   }
 
   deleteChild(item: BaseModel) {

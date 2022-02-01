@@ -2,7 +2,7 @@ import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { IState } from "./istate";
-import { CHILD_ITEM_KEYS, DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
+import { CHILD_ITEM_KEYS, DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, parentKeyForChildKey, PARENT_ITEM_KEYS } from "./keys";
 import { findParentForChild, getAllEnumValues, itemIdsToSelect, updateItemInStore } from "./store.helper";
 
 
@@ -75,25 +75,14 @@ const itemUpdated = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITE
     }
 }
 
+
 const itemsDeleted = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, items: BaseModel[]}): void => {
-    /*const { key, items } = payload;
-    const itemIds = items.map(item => item.id);
-    if (Object.values(PARENT_ITEM_KEYS).includes(key)) {
-        state.novelItems.set(key, getChildItems(state, key).filter(i => !itemIds.includes(i.id)));
+    const { key, items } = payload;
+    if (isParentKey(key)) {
+        parentsDeleted(state, key as PARENT_ITEM_KEYS, items);
     } else {
-        if (key === PARENT_ITEM_KEYS.TIMELINE) { // TODO generic handling for flat hierarchies
-            state.novelItems.set(key, state.novelItems.get(key).filter(i => !itemIds.includes(i.id)));
-        } else {
-            const allParentItems = state.novelItems.get(getParentKey(key));
-            for (const item of items) {
-                const parentItem = allParentItems.find(parent => parent.id === item.parentId);
-                const childIndex = parentItem['children'].findIndex(child => child.id === item.id);
-                parentItem['children'].splice(childIndex, 1);
-            }
-        }
-        
-       
-    }*/
+        childrenDeleted(state, key as CHILD_ITEM_KEYS, items);
+    }
 }
   
 const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
@@ -144,6 +133,22 @@ const childItemUpdated = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel):
     const index = parent['children'].findIndex(child => child.id === item.id);
     parent['children'].splice(index, 1, item);
 };
+
+
+const parentsDeleted = (state: IState, key: PARENT_ITEM_KEYS, items: BaseModel[]): void => {
+    const itemIds = items.map(item => item.id);
+    const afterDeletion = state.novelItems.get(key).filter(i => !itemIds.includes(i.id));
+    state.novelItems.set(key, afterDeletion);
+};
+
+const childrenDeleted = (state: IState, key: CHILD_ITEM_KEYS, items: BaseModel[]): void => {
+    const allParentItems = state.novelItems.get(parentKeyForChildKey(key));
+    for (const item of items) {
+        const parentItem = allParentItems.find(parent => parent.id === item.parentId);
+        const childIndex = parentItem['children'].findIndex(child => child.id === item.id);
+        parentItem['children'].splice(childIndex, 1);
+    }
+}
 
 const isParentKey = (key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS) => {
     const allParentKeys = getAllEnumValues(PARENT_ITEM_KEYS);
