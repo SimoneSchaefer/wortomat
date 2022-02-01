@@ -11,7 +11,7 @@
       </SplitterPanel>
       <SplitterPanel class="split-content-right">
         <ScrollPanel style="height: 100%">
-          <WNovelItemSheetList :childKey="childKey" :parentKey="parentKey" />
+          <WNovelItemSheetList />
         </ScrollPanel>
       </SplitterPanel>
     </Splitter> 
@@ -73,22 +73,18 @@ export default class GroupingNovelItem extends mixins(NovelItemKeyAwareMixin) {
     this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
   }
 
-
   get loading(): boolean {
     return this.$store.state.loading;
   }
-     
-  get items(): BaseModel[] {
-      return getAllItems(this.$store.state, this.parentKey);
-  }
-
-  set items(value: BaseModel[]) {
-      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
-  } 
-
   get selectedItems(): number[] {
     return this.$store.state.selection.get(this.childKey) || [];
   }
+  get items(): BaseModel[] {
+      return getAllItems(this.$store.state, this.parentKey);
+  }
+  set items(value: BaseModel[]) {
+      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
+  } 
 }       
 </script>
 

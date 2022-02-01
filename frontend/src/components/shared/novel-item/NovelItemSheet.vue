@@ -2,14 +2,14 @@
     <div class="sheet" v-if="item">
         <div class="header-container">
             <div v-if="displayImages">
-                <ImageGallery :novelItemKey="novelItemKey" :imageUrls="images" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>
+                <ImageGallery :novelItemKey="childKey" :imageUrls="images" :uploadUrl="getUploadUrl()" @uploadImage="uploadImage" @deleteImage="deleteImage"></ImageGallery>
             </div>
 
             <div class="meta">
-                <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel></div>
-                <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
-                <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
-                <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags" :novelItemKey="novelItemKey"></EditableTags>
+                <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="`fallback_labels.no_name.${childKey}`"></EditableLabel></div>
+                <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
+                <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
+                <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags(item, $event)" :novelItemKey="childKey"></EditableTags>
             </div>
         </div>
         <hr>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { mixins, Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 import { BaseModel } from '@/models/Base.model';
 
@@ -29,7 +29,6 @@ import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import { NovelItemService } from '@/service/NovelItemService';
-import { TagModel } from '@/models/Tag.model';
 import { CHILD_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
 
 @Options({

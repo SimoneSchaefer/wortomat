@@ -14,11 +14,11 @@
 </template>
 
 <script lang="ts">
-import { mixins, Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
+
 import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
 import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 import { BaseModel } from '@/models/Base.model';
-import { Prop } from 'vue-property-decorator';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { NovelItemService } from '@/service/NovelItemService';
 import { KEY_TO_CHILD, KEY_TO_SERVICE } from '@/store/store-api-adapter';

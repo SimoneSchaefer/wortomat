@@ -4,7 +4,9 @@ import { CHILD_ITEM_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys
 import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
 
 export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin {  
+
     protected abstract key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS;
+    
     updateTags(oldItem: BaseModel, newTags: TagModel[]): void {
         this.updateItem(oldItem, { tags: newTags});
     }
@@ -25,14 +27,15 @@ export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin {
         this.updateItem(oldItem, { content: newValue });   
     }
 
-
     updateImages(oldItem: BaseModel, images: Array<{ id: number, name: string }>): void {
         this.updateItem(oldItem, { images: images});
     }   
 
     updateItem (oldItem: BaseModel, overrideValues: Record<string,any> ) {
+        console.log('update item', oldItem)
+        
         this.$store.dispatch('updateItem', { 
-            key: this.parentKey, 
+            key: this.key, 
             novelId: this.novelId,
             oldItem: oldItem,
             overrideValues: overrideValues

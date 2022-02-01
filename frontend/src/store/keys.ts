@@ -22,6 +22,10 @@ export const PARENT_TO_CHILD: Map<PARENT_ITEM_KEYS,CHILD_ITEM_KEYS> = new Map([
 ])
 
 
+/*
+export const NOVEL_ITEM_KEYS = { ...PARENT_ITEM_KEYS, ...CHILD_ITEM_KEYS };
+export type NOVEL_ITEM_KEYS = typeof NOVEL_ITEM_KEYS;
+*/
 
 /**
  * @deprecated
