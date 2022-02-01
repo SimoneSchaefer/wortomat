@@ -2,8 +2,8 @@ import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { IState } from "./istate";
-import { CHILD_ITEM_KEYS, DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from "./keys";
-import { itemIdsToSelect, updateItemInStore } from "./store.helper";
+import { CHILD_ITEM_KEYS, DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
+import { findParentForChild, getAllEnumValues, itemIdsToSelect, updateItemInStore } from "./store.helper";
 
 
 const setLoading = (state: IState, payload: { loading: boolean}): void => {
@@ -31,7 +31,6 @@ const novelDeleted = (state: IState, payload: NovelModel): void => {
 };
 
 const parentItemKeySelected = (state: IState, payload: PARENT_ITEM_KEYS): void => {
-    console.log('MUTATE, parentItemKey', payload)
     state.activeParentKey = payload;
 };
 
@@ -57,59 +56,23 @@ const itemsLoaded = (state: IState, payload: { key: PARENT_ITEM_KEYS, items: Bas
     state.novelItems.set(key, items);
 }
 
-const childAdded = (state: IState, payload: { item: BaseModel}): void => {
-    const { item } = payload;
-    const parent = getCurrentParentItems(state).find(parent => parent.id === item.parentId);
-    addChild(parent, item);
-    // TODO: Select new child
-}
 
-const parentAdded = (state: IState, payload: { item: BaseModel}): void => {
-    const { item } = payload;
-    const key = state.activeParentKey;
-    const items = state.novelItems.get(key) as BaseModel[] || [];
-    items.push(item);
-    state.novelItems.set(key, items);
-}
-
-const addChild = (parent: BaseModel, child: BaseModel): void => {
-    if (!parent['children']) { parent['children'] = []; }
-    parent['children'].push(child);
-
-}
-
-const getCurrentParentItems = (state: IState): BaseModel[] => {
-    const key = state.activeParentKey;
-    return state.novelItems.get(key) as BaseModel[] || [];
-}
-    
-
-
-const itemAdded = (state: IState, payload: { key: PARENT_ITEM_KEYS, item: BaseModel }): void => {
-   /* const { key, item } = payload;
-    const parent = findParent(state, key, item );
-    if (parent) { 
-        if (!parent['children']) { parent['children'] = []; }
-        parent['children'].push(item);
+const itemAdded = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel }): void => {
+    const { key, item } = payload;
+    if (isParentKey(key)) {
+        parentItemAdded(state, key as PARENT_ITEM_KEYS, item);
     } else {
-        const items = state.novelItems.get(key) as BaseModel[] || [];
-        items.push(item);
-        state.novelItems.set(key, items);
+        childItemAdded(state, key as CHILD_ITEM_KEYS, item);
     }
-    if (!KEY_TO_CHILD.has(key)) {
-        state.selection.set(key, [item.id]);
-    }*/
 }
-  
+ 
 const itemUpdated = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel}):void => {
-   /* const { key, item } = payload;
-    const parent = findParent(state, key, item );
-    if (parent) {
-        const index = findItem(item, parent['children']);
-        parent['children'].splice(index, 1, item);
+    const { key, item } = payload;
+    if (isParentKey(key)) {
+        parentItemUpdated(state, key as PARENT_ITEM_KEYS, item);
     } else {
-        updateItemInStore(item, state.novelItems.get(key) as BaseModel[]);
-    }*/
+        childItemUpdated(state, key as CHILD_ITEM_KEYS, item);
+    }
 }
 
 const itemsDeleted = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, items: BaseModel[]}): void => {
@@ -138,19 +101,6 @@ const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Ba
     state.selection.set(key, itemIdsToSelect(key, items));
 }
 
-const getParentKey = ( itemKey : CHILD_ITEM_KEYS ): PARENT_ITEM_KEYS => {
-    const parentKey = Array.from(PARENT_TO_CHILD.entries()).find(entry => entry[1] === itemKey)
-    return parentKey ? parentKey[0] : null;
-}
-
-const findParent = (state: IState, itemKey: CHILD_ITEM_KEYS, item: BaseModel ) => {
-    const parentKey = getParentKey(itemKey);
-    if (!parentKey) { return null }
-
-    const allParents = state.novelItems.get(parentKey);
-    return allParents.find(parent => parent.id === item.parentId);
-}
-
   export default {
     novelsLoaded,
     novelAdded,
@@ -169,3 +119,33 @@ const findParent = (state: IState, itemKey: CHILD_ITEM_KEYS, item: BaseModel ) =
     displaySettingsUpdated,
     parentItemKeySelected
 };
+
+
+
+const childItemAdded = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel): void => {
+    const parent = findParentForChild(state, key, item);
+    if (!parent['children']) { parent['children'] = []; }
+    parent['children'].push(item);
+};
+
+const parentItemAdded = (state: IState, key: PARENT_ITEM_KEYS, item: BaseModel): void => {
+    const items = state.novelItems.get(key) as BaseModel[] || [];
+    items.push(item);
+    state.novelItems.set(key, items);
+};
+
+
+const parentItemUpdated = (state: IState, key: PARENT_ITEM_KEYS, item: BaseModel): void => {
+    updateItemInStore(item, state.novelItems.get(key as PARENT_ITEM_KEYS) as BaseModel[]);
+};
+
+const childItemUpdated = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel): void => {
+    const parent = findParentForChild(state, key, item);
+    const index = parent['children'].findIndex(child => child.id === item.id);
+    parent['children'].splice(index, 1, item);
+};
+
+const isParentKey = (key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS) => {
+    const allParentKeys = getAllEnumValues(PARENT_ITEM_KEYS);
+    return allParentKeys.includes(key);
+}

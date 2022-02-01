@@ -11,7 +11,7 @@
             :childKey="childKey"
             :open="isOpen(item)"
             @toggle="toggle($event, item)"
-            @updateParentName="updateName($event, item)"
+            @updateParentName="updateName(item, $event)"
             @addChild="addChild(item)"
             @childMoved="childMoved($event)"
             @deleteParent="deleteParent"
@@ -30,7 +30,7 @@ import { BaseModel } from '@/models/Base.model';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
-import { CHILD_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
+import { childKeyForParentKey, CHILD_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 
 @Options({
   components: { WTreeViewParent}
@@ -39,7 +39,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   @Prop() items: BaseModel[] = [];
 
   protected get key(): CHILD_ITEM_KEYS {
-    return PARENT_TO_CHILD.get(this.$store.state.activeParentKey);
+    return this.$store.state.activeParentKey;
   }
 
   toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store
@@ -53,7 +53,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
 
   deleteParent(item: BaseModel) {
-    this.deleteItem(PARENT_TO_CHILD.get(this.parentKey), item);
+    this.deleteItem(childKeyForParentKey(this.parentKey), item);
   }
 
   deleteChild(item: BaseModel) {

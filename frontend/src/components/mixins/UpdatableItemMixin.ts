@@ -31,9 +31,7 @@ export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin {
         this.updateItem(oldItem, { images: images});
     }   
 
-    updateItem (oldItem: BaseModel, overrideValues: Record<string,any> ) {
-        console.log('update item', oldItem)
-        
+    updateItem (oldItem: BaseModel, overrideValues: Record<string,any> ) {      
         this.$store.dispatch('updateItem', { 
             key: this.key, 
             novelId: this.novelId,

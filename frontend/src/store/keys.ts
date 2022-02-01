@@ -21,13 +21,21 @@ export const PARENT_TO_CHILD: Map<PARENT_ITEM_KEYS,CHILD_ITEM_KEYS> = new Map([
     [PARENT_ITEM_KEYS.LOCATION_GROUPS, CHILD_ITEM_KEYS.LOCATIONS]
 ])
 
+export const childKeyForParentKey = (parentKey: PARENT_ITEM_KEYS) => {
+    return PARENT_TO_CHILD.get(parentKey);
+}
 
-/*
-export const NOVEL_ITEM_KEYS = { ...PARENT_ITEM_KEYS, ...CHILD_ITEM_KEYS };
-export type NOVEL_ITEM_KEYS = typeof NOVEL_ITEM_KEYS;
-*/
+export const parentKeyForChildKey = (childKey: CHILD_ITEM_KEYS) => {
+    for (const key of PARENT_TO_CHILD.keys()) {
+        if (PARENT_TO_CHILD.get(key) === childKey) {
+            return key;
+        }
+    }
+    return undefined;
+}
 
 /**
+ * TODO GENERATE FROM PARENTS AND CHILDREN or remove
  * @deprecated
  */
 export enum NOVEL_ITEM_KEYS {

@@ -42,7 +42,7 @@
         "CHARACTER_GROUPS": "Delete Character Group"
     },
     "remove_child": {
-        "parts": "Delete chapter",
+        "PARTS": "Delete chapter",
         "RESEARCH_GROUPS": "Delete research item",
         "CHARACTER_GROUPS": "Delete character",
         "LOCATION_GROUPS": "Delete location"
