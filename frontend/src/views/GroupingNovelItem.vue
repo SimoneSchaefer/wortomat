@@ -16,7 +16,7 @@
       </SplitterPanel>
     </Splitter> 
   </div>
-  <WSubMenu :parentKey="parentKey" :childKey="childKey"></WSubMenu>
+  <WSubMenu></WSubMenu>
 
 </template>
 
@@ -31,7 +31,7 @@ import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
 import WHelpNote from '@/components/HelpNote.vue';
-import WSubMenu from '@/components/navigation/SubMenu.vue';
+import WSubMenu from '@/components/navigation/submenu/SubMenu.vue';
 import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
 import { Prop } from 'vue-property-decorator';
 

@@ -38,7 +38,6 @@ const displaySettingsUpdated = (state: IState, payload: Record<NOVEL_ITEM_KEYS, 
     state.displaySettings = payload;
 }
 
-
 const novelOpened = (state: IState, payload: NovelModel): void => {
     state.currentNovel = payload;
 }
@@ -55,7 +54,6 @@ const itemsLoaded = (state: IState, payload: { key: PARENT_ITEM_KEYS, items: Bas
     const {key, items } = payload;
     state.novelItems.set(key, items);
 }
-
 
 const itemAdded = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel }): void => {
     const { key, item } = payload;
@@ -90,27 +88,6 @@ const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Ba
     state.selection.set(key, itemIdsToSelect(key, items));
 }
 
-  export default {
-    novelsLoaded,
-    novelAdded,
-    novelUpdated,
-    novelDeleted,
-    novelOpened,
-    tagsFiltered,
-    setLoading,
-    setModalOpen,
-    itemsLoaded,
-    tagsLoaded,
-    itemsSelected,
-    itemAdded,
-    itemUpdated,
-    itemsDeleted,
-    displaySettingsUpdated,
-    parentItemKeySelected
-};
-
-
-
 const childItemAdded = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel): void => {
     const parent = state.novelItems.get(parentKeyForChildKey(key)).find(parent => parent.id === item.parentId);
     parent['children'].push(item);
@@ -133,7 +110,6 @@ const childItemUpdated = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel):
     parent['children'].splice(index, 1, item);
 };
 
-
 const parentsDeleted = (state: IState, key: PARENT_ITEM_KEYS, items: BaseModel[]): void => {
     const itemIds = items.map(item => item.id);
     const afterDeletion = state.novelItems.get(key).filter(i => !itemIds.includes(i.id));
@@ -153,3 +129,22 @@ const isParentKey = (key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS) => {
     const allParentKeys = getAllEnumValues(PARENT_ITEM_KEYS);
     return allParentKeys.includes(key);
 }
+
+export default {
+    novelsLoaded,
+    novelAdded,
+    novelUpdated,
+    novelDeleted,
+    novelOpened,
+    tagsFiltered,
+    setLoading,
+    setModalOpen,
+    itemsLoaded,
+    tagsLoaded,
+    itemsSelected,
+    itemAdded,
+    itemUpdated,
+    itemsDeleted,
+    displaySettingsUpdated,
+    parentItemKeySelected
+};

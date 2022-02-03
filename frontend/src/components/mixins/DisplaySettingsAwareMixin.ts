@@ -1,4 +1,4 @@
-import { DISPLAY_SETTINGS_KEYS } from "@/store/keys"
+import { childKeyForParentKey, DISPLAY_SETTINGS_KEYS, parentKeyForChildKey } from "@/store/keys"
 import { Vue } from "vue-class-component";
 
 export default abstract class DisplaySettingsAwareMixin extends Vue {
@@ -22,7 +22,7 @@ export default abstract class DisplaySettingsAwareMixin extends Vue {
         return this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_TAGS);
     }
     private isEnabled(view: DISPLAY_SETTINGS_KEYS): boolean {
-        return this.$store.state.displaySettings[this.$store.state.activeParentKey][view];
+        return this.$store.state.displaySettings[childKeyForParentKey(this.$store.state.activeParentKey)][view];
      }
   }
   

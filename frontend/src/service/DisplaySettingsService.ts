@@ -8,7 +8,6 @@ export class DisplaySettingsService {
     }
 
     public setVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS, visible: boolean) {
-        console.log('updating visiblity');
         const currentSettings = this.currentSettings;
         currentSettings[novelItemKey][settingKey] = visible;
         this.storeSettings(currentSettings);
@@ -25,7 +24,6 @@ export class DisplaySettingsService {
             this.storeSettings(this.initializeWithDefaultValues());
             localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(this.initializeWithDefaultValues()));
         }
-        console.log('getting current settings');
         return JSON.parse(localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS'));    
     }
 

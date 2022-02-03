@@ -1,4 +1,4 @@
-import { PARENT_ITEM_KEYS, PARENT_TO_CHILD } from "@/store/keys"
+import { childKeyForParentKey, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from "@/store/keys"
 import { Vue } from "vue-class-component";
 
 export default abstract class NovelItemKeyAwareMixin extends Vue {
@@ -9,7 +9,7 @@ export default abstract class NovelItemKeyAwareMixin extends Vue {
         return this.$store.state.activeParentKey;
     }
     get childKey() {
-        return PARENT_TO_CHILD.get(this.parentKey);
+        return childKeyForParentKey(this.parentKey);
     }  
   }
   

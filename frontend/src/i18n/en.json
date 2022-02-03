@@ -25,6 +25,12 @@
 
         }
     },
+    "sub_menu": {
+        "add": "Add item",
+        "export": "Export",
+        "filter": "Filter",
+        "display_settings": "Display settings"
+    },
     "add_parent": {
         "PARTS": "Create Part",
         "RESEARCH_GROUPS": "Create Research Group"

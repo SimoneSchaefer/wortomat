@@ -3,7 +3,7 @@
         <button class="navigation-link" :title="$t(`sub_menu.add`)" @click="addParent">
             <i class="fa fa-2x fa-plus"></i>
         </button>
-        <button class="navigation-link" :title="$t(`sub_menu.aaa`)" @click="setVisible('display_settings_visible')">
+        <button class="navigation-link" :title="$t(`sub_menu.display_settings`)" @click="setVisible('display_settings_visible')">
             <i class="fa fa-2x fa-eye"></i>
         </button>
         <button class="navigation-link" :title="$t(`sub_menu.filter`)" @click="setVisible('filter_visible')">
@@ -12,46 +12,34 @@
         <button class="navigation-link" :title="$t(`sub_menu.export`)" @click="setVisible('export_visible')">
             <i class="fa fa-2x fa-file-export"></i>
         </button>
-  </div>
+    </div>
 
-
-  <Sidebar v-model:visible="display_settings_visible" position="right">
-      <h1>Display settings</h1>
-      <div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey" class="toggle-switch">
-        <InputSwitch v-bind:modelValue="isVisible(displaySettingKey)" @input="toggleDisplaySetting($event, displaySettingKey)"></InputSwitch>
-        <div class="label">{{ $t(`display_settings.${displaySettingKey}` ) }}</div>
-      </div>
-  </Sidebar>
-
-  <Sidebar v-model:visible="filter_visible" position="right">
-      <h1>Filter Options</h1>
-      - coming soon - 
-  </Sidebar>
-
-  <Sidebar v-model:visible="export_visible" position="right">
-      <h1>Export Options</h1>
-      - coming soon - 
-  </Sidebar>
+    <Sidebar v-model:visible="sidebarVisible" position="right">
+        <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
+        <FilterMenu v-if="filter_visible"></FilterMenu>
+        <ExportMenu v-if="export_visible"></ExportMenu>
+    </Sidebar>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
-
+import { mixins, Options } from 'vue-class-component';
 import Navlink from '@/components/navigation/Navlink.vue'
+import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
+import FilterMenu from '@/components/navigation/submenu/FilterMenu.vue'
+import ExportMenu from '@/components/navigation/submenu/ExportMenu.vue'
 import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
+import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
 
 
 type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';
 
 @Options({
-    components: { Navlink }
+    components: { Navlink, DisplaySettingsMenu, FilterMenu, ExportMenu }
 })
-export default class SubMenu extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
+   
     private displaySettingService = new DisplaySettingsService();
 
     filter_visible = false;
@@ -59,9 +47,7 @@ export default class SubMenu extends Vue {
     display_settings_visible = false;
 
     setVisible(flag: visible_flags) {
-        this.filter_visible = false;
-        this.export_visible = false;
-        this.display_settings_visible = false;
+        this.setAllInvisible();
         this[flag] = true;
     }
 
@@ -71,6 +57,20 @@ export default class SubMenu extends Vue {
 
     get displaySettingKeys() {
         return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
+    }
+
+    get sidebarVisible() {
+        return this.filter_visible || this.export_visible || this.display_settings_visible;
+    }
+
+    set sidebarVisible(_value: boolean) {
+        this.setAllInvisible();
+    }
+
+    setAllInvisible() {
+        this.filter_visible = false;
+        this.export_visible = false;
+        this.display_settings_visible = false;
     }
 
     isVisible(displaySettingsKey: DISPLAY_SETTINGS_KEYS) {
@@ -85,11 +85,6 @@ export default class SubMenu extends Vue {
           item: new BaseModel() 
       });
     }
-
-
-    get novelId(): number {
-        return this.$store.getters.openNovelId;
-    }  
 }
 </script>
 
