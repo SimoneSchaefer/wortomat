@@ -1,6 +1,5 @@
 <template>
     <WTreeviewHeader 
-        :parentKey="parentKey" 
         :item="item"    
         :open="isOpen"  
         @toggle="toggle"               
@@ -12,7 +11,6 @@
         <WTreeviewListItem v-for="child in item['children']" :key="child.id"
             @select="selectChild"
             @deleteChild="deleteChild"
-            :selected="isSelected(child)"
             :element="child" 
             :parentKey="parentKey" 
             :childKey="childKey">

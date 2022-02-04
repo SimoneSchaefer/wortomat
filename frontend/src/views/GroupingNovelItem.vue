@@ -11,7 +11,7 @@
       </SplitterPanel>
       <SplitterPanel class="split-content-right">
         <ScrollPanel style="height: 100%">
-         <!-- <WNovelItemSheetList />-->
+          <WNovelItemSheetList />
         </ScrollPanel>
       </SplitterPanel>
     </Splitter> 
@@ -67,7 +67,6 @@ export default class GroupingNovelItem extends Vue {
 
   get items(): BaseModel[] {
     return this.novelItems.get(this.novelItemKey) || [];
-    // return getAllItems(this.$store.state, this.novelItemKey);
   }
 
   set items(value: BaseModel[]) {

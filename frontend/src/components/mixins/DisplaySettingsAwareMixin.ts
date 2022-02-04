@@ -1,8 +1,16 @@
-import { childKeyForParentKey, DISPLAY_SETTINGS_KEYS, parentKeyForChildKey } from "@/store/keys"
-import { Vue } from "vue-class-component";
+import { childKeyForParentKey, DISPLAY_SETTINGS_KEYS, parentKeyForChildKey, PARENT_ITEM_KEYS } from "@/store/keys"
+import { namespace } from "s-vuex-class";
+import { mixins, Vue } from "vue-class-component";
+import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
 
-export default abstract class DisplaySettingsAwareMixin extends Vue {
- 
+
+const displaySettingsModule = namespace("displaySettings");
+
+export default abstract class DisplaySettingsAwareMixin extends mixins(NovelItemKeyAwareMixin) {
+     
+    @displaySettingsModule.State('_displaySettings')
+    displaySettings!: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>;
+
     get displayImages() {
         return this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_IMAGES);
     }
@@ -22,7 +30,7 @@ export default abstract class DisplaySettingsAwareMixin extends Vue {
         return this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_TAGS);
     }
     private isEnabled(view: DISPLAY_SETTINGS_KEYS): boolean {
-        return this.$store.state.displaySettings[childKeyForParentKey(this.$store.state.activeParentKey)][view];
+        return this.displaySettings[childKeyForParentKey(this.parentKey)][view];
      }
   }
   

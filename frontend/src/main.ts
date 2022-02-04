@@ -62,11 +62,13 @@ import DisplaySettingsModule from './store/DisplaySettingsModule';
 
 import NovelDataModule from './store/NovelDataModule';
 import ApplicationStateModule from './store/ApplicationStateModule';
+import SelectionModule from './store/SelectionModule';
 
 const storeX = createStore({});
 new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
 new NovelDataModule({ store: storeX, name: 'novelData' });
 new ApplicationStateModule({ store: storeX, name: 'applicationState' });
+new SelectionModule({ store: storeX, name: 'selection' });
 
 
 const app = createApp(App)

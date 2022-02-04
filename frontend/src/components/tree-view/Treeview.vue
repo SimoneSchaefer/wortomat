@@ -6,9 +6,7 @@
         @change="parentMoved">
        <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
           <w-tree-view-parent 
-            :item="item" 
-            :parentKey="parentKey" 
-            :childKey="childKey"
+            :item="item"
             :open="isOpen(item)"
             @toggle="toggle($event, item)"
             @updateParentName="updateName(item, $event)"

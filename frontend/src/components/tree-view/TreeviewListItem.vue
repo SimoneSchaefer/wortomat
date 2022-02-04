@@ -36,36 +36,50 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
+import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+import { namespace } from 's-vuex-class';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 
+const selectionModule = namespace("selection");
 
 @Options({
     components: { WMissingValueTolerantLabel, WButton, WConfirmDialog },
     emits: ['delete-child', 'select']
 })
-export default class TreeviewHeader extends Vue {
+export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     @Prop() element: BaseModel;
-    @Prop() selected: boolean;
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+
+    @selectionModule.State('_selectedItemIds')
+    _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+
+    @selectionModule.Action
+    selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
+    get selected(): boolean {
+      return !!((this._selectedItemIds.get(this.parentKey) || []).find(itemId => itemId === this.element.id));
+    }
+
+    select(): void {
+      this.selectItemIds({ view: this.parentKey, itemIds: [ this.element.id ]});
+    }
 
     @Emit('delete-child')
     deleteChild() {
         return this.element;
     }
     
-    @Emit('select')
+    /*@Emit('select')
     select() {
         return this.element;
-    }
+    }*/
 
     confirmDeleteChild(): void {
         (this.$refs.confirmDeleteChild as WConfirmDialog).getDecision(this.element);

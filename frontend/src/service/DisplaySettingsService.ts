@@ -1,24 +1,24 @@
-import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from "@/store/keys";
+import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys";
 
 export class DisplaySettingsService {
     readonly LOCAL_STORAGE_KEY = 'WORTOMAT_DISPLAY_SETTINGS';
 
-    public isVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS): boolean {
+    public isVisible(novelItemKey: PARENT_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS): boolean {
         return this.currentSettings[novelItemKey][settingKey] === true;
     }
 
-    public setVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS, visible: boolean) {
+    public setVisible(novelItemKey: PARENT_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS, visible: boolean) {
         const currentSettings = this.currentSettings;
         currentSettings[novelItemKey][settingKey] = visible;
         this.storeSettings(currentSettings);
         return currentSettings;
     }
 
-    private storeSettings(values: Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
+    private storeSettings(values: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
         localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
     }
 
-    get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> {
+    get currentSettings(): Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> {
         const inLocalStorage = localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS');
         if (!inLocalStorage) {
             this.storeSettings(this.initializeWithDefaultValues());

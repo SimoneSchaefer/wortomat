@@ -4,59 +4,54 @@
     </div>
     <div v-else>
         <div v-for="item in selected" :key="item.id">
-            <NovelItemSheet 
-                :novelItemKey="childKey" 
-                :item="item" 
-                :service="service">
-            </NovelItemSheet>
+            <NovelItemSheet :item="item"></NovelItemSheet>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
+import { namespace } from 's-vuex-class';
 
 import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 import { BaseModel } from '@/models/Base.model';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
-import { NovelItemService } from '@/service/NovelItemService';
-import { KEY_TO_CHILD, KEY_TO_SERVICE } from '@/store/store-api-adapter';
-import { getAllItems } from '@/store/getters';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 import WHelpNote from '@/components/HelpNote.vue';
 import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
-import { ChapterService } from '@/service/Chapter.service';
-import { namespace } from 's-vuex-class';
 
 const novelDataModule = namespace("novelData");
+const selection = namespace("selection");
 
 
 @Options({
   components: { EditableLabel, NovelItemSheet, WHelpNote }
 })
 export default class NovelItemSheetList extends mixins(NovelItemKeyAwareMixin)  {
-    get hasChildItems(): boolean {
-      return !!(getAllItems(this.$store.state, this.parentKey).find(parent => (parent['children'] || []).length ));
+    @novelDataModule.State('_novelItems')
+    novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
+    
+    @selection.State('_selectedItemIds')
+    selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+
+    get items() {
+        return this.novelItems.get(this.parentKey) || [];
     }
 
-    get service(): NovelItemService {
-        // return KEY_TO_SERVICE.get(this.childKey);
-        return new ChapterService();
+    get hasChildItems(): boolean {
+      return !!this.items.find(parent => (parent['children'] || []).length );
     }
 
     get selectedItems(): number[] {
-        return this.$store.state.selection.get(this.childKey) || [];
+        return this.selectedItemIds.get(this.parentKey) || [];
     }
 
     get selected(): BaseModel[] {
-        const ids = this.selectedItems;
-        const all = this.$store.state.novelItems.get(this.parentKey) || [];
-        let allChapters = [];
-        for (let part of all) {
-            allChapters = allChapters.concat((part['children'] || []).filter(chapter => ids.includes(chapter.id)));
+        let allSelectedItems = [];
+        for (let part of this.novelItems.get(this.parentKey)) {
+            allSelectedItems = allSelectedItems.concat((part['children'] || []).filter(chapter => this.selectedItems.includes(chapter.id)));
         }
-        return allChapters;        
+        return allSelectedItems;        
     }
-
 }
 </script>

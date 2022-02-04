@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
 import { BaseModel } from '@/models/Base.model';
@@ -30,6 +30,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
+import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
 
 @Options({
   components: {
@@ -39,9 +40,7 @@ import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'toggle']
 })
-export default class TreeviewHeader extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
 
