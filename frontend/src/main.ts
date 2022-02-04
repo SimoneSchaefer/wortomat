@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store/store'
+// import store from './store/store'
 
 
 // primevue 
@@ -56,10 +56,21 @@ const i18n = createI18n({
     messages // set locale messages
 })
 
+import { createStore } from "vuex";
+import store from './store/store';
+import DisplaySettingsModule from './store/DisplaySettingsModule';
+import NovelModule from './store/NovelModule';
+
+const storeX = createStore({});
+new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
+new NovelModule({ store: storeX, name: 'novel' });
+
+
 const app = createApp(App)
     .use(router)
     .use(PrimeVue)
-    .use(store)
+    //.use(store)
+    .use(storeX)
     .use(i18n)
     .use(ConfirmationService)
     .use(ToastService)

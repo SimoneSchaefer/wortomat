@@ -1,11 +1,14 @@
 <template>
-  <NovelList v-bind:novels="novels" />
+  <NovelList />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import NovelList from '@/components/novels/NovelList.vue'; 
 import { NovelModel} from '@/models/Novel.model';
+import { namespace } from "s-vuex-class";
+
+const novelModule = namespace("novel");
 
 @Options({
   components: {
@@ -13,12 +16,14 @@ import { NovelModel} from '@/models/Novel.model';
   },
 })
 export default class BooksOverview extends Vue {
+  @novelModule.State('_novels')
+  novels!: NovelModel[];
+
   mounted(): void {
-    this.$store.dispatch('loadNovels', this.$route.params.id)
+    this.loadNovels();
   }
 
-  get novels(): NovelModel[] {
-    return this.$store.state.novels;
-  }
+  @novelModule.Action
+  private loadNovels!: () => Promise<void>;
 }
 </script>

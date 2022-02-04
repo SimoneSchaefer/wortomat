@@ -38,7 +38,6 @@ import InlineEdit from '@/components/forms/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import { NovelItemService } from "@/service/NovelItemService";
 import { KEY_TO_CHILD, KEY_TO_SERVICE } from "@/store/store-api-adapter";
-
 @Options({
     components: { InlineEdit, MissingValueTolerantLabel },
     emits: [ 'update-tags' ]
