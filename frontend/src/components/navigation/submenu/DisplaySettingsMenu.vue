@@ -1,35 +1,33 @@
 <template>
-<h1>Display settings</h1>
+<h1>{{ $t('display_settings.header') }}</h1>
 <div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey" class="toggle-switch">
-    <InputSwitch v-bind:modelValue="isEnabled(displaySettingKey)" @input="toggleDisplaySetting($event, displaySettingKey)"></InputSwitch>
-    <div class="label">{{ $t(`display_settings.${displaySettingKey}` ) }}</div>
+    <ToggleSwitch 
+        :enabled="isEnabled(displaySettingKey)" 
+        :label="`display_settings.${displaySettingKey}`"
+        @toggle="toggle($event, displaySettingKey)"></ToggleSwitch>
 </div>
 </template>
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import Navlink from '@/components/navigation/Navlink.vue'
 import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
+import ToggleSwitch from '@/components/forms/ToggleSwitch.vue';
 
 
 
 @Options({
-    components: { Navlink }
+    components: { ToggleSwitch}
 })
 export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, DisplaySettingsAwareMixin) {
    
     private displaySettingService = new DisplaySettingsService();
 
-    toggleDisplaySetting($event, displaySettingKey: DISPLAY_SETTINGS_KEYS) {
+    toggle($event, displaySettingKey: DISPLAY_SETTINGS_KEYS) {
         this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
-    }
-
-    get displaySettingKeys() {
-        return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
     }
 
     isVisible(displaySettingsKey: DISPLAY_SETTINGS_KEYS) {
@@ -43,6 +41,10 @@ export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, 
           item: new BaseModel() 
       });
     } 
+
+    get displaySettingKeys() {
+        return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
+    }
 }
 </script>
 

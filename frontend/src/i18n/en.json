@@ -109,6 +109,7 @@
 
     },
     "display_settings": {
+        "header": "Display settings",
         "SHOW_TITLE": "Show title",
         "SHOW_SUMMARY": "Show summary",
         "SHOW_EXTENDED_SUMMARY": "Show extended summary",
