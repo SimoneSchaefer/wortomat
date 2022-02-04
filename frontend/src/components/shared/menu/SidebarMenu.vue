@@ -64,10 +64,6 @@ export default class WSidebarMenu extends mixins(NovelItemKeyAwareMixin) {
     get parents(): BaseModel[] {
         return getAllItems(this.$store.state, this.parentKey);
     }
-
-    get novelId(): number {
-        return this.$store.getters.openNovelId;
-    } 
         
     private hideSidebar() {
         this.sidebarVisible = false;

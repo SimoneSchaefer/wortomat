@@ -9,9 +9,10 @@ import { CharacterGroupService } from "@/service/CharacterGroupService";
 import { TagService } from "@/service/Tag.service";
 import { TimelineService } from "@/service/TimelineService";
 import { AxiosResponse } from "axios";
-import { NOVEL_ITEM_KEYS } from "./keys";
+import { NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
 import { LocationService } from "@/service/Location.service";
 import { LocationGroupService } from "@/service/LocationGroupService";
+import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 
 export const KEY_TO_SERVICE: Map<NOVEL_ITEM_KEYS,NovelItemService>  = new Map<NOVEL_ITEM_KEYS,NovelItemService>([
     [NOVEL_ITEM_KEYS.TIMELINE, new TimelineService()],
@@ -32,23 +33,14 @@ export const KEY_TO_CHILD: Map<NOVEL_ITEM_KEYS,NOVEL_ITEM_KEYS>  = new Map<NOVEL
     [NOVEL_ITEM_KEYS.CHARACTER_GROUPS, NOVEL_ITEM_KEYS.CHARACTERS],
     [NOVEL_ITEM_KEYS.LOCATION_GROUPS, NOVEL_ITEM_KEYS.LOCATIONS],
 ]);
-
-export function loadItemsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
-    const serviceToUse = KEY_TO_SERVICE.get(key);
-    if (serviceToUse) {
-        return serviceToUse.list(novelId);
-    }
+/*
+export function loadItemsFromBackend(key: PARENT_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
+    return new GroupingNovelItemService().list(key, novelId);
 }
 
-export function loadTagsFromBackend(key: NOVEL_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
-    /*if (key === NOVEL_ITEM_KEYS.TIMELINE) {
-        key = NOVEL_ITEM_KEYS.CHAPTERS; //TODO
-    }*/
-    const serviceToUse = KEY_TO_SERVICE.get(key);
-    if (serviceToUse) {
-        return serviceToUse.tags(novelId);
-    }
-}
+export function loadTagsFromBackend(key: PARENT_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
+    return new GroupingNovelItemService().tags(key, novelId);
+}*/
 
 export function createItemInBackend(key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel, parentId?: number): Promise<AxiosResponse> {
     const serviceToUse = KEY_TO_SERVICE.get(key);

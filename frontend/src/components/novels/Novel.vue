@@ -34,7 +34,7 @@ import { NovelModel } from '@/models/Novel.model';
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 
 
-const novelModule = namespace("novel");
+const novelModule = namespace("novelData");
 
 @Options({
     components: { EditableLabel, ImageGallery, ConfirmDialog }
@@ -46,15 +46,7 @@ export default class Novel extends Vue {
     confirm(): void {
         (this.$refs.confirm as ConfirmDialog).getDecision();
     }
-
-    /*getUploadUrl(): string {
-        return this.service.getUploadUrl(this.novelId, this.item.id);
-    }
-
-    get service() {
-        return new NovelService();
-    }*/
-
+    
     updateName(title: string): void {
         this.updateNovelProperty('name', title)
     }

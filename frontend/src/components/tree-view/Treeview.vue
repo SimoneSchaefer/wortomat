@@ -4,7 +4,7 @@
         class="list-group"
         ghost-class="ghost"
         @change="parentMoved">
-        <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
+       <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
           <w-tree-view-parent 
             :item="item" 
             :parentKey="parentKey" 
@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { namespace } from 's-vuex-class';
 
 import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
@@ -33,14 +33,17 @@ import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 import { childKeyForParentKey, CHILD_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 import { findParentForChild } from '@/store/store.helper';
 
+const novelDataModule = namespace("novelData");
+
 @Options({
   components: { WTreeViewParent}
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
-  @Prop() items: BaseModel[] = [];
+  @novelDataModule.State('_novelItems')
+  novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
-  protected get key(): CHILD_ITEM_KEYS {
-    return this.$store.state.activeParentKey;
+  get items() {
+    return this.novelItems.get(this.parentKey) || [];
   }
 
   toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store

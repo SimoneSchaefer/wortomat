@@ -1,6 +1,6 @@
 <template>
   <ErrorBoundary>
-    <Spinner></Spinner>
+    <!--<Spinner></Spinner>-->
     <Backdrop />
 
     <router-view/>

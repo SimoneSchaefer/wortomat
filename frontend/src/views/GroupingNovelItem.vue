@@ -1,39 +1,40 @@
 <template>
   <div v-if="!items.length && !loading" class="empty">
-    <WHelpNote :itemKey="parentKey"></WHelpNote>
+    <WHelpNote :itemKey="novelItemKey"></WHelpNote>
   </div>
   <div v-else class="grouping-item-view">
-    <Splitter style="height: 100%" :stateKey="parentKey">
+    <Splitter style="height: 100%" :stateKey="novelItemKey">
       <SplitterPanel class="split-content-left" :size="30">
         <ScrollPanel style="height: 100%">
-          <WTreeview :items="items"></WTreeview>
+          <WTreeview></WTreeview>
         </ScrollPanel>
       </SplitterPanel>
       <SplitterPanel class="split-content-right">
         <ScrollPanel style="height: 100%">
-          <WNovelItemSheetList />
+         <!-- <WNovelItemSheetList />-->
         </ScrollPanel>
       </SplitterPanel>
     </Splitter> 
   </div>
   <WSubMenu></WSubMenu>
-
 </template>
 
 <script lang="ts">
-import { mixins, Options } from 'vue-class-component';
+import { Options, Vue } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
+import { namespace } from "s-vuex-class";
 
-import { getAllItems } from '@/store/getters';
-import { BaseModel } from '@/models/Base.model';
 import { PARENT_ITEM_KEYS } from '@/store/keys';
+import { BaseModel } from '@/models/Base.model';
 
 import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
 import WHelpNote from '@/components/HelpNote.vue';
 import WSubMenu from '@/components/navigation/submenu/SubMenu.vue';
-import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
-import { Prop } from 'vue-property-decorator';
+
+const applicationStateModule = namespace("applicationState");
+const novelDataModule = namespace("novelData");
 
 @Options({
   components: {
@@ -44,46 +45,33 @@ import { Prop } from 'vue-property-decorator';
     WSubMenu
   }
 })
-export default class GroupingNovelItem extends mixins(NovelItemKeyAwareMixin) {
+export default class GroupingNovelItem extends Vue {
   @Prop() novelItemKey: PARENT_ITEM_KEYS;
-    
-  activeIndex = [];
 
-  protected get key(): PARENT_ITEM_KEYS {
-    return this.$store.state.activeParentKey;
-  }
+  @novelDataModule.State('_novelItems')
+  novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
+
+  @novelDataModule.State('_loading')
+  loading!: boolean;
 
   mounted(): void {
-    this.$store.dispatch('setActiveParentKey', { parentKey: this.novelItemKey }); 
-    this.$store.dispatch('loadItems', { key: this.novelItemKey, novelId: this.$route.params.id }); 
+    this.setActiveView(this.novelItemKey); // TODO: Move this to link click
+    this.loadNovelItems({ view: this.novelItemKey, novelId: this.$route.params.id});
   }
 
-  isSelected(item: BaseModel) {
-    const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
-    if (isSelected) {
-      const parentIndex = this.items.findIndex(parent => parent.id === item.parentId);
-      if (!this.activeIndex.includes(parentIndex)) {
-        this.activeIndex.push(parentIndex);
-      }
-    }
-    return isSelected;
-  }
+  @applicationStateModule.Action
+  setActiveView!: (view: PARENT_ITEM_KEYS) => Promise<void>;
 
-  selectChild(item: BaseModel) {
-    this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
-  }
+  @novelDataModule.Action
+  loadNovelItems!: ({ view: PARENT_ITEM_KEYS, novelId: number }) => Promise<void>;
 
-  get loading(): boolean {
-    return this.$store.state.loading;
-  }
-  get selectedItems(): number[] {
-    return this.$store.state.selection.get(this.childKey) || [];
-  }
   get items(): BaseModel[] {
-      return getAllItems(this.$store.state, this.parentKey);
+    return this.novelItems.get(this.novelItemKey) || [];
+    // return getAllItems(this.$store.state, this.novelItemKey);
   }
+
   set items(value: BaseModel[]) {
-      this.$store.dispatch('updateOrder', { key: this.parentKey, novelId: this.$store.getters.openNovelId, newOrder: value });
+    this.$store.dispatch('updateOrder', { key: this.novelItemKey, novelId: this.$store.getters.openNovelId, newOrder: value });
   } 
 }       
 </script>

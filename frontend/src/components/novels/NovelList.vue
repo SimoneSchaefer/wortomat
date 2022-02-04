@@ -26,7 +26,7 @@ import { namespace } from "s-vuex-class";
 import { NovelModel } from '@/models/Novel.model';
 import Novel from '@/components/novels/Novel.vue'; 
 
-const novelModule = namespace("novel");
+const novelModule = namespace("novelData");
 
 @Options({ 
   components: { 

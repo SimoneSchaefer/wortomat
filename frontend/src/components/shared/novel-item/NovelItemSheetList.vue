@@ -26,6 +26,10 @@ import { getAllItems } from '@/store/getters';
 import WHelpNote from '@/components/HelpNote.vue';
 import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
 import { ChapterService } from '@/service/Chapter.service';
+import { namespace } from 's-vuex-class';
+
+const novelDataModule = namespace("novelData");
+
 
 @Options({
   components: { EditableLabel, NovelItemSheet, WHelpNote }

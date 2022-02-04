@@ -3,7 +3,7 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, loadItemsFromBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend, loadTagsFromBackend } from "./store-api-adapter";
+import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
@@ -19,42 +19,12 @@ const setLoading = (context: ActionContext<IState,IState>, loading: boolean) => 
 const setModalOpen = (context: ActionContext<IState,IState>, payload: { isOpen: boolean}): void => {
   context.commit('setModalOpen', payload)        
 }
-
-const openNovel = (context: ActionContext<IState,IState>, novelId: number): void => {
-  context.commit('novelOpened', { id: novelId });
- }
-
-const addNovel = (context: ActionContext<IState,IState>, novel: NovelModel): void => {
-  new NovelService().create(novel).then(result => {
-    context.commit('novelAdded', result.data);
-  });
-}
-
-const updateNovel = (context: ActionContext<IState,IState>, novel: NovelModel): void => {
-  new NovelService().update(novel).then(result => {
-    context.commit('novelUpdated', result.data);
-  });
-}
-  
-const deleteNovel = (context: ActionContext<IState,IState>, novel: NovelModel): void => {
-  new NovelService().delete(novel).then(() => {
-    context.commit('novelDeleted', novel);
-  });
-}
-
-const loadNovels = (context: ActionContext<IState,IState>): void => {
-  setLoading(context, true);
-  new NovelService().getAll().then(result => {
-    context.commit('novelsLoaded', result.data)
-    setLoading(context, false);
-  });  
-}
-
+/*
 const setActiveParentKey = (context: ActionContext<IState, IState>, payload: { parentKey: PARENT_ITEM_KEYS }): void => {
   context.commit('parentItemKeySelected', payload.parentKey );
-}
+}*/
 
-const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number }): void => {
+/*const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number }): void => {
   const { key, novelId } = payload;
   setLoading(context, true);
 
@@ -68,7 +38,7 @@ const loadItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_
     selectFirstItemIfNecessary(context, key, loadedItems) ;
     setLoading(context, false);
   });
-}
+}*/
 
 const selectItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     context.commit('itemsSelected', payload)        
@@ -155,12 +125,6 @@ const selectFirstItemIfNecessary = (context: ActionContext<IState,IState>, key: 
 
 
 export default {
-    openNovel,
-    setActiveParentKey,
-    addNovel,
-    updateNovel,
-    deleteNovel,
-    loadNovels,
     selectItems,
     addItem,
     updateItem,
@@ -168,7 +132,6 @@ export default {
     updateOrder,
     moveParent,
     moveChild,
-    loadItems,
     filterTags,
     addReference,
     deleteReference,

@@ -59,11 +59,14 @@ const i18n = createI18n({
 import { createStore } from "vuex";
 import store from './store/store';
 import DisplaySettingsModule from './store/DisplaySettingsModule';
-import NovelModule from './store/NovelModule';
+
+import NovelDataModule from './store/NovelDataModule';
+import ApplicationStateModule from './store/ApplicationStateModule';
 
 const storeX = createStore({});
 new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
-new NovelModule({ store: storeX, name: 'novel' });
+new NovelDataModule({ store: storeX, name: 'novelData' });
+new ApplicationStateModule({ store: storeX, name: 'applicationState' });
 
 
 const app = createApp(App)

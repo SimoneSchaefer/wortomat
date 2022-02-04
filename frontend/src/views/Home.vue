@@ -8,7 +8,7 @@ import NovelList from '@/components/novels/NovelList.vue';
 import { NovelModel} from '@/models/Novel.model';
 import { namespace } from "s-vuex-class";
 
-const novelModule = namespace("novel");
+const novelModule = namespace("novelData");
 
 @Options({
   components: {

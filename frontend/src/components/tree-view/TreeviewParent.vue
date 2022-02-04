@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
 import { BaseModel } from '@/models/Base.model';
@@ -33,6 +33,7 @@ import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
+import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
 
 @Options({
   components: {
@@ -44,9 +45,7 @@ import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle']
 })
-export default class TreeviewParent extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
 
@@ -82,11 +81,12 @@ export default class TreeviewParent extends Vue {
 
 
     isSelected(item: BaseModel) {
-        const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
+        /*const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
         if (isSelected) {
             this.openParentIfNecessary();
         }
-        return isSelected;
+        return isSelected;*/
+        return true;
     }
     
     selectChild(item: BaseModel) {
@@ -98,7 +98,8 @@ export default class TreeviewParent extends Vue {
         return this.open;
     }
     get selectedItems(): number[] {
-        return this.$store.state.selection.get(this.childKey) || [];
+        return [];
+        // return this.$store.state.selection.get(this.childKey) || [];
     }
   
     private openParentIfNecessary() {
