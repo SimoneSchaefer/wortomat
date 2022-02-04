@@ -19,9 +19,9 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
-import TipTap from '../wysisyg/TipTap.vue'
-import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
+import InlineEdit from '@/components/forms/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
+import TipTap from '@/components/shared/wysisyg/TipTap.vue';
 
 @Options({
     components: { TipTap, InlineEdit, MissingValueTolerantLabel},

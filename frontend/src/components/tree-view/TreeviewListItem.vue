@@ -43,7 +43,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 
 

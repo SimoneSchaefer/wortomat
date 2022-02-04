@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { TagModel } from "@/models/Tag.model";
-import EditableTag from "@/components/shared/inline-edit/EditableTag.vue";
+import EditableTag from "@/components/forms/inline-edit/EditableTag.vue";
 import { Options, Vue } from "vue-class-component";
 
 @Options({

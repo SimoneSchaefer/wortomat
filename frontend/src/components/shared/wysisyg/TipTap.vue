@@ -36,7 +36,7 @@ import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 
 import TodoMarker from './todo-marker'
-import AppButton from '@/components/shared/Button.vue'
+import AppButton from '@/components/forms/Button.vue'
 
 
 @Options({

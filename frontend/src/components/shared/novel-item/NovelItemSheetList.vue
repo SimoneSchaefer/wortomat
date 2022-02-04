@@ -16,7 +16,7 @@
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
 
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import NovelItemSheet from '@/components/shared/novel-item/NovelItemSheet.vue';
 import { BaseModel } from '@/models/Base.model';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';

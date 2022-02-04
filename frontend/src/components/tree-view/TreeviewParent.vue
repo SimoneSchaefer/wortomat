@@ -27,9 +27,9 @@ import { Emit, Prop } from 'vue-property-decorator';
 import { BaseModel } from '@/models/Base.model';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-import WEditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';

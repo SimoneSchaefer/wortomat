@@ -17,7 +17,7 @@
 <script lang="ts">
 import { mixins, Options } from "vue-class-component";
 
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WSidebarOpener from '@/components/shared/menu/SidebarOpener.vue';
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';

@@ -34,7 +34,7 @@ import { TagService } from "@/service/Tag.service";
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
-import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
+import InlineEdit from '@/components/forms/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import { NovelItemService } from "@/service/NovelItemService";
 import { KEY_TO_CHILD, KEY_TO_SERVICE } from "@/store/store-api-adapter";

@@ -30,18 +30,6 @@ export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, 
         this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
     }
 
-    isVisible(displaySettingsKey: DISPLAY_SETTINGS_KEYS) {
-        return this.$store.state.displaySettings[this.childKey][displaySettingsKey] === true;
-    }
-
-    addParent(): void {
-      this.$store.dispatch('addItem', { 
-          key: this.parentKey, 
-          novelId: this.novelId, 
-          item: new BaseModel() 
-      });
-    } 
-
     get displaySettingKeys() {
         return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
     }

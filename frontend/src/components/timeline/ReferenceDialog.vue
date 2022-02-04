@@ -65,9 +65,9 @@ import { Emit, Prop } from "vue-property-decorator";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { BaseModel } from "@/models/Base.model";
 
-import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
-import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
-import WButton from "@/components/shared/Button.vue";
+import EditableDate from "@/components/forms/inline-edit/EditableDate.vue";
+import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
+import WButton from "@/components/forms/Button.vue";
 import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";

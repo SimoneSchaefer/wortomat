@@ -23,9 +23,9 @@ import { Prop } from 'vue-property-decorator';
 import { BaseModel } from '@/models/Base.model';
 
 import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
-import EditableText from '@/components/shared/inline-edit/EditableText.vue';
-import EditableTags from '@/components/shared/inline-edit/EditableTags.vue';
+import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
+import EditableText from '@/components/forms/inline-edit/EditableText.vue';
+import EditableTags from '@/components/forms/inline-edit/EditableTags.vue';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import { NovelItemService } from '@/service/NovelItemService';

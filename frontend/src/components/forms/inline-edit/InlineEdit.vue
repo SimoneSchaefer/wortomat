@@ -21,7 +21,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
-import AppButton from "@/components/shared/Button.vue";
+import AppButton from "@/components/forms/Button.vue";
 
 @Options({
     components: { AppButton },

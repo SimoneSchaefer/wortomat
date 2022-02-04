@@ -12,8 +12,8 @@
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
-import EditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import InlineEdit from '@/components/forms/inline-edit/InlineEdit.vue';
+import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 
 @Options({
     components: { InlineEdit, MissingValueTolerantLabel, EditableLabel },

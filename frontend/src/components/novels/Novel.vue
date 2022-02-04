@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
-import EditableLabel from '../shared/inline-edit/EditableLabel.vue';
+import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
 import { NovelService } from '@/service/NovelService';
 
