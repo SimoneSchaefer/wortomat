@@ -13,7 +13,7 @@
             </div>
         </div>
         <hr>
-        <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent"></EditableText>        
+        <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent(item, $event)"></EditableText>        
     </div>
 </template>
 

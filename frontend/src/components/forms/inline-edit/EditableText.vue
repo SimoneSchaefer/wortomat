@@ -53,13 +53,13 @@ export default class EditableLabel extends Vue {
 
     @Emit('update-text')
     updateText(content: string): string {
-    this.editing = false;
-    return content;
+        this.editing = false;
+        return content;
     }
 
 
     private discard(): void {
-    this.editing = false;
+        this.editing = false;
     }
 
     private getCurrentContent(): string {
