@@ -23,13 +23,11 @@
 import { mixins, Options } from 'vue-class-component';
 import { namespace } from 's-vuex-class';
 
-import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
-import { childKeyForParentKey, CHILD_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
-import { findParentForChild } from '@/store/store.helper';
 
 const novelDataModule = namespace("novelData");
 
@@ -39,7 +37,6 @@ const novelDataModule = namespace("novelData");
 export default class Treeview extends mixins(UpdatableItemMixin) {
   @novelDataModule.State('_novelItems')
   novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
-
 
   @novelDataModule.Action
   updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
@@ -79,7 +76,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     const child = new BaseModel();
     child.parentId = selectedParent.id;
     this.addNovelItem({ view: this.parentKey, novelItem: child });
-    // TODO: this.toggleState.set(selectedParent.id, true);*/
+    this.toggleState.set(selectedParent.id, true);
   }
 
   childMoved($event): void {
@@ -107,14 +104,6 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
       parentId: parentId,
       oldPosition: oldIndex,
       newPosition: newIndex
-    });
-  }
-
-  private deleteItem(key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel) {
-    this.$store.dispatch('deleteItems', { 
-      key: key, 
-      novelId: this.$store.state.currentNovel?.id,
-      items: [item]
     });
   }
 }

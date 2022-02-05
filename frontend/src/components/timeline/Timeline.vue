@@ -44,10 +44,9 @@ import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
-import { ChapterService } from "@/service/Chapter.service";
-import { ResearchService } from "@/service/Research.service";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WReferenceDialog from '@/components/timeline/ReferenceDialog.vue';
+import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 
 @Options({
   components: {
@@ -109,22 +108,6 @@ export default class WTimeline extends Vue {
 
     get novelItemKey() {
         return NOVEL_ITEM_KEYS.TIMELINE;
-    }
-
-    get chapterNovelItemKey() {
-        return NOVEL_ITEM_KEYS.CHAPTERS;
-    }
-
-    get researchNovelItemKey() {
-        return NOVEL_ITEM_KEYS.RESEARCH;
-    }
-
-    get chapterService() {
-        return new ChapterService();
-    }
-    
-    get researchService() {
-        return new ResearchService();
     }
 }
 </script>

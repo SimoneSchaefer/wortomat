@@ -72,7 +72,6 @@ import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-import { KEY_TO_CHILD } from "@/store/store-api-adapter";
 
 @Options({
   components: {
@@ -135,7 +134,8 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   }
 
   getParentKey(childKey: NOVEL_ITEM_KEYS) {
-    return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
+    return null;
+    // return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
   }
 
   deleteReference(item: BaseModel, key: NOVEL_ITEM_KEYS) {

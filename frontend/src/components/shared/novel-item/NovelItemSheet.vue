@@ -22,7 +22,6 @@ import { mixins, Options } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
 
 import { BaseModel } from '@/models/Base.model';
-import { NovelItemService } from '@/service/NovelItemService';
 import { CHILD_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
 
 import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
@@ -32,6 +31,7 @@ import EditableTags from '@/components/forms/inline-edit/EditableTags.vue';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import { namespace } from 's-vuex-class';
+import { GroupingNovelItemService } from '@/service/GroupingNovelItemService';
 
 
 const novelDataModule = namespace("novelData");
@@ -40,7 +40,6 @@ const novelDataModule = namespace("novelData");
   components: { EditableLabel, EditableText, EditableTags, NovelItemSheet, ImageGallery }
 })
 export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySettingsAwareMixin) {
-    @Prop() service!: NovelItemService;
     @Prop() item!: BaseModel;
 
     @novelDataModule.Action
@@ -52,7 +51,7 @@ export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySe
     }
 
     deleteImage(image: ImageParam): void {
-        this.service.deleteImage(this.novelId, this.item.parentId, this.item.id, image.imageId).then((response) => {
+        this.service.deleteImage(this.parentKey, this.novelId, this.item.parentId, this.item.id, image.imageId).then((response) => {
             this.updateImages(this.item, response.data.images);
         });
     }
@@ -78,11 +77,15 @@ export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySe
     } 
 
     getUploadUrl(): string {
-        return this.service.getUploadUrl(this.novelId, this.item.parentId, this.item.id);
+        return this.service.getUploadUrl(this.parentKey, this.novelId, this.item.parentId, this.item.id);
     }
 
     getImageUrl(fileId: number): string {
-        return this.service.getImageUrl(this.novelId, this.item.parentId, this.item.id, fileId);
+        return this.service.getImageUrl(this.parentKey, this.novelId, this.item.parentId, this.item.id, fileId);
+    }
+
+    get service() {
+        return new GroupingNovelItemService();
     }
  
 
