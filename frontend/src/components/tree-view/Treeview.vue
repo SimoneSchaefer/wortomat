@@ -30,6 +30,7 @@ import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 
 const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
 
 @Options({
   components: { WTreeViewParent}
@@ -46,7 +47,6 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
 
   @novelDataModule.Action
   deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
-
 
   get items() {
     return this.novelItems.get(this.parentKey) || [];

@@ -63,6 +63,14 @@ export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     @selectionModule.Action
     selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
 
+    mounted() {
+      this.$store.subscribe((mutation) => {
+        if (mutation.type === 'novelData/novelItemAdded') { //TODO move to parent component
+          this.selectItemIds({ view: this.parentKey, itemIds: [ mutation.payload.novelItem.id ]} );
+        }
+      });
+    }
+
     get selected(): boolean {
       return !!((this._selectedItemIds.get(this.parentKey) || []).find(itemId => itemId === this.element.id));
     }
