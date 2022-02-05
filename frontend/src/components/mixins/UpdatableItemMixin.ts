@@ -1,14 +1,14 @@
 import { BaseModel } from "@/models/Base.model"
 import { TagModel } from "@/models/Tag.model";
-import { CHILD_ITEM_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys"
+import { PARENT_ITEM_KEYS } from "@/store/keys"
+
 import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
 
+export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin { 
 
+    // This needs to be implemented in the base component, as the auto-injection of @Action does not work in mixins
+    abstract updateNovelItem: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
 
-export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin {  
-
-    // protected abstract key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS;
-    
     updateTags(oldItem: BaseModel, newTags: TagModel[]): void {
         this.updateItem(oldItem, { tags: newTags});
     }
@@ -33,13 +33,9 @@ export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin {
         this.updateItem(oldItem, { images: images});
     }   
 
-    updateItem (oldItem: BaseModel, overrideValues: Record<string,any> ) {      
-        this.$store.dispatch('updateItem', { 
-            key: this.parentKey, 
-            novelId: this.novelId,
-            oldItem: oldItem,
-            overrideValues: overrideValues
-        })  
-    } 
+    updateItem (oldItem: BaseModel, overrideValues: Record<string,any> ) {  
+        const newItem =  Object.assign({}, oldItem, overrideValues);  
+        this.updateNovelItem({  view: this.parentKey, novelItem: newItem });  
+    }     
  }
   

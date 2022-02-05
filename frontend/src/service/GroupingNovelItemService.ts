@@ -58,8 +58,8 @@ export class GroupingNovelItemService {
         return API.put(`/novels/${novelId}/${this.getAPIPath(view, parentId)}/`, item)
     } 
 
-    public create(view: PARENT_ITEM_KEYS, novelId: number, item: BaseModel, parentId?: number): Promise<AxiosResponse> {
-        return API.post(`/novels/${novelId}/${this.getAPIPath(view, parentId)}/`, item)
+    public create(view: PARENT_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {
+        return API.post(`/novels/${novelId}/${this.getAPIPath(view, item.parentId)}/`, item)
     }
 
     public delete(view: PARENT_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {

@@ -7,7 +7,7 @@ export default class SelectionModule extends VuexModule {
   private _selectedItemIds: Map<PARENT_ITEM_KEYS,number[]> = new Map(); 
 
   @Mutation
-  public itemsSelected(update: { view: PARENT_ITEM_KEYS, itemIds: number[] }) {
+  public itemsSelected(update: { view: PARENT_ITEM_KEYS, itemIds: number[] }): void {
     this._selectedItemIds.set(update.view, update.itemIds);
   }
 

@@ -40,16 +40,16 @@ const setActiveParentKey = (context: ActionContext<IState, IState>, payload: { p
   });
 }*/
 
-const selectItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
+/*const selectItems = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
     context.commit('itemsSelected', payload)        
-}
+}*/
 
 const addItem = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel }): void => {
   const { key, novelId, item } = payload;  
   createItemInBackend(key, novelId, item, item.parentId).then(result => {
     result.data.parentId = item.parentId;
     context.commit('itemAdded', { key: key, item: result.data });
-    if (!KEY_TO_CHILD.has(key)) selectItems(context, { key: key, items: [result.data] });
+   // if (!KEY_TO_CHILD.has(key)) selectItems(context, { key: key, items: [result.data] });
   });  
 }
 
@@ -66,12 +66,12 @@ const deleteItems = async (context: ActionContext<IState,IState>, update: { key:
     const deleted = await deleteItemsInBackend(key, novelId, items);
     context.commit('itemsDeleted', { key: key, items: deleted })
 }
-
+/*
 const updateDisplaySettings = (context: ActionContext<IState, IState>, update: { novelItemKey: NOVEL_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}) => {
   const { novelItemKey, displaySettingKey, value} = update;
   const newSettings = new DisplaySettingsService().setVisible(novelItemKey, displaySettingKey, value);
   context.commit('displaySettingsUpdated', newSettings);
-}
+}*/
 
 const moveChild = async (context: ActionContext<IState,IState>, update: { 
   key: NOVEL_ITEM_KEYS, 
@@ -136,6 +136,5 @@ export default {
     addReference,
     deleteReference,
     setModalOpen,
-    updateDisplaySettings
 }
 

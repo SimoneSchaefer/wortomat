@@ -40,6 +40,14 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   @novelDataModule.State('_novelItems')
   novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
+
+  @novelDataModule.Action
+  updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+
   get items() {
     return this.novelItems.get(this.parentKey) || [];
   }
@@ -67,12 +75,8 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   addChild(selectedParent: BaseModel): void {
     const child = new BaseModel();
     child.parentId = selectedParent.id;
-    this.$store.dispatch('addItem', { 
-        key: this.childKey, 
-        novelId: this.novelId, 
-        item: child,
-    });
-    this.toggleState.set(selectedParent.id, true);
+    this.addNovelItem({ view: this.parentKey, novelItem: child });
+    // TODO: this.toggleState.set(selectedParent.id, true);*/
   }
 
   childMoved($event): void {

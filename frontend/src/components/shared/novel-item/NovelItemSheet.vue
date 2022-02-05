@@ -20,7 +20,10 @@
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
+
 import { BaseModel } from '@/models/Base.model';
+import { NovelItemService } from '@/service/NovelItemService';
+import { CHILD_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
 
 import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
 import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
@@ -28,15 +31,21 @@ import EditableText from '@/components/forms/inline-edit/EditableText.vue';
 import EditableTags from '@/components/forms/inline-edit/EditableTags.vue';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
-import { NovelItemService } from '@/service/NovelItemService';
-import { CHILD_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
+import { namespace } from 's-vuex-class';
+
+
+const novelDataModule = namespace("novelData");
 
 @Options({
   components: { EditableLabel, EditableText, EditableTags, NovelItemSheet, ImageGallery }
 })
-export default class NovelItemSheet extends mixins(DisplaySettingsAwareMixin, UpdatableItemMixin) {
+export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySettingsAwareMixin) {
     @Prop() service!: NovelItemService;
     @Prop() item!: BaseModel;
+
+    @novelDataModule.Action
+    updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
 
     protected get key(): CHILD_ITEM_KEYS {
         return PARENT_TO_CHILD.get(this.$store.state.activeParentKey);
@@ -66,8 +75,7 @@ export default class NovelItemSheet extends mixins(DisplaySettingsAwareMixin, Up
             }
             return obj;
         }); 
-    }
- 
+    } 
 
     getUploadUrl(): string {
         return this.service.getUploadUrl(this.novelId, this.item.parentId, this.item.id);

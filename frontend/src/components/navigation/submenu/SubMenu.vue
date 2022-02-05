@@ -27,19 +27,24 @@ import Navlink from '@/components/navigation/Navlink.vue'
 import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
 import FilterMenu from '@/components/navigation/submenu/FilterMenu.vue'
 import ExportMenu from '@/components/navigation/submenu/ExportMenu.vue'
-import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from '@/store/keys';
+import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
+import { namespace } from 's-vuex-class';
 
 
 type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';
+const novelDataModule = namespace("novelData");
 
 @Options({
     components: { Navlink, DisplaySettingsMenu, FilterMenu, ExportMenu }
 })
 export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
-   
+
+    @novelDataModule.Action
+    addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+  
     private displaySettingService = new DisplaySettingsService();
 
     filter_visible = false;
@@ -77,13 +82,8 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
         return this.$store.state.displaySettings[this.childKey][displaySettingsKey] === true;
     }
 
-
     addParent(): void {
-      this.$store.dispatch('addItem', { 
-          key: this.parentKey, 
-          novelId: this.novelId, 
-          item: new BaseModel() 
-      });
+        this.addNovelItem({ view: this.parentKey, novelItem: new BaseModel()});
     }
 }
 </script>
