@@ -7,7 +7,7 @@ import { BACKEND_URL } from './Env';
 
 export class GroupingNovelItemService {
     getAPIPath(view: PARENT_ITEM_KEYS, parentId?: number): string {
-        const apiPathParts = [view.toLocaleLowerCase()];
+        const apiPathParts = [view.toLocaleLowerCase().replaceAll('_', '-')];
         if (parentId) {
             apiPathParts.push(`${parentId}`);
             apiPathParts.push(childKeyForParentKey(view).toLocaleLowerCase());
