@@ -47,6 +47,9 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   @novelDataModule.Action
   addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
 
+  @novelDataModule.Action
+  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
 
   get items() {
     return this.novelItems.get(this.parentKey) || [];
@@ -63,13 +66,13 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
 
   deleteParent(item: BaseModel) {
-    this.deleteItem(this.parentKey, item);
+    this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
 
   deleteChild(item: BaseModel) {
-    const parent = findParentForChild(this.$store.state, childKeyForParentKey(this.$store.state.activeParentKey), item);
-    item.parentId = parent?.id || undefined;
-    this.deleteItem(this.childKey, item);
+    const parent = this.novelItems.get(this.parentKey).find(parent => parent.id === item.parentId);
+    item.parentId = parent?.id || -1;
+    this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
 
   addChild(selectedParent: BaseModel): void {

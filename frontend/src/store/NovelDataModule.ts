@@ -59,6 +59,18 @@ export default class NovelDataModule extends VuexModule {
         } 
     }
 
+    @Mutation
+    public novelItemDeleted(update: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }): void {
+        if (update.novelItem.parentId) {
+            const parent = this.findParentForChild(update.view, update.novelItem);
+            const index = parent['children'].findIndex(child => child.id === update.novelItem.id);
+            parent['children'].splice(index, 1);
+        } else {
+            const index = this._novelItems.get(update.view).findIndex(parent => parent.id === update.novelItem.id);
+            this._novelItems.get(update.view).splice(index, 1);
+        } 
+    }
+
 
     @Mutation
     public novelsLoaded(novels: NovelModel[]): void {
@@ -124,6 +136,13 @@ export default class NovelDataModule extends VuexModule {
     public async addNovelItem(payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }): Promise<void> {
         this._groupingNovelItemService.create(payload.view, this._novelId, payload.novelItem).then(result => {
             this.novelItemAdded({ view: payload.view, novelItem: result.data });
+        });
+    }
+
+    @Action
+    public async deleteNovelItem(payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }): Promise<void> {
+        this._groupingNovelItemService.delete(payload.view, this._novelId, payload.novelItem).then(() => {
+            this.novelItemDeleted({ view: payload.view, novelItem: payload.novelItem });
         });
     }
 
