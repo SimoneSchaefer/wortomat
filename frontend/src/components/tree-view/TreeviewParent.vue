@@ -88,7 +88,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
 
 
     isSelected(item: BaseModel) {
-        const isSelected = this._selectedItemIds.get(this.parentKey).find(id => id === item.id);
+        const isSelected = (this._selectedItemIds.get(this.parentKey) || []).find(id => id === item.id);
         if (isSelected) {
             this.openParentIfNecessary();
         }
@@ -96,7 +96,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     }
     
     selectChild(item: BaseModel) {
-        this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
+        this.selectItemIds({ view: this.parentKey, itemIds: [item.id] });
     }
 
 
