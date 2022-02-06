@@ -45,8 +45,6 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
     @novelDataModule.Action
     addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
   
-    private displaySettingService = new DisplaySettingsService();
-
     filter_visible = false;
     export_visible = false;
     display_settings_visible = false;
@@ -54,14 +52,6 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
     setVisible(flag: visible_flags) {
         this.setAllInvisible();
         this[flag] = true;
-    }
-
-    toggleDisplaySetting($event, displaySettingKey: DISPLAY_SETTINGS_KEYS) {
-        this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
-    }
-
-    get displaySettingKeys() {
-        return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
     }
 
     get sidebarVisible() {
@@ -76,10 +66,6 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
         this.filter_visible = false;
         this.export_visible = false;
         this.display_settings_visible = false;
-    }
-
-    isVisible(displaySettingsKey: DISPLAY_SETTINGS_KEYS) {
-        return this.$store.state.displaySettings[this.childKey][displaySettingsKey] === true;
     }
 
     addParent(): void {

@@ -10,24 +10,28 @@
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from '@/store/keys';
+import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import ToggleSwitch from '@/components/forms/ToggleSwitch.vue';
+import { namespace } from 's-vuex-class';
 
 
+const displaySettingsModule = namespace('displaySettings');
 
 @Options({
     components: { ToggleSwitch}
 })
 export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, DisplaySettingsAwareMixin) {
-   
     private displaySettingService = new DisplaySettingsService();
 
+    @displaySettingsModule.Action
+    setVisible!: (payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}) => Promise<void>;
+
     toggle($event, displaySettingKey: DISPLAY_SETTINGS_KEYS) {
-        this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
+        this.setVisible({ novelItemKey: this.parentKey, displaySettingKey: displaySettingKey, value: $event})
     }
 
     get displaySettingKeys() {

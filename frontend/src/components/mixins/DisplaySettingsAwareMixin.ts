@@ -30,7 +30,7 @@ export default abstract class DisplaySettingsAwareMixin extends mixins(NovelItem
         return this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_TAGS);
     }
     private isEnabled(view: DISPLAY_SETTINGS_KEYS): boolean {
-        return this.displaySettings[childKeyForParentKey(this.parentKey)][view];
+        return this.displaySettings[this.parentKey][view];
      }
   }
   

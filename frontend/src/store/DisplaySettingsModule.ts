@@ -16,8 +16,8 @@ export default class DisplaySettingsModule extends VuexModule {
   }
 
   @Action
-  public async setVisible(update: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}): Promise<void> {
-    const { novelItemKey, displaySettingKey, value} = update;
+  public async setVisible(payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}): Promise<void> {
+    const { novelItemKey, displaySettingKey, value} = payload;
     const newSettings = new DisplaySettingsService().setVisible(novelItemKey, displaySettingKey, value);
     this.updateDisplaySettings(newSettings);
   }
