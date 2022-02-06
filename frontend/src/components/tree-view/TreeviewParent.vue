@@ -12,18 +12,18 @@
             @select="selectChild"
             @deleteChild="deleteChild"
             :element="child" 
-            :parentKey="parentKey" 
-            :childKey="childKey">
+            :selected="isSelected(child)">
         </WTreeviewListItem>    
     </draggable>
 </template>
 
 <script lang="ts">
-import { mixins, Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
+import { namespace } from 's-vuex-class';
 
 import { BaseModel } from '@/models/Base.model';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
@@ -32,6 +32,8 @@ import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+
+const selectionModule = namespace("selection");
 
 @Options({
   components: {
@@ -46,6 +48,13 @@ import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
 export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
+
+    @selectionModule.State('_selectedItemIds')
+    _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+
+    @selectionModule.Action
+    selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
 
     @Emit('delete-parent')
     deleteParent() {
@@ -79,12 +88,11 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
 
 
     isSelected(item: BaseModel) {
-        /*const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
+        const isSelected = this._selectedItemIds.get(this.parentKey).find(id => id === item.id);
         if (isSelected) {
             this.openParentIfNecessary();
         }
-        return isSelected;*/
-        return true;
+        return isSelected;
     }
     
     selectChild(item: BaseModel) {

@@ -45,49 +45,24 @@ import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerant
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
-import { namespace } from 's-vuex-class';
-import { PARENT_ITEM_KEYS } from '@/store/keys';
-
-const selectionModule = namespace("selection");
 
 @Options({
     components: { WMissingValueTolerantLabel, WButton, WConfirmDialog },
     emits: ['delete-child', 'select']
 })
-export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
-    @Prop() element: BaseModel;
-
-    @selectionModule.State('_selectedItemIds')
-    _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
-
-    @selectionModule.Action
-    selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
-
-    mounted() {
-      this.$store.subscribe((mutation) => {
-        if (mutation.type === 'novelData/novelItemAdded') { //TODO move to parent component
-          this.selectItemIds({ view: this.parentKey, itemIds: [ mutation.payload.novelItem.id ]} );
-        }
-      });
-    }
-
-    get selected(): boolean {
-      return !!((this._selectedItemIds.get(this.parentKey) || []).find(itemId => itemId === this.element.id));
-    }
-
-    select(): void {
-      this.selectItemIds({ view: this.parentKey, itemIds: [ this.element.id ]});
-    }
+export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
+    @Prop() element!: BaseModel;
+    @Prop() selected!: boolean;
 
     @Emit('delete-child')
     deleteChild() {
         return this.element;
     }
     
-    /*@Emit('select')
+    @Emit('select')
     select() {
         return this.element;
-    }*/
+    }
 
     confirmDeleteChild(): void {
         (this.$refs.confirmDeleteChild as WConfirmDialog).getDecision(this.element);

@@ -30,6 +30,7 @@ import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 
 const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
 
 @Options({
   components: { WTreeViewParent}
@@ -37,6 +38,20 @@ const novelDataModule = namespace("novelData");
 export default class Treeview extends mixins(UpdatableItemMixin) {
   @novelDataModule.State('_novelItems')
   novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
+
+  @selectionModule.State('_selectedItemIds')
+  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+
+  @selectionModule.Action
+  selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
+  mounted() {
+    this.$store.subscribe((mutation) => {
+      if (mutation.type === 'novelData/novelItemAdded') { //TODO move to parent component
+        this.selectItemIds({ view: this.parentKey, itemIds: [ mutation.payload.novelItem.id ]} );
+      }
+    });
+  }
 
   @novelDataModule.Action
   updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
