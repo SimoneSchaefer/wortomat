@@ -3,7 +3,6 @@ import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
 import { NovelService } from "@/service/NovelService";
 import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
-import { createItemInBackend, updateItemInBackend, deleteItemsInBackend, updatePositionsInBackend, KEY_TO_CHILD, moveChildInBackend, moveParentInBackend } from "./store-api-adapter";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
@@ -44,6 +43,8 @@ const setActiveParentKey = (context: ActionContext<IState, IState>, payload: { p
     context.commit('itemsSelected', payload)        
 }*/
 
+
+/*
 const addItem = (context: ActionContext<IState,IState>, payload: { key: NOVEL_ITEM_KEYS, novelId: number, item: BaseModel }): void => {
   const { key, novelId, item } = payload;  
   createItemInBackend(key, novelId, item, item.parentId).then(result => {
@@ -80,8 +81,8 @@ const moveChild = async (context: ActionContext<IState,IState>, update: {
   newParentId: number,
   newPosition: number
   }): Promise<void> => {
-    const newOrder = await moveChildInBackend(update.key, update.novelId, update.childToMove, update.newParentId, update.newPosition);
-    context.commit('itemsLoaded', { key: update.key, items: newOrder.data });
+    // const newOrder = await moveChildInBackend(update.key, update.novelId, update.childToMove, update.newParentId, update.newPosition);
+    // context.commit('itemsLoaded', { key: update.key, items: newOrder.data });
 }
 
 const moveParent = async (context: ActionContext<IState,IState>, update: { 
@@ -91,14 +92,14 @@ const moveParent = async (context: ActionContext<IState,IState>, update: {
   oldPosition: number
   newPosition: number
   }): Promise<void> => {
-    const newOrder = await moveParentInBackend(update.key, update.novelId, update.parentId, update.oldPosition, update.newPosition);
-    context.commit('itemsLoaded', { key: update.key, items: newOrder.data });
+    // const newOrder = await moveParentInBackend(update.key, update.novelId, update.parentId, update.oldPosition, update.newPosition);
+    // context.commit('itemsLoaded', { key: update.key, items: newOrder.data });
 }
-
+/*
 const updateOrder = async (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, novelId: number, newOrder: BaseModel[] }): Promise<void> => {
   const newOrder = await updatePositionsInBackend(update.key, update.novelId, update.newOrder);
   context.commit('itemsLoaded', { key: update.key, items: newOrder.data })
-}
+}*/
 
 const addReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, item: BaseModel, key: NOVEL_ITEM_KEYS }): void => {
   new TimelineService().addReference(payload.novelId, payload.event, payload.item, payload.key).then(result => {
@@ -115,21 +116,17 @@ const deleteReference = (context: ActionContext<IState,IState>, payload: { novel
 const filterTags = (context: ActionContext<IState,IState>, update: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}): void => {
   context.commit('tagsFiltered', { key: update.key, tags: update.tags });
 }
-
+/*
 const selectFirstItemIfNecessary = (context: ActionContext<IState,IState>, key: NOVEL_ITEM_KEYS, loadedItems: BaseModel[]) => {
   const itemToSelect = new SelectionService().getFirstItemToSelect(context.state, key, loadedItems);
   if (itemToSelect) {
     context.commit('itemsSelected', { key: KEY_TO_CHILD.has(key) ? KEY_TO_CHILD.get(key) : key, items: [itemToSelect] });
   }  
-}
+}*/
 
 
 export default {
-    selectItems,
-    addItem,
-    updateItem,
-    deleteItems,
-    updateOrder,
+    // updateOrder,
     moveParent,
     moveChild,
     filterTags,

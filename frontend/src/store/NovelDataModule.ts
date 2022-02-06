@@ -158,7 +158,33 @@ export default class NovelDataModule extends VuexModule {
             this.tagsLoaded(result[1].data);
             this.isLoading(false);            
         });
-    }   
+    }  
+    
+    @Action
+    public async moveParent(payload: { key: PARENT_ITEM_KEYS, 
+        novelId: number, 
+        parentId: number,
+        oldPosition: number
+        newPosition: number
+        }): Promise<void> {
+        const {key, novelId, parentId, oldPosition, newPosition} = payload;
+        this._groupingNovelItemService.moveParent(key, novelId, parentId, oldPosition, newPosition).then((result) => {
+            this.novelItemsLoaded({ view: key, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+        });
+    }    
+
+    @Action
+    public async moveChild(payload: { key: PARENT_ITEM_KEYS, 
+        novelId: number, 
+        childToMove: number,
+        newParentId: number,
+        newPosition: number
+        }): Promise<void> {
+        const {key, novelId, childToMove, newParentId, newPosition} = payload;
+        this._groupingNovelItemService.moveChild(key, novelId, childToMove, newParentId, newPosition).then((result) => {
+            this.novelItemsLoaded({ view: key, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+        });      
+    }
     
     
     private findParentIndex(view: PARENT_ITEM_KEYS, parent: BaseModel): number {

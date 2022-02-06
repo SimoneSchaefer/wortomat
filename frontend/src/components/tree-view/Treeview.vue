@@ -30,7 +30,6 @@ import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 
 const novelDataModule = namespace("novelData");
-const selectionModule = namespace("selection");
 
 @Options({
   components: { WTreeViewParent}
@@ -47,6 +46,12 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
 
   @novelDataModule.Action
   deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  moveParent!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, parentId: number, oldPosition: number, newPosition: number }) => Promise<void>;
+
+  @novelDataModule.Action
+  moveChild!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, childToMove: number, newParentId: number, newPosition: number }) => Promise<void>;
 
   get items() {
     return this.novelItems.get(this.parentKey) || [];
@@ -83,28 +88,14 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     const childId = $event.clone.id.replace('child-', '');
     const parentTo = $event.to.id.replace('parent-', '');
     const newPosition = $event.newIndex;
-
-    this.$store.dispatch('moveChild', { 
-      key: this.parentKey, 
-      novelId: this.$route.params.id,
-      childToMove: childId,
-      newParentId: parentTo,
-      newPosition: newPosition
-    }); 
+    this.moveChild({ key: this.parentKey, novelId: this.novelId, childToMove: childId, newParentId: parentTo, newPosition: newPosition });
   }
 
   parentMoved($event): void {
     const parentId = $event.moved.element.id;
     const newIndex = $event.moved.newIndex;
     const oldIndex = $event.moved.oldIndex;
-
-    this.$store.dispatch('moveParent', { 
-      key: this.parentKey, 
-      novelId: this.$route.params.id,
-      parentId: parentId,
-      oldPosition: oldIndex,
-      newPosition: newIndex
-    });
+    this.moveParent({ key: this.parentKey, novelId: this.novelId, parentId: parentId, oldPosition: oldIndex, newPosition: newIndex });
   }
 }
 </script>
