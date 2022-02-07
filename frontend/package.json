@@ -19,13 +19,15 @@
     "axios": "^0.21.1",
     "primeicons": "^5.0.0",
     "primevue": "^3.6.0",
+    "s-vuex-class": "^0.4.1",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0",
     "vue-draggable-next": "^2.1.1",
     "vue-i18n": "^9.2.0-beta.16",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^4.0.0-0",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "vuex-class-modules": "^1.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.18.0",

@@ -39,15 +39,14 @@ import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { Options, Vue } from "vue-class-component";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { Emit, Prop } from "vue-property-decorator";
-import EditableDate from "@/components/shared/inline-edit/EditableDate.vue";
-import EditableLabel from "@/components/shared/inline-edit/EditableLabel.vue";
-import WButton from '@/components/shared/Button.vue';
+import EditableDate from "@/components/forms/inline-edit/EditableDate.vue";
+import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
+import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
-import { ChapterService } from "@/service/Chapter.service";
-import { ResearchService } from "@/service/Research.service";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WReferenceDialog from '@/components/timeline/ReferenceDialog.vue';
+import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 
 @Options({
   components: {
@@ -109,22 +108,6 @@ export default class WTimeline extends Vue {
 
     get novelItemKey() {
         return NOVEL_ITEM_KEYS.TIMELINE;
-    }
-
-    get chapterNovelItemKey() {
-        return NOVEL_ITEM_KEYS.CHAPTERS;
-    }
-
-    get researchNovelItemKey() {
-        return NOVEL_ITEM_KEYS.RESEARCH;
-    }
-
-    get chapterService() {
-        return new ChapterService();
-    }
-    
-    get researchService() {
-        return new ResearchService();
     }
 }
 </script>

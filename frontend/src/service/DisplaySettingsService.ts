@@ -1,38 +1,36 @@
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys";
 
 export class DisplaySettingsService {
     readonly LOCAL_STORAGE_KEY = 'WORTOMAT_DISPLAY_SETTINGS';
 
-    public isVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys): boolean {
+    public isVisible(novelItemKey: PARENT_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS): boolean {
         return this.currentSettings[novelItemKey][settingKey] === true;
     }
 
-    public setVisible(novelItemKey: NOVEL_ITEM_KEYS, settingKey: DisplaySettingsKeys, visible: boolean) {
-        console.log('updating visiblity');
+    public setVisible(novelItemKey: PARENT_ITEM_KEYS, settingKey: DISPLAY_SETTINGS_KEYS, visible: boolean) {
         const currentSettings = this.currentSettings;
         currentSettings[novelItemKey][settingKey] = visible;
         this.storeSettings(currentSettings);
         return currentSettings;
     }
 
-    private storeSettings(values: Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>) {
+    private storeSettings(values: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
         localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
     }
 
-    get currentSettings(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>> {
+    get currentSettings(): Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> {
         const inLocalStorage = localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS');
         if (!inLocalStorage) {
             this.storeSettings(this.initializeWithDefaultValues());
             localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(this.initializeWithDefaultValues()));
         }
-        console.log('getting current settings');
         return JSON.parse(localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS'));    
     }
 
 
-    initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>  {
+    initializeWithDefaultValues(): Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>  {
         const allNovelItemKeys = this.getAllEnumValues(NOVEL_ITEM_KEYS);
-        const allDisplaySettingKeys = this.getAllEnumValues(DisplaySettingsKeys);
+        const allDisplaySettingKeys = this.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
 
         const defaultAllTrue = {};
         allDisplaySettingKeys.forEach((displaySettingKey: string) => {
@@ -64,13 +62,4 @@ export class DisplaySettings {
     show_tags = true;
     show_image = true;
     show_content = true;
-}
-
-export enum DisplaySettingsKeys {
-    SHOW_TITLE = 'SHOW_TITLE',
-    SHOW_SUMMARY = 'SHOW_SUMMARY',
-    SHOW_EXTENDED_SUMMARY = 'SHOW_EXTENDED_SUMMARY',
-    SHOW_TAGS = 'SHOW_TAGS',
-    SHOW_IMAGES = 'SHOW_IMAGES',
-    SHOW_CONTENT = 'SHOW_CONTENT'
 }

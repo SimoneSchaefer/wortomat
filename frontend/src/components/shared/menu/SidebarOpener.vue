@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import { Emit } from "vue-property-decorator";
 
 @Options({

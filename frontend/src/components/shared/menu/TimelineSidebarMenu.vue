@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WSidebarOpener from '@/components/shared/menu/SidebarOpener.vue';
 import { Prop } from "vue-property-decorator";
 import { BaseModel } from "@/models/Base.model";

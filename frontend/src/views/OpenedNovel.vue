@@ -7,16 +7,23 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { namespace } from 's-vuex-class';
+
 import VerticalMenu from '@/components/navigation/VerticalMenu.vue';
 import { MenuModel } from '@/models/Menu.model';
+
+const novelDataModule = namespace("novelData");
 
 @Options({
   components: { VerticalMenu }
 })
 export default class OpenedNovel extends Vue {
   mounted(): void {
-    this.$store.dispatch('openNovel', this.$route.params.id) 
+    this.openNovel(Number(this.$route.params.id));
   }
+
+  @novelDataModule.Action
+  openNovel: (novelId: number) => Promise<void>;
 
   get menuItems(): Array<MenuModel> {
     return [

@@ -21,15 +21,19 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
 import { BaseModel } from '@/models/Base.model';
 import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-import WEditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
+import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+import { namespace } from 's-vuex-class';
+
+const applicationStateModule = namespace("applicationState");
 
 @Options({
   components: {
@@ -39,11 +43,12 @@ import WEditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'toggle']
 })
-export default class TreeviewHeader extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
+
+    @applicationStateModule.State('_modalOpen')
+    modalOpen!: boolean;   
 
     confirmDeleteParent(item, $event): void {
         $event.stopPropagation();
@@ -73,10 +78,6 @@ export default class TreeviewHeader extends Vue {
     get isOpen() {
         return this.open;
     }
-
-    get modalOpen() {
-        return this.$store.state.modalIsOpen;
-    }   
 }
 </script>
 

@@ -4,14 +4,12 @@
         class="list-group"
         ghost-class="ghost"
         @change="parentMoved">
-        <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
+       <div class="list-group-item tree-view-item" v-for="item in items" :key="item.id">
           <w-tree-view-parent 
-            :item="item" 
-            :parentKey="parentKey" 
-            :childKey="childKey"
+            :item="item"
             :open="isOpen(item)"
             @toggle="toggle($event, item)"
-            @updateParentName="updateName($event, item)"
+            @updateParentName="updateName(item, $event)"
             @addChild="addChild(item)"
             @childMoved="childMoved($event)"
             @deleteParent="deleteParent"
@@ -23,70 +21,87 @@
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { namespace } from 's-vuex-class';
 
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
-import { getAllItems } from '@/store/getters';
 import { BaseModel } from '@/models/Base.model';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
+
+const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
 
 @Options({
   components: { WTreeViewParent}
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
-    @Prop() items: BaseModel[] = [];
+  @novelDataModule.State('_novelItems')
+  novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
-    toggleState = new Map<number, boolean>();
-    
-    toggle(open: boolean, parent: BaseModel) {
-      this.toggleState.set(parent.id, open);
-    }
+  @selectionModule.State('_selectedItemIds')
+  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
 
-    isOpen(parent: BaseModel) {
-      return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
-    }
+  @selectionModule.Action
+  selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
 
-    deleteParent(item: BaseModel) {
-      this.$store.dispatch('deleteItems', { 
-          key: this.parentKey, 
-          novelId: this.$store.state.currentNovel?.id,
-          items: [item]
-      });
-    }
-
-    deleteChild(item: BaseModel) {
-        const parentId = (this.items.find(parent => parent['children'].find(child => child.id === item.id)))?.id; 
-        // TODO cleanup data structure mess
-        let flatList = [];
-        let parent = null;
-        for (const group of getAllItems(this.$store.state, this.parentKey)) {
-          // flatList = flatList.concat(group.research);
-          const findChild = group['children'].find(child => child.id === item.id);
-          if (findChild) {
-              parent = group;
-              break;
-          }
+  mounted() {
+    this.$store.subscribe((mutation) => {
+      if (mutation.type === 'novelData/novelItemAdded') {
+        this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
+      }
+      if (mutation.type === 'novelData/novelItemsLoaded'  && !this._selectedItemIds.get(mutation.payload.view)?.length){
+        const firstParentWithChildren = mutation.payload.novelItems.find(parent => parent['children'].length > 0);
+        if (firstParentWithChildren) {
+          this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
         }
-        item.parentId = parent?.id || undefined;
-        this.$store.dispatch('deleteItems', { 
-            key: this.childKey, 
-            novelId: this.$store.state.currentNovel?.id,
-            items: [item]
-        });
-    }
+      }
+    });
+  }
 
-  addChild(selectedParent: BaseModel, $event): void {
+  @novelDataModule.Action
+  updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  moveParent!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, parentId: number, oldPosition: number, newPosition: number }) => Promise<void>;
+
+  @novelDataModule.Action
+  moveChild!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, childToMove: number, newParentId: number, newPosition: number }) => Promise<void>;
+
+  get items() {
+    return this.novelItems.get(this.parentKey) || [];
+  }
+
+  toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store
+  
+  toggle(open: boolean, parent: BaseModel) {
+    this.toggleState.set(parent.id, open);
+  }
+
+  isOpen(parent: BaseModel) {
+    return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
+  }
+
+  deleteParent(item: BaseModel) {
+    this.deleteNovelItem({ view: this.parentKey, novelItem: item});
+  }
+
+  deleteChild(item: BaseModel) {
+    const parent = this.novelItems.get(this.parentKey).find(parent => parent.id === item.parentId);
+    item.parentId = parent?.id || -1;
+    this.deleteNovelItem({ view: this.parentKey, novelItem: item});
+  }
+
+  addChild(selectedParent: BaseModel): void {
     const child = new BaseModel();
     child.parentId = selectedParent.id;
-    this.$store.dispatch('addItem', { 
-        key: this.childKey, 
-        novelId: this.novelId, 
-        item: child,
-    });
+    this.addNovelItem({ view: this.parentKey, novelItem: child });
     this.toggleState.set(selectedParent.id, true);
   }
 
@@ -94,31 +109,15 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     const childId = $event.clone.id.replace('child-', '');
     const parentTo = $event.to.id.replace('parent-', '');
     const newPosition = $event.newIndex;
-
-    this.$store.dispatch('moveChild', { 
-      key: this.parentKey, 
-      novelId: this.$route.params.id,
-      childToMove: childId,
-      newParentId: parentTo,
-      newPosition: newPosition
-    }); 
+    this.moveChild({ key: this.parentKey, novelId: this.novelId, childToMove: childId, newParentId: parentTo, newPosition: newPosition });
   }
 
   parentMoved($event): void {
     const parentId = $event.moved.element.id;
     const newIndex = $event.moved.newIndex;
     const oldIndex = $event.moved.oldIndex;
-
-    this.$store.dispatch('moveParent', { 
-      key: this.parentKey, 
-      novelId: this.$route.params.id,
-      parentId: parentId,
-      oldPosition: oldIndex,
-      newPosition: newIndex
-    });
+    this.moveParent({ key: this.parentKey, novelId: this.novelId, parentId: parentId, oldPosition: oldIndex, newPosition: newIndex });
   }
-
-
 }
 </script>
 

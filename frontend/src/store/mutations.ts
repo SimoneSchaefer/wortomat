@@ -1,11 +1,9 @@
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
-import { DisplaySettingsKeys } from "@/service/DisplaySettingsService";
 import { IState } from "./istate";
-import { NOVEL_ITEM_KEYS, VIEWS } from "./keys";
-import { KEY_TO_CHILD } from "./store-api-adapter";
-import { findItem, getChildItems, itemIdsToSelect, updateItemInStore } from "./store.helper";
+import { CHILD_ITEM_KEYS, DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, parentKeyForChildKey, PARENT_ITEM_KEYS } from "./keys";
+import { findParentForChild, getAllEnumValues, itemIdsToSelect, updateItemInStore } from "./store.helper";
 
 
 const setLoading = (state: IState, payload: { loading: boolean}): void => {
@@ -32,80 +30,56 @@ const novelDeleted = (state: IState, payload: NovelModel): void => {
     updateItemInStore(payload, state.novels, true)  
 };
 
-const displaySettingsUpdated = (state: IState, payload: Record<NOVEL_ITEM_KEYS, Record<DisplaySettingsKeys, boolean>>): void => {
+const parentItemKeySelected = (state: IState, payload: PARENT_ITEM_KEYS): void => {
+    state.activeParentKey = payload;
+};
+
+const displaySettingsUpdated = (state: IState, payload: Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>): void => {
     state.displaySettings = payload;
 }
-
 
 const novelOpened = (state: IState, payload: NovelModel): void => {
     state.currentNovel = payload;
 }
 
 const tagsLoaded = (state: IState, payload: []): void => {
-    state.novelItems.set(NOVEL_ITEM_KEYS.TAGS, payload);
+    state.novelItems.set(PARENT_ITEM_KEYS.TAGS, payload);
 }
 
 const tagsFiltered = (state: IState, payload: { key: NOVEL_ITEM_KEYS, tags: TagModel[]}): void => {
     state.filteredTags.set(payload.key, payload.tags.map(tag => tag.id));
 }
 
-const setView = (state: IState, payload: { key: NOVEL_ITEM_KEYS, view: VIEWS, value: boolean}): void => {
-    const currentView = state.view.get(payload.key);
-    currentView.set(payload.view, payload.value);
-    state.view.set(payload.key, currentView);
-};
-
-const itemsLoaded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
+const itemsLoaded = (state: IState, payload: { key: PARENT_ITEM_KEYS, items: BaseModel[]}): void => {
     const {key, items } = payload;
     state.novelItems.set(key, items);
 }
 
-    
-const itemAdded = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel }): void => {
+const itemAdded = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel }): void => {
     const { key, item } = payload;
-    const parent = findParent(state, key, item );
-    if (parent) { 
-        if (!parent['children']) { parent['children'] = []; }
-        parent['children'].push(item);
+    if (isParentKey(key)) {
+        parentItemAdded(state, key as PARENT_ITEM_KEYS, item);
     } else {
-        const items = state.novelItems.get(key) as BaseModel[] || [];
-        items.push(item);
-        state.novelItems.set(key, items);
-    }
-    if (!KEY_TO_CHILD.has(key)) {
-        state.selection.set(key, [item.id]);
+        childItemAdded(state, key as CHILD_ITEM_KEYS, item);
     }
 }
-  
-const itemUpdated = (state: IState, payload: { key: NOVEL_ITEM_KEYS, item: BaseModel}):void => {
+ 
+const itemUpdated = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, item: BaseModel}):void => {
     const { key, item } = payload;
-    const parent = findParent(state, key, item );
-    if (parent) {
-        const index = findItem(item, parent['children']);
-        parent['children'].splice(index, 1, item);
+    if (isParentKey(key)) {
+        parentItemUpdated(state, key as PARENT_ITEM_KEYS, item);
     } else {
-        updateItemInStore(item, state.novelItems.get(key) as BaseModel[]);
+        childItemUpdated(state, key as CHILD_ITEM_KEYS, item);
     }
 }
 
-const itemsDeleted = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: BaseModel[]}): void => {
+
+const itemsDeleted = (state: IState, payload: { key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS, items: BaseModel[]}): void => {
     const { key, items } = payload;
-    const itemIds = items.map(item => item.id);
-    if (KEY_TO_CHILD.has(key)) {
-        state.novelItems.set(key, getChildItems(state, key).filter(i => !itemIds.includes(i.id)));
+    if (isParentKey(key)) {
+        parentsDeleted(state, key as PARENT_ITEM_KEYS, items);
     } else {
-        if (key === NOVEL_ITEM_KEYS.TIMELINE) { // TODO generic handling for flat hierarchies
-            state.novelItems.set(key, state.novelItems.get(key).filter(i => !itemIds.includes(i.id)));
-        } else {
-            const allParentItems = state.novelItems.get(getParentKey(key));
-            for (const item of items) {
-                const parentItem = allParentItems.find(parent => parent.id === item.parentId);
-                const childIndex = parentItem['children'].findIndex(child => child.id === item.id);
-                parentItem['children'].splice(childIndex, 1);
-            }
-        }
-        
-       
+        childrenDeleted(state, key as CHILD_ITEM_KEYS, items);
     }
 }
   
@@ -114,27 +88,55 @@ const itemsSelected = (state: IState, payload: { key: NOVEL_ITEM_KEYS, items: Ba
     state.selection.set(key, itemIdsToSelect(key, items));
 }
 
-const getParentKey = ( itemKey : NOVEL_ITEM_KEYS ): NOVEL_ITEM_KEYS => {
-    const parentKey = Array.from(KEY_TO_CHILD.entries()).find(entry => entry[1] === itemKey)
-    return parentKey ? parentKey[0] : null;
+const childItemAdded = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel): void => {
+    const parent = state.novelItems.get(parentKeyForChildKey(key)).find(parent => parent.id === item.parentId);
+    parent['children'].push(item);
+};
+
+const parentItemAdded = (state: IState, key: PARENT_ITEM_KEYS, item: BaseModel): void => {
+    const items = state.novelItems.get(key) as BaseModel[] || [];
+    items.push(item);
+    state.novelItems.set(key, items);
+};
+
+
+const parentItemUpdated = (state: IState, key: PARENT_ITEM_KEYS, item: BaseModel): void => {
+    updateItemInStore(item, state.novelItems.get(key as PARENT_ITEM_KEYS) as BaseModel[]);
+};
+
+const childItemUpdated = (state: IState, key: CHILD_ITEM_KEYS, item: BaseModel): void => {
+    const parent = findParentForChild(state, key, item);
+    const index = parent['children'].findIndex(child => child.id === item.id);
+    parent['children'].splice(index, 1, item);
+};
+
+const parentsDeleted = (state: IState, key: PARENT_ITEM_KEYS, items: BaseModel[]): void => {
+    const itemIds = items.map(item => item.id);
+    const afterDeletion = state.novelItems.get(key).filter(i => !itemIds.includes(i.id));
+    state.novelItems.set(key, afterDeletion);
+};
+
+const childrenDeleted = (state: IState, key: CHILD_ITEM_KEYS, items: BaseModel[]): void => {
+    const allParentItems = state.novelItems.get(parentKeyForChildKey(key));
+    for (const item of items) {
+        const parentItem = allParentItems.find(parent => parent.id === item.parentId);
+        const childIndex = parentItem['children'].findIndex(child => child.id === item.id);
+        parentItem['children'].splice(childIndex, 1);
+    }
 }
 
-const findParent = (state: IState, itemKey: NOVEL_ITEM_KEYS, item: BaseModel ) => {
-    const parentKey = getParentKey(itemKey);
-    if (!parentKey) { return null }
-
-    const allParents = state.novelItems.get(parentKey);
-    return allParents.find(parent => parent.id === item.parentId);
+const isParentKey = (key: PARENT_ITEM_KEYS | CHILD_ITEM_KEYS) => {
+    const allParentKeys = getAllEnumValues(PARENT_ITEM_KEYS);
+    return allParentKeys.includes(key);
 }
 
-  export default {
+export default {
     novelsLoaded,
     novelAdded,
     novelUpdated,
     novelDeleted,
     novelOpened,
     tagsFiltered,
-    setView,
     setLoading,
     setModalOpen,
     itemsLoaded,
@@ -143,5 +145,6 @@ const findParent = (state: IState, itemKey: NOVEL_ITEM_KEYS, item: BaseModel ) =
     itemAdded,
     itemUpdated,
     itemsDeleted,
-    displaySettingsUpdated
+    displaySettingsUpdated,
+    parentItemKeySelected
 };

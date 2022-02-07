@@ -4,8 +4,8 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import { IState } from './istate';
-import { NOVEL_ITEM_KEYS, VIEWS } from './keys';
 import { DisplaySettingsService } from '@/service/DisplaySettingsService';
+import { PARENT_ITEM_KEYS } from './keys';
 
 export default new Vuex.Store<IState>({
   state: {
@@ -13,44 +13,11 @@ export default new Vuex.Store<IState>({
     modalIsOpen: false,
     novels: [],
     currentNovel: new NovelModel(),
-    selection: new Map(),
+    activeParentKey: PARENT_ITEM_KEYS.PARTS,
     novelItems: new Map(),
+    selection: new Map(),
     filteredTags: new Map(),
-    displaySettings: new DisplaySettingsService().currentSettings,
-    view: new Map([[
-      NOVEL_ITEM_KEYS.CHAPTERS, new Map<VIEWS,boolean>([[
-        VIEWS.SUMMARY, true
-      ], [
-        VIEWS.EXTENDED_SUMMARY, true
-      ],[
-        VIEWS.TAGS, true
-      ],[
-        VIEWS.CONTENT, true
-      ]
-    ])
-    ],[
-      NOVEL_ITEM_KEYS.CHARACTERS, new Map<VIEWS,boolean>([[
-        VIEWS.SUMMARY, true
-      ], [
-        VIEWS.EXTENDED_SUMMARY, true
-      ],[
-        VIEWS.TAGS, true
-      ],[
-        VIEWS.CONTENT, true
-      ]
-    ])
-    ],[
-      NOVEL_ITEM_KEYS.RESEARCH, new Map<VIEWS,boolean>([[
-        VIEWS.SUMMARY, true
-      ], [
-        VIEWS.EXTENDED_SUMMARY, true
-      ],[
-        VIEWS.TAGS, true
-      ],[
-        VIEWS.CONTENT, true
-      ]
-    ])
-    ]])
+    displaySettings: new DisplaySettingsService().currentSettings
   },
   getters,
   mutations,

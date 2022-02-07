@@ -3,7 +3,7 @@
         <button class="navigation-link" :title="$t(`sub_menu.add`)" @click="addParent">
             <i class="fa fa-2x fa-plus"></i>
         </button>
-        <button class="navigation-link" :title="$t(`sub_menu.aaa`)" @click="setVisible('display_settings_visible')">
+        <button class="navigation-link" :title="$t(`sub_menu.display_settings`)" @click="setVisible('display_settings_visible')">
             <i class="fa fa-2x fa-eye"></i>
         </button>
         <button class="navigation-link" :title="$t(`sub_menu.filter`)" @click="setVisible('filter_visible')">
@@ -12,85 +12,65 @@
         <button class="navigation-link" :title="$t(`sub_menu.export`)" @click="setVisible('export_visible')">
             <i class="fa fa-2x fa-file-export"></i>
         </button>
-  </div>
+    </div>
 
-
-  <Sidebar v-model:visible="display_settings_visible" position="right">
-      <h1>Display settings</h1>
-      <div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey" class="toggle-switch">
-        <InputSwitch v-bind:modelValue="isVisible(displaySettingKey)" @input="toggleDisplaySetting($event, displaySettingKey)"></InputSwitch>
-        <div class="label">{{ $t(`display_settings.${displaySettingKey}` ) }}</div>
-      </div>
-  </Sidebar>
-
-  <Sidebar v-model:visible="filter_visible" position="right">
-      <h1>Filter Options</h1>
-      - coming soon - 
-  </Sidebar>
-
-  <Sidebar v-model:visible="export_visible" position="right">
-      <h1>Export Options</h1>
-      - coming soon - 
-  </Sidebar>
+    <Sidebar v-model:visible="sidebarVisible" position="right">
+        <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
+        <FilterMenu v-if="filter_visible"></FilterMenu>
+        <ExportMenu v-if="export_visible"></ExportMenu>
+    </Sidebar>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
-
-import { MenuModel } from '@/models/Menu.model'
+import { mixins, Options } from 'vue-class-component';
 import Navlink from '@/components/navigation/Navlink.vue'
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
+import FilterMenu from '@/components/navigation/submenu/FilterMenu.vue'
+import ExportMenu from '@/components/navigation/submenu/ExportMenu.vue'
+import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
-import { DisplaySettingsKeys, DisplaySettingsService } from '@/service/DisplaySettingsService';
+import { DisplaySettingsService } from '@/service/DisplaySettingsService';
+import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
+import { namespace } from 's-vuex-class';
 
 
 type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';
+const novelDataModule = namespace("novelData");
 
 @Options({
-    components: { Navlink }
+    components: { Navlink, DisplaySettingsMenu, FilterMenu, ExportMenu }
 })
-export default class SubMenu extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
-    private displaySettingService = new DisplaySettingsService();
+export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
 
+    @novelDataModule.Action
+    addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+  
     filter_visible = false;
     export_visible = false;
     display_settings_visible = false;
 
     setVisible(flag: visible_flags) {
-        this.filter_visible = false;
-        this.export_visible = false;
-        this.display_settings_visible = false;
+        this.setAllInvisible();
         this[flag] = true;
     }
 
-    toggleDisplaySetting($event, displaySettingKey: DisplaySettingsKeys) {
-        this.$store.dispatch('updateDisplaySettings', { novelItemKey: this.childKey, displaySettingKey: displaySettingKey, value: $event});
+    get sidebarVisible() {
+        return this.filter_visible || this.export_visible || this.display_settings_visible;
     }
 
-    get displaySettingKeys() {
-        return this.displaySettingService.getAllEnumValues(DisplaySettingsKeys);
+    set sidebarVisible(_value: boolean) {
+        this.setAllInvisible();
     }
 
-    isVisible(displaySettingsKey: DisplaySettingsKeys) {
-        return this.$store.state.displaySettings[this.childKey][displaySettingsKey] === true;
+    setAllInvisible() {
+        this.filter_visible = false;
+        this.export_visible = false;
+        this.display_settings_visible = false;
     }
-
 
     addParent(): void {
-      this.$store.dispatch('addItem', { 
-          key: this.parentKey, 
-          novelId: this.novelId, 
-          item: new BaseModel() 
-      });
+        this.addNovelItem({ view: this.parentKey, novelItem: new BaseModel()});
     }
-
-
-    get novelId(): number {
-        return this.$store.getters.openNovelId;
-    }  
 }
 </script>
 

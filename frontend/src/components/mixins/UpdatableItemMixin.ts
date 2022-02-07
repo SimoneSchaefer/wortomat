@@ -1,29 +1,41 @@
 import { BaseModel } from "@/models/Base.model"
-import { NOVEL_ITEM_KEYS } from "@/store/keys"
-import { Vue } from "vue-class-component";
+import { TagModel } from "@/models/Tag.model";
+import { PARENT_ITEM_KEYS } from "@/store/keys"
 
-export default abstract class UpdateItemMixin extends Vue {
-    abstract get parentKey(): NOVEL_ITEM_KEYS;
+import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
 
-    get novelId(): number {
-        return this.$store.getters.openNovelId;
-    }  
+export default abstract class UpdateItemMixin extends NovelItemKeyAwareMixin { 
+
+    // This needs to be implemented in the base component, as the auto-injection of @Action does not work in mixins
+    abstract updateNovelItem: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+    updateTags(oldItem: BaseModel, newTags: TagModel[]): void {
+        this.updateItem(oldItem, { tags: newTags});
+    }
     
-    updateName(newValue: string, item: BaseModel): void {
-        this.updateItem(this.parentKey, item, { name: newValue });   
+    updateName(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { name: newValue });   
+    }  
+
+    updateSummary(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { summary: newValue });   
+    }   
+    
+    updateExtendedSummary(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { extended_summary: newValue });   
     }
 
-    updateSummary(newValue: string, item: BaseModel): void {
-        this.updateItem(this.parentKey, item, { summary: newValue });   
-    } 
+    updateContent(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { content: newValue });   
+    }
 
-    updateItem (itemKey: NOVEL_ITEM_KEYS, oldItem: BaseModel, overrideValues ) {
-        this.$store.dispatch('updateItem', { 
-            key: itemKey, 
-            novelId: this.novelId,
-            oldItem: oldItem,
-            overrideValues: overrideValues
-        })  
-    }    
-  }
+    updateImages(oldItem: BaseModel, images: Array<{ id: number, name: string }>): void {
+        this.updateItem(oldItem, { images: images});
+    }   
+
+    updateItem (oldItem: BaseModel, overrideValues: Record<string,any> ) {  
+        const newItem =  Object.assign({}, oldItem, overrideValues);  
+        this.updateNovelItem({  view: this.parentKey, novelItem: newItem });  
+    }     
+ }
   

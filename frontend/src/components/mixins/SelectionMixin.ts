@@ -1,5 +1,4 @@
 import { BaseModel } from "@/models/Base.model";
-import { NovelItemService } from "@/service/NovelItemService";
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { Vue } from "vue-class-component";
 

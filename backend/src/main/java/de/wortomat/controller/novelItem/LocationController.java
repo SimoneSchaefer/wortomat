@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/novels/{novelId}/location-groups/{groupId}/location/")
+@RequestMapping("/novels/{novelId}/location-groups/{groupId}/locations/")
 @CrossOrigin(origins = "*")
 public class LocationController extends NovelItemController<Location, LocationGroup, LocationTag> {
     @Autowired

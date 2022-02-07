@@ -36,26 +36,23 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-
+import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
 
 @Options({
     components: { WMissingValueTolerantLabel, WButton, WConfirmDialog },
     emits: ['delete-child', 'select']
 })
-export default class TreeviewHeader extends Vue {
-    @Prop() element: BaseModel;
-    @Prop() selected: boolean;
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
+    @Prop() element!: BaseModel;
+    @Prop() selected!: boolean;
 
     @Emit('delete-child')
     deleteChild() {

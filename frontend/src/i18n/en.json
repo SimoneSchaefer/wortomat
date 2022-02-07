@@ -25,6 +25,12 @@
 
         }
     },
+    "sub_menu": {
+        "add": "Add item",
+        "export": "Export",
+        "filter": "Filter",
+        "display_settings": "Display settings"
+    },
     "add_parent": {
         "PARTS": "Create Part",
         "RESEARCH_GROUPS": "Create Research Group"
@@ -42,7 +48,7 @@
         "CHARACTER_GROUPS": "Delete Character Group"
     },
     "remove_child": {
-        "parts": "Delete chapter",
+        "PARTS": "Delete chapter",
         "RESEARCH_GROUPS": "Delete research item",
         "CHARACTER_GROUPS": "Delete character",
         "LOCATION_GROUPS": "Delete location"
@@ -103,6 +109,7 @@
 
     },
     "display_settings": {
+        "header": "Display settings",
         "SHOW_TITLE": "Show title",
         "SHOW_SUMMARY": "Show summary",
         "SHOW_EXTENDED_SUMMARY": "Show extended summary",

@@ -21,13 +21,22 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
-import AppButton from "@/components/shared/Button.vue";
+import AppButton from "@/components/forms/Button.vue";
+import { namespace } from "s-vuex-class";
+
+const applicationStateModule = namespace("applicationState");
 
 @Options({
     components: { AppButton },
     emits: ['start-edit', 'update', 'cancel']
 })  
 export default class InlineEdit extends Vue {
+    @applicationStateModule.State('_modalOpen')
+    modalOpen!: boolean;    
+    
+    @applicationStateModule.Action
+    setModalOpen!: (value: boolean) => Promise<void>;
+
     editing = false;
     @Prop() currentValue: string;
     @Prop() validationRegex: RegExp;
@@ -68,7 +77,7 @@ export default class InlineEdit extends Vue {
     }
 
     private toggleEditMode(active: boolean): void {
-        this.$store.dispatch('setModalOpen', { isOpen: active })
+        this.setModalOpen(active);
         this.editing = active;
     }
 

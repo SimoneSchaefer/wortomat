@@ -30,20 +30,20 @@
 
 <script lang="ts">
 import { TagModel } from "@/models/Tag.model";
-import { TagService } from "@/service/Tag.service";
 import { NOVEL_ITEM_KEYS } from "@/store/keys";
-import { Options, Vue } from "vue-class-component";
+import { mixins, Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
-import InlineEdit from '@/components/shared/inline-edit/InlineEdit.vue';
+import InlineEdit from '@/components/forms/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-import { NovelItemService } from "@/service/NovelItemService";
-import { KEY_TO_CHILD, KEY_TO_SERVICE } from "@/store/store-api-adapter";
+import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
+import Novel from "@/components/novels/Novel.vue";
+import NovelItemKeyAwareMixin from "@/components/mixins/NovelItemKeyAwareMixin";
 
 @Options({
     components: { InlineEdit, MissingValueTolerantLabel },
     emits: [ 'update-tags' ]
 })
-export default class EditableTags extends Vue {
+export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
     @Prop() tags: TagModel[];
     @Prop() novelItemKey: NOVEL_ITEM_KEYS;
 
@@ -64,25 +64,19 @@ export default class EditableTags extends Vue {
 
     @Emit('update-tags')
     async updateTags(): Promise<TagModel[]> {
-        const parentKey = this.getParentKey(this.novelItemKey);
-        const service = KEY_TO_SERVICE.get(parentKey);
+        const service = new GroupingNovelItemService();
         const newTags = [];
         const novelId = this.$store.state.currentNovel.id;
         for (let tag of this.tagsDraft) {
             tag.novelId = novelId;
             if (!tag.id) {
-                tag = await service.createTag(novelId, tag);
+                tag = await service.createTag(this.parentKey, novelId, tag);
                 tag = tag.data;
                 this.$store.commit('itemAdded', { key: NOVEL_ITEM_KEYS.TAGS, item: tag });
             }
             newTags.push(tag)
         }
         return newTags;
-    }
-
-
-    getParentKey(childKey: NOVEL_ITEM_KEYS) {
-        return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
     }
 
     searchTags($event: { query: string }): void {      

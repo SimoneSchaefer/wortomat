@@ -1,5 +1,5 @@
 <template>
-    <div class="spinner" v-if="isLoading()">
+    <div class="spinner" v-if="loading">
         <div class="loader">
             <div class="lds-heart"><div></div></div>
         </div>
@@ -7,13 +7,15 @@
 </template>    
 
 <script lang="ts">
+const novelDataModule = namespace("novelData");
+
+import { namespace } from "s-vuex-class";
 import { Options, Vue } from "vue-class-component";
 
 @Options({})
 export default class Spinner extends Vue {
-    isLoading(): boolean {
-        return this.$store.state.loading;
-    }
+  @novelDataModule.State('_loading')
+  loading!: boolean;
 }
 </script>
 

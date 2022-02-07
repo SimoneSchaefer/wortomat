@@ -1,11 +1,12 @@
 <template>
-  <GroupingNovelItem :parentKey="parentKey" :childKey="childKey"></GroupingNovelItem>
+  <GroupingNovelItem :novelItemKey="parentKey"></GroupingNovelItem>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
+
 import GroupingNovelItem from './GroupingNovelItem.vue';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 @Options({
   components: { 
@@ -13,12 +14,8 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   }
 })
 export default class Characters extends Vue {
-  get parentKey(): NOVEL_ITEM_KEYS {
-    return NOVEL_ITEM_KEYS.CHARACTER_GROUPS;
-  }
-  
-  get childKey(): NOVEL_ITEM_KEYS {
-    return NOVEL_ITEM_KEYS.CHARACTERS;
+  get parentKey(): PARENT_ITEM_KEYS {
+    return PARENT_ITEM_KEYS.CHARACTER_GROUPS;
   }
 }
 </script>

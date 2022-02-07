@@ -1,20 +1,19 @@
 <template>
 <ScrollPanel style="height: 100vh">
   <div class="novels">
-      <div class="novel">
-        <Card class="dummy-novel novel-card h-100" id="v-tour-step-1">
-          <template #content>
-            <div class="p-d-flex p-ai-center p-jc-center">
-              <Button data-cy="add-novel" label="Start a novel" class="p-button-text p-button-lg add-button" icon="pi pi-plus" v-on:click="startAddMode()"></Button>
-            </div>
-          </template>
-        </Card>
-      </div>
+    <div class="novel">
+      <Card class="dummy-novel novel-card h-100">
+        <template #content>
+          <div class="p-d-flex p-ai-center p-jc-center">
+            <Button data-cy="add-novel" label="Start a novel" class="p-button-text p-button-lg add-button" icon="pi pi-plus" v-on:click="newNovel()"></Button>
+          </div>
+        </template>
+      </Card>
+    </div>
 
-      <div class="novel" v-for="novel in novels" :key="novel.id">
-        <Novel v-bind:novel="novel"></Novel>
-      </div>
-
+    <div class="novel" v-for="novel in novels" :key="novel.id">
+      <Novel :novel="novel"></Novel>
+    </div>
   </div>
 </ScrollPanel>
 
@@ -22,9 +21,12 @@
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { namespace } from "s-vuex-class";
+
 import { NovelModel } from '@/models/Novel.model';
 import Novel from '@/components/novels/Novel.vue'; 
+
+const novelModule = namespace("novelData");
 
 @Options({ 
   components: { 
@@ -32,11 +34,15 @@ import Novel from '@/components/novels/Novel.vue';
   }
 })  
 export default class NovelList extends Vue {
-  @Prop() novels!: Novel[]; 
+  @novelModule.State('_novels')
+  novels!: Novel[]; 
 
-  startAddMode(): void {
-    this.$store.dispatch('addNovel', new NovelModel());
+  newNovel() {
+    this.addNovel(new NovelModel());
   }
+
+  @novelModule.Action
+  addNovel!: (novel) => Promise<void>;
 }
 </script>
 

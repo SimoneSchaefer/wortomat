@@ -1,6 +1,5 @@
 <template>
     <WTreeviewHeader 
-        :parentKey="parentKey" 
         :item="item"    
         :open="isOpen"  
         @toggle="toggle"               
@@ -12,27 +11,30 @@
         <WTreeviewListItem v-for="child in item['children']" :key="child.id"
             @select="selectChild"
             @deleteChild="deleteChild"
-            :selected="isSelected(child)"
             :element="child" 
-            :parentKey="parentKey" 
-            :childKey="childKey">
+            :selected="isSelected(child)">
         </WTreeviewListItem>    
     </draggable>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
+import { namespace } from 's-vuex-class';
 
 import { BaseModel } from '@/models/Base.model';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 
-import WButton from '@/components/shared/Button.vue';
+import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-import WEditableLabel from '@/components/shared/inline-edit/EditableLabel.vue';
+import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
+import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+
+const selectionModule = namespace("selection");
+const applicationStateModule = namespace("applicationState");
 
 @Options({
   components: {
@@ -44,11 +46,20 @@ import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle']
 })
-export default class TreeviewParent extends Vue {
-    @Prop() parentKey: NOVEL_ITEM_KEYS;
-    @Prop() childKey: NOVEL_ITEM_KEYS;
+export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
+
+
+    @applicationStateModule.State('_modalOpen')
+    modalOpen!: boolean;   
+
+    @selectionModule.State('_selectedItemIds')
+    _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+
+    @selectionModule.Action
+    selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
 
     @Emit('delete-parent')
     deleteParent() {
@@ -82,7 +93,7 @@ export default class TreeviewParent extends Vue {
 
 
     isSelected(item: BaseModel) {
-        const isSelected = !!this.selectedItems.find(selectedItem => selectedItem === item.id); 
+        const isSelected = (this._selectedItemIds.get(this.parentKey) || []).find(id => id === item.id);
         if (isSelected) {
             this.openParentIfNecessary();
         }
@@ -90,7 +101,7 @@ export default class TreeviewParent extends Vue {
     }
     
     selectChild(item: BaseModel) {
-        this.$store.dispatch('selectItems', { key: this.childKey, items: [item] });
+        this.selectItemIds({ view: this.parentKey, itemIds: [item.id] });
     }
 
 
@@ -98,18 +109,15 @@ export default class TreeviewParent extends Vue {
         return this.open;
     }
     get selectedItems(): number[] {
-        return this.$store.state.selection.get(this.childKey) || [];
+        return [];
+        // return this.$store.state.selection.get(this.childKey) || [];
     }
   
     private openParentIfNecessary() {
         if(!open) {
             this.$emit('toggle', true);
         }
-    }
-
-    get modalOpen() {
-        return this.$store.state.modalIsOpen;
-    }   
+    } 
 }
 </script>
 
