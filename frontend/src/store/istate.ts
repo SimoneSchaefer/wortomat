@@ -9,7 +9,7 @@ export interface IState {
     activeParentKey: PARENT_ITEM_KEYS,
     currentNovel: NovelModel,
     novelItems: Map<PARENT_ITEM_KEYS, BaseModel[]>,
-    displaySettings: Record<NOVEL_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>,
+    displaySettings: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>,
     selection: Map<NOVEL_ITEM_KEYS,Array<number>>,
     filteredTags: Map<NOVEL_ITEM_KEYS,Array<number>>,
 }

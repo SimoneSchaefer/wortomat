@@ -48,12 +48,12 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   mounted() {
     this.$store.subscribe((mutation) => {
       if (mutation.type === 'novelData/novelItemAdded') {
-        this.selectItemIds({ view: this.parentKey, itemIds: [ mutation.payload.novelItem.id ]} );
+        this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
       }
-      if (mutation.type === 'novelData/novelItemsLoaded' && !this._selectedItemIds.get(this.parentKey)?.length) { //TODO move to parent component
+      if (mutation.type === 'novelData/novelItemsLoaded'  && !this._selectedItemIds.get(mutation.payload.view)?.length){
         const firstParentWithChildren = mutation.payload.novelItems.find(parent => parent['children'].length > 0);
         if (firstParentWithChildren) {
-          this.selectItemIds({ view: this.parentKey, itemIds: [ firstParentWithChildren['children'][0].id ]} );
+          this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
         }
       }
     });

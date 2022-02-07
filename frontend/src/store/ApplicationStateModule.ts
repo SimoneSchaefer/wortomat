@@ -15,7 +15,6 @@ export default class ApplicationStateModule extends VuexModule {
 
   @Mutation
   public modalOpen(value: boolean ) {
-    console.log('set modal open', value)
     this._modalOpen = value;
   }
 
