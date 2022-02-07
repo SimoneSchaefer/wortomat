@@ -34,6 +34,7 @@ import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
 
 const selectionModule = namespace("selection");
+const applicationStateModule = namespace("applicationState");
 
 @Options({
   components: {
@@ -48,6 +49,10 @@ const selectionModule = namespace("selection");
 export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
+
+
+    @applicationStateModule.State('_modalOpen')
+    modalOpen!: boolean;   
 
     @selectionModule.State('_selectedItemIds')
     _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
@@ -112,11 +117,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
         if(!open) {
             this.$emit('toggle', true);
         }
-    }
-
-    get modalOpen() {
-        return this.$store.state.modalIsOpen;
-    }   
+    } 
 }
 </script>
 

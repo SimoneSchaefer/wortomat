@@ -1,16 +1,19 @@
 <template>
-    <div class="backdrop" v-if="modalIsOpen"></div>
+    <div class="backdrop" v-if="modalOpen"></div>
 </template>
 
 
 <script lang="ts">
+
+import { namespace } from "s-vuex-class";
 import { Options, Vue } from "vue-class-component";
+
+const applicationStateModule = namespace("applicationState");
 
 @Options({})  
 export default class Backdrop extends Vue {
-    get modalIsOpen(): boolean {
-        return this.$store.state.modalIsOpen;
-    }
+    @applicationStateModule.State('_modalOpen')
+    modalOpen!: boolean;   
 }
 </script>
 

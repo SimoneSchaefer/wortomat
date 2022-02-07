@@ -31,6 +31,9 @@ import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+import { namespace } from 's-vuex-class';
+
+const applicationStateModule = namespace("applicationState");
 
 @Options({
   components: {
@@ -43,6 +46,9 @@ import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
 export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
+
+    @applicationStateModule.State('_modalOpen')
+    modalOpen!: boolean;   
 
     confirmDeleteParent(item, $event): void {
         $event.stopPropagation();
@@ -72,10 +78,6 @@ export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     get isOpen() {
         return this.open;
     }
-
-    get modalOpen() {
-        return this.$store.state.modalIsOpen;
-    }   
 }
 </script>
 

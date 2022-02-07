@@ -57,7 +57,6 @@ const i18n = createI18n({
 })
 
 import { createStore } from "vuex";
-import store from './store/store';
 import DisplaySettingsModule from './store/DisplaySettingsModule';
 
 import NovelDataModule from './store/NovelDataModule';
@@ -74,7 +73,6 @@ new SelectionModule({ store: storeX, name: 'selection' });
 const app = createApp(App)
     .use(router)
     .use(PrimeVue)
-    //.use(store)
     .use(storeX)
     .use(i18n)
     .use(ConfirmationService)
