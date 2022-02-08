@@ -14,10 +14,10 @@
         </template>
         <template v-slot:readonly>
             <div class="readonly">
-                <div v-if="!tags?.length">
+                <div v-if="!itemTags?.length"  class="underline">
                     <MissingValueTolerantLabel :value="''" :fallback="'No Tags added yet'"></MissingValueTolerantLabel>
                 </div>
-                <div v-for="tag in tags" :key="tag.id" class="tag-chip">
+                <div v-for="tag in itemTags" :key="tag.id" class="tag-chip">
                     <Chip>
                         {{ tag.name }}
                     </Chip>
@@ -29,58 +29,69 @@
 </template>
 
 <script lang="ts">
-import { TagModel } from "@/models/Tag.model";
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
-import { mixins, Options, Vue } from "vue-class-component";
+
+import { mixins, Options } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
+import { namespace } from "s-vuex-class";
+
+import { TagModel } from "@/models/Tag.model";
+import { PARENT_ITEM_KEYS } from "@/store/keys";
+import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
+
 import InlineEdit from '@/components/forms/inline-edit/InlineEdit.vue';
 import MissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
-import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
-import Novel from "@/components/novels/Novel.vue";
 import NovelItemKeyAwareMixin from "@/components/mixins/NovelItemKeyAwareMixin";
+
+
+const novelDataModule = namespace("novelData");
 
 @Options({
     components: { InlineEdit, MissingValueTolerantLabel },
     emits: [ 'update-tags' ]
 })
 export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
-    @Prop() tags: TagModel[];
-    @Prop() novelItemKey: NOVEL_ITEM_KEYS;
+    @Prop() novelItemKey: PARENT_ITEM_KEYS;
+    @Prop() itemTags: TagModel[];
+   
+    @novelDataModule.State('_tags')
+    tags!: Map<PARENT_ITEM_KEYS,TagModel[]>; 
+   
+    @novelDataModule.Mutation
+    tagAdded!: (update: { view: PARENT_ITEM_KEYS, tag: TagModel}) => Promise<void>; 
 
     private tagsDraft = [];
     private filteredTags = [];
+    private service = new GroupingNovelItemService();
+
 
     onStartEdit(): void {
-        this.tagsDraft = [...this.tags || []];
-
+        this.tagsDraft = [...(this.itemTags || [])];
         setTimeout(() => {
             (this.$refs.editableRef as HTMLInputElement).focus();
         }, 0);
     }
 
     cancel(): void {
-        this.tagsDraft = this.tags;
+        this.tagsDraft = this.itemTags;
     }
 
     @Emit('update-tags')
     async updateTags(): Promise<TagModel[]> {
-        const service = new GroupingNovelItemService();
         const newTags = [];
-        const novelId = this.$store.state.currentNovel.id;
         for (let tag of this.tagsDraft) {
-            tag.novelId = novelId;
+            tag.novelId = this.novelId;
             if (!tag.id) {
-                tag = await service.createTag(this.parentKey, novelId, tag);
+                tag = await this.service.createTag(this.novelItemKey, this.novelId, tag);
                 tag = tag.data;
-                this.$store.commit('itemAdded', { key: NOVEL_ITEM_KEYS.TAGS, item: tag });
+                this.tagAdded({ view: this.novelItemKey, tag: tag });
             }
             newTags.push(tag)
         }
         return newTags;
     }
 
-    searchTags($event: { query: string }): void {      
-        this.filteredTags = this.$store.getters.tags.filter(tag => tag.name.toLocaleLowerCase().includes($event.query.toLocaleLowerCase()));
+    searchTags($event: { query: string }): void { 
+        this.filteredTags = (this.tags.get(this.novelItemKey) || []).filter(tag => tag.name.toLocaleLowerCase().includes($event.query.toLocaleLowerCase()));
         if (!this.filteredTags.find(tag => tag.name.toLocaleLowerCase() === $event.query.toLocaleLowerCase())) {
             this.filteredTags.splice(0, 0, { id: undefined, name: $event.query });
         }
