@@ -14,6 +14,7 @@ export default class NovelDataModule extends VuexModule {
     private _novels = [];
     private _loading = false;
     private _novelItems: Map<PARENT_ITEM_KEYS, BaseModel[]> = new Map();
+    private _tags: Map<PARENT_ITEM_KEYS, TagModel[]> = new Map();
 
     @Mutation
     public novelOpened(novelId: number): void {
@@ -60,6 +61,12 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Mutation
+    private tagAdded(update: { view: PARENT_ITEM_KEYS, tag: TagModel }) {
+        if (!this._tags.get(update.view)) this._tags.set(update.view, []);
+        this._tags.get(update.view).push(update.tag);
+    }
+
+    @Mutation
     public novelItemDeleted(update: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }): void {
         if (update.novelItem.parentId) {
             const parent = this.findParentForChild(update.view, update.novelItem);
@@ -88,8 +95,8 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Mutation
-    public tagsLoaded(tags: TagModel[]): void {
-        this._novelItems.set(PARENT_ITEM_KEYS.TAGS, tags);
+    public tagsLoaded(update: { view: PARENT_ITEM_KEYS, tags: TagModel[] }): void {
+        this._tags.set(update.view, update.tags);
     }
 
     @Action
@@ -140,6 +147,13 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Action
+    public async addTag(payload: { view: PARENT_ITEM_KEYS, novelItem: TagModel }): Promise<void> {
+        this._groupingNovelItemService.createTag(payload.view, this._novelId, payload.novelItem).then(result => {
+            this.tagAdded({ view: payload.view, tag: result.data });
+        });
+    }
+
+    @Action
     public async deleteNovelItem(payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }): Promise<void> {
         this._groupingNovelItemService.delete(payload.view, this._novelId, payload.novelItem).then(() => {
             this.novelItemDeleted({ view: payload.view, novelItem: payload.novelItem });
@@ -155,7 +169,7 @@ export default class NovelDataModule extends VuexModule {
             this._groupingNovelItemService.tags( view, novelId)
           ]).then(result => {
             this.novelItemsLoaded( { view: view, novelItems: result[0].data });
-            this.tagsLoaded(result[1].data);
+            this.tagsLoaded( { view: view, tags: result[1].data });
             this.isLoading(false);            
         });
     }  

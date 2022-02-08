@@ -9,7 +9,7 @@
                 <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="`fallback_labels.no_name.${childKey}`"></EditableLabel></div>
                 <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
                 <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
-                <EditableTags v-if="displayTags" :tags="item.tags" @update-tags="updateTags(item, $event)" :novelItemKey="childKey"></EditableTags>
+                <EditableTags v-if="displayTags" :itemTags="item.tags" @update-tags="updateTags(item, $event)" :novelItemKey="parentKey"></EditableTags>
             </div>
         </div>
         <hr>
@@ -20,9 +20,12 @@
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
 import { Prop } from 'vue-property-decorator';
+import { namespace } from 's-vuex-class';
 
 import { BaseModel } from '@/models/Base.model';
-import { CHILD_ITEM_KEYS, PARENT_ITEM_KEYS, PARENT_TO_CHILD } from '@/store/keys';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
+
+import { GroupingNovelItemService } from '@/service/GroupingNovelItemService';
 
 import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
 import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
@@ -30,8 +33,6 @@ import EditableText from '@/components/forms/inline-edit/EditableText.vue';
 import EditableTags from '@/components/forms/inline-edit/EditableTags.vue';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
-import { namespace } from 's-vuex-class';
-import { GroupingNovelItemService } from '@/service/GroupingNovelItemService';
 
 
 const novelDataModule = namespace("novelData");
@@ -42,13 +43,11 @@ const novelDataModule = namespace("novelData");
 export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySettingsAwareMixin) {
     @Prop() item!: BaseModel;
 
+    private service = new GroupingNovelItemService();
+
     @novelDataModule.Action
     updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
 
-
-    protected get key(): CHILD_ITEM_KEYS {
-        return PARENT_TO_CHILD.get(this.$store.state.activeParentKey);
-    }
 
     deleteImage(image: ImageParam): void {
         this.service.deleteImage(this.parentKey, this.novelId, this.item.parentId, this.item.id, image.imageId).then((response) => {
@@ -62,7 +61,7 @@ export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySe
         this.updateImages(this.item, images);
     }
 
-    get imagesOrEmpty() {
+    get imagesOrEmpty(): { id: number, name: string}[] {
         return [...this.item['images'] || []];
     }
 
@@ -83,12 +82,6 @@ export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySe
     getImageUrl(fileId: number): string {
         return this.service.getImageUrl(this.parentKey, this.novelId, this.item.parentId, this.item.id, fileId);
     }
-
-    get service() {
-        return new GroupingNovelItemService();
-    }
- 
-
 }
 </script>
 
