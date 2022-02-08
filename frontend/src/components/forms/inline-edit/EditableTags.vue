@@ -14,7 +14,7 @@
         </template>
         <template v-slot:readonly>
             <div class="readonly">
-                <div v-if="!itemTags?.length">
+                <div v-if="!itemTags?.length"  class="underline">
                     <MissingValueTolerantLabel :value="''" :fallback="'No Tags added yet'"></MissingValueTolerantLabel>
                 </div>
                 <div v-for="tag in itemTags" :key="tag.id" class="tag-chip">

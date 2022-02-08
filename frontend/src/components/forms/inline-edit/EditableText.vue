@@ -11,7 +11,7 @@
     </Dialog>
     <div class="content" v-on:click="startEditMode()">
         <div v-if="value?.length" v-html="value"></div>
-        <div v-else><MissingValueTolerantLabel :value="value" fallback="No content added yet."></MissingValueTolerantLabel></div>
+        <div v-else class="readonly underline"><MissingValueTolerantLabel :value="value" fallback="No content added yet."></MissingValueTolerantLabel></div>
     </div>
 </template>
 
@@ -93,5 +93,8 @@ div.content:hover {
     cursor: pointer;
     cursor: url("/assets/cursors/edit.png"), pointer;
     background: var(--editable-background-hover);
+}
+.readonly.underline {
+    border-bottom: 2px dotted rgba(99, 99, 99, 0.445);
 }
 </style>
