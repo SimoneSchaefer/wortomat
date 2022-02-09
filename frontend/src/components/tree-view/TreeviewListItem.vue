@@ -4,7 +4,7 @@
         <div class="tree-view-item-child">
           <div class="link">
             <a href="#"
-                @click="select(element)"  
+                @click="select"  
                 :key="element.id">
                 <WMissingValueTolerantLabel 
                     :value="element.name" 
@@ -60,8 +60,10 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
     }
     
     @Emit('select')
-    select() {
-        return this.element;
+    select($event) {
+      $event.preventDefault();
+      $event.stopPropagation();
+      return { item: this.element, event: $event};
     }
 
     confirmDeleteChild(): void {

@@ -5,6 +5,7 @@
                 <button class="padding-left editor-button" :title="$t('editor.bold')" @click="runCommand('toggleBold')" :class="{ 'is-active': editor.isActive('bold') }"><i class="fa fa-bold"></i></button>
                 <button class="editor-button" :title="$t('editor.italic')" @click="runCommand('toggleItalic')" :class="{ 'is-active': editor.isActive('italic') }"><i class="fa fa-italic"></i></button>
                 <button class="editor-button" :title="$t('editor.strike')" @click="runCommand('toggleStrike')" :class="{ 'is-active': editor.isActive('strike') }"><i class="fa fa-strikethrough"></i></button>
+             <!--   <button class="editor-button" :title="$t('editor.link')" @click="enterUrl" :class="{ 'is-active': editor.isActive('link') }"><i class="fa fa-url"></i></button>-->
                 <button class="editor-button" :title="$t('editor.code')" @click="runCommand('toggleCode')" :class="{ 'is-active': editor.isActive('code') }"><i class="fa fa-code"></i></button>
                 <button class="editor-button" :title="$t('editor.heading')" @click="runCommand('toggleHeading', { level: 1})" :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"><i class="fa fa-heading"></i></button>
                 <button class="editor-button"  :title="$t('editor.ul')" @click="runCommand('toggleBulletList')" :class="{ 'is-active': editor.isActive('bulletList') }"><i class="fa fa-list-ul"></i></button>
@@ -33,7 +34,9 @@
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 import { Editor, EditorContent } from '@tiptap/vue-3'
+
 import StarterKit from '@tiptap/starter-kit'
+import TipTapLink from '@tiptap/extension-link'
 
 import TodoMarker from './todo-marker'
 import AppButton from '@/components/forms/Button.vue'
@@ -62,10 +65,33 @@ export default class TipTap extends Vue {
             autofocus: true,
             extensions: [
                 StarterKit,
-                TodoMarker.configure()
+                TodoMarker.configure(),
+                /*TipTapLink.configure({
+                    openOnClick: false,
+                    linkOnPaste: false,
+                })*/
             ],
         });
     }  
+
+    enterUrl() {
+        const previousUrl = this.editor.getAttributes('link').href;
+        const url = window.prompt('URL', previousUrl);
+
+        // cancelled
+        if (url === null) {
+            return
+        }
+
+        // empty
+        if (url === '') {
+            this.editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return
+        }
+
+        // update link
+        this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+    }
     
     @Emit('save') 
     save() {

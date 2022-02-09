@@ -44,7 +44,7 @@ const applicationStateModule = namespace("applicationState");
     WTreeviewListItem,
     WTreeviewHeader    
   },
-  emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle']
+  emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle', 'select-child']
 })
 export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
@@ -100,8 +100,9 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
         return isSelected;
     }
     
-    selectChild(item: BaseModel) {
-        this.selectItemIds({ view: this.parentKey, itemIds: [item.id] });
+    @Emit('select-child')
+    selectChild($event) {
+        return $event;
     }
 
 
