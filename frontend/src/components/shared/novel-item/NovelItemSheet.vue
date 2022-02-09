@@ -84,6 +84,13 @@ export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySe
 }
 </script>
 
+<style>
+
+.header .underline {
+    font-size: 2rem;
+}
+</style>
+
 <style scoped>
 .sheet {
     border: var(--sheet-border);

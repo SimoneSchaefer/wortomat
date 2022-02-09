@@ -9,6 +9,7 @@
             :item="item"
             :open="isOpen(item)"
             @toggle="toggle($event, item)"
+            @select-child="selectItem($event)"
             @updateParentName="updateName(item, $event)"
             @addChild="addChild(item)"
             @childMoved="childMoved($event)"
@@ -36,14 +37,33 @@ const selectionModule = namespace("selection");
   components: { WTreeViewParent}
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
+  private lastChecked: BaseModel = null; // needed for CTRL handling
+
+  toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store
+
   @novelDataModule.State('_novelItems')
-  novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
+  _novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
   @selectionModule.State('_selectedItemIds')
   _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
 
   @selectionModule.Action
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
+  @novelDataModule.Action
+  updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  moveParent!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, parentId: number, oldPosition: number, newPosition: number }) => Promise<void>;
+
+  @novelDataModule.Action
+  moveChild!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, childToMove: number, newParentId: number, newPosition: number }) => Promise<void>;
 
   mounted() {
     this.$store.subscribe((mutation) => {
@@ -61,26 +81,25 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     });
   }
 
-  @novelDataModule.Action
-  updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
-
-  @novelDataModule.Action
-  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
-
-  @novelDataModule.Action
-  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
-
-  @novelDataModule.Action
-  moveParent!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, parentId: number, oldPosition: number, newPosition: number }) => Promise<void>;
-
-  @novelDataModule.Action
-  moveChild!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, childToMove: number, newParentId: number, newPosition: number }) => Promise<void>;
-
   get items() {
-    return this.novelItems.get(this.parentKey) || [];
+    return this.novelItems;
   }
 
-  toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store
+  get novelItems() {
+    return this._novelItems.get(this.parentKey) || [];
+  }
+
+  get childItems() {
+    const flatChildren = [];
+    for (let parent of this.novelItems) {
+      flatChildren.push(...parent['children']);
+    }
+    return flatChildren;
+  }
+     
+  get selectedItems() {
+    return this._selectedItemIds.get(this.parentKey);
+  }
   
   toggle(open: boolean, parent: BaseModel) {
     this.toggleState.set(parent.id, open);
@@ -95,7 +114,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
 
   deleteChild(item: BaseModel) {
-    const parent = this.novelItems.get(this.parentKey).find(parent => parent.id === item.parentId);
+    const parent = this.novelItems.find(parent => parent.id === item.parentId);
     item.parentId = parent?.id || -1;
     this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
@@ -119,6 +138,45 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     const newIndex = $event.moved.newIndex;
     const oldIndex = $event.moved.oldIndex;
     this.moveParent({ key: this.parentKey, novelId: this.novelId, parentId: parentId, oldPosition: oldIndex, newPosition: newIndex });
+  }
+
+  selectItem(event): void  {
+    const $event = event.event;
+    $event.stopPropagation();
+    const selected = event.item;
+    let selectedItems: number[] = [];
+    if ($event['shiftKey']) {
+        selectedItems = this.handleShift(selected);
+    } else if ($event['ctrlKey']) {
+        selectedItems = this.handleCtrl(selected);
+    } else {
+        selectedItems = [selected.id];
+    }
+    if (selectedItems.find(selectedItem => selectedItem === selected.id)) {
+      this.lastChecked = selected;
+    } 
+    this.selectItemIds( { view: this.parentKey, itemIds: selectedItems });    
+  }
+
+  handleCtrl(selected: BaseModel): number[]  {
+    const index = this.selectedItems.findIndex(selectedItem => selectedItem === selected.id);
+    if (index >= 0) {
+        this.selectedItems.splice(index, 1);
+    } else {
+        this.selectedItems.push(selected.id);
+    }
+    return this.selectedItems;
+  }
+
+  handleShift(selected: BaseModel): number[] {
+    if (!this.lastChecked) {
+        return [selected.id];
+    }
+    const childItems = this.childItems;
+    const start = childItems.findIndex(item => item.id === selected.id);
+    const end = childItems.findIndex(item => item.id === this.lastChecked.id);
+    const newSelectedItems = this.childItems.slice(Math.min(start,end), Math.max(start,end)+ 1);
+    return newSelectedItems.map(item => item.id);
   }
 }
 </script>
