@@ -75,7 +75,7 @@ const vuexLocal = new VuexPersistence({
   })
 
 const storeX = createStore({
-    plugins: [ vuexLocal.plugin]
+   // plugins: [ vuexLocal.plugin]
     // plugins: [ VuexLocalStorage ]
 });
 new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });

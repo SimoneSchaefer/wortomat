@@ -2,7 +2,6 @@
     <WConfirmDialog ref="confirmDeleteParent" @accept="deleteParent" message="delete_confirm"></WConfirmDialog>
     <div class="accordion-header">
         <div class="toggle-button fa"  v-bind:class="{ 'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen }" @click="toggle"></div>
-        {{ item.id }}
         <WEditableLabel 
             :value="item.name" 
             :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"

@@ -1,5 +1,5 @@
 <template>
-  <div class="tree" :key="componentKey">
+  <div class="tree">
       <draggable :list="items" group="parents"
         class="list-group"
         ghost-class="ghost"
@@ -39,8 +39,6 @@ const treeStateModule = namespace("treeState");
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
   private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
-
-  componentKey = 0;
 
   @treeStateModule.State('toggleState')
   toggleState!: Map<PARENT_ITEM_KEYS, Map<number, boolean>>; // TODO issue#12 remember in local store

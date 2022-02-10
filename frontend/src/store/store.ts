@@ -4,7 +4,6 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import { IState } from './istate';
-import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import { PARENT_ITEM_KEYS } from './keys';
 
 export default new Vuex.Store<IState>({
@@ -17,7 +16,7 @@ export default new Vuex.Store<IState>({
     novelItems: new Map(),
     selection: new Map(),
     filteredTags: new Map(),
-    displaySettings: new DisplaySettingsService().currentSettings
+    displaySettings: Object()
   },
   getters,
   mutations,

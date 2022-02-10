@@ -8,9 +8,6 @@ import { Prop } from 'vue-property-decorator';
 
 import Navlink from '@/components/navigation/Navlink.vue'
 import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
-import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS } from '@/store/keys';
-import { BaseModel } from '@/models/Base.model';
-import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
 
 

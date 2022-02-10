@@ -1,14 +1,10 @@
 import { BaseModel } from "@/models/Base.model";
-import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
-import { NovelService } from "@/service/NovelService";
-import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys";
+import { NOVEL_ITEM_KEYS } from "./keys";
 import { ActionContext } from 'vuex';
 import { IState } from "./istate";
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { TimelineService } from "@/service/TimelineService";
-import { SelectionService } from "@/service/Selection.service";
-import { DisplaySettingsService } from "@/service/DisplaySettingsService";
 
 
 
