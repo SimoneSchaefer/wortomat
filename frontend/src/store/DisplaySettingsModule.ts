@@ -4,7 +4,7 @@ import { DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "./keys
 
 @Module({ generateMutationSetters: true })
 export default class DisplaySettingsModule extends VuexModule {
-  private _displaySettings = new DisplaySettingsService().currentSettings;
+  private _displaySettings: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> = Object()//= new DisplaySettingsService().currentSettings;
 
   get displaySettings(): Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> {
     return this._displaySettings;
@@ -18,8 +18,13 @@ export default class DisplaySettingsModule extends VuexModule {
   @Action
   public async setVisible(payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}): Promise<void> {
     const { novelItemKey, displaySettingKey, value} = payload;
-    const newSettings = new DisplaySettingsService().setVisible(novelItemKey, displaySettingKey, value);
-    this.updateDisplaySettings(newSettings);
+    const currentSettings = this._displaySettings;
+    const settingsForView = this._displaySettings[novelItemKey] || {};
+    settingsForView[displaySettingKey] = value;
+
+
+    // const newSettings = new DisplaySettingsService().setVisible(novelItemKey, displaySettingKey, value);
+    this.updateDisplaySettings(currentSettings);
   }
 }
 

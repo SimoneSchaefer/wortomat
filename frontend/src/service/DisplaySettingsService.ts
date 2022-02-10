@@ -15,14 +15,14 @@ export class DisplaySettingsService {
     }
 
     private storeSettings(values: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
-        localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
+       // localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(values));
     }
 
     get currentSettings(): Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> {
         const inLocalStorage = localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS');
         if (!inLocalStorage) {
             this.storeSettings(this.initializeWithDefaultValues());
-            localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(this.initializeWithDefaultValues()));
+        //    localStorage.setItem('WORTOMAT_DISPLAY_SETTINGS', JSON.stringify(this.initializeWithDefaultValues()));
         }
         return JSON.parse(localStorage.getItem('WORTOMAT_DISPLAY_SETTINGS'));    
     }

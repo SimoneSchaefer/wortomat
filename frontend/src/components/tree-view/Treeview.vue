@@ -1,5 +1,5 @@
 <template>
-  <div class="tree">
+  <div class="tree" :key="componentKey">
       <draggable :list="items" group="parents"
         class="list-group"
         ghost-class="ghost"
@@ -32,14 +32,18 @@ import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
+const treeStateModule = namespace("treeState");
 
 @Options({
   components: { WTreeViewParent}
 })
 export default class Treeview extends mixins(UpdatableItemMixin) {
-  private lastChecked: BaseModel = null; // needed for CTRL handling
+  private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
 
-  toggleState = new Map<number, boolean>(); // TODO issue#12 remember in local store
+  componentKey = 0;
+
+  @treeStateModule.State('toggleState')
+  toggleState!: Map<PARENT_ITEM_KEYS, Map<number, boolean>>; // TODO issue#12 remember in local store
 
   @novelDataModule.State('_novelItems')
   _novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
@@ -49,6 +53,9 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
 
   @selectionModule.Action
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
+  @treeStateModule.Action
+  toggleItems!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[], expanded: boolean } ) => Promise<void>;
 
   @novelDataModule.Action
   updateNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
@@ -85,6 +92,10 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     return this.novelItems;
   }
 
+  get currentToggleState() {
+    return this.toggleState.get(this.parentKey) || new Map();
+  }
+
   get novelItems() {
     return this._novelItems.get(this.parentKey) || [];
   }
@@ -102,11 +113,11 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
   
   toggle(open: boolean, parent: BaseModel) {
-    this.toggleState.set(parent.id, open);
+    this.toggleItems({ view: this.parentKey, itemIds: [ parent.id], expanded: open })
   }
 
   isOpen(parent: BaseModel) {
-    return this.toggleState.has(parent.id) ? this.toggleState.get(parent.id) : true;
+    return this.currentToggleState.has(parent.id) ? this.currentToggleState.get(parent.id) : true;
   }
 
   deleteParent(item: BaseModel) {
@@ -123,7 +134,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     const child = new BaseModel();
     child.parentId = selectedParent.id;
     this.addNovelItem({ view: this.parentKey, novelItem: child });
-    this.toggleState.set(selectedParent.id, true);
+    this.currentToggleState.set(selectedParent.id, true);
   }
 
   childMoved($event): void {
