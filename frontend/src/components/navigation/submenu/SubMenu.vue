@@ -27,9 +27,8 @@ import Navlink from '@/components/navigation/Navlink.vue'
 import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
 import FilterMenu from '@/components/navigation/submenu/FilterMenu.vue'
 import ExportMenu from '@/components/navigation/submenu/ExportMenu.vue'
-import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
-import { DisplaySettingsService } from '@/service/DisplaySettingsService';
 import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
 import { namespace } from 's-vuex-class';
 

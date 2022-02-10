@@ -10,13 +10,13 @@
 
 <script lang="ts">
 import { mixins, Options } from 'vue-class-component';
-import {  DISPLAY_SETTINGS_KEYS, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
-import { BaseModel } from '@/models/Base.model';
-import { DisplaySettingsService } from '@/service/DisplaySettingsService';
-import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
+import { namespace } from 's-vuex-class';
+
+import {  DISPLAY_SETTINGS_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
+import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import ToggleSwitch from '@/components/forms/ToggleSwitch.vue';
-import { namespace } from 's-vuex-class';
+import { getAllEnumValues } from '@/store/DisplaySettingsModule';
 
 
 const displaySettingsModule = namespace('displaySettings');
@@ -25,8 +25,6 @@ const displaySettingsModule = namespace('displaySettings');
     components: { ToggleSwitch}
 })
 export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, DisplaySettingsAwareMixin) {
-    private displaySettingService = new DisplaySettingsService();
-
     @displaySettingsModule.Action
     setVisible!: (payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}) => Promise<void>;
 
@@ -35,7 +33,7 @@ export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, 
     }
 
     get displaySettingKeys() {
-        return this.displaySettingService.getAllEnumValues(DISPLAY_SETTINGS_KEYS);
+        return getAllEnumValues(DISPLAY_SETTINGS_KEYS);
     }
 }
 </script>

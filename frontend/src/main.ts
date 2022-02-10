@@ -62,12 +62,27 @@ import DisplaySettingsModule from './store/DisplaySettingsModule';
 import NovelDataModule from './store/NovelDataModule';
 import ApplicationStateModule from './store/ApplicationStateModule';
 import SelectionModule from './store/SelectionModule';
+import TreeStateModule from './store/TreeStateModule';
+import VuexLocalStorage from './store/plugins/web-storage';
+import VuexPersistence from 'vuex-persist'
 
-const storeX = createStore({});
+const vuexLocal = new VuexPersistence({
+    storage: window.localStorage,
+    // modules: [ 'displaySettings']
+    reducer: (state) => ({ displaySettings: state['displaySettings'] }), //only save navigation module
+  //  filter: (mutation) => mutation.type == 'displaySettings/updateDisplaySettings'
+  
+  })
+
+const storeX = createStore({
+   // plugins: [ vuexLocal.plugin]
+    // plugins: [ VuexLocalStorage ]
+});
 new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
 new NovelDataModule({ store: storeX, name: 'novelData' });
 new ApplicationStateModule({ store: storeX, name: 'applicationState' });
 new SelectionModule({ store: storeX, name: 'selection' });
+new TreeStateModule({ store: storeX, name: 'treeState' });
 
 
 const app = createApp(App)
