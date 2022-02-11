@@ -63,7 +63,7 @@ import NovelDataModule from './store/NovelDataModule';
 import ApplicationStateModule from './store/ApplicationStateModule';
 import SelectionModule from './store/SelectionModule';
 import TreeStateModule from './store/TreeStateModule';
-import VuexLocalStorage from './store/plugins/web-storage';
+import VuexLocalStorage, { setupLocalStorage } from './store/plugins/web-storage';
 import VuexPersistence from 'vuex-persist'
 
 const vuexLocal = new VuexPersistence({
@@ -76,13 +76,15 @@ const vuexLocal = new VuexPersistence({
 
 const storeX = createStore({
    // plugins: [ vuexLocal.plugin]
-    // plugins: [ VuexLocalStorage ]
+    plugins: [ VuexLocalStorage ]
 });
+
 new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
 new NovelDataModule({ store: storeX, name: 'novelData' });
 new ApplicationStateModule({ store: storeX, name: 'applicationState' });
 new SelectionModule({ store: storeX, name: 'selection' });
 new TreeStateModule({ store: storeX, name: 'treeState' });
+setupLocalStorage(storeX);
 
 
 const app = createApp(App)

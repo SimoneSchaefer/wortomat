@@ -1,32 +1,22 @@
 
-const keysToStore = {
-    'displaySettings/_displaySettings': 'displaySettings/updateDisplaySettings',
+const keysToStore = [
+    'displaySettings/updateDisplaySettings'
+]
 
-}
-
-const setupLocalStorage = (store) => {
-    console.log('store', store)
-    for (const key of Object.keys(keysToStore)) {
-        console.log('key is ', key)
-        console.log('key is ', localStorage.getItem(keysToStore[key]))
-        const item = localStorage.getItem(keysToStore[key]);
+export const setupLocalStorage = (store) => {
+    for (const key of keysToStore) {
+        const item = localStorage.getItem(key);
         if (item) {
-            console.log('HARR GARR')
-            store._state.data.displaySettings = JSON.parse(item);
-          // store.commit(keysToStore[key], JSON.parse(item));
+            store.commit(key, JSON.parse(item));
         }
     }
 
 }
 
 const VuexLocalStorage = (store) => {
-
-	setupLocalStorage(store);
-
-    store.subscribe((mutation, state) => {
+    store.subscribe((mutation, _state) => {
         if (Object.values(keysToStore).includes(mutation.type)) {
-            const payload = mutation.payload;
-            localStorage.setItem(mutation.type, JSON.stringify(payload));
+            localStorage.setItem(mutation.type, JSON.stringify(mutation.payload));
         }
     })
 }
