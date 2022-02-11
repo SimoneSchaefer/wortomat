@@ -54,7 +54,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     modalOpen!: boolean;   
 
     @selectionModule.State('_selectedItemIds')
-    _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+    _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
     @selectionModule.Action
     selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
@@ -96,7 +96,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     }
 
     isSelected(item: BaseModel) {
-        const isSelected = (this._selectedItemIds.get(this.parentKey) || []).find(id => id === item.id);
+        const isSelected = (this._selectedItemIds[this.parentKey] || []).find(id => id === item.id);
         if (isSelected) {
             this.openParentIfNecessary();
         }

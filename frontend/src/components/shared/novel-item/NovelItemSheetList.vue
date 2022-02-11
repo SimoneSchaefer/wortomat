@@ -32,7 +32,7 @@ export default class NovelItemSheetList extends mixins(NovelItemKeyAwareMixin)  
     novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
     
     @selection.State('_selectedItemIds')
-    selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+    selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
     get items() {
         return this.novelItems.get(this.parentKey) || [];
@@ -43,7 +43,7 @@ export default class NovelItemSheetList extends mixins(NovelItemKeyAwareMixin)  
     }
 
     get selectedItems(): number[] {
-        return this.selectedItemIds.get(this.parentKey) || [];
+        return this.selectedItemIds[this.parentKey] || [];
     }
 
     get selected(): BaseModel[] {

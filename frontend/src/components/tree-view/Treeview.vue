@@ -47,7 +47,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   _novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
   @selectionModule.State('_selectedItemIds')
-  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+  _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
   @selectionModule.Action
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
@@ -77,7 +77,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
           this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
         }
       }
-      if (mutation.type === 'novelData/novelItemsLoaded'  && !this._selectedItemIds.get(mutation.payload.view)?.length){
+      if (mutation.type === 'novelData/novelItemsLoaded'  && !this._selectedItemIds[mutation.payload.view]?.length){
         const firstParentWithChildren = mutation.payload.novelItems.find(parent => parent['children'].length > 0);
         if (firstParentWithChildren) {
           this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
@@ -107,7 +107,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
      
   get selectedItems() {
-    return this._selectedItemIds.get(this.parentKey);
+    return this._selectedItemIds[this.parentKey] || [];
   }
   
   toggle(open: boolean, parent: BaseModel) {
