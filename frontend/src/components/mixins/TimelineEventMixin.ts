@@ -25,7 +25,8 @@ export default abstract class TimelineEventMixin extends Vue {
 
     protected getFlatList(parentKey: PARENT_ITEM_KEYS): BaseModel[]{
         let flatList = [];
-        for (const group of this.novelItems.get(parentKey)) {
+        const items = this.novelItems.get(parentKey) || [];
+        for (const group of items) {
             flatList = flatList.concat(group['children']);
         }
         return flatList;
