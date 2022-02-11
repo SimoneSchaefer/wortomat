@@ -24,7 +24,7 @@
                         <div class="w-timeline-marker" @click="select(event)">&nbsp;</div>
                     </div>
                     <div class="w-timeline-event-name">
-                        <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel>
+                        <EditableLabel v-bind:value="event.name" @update-label="updateName(event, $event)" :placeHolderTitle="`fallback_labels.no_name.${parentItemKey}`"></EditableLabel>
                     </div>
                 </div>
             </div>
@@ -35,10 +35,12 @@
 </template>
 
 <script lang="ts">
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { Options, Vue } from "vue-class-component";
-import { TimelineEventModel } from "@/models/TimelineEvent";
 import { Emit, Prop } from "vue-property-decorator";
+
+import { PARENT_ITEM_KEYS } from "@/store/keys";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+
 import EditableDate from "@/components/forms/inline-edit/EditableDate.vue";
 import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
 import WButton from '@/components/forms/Button.vue';
@@ -46,7 +48,6 @@ import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WReferenceDialog from '@/components/timeline/ReferenceDialog.vue';
-import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 
 @Options({
   components: {
@@ -57,7 +58,7 @@ import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
       WNovelItemDropdown,
       WReferenceDialog
   },
-  emits: [ 'select', 'update-date', 'update-name', 'delete-event', 'add-reference']
+  emits: [ 'select', 'update-date', 'update-name', 'delete-event']
 })
 export default class WTimeline extends Vue {
     @Prop() events: TimelineEventModel[];
@@ -84,16 +85,6 @@ export default class WTimeline extends Vue {
         return item.event;
     }
 
-    /*@Emit('add-reference')
-    saveReference(event: TimelineEventModel, reference: { chapters: [], research: []}) {
-        return { event, reference };        
-    }
-
-    @Emit('delete-reference')
-    deleteReference(event: TimelineEventModel, item: Bas) {
-        return { event, reference };        
-    }*/
-
     cancelReference() {
         this.displayDialog = -1;
     }
@@ -106,8 +97,8 @@ export default class WTimeline extends Vue {
         return this.selectedEvents.find(selected => selected === item.id);
     }
 
-    get novelItemKey() {
-        return NOVEL_ITEM_KEYS.TIMELINE;
+    get parentItemKey() {
+        return PARENT_ITEM_KEYS.TIMELINE;
     }
 }
 </script>

@@ -128,8 +128,8 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Action
-    public async addReference(payload: { novelId: number, event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
-        this._timelineService.addReference(payload.novelId, payload.event, payload.item, payload.key).then(result => {
+    public async addReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
+        this._timelineService.addReference(this._novelId, payload.event, payload.item, payload.key).then(result => {
             this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data})
           });   
     }

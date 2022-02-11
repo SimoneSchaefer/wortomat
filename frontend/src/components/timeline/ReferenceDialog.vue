@@ -49,7 +49,7 @@
 
       <div class="option-groups">
         <WButton :disabled="!selectedReferenceItem" type="text"
-          @click="addReference" 
+          @click="addNewReference" 
           :title="`timeline.select_reference_type.add_locally`" 
           icon="fa fa-plus" />
       </div>
@@ -61,6 +61,7 @@
 import { childKeyForParentKey, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys";
 import { mixins, Options, } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
+import { namespace } from "s-vuex-class";
 
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { BaseModel } from "@/models/Base.model";
@@ -73,6 +74,8 @@ import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 
+const novelDataModule = namespace("novelData");
+
 @Options({
   components: {
     EditableDate,
@@ -84,16 +87,13 @@ import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerant
   },
   emits: ["close"],
 })
-export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
+export default class WReferenceDialog extends mixins(TimelineEventMixin)  {
   @Prop() event: TimelineEventModel;
   @Prop() displayDialog = false;
 
-  allowedReferences = [
-    NOVEL_ITEM_KEYS.CHAPTERS,
-    NOVEL_ITEM_KEYS.RESEARCH,
-    NOVEL_ITEM_KEYS.LOCATIONS,
-    NOVEL_ITEM_KEYS.CHARACTERS,
-  ]
+  @novelDataModule.Action
+  addReference: (payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ) => Promise<void> ;
+
   selectedReferenceType: PARENT_ITEM_KEYS = null;
   selectedReferenceItems = new Map();
 
@@ -111,15 +111,15 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     return this.referencedItems(key);
   }
 
-  getIconForType(key: NOVEL_ITEM_KEYS) {
+  getIconForType(key: PARENT_ITEM_KEYS) {
     switch (key) { 
-      case NOVEL_ITEM_KEYS.CHAPTERS:
+      case PARENT_ITEM_KEYS.PARTS:
         return 'book-open'
-      case NOVEL_ITEM_KEYS.CHARACTERS:
+      case PARENT_ITEM_KEYS.CHARACTER_GROUPS:
         return 'users'
-      case NOVEL_ITEM_KEYS.LOCATIONS:
+      case PARENT_ITEM_KEYS.LOCATION_GROUPS:
         return 'map'
-      case NOVEL_ITEM_KEYS.RESEARCH:
+      case PARENT_ITEM_KEYS.RESEARCH_GROUPS:
         return 'flask'     
     }
     return 'question-mark';
@@ -147,23 +147,10 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     });   
   }
 
-  addReference() {
+  addNewReference() {
     const item = this.selectedReferenceItem;
-    this.$store.dispatch('addReference', { 
-      novelId: this.novelId,
-      event: this.event,
-      item: item,
-      key: this.selectedReferenceType
-    });  
+    this.addReference({ event: this.event, item: item, key: this.selectedReferenceType}) 
     this.selectedReferenceItems = new Map();      
-  }
-
-  get novelItemKey() {
-    return PARENT_ITEM_KEYS.TIMELINE;
-  }
-
-  private get novelId(): number {
-      return this.$store.getters.openNovelId;
   }
 
   private referencedItems(parentKey: PARENT_ITEM_KEYS, mustInclude = true) {

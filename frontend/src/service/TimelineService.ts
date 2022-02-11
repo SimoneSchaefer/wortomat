@@ -1,7 +1,8 @@
+import { API } from './Axios';
+
 import { BaseModel } from '@/models/Base.model';
 import { TimelineEventModel } from '@/models/TimelineEvent';
-import { NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
-import { API } from './Axios';
+import { childKeyForParentKey, PARENT_ITEM_KEYS } from '@/store/keys';
 import { NovelItemService } from './NovelItemService';
 
 export class TimelineService extends NovelItemService {
@@ -11,9 +12,10 @@ export class TimelineService extends NovelItemService {
     }
 
     addReference(novelId: number, timelineEvent: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS) {
-        return API.put(`${super.getBasePath(novelId)}/addReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${key}`);
+        return API.put(`${super.getBasePath(novelId)}/addReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${childKeyForParentKey(key).toLocaleLowerCase()}`);
     }
+    
     deleteReference(novelId: number, timelineEvent: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS) {
-        return API.delete(`${super.getBasePath(novelId)}/deleteReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${key}`);
+        return API.delete(`${super.getBasePath(novelId)}/deleteReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${childKeyForParentKey(key).toLocaleLowerCase()}`);
     }
 }

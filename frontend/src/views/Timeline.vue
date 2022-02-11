@@ -10,7 +10,7 @@
               <ScrollPanel style="height: 100%" class="scroll-timeline">
                 <WTimeline 
                   :events="sortedTimelineEvents" 
-                  :selectedEvents="selectedItems"
+                  :selectedEvents="selectedItemIds"
                   @update-date="updateDate"
                   @update-name="updateName"
                   @select="select"
@@ -39,7 +39,11 @@
 import { mixins, Options } from "vue-class-component";
 import { namespace } from "s-vuex-class";
 
-import { childKeyForParentKey, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys";
+import { childKeyForParentKey, PARENT_ITEM_KEYS } from "@/store/keys";
+
+import { BaseModel } from "@/models/Base.model";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
@@ -48,8 +52,6 @@ import WSidebarOpener from "@/components/shared/menu/SidebarOpener.vue";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WHelpNote from '@/components/HelpNote.vue';
-import { BaseModel } from "@/models/Base.model";
-import { TimelineEventModel } from "@/models/TimelineEvent";
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
@@ -82,25 +84,13 @@ export default class Plot extends mixins(TimelineEventMixin) {
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
 
   @selectionModule.State('_selectedItemIds')
-  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
-
-
-  @novelDataModule.State('_novelId')
-  novelId!: number;   
+  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;  
     
   @novelDataModule.State('_loading')
   loading!: boolean;
     
   @novelDataModule.Getter
   sortedTimelineEvents!: TimelineEventModel[];
-  
-
-  allowedReferences = [
-    PARENT_ITEM_KEYS.PARTS,
-    PARENT_ITEM_KEYS.RESEARCH_GROUPS,
-    PARENT_ITEM_KEYS.LOCATION_GROUPS,
-    PARENT_ITEM_KEYS.CHARACTER_GROUPS,
-  ]
 
   mounted(): void {
     this.loadNovelItems({ view: PARENT_ITEM_KEYS.TIMELINE, novelId: this.$route.params.id})
@@ -115,14 +105,6 @@ export default class Plot extends mixins(TimelineEventMixin) {
 
   getExistingEventReferences(event: TimelineEventModel, key: PARENT_ITEM_KEYS) {
     return this.referencedItems(event, key);
-  }
-
-  getParentKey(childKey: NOVEL_ITEM_KEYS) {
-    return PARENT_ITEM_KEYS.TIMELINE// TODO
-  }
-
-  get parentKey() {
-    return NOVEL_ITEM_KEYS.TIMELINE;
   }
 
   select(item): void {
@@ -141,15 +123,8 @@ export default class Plot extends mixins(TimelineEventMixin) {
     this.updateItem(update.item, { eventDate: update.newValue });   
   }  
 
-  selected(item) {
-    return this.selectedItems.find(selected => selected === item.id);
-  }
- 
-  get selectedItemIds(): number[] {
-    return this._selectedItemIds.get(PARENT_ITEM_KEYS.TIMELINE) || [];
-  }
-  get selectedItems(): TimelineEventModel[] {
-    return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
+  selected(item: TimelineEventModel): boolean {
+    return !!this.selectedItemIds.find(selected => selected === item.id);
   }
 
   private updateItem(item, overrideValues): void {
@@ -164,8 +139,14 @@ export default class Plot extends mixins(TimelineEventMixin) {
     ).filter(child => itemIds.includes(child.id) === mustInclude);
   }
 
-  get novelItemKey() {
-    return NOVEL_ITEM_KEYS.TIMELINE;
+  get parentKey() {
+    return PARENT_ITEM_KEYS.TIMELINE;
+  }   
+  get selectedItemIds(): number[] {
+    return this._selectedItemIds.get(PARENT_ITEM_KEYS.TIMELINE) || [];
+  }
+  get selectedItems(): TimelineEventModel[] {
+    return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
   }
 }
 </script>
