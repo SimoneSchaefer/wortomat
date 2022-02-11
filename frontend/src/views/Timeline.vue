@@ -23,7 +23,7 @@
                 <div v-for="selectedItem of selectedItems" :key="selectedItem.id">
                   <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
                     <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
-                      <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="getService(referenceType)"></NovelItemSheet>
+                      <NovelItemSheet :novelItemKey="referenceType" :item="eventReference"></NovelItemSheet>
                     </div>
                   </div>  
                 </div>                    
