@@ -41,11 +41,11 @@ const novelDataModule = namespace("novelData");
 })
 export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySettingsAwareMixin) {
     @Prop() item!: BaseModel;
-    @Prop() novelItemKey?: PARENT_ITEM_KEYS;
+    @Prop() novelItemKey!: PARENT_ITEM_KEYS;
 
     // Overriding base view, as this might be included in the timeline view
     get parentKey() {
-        return this.novelItemKey || super.parentKey;
+        return this.novelItemKey;
     }
 
     private service = new GroupingNovelItemService();

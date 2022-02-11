@@ -4,7 +4,7 @@
     </div>
     <div v-else>
         <div v-for="item in selected" :key="item.id">
-            <NovelItemSheet :item="item"></NovelItemSheet>
+            <NovelItemSheet :item="item" :novelItemKey="parentKey"></NovelItemSheet>
         </div>
     </div>
 </template>

@@ -12,7 +12,7 @@ import { Emit } from "vue-property-decorator";
   components: { WButton },
   emits: [ 'click']
 })
-export default class WSidebarMenu extends Vue {
+export default class WSidebarOpener extends Vue {
     @Emit('click') 
     click($event) {
         return $event;

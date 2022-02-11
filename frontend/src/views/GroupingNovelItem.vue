@@ -27,7 +27,6 @@ import { namespace } from "s-vuex-class";
 import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 
-import WSidebarMenu from '@/components/shared/menu/SidebarMenu.vue';
 import WNovelItemSheetList from '@/components/shared/novel-item/NovelItemSheetList.vue';
 import WTreeview from '@/components/tree-view/Treeview.vue';
 import WHelpNote from '@/components/HelpNote.vue';
@@ -38,7 +37,6 @@ const novelDataModule = namespace("novelData");
 
 @Options({
   components: {
-    WSidebarMenu,
     WNovelItemSheetList,
     WTreeview,
     WHelpNote,
