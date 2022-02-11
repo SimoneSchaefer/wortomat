@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-// import store from './store/store'
 
 
 // primevue 
@@ -64,33 +63,23 @@ import ApplicationStateModule from './store/ApplicationStateModule';
 import SelectionModule from './store/SelectionModule';
 import TreeStateModule from './store/TreeStateModule';
 import VuexLocalStorage, { setupLocalStorage } from './store/plugins/web-storage';
-import VuexPersistence from 'vuex-persist'
 
-const vuexLocal = new VuexPersistence({
-    storage: window.localStorage,
-    // modules: [ 'displaySettings']
-    reducer: (state) => ({ displaySettings: state['displaySettings'] }), //only save navigation module
-  //  filter: (mutation) => mutation.type == 'displaySettings/updateDisplaySettings'
-  
-  })
-
-const storeX = createStore({
-   // plugins: [ vuexLocal.plugin]
+const store = createStore({
     plugins: [ VuexLocalStorage ]
 });
 
-new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
-new NovelDataModule({ store: storeX, name: 'novelData' });
-new ApplicationStateModule({ store: storeX, name: 'applicationState' });
-new SelectionModule({ store: storeX, name: 'selection' });
-new TreeStateModule({ store: storeX, name: 'treeState' });
-setupLocalStorage(storeX);
+new DisplaySettingsModule({ store: store, name: 'displaySettings' });
+new NovelDataModule({ store: store, name: 'novelData' });
+new ApplicationStateModule({ store: store, name: 'applicationState' });
+new SelectionModule({ store: store, name: 'selection' });
+new TreeStateModule({ store: store, name: 'treeState' });
+setupLocalStorage(store);
 
 
 const app = createApp(App)
     .use(router)
     .use(PrimeVue)
-    .use(storeX)
+    .use(store)
     .use(i18n)
     .use(ConfirmationService)
     .use(ToastService)

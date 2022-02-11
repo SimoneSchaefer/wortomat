@@ -1,6 +1,7 @@
 
 const keysToStore = [
-    'displaySettings/updateDisplaySettings'
+    'displaySettings/updateDisplaySettings',
+    'treeState/itemsToggled'
 ]
 
 export const setupLocalStorage = (store) => {
