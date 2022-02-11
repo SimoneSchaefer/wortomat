@@ -19,21 +19,3 @@ export default class DisplaySettingsModule extends VuexModule {
   }
 }
 
-export class DisplaySettings {
-  show_title = true;
-  show_summary = true;
-  show_extended_summary = true;
-  show_tags = true;
-  show_image = true;
-  show_content = true;
-}
-
-
-export const getAllEnumValues = (enumType) => {
-  const allValues = [];
-  for (const value in enumType) {
-      if (isNaN(Number(value))) allValues.push(value)
-  }
-  return allValues;
-}
-
