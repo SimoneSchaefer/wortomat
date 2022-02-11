@@ -15,7 +15,7 @@
             <WMissingValueTolerantLabel :value="eventReference.name" :fallback="$t(`fallback_labels.no_name.${referenceType}`)"></WMissingValueTolerantLabel>
           </div>
           <WButton color="danger" type="text"
-            @click="deleteReference(eventReference, referenceType)" 
+            @click="deleteExistingReference(eventReference, referenceType)" 
             :title="`timeline.select_reference_type.delete`" 
             icon="fa fa-trash" />
         </div>
@@ -45,7 +45,6 @@
         :novelItemKey="selectedReferenceType"
         :placeHolder="`timeline.select_${selectedReferenceType}`" >
       </WNovelItemDropdown>
-
 
       <div class="option-groups">
         <WButton :disabled="!selectedReferenceItem" type="text"
@@ -94,6 +93,9 @@ export default class WReferenceDialog extends mixins(TimelineEventMixin)  {
   @novelDataModule.Action
   addReference: (payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ) => Promise<void> ;
 
+  @novelDataModule.Action
+  deleteReference: (payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS } ) => Promise<void> ;
+
   selectedReferenceType: PARENT_ITEM_KEYS = null;
   selectedReferenceItems = new Map();
 
@@ -133,18 +135,8 @@ export default class WReferenceDialog extends mixins(TimelineEventMixin)  {
     return this.referencedItems(this.selectedReferenceType, false);
   }
 
-  getParentKey(childKey: NOVEL_ITEM_KEYS) {
-    return null;
-    // return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
-  }
-
-  deleteReference(item: BaseModel, key: NOVEL_ITEM_KEYS) {
-    this.$store.dispatch('deleteReference', { 
-      novelId: this.novelId,
-      event: this.event,
-      item: item,
-      key: key
-    });   
+  deleteExistingReference(item: BaseModel, key: PARENT_ITEM_KEYS) {
+    this.deleteReference({ key: key, event: this.event, item: item});
   }
 
   addNewReference() {

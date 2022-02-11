@@ -1,14 +1,16 @@
 import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
-import { Getter } from "s-vuex-class";
 
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+
 import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 import { NovelService } from "@/service/NovelService";
-import { PARENT_ITEM_KEYS } from "./keys";
 import { TimelineService } from "@/service/TimelineService";
-import { TimelineEventModel } from "@/models/TimelineEvent";
+
+import { PARENT_ITEM_KEYS } from "./keys";
+
 
 @Module({ generateMutationSetters: true })
 export default class NovelDataModule extends VuexModule {
@@ -135,8 +137,8 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Action
-    public async deleteReference(payload: { novelId: number, event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
-        this._timelineService.deleteReference(payload.novelId, payload.event, payload.item, payload.key).then(result => {
+    public async deleteReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
+        this._timelineService.deleteReference(this._novelId, payload.event, payload.item, payload.key).then(result => {
             this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data})
           });   
     }
