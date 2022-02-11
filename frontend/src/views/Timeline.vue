@@ -84,7 +84,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
 
   @selectionModule.State('_selectedItemIds')
-  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;  
+  _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;  
     
   @novelDataModule.State('_loading')
   loading!: boolean;
@@ -143,7 +143,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
     return PARENT_ITEM_KEYS.TIMELINE;
   }   
   get selectedItemIds(): number[] {
-    return this._selectedItemIds.get(PARENT_ITEM_KEYS.TIMELINE) || [];
+    return this._selectedItemIds[PARENT_ITEM_KEYS.TIMELINE] || [];
   }
   get selectedItems(): TimelineEventModel[] {
     return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
