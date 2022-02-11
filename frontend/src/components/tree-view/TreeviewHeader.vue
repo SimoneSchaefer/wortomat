@@ -1,7 +1,7 @@
 <template>
     <WConfirmDialog ref="confirmDeleteParent" @accept="deleteParent" message="delete_confirm"></WConfirmDialog>
     <div class="accordion-header">
-        <div class="toggle-button fa"  v-bind:class="{ 'fa-chevron-down': isOpen, 'fa-chevron-right': !isOpen }" @click="toggle"></div>
+        <div class="toggle-button fa"  v-bind:class="{ 'fa-chevron-down': open, 'fa-chevron-right': !open }" @click="toggle"></div>
         <WEditableLabel 
             :value="item.name" 
             :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
@@ -21,17 +21,16 @@
 </template>
 
 <script lang="ts">
-import { mixins, Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
+import { namespace } from 's-vuex-class';
 
 import { BaseModel } from '@/models/Base.model';
-import { NOVEL_ITEM_KEYS } from '@/store/keys';
 
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
-import { namespace } from 's-vuex-class';
 
 const applicationStateModule = namespace("applicationState");
 
@@ -74,10 +73,6 @@ export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     addChild() {
         return this.item;
     }
-
-    get isOpen() {
-        return this.open;
-    }
 }
 </script>
 
@@ -93,13 +88,6 @@ export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
   border-top: 1px solid rgba(53, 53, 53, 0.178);
   padding-right:1em;
   border-right: 1px solid rgba(80, 80, 80, 0.39);
-
-}
-
-.accordion-header .menu {
-  width: 2em;
-  opacity: 0.5;
-  text-align: right;
 }
 
 .accordion-header .group-options {

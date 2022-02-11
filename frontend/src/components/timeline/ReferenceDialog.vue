@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import { childKeyForParentKey, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys";
 import { mixins, Options, } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
 
@@ -94,7 +94,7 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     NOVEL_ITEM_KEYS.LOCATIONS,
     NOVEL_ITEM_KEYS.CHARACTERS,
   ]
-  selectedReferenceType: NOVEL_ITEM_KEYS = null;
+  selectedReferenceType: PARENT_ITEM_KEYS = null;
   selectedReferenceItems = new Map();
 
 
@@ -107,8 +107,8 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     this.selectedReferenceItems.set(this.selectedReferenceType, baseModel);
   }
 
-  getExistingEventReferences(key: NOVEL_ITEM_KEYS) {
-    return this.referencedItems(this.getParentKey(key), key);
+  getExistingEventReferences(key: PARENT_ITEM_KEYS) {
+    return this.referencedItems(key);
   }
 
   getIconForType(key: NOVEL_ITEM_KEYS) {
@@ -130,7 +130,7 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   }
 
   get selectableReferenceItems() {
-    return this.referencedItems(this.getParentKey(this.selectedReferenceType), this.selectedReferenceType, false);
+    return this.referencedItems(this.selectedReferenceType, false);
   }
 
   getParentKey(childKey: NOVEL_ITEM_KEYS) {
@@ -159,15 +159,15 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   }
 
   get novelItemKey() {
-    return NOVEL_ITEM_KEYS.TIMELINE;
+    return PARENT_ITEM_KEYS.TIMELINE;
   }
 
   private get novelId(): number {
       return this.$store.getters.openNovelId;
   }
 
-  private referencedItems(parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS, mustInclude = true) {
-    const itemIds: number[] = this.event['references'][childKey.toUpperCase()];
+  private referencedItems(parentKey: PARENT_ITEM_KEYS, mustInclude = true) {
+    const itemIds: number[] = this.event['references'][childKeyForParentKey(parentKey).toUpperCase()];
     return this.getFlatList(
       parentKey, 
     ).filter(child => itemIds.includes(child.id) === mustInclude);

@@ -7,7 +7,7 @@ import { TimelineEventModel } from "@/models/TimelineEvent";
 import { TimelineService } from "@/service/TimelineService";
 
 
-
+/*
 const addReference = (context: ActionContext<IState,IState>, payload: { novelId: number, event: TimelineEventModel, item: BaseModel, key: NOVEL_ITEM_KEYS }): void => {
   new TimelineService().addReference(payload.novelId, payload.event, payload.item, payload.key).then(result => {
     context.commit('itemUpdated', { key: NOVEL_ITEM_KEYS.TIMELINE, item: result.data });
@@ -29,4 +29,4 @@ export default {
     addReference,
     deleteReference,
 }
-
+*/

@@ -1,6 +1,7 @@
-import { childKeyForParentKey, DISPLAY_SETTINGS_KEYS, parentKeyForChildKey, PARENT_ITEM_KEYS } from "@/store/keys"
 import { namespace } from "s-vuex-class";
-import { mixins, Vue } from "vue-class-component";
+import { mixins } from "vue-class-component";
+
+import { DISPLAY_SETTINGS_KEYS, PARENT_ITEM_KEYS } from "@/store/keys"
 import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
 
 
