@@ -61,7 +61,7 @@ import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 })
 export default class WTimeline extends Vue {
     @Prop() events: TimelineEventModel[];
-    @Prop() selectedEvent: TimelineEventModel;
+    @Prop() selectedEvents: number[];
     displayDialog = -1;
     
     @Emit('select')
@@ -103,7 +103,7 @@ export default class WTimeline extends Vue {
     }
 
     selected(item: TimelineEventModel) {
-        return (this.selectedEvent?.id === item.id);
+        return this.selectedEvents.find(selected => selected === item.id);
     }
 
     get novelItemKey() {

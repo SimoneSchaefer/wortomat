@@ -10,7 +10,7 @@
               <ScrollPanel style="height: 100%" class="scroll-timeline">
                 <WTimeline 
                   :events="sortedTimelineEvents" 
-                  :selectedEvent="selectedItem"
+                  :selectedEvents="selectedItems"
                   @update-date="updateDate"
                   @update-name="updateName"
                   @select="select"
@@ -19,13 +19,15 @@
           </SplitterPanel>
           <SplitterPanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
-              <div v-if="selectedItem" class="selected-item sheet-list">   
-                <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
-                  <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
-                    <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="getService(referenceType)"></NovelItemSheet>
-                  </div>
-                </div>       
-              </div> 
+              <div v-if="selectedItems.length" class="selected-item sheet-list"> 
+                <div v-for="selectedItem of selectedItems" :key="selectedItem.id">
+                  <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
+                    <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
+                      <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="getService(referenceType)"></NovelItemSheet>
+                    </div>
+                  </div>  
+                </div>                    
+              </div>
             </ScrollPanel>
           </SplitterPanel>
         </Splitter>
@@ -79,6 +81,10 @@ export default class Plot extends mixins(TimelineEventMixin) {
   @selectionModule.Action
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
 
+  @selectionModule.State('_selectedItemIds')
+  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;
+
+
   @novelDataModule.State('_novelId')
   novelId!: number;   
     
@@ -111,9 +117,6 @@ export default class Plot extends mixins(TimelineEventMixin) {
     return this.referencedItems(event, key);
   }
 
-
-
-
   getParentKey(childKey: NOVEL_ITEM_KEYS) {
     return PARENT_ITEM_KEYS.TIMELINE// TODO
   }
@@ -139,13 +142,14 @@ export default class Plot extends mixins(TimelineEventMixin) {
   }  
 
   selected(item) {
-    return this.selectedItem?.id === item.id;
+    return this.selectedItems.find(selected => selected === item.id);
   }
  
-
-  get selectedItem() {
-    return undefined;
-    // return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{ id: undefined}])[0];
+  get selectedItemIds(): number[] {
+    return this._selectedItemIds.get(PARENT_ITEM_KEYS.TIMELINE) || [];
+  }
+  get selectedItems(): TimelineEventModel[] {
+    return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
   }
 
   private updateItem(item, overrideValues): void {
