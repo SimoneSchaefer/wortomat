@@ -15,7 +15,7 @@
             <WMissingValueTolerantLabel :value="eventReference.name" :fallback="$t(`fallback_labels.no_name.${referenceType}`)"></WMissingValueTolerantLabel>
           </div>
           <WButton color="danger" type="text"
-            @click="deleteReference(eventReference, referenceType)" 
+            @click="deleteExistingReference(eventReference, referenceType)" 
             :title="`timeline.select_reference_type.delete`" 
             icon="fa fa-trash" />
         </div>
@@ -46,10 +46,9 @@
         :placeHolder="`timeline.select_${selectedReferenceType}`" >
       </WNovelItemDropdown>
 
-
       <div class="option-groups">
         <WButton :disabled="!selectedReferenceItem" type="text"
-          @click="addReference" 
+          @click="addNewReference" 
           :title="`timeline.select_reference_type.add_locally`" 
           icon="fa fa-plus" />
       </div>
@@ -58,9 +57,10 @@
 </template>
 
 <script lang="ts">
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
+import { childKeyForParentKey, NOVEL_ITEM_KEYS, PARENT_ITEM_KEYS } from "@/store/keys";
 import { mixins, Options, } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
+import { namespace } from "s-vuex-class";
 
 import { TimelineEventModel } from "@/models/TimelineEvent";
 import { BaseModel } from "@/models/Base.model";
@@ -73,6 +73,8 @@ import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 
+const novelDataModule = namespace("novelData");
+
 @Options({
   components: {
     EditableDate,
@@ -84,17 +86,17 @@ import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerant
   },
   emits: ["close"],
 })
-export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
+export default class WReferenceDialog extends mixins(TimelineEventMixin)  {
   @Prop() event: TimelineEventModel;
   @Prop() displayDialog = false;
 
-  allowedReferences = [
-    NOVEL_ITEM_KEYS.CHAPTERS,
-    NOVEL_ITEM_KEYS.RESEARCH,
-    NOVEL_ITEM_KEYS.LOCATIONS,
-    NOVEL_ITEM_KEYS.CHARACTERS,
-  ]
-  selectedReferenceType: NOVEL_ITEM_KEYS = null;
+  @novelDataModule.Action
+  addReference: (payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ) => Promise<void> ;
+
+  @novelDataModule.Action
+  deleteReference: (payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS } ) => Promise<void> ;
+
+  selectedReferenceType: PARENT_ITEM_KEYS = null;
   selectedReferenceItems = new Map();
 
 
@@ -107,19 +109,19 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
     this.selectedReferenceItems.set(this.selectedReferenceType, baseModel);
   }
 
-  getExistingEventReferences(key: NOVEL_ITEM_KEYS) {
-    return this.referencedItems(this.getParentKey(key), key);
+  getExistingEventReferences(key: PARENT_ITEM_KEYS) {
+    return this.referencedItems(key);
   }
 
-  getIconForType(key: NOVEL_ITEM_KEYS) {
+  getIconForType(key: PARENT_ITEM_KEYS) {
     switch (key) { 
-      case NOVEL_ITEM_KEYS.CHAPTERS:
+      case PARENT_ITEM_KEYS.PARTS:
         return 'book-open'
-      case NOVEL_ITEM_KEYS.CHARACTERS:
+      case PARENT_ITEM_KEYS.CHARACTER_GROUPS:
         return 'users'
-      case NOVEL_ITEM_KEYS.LOCATIONS:
+      case PARENT_ITEM_KEYS.LOCATION_GROUPS:
         return 'map'
-      case NOVEL_ITEM_KEYS.RESEARCH:
+      case PARENT_ITEM_KEYS.RESEARCH_GROUPS:
         return 'flask'     
     }
     return 'question-mark';
@@ -130,44 +132,21 @@ export default class WReferenceDialog extends  mixins(TimelineEventMixin)  {
   }
 
   get selectableReferenceItems() {
-    return this.referencedItems(this.getParentKey(this.selectedReferenceType), this.selectedReferenceType, false);
+    return this.referencedItems(this.selectedReferenceType, false);
   }
 
-  getParentKey(childKey: NOVEL_ITEM_KEYS) {
-    return null;
-    // return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
+  deleteExistingReference(item: BaseModel, key: PARENT_ITEM_KEYS) {
+    this.deleteReference({ key: key, event: this.event, item: item});
   }
 
-  deleteReference(item: BaseModel, key: NOVEL_ITEM_KEYS) {
-    this.$store.dispatch('deleteReference', { 
-      novelId: this.novelId,
-      event: this.event,
-      item: item,
-      key: key
-    });   
-  }
-
-  addReference() {
+  addNewReference() {
     const item = this.selectedReferenceItem;
-    this.$store.dispatch('addReference', { 
-      novelId: this.novelId,
-      event: this.event,
-      item: item,
-      key: this.selectedReferenceType
-    });  
+    this.addReference({ event: this.event, item: item, key: this.selectedReferenceType}) 
     this.selectedReferenceItems = new Map();      
   }
 
-  get novelItemKey() {
-    return NOVEL_ITEM_KEYS.TIMELINE;
-  }
-
-  private get novelId(): number {
-      return this.$store.getters.openNovelId;
-  }
-
-  private referencedItems(parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS, mustInclude = true) {
-    const itemIds: number[] = this.event['references'][childKey.toUpperCase()];
+  private referencedItems(parentKey: PARENT_ITEM_KEYS, mustInclude = true) {
+    const itemIds: number[] = this.event['references'][childKeyForParentKey(parentKey).toUpperCase()];
     return this.getFlatList(
       parentKey, 
     ).filter(child => itemIds.includes(child.id) === mustInclude);

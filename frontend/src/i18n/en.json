@@ -72,17 +72,17 @@
         "no_date": "No date added yet"
     },
     "timeline": {
-        "select_research": "Select research",
-        "select_chapters": "Select chapter",
-        "select_characters": "Select character",
-        "select_locations": "Select location",
+        "select_RESEARCH_GROUPS": "Select research",
+        "select_PARTS": "Select chapter",
+        "select_CHARACTER_GROUPS": "Select character",
+        "select_LOCATION_GROUPS": "Select location",
         "manage_references": "Add or delete references",
         "select_reference_type": {
             "select_item_type": "Select reference type",
-            "chapters": "Chapter",
-            "characters": "Character",
-            "locations": "Location",
-            "research": "Research",
+            "PARTS": "Chapter",
+            "CHARACTER_GROUPS": "Character",
+            "LOCATION_GROUPS": "Location",
+            "RESEARCH_GROUPS": "Research",
             "add_locally": "Add this reference",
             "close": "Close",
             "delete": "Delete this reference"

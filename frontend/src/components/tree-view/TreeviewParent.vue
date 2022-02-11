@@ -1,7 +1,7 @@
 <template>
     <WTreeviewHeader 
         :item="item"    
-        :open="isOpen"  
+        :open="open"  
         @toggle="toggle"               
         @addChild="addChild"
         @updateParentName="updateParentName($event)"
@@ -13,7 +13,7 @@
             @deleteChild="deleteChild"
             :element="child" 
             :selected="isSelected(child)">
-        </WTreeviewListItem>    
+        </WTreeviewListItem>       
     </draggable>
 </template>
 
@@ -49,7 +49,6 @@ const applicationStateModule = namespace("applicationState");
 export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     @Prop() item: BaseModel;
     @Prop() open: boolean;
-
 
     @applicationStateModule.State('_modalOpen')
     modalOpen!: boolean;   
@@ -91,6 +90,10 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
         return $event;
     }
 
+    @Emit('select-child')
+    selectChild($event) {
+        return $event;
+    }
 
     isSelected(item: BaseModel) {
         const isSelected = (this._selectedItemIds.get(this.parentKey) || []).find(id => id === item.id);
@@ -99,21 +102,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
         }
         return isSelected;
     }
-    
-    @Emit('select-child')
-    selectChild($event) {
-        return $event;
-    }
 
-
-    get isOpen() {
-        return this.open;
-    }
-    get selectedItems(): number[] {
-        return [];
-        // return this.$store.state.selection.get(this.childKey) || [];
-    }
-  
     private openParentIfNecessary() {
         if(!open) {
             this.$emit('toggle', true);
@@ -121,4 +110,3 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
     } 
 }
 </script>
-

@@ -31,7 +31,7 @@ import { NOVEL_ITEM_KEYS } from '@/store/keys';
   components: { WMissingValueTolerantLabel },
   emits: ['change']
 })
-export default class WSidebarMenu extends Vue {
+export default class NovelItemDropdown extends Vue {
     @Prop() selectedItem: BaseModel  = null;
     @Prop() novelItemKey: NOVEL_ITEM_KEYS;
     @Prop() items: BaseModel;

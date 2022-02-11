@@ -16,7 +16,7 @@ import {  DISPLAY_SETTINGS_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import ToggleSwitch from '@/components/forms/ToggleSwitch.vue';
-import { getAllEnumValues } from '@/store/DisplaySettingsModule';
+import { getAllEnumValues } from '@/store/store.helper';
 
 
 const displaySettingsModule = namespace('displaySettings');

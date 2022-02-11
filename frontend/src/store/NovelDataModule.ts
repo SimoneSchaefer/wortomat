@@ -1,20 +1,50 @@
+import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
+
 import { BaseModel } from "@/models/Base.model";
 import { NovelModel } from "@/models/Novel.model";
 import { TagModel } from "@/models/Tag.model";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+
 import { GroupingNovelItemService } from "@/service/GroupingNovelItemService";
 import { NovelService } from "@/service/NovelService";
-import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
+import { TimelineService } from "@/service/TimelineService";
+
 import { PARENT_ITEM_KEYS } from "./keys";
+
 
 @Module({ generateMutationSetters: true })
 export default class NovelDataModule extends VuexModule {
     private _groupingNovelItemService = new GroupingNovelItemService();
+    private _timelineService = new TimelineService();
     private _novelService = new NovelService(); 
+
     private _novelId: number = undefined;
     private _novels = [];
     private _loading = false;
     private _novelItems: Map<PARENT_ITEM_KEYS, BaseModel[]> = new Map();
     private _tags: Map<PARENT_ITEM_KEYS, TagModel[]> = new Map();
+
+    get sortedTimelineEvents(): TimelineEventModel[] {
+        const allItems = (this._novelItems.get(PARENT_ITEM_KEYS.TIMELINE) || []) as TimelineEventModel[];
+        allItems.sort(function(a, b) {
+            if (a.eventDate === null && b.eventDate === null) {
+                return Number(a.id < b.id);
+            }
+            if (a.eventDate === null) {
+                return -1;
+            }
+            if (b.eventDate === null) {
+                return 1;
+            }
+            if (a.eventDate < b.eventDate) {
+                return -1;
+            }
+            if (a.eventDate > b.eventDate) {
+                return 1;
+            }      
+        });
+        return allItems;
+    }
 
     @Mutation
     public novelOpened(novelId: number): void {
@@ -97,6 +127,20 @@ export default class NovelDataModule extends VuexModule {
     @Mutation
     public tagsLoaded(update: { view: PARENT_ITEM_KEYS, tags: TagModel[] }): void {
         this._tags.set(update.view, update.tags);
+    }
+
+    @Action
+    public async addReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
+        this._timelineService.addReference(this._novelId, payload.event, payload.item, payload.key).then(result => {
+            this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data})
+          });   
+    }
+
+    @Action
+    public async deleteReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
+        this._timelineService.deleteReference(this._novelId, payload.event, payload.item, payload.key).then(result => {
+            this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data})
+          });   
     }
 
     @Action

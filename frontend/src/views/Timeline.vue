@@ -1,9 +1,7 @@
 <template>
-  <WSidebarMenu :parentKey="parentKey"/>
-
-
+  <WSidebarOpener icon="fa fa-2x fa-plus" @click="add" />
   <div class="plot">
-    <div v-if="!events.length && !isLoading()" class="empty">
+    <div v-if="!sortedTimelineEvents.length && loading" class="empty">
       <WHelpNote :itemKey="parentKey"></WHelpNote>
     </div>
     <div v-else class="timeline">
@@ -11,8 +9,8 @@
           <SplitterPanel>      
               <ScrollPanel style="height: 100%" class="scroll-timeline">
                 <WTimeline 
-                  :events="events" 
-                  :selectedEvent="selectedItem"
+                  :events="sortedTimelineEvents" 
+                  :selectedEvents="selectedItemIds"
                   @update-date="updateDate"
                   @update-name="updateName"
                   @select="select"
@@ -21,13 +19,15 @@
           </SplitterPanel>
           <SplitterPanel class="split-content-right sheet-list">
             <ScrollPanel style="height: 100%">
-              <div v-if="selectedItem" class="selected-item sheet-list">   
-                <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
-                  <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
-                    <NovelItemSheet :novelItemKey="referenceType" :item="eventReference" :service="getService(referenceType)"></NovelItemSheet>
-                  </div>
-                </div>       
-              </div> 
+              <div v-if="selectedItems.length" class="selected-item sheet-list"> 
+                <div v-for="selectedItem of selectedItems" :key="selectedItem.id">
+                  <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
+                    <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
+                      <NovelItemSheet :novelItemKey="referenceType" :item="eventReference"></NovelItemSheet>
+                    </div>
+                  </div>  
+                </div>                    
+              </div>
             </ScrollPanel>
           </SplitterPanel>
         </Splitter>
@@ -36,126 +36,84 @@
 </template>
 
 <script lang="ts">
-import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { mixins, Options } from "vue-class-component";
+import { namespace } from "s-vuex-class";
+
+import { childKeyForParentKey, PARENT_ITEM_KEYS } from "@/store/keys";
+
+import { BaseModel } from "@/models/Base.model";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+
 import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
 import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
 import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/forms/inline-edit/EditableDate.vue";
-import WSidebarMenu from "@/components/shared/menu/SidebarMenu.vue";
-import { TimelineEventModel } from "@/models/TimelineEvent";
-import { getSortedEvents } from "@/store/getters";
+import WSidebarOpener from "@/components/shared/menu/SidebarOpener.vue";
 import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
 import WHelpNote from '@/components/HelpNote.vue';
+
+const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
 
 @Options({
   components: {
     EditableLabel,
     EditableDate,
     NovelItemSheet,
-    WSidebarMenu,
+    WSidebarOpener,
     WTimeline,
     WNovelItemDropdown,
     WHelpNote
   },
 })
 export default class Plot extends mixins(TimelineEventMixin) {
+  @novelDataModule.Action
+  loadNovelItems!: ({ view: PARENT_ITEM_KEYS, novelId: number }) => Promise<void>;
+  
+  @novelDataModule.Action
+  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }) => Promise<void>;
 
-  allowedReferences = [
-    NOVEL_ITEM_KEYS.CHAPTERS,
-    NOVEL_ITEM_KEYS.RESEARCH,
-    NOVEL_ITEM_KEYS.LOCATIONS,
-    NOVEL_ITEM_KEYS.CHARACTERS,
-  ]
+  @novelDataModule.Action
+  updateNovelItem: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @selectionModule.Action
+  selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
+  @selectionModule.State('_selectedItemIds')
+  _selectedItemIds!: Map<PARENT_ITEM_KEYS, number[]>;  
+    
+  @novelDataModule.State('_loading')
+  loading!: boolean;
+    
+  @novelDataModule.Getter
+  sortedTimelineEvents!: TimelineEventModel[];
 
   mounted(): void {
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.TIMELINE,
-      novelId: this.$route.params.id,
-    });
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.PARTS,
-      novelId: this.$route.params.id,
-    });
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.RESEARCH_GROUPS,
-      novelId: this.$route.params.id,
-    });
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.LOCATION_GROUPS,
-      novelId: this.$route.params.id,
-    });
-    this.$store.dispatch("loadItems", {
-      key: NOVEL_ITEM_KEYS.CHARACTER_GROUPS,
-      novelId: this.$route.params.id,
-    });
+    this.loadNovelItems({ view: PARENT_ITEM_KEYS.TIMELINE, novelId: this.$route.params.id})
+    for (let key of this.allowedReferences) {
+      this.loadNovelItems({ view: key, novelId: this.$route.params.id})
+    }
   }
 
   add() {
-    this.$store.dispatch("addItem", {
-      key: this.novelItemKey,
-      novelId: this.$store.state.currentNovel?.id,
-      item: new TimelineEventModel(),
-    });
-    var container = this.$el.querySelector(".p-scrollpanel-content");
-    container.scrollTop = container.scrollHeight;
+    this.addNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: new TimelineEventModel() });
   }
 
-
-  getExistingEventReferences(event: TimelineEventModel, key: NOVEL_ITEM_KEYS) {
-    return this.referencedItems(event, this.getParentKey(key), key);
+  getExistingEventReferences(event: TimelineEventModel, key: PARENT_ITEM_KEYS) {
+    return this.referencedItems(event, key);
   }
-
-  // TODO move to store getters or mixins?
-  private referencedItems(event: TimelineEventModel, parentKey: NOVEL_ITEM_KEYS, childKey: NOVEL_ITEM_KEYS, mustInclude = true) {
-    const itemIds: number[] = event['references'][childKey.toUpperCase()];
-    return this.getFlatList(
-      parentKey, 
-    ).filter(child => itemIds.includes(child.id) === mustInclude);
-  }
-
-
-  getParentKey(childKey: NOVEL_ITEM_KEYS) {
-    return null// TODO
-    // return [...KEY_TO_CHILD].find(([_key, value]) => childKey === value)[0];
-  }
-
-  isLoading(): boolean {
-    return this.$store.state.loading;
-  }
-
-  get parentKey() {
-    return NOVEL_ITEM_KEYS.TIMELINE;
-  }
-  get chapterNovelItemKey() {
-    return NOVEL_ITEM_KEYS.CHAPTERS;
-  }
-  get researchNovelItemKey() {
-    return NOVEL_ITEM_KEYS.RESEARCH;
-  }
-  get chapterService() {
-    return null; // TODO
-    // return new ChapterService();
-  }
-  get researchService() {
-    return null//TODO
-    // return new ResearchService();
-  }
-
 
   select(item): void {
-    this.$store.dispatch('selectItems', { key: this.novelItemKey, items: [item ] });
+    this.selectItemIds({ view: PARENT_ITEM_KEYS.TIMELINE, itemIds: [item.id]});
   }
 
   deleteEvent(event: TimelineEventModel) {
-    this.$store.dispatch('deleteItems', { 
-        key: this.novelItemKey, 
-        novelId: this.$store.state.currentNovel?.id,
-        items: [event]
-    });
+    this.deleteNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: event });
   }
-
 
   updateName(update: { newValue: string, item: TimelineEventModel }): void {
     this.updateItem(update.item, { name: update.newValue });   
@@ -165,35 +123,30 @@ export default class Plot extends mixins(TimelineEventMixin) {
     this.updateItem(update.item, { eventDate: update.newValue });   
   }  
 
-  selected(item) {
-    return this.selectedItem?.id === item.id;
-  }
- 
-
-  get selectedItem() {
-    return undefined;
-    // return (getCurrentSelection(this.$store.state, this.novelItemKey) || [{ id: undefined}])[0];
+  selected(item: TimelineEventModel): boolean {
+    return !!this.selectedItemIds.find(selected => selected === item.id);
   }
 
   private updateItem(item, overrideValues): void {
-      this.$store.dispatch('updateItem', { 
-          key: NOVEL_ITEM_KEYS.TIMELINE, 
-          novelId: this.novelId,
-          oldItem: item,
-          overrideValues: overrideValues
-      })  
+    const newItem =  Object.assign({}, item, overrideValues);  
+    this.updateNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: newItem});  
   }
 
-  private get novelId(): number {
-      return this.$store.getters.openNovelId;
+  private referencedItems(event: TimelineEventModel, parentKey: PARENT_ITEM_KEYS, mustInclude = true) {
+    const itemIds: number[] = event['references'][childKeyForParentKey(parentKey).toUpperCase()];
+    return this.getFlatList(
+      parentKey, 
+    ).filter(child => itemIds.includes(child.id) === mustInclude);
   }
 
-  get events() {
-    return getSortedEvents(this.$store.state);
+  get parentKey() {
+    return PARENT_ITEM_KEYS.TIMELINE;
+  }   
+  get selectedItemIds(): number[] {
+    return this._selectedItemIds.get(PARENT_ITEM_KEYS.TIMELINE) || [];
   }
-
-  get novelItemKey() {
-    return NOVEL_ITEM_KEYS.TIMELINE;
+  get selectedItems(): TimelineEventModel[] {
+    return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
   }
 }
 </script>
