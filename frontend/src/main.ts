@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-// import store from './store/store'
 
 
 // primevue 
@@ -49,6 +48,7 @@ import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 
 import { messages, defaultLocale} from '@/i18n'
+import store from '@/store';
 
 const i18n = createI18n({
     locale: defaultLocale, // set locale
@@ -56,39 +56,11 @@ const i18n = createI18n({
     messages // set locale messages
 })
 
-import { createStore } from "vuex";
-import DisplaySettingsModule from './store/DisplaySettingsModule';
-
-import NovelDataModule from './store/NovelDataModule';
-import ApplicationStateModule from './store/ApplicationStateModule';
-import SelectionModule from './store/SelectionModule';
-import TreeStateModule from './store/TreeStateModule';
-import VuexLocalStorage from './store/plugins/web-storage';
-import VuexPersistence from 'vuex-persist'
-
-const vuexLocal = new VuexPersistence({
-    storage: window.localStorage,
-    // modules: [ 'displaySettings']
-    reducer: (state) => ({ displaySettings: state['displaySettings'] }), //only save navigation module
-  //  filter: (mutation) => mutation.type == 'displaySettings/updateDisplaySettings'
-  
-  })
-
-const storeX = createStore({
-   // plugins: [ vuexLocal.plugin]
-    // plugins: [ VuexLocalStorage ]
-});
-new DisplaySettingsModule({ store: storeX, name: 'displaySettings' });
-new NovelDataModule({ store: storeX, name: 'novelData' });
-new ApplicationStateModule({ store: storeX, name: 'applicationState' });
-new SelectionModule({ store: storeX, name: 'selection' });
-new TreeStateModule({ store: storeX, name: 'treeState' });
-
 
 const app = createApp(App)
     .use(router)
     .use(PrimeVue)
-    .use(storeX)
+    .use(store)
     .use(i18n)
     .use(ConfirmationService)
     .use(ToastService)

@@ -4,22 +4,24 @@ import { PARENT_ITEM_KEYS } from "./keys";
 
 @Module({ generateMutationSetters: true })
 export default class TreeStateModule extends VuexModule {
-  private toggleState: Map<PARENT_ITEM_KEYS,Map<number,boolean>> = new Map(); 
+  private toggleState: Record<PARENT_ITEM_KEYS,Record<number,boolean>> = {} as any; 
 
   @Mutation
-  public itemsToggled(update: { view: PARENT_ITEM_KEYS, itemIds: number[], expanded: boolean }): void {
-    if (!this.toggleState.has(update.view)) {
-      this.toggleState.set(update.view, new Map());
-    }
-    for (const itemId of update.itemIds) {
-      this.toggleState.get(update.view).set(itemId, update.expanded);     
-    }
+  public itemsToggled(newToggleState: Record<PARENT_ITEM_KEYS,Record<number,boolean>>): void {
+    this.toggleState = newToggleState;
   }
 
   @Action
   public async toggleItems( payload: { view: PARENT_ITEM_KEYS, itemIds: number[], expanded: boolean }): Promise<void> {
     const { view, itemIds, expanded } = payload;
-    this.itemsToggled({ view, itemIds, expanded });   
+    const currentToggleState = {...this.toggleState};
+    if (!currentToggleState[view]) {
+      currentToggleState[view] = {};
+    }
+    for (const itemId of itemIds) {
+      currentToggleState[view][itemId] = expanded;     
+    }
+    this.itemsToggled(currentToggleState);   
   }
 }
 

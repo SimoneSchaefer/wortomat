@@ -6,16 +6,18 @@ export default class DisplaySettingsModule extends VuexModule {
   private _displaySettings: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>> = Object()
 
   @Mutation
-  public updateDisplaySettings(payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}  ) {
-    if (!this._displaySettings[payload.novelItemKey]) {
-      this._displaySettings[payload.novelItemKey] = Object();
-    }
-    this._displaySettings[payload.novelItemKey][payload.displaySettingKey] = payload.value;
+  public updateDisplaySettings(newDisplaySettings: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
+    this._displaySettings = newDisplaySettings;
   }
 
   @Action
   public async setVisible(payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}): Promise<void> {
-    this.updateDisplaySettings(payload);
+    const displaySettings = {...this._displaySettings};
+    if (!displaySettings[payload.novelItemKey]) {
+      displaySettings[payload.novelItemKey] = Object();
+    }
+    displaySettings[payload.novelItemKey][payload.displaySettingKey] = payload.value;
+    this.updateDisplaySettings(displaySettings);
   }
 }
 
