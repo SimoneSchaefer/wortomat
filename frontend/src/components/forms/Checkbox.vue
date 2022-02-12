@@ -1,6 +1,6 @@
 <template>
-    <div class="toggle-switch">
-        <InputSwitch v-bind:modelValue="enabled" @input="toggle($event)"></InputSwitch>
+    <div class="checkbox">
+        <Checkbox v-bind:modelValue="enabled" @input="toggle($event)"></Checkbox>
         <div class="label" @click="toggle(!enabled)">{{ $t(label) }}</div>
     </div>
 </template>
@@ -9,10 +9,14 @@
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
+import Navlink from '@/components/navigation/Navlink.vue'
+import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
+
 @Options({
     emits: [ 'toggle'],
+    components: { Navlink, DisplaySettingsMenu }
 })
-export default class ToggleSwitch extends Vue {
+export default class Checkbox extends Vue {
     @Prop() label: string;
     @Prop() enabled: boolean;
 
@@ -24,16 +28,16 @@ export default class ToggleSwitch extends Vue {
 </script>
 
 <style scoped>
-.toggle-switch {
-    line-height: 3.0em;
+.checkbox {
+    line-height: 2.0em;
     display: flex;
     align-items: center;
 }
 
-.toggle-switch .label {
+.checkbox .label {
     margin-left: 1em;;
 }
-.toggle-switch .label:hover {
+.checkbox .label:hover {
     cursor: pointer;
 }
 </style>

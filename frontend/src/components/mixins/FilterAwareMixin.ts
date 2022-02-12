@@ -3,7 +3,7 @@ import { mixins } from "vue-class-component";
 
 import { PARENT_ITEM_KEYS } from "@/store/keys"
 import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
-import { TagFilterSetting } from "@/store/FilterModule";
+import { StatusFilterSetting, TagFilterSetting } from "@/store/FilterModule";
 import { ParentModel } from "@/models/ParentModel";
 import { ChildModel } from "@/models/ChildModel";
 
@@ -15,6 +15,9 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
      
     @filterModule.State('_tagFilterSettings')
     _tagFilterSettings!: Record<PARENT_ITEM_KEYS, TagFilterSetting>;
+     
+    @filterModule.State('_statusFilterSettings')
+    _statusFilterSettings!: Record<PARENT_ITEM_KEYS, StatusFilterSetting>;
 
     @novelDataModule.State('_novelItems')
     _novelItems!: Map<PARENT_ITEM_KEYS, ParentModel[]>;
@@ -75,6 +78,13 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     get tagFilterEnabled() {
         if (Object.keys(this._tagFilterSettings).includes(this.parentKey)) {
             return this._tagFilterSettings[this.parentKey]?.enabled;
+        }
+        return false;
+    }  
+
+    get statusFilterEnabled() {
+        if (Object.keys(this._statusFilterSettings).includes(this.parentKey)) {
+            return this._statusFilterSettings[this.parentKey]?.enabled;
         }
         return false;
     }  

@@ -118,7 +118,8 @@
         "SHOW_CONTENT": "Show content"
     },
     "filter_settings": {
-        "tag_filter_enabled": "Filter by tag"
+        "tag_filter_enabled": "Filter by tag",
+        "status_filter_enabled": "Filter by status"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",
