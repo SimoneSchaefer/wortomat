@@ -1,5 +1,5 @@
 <template>
-    <WTreeviewHeader 
+    <WTreeviewHeader
         :item="item"    
         :open="open"  
         @toggle="toggle"               
@@ -8,7 +8,7 @@
         @deleteParent="deleteParent">
     </WTreeviewHeader>
     <draggable v-if="open" :list="item['children']" class="list-group" ghost-class="ghost"  group="children" @end="childMoved($event)" :id="`parent-${item.id}`">   
-        <WTreeviewListItem v-for="child in item['children']" :key="child.id"
+        <WTreeviewListItem v-for="child in item.children" :key="child.id"
             @select="selectChild"
             @deleteChild="deleteChild"
             :element="child" 
@@ -32,6 +32,8 @@ import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+import FilterAwareMixin from '../mixins/FilterAwareMixin';
+import { ParentModel } from '@/models/ParentModel';
 
 const selectionModule = namespace("selection");
 const applicationStateModule = namespace("applicationState");
@@ -46,8 +48,8 @@ const applicationStateModule = namespace("applicationState");
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle', 'select-child']
 })
-export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
-    @Prop() item: BaseModel;
+export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin, FilterAwareMixin) {
+    @Prop() item: ParentModel;
     @Prop() open: boolean;
 
     @applicationStateModule.State('_modalOpen')
@@ -58,7 +60,6 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin) {
 
     @selectionModule.Action
     selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
-
 
     @Emit('delete-parent')
     deleteParent() {

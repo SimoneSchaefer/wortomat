@@ -1,6 +1,8 @@
 <template>
-    <InputSwitch v-bind:modelValue="enabled" @input="toggle($event)"></InputSwitch>
-    <div class="label" @click="toggle(!enabled)">{{ $t(label) }}</div>
+    <div class="toggle-switch">
+        <InputSwitch v-bind:modelValue="enabled" @input="toggle($event)"></InputSwitch>
+        <div class="label" @click="toggle(!enabled)">{{ $t(label) }}</div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -26,11 +28,16 @@ export default class FilterMenu extends Vue {
 </script>
 
 <style scoped>
-.label {
-    margin-left: 1em;
+.toggle-switch {
+    line-height: 3.0em;
+    display: flex;
+    align-items: center;
 }
 
-.label:hover {
+.toggle-switch .label {
+    margin-left: 1em;;
+}
+.toggle-switch .label:hover {
     cursor: pointer;
 }
 </style>

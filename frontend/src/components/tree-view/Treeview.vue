@@ -28,7 +28,10 @@ import { BaseModel } from '@/models/Base.model';
 import { PARENT_ITEM_KEYS } from '@/store/keys';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
+import FilterAwareMixin from '@/components/mixins/FilterAwareMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
+import { ChildModel } from '@/models/ChildModel';
+import { ParentModel } from '@/models/ParentModel';
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
@@ -37,14 +40,11 @@ const treeStateModule = namespace("treeState");
 @Options({
   components: { WTreeViewParent}
 })
-export default class Treeview extends mixins(UpdatableItemMixin) {
+export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixin) {
   private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
 
   @treeStateModule.State('toggleState')
   toggleState!: Record<PARENT_ITEM_KEYS, Record<number, boolean>>; // TODO issue#12 remember in local store
-
-  @novelDataModule.State('_novelItems')
-  _novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
   @selectionModule.State('_selectedItemIds')
   _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
@@ -71,23 +71,41 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   moveChild!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, childToMove: number, newParentId: number, newPosition: number }) => Promise<void>;
 
   mounted() {
-    this.$store.subscribe((mutation) => {
-      if (mutation.type === 'novelData/novelItemAdded') {
-        if (mutation.payload.novelItem.parentId) {
-          this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
-        }
+    this.$store.subscribe((mutation, store) => {
+      if (mutation.type === 'novelData/novelItemAdded' && this.isAboutChildItem(mutation)) {
+        this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
+      }      
+      if (mutation.type === 'novelData/novelItemDeleted' && this.isAboutChildItem(mutation)) {
+        // TODO: In case the currently selected item has been deleted, we need to deselect, and, in case
+        // nothing else is selected, select another item.
+        /*const index = store.selectedItems.findIndex(mutation.payload.novelItem.id);
+        if (index > -1) {
+          const newSelectedItems = this.selectedItems.splice(index, 1);
+          if (newSelectedItems.length) {
+            this.selectItemIds({ view:mutation.payload.view, itemIds: newSelectedItems});
+          } else {
+            const firstParentWithChildren = this.getFilteredItems().find(parent => parent.children.length > 0);
+            if (firstParentWithChildren) {
+              this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
+            }
+          }
+        }*/
       }
       if (mutation.type === 'novelData/novelItemsLoaded'  && !this._selectedItemIds[mutation.payload.view]?.length){
-        const firstParentWithChildren = mutation.payload.novelItems.find(parent => parent['children'].length > 0);
+        const firstParentWithChildren = this.getFilteredItems(mutation.payload.novelItems).find(parent => parent.children.length > 0);
         if (firstParentWithChildren) {
-          this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
+          this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren.children[0].id ]} );
         }
       }
     });
   }
 
+  private isAboutChildItem(mutation): boolean {
+   return !!mutation.payload.novelItem.parentId;
+  }
+
   get items() {
-    return this.novelItems;
+    return this.getFilteredItems();
   }
 
   get currentToggleState() {
@@ -100,7 +118,8 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
 
   get childItems() {
     const flatChildren = [];
-    for (let parent of this.novelItems) {
+    const filteredItems = this.getFilteredItems();
+    for (let parent of filteredItems) {
       flatChildren.push(...parent['children']);
     }
     return flatChildren;
@@ -110,29 +129,31 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
     return this._selectedItemIds[this.parentKey] || [];
   }
   
-  toggle(open: boolean, parent: BaseModel) {
+  toggle(open: boolean, parent: ParentModel) {
     this.toggleItems({ view: this.parentKey, itemIds: [ parent.id], expanded: open })
   }
 
-  isOpen(parent: BaseModel) {
+  isOpen(parent: ParentModel) {
     return Object.keys(this.currentToggleState).includes(`${parent.id}`) ? this.currentToggleState[parent.id] : true;
   }
 
-  deleteParent(item: BaseModel) {
+  deleteParent(item: ParentModel) {
     this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
 
-  deleteChild(item: BaseModel) {
+  deleteChild(item: ChildModel) {
     const parent = this.novelItems.find(parent => parent.id === item.parentId);
     item.parentId = parent?.id || -1;
     this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
 
-  addChild(selectedParent: BaseModel): void {
-    const child = new BaseModel();
+  addChild(selectedParent: ParentModel): void {
+    const child = new ChildModel();
     child.parentId = selectedParent.id;
+    child.tags = [];
+
     this.addNovelItem({ view: this.parentKey, novelItem: child });
-    this.currentToggleState[selectedParent.id] = true;
+    this.toggle(true, selectedParent);
   }
 
   childMoved($event): void {
