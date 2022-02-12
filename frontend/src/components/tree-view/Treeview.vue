@@ -69,19 +69,39 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
   moveChild!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, childToMove: number, newParentId: number, newPosition: number }) => Promise<void>;
 
   mounted() {
-    this.$store.subscribe((mutation) => {
-      if (mutation.type === 'novelData/novelItemAdded') {
-        if (mutation.payload.novelItem.parentId) {
-          this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
-        }
+    this.$store.subscribe((mutation, store) => {
+      if (mutation.type === 'novelData/novelItemAdded' && this.isAboutChildItem(mutation)) {
+        this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
+      }      
+      if (mutation.type === 'novelData/novelItemDeleted' && this.isAboutChildItem(mutation)) {
+        // TODO: In case the currently selected item has been deleted, we need to deselect, and, in case
+        // nothing else is selected, select another item. 
+        // TODO: at the moment we just select the first item. It would be better to select something
+        // in the 'near' of the deleted item
+        /*const index = store.selectedItems.findIndex(mutation.payload.novelItem.id);
+        if (index > -1) {
+          const newSelectedItems = this.selectedItems.splice(index, 1);
+          if (newSelectedItems.length) {
+            this.selectItemIds({ view:mutation.payload.view, itemIds: newSelectedItems});
+          } else {
+            const firstParentWithChildren = this.getFilteredItems().find(parent => parent.children.length > 0);
+            if (firstParentWithChildren) {
+              this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
+            }
+          }
+        }*/
       }
       if (mutation.type === 'novelData/novelItemsLoaded'  && !this._selectedItemIds[mutation.payload.view]?.length){
-        const firstParentWithChildren = mutation.payload.novelItems.find(parent => parent['children'].length > 0);
+        const firstParentWithChildren = this.getFilteredItems(mutation.payload.novelItems).find(parent => parent.children.length > 0);
         if (firstParentWithChildren) {
-          this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren['children'][0].id ]} );
+          this.selectItemIds({ view:mutation.payload.view, itemIds: [ firstParentWithChildren.children[0].id ]} );
         }
       }
     });
+  }
+
+  private isAboutChildItem(mutation): boolean {
+   return !!mutation.payload.novelItem.parentId;
   }
 
   get items() {

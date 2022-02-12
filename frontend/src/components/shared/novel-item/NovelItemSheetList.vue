@@ -36,7 +36,7 @@ export default class NovelItemSheetList extends mixins(NovelItemKeyAwareMixin, F
     selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
     get hasChildItems(): boolean {
-      return !!this.getFilteredItems().find(parent => (parent['children'] || []).length );
+      return !!this.getFilteredItems().find(parent => (parent.children || []).length );
     }
 
     get selectedItems(): number[] {

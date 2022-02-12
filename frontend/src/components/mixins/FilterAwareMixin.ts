@@ -19,8 +19,8 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     @novelDataModule.State('_novelItems')
     _novelItems!: Map<PARENT_ITEM_KEYS, ParentModel[]>;
     
-    getFilteredItems() {
-        const allParents = this._novelItems.get(this.parentKey) || [];
+    getFilteredItems(novelItems?: ParentModel[] ) {
+        const allParents = novelItems || this._novelItems?.get(this.parentKey) || [];
         if (!this.tagFilterEnabled) {
             return allParents;
         }  
@@ -67,7 +67,6 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
             }
         }
     }
-
 
     get selectedTags() {
         return this._tagFilterSettings[this.parentKey]?.tags || [];
