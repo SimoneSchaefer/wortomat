@@ -14,10 +14,10 @@
         </template>
         <template v-slot:readonly>
             <div class="readonly">
-                <div v-if="!itemTags?.length"  class="underline">
+                <div v-if="!selectedTags?.length"  class="underline">
                     <MissingValueTolerantLabel :value="''" :fallback="'No Tags added yet'"></MissingValueTolerantLabel>
                 </div>
-                <div v-for="tag in itemTags" :key="tag.id" class="tag-chip">
+                <div v-for="tag in selectedTags" :key="tag.id" class="tag-chip">
                     <Chip>
                         {{ tag.name }}
                     </Chip>
@@ -51,7 +51,7 @@ const novelDataModule = namespace("novelData");
 })
 export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
     @Prop() novelItemKey: PARENT_ITEM_KEYS;
-    @Prop() itemTags: TagModel[];
+    @Prop() selectedTags: TagModel[];
    
     @novelDataModule.State('_tags')
     tags!: Map<PARENT_ITEM_KEYS,TagModel[]>; 
@@ -65,14 +65,14 @@ export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
 
 
     onStartEdit(): void {
-        this.tagsDraft = [...(this.itemTags || [])];
+        this.tagsDraft = [...(this.selectedTags || [])];
         setTimeout(() => {
             (this.$refs.editableRef as HTMLInputElement).focus();
         }, 0);
     }
 
     cancel(): void {
-        this.tagsDraft = this.itemTags;
+        this.tagsDraft = this.selectedTags;
     }
 
     @Emit('update-tags')

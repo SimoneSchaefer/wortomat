@@ -28,6 +28,7 @@ import { BaseModel } from '@/models/Base.model';
 import { PARENT_ITEM_KEYS } from '@/store/keys';
 
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
+import FilterAwareMixin from '@/components/mixins/FilterAwareMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 
 const novelDataModule = namespace("novelData");
@@ -37,14 +38,11 @@ const treeStateModule = namespace("treeState");
 @Options({
   components: { WTreeViewParent}
 })
-export default class Treeview extends mixins(UpdatableItemMixin) {
+export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixin) {
   private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
 
   @treeStateModule.State('toggleState')
   toggleState!: Record<PARENT_ITEM_KEYS, Record<number, boolean>>; // TODO issue#12 remember in local store
-
-  @novelDataModule.State('_novelItems')
-  _novelItems!: Map<PARENT_ITEM_KEYS, BaseModel[]>;
 
   @selectionModule.State('_selectedItemIds')
   _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
@@ -87,7 +85,7 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
   }
 
   get items() {
-    return this.novelItems;
+    return this.getFilteredItems();
   }
 
   get currentToggleState() {
@@ -100,7 +98,8 @@ export default class Treeview extends mixins(UpdatableItemMixin) {
 
   get childItems() {
     const flatChildren = [];
-    for (let parent of this.novelItems) {
+    const filteredItems = this.getFilteredItems();
+    for (let parent of filteredItems) {
       flatChildren.push(...parent['children']);
     }
     return flatChildren;

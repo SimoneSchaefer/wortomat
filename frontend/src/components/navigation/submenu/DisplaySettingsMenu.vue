@@ -1,6 +1,6 @@
 <template>
 <h1>{{ $t('display_settings.header') }}</h1>
-<div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey" class="toggle-switch">
+<div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey">
     <ToggleSwitch 
         :enabled="isEnabled(displaySettingKey)" 
         :label="`display_settings.${displaySettingKey}`"
@@ -71,14 +71,4 @@ export default class DisplaySettingsMenu extends mixins(NovelItemKeyAwareMixin, 
 }
 
 
-
-.toggle-switch {
-    line-height: 3.0em;
-    display: flex;
-    align-items: center;
-}
-
-.toggle-switch .label {
-    margin-left: 1em;;
-}
 </style>
