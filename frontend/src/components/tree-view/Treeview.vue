@@ -30,6 +30,8 @@ import { PARENT_ITEM_KEYS } from '@/store/keys';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
 import FilterAwareMixin from '@/components/mixins/FilterAwareMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
+import { ChildModel } from '@/models/ChildModel';
+import { ParentModel } from '@/models/ParentModel';
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
@@ -75,9 +77,7 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
       }      
       if (mutation.type === 'novelData/novelItemDeleted' && this.isAboutChildItem(mutation)) {
         // TODO: In case the currently selected item has been deleted, we need to deselect, and, in case
-        // nothing else is selected, select another item. 
-        // TODO: at the moment we just select the first item. It would be better to select something
-        // in the 'near' of the deleted item
+        // nothing else is selected, select another item.
         /*const index = store.selectedItems.findIndex(mutation.payload.novelItem.id);
         if (index > -1) {
           const newSelectedItems = this.selectedItems.splice(index, 1);
@@ -129,29 +129,31 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     return this._selectedItemIds[this.parentKey] || [];
   }
   
-  toggle(open: boolean, parent: BaseModel) {
+  toggle(open: boolean, parent: ParentModel) {
     this.toggleItems({ view: this.parentKey, itemIds: [ parent.id], expanded: open })
   }
 
-  isOpen(parent: BaseModel) {
+  isOpen(parent: ParentModel) {
     return Object.keys(this.currentToggleState).includes(`${parent.id}`) ? this.currentToggleState[parent.id] : true;
   }
 
-  deleteParent(item: BaseModel) {
+  deleteParent(item: ParentModel) {
     this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
 
-  deleteChild(item: BaseModel) {
+  deleteChild(item: ChildModel) {
     const parent = this.novelItems.find(parent => parent.id === item.parentId);
     item.parentId = parent?.id || -1;
     this.deleteNovelItem({ view: this.parentKey, novelItem: item});
   }
 
-  addChild(selectedParent: BaseModel): void {
-    const child = new BaseModel();
+  addChild(selectedParent: ParentModel): void {
+    const child = new ChildModel();
     child.parentId = selectedParent.id;
+    child.tags = [];
+
     this.addNovelItem({ view: this.parentKey, novelItem: child });
-    this.currentToggleState[selectedParent.id] = true;
+    this.toggle(true, selectedParent);
   }
 
   childMoved($event): void {
