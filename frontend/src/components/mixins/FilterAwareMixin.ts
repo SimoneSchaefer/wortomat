@@ -64,6 +64,9 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     }
 
     visibleByStatus(child: ChildModel) {
+        if (!this.statusFilterEnabled) {
+            return true;
+        }
         const todoMarker = this.getTodoCount(child.content);
         const fixmeMarker = this.getFixmeCount(child.content);
         const ideaMarker = this.getIdeaCount(child.content);
@@ -85,6 +88,9 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     }
 
     visibleByTag(child: ChildModel) {
+        if (!this.tagFilterEnabled) {
+            return true;
+        }
          // when no filter tags have been specified, display all items without any tag
          if (this.selectedTags.length === 0 && child.tags.length === 0) {
             return true;

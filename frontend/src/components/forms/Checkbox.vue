@@ -24,7 +24,6 @@ export default class Checkbox extends Vue {
 
     @Emit('toggle')
     toggle($event: boolean) {
-        console.log('toggleCheckbox', $event)
         return $event;
     }
  }

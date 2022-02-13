@@ -1,7 +1,6 @@
 import { TagModel } from "@/models/Tag.model";
 import { VuexModule, Module, Mutation, Action } from "vuex-class-modules";
 import { PARENT_ITEM_KEYS } from "./keys";
-import { getAllEnumValues } from "./store.helper";
 
 @Module({ generateMutationSetters: true })
 export default class FilterModule extends VuexModule {
@@ -28,8 +27,6 @@ export default class FilterModule extends VuexModule {
     for (const status of payload.checkedStatus) {
       filterSettings[payload.novelItemKey].status.push(status);
     }
-
-    console.log('FILTER', filterSettings);
     this.updateStatusFilterSetting(filterSettings);
   } 
 
