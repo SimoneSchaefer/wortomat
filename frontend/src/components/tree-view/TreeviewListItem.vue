@@ -20,9 +20,9 @@
           </div>
                   
           <div class="badges">
-            <Badge v-if="getTodoCount()" :value="getTodoCount()" severity="warning"></Badge>
-            <Badge v-if="getFixmeCount()" :value="getFixmeCount()" severity="danger"></Badge>
-            <Badge v-if="getIdeaCount()" :value="getIdeaCount()" severity="info"></Badge>
+            <Badge v-if="getTodoCount(element.content)" :value="getTodoCount(element.content)" severity="warning"></Badge>
+            <Badge v-if="getFixmeCount(element.content)" :value="getFixmeCount(element.content)" severity="danger"></Badge>
+            <Badge v-if="getIdeaCount(element.content)" :value="getIdeaCount(element.content)" severity="info"></Badge>
           </div>
         </div>
 
@@ -44,13 +44,14 @@ import { BaseModel } from '@/models/Base.model';
 import WMissingValueTolerantLabel from '@/components/shared/MissingValueTolerantLabel.vue';
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
-import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
+import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
+import TodoMarkerAwareMixin from '@/components/mixins/TodoMarkerAwareMixin';
 
 @Options({
     components: { WMissingValueTolerantLabel, WButton, WConfirmDialog },
     emits: ['delete-child', 'select']
 })
-export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
+export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, TodoMarkerAwareMixin) {
     @Prop() element!: BaseModel;
     @Prop() selected!: boolean;
 
@@ -70,24 +71,6 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
         (this.$refs.confirmDeleteChild as WConfirmDialog).getDecision(this.element);
     }
 
-    getTodoCount(): number {
-        return this.getMarkerCount('yellow')
-    }  
-
-    getFixmeCount(): number {
-        return this.getMarkerCount('red')
-    }
-
-    getIdeaCount(): number {
-        return this.getMarkerCount('blue')
-    }
-
-    getMarkerCount(color: string): number {
-        // TODO: make part of model?
-        const regex = new RegExp(`data-background-color="${color}"`, 'g');
-        const count = ((this.element.content || '').match(regex) || []).length;
-        return count;
-    }
 }
 </script>
 
@@ -105,6 +88,11 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
   display: flex;
 }
 
+.badges {
+  display: flex;
+  align-items: center;
+}
+
 .badges > * {
   margin: 0.5em;
 }
@@ -119,6 +107,7 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin) {
   padding-left: 1em;
   display: flex;
   flex-grow: 2;
+  justify-content: space-between;
 
 }
 .tree-view .tree-view-item-child .link{

@@ -1,6 +1,6 @@
 <template>
     <div class="checkbox">
-        <Checkbox v-bind:modelValue="enabled" @input="toggle($event)"></Checkbox>
+        <Checkbox :binary="true" :name="name" v-bind:modelValue="enabled" @input="toggle($event)"></Checkbox>
         <div class="label" @click="toggle(!enabled)">{{ $t(label) }}</div>
     </div>
 </template>
@@ -18,10 +18,13 @@ import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettings
 })
 export default class Checkbox extends Vue {
     @Prop() label: string;
-    @Prop() enabled: boolean;
+    @Prop() name: string;
+    @Prop() value: any;
+    @Prop() enabled: boolean;    
 
     @Emit('toggle')
     toggle($event: boolean) {
+        console.log('toggleCheckbox', $event)
         return $event;
     }
  }

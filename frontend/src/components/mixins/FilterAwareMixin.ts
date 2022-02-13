@@ -3,15 +3,16 @@ import { mixins } from "vue-class-component";
 
 import { PARENT_ITEM_KEYS } from "@/store/keys"
 import NovelItemKeyAwareMixin from "./NovelItemKeyAwareMixin";
-import { StatusFilterSetting, TagFilterSetting } from "@/store/FilterModule";
+import { STATUS, StatusFilterSetting, TagFilterSetting } from "@/store/FilterModule";
 import { ParentModel } from "@/models/ParentModel";
 import { ChildModel } from "@/models/ChildModel";
+import TodoMarkerAwareMixin from "./TodoMarkerAwareMixin";
 
 
 const filterModule = namespace("filter");
 const novelDataModule = namespace("novelData");
 
-export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareMixin) {
+export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareMixin, TodoMarkerAwareMixin) {
      
     @filterModule.State('_tagFilterSettings')
     _tagFilterSettings!: Record<PARENT_ITEM_KEYS, TagFilterSetting>;
@@ -24,7 +25,7 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     
     getFilteredItems(novelItems?: ParentModel[] ) {
         const allParents = novelItems || this._novelItems?.get(this.parentKey) || [];
-        if (!this.tagFilterEnabled) {
+        if (!this.tagFilterEnabled && !this.statusFilterEnabled) {
             return allParents;
         }  
         const filteredItems = [];
@@ -55,11 +56,37 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     }
 
     isChildVisible(child: ChildModel) {
-        if (!this.tagFilterEnabled) {
+        const visibleByTag = this.visibleByTag(child);
+        if (!visibleByTag) {
+            return false;
+        }
+        return this.visibleByStatus(child);
+    }
+
+    visibleByStatus(child: ChildModel) {
+        const todoMarker = this.getTodoCount(child.content);
+        const fixmeMarker = this.getFixmeCount(child.content);
+        const ideaMarker = this.getIdeaCount(child.content);
+        // in case no status have been selected, we only display the children that do 
+        // not have any marker
+        if (this.selectedStatus.length === 0 && todoMarker === 0 && fixmeMarker === 0 && ideaMarker === 0) {
             return true;
-        }  
-        // when no filter tags have been specified, display all items without any tag
-        if (this.selectedTags.length === 0 && child.tags.length === 0) {
+        }
+        if (this.selectedStatus.includes(STATUS.TODO) && todoMarker === 0) {
+            return false;
+        }
+        if (this.selectedStatus.includes(STATUS.FIXME) && fixmeMarker === 0) {
+            return false;
+        }
+        if (this.selectedStatus.includes(STATUS.IDEA) && ideaMarker === 0) {
+            return false;
+        }
+        return true;
+    }
+
+    visibleByTag(child: ChildModel) {
+         // when no filter tags have been specified, display all items without any tag
+         if (this.selectedTags.length === 0 && child.tags.length === 0) {
             return true;
         }
 
@@ -69,10 +96,15 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
                 return true;
             }
         }
+        return false;
     }
 
     get selectedTags() {
         return this._tagFilterSettings[this.parentKey]?.tags || [];
+    }
+
+    get selectedStatus() {
+        return this._statusFilterSettings[this.parentKey]?.status || [];
     }
 
     get tagFilterEnabled() {

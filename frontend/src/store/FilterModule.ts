@@ -56,8 +56,8 @@ export interface StatusFilterSetting {
 }
 
 export enum STATUS {
-  TODO,
-  IDEA,
-  FIXME
+  TODO = 'TODO',
+  IDEA = 'IDEA',
+  FIXME = 'FIXME'
 }
 
