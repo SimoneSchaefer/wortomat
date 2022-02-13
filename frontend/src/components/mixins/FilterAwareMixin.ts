@@ -72,16 +72,16 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
         if (this.selectedStatus.length === 0 && todoMarker === 0 && fixmeMarker === 0 && ideaMarker === 0) {
             return true;
         }
-        if (this.selectedStatus.includes(STATUS.TODO) && todoMarker === 0) {
-            return false;
+        if (this.selectedStatus.includes(STATUS.TODO) && todoMarker > 0) {
+            return true;
         }
-        if (this.selectedStatus.includes(STATUS.FIXME) && fixmeMarker === 0) {
-            return false;
+        if (this.selectedStatus.includes(STATUS.FIXME) && fixmeMarker > 0) {
+            return true;
         }
-        if (this.selectedStatus.includes(STATUS.IDEA) && ideaMarker === 0) {
-            return false;
+        if (this.selectedStatus.includes(STATUS.IDEA) && ideaMarker > 0) {
+            return true;
         }
-        return true;
+        return false;
     }
 
     visibleByTag(child: ChildModel) {

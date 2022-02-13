@@ -110,7 +110,6 @@ export default class FilterMenu extends mixins(NovelItemKeyAwareMixin, FilterAwa
     }
 
     get todoChecked() {
-        console.log('todoChecked: ', this.statusFilterSettings)
         return this.statusFilterSettings.status.includes(STATUS.TODO);
     }
     get fixmeChecked() {
