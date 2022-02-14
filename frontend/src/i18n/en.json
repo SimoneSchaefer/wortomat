@@ -118,7 +118,11 @@
         "SHOW_CONTENT": "Show content"
     },
     "filter_settings": {
-        "tag_filter_enabled": "Filter by tag"
+        "tag_filter_enabled": "Filter by tag",
+        "status_filter_enabled": "Filter by status",
+        "status_filter_TODO": "TODO",
+        "status_filter_FIXME": "FIXME",
+        "status_filter_IDEA": "IDEA"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",

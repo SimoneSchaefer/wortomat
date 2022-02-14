@@ -9,14 +9,10 @@
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
 
-import Navlink from '@/components/navigation/Navlink.vue'
-import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
-
 @Options({
     emits: [ 'toggle'],
-    components: { Navlink, DisplaySettingsMenu }
 })
-export default class FilterMenu extends Vue {
+export default class ToggleSwitch extends Vue {
     @Prop() label: string;
     @Prop() enabled: boolean;
 
