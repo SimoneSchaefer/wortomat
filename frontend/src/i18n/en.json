@@ -124,6 +124,12 @@
         "status_filter_FIXME": "FIXME",
         "status_filter_IDEA": "IDEA"
     },
+    "export_settings": {
+        "include_SHOW_TITLE": "Include title",
+        "include_SHOW_SUMMARY": "Include summary",
+        "include_SHOW_EXTENDED_SUMMARY": "Include extended summary",
+        "include_SHOW_CONTENT": "Include content"
+    },
     "delete_confirm": "Are you sure you want to delete this item?",
     "confirm_proceed": "Are you sure you want to proceed?",
     "please_confirm": "Please confirm",
