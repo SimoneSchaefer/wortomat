@@ -1,15 +1,9 @@
+import { EXPORT_FORMAT } from '@/store/ExportSettingsModule';
 import { AxiosResponse } from 'axios';
 import { API } from './Axios';
 
-export enum ExportType {
-    HTML = "HTML",
-    PDF = "PDF",
-    PDF_LATEX = "PDF_LATEX",
-    DOC = "DOC"
-}
-
 export interface ExportOptions{
-    type: ExportType;
+    type: EXPORT_FORMAT;
     includeSummary: boolean;
     includeExtendedSummary: boolean;
     includeContent: boolean;

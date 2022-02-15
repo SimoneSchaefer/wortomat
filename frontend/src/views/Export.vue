@@ -30,7 +30,8 @@
 <script lang="ts">
 
 import { Vue } from 'vue-class-component';
-import { ExportService, ExportType } from '@/service/ExportService';
+import { ExportService } from '@/service/ExportService';
+import { EXPORT_FORMAT } from '@/store/ExportSettingsModule';
 export default class Export extends Vue {
 
   selectedIncludes = ['includeSummary', 'includeExtendedSummary', 'includeContent'];
@@ -38,7 +39,7 @@ export default class Export extends Vue {
 
   exportNovel(): void {
     const exportOptions = {
-      type: this.selectedType.type || ExportType.HTML,
+      type: this.selectedType.type || EXPORT_FORMAT.HTML,
       includeSummary: this.selectedIncludes.includes('includeSummary'),
       includeExtendedSummary: this.selectedIncludes.includes('includeExtendedSummary'),
       includeContent: this.selectedIncludes.includes('includeContent')
@@ -50,11 +51,11 @@ export default class Export extends Vue {
     });
   }
 
-  get typeOptions(): Array<{ type: ExportType, name: string}> {
+  get typeOptions(): Array<{ type: EXPORT_FORMAT, name: string}> {
     return [ 
-      { type: ExportType.HTML, name: 'HTML'},
-      { type: ExportType.PDF, name: 'PDF'},
-      { type: ExportType.PDF_LATEX, name: 'PDF_LATEX'}, // requires pandoc, pdflatex, texlive-science
+      { type: EXPORT_FORMAT.HTML, name: 'HTML'},
+      { type: EXPORT_FORMAT.PDF, name: 'PDF'},
+    //  { type: EXPORT_FORMAT.PDF_LATEX, name: 'PDF_LATEX'}, // requires pandoc, pdflatex, texlive-science
      // { type: ExportType.DOC, name: 'DOC'}
     ]
   }

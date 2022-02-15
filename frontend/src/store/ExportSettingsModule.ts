@@ -35,7 +35,11 @@ export default class ExportSettingsModule extends VuexModule {
 }
 
 
-export type EXPORT_FORMAT = 'html' | 'pdf';
+export enum EXPORT_FORMAT {
+ HTML = 'HTML',
+ PDF = 'PDF',
+ PDF_LATEX = 'PDF_LATEX'
+}
 
 export interface ExportSettings {
   visible:  Record<DISPLAY_SETTINGS_KEYS, boolean>;

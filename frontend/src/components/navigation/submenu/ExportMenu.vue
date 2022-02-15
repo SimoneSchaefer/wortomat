@@ -1,10 +1,18 @@
 <template>
     <h1>Export</h1>
     <div v-for="displaySettingKey of displaySettingKeys" v-bind:key="displaySettingKey">
-    <ToggleSwitch 
-        :enabled="isEnabled(displaySettingKey)" 
-        :label="`export_settings.include_${displaySettingKey}`"
-        @toggle="toggle($event, displaySettingKey)"></ToggleSwitch>
+        <ToggleSwitch 
+            :enabled="isEnabled(displaySettingKey)" 
+            :label="`export_settings.include_${displaySettingKey}`"
+            @toggle="toggle($event, displaySettingKey)"></ToggleSwitch>
+    </div>
+
+    <div class="formats">
+        <span class="hint">Export as</span> 
+        <SelectButton v-model="selectedType" :options="typeOptions" :multiple="false" />
+    </div>
+    <div class="button">
+        <Button @click="exportView()">Export now</Button>
     </div>
 </template>
 
@@ -17,6 +25,8 @@ import { DISPLAY_SETTINGS_KEYS, PARENT_ITEM_KEYS } from '@/store/keys';
 import ToggleSwitch from '@/components/forms/ToggleSwitch.vue';
 import { namespace } from 's-vuex-class';
 import { EXPORT_FORMAT } from '@/store/ExportSettingsModule';
+import { getAllEnumValues } from '@/store/store.helper';
+import { ExportService } from '@/service/ExportService';
 
 const exportModule = namespace('export');
 
@@ -24,6 +34,8 @@ const exportModule = namespace('export');
     components: { ToggleSwitch }
 })
 export default class ExportMenu extends mixins(NovelItemKeyAwareMixin) {
+    selectedType = this.typeOptions[0];
+
     @exportModule.Action
     setExportIncludes!: (payload: { novelItemKey: PARENT_ITEM_KEYS, displaySettingKey: DISPLAY_SETTINGS_KEYS, value: boolean}) => Promise<void>;
   
@@ -33,7 +45,21 @@ export default class ExportMenu extends mixins(NovelItemKeyAwareMixin) {
     @exportModule.State('_exportIncludes')
     _exportIncludes!: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>;
 
-    
+    exportView() {
+        const exportOptions = {
+            type: this.selectedType || EXPORT_FORMAT.HTML,
+            includeSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
+            includeExtendedSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
+            includeContent: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
+        }
+        
+        new ExportService().export(this.novelId, exportOptions).then((response) => {
+            this.$toast.add({severity:'success', summary: 'Success', detail: `Your novel has been exported to ${response.data}`, life: 3000});
+        }, error => {
+            this.$toast.add({severity:'error', summary: 'This did not work :(', detail:error, life: 3000});
+        });
+    }
+
     isEnabled(displaySetting: DISPLAY_SETTINGS_KEYS) {
         return this.exportIncludes[displaySetting];
     }
@@ -48,10 +74,30 @@ export default class ExportMenu extends mixins(NovelItemKeyAwareMixin) {
 
     get displaySettingKeys(): DISPLAY_SETTINGS_KEYS[] {
         return [
-            DISPLAY_SETTINGS_KEYS.SHOW_TITLE,
+           // DISPLAY_SETTINGS_KEYS.SHOW_TITLE,
             DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY,
             DISPLAY_SETTINGS_KEYS.SHOW_EXTENDED_SUMMARY,
-            DISPLAY_SETTINGS_KEYS.SHOW_CONTENT        ]
+            DISPLAY_SETTINGS_KEYS.SHOW_CONTENT        
+        ]
+    }
+
+    get typeOptions(){
+        return getAllEnumValues(EXPORT_FORMAT);
     }
  }
 </script>
+
+<style scoped>
+.hint {
+    color: gray;
+}
+.formats {
+    margin: 2em 0;
+}
+.button {
+    margin: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
