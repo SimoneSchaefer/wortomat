@@ -49,8 +49,8 @@ export default class ExportMenu extends mixins(NovelItemKeyAwareMixin) {
         const exportOptions = {
             type: this.selectedType || EXPORT_FORMAT.HTML,
             includeSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
-            includeExtendedSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
-            includeContent: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
+            includeExtendedSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_EXTENDED_SUMMARY),
+            includeContent: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_CONTENT),
         }
         
         new ExportService().export(this.novelId, exportOptions).then((response) => {
