@@ -31,7 +31,7 @@ public class HTMLExportService implements Exporter {
         for (Part part : parts) {
             for (Chapter chapter : part.getChildren()) {
                 stringBuilder.append(nullSafeHtmlElement(true, chapter.getName(), "<h1>%s</h1>"));
-                stringBuilder.append(nullSafeHtmlElement(exportOptions.includeSummary, chapter.getExtended_summary(), "<div><b>%s</b></div>"));
+                stringBuilder.append(nullSafeHtmlElement(exportOptions.includeSummary, chapter.getSummary(), "<div><b>%s</b></div>"));
                 stringBuilder.append(nullSafeHtmlElement(exportOptions.includeExtendedSummary, chapter.getExtended_summary(), "<div>%s</div>"));
                 stringBuilder.append(nullSafeHtmlElement(exportOptions.includeContent, chapter.getContent(), "<div>%s</div>"));
             }
