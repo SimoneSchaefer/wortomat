@@ -17,14 +17,14 @@ public class ExportService {
     PDFLatexExportService pdfLatexExportService;
 
     public String export(Long novelId, ExportOptions exportOptions) throws IOException {
-        ExportOptionsType type = exportOptions.type;
+        ExportOptionsFormat type = exportOptions.format;
         String filePath = fileService.getExportFile(type);
         Exporter exporter = getExporter(type);
         exporter.export(novelId, exportOptions, filePath);
         return filePath;
     }
 
-    private Exporter getExporter(ExportOptionsType type) {
+    private Exporter getExporter(ExportOptionsFormat type) {
         switch (type) {
             case HTML: return this.htmlExportService;
             case PDF: return this.pdfExportService;

@@ -1,15 +1,11 @@
+import { EXPORT_FORMAT } from '@/store/ExportSettingsModule';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { AxiosResponse } from 'axios';
 import { API } from './Axios';
 
-export enum ExportType {
-    HTML = "HTML",
-    PDF = "PDF",
-    PDF_LATEX = "PDF_LATEX",
-    DOC = "DOC"
-}
-
 export interface ExportOptions{
-    type: ExportType;
+    itemType: PARENT_ITEM_KEYS,
+    format: EXPORT_FORMAT;
     includeSummary: boolean;
     includeExtendedSummary: boolean;
     includeContent: boolean;

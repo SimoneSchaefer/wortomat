@@ -1,7 +1,8 @@
 package de.wortomat.service.export;
 
 public class ExportOptions {
-    public ExportOptionsType type;
+    public ExportOptionsFormat format;
+    public ExportOptionsItemType itemType;
     public boolean includeSummary;
     public boolean includeExtendedSummary;
     public boolean includeContent;

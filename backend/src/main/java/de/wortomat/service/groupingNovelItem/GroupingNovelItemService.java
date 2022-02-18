@@ -103,6 +103,9 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         T oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
         T newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
 
+        sortChildren(oldParent);
+        sortChildren(newParent);
+
         child.setParent(newParent);
         oldParent.getChildren().remove(child);
         newParent.getChildren().add(newPosition, child);
