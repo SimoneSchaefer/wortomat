@@ -5,7 +5,6 @@ import Chapters from '../views/Chapters.vue'
 import Characters from '../views/Characters.vue'
 import Locations from '../views/Locations.vue'
 import Research from '../views/Research.vue'
-import Export from '../views/Export.vue'
 import Timeline from '../views/Timeline.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -29,9 +28,6 @@ const routes: Array<RouteRecordRaw> = [
       },{
         path: 'location',
         component: Locations,
-      },{
-        path: 'export',
-        component: Export,
       },
       {
         path: 'plot',

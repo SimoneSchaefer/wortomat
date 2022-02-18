@@ -9,10 +9,10 @@
 
     <div class="formats">
         <span class="hint">Export as</span> 
-        <SelectButton v-model="selectedType" :options="typeOptions" :multiple="false" />
+        <SelectButton v-model="selectedType" :options="typeOptions" :multiple="false"  />
     </div>
     <div class="button">
-        <Button @click="exportView()">Export now</Button>
+        <Button @click="exportView()">Export now!</Button>
     </div>
 </template>
 
@@ -45,9 +45,13 @@ export default class ExportMenu extends mixins(NovelItemKeyAwareMixin) {
     @exportModule.State('_exportIncludes')
     _exportIncludes!: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>;
 
+    @exportModule.State('_exportFormat')
+    _exportFormat!: Record<PARENT_ITEM_KEYS, EXPORT_FORMAT>;
+
     exportView() {
         const exportOptions = {
-            type: this.selectedType || EXPORT_FORMAT.HTML,
+            format: this.selectedType || EXPORT_FORMAT.HTML,
+            itemType: this.parentKey,
             includeSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_SUMMARY),
             includeExtendedSummary: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_EXTENDED_SUMMARY),
             includeContent: this.isEnabled(DISPLAY_SETTINGS_KEYS.SHOW_CONTENT),
@@ -79,6 +83,17 @@ export default class ExportMenu extends mixins(NovelItemKeyAwareMixin) {
             DISPLAY_SETTINGS_KEYS.SHOW_EXTENDED_SUMMARY,
             DISPLAY_SETTINGS_KEYS.SHOW_CONTENT        
         ]
+    }
+
+    get selectedFormat() {
+        console.log('selected format', this._exportFormat)
+        if (!this._exportFormat || !Object.keys(this._exportFormat).includes(PARENT_ITEM_KEYS.PARTS)) return EXPORT_FORMAT.HTML;
+        return this._exportFormat[PARENT_ITEM_KEYS.PARTS];
+    }
+
+    set selectedFormat(format: EXPORT_FORMAT) {
+        this.setExportFormat({ novelItemKey: this.parentKey, format: format})
+
     }
 
     get typeOptions(){

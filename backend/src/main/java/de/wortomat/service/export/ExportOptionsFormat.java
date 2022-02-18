@@ -1,6 +1,6 @@
 package de.wortomat.service.export;
 
-public enum ExportOptionsType {
+public enum ExportOptionsFormat {
         HTML("html"),
         PDF("pdf"),
         WORD("doc"),
@@ -8,7 +8,7 @@ public enum ExportOptionsType {
 
 
         private final String fileEnding;
-        ExportOptionsType(final String fileEnding) {
+        ExportOptionsFormat(final String fileEnding) {
                 this.fileEnding = fileEnding;
         }
 

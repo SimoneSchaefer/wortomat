@@ -33,7 +33,6 @@ export default class OpenedNovel extends Vue {
       { label: 'research', icon: 'fa fa-flask', to: 'research' },
       { label: 'location', icon: 'fa fa-map', to: 'location' },
       { label: 'timeline', icon: 'fa fa-clock', to: 'plot' },
-      { label: 'export', icon: 'fa fa-file-export', to: 'export' },
     ]
   }
 }

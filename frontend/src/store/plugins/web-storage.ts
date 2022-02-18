@@ -2,7 +2,9 @@
 const keysToStore = [
     'displaySettings/updateDisplaySettings',
     'treeState/itemsToggled',
-    'selection/itemsSelected'
+    'selection/itemsSelected',
+    'export/updateExportIncludes',
+    'export/updateExportFormat'
 ]
 
 export const setupLocalStorage = (store) => {

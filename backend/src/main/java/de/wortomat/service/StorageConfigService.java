@@ -1,6 +1,6 @@
 package de.wortomat.service;
 
-import de.wortomat.service.export.ExportOptionsType;
+import de.wortomat.service.export.ExportOptionsFormat;
 import de.wortomat.service.uploads.EntityType;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class StorageConfigService {
         return getOrCreate(EXPORT_FOLDER);
     }
 
-    public String getExportFile(ExportOptionsType type) throws IOException {
+    public String getExportFile(ExportOptionsFormat type) throws IOException {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss");
         String filePath = String.format("%s/%s.%s", getExportFolder(), format.format(new Date()), type.getFileEnding());
         Files.createFile(Paths.get(filePath));

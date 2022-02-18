@@ -1,9 +1,11 @@
 import { EXPORT_FORMAT } from '@/store/ExportSettingsModule';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { AxiosResponse } from 'axios';
 import { API } from './Axios';
 
 export interface ExportOptions{
-    type: EXPORT_FORMAT;
+    itemType: PARENT_ITEM_KEYS,
+    format: EXPORT_FORMAT;
     includeSummary: boolean;
     includeExtendedSummary: boolean;
     includeContent: boolean;
