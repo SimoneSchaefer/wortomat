@@ -26,6 +26,12 @@
         }
     },
     "sub_menu": {
+        "PARTS": {
+            "add": "Add part",
+            "display_settings": "Display settings",
+            "export": "Export chapters",
+            "filter": "Filter view"
+        },
         "add": "Add item",
         "export": "Export",
         "filter": "Filter",

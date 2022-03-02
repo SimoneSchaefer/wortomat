@@ -1,6 +1,6 @@
 <template>
   <div class="opened-novel">
-    <VerticalMenu :menuItems="menuItems"></VerticalMenu>    
+    <MainMenu></MainMenu>    
     <router-view></router-view>
   </div>
 </template>
@@ -9,13 +9,13 @@
 import { Options, Vue } from 'vue-class-component';
 import { namespace } from 's-vuex-class';
 
-import VerticalMenu from '@/components/navigation/VerticalMenu.vue';
+import MainMenu from '@/components/navigation/MainMenu.vue';
 import { MenuModel } from '@/models/Menu.model';
 
 const novelDataModule = namespace("novelData");
 
 @Options({
-  components: { VerticalMenu }
+  components: { MainMenu }
 })
 export default class OpenedNovel extends Vue {
   mounted(): void {
@@ -42,5 +42,6 @@ export default class OpenedNovel extends Vue {
 .opened-novel {
   height: 100vh; 
   display: flex;
+  flex-direction: column;
 }
 </style>

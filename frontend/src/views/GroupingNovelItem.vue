@@ -1,22 +1,21 @@
 <template>
-  <div v-if="!items.length && !loading" class="empty">
-    <WHelpNote :itemKey="novelItemKey"></WHelpNote>
+  <div class="grouping-item-view">
+    <div class="submenu"><WSubMenu></WSubMenu></div>
+    <div class="content-view">
+      <Splitter style="height: 100%" :stateKey="novelItemKey">
+        <SplitterPanel class="split-content-left" :size="30">
+          <ScrollPanel style="height: 100%">
+            <WTreeview></WTreeview>
+          </ScrollPanel>
+        </SplitterPanel>
+        <SplitterPanel class="split-content-right">
+          <ScrollPanel style="height: 100%">
+            <WNovelItemSheetList />
+          </ScrollPanel>
+        </SplitterPanel>
+      </Splitter>
+    </div>    
   </div>
-  <div v-else class="grouping-item-view">
-    <Splitter style="height: 100%" :stateKey="novelItemKey">
-      <SplitterPanel class="split-content-left" :size="30">
-        <ScrollPanel style="height: 100%">
-          <WTreeview></WTreeview>
-        </ScrollPanel>
-      </SplitterPanel>
-      <SplitterPanel class="split-content-right">
-        <ScrollPanel style="height: 100%">
-          <WNovelItemSheetList />
-        </ScrollPanel>
-      </SplitterPanel>
-    </Splitter> 
-  </div>
-  <WSubMenu></WSubMenu>
 </template>
 
 <script lang="ts">
@@ -77,6 +76,22 @@ export default class GroupingNovelItem extends Vue {
 .grouping-item-view {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.submenu {
+  flex-grow: 0;
+  justify-content: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.63);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5)  ; 
+	-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5)  ; 
+	-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5)  ; 
+  z-index: 1;
+}
+
+.content-view {
+  flex-grow: 1;
 }
 
 .split-content-right {
