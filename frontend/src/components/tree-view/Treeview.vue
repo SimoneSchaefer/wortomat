@@ -16,7 +16,23 @@
             @deleteParent="deleteParent"
             @deleteChild="deleteChild"></w-tree-view-parent>        
         </div>
+     </draggable>
+     <div class="trash">
+      <draggable class="dropzone trashzone" :group="{ name: 'trash', put: () => true}">
+        <i class="fa fa-trash-alt"></i> Trash
+          <div class="accordion-header">
+            <div class="toggle-button fa fa-chevron-down" ></div>
+            TRASH
+                <draggable :list="trashGroup['children']" class="list-group" ghost-class="ghost"  group="trash" id="trash">   
+                  <div v-for="t in trashGroup['children']" :key="t.id">
+                    {{ t.name }}
+                  </div>    
+             </draggable>
+
+
+          </div>
       </draggable>
+    </div>
   </div>
 </template>
 
@@ -32,13 +48,14 @@ import FilterAwareMixin from '@/components/mixins/FilterAwareMixin';
 import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 import { ChildModel } from '@/models/ChildModel';
 import { ParentModel } from '@/models/ParentModel';
+import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
 const treeStateModule = namespace("treeState");
 
 @Options({
-  components: { WTreeViewParent}
+  components: { WTreeViewParent, WTreeviewListItem}
 })
 export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixin) {
   private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
@@ -48,6 +65,10 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
 
   @selectionModule.State('_selectedItemIds')
   _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
+
+
+  @novelDataModule.State('_deletedNovelItems')
+  _deletedNovelItems!: Map<PARENT_ITEM_KEYS, ParentModel>;
 
   @selectionModule.Action
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
@@ -104,6 +125,13 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
         }
       }
     });
+  }
+
+  get trashGroup() {
+    if (this._deletedNovelItems?.get(this.parentKey)) {
+      return this._deletedNovelItems.get(this.parentKey);
+    }
+    return { children: []};
   }
 
   private isAboutChildItem(mutation): boolean {

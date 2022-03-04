@@ -12,10 +12,6 @@
                 :title="`add_child.${parentKey}`" 
                 @click="addChild">
             </WButton>
-            <WButton type="text" color="danger" icon="fa fa-trash" 
-                :title="`remove_parent.${parentKey}`" 
-                @click="confirmDeleteParent(item, $event)">
-            </WButton>
         </div>
     </div>
 </template>

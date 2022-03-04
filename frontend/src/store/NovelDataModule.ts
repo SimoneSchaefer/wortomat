@@ -23,6 +23,7 @@ export default class NovelDataModule extends VuexModule {
     private _novels = [];
     private _loading = false;
     private _novelItems: Map<PARENT_ITEM_KEYS, BaseModel[]> = new Map(); // TODO: make BaseModel
+    private _deletedNovelItems: Map<PARENT_ITEM_KEYS, BaseModel> = new Map(); // TODO: make BaseModel
     private _tags: Map<PARENT_ITEM_KEYS, TagModel[]> = new Map();
 
     get sortedTimelineEvents(): TimelineEventModel[] {
@@ -128,6 +129,11 @@ export default class NovelDataModule extends VuexModule {
     @Mutation
     public novelItemsLoaded(update: { view: PARENT_ITEM_KEYS, novelItems: BaseModel[] }): void {
         this._novelItems.set(update.view, update.novelItems);
+    }    
+    
+    @Mutation
+    public deletedNovelItemsLoaded(update: { view: PARENT_ITEM_KEYS, novelItems: BaseModel}): void {
+        this._deletedNovelItems.set(update.view, update.novelItems);
     }
 
     @Mutation
@@ -214,13 +220,15 @@ export default class NovelDataModule extends VuexModule {
     @Action
     public async deleteNovelItemChild(payload: { view: PARENT_ITEM_KEYS, novelItem: number }): Promise<void> {
         this._groupingNovelItemService.deleteChild(payload.view, this._novelId, payload.novelItem).then((result) => {
-            this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+            this.loadNovelItems({ view: payload.view, novelId: this._novelId });
+           // this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
         });
     }
     @Action
     public async deleteNovelItemParent(payload: { view: PARENT_ITEM_KEYS, novelItem: number }): Promise<void> {
         this._groupingNovelItemService.deleteParent(payload.view, this._novelId, payload.novelItem).then((result) => {
-            this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+            this.loadNovelItems({ view: payload.view, novelId: this._novelId });
+          //  this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
         });
     }
 
@@ -230,10 +238,12 @@ export default class NovelDataModule extends VuexModule {
         const { view, novelId } = payload;
         Promise.all([
             this._groupingNovelItemService.list( view, novelId),
+            this._groupingNovelItemService.listDeleted( view, novelId),
             this._groupingNovelItemService.tags( view, novelId)
           ]).then(result => {
             this.novelItemsLoaded( { view: view, novelItems: result[0].data });
-            this.tagsLoaded( { view: view, tags: result[1].data });
+            this.deletedNovelItemsLoaded( { view: view, novelItems: result[1].data });
+            this.tagsLoaded( { view: view, tags: result[2].data });
             this.isLoading(false);            
         });
     }  

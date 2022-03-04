@@ -15,7 +15,7 @@
             :selected="isSelected(child)">
         </WTreeviewListItem>       
     </draggable>
-    <div v-if="item['children'].length === 0" class="no-children">
+    <div v-if="item['children'].length === 0 && open" class="no-children">
         {{ $t('no_children')}}
     </div>
 </template>

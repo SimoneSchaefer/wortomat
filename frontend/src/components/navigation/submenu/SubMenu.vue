@@ -21,13 +21,13 @@
                 <span class="sub-link">{{$t(`sub_menu.${parentKey}.export`)}}</span>
             </button>
         </div>
-
+<!--
         <div class="trash">
             <draggable @change="itemMovedToTrash" class="dropzone trashzone" :group="{ name: 'trash', put: () => true}">
                 <i class="fa fa-trash-alt"></i> Trash
             </draggable>
         </div>
-
+-->
     </div>
 
 

@@ -68,7 +68,16 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
     public void delete(Long novelId, Long itemId) {
         S item = this.getRepository().findById(itemId).orElseThrow(NotFoundException::new);
         item.setDeletedAt(new Date());
-        this.update(novelId, item.getParentId(), item);
+
+        T previousParent = item.getParent();
+        previousParent.getChildren().remove(item);
+
+        T trashGroup = this.getParentService().getTrashGroup(novelId);
+        trashGroup.getChildren().add(item);
+
+        this.getParentService().update(novelId, previousParent);
+        this.getParentService().update(novelId, trashGroup);
+        this.update(novelId, trashGroup.getId(), item);
     }
 
 

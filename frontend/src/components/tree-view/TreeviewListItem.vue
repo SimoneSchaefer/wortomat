@@ -6,6 +6,7 @@
               <a href="#"
                   @click="select"  
                   :key="element.id">
+                  {{ element.id }} --
                   <WMissingValueTolerantLabel 
                       :value="element.name" 
                       :fallback="$t(`fallback_labels.no_name.${childKey}`)">

@@ -67,6 +67,9 @@ export class GroupingNovelItemService {
     public list(view: PARENT_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
         return API.get(`/novels/${novelId}/${this.getAPIPath(view)}/`)
     }
+    public listDeleted(view: PARENT_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
+        return API.get(`/novels/${novelId}/${this.getAPIPath(view)}/deleted`)
+    }
    
     public update(view: PARENT_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {
         const parentId = item.parentId;

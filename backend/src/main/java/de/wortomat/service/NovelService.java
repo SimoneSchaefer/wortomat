@@ -2,7 +2,7 @@ package de.wortomat.service;
 
 
 import de.wortomat.exceptions.NotFoundException;
-import de.wortomat.model.Novel;
+import de.wortomat.model.*;
 import de.wortomat.repository.NovelRepository;
 import de.wortomat.service.groupingNovelItem.CharacterGroupService;
 import de.wortomat.service.groupingNovelItem.LocationGroupService;
@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -44,7 +46,7 @@ public class NovelService {
         return this.novelRepository.findById(novelId).orElseThrow(NotFoundException::new);
     }
 
-    @Transactional
+   // @Transactional
     public Novel create(Novel novel) {
         List<Novel> novels = this.novelRepository.findByOrderByPositionAsc();
         int position = 0;
@@ -52,7 +54,28 @@ public class NovelService {
             position = novels.get(novels.size() - 1).getPosition();
         }
         novel.setPosition(position);
-        return this.novelRepository.save(novel);
+        novel.setParts(Collections.emptyList());
+        novel.setCharacters(Collections.emptyList());
+        novel.setLocations(Collections.emptyList());
+        novel.setResearchGroups(Collections.emptyList());
+        novel = this.novelRepository.save(novel);
+
+        Part part = (Part) setupTrashGroup(new Part(), novel);
+        CharacterGroup characterGroup = (CharacterGroup) setupTrashGroup(new CharacterGroup(), novel);
+        ResearchGroup researchGroup = (ResearchGroup) setupTrashGroup(new ResearchGroup(), novel);
+        LocationGroup locationGroup = (LocationGroup) setupTrashGroup(new LocationGroup(), novel);
+
+        partService.create(novel.getId(), part);
+        characterGroupService.create(novel.getId(), characterGroup);
+        researchGroupService.create(novel.getId(), researchGroup);
+        locationGroupService.create(novel.getId(), locationGroup);
+        return this.get(novel.getId());
+    }
+
+    private GroupingNovelItem setupTrashGroup(GroupingNovelItem item, Novel novel) {
+        item.setIsTrash(true);
+        item.setNovel(novel);
+        return item;
     }
 
     @Transactional
