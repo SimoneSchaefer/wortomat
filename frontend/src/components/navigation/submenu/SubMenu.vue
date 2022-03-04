@@ -1,30 +1,48 @@
 <template>
-    <div class="vertical-menu">
-        <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.add`)" @click="addParent">
-            <i class="fa fa fa-plus"></i> 
-            <span class="sub-link">{{$t(`sub_menu.${parentKey}.add`)}}</span>
-        </button>
-        <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.display_settings`)" @click="setVisible('display_settings_visible')">
-            <i class="fa fa fa-eye"></i>
-            <span class="sub-link">{{$t(`sub_menu.${parentKey}.display_settings`)}}</span>
-        </button>
-        <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.filter`)" @click="setVisible('filter_visible')">
-            <i class="fa fa fa-filter"></i>
-            <span class="sub-link">{{$t(`sub_menu.${parentKey}.filter`)}}</span>
-        </button>
-        <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.export`)" @click="setVisible('export_visible')">
-            <i class="fa fa fa-file-export"></i>
-            <span class="sub-link">{{$t(`sub_menu.${parentKey}.export`)}}</span>
-        </button>
+    <div class="sub-menu">
+        <div class="option-list">
+            <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.add`)" @click="addParent">
+                <i class="fa fa fa-plus"></i> 
+                <span class="sub-link">{{$t(`sub_menu.${parentKey}.add`)}}</span>
+            </button>
+            <div class="divider"></div>
+            <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.display_settings`)" @click="setVisible('display_settings_visible')">
+                <i class="fa fa fa-eye"></i>
+                <span class="sub-link">{{$t(`sub_menu.${parentKey}.display_settings`)}}</span>
+            </button>
+            <div class="divider"></div>
+            <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.filter`)" @click="setVisible('filter_visible')">
+                <i class="fa fa fa-filter"></i>
+                <span class="sub-link">{{$t(`sub_menu.${parentKey}.filter`)}}</span>
+            </button>
+            <div class="divider"></div>
+            <button class="navigation-link" :title="$t(`sub_menu.${parentKey}.export`)" @click="setVisible('export_visible')">
+                <i class="fa fa fa-file-export"></i>
+                <span class="sub-link">{{$t(`sub_menu.${parentKey}.export`)}}</span>
+            </button>
+        </div>
+
+        <div class="trash">
+            <draggable @change="itemMovedToTrash" class="dropzone trashzone" :group="{ name: 'trash', put: () => true}">
+                <i class="fa fa-trash-alt"></i> Trash
+            </draggable>
+        </div>
+
     </div>
-    <Dialog v-model:visible="sidebarVisible" modal="true" dismissableMask="true">
+
+
+
+
+
+
+    <Dialog v-model:visible="sidebarVisible" :modal="true" :dismissableMask="true">
         <div class="menu-options">
             <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
             <FilterMenu v-if="filter_visible"></FilterMenu>
             <ExportMenu v-if="export_visible"></ExportMenu>
         </div>
     </Dialog>
-   <!-- <Sidebar v-model:visible="sidebarVisible" position="right">
+   <!-- <Sidebar v-model:visible="sidebarVisible" :modal="false" position="top" :showCloseIcon="false">
         <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
         <FilterMenu v-if="filter_visible"></FilterMenu>
         <ExportMenu v-if="export_visible"></ExportMenu>
@@ -41,15 +59,25 @@ import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { BaseModel } from '@/models/Base.model';
 import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
 import { namespace } from 's-vuex-class';
+import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
+import { ParentModel } from '@/models/ParentModel';
+import FilterAwareMixin from '@/components/mixins/FilterAwareMixin';
 
 
 type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';
 const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
 
 @Options({
-    components: { Navlink, DisplaySettingsMenu, FilterMenu, ExportMenu }
+    components: { Navlink, DisplaySettingsMenu, FilterMenu, ExportMenu, WConfirmDialog }
 })
-export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
+export default class SubMenu extends mixins(NovelItemKeyAwareMixin, FilterAwareMixin) {
+
+    @novelDataModule.Action
+    deleteMultipleNovelItems!: (payload: { view: PARENT_ITEM_KEYS, novelItemIds: number[]}) => Promise<void>;
+
+    @selectionModule.State('_selectedItemIds')
+    _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
     @novelDataModule.Action
     addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
@@ -61,6 +89,20 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
     setVisible(flag: visible_flags) {
         this.setAllInvisible();
         this[flag] = true;
+    }
+
+    get trashOptions() {
+        return {
+            group: {
+                name: 'trash',
+                put: () => true,
+                pull: false
+            }
+        }
+    }
+
+    itemMovedToTrash($event) {
+        console.log('MOVED TO TRASH', $event);
     }
 
     get sidebarVisible() {
@@ -80,12 +122,18 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
     addParent(): void {
         this.addNovelItem({ view: this.parentKey, novelItem: new BaseModel()});
     }
+
+    confirmDeleteSelected($event): void {
+        $event.stopPropagation();
+        (this.$refs.confirmDeleteSelected as WConfirmDialog).getDecision();
+    }
 }
 </script>
 
 <style >
-.p-sidebar.p-sidebar-active.p-sidebar-right {
-    right: 80px;
+.p-sidebar.p-sidebar-active.p-sidebar-top {
+    top: 8rem;
+    height: auto !important;
 }
 
 .p-dialog-header {
@@ -94,16 +142,36 @@ export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
 </style>
 
 <style scoped>
-.vertical-menu {
+.sub-menu {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  height: 3em;
+  height: 3rem;
   flex-shrink: 0;
-  /*background: var(--tabmenu-background);*/
   background-color: #d2d2d2;
   z-index: 1102;
+}
+
+.sub-menu .option-list {
+    display: flex;
+}
+
+.sub-menu .trash {
+    display: block;
+    border: 1px solid gray;
+    padding: 0.5em;
+    margin-right: 0.3em;
+    
+
+}
+
+.divider {
+    width: 1px;
+    height: 80%;
+    margin: 0 0.5em;
+    background-color: #2b2b2b34;
 }
 
 .menu-options {

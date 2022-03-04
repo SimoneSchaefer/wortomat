@@ -7,5 +7,7 @@ public interface IGroupingNovelItem<T extends INovelItem<?>> extends PositionAwa
 
     List<T> getChildren();
 
+    void setChildren(List<T> children);
+
     void setNovel(Novel novel);
 }

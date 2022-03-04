@@ -6,16 +6,20 @@ import de.wortomat.repository.GroupingItemRepository;
 import de.wortomat.repository.NovelItemRepository;
 import de.wortomat.repository.NovelItemTagRepository;
 import de.wortomat.service.NovelService;
+import de.wortomat.service.novelItem.NovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>, U extends INovelItemTag> {
 
     protected abstract GroupingItemRepository<T, Long> getParentRepository();
     protected abstract NovelItemRepository<S> getChildRepository();
+    protected abstract NovelItemService<T, S, U> getChildService();
+
     NovelItemTagRepository getTagRepository() { // TODO make abstract
         return null;
     }
@@ -51,7 +55,10 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     }
 
     public void delete(Long _novelId, Long parentId) {
-        this.getChildRepository().deleteAll(this.get(_novelId, parentId).getChildren());
+        List<S> children = this.get(_novelId, parentId).getChildren();
+        for (S child : children) {
+            this.getChildService().delete(_novelId, child.getId());
+        }
         this.getParentRepository().deleteById(parentId);
     }
 
@@ -139,6 +146,8 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     }
 
     private void sortChildren(T parent) {
+        List<S> filteredChildren = parent.getChildren().stream().filter(child -> child.getDeletedAt() == null).collect(Collectors.toList());
+        parent.setChildren(filteredChildren);
         parent.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
     }
 }

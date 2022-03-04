@@ -83,6 +83,11 @@ public class Novel implements IGroupingNovelItem {
     }
 
     @Override
+    public void setChildren(List children) {
+
+    }
+
+    @Override
     public void setNovel(Novel novel) { }
 
     @Override

@@ -1,5 +1,6 @@
 package de.wortomat.model;
 
+import java.util.Date;
 import java.util.List;
 
 public interface INovelItem<T extends IGroupingNovelItem> {
@@ -10,6 +11,9 @@ public interface INovelItem<T extends IGroupingNovelItem> {
     Long getParentId();
     T getParent();
     void setParent(T item);
+
+    Date getDeletedAt();
+    void setDeletedAt(Date date);
 
     <E> List<E> getImages();
 }

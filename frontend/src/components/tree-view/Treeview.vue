@@ -65,6 +65,12 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
   deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
 
   @novelDataModule.Action
+  deleteNovelItemChild!: (payload: { view: PARENT_ITEM_KEYS, novelItem: number}) => Promise<void>;
+
+  @novelDataModule.Action
+  deleteNovelItemParent!: (payload: { view: PARENT_ITEM_KEYS, novelItem: number}) => Promise<void>;
+
+  @novelDataModule.Action
   moveParent!: (payload: { key: PARENT_ITEM_KEYS, novelId: number, parentId: number, oldPosition: number, newPosition: number }) => Promise<void>;
 
   @novelDataModule.Action
@@ -158,18 +164,28 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
 
   childMoved($event): void {
     const childId = $event.clone.id.replace('child-', '');
-    const parentTo = $event.to.id.replace('parent-', '');
-    const newPosition = $event.newIndex;
-    this.moveChild({ key: this.parentKey, novelId: this.novelId, childToMove: childId, newParentId: parentTo, newPosition: newPosition });
+    if ($event.to.className.includes('trashzone')) {
+      this.deleteNovelItemChild({ view: this.parentKey, novelItem: childId});
+    } else {
+      const parentTo = $event.to.id.replace('parent-', '');
+      const newPosition = $event.newIndex;
+      this.moveChild({ key: this.parentKey, novelId: this.novelId, childToMove: childId, newParentId: parentTo, newPosition: newPosition });
+    }
   }
 
   parentMoved($event): void {
-    const parentId = $event.moved.element.id;
-    const newIndex = $event.moved.newIndex;
-    const oldIndex = $event.moved.oldIndex;
-    this.moveParent({ key: this.parentKey, novelId: this.novelId, parentId: parentId, oldPosition: oldIndex, newPosition: newIndex });
+    console.log('parent moved', $event);
+    if ($event.removed) {
+      const parentId = $event.removed.element.id;
+      this.deleteNovelItemParent({ view: this.parentKey, novelItem: parentId });
+    } else {
+      const parentId = $event.moved.element.id;
+      const newIndex = $event.moved.newIndex;
+      const oldIndex = $event.moved.oldIndex;
+      this.moveParent({ key: this.parentKey, novelId: this.novelId, parentId: parentId, oldPosition: oldIndex, newPosition: newIndex });
+    }
   }
-
+  
   selectItem(event): void  {
     const $event = event.event;
     $event.stopPropagation();

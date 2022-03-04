@@ -4,6 +4,8 @@ import { AxiosResponse } from 'axios';
 import { API } from './Axios';
 import { BACKEND_URL } from './Env';
 
+
+/** @deprecated */
 export abstract class NovelItemService {
 
     abstract getAPIPath(parentId?: number): string;
@@ -58,6 +60,7 @@ export abstract class NovelItemService {
     public delete(novelId: number, item: BaseModel): Promise<AxiosResponse> {
         return API.delete(`/novels/${novelId}/${this.getAPIPath(item.parentId)}/${item.id}`)
     }
+
 
     deleteImage(novelId: number, parentId: number, itemId: number, fileId: number) {
         return API.delete(`${BACKEND_URL}/novels/${novelId}/${this.getAPIPath(parentId)}/${itemId}/files/${fileId}`);

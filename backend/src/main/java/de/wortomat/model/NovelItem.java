@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @MappedSuperclass
@@ -23,6 +24,8 @@ public abstract class NovelItem<T extends GroupingNovelItem> implements INovelIt
     private String extended_summary;
 
     private Integer position;
+
+    private Date deletedAt;
 
     @JsonIgnore
     @ManyToOne

@@ -4,6 +4,8 @@ import de.wortomat.model.Chapter;
 import de.wortomat.model.ChapterTag;
 import de.wortomat.model.Part;
 import de.wortomat.repository.*;
+import de.wortomat.service.novelItem.ChapterService;
+import de.wortomat.service.novelItem.NovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,9 @@ public class PartService extends GroupingNovelItemService<Part, Chapter, Chapter
 
     @Autowired
     private PartsRepository partsRepository;
+
+    @Autowired
+    private ChapterService chapterService;
 
     @Autowired
     private ChapterRepository chapterRepository;
@@ -27,6 +32,11 @@ public class PartService extends GroupingNovelItemService<Part, Chapter, Chapter
     @Override
     protected NovelItemRepository<Chapter> getChildRepository() {
         return this.chapterRepository;
+    }
+
+    @Override
+    protected NovelItemService<Part, Chapter, ChapterTag> getChildService() {
+        return this.chapterService;
     }
 
     @Override

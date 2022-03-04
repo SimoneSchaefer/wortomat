@@ -3,6 +3,8 @@ package de.wortomat.controller.novelItem;
 import de.wortomat.model.Research;
 import de.wortomat.model.ResearchGroup;
 import de.wortomat.model.ResearchTag;
+import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
+import de.wortomat.service.groupingNovelItem.ResearchGroupService;
 import de.wortomat.service.novelItem.NovelItemService;
 import de.wortomat.service.novelItem.ResearchService;
 import de.wortomat.service.uploads.EntityType;
@@ -17,10 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ResearchController extends NovelItemController<Research, ResearchGroup, ResearchTag>  {
     @Autowired
     private ResearchService researchService;
+    @Autowired
+    private ResearchGroupService researchGroupService;
 
     @Override
     protected NovelItemService<ResearchGroup, Research, ResearchTag> getService() {
         return researchService;
+    }
+
+    @Override
+    protected GroupingNovelItemService<ResearchGroup, Research, ResearchTag> getParentService() {
+        return researchGroupService;
     }
 
     @Override

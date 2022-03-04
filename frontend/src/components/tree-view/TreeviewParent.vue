@@ -15,6 +15,9 @@
             :selected="isSelected(child)">
         </WTreeviewListItem>       
     </draggable>
+    <div v-if="item['children'].length === 0" class="no-children">
+        {{ $t('no_children')}}
+    </div>
 </template>
 
 <script lang="ts">
@@ -111,3 +114,12 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin, Filte
     } 
 }
 </script>
+
+<style scoped>
+.no-children {
+    background: var(--light-background);
+    padding: 1em 1em;
+    font-style: italic;
+    color: rgba(128, 128, 128, 0.411);
+}
+</style>

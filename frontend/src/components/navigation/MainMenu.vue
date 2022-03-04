@@ -32,7 +32,7 @@ export default class MainMenu extends Vue {}
   justify-content: space-between;
   flex-direction: row;
   align-items: center;
-  height: 5em;
+  height: 5rem;
   width: 100%;
   flex-shrink: 0;
   flex-grow: 0;

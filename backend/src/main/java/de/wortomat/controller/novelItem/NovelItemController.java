@@ -1,6 +1,7 @@
 package de.wortomat.controller.novelItem;
 
 import de.wortomat.model.*;
+import de.wortomat.service.groupingNovelItem.GroupingNovelItemService;
 import de.wortomat.service.novelItem.NovelItemService;
 import de.wortomat.service.uploads.EntityType;
 import de.wortomat.service.uploads.FileResponseCreator;
@@ -11,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 public abstract  class NovelItemController<S extends INovelItem<T>, T extends IGroupingNovelItem<S>, U extends INovelItemTag> {
     abstract protected NovelItemService<T, S, U> getService();
+    abstract protected GroupingNovelItemService<T, S, U> getParentService();
     abstract protected EntityType getEntityType();
 
     @Autowired
@@ -41,7 +44,7 @@ public abstract  class NovelItemController<S extends INovelItem<T>, T extends IG
             @PathVariable("groupId") Long groupId,
             @PathVariable("childId") Long childId) {
         this.getService().delete(novelId, childId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(this.getParentService().get(novelId));
     }
 
     @PostMapping("{childId}/files/upload")
