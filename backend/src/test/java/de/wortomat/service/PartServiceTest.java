@@ -118,7 +118,7 @@ public class PartServiceTest {
         Assertions.assertEquals(novel, savedPart.getNovel());
     }
 
-    @Test
+    /*@Test
     public void delete_shouldDeleteItemAndChildren() {
         Novel novel = NovelFactory.createMockNovel();
         Part part = createDummyPartWithChapters();
@@ -127,7 +127,7 @@ public class PartServiceTest {
         partService.delete(novel.getId(), part.getId());
         verify(partsRepository).deleteById(part.getId());
         verify(chapterRepository).deleteAll(part.getChildren());
-    }
+    }*/
 
     private List<Part> createDummyPartsWithChapter() {
         Part part = createDummyPartWithChapters();
