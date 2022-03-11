@@ -1,4 +1,6 @@
 <template>
+  <WConfirmDialog ref="confirmDeleteParent" @cancel="reload" @accept="deleteNovelItemParent" message="delete_confirm"></WConfirmDialog>
+  <WConfirmDialog ref="confirmDeleteChild" @cancel="reload" @accept="deleteNovelItemChild" message="delete_confirm"></WConfirmDialog>
   <div class="tree">
       <draggable :list="items" group="parents"
         class="list-group"
@@ -12,9 +14,7 @@
             @select-child="selectItem($event)"
             @updateParentName="updateName(item, $event)"
             @addChild="addChild(item)"
-            @childMoved="childMoved($event)"
-            @deleteParent="deleteParent"
-            @deleteChild="deleteChild"></w-tree-view-parent>        
+            @childMoved="childMoved($event)"></w-tree-view-parent>        
         </div>
      </draggable>
     <!-- <div class="trash">
@@ -49,13 +49,14 @@ import { ChildModel } from '@/models/ChildModel';
 import { ParentModel } from '@/models/ParentModel';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 import Accordion from '@/components/tree-view/Accordion.vue';
+ import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
 const treeStateModule = namespace("treeState");
 
 @Options({
-  components: { WTreeViewParent, WTreeviewListItem, Accordion}
+  components: { WTreeViewParent, WTreeviewListItem, Accordion, WConfirmDialog}
 })
 export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixin) {
   private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
@@ -66,9 +67,11 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
   @selectionModule.State('_selectedItemIds')
   _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
-
   @novelDataModule.State('_deletedNovelItems')
   _deletedNovelItems!: Map<PARENT_ITEM_KEYS, ParentModel>;
+
+  @novelDataModule.Action
+  loadNovelItems!: (payload: { view: PARENT_ITEM_KEYS, novelId: number } ) => Promise<void>;
 
   @selectionModule.Action
   selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
@@ -127,11 +130,8 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     });
   }
 
-  get trashGroup() {
-    if (this._deletedNovelItems?.get(this.parentKey)) {
-      return this._deletedNovelItems.get(this.parentKey);
-    }
-    return { children: []};
+  reload() {
+    this.loadNovelItems({ view: this.parentKey, novelId: this.novelId});
   }
 
   private isAboutChildItem(mutation): boolean {
@@ -171,16 +171,6 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     return Object.keys(this.currentToggleState).includes(`${parent.id}`) ? this.currentToggleState[parent.id] : true;
   }
 
-  deleteParent(item: ParentModel) {
-    this.deleteNovelItem({ view: this.parentKey, novelItem: item});
-  }
-
-  deleteChild(item: ChildModel) {
-    const parent = this.novelItems.find(parent => parent.id === item.parentId);
-    item.parentId = parent?.id || -1;
-    this.deleteNovelItem({ view: this.parentKey, novelItem: item});
-  }
-
   addChild(selectedParent: ParentModel): void {
     const child = new ChildModel();
     child.parentId = selectedParent.id;
@@ -193,7 +183,8 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
   childMoved($event): void {
     const childId = $event.clone.id.replace('child-', '');
     if ($event.to.className.includes('trashzone')) {
-      this.deleteNovelItemChild({ view: this.parentKey, novelItem: childId});
+      this.confirmDeleteChild({ view: this.parentKey, novelItem: childId}, $event);
+      // this.deleteNovelItemChild({ view: this.parentKey, novelItem: childId});
     } else {
       const parentTo = $event.to.id.replace('parent-', '');
       const newPosition = $event.newIndex;
@@ -201,11 +192,19 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     }
   }
 
+  confirmDeleteParent(item, $event): void {
+    (this.$refs.confirmDeleteParent as WConfirmDialog).getDecision(item);
+  }
+
+  confirmDeleteChild(item, $event): void {
+      $event.stopPropagation();
+      (this.$refs.confirmDeleteChild as WConfirmDialog).getDecision(item);
+  }
+
   parentMoved($event): void {
-    console.log('parent moved', $event);
     if ($event.removed) {
       const parentId = $event.removed.element.id;
-      this.deleteNovelItemParent({ view: this.parentKey, novelItem: parentId });
+      this.confirmDeleteParent({ view: this.parentKey, novelItem: parentId}, $event);
     } else {
       const parentId = $event.moved.element.id;
       const newIndex = $event.moved.newIndex;

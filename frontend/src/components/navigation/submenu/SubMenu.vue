@@ -2,18 +2,15 @@
   <div class="sub-menu">
     <div class="mutation-options">
       <SubMenuLink
-        class="mutation-link add"
+        class="add"
         icon="plus"
         :title="`sub_menu.${parentKey}.add`"
         @click="addParent"
       ></SubMenuLink>
 
-      <div
-        class="mutation-link trash"
-        :title="$t(`sub_menu.${parentKey}.trash`)"
-      >
+      <div class="trash" :title="$t(`sub_menu.${parentKey}.trash`)">
         <draggable
-          @change="itemMovedToTrash"
+          :list="[]"
           class="dropzone trashzone"
           :group="{ name: 'trash', put: () => true }"
         >
@@ -24,19 +21,19 @@
 
     <div class="option-list">
       <SubMenuLink
-        class="mutation-link setting"
+        class="setting"
         icon="eye"
         :title="`sub_menu.${parentKey}.display_settings`"
         @click="setVisible('display_settings_visible')"
       ></SubMenuLink>
       <SubMenuLink
-        class="mutation-link setting"
+        class="setting"
         icon="filter"
         :title="`sub_menu.${parentKey}.filter`"
         @click="setVisible('filter_visible')"
       ></SubMenuLink>
       <SubMenuLink
-        class="mutation-link setting"
+        class="setting"
         icon="print"
         :title="`sub_menu.${parentKey}.export`"
         @click="setVisible('export_visible')"
@@ -75,7 +72,6 @@ import { BaseModel } from "@/models/Base.model";
 import NovelItemKeyAwareMixin from "../../mixins/NovelItemKeyAwareMixin";
 import { namespace } from "s-vuex-class";
 import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
-import { ParentModel } from "@/models/ParentModel";
 import FilterAwareMixin from "@/components/mixins/FilterAwareMixin";
 import SubMenuLink from "./SubMenuLink.vue";
 
@@ -123,20 +119,6 @@ export default class SubMenu extends mixins(
   setVisible(flag: visible_flags) {
     this.setAllInvisible();
     this[flag] = true;
-  }
-
-  get trashOptions() {
-    return {
-      group: {
-        name: "trash",
-        put: () => true,
-        pull: false,
-      },
-    };
-  }
-
-  itemMovedToTrash($event) {
-    console.log("MOVED TO TRASH", $event);
   }
 
   get sidebarVisible() {
@@ -193,8 +175,7 @@ export default class SubMenu extends mixins(
 }
 
 .sub-menu .option-list {
-    margin: 1rem 0;
-
+  margin: 1rem 0;
 }
 
 .add {
@@ -207,22 +188,12 @@ export default class SubMenu extends mixins(
   background-color: rgb(47, 47, 228);
 }
 
-.mutation-link {
-  height: 4rem;
-  width: 4rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 1rem;
-  border-radius: 50%;
-}
-
-.mutation-link.setting {
+.setting {
   color: white;
   background-color: rgba(153, 153, 153, 0.466);
 }
 
-.mutation-link.setting:hover {
+.setting:hover {
   color: white;
   background-color: rgba(206, 206, 206, 0.466);
 }
@@ -230,6 +201,12 @@ export default class SubMenu extends mixins(
 .trash {
   background-color: rgb(173, 35, 35);
   color: #efefef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  width: 4rem;
+  height: 4rem;
 }
 
 .trash:hover {
@@ -240,8 +217,6 @@ export default class SubMenu extends mixins(
 .mutation-options {
   margin: 1rem 0;
 }
-
-
 
 .toggle-switch {
   line-height: 3em;

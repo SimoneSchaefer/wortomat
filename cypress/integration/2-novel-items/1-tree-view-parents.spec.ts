@@ -4,7 +4,7 @@ import { GroupingItemPage } from "../../page-objects/GroupingItemPage";
 import { NovelList } from "../../page-objects/NovelList";
 import { novelItemsSpecDefinition } from "./spec-definitions";
 
-describe('Novel items', () => {
+xdescribe('Novel items', () => {
     const novelList = new NovelList();
     const groupingItemPage = new GroupingItemPage();
     const TITLE = 'group name 1';
