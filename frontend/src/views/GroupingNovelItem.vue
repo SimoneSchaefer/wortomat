@@ -93,7 +93,7 @@ export default class GroupingNovelItem extends Vue {
   flex-grow: 0;
   justify-content: center;
   width: 5rem;
-  height: 100%;
+  height: calc(100vh - 5rem);
   z-index: 1;
 
   border-bottom: 1px solid rgba(0, 0, 0, 0.63);

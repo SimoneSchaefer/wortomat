@@ -39,6 +39,19 @@
         @click="setVisible('export_visible')"
       ></SubMenuLink>
     </div>
+
+    <Sidebar
+      v-model:visible="sidebarVisible"
+      :modal="true"
+      position="left"
+      :showCloseIcon="true"
+    >
+      <DisplaySettingsMenu
+        v-if="display_settings_visible"
+      ></DisplaySettingsMenu>
+      <FilterMenu v-if="filter_visible"></FilterMenu>
+      <ExportMenu v-if="export_visible"></ExportMenu>
+    </Sidebar>
   </div>
 
   <!--
@@ -49,16 +62,6 @@
             <ExportMenu v-if="export_visible"></ExportMenu>
         </div>
     </Dialog>-->
-  <Sidebar
-    v-model:visible="sidebarVisible"
-    :modal="true"
-    position="left"
-    :showCloseIcon="true"
-  >
-    <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
-    <FilterMenu v-if="filter_visible"></FilterMenu>
-    <ExportMenu v-if="export_visible"></ExportMenu>
-  </Sidebar>
 </template>
 
 <script lang="ts">

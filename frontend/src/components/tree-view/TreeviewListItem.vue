@@ -130,11 +130,11 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
 
 .tree-view-item:hover {
   background: none;
-  background-color: pink;
+  background-color: aliceblue;
 }
 
 .tree-view-item.selected {
   background: none;
-  background-color: pink;
+  background-color: rgb(202, 230, 255);
 }
 </style>

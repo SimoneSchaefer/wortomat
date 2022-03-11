@@ -78,7 +78,7 @@ body {
   overflow: hidden;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   color: var(--font-color);
-  /*background: var(--dark-background);*/
+  background: var(--dark-background);
   height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -129,11 +129,11 @@ a {
 }
 
 .p-splitter .p-splitter-gutter {
-  background-color: rgba(71, 1, 71, 0.89) !important;
+  background-color: rgb(80, 80, 248) !important;
 }
 
 .p-splitter .p-splitter-gutter-handle {
-    background-color: purple !important;
+    background-color: rgb(47, 47, 228) !important;
 }
 
 .split-content-left .p-scrollpanel-content {
