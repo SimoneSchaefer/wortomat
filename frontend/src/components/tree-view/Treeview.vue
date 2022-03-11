@@ -17,22 +17,21 @@
             @deleteChild="deleteChild"></w-tree-view-parent>        
         </div>
      </draggable>
-     <div class="trash">
-      <draggable class="dropzone trashzone" :group="{ name: 'trash', put: () => true}">
-        <i class="fa fa-trash-alt"></i> Trash
-          <div class="accordion-header">
-            <div class="toggle-button fa fa-chevron-down" ></div>
-            TRASH
-                <draggable :list="trashGroup['children']" class="list-group" ghost-class="ghost"  group="trash" id="trash">   
-                  <div v-for="t in trashGroup['children']" :key="t.id">
-                    {{ t.name }}
-                  </div>    
-             </draggable>
-
-
-          </div>
+    <!-- <div class="trash">
+      <draggable class="dropzone trashzone" :group="{ name: 'trash', put: () => true, pull: () => false }">
+          <Accordion :open="isOpen(trashGroup)" @toggle="toggle($event, trashGroup)">
+            <template v-slot:header>
+              <i class="fa fa-icon fa-trash-alt"></i>&nbsp;
+              {{ $t('trash') }}
+            </template>
+            <template v-slot:content>
+              <draggable :list="trashGroup['children']" class="list-group" ghost-class="ghost"  group="trash" :id="`trash-parent-${trashGroup.id}`">   
+                <div class="trash-hint">{{ $t('trash_hint') }} </div>
+            </draggable>
+          </template>
+          </Accordion>        
       </draggable>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -49,13 +48,14 @@ import WTreeViewParent from '@/components/tree-view/TreeviewParent.vue';
 import { ChildModel } from '@/models/ChildModel';
 import { ParentModel } from '@/models/ParentModel';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
+import Accordion from '@/components/tree-view/Accordion.vue';
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
 const treeStateModule = namespace("treeState");
 
 @Options({
-  components: { WTreeViewParent, WTreeviewListItem}
+  components: { WTreeViewParent, WTreeviewListItem, Accordion}
 })
 export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixin) {
   private lastChecked: BaseModel = null; // needed for CTRL/SHiFT+select handling
@@ -213,11 +213,8 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
       this.moveParent({ key: this.parentKey, novelId: this.novelId, parentId: parentId, oldPosition: oldIndex, newPosition: newIndex });
     }
   }
-  
-  selectItem(event): void  {
-    const $event = event.event;
-    $event.stopPropagation();
-    const selected = event.item;
+
+  selectChild(selected, $event): void {
     let selectedItems: number[] = [];
     if ($event['shiftKey']) {
         selectedItems = this.handleShift(selected);
@@ -229,7 +226,26 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     if (selectedItems.find(selectedItem => selectedItem === selected.id)) {
       this.lastChecked = selected;
     } 
-    this.selectItemIds( { view: this.parentKey, itemIds: selectedItems });    
+    this.selectItemIds( { view: this.parentKey, itemIds: selectedItems }); 
+  }
+  
+  selectItem(event): void  {
+    const $event = event.event;
+    $event.stopPropagation();
+    const selected = event.item;
+    /*let selectedItems: number[] = [];
+    if ($event['shiftKey']) {
+        selectedItems = this.handleShift(selected);
+    } else if ($event['ctrlKey']) {
+        selectedItems = this.handleCtrl(selected);
+    } else {
+        selectedItems = [selected.id];
+    }
+    if (selectedItems.find(selectedItem => selectedItem === selected.id)) {
+      this.lastChecked = selected;
+    } 
+    this.selectItemIds( { view: this.parentKey, itemIds: selectedItems });  */
+    this.selectChild(selected, $event);  
   }
 
   handleCtrl(selected: BaseModel): number[]  {
@@ -259,5 +275,12 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
 <style scoped>
 .list-group {
   width: 100%;
+}
+
+.trash-hint {
+  background: var(--light-background);
+  padding: 1em;
+  color: gray;
+  font-style: italic;
 }
 </style>

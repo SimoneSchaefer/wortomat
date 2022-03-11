@@ -1,7 +1,5 @@
 <template>
-    <WConfirmDialog ref="confirmDeleteParent" @accept="deleteParent" message="delete_confirm"></WConfirmDialog>
-    <div class="accordion-header">
-        <div class="toggle-button fa"  v-bind:class="{ 'fa-chevron-down': open, 'fa-chevron-right': !open }" @click="toggle"></div>
+    <Accordion :open="open" @toggle="toggle">
         <WEditableLabel 
             :value="item.name" 
             :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
@@ -13,7 +11,7 @@
                 @click="addChild">
             </WButton>
         </div>
-    </div>
+    </Accordion>
 </template>
 
 <script lang="ts">
@@ -22,6 +20,7 @@ import { Emit, Prop } from 'vue-property-decorator';
 import { namespace } from 's-vuex-class';
 
 import { BaseModel } from '@/models/Base.model';
+import Accordion from '@/components/tree-view/Accordion.vue';
 
 import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
@@ -35,6 +34,7 @@ const applicationStateModule = namespace("applicationState");
     WButton,
     WEditableLabel,
     WConfirmDialog,
+    Accordion
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'toggle']
 })
@@ -45,19 +45,9 @@ export default class TreeviewHeader extends mixins(NovelItemKeyAwareMixin) {
     @applicationStateModule.State('_modalOpen')
     modalOpen!: boolean;   
 
-    confirmDeleteParent(item, $event): void {
-        $event.stopPropagation();
-        (this.$refs.confirmDeleteParent as WConfirmDialog).getDecision(item);
-    }
-
     @Emit('toggle')
     toggle() {
         return !this.open;
-    }
-
-    @Emit('delete-parent')
-    deleteParent() {
-        return this.item;
     }
 
     @Emit('update-parent-name')

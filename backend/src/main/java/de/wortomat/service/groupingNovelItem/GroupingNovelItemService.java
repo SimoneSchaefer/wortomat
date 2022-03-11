@@ -10,6 +10,8 @@ import de.wortomat.service.novelItem.NovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,7 +65,8 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
 
     public void delete(Long _novelId, Long parentId) {
         List<S> children = this.get(_novelId, parentId).getChildren();
-        for (S child : children) {
+        List<S> clone = new ArrayList<>(children);
+        for (S child : clone) {
             this.getChildService().delete(_novelId, child.getId());
         }
         this.getParentRepository().deleteById(parentId);

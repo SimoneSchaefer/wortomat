@@ -1,23 +1,36 @@
 <template>
-    <WTreeviewHeader
-        :item="item"    
-        :open="open"  
-        @toggle="toggle"               
-        @addChild="addChild"
-        @updateParentName="updateParentName($event)"
-        @deleteParent="deleteParent">
-    </WTreeviewHeader>
-    <draggable v-if="open" :list="item['children']" class="list-group" ghost-class="ghost"  group="children" @end="childMoved($event)" :id="`parent-${item.id}`">   
-        <WTreeviewListItem v-for="child in item.children" :key="child.id"
-            @select="selectChild"
-            @deleteChild="deleteChild"
-            :element="child" 
-            :selected="isSelected(child)">
-        </WTreeviewListItem>       
-    </draggable>
-    <div v-if="item['children'].length === 0 && open" class="no-children">
-        {{ $t('no_children')}}
-    </div>
+    <Accordion :open="open" @toggle="toggle">
+        <template v-slot:header>
+            <div class="accordion-header w-100">
+                <div class="title">
+                    <WEditableLabel 
+                        :value="item.name" 
+                        :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
+                        @update-label="updateParentName($event)" >
+                    </WEditableLabel>
+                </div>
+                <div class="options">
+                    <WButton type="text" color="primary" icon="fa fa-plus" 
+                        :title="`add_child.${parentKey}`" 
+                        @click="addChild">
+                    </WButton>
+                </div>
+            </div>
+        </template>
+        <template v-slot:content>
+            <draggable :list="item['children']" class="list-group" ghost-class="ghost"  group="children" @end="childMoved($event)" :id="`parent-${item.id}`">   
+                <WTreeviewListItem v-for="child in item.children" :key="child.id"
+                    @select="selectChild"
+                    @deleteChild="deleteChild"
+                    :element="child" 
+                    :selected="isSelected(child)">
+                </WTreeviewListItem>       
+            </draggable>
+            <div v-if="item['children'].length === 0 && open" class="no-children">
+                {{ $t('no_children')}}
+            </div>
+        </template>        
+    </Accordion>
 </template>
 
 <script lang="ts">
@@ -32,6 +45,7 @@ import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import WEditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
 
+import Accordion from '@/components/tree-view/Accordion.vue';
 import WTreeviewHeader from '@/components/tree-view/TreeviewHeader.vue';
 import WTreeviewListItem from '@/components/tree-view/TreeviewListItem.vue';
 import NovelItemKeyAwareMixin from '../mixins/NovelItemKeyAwareMixin';
@@ -47,7 +61,8 @@ const applicationStateModule = namespace("applicationState");
     WEditableLabel,
     WConfirmDialog,
     WTreeviewListItem,
-    WTreeviewHeader    
+    WTreeviewHeader,
+    Accordion
   },
   emits: ['delete-parent', 'update-parent-name', 'add-child', 'delete-child', 'child-moved', 'toggle', 'select-child']
 })
@@ -76,6 +91,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin, Filte
 
     @Emit('update-parent-name')
     updateParentName(newValue: string) {
+        console.log('NEW VALUE', newValue)
         return newValue;
     }
 
@@ -91,6 +107,7 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin, Filte
 
     @Emit('toggle')
     toggle($event) {
+        console.log('EVENT', $event)
         return $event;
     }
 
@@ -122,4 +139,24 @@ export default class TreeviewParent extends mixins(NovelItemKeyAwareMixin, Filte
     font-style: italic;
     color: rgba(128, 128, 128, 0.411);
 }
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+}
+
+.accordion-header .title {
+    flex-grow: 1;
+}
+
+.accordion-header .options {
+    flex-grow: 0;
+    height: 100%;
+}
+
+.accordion-header .options button {
+    height: 100%;
+}
+
 </style>
