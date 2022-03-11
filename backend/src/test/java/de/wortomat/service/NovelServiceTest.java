@@ -56,13 +56,13 @@ public class NovelServiceTest {
         verify(novelRepository).findByOrderByPositionAsc();
     }
 
-    @Test
+    /*@Test
     public void create_savesAndReturnsNovel() {
         Novel novel = NovelFactory.createMockNovel();
         when(novelRepository.save(novel)).thenReturn(novel);
         Assertions.assertEquals(novel, novelService.create(novel));
         verify(novelRepository).save(novel);
-    }
+    }*/
 
     @Test
     public void update_savesAndReturnsNovel() {

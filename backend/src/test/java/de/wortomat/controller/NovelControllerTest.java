@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Ignore
 public class NovelControllerTest {
 
     @Autowired
@@ -111,8 +110,8 @@ public class NovelControllerTest {
                 "\"name\":\"%s\"," +
                 "\"summary\":\"%s\"," +
                 "\"position\":%d," +
-                "\"author\":\"%s\"}," +
-                "\"isTrash\":false",
+                "\"author\":\"%s\"," +
+                "\"isTrash\":false}",
                 novel.getId(), novel.getName(), novel.getSummary(), novel.getPosition(), novel.getAuthor());
     }
 
