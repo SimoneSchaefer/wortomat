@@ -1,37 +1,36 @@
 <template>
     <div class="tree-view-item" :id="`child-${element.id}`" :class="{ selected: selected }">
         <WConfirmDialog ref="confirmDeleteChild" @accept="deleteChild" message="delete_confirm"></WConfirmDialog>
-        <div class="tree-view-item-child">
-          <div class="link">
-            <a href="#"
-                @click="select"  
-                :key="element.id">
-                <WMissingValueTolerantLabel 
-                    :value="element.name" 
-                    :fallback="$t(`fallback_labels.no_name.${childKey}`)">
-                </WMissingValueTolerantLabel>&nbsp;
-                <i v-if="element.summary && element.summary.length">
-                    <WMissingValueTolerantLabel 
-                        :value="element.summary" 
-                        :fallback="$t('fallback_labels.no_summary')">
-                    </WMissingValueTolerantLabel>
-                </i>
-            </a> 
+         <div class="tree-view-item-child">
+            <div class="link">
+              <a href="#"
+                  @click="select"  
+                  :key="element.id">
+                  <WMissingValueTolerantLabel 
+                      :value="element.name" 
+                      :fallback="$t(`fallback_labels.no_name.${childKey}`)">
+                  </WMissingValueTolerantLabel>&nbsp;
+                  <i v-if="element.summary && element.summary.length">
+                      <WMissingValueTolerantLabel 
+                          :value="element.summary" 
+                          :fallback="$t('fallback_labels.no_summary')">
+                      </WMissingValueTolerantLabel>
+                  </i>
+              </a> 
+            </div>
+                    
+            <div class="badges">
+              <Badge v-if="getTodoCount(element.content)" :value="getTodoCount(element.content)" severity="warning"></Badge>
+              <Badge v-if="getFixmeCount(element.content)" :value="getFixmeCount(element.content)" severity="danger"></Badge>
+              <Badge v-if="getIdeaCount(element.content)" :value="getIdeaCount(element.content)" severity="info"></Badge>
+            </div>
           </div>
-                  
-          <div class="badges">
-            <Badge v-if="getTodoCount(element.content)" :value="getTodoCount(element.content)" severity="warning"></Badge>
-            <Badge v-if="getFixmeCount(element.content)" :value="getFixmeCount(element.content)" severity="danger"></Badge>
-            <Badge v-if="getIdeaCount(element.content)" :value="getIdeaCount(element.content)" severity="info"></Badge>
-          </div>
-        </div>
-
-        <div class="child-options">
+       <!-- <div class="child-options">
             <WButton type="text" color="danger" icon="fa fa-trash"  
                 :title="`remove_child.${parentKey}`" 
                 @click="confirmDeleteChild(element, $event)">
             </WButton>     
-        </div>
+        </div>-->
     </div>     
 </template>
 
@@ -131,11 +130,11 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
 
 .tree-view-item:hover {
   background: none;
-  background-color: pink;
+  background-color: aliceblue;
 }
 
 .tree-view-item.selected {
   background: none;
-  background-color: pink;
+  background-color: rgb(202, 230, 255);
 }
 </style>

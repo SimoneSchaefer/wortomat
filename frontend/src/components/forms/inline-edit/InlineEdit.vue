@@ -1,5 +1,5 @@
 <template>
-    <div class="inline-edit w-100" 
+    <div class="inline-edit" 
         :title="editing ? '' : 'Click to edit'" 
         :class=" { editing: editing, readonly: !editing }" 
         @click="editModeActivated">

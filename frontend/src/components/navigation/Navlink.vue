@@ -1,10 +1,11 @@
 <template>
-    <router-link
-        :to="menuItem.to"
+
+    <router-link :to="menuItem.to"
         v-slot="{ href, isActive }" >
-        <a class="navigation-link" :class="{ active: isActive }" :title="$t(`vertical_menu.${menuItem.label}`)" :href="href">
-            <i v-bind:class="getIconClass(isActive)"></i>
-        </a>
+        <div class="navigation-link" :class="{ active: isActive }" :title="$t(`vertical_menu.${menuItem.label}`)" :href="href">
+            <i v-bind:class="getIconClass(isActive)"></i> 
+            <span class="navigation-link-label">{{ $t(`vertical_menu.${menuItem.label}`) }}</span>
+        </div>
     </router-link>
 </template>
 
@@ -18,22 +19,26 @@ export default class Navlink extends Vue {
     @Prop() menuItem: MenuModel;
 
     getIconClass( isActive: boolean): string {
-        return `fa fa-icon ${this.menuItem.icon} ${isActive ? 'fa-3x' : 'fa-2x'}`;
+        return `fa fa-icon ${this.menuItem.icon} ${isActive ? 'fa-2x' : 'fa'}`;
     }
 }
 </script>
 
 <style scoped>
-
 .navigation-link{
-  height: 5em;
-  width: 5em !important;
   display: flex;
   justify-content: center;
   align-items: center;
   color: #efefef7e;
-  border-bottom: 1px solid #efefef7e;
   text-decoration: none;
+  padding: 0 1em;
+}
+
+.navigation-link-label {
+    margin-left: 0.5em;
+    font-weight: bold;
+    text-transform: uppercase;
+
 }
 
 .navigation-link.active {

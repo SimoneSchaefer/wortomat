@@ -15,6 +15,22 @@ export class GroupingNovelItemService {
         return apiPathParts.join('/');
     }
 
+    getParentAPIPath(view: PARENT_ITEM_KEYS, parentId: number): string {
+        const apiPathParts = [view.toLocaleLowerCase().replaceAll('_', '-')];
+        apiPathParts.push(`${parentId}`);
+        return apiPathParts.join('/');
+    }
+
+    getChildAPIPath(view: PARENT_ITEM_KEYS, novelId: number): string {
+        const apiPathParts = [BACKEND_URL];
+        apiPathParts.push('novels');
+        apiPathParts.push(`${novelId}`);
+        apiPathParts.push(view.toLocaleLowerCase().replaceAll('_', '-'));
+        apiPathParts.push(`0`); //TODO
+        apiPathParts.push(childKeyForParentKey(view).toLocaleLowerCase());
+        return apiPathParts.join('/');
+    }
+
     public getBasePath(view: PARENT_ITEM_KEYS, novelId: number): string {
         return `${BACKEND_URL}/novels/${novelId}/${this.getAPIPath(view)}`;
     }
@@ -51,6 +67,9 @@ export class GroupingNovelItemService {
     public list(view: PARENT_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
         return API.get(`/novels/${novelId}/${this.getAPIPath(view)}/`)
     }
+    public listDeleted(view: PARENT_ITEM_KEYS, novelId: number): Promise<AxiosResponse> {
+        return API.get(`/novels/${novelId}/${this.getAPIPath(view)}/deleted`)
+    }
    
     public update(view: PARENT_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {
         const parentId = item.parentId;
@@ -66,6 +85,14 @@ export class GroupingNovelItemService {
         return API.delete(`/novels/${novelId}/${this.getAPIPath(view, item.parentId)}/${item.id}`)
     }
 
+    public deleteChild(view: PARENT_ITEM_KEYS, novelId: number, item: number): Promise<AxiosResponse> {
+        return API.delete(`${this.getChildAPIPath(view, novelId)}/${item}`)
+    }
+
+    public deleteParent(view: PARENT_ITEM_KEYS, novelId: number, item: number): Promise<AxiosResponse> {
+        return API.delete(`/novels/${novelId}/${this.getParentAPIPath(view, item)}`);
+    }
+    
     deleteImage(view: PARENT_ITEM_KEYS, novelId: number, parentId: number, itemId: number, fileId: number) {
         return API.delete(`${BACKEND_URL}/novels/${novelId}/${this.getAPIPath(view, parentId)}/${itemId}/files/${fileId}`);
     }

@@ -24,6 +24,8 @@ public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S
         return ResponseEntity.ok(this.getService().create(novelId, parent));
     }
 
+
+
     @PutMapping
     public ResponseEntity<T> update(@PathVariable("novelId") Long novelId, @RequestBody T parent) {
         return ResponseEntity.ok(this.getService().update(novelId, parent));
@@ -57,10 +59,15 @@ public abstract class GroupingNovelItemController<T extends IGroupingNovelItem<S
         return ResponseEntity.ok(this.getService().get(novelId));
     }
 
+    @GetMapping("deleted")
+    public ResponseEntity<T> getDeleted(@PathVariable("novelId") Long novelId) {
+        return ResponseEntity.ok(this.getService().getTrashGroup(novelId));
+    }
+
     @DeleteMapping("{parentId}")
     public ResponseEntity<?> delete(@PathVariable("novelId") Long novelId, @PathVariable("parentId") Long parentId) {
         this.getService().delete(novelId, parentId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(this.getService().get(novelId));
     }
 
     @GetMapping("tags")

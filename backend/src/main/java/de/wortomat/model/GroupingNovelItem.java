@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @MappedSuperclass
 @Getter
@@ -17,6 +18,8 @@ public abstract class GroupingNovelItem<C extends INovelItem<?>> implements IGro
     private String name;
 
     private Integer position;
+
+    private Boolean isTrash;
 
     @JsonIgnore
     @ManyToOne

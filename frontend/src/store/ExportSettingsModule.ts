@@ -13,7 +13,6 @@ export default class ExportSettingsModule extends VuexModule {
 
   @Mutation
   public updateExportFormat(format: Record<PARENT_ITEM_KEYS,EXPORT_FORMAT>) {
-    console.log('update format', format)
     this._exportFormat = format;
   }
 

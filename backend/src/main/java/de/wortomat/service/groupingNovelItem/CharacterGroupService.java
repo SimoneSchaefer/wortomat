@@ -4,6 +4,8 @@ import de.wortomat.model.Character;
 import de.wortomat.model.CharacterGroup;
 import de.wortomat.model.CharacterTag;
 import de.wortomat.repository.*;
+import de.wortomat.service.novelItem.CharacterService;
+import de.wortomat.service.novelItem.NovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,10 @@ public class CharacterGroupService extends GroupingNovelItemService<CharacterGro
     private CharacterGroupRepository partsRepository;
 
     @Autowired
-    private CharacterRepository chapterRepository;
+    private CharacterRepository characterRepository;
+
+    @Autowired
+    private CharacterService characterService;
 
     @Autowired
     private CharacterTagRepository characterTagRepository;
@@ -26,7 +31,12 @@ public class CharacterGroupService extends GroupingNovelItemService<CharacterGro
 
     @Override
     protected NovelItemRepository<Character> getChildRepository() {
-        return this.chapterRepository;
+        return this.characterRepository;
+    }
+
+    @Override
+    protected NovelItemService<CharacterGroup, Character, CharacterTag> getChildService() {
+        return this.characterService;
     }
 
     @Override

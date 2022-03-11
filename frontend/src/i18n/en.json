@@ -26,6 +26,41 @@
         }
     },
     "sub_menu": {
+        "PARTS": {
+            "add": "Add part",
+            "delete": "Delete chapters",
+            "display_settings": "Configure view",
+            "export": "Export chapters",
+            "filter": "Filter view",
+            "trash": "Drop items here to delete them"
+        },
+        "CHARACTER_GROUPS": {
+            "add": "Add character group",
+            "delete": "Delete characters",
+            "display_settings": "Configure view",
+            "export": "Export characters",
+            "filter": "Filter view",
+            "trash": "Drop items here to delete them"
+
+        },
+        "RESEARCH_GROUPS": {
+            "add": "Add research group",
+            "delete": "Delete selected research items",
+            "display_settings": "Configure view",
+            "export": "Export research",
+            "filter": "Filter view",
+            "trash": "Drop items here to delete them"
+
+        },
+        "LOCATION_GROUPS": {
+            "add": "Add location group",
+            "delete": "Delete selected locations",
+            "display_settings": "Configure view",
+            "export": "Export locations",
+            "filter": "Filter view",
+            "trash": "Drop items here to delete them"
+
+        },
         "add": "Add item",
         "export": "Export",
         "filter": "Filter",
@@ -131,10 +166,15 @@
         "include_SHOW_CONTENT": "Include content"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
+    "delete_multiple_confirm": "Are you sure you want to delete the selected items?",
     "confirm_proceed": "Are you sure you want to proceed?",
     "please_confirm": "Please confirm",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "no_children": "No items added yet",
+    "trash": "Trash can",
+    "trash_hint": "Drop items here to remove them"
+
 }
 
 

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,17 +59,27 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
         return prepareAndSave(chapter, novelId, partId);
     }
 
-
-
     /**
-     * Deletes an existing item in the database
+     * Deletes an existing item from the database
      * @param novelId the novelId
-     * @param chapterId the child id
+     * @param itemId the child id
      * @return the stored item
      */
-    public void delete(Long novelId, Long chapterId) {
-        this.getRepository().deleteById(chapterId);
+    public void delete(Long novelId, Long itemId) {
+        S item = this.getRepository().findById(itemId).orElseThrow(NotFoundException::new);
+        item.setDeletedAt(new Date());
+
+        T previousParent = item.getParent();
+        previousParent.getChildren().remove(item);
+
+        T trashGroup = this.getParentService().getTrashGroup(novelId);
+        trashGroup.getChildren().add(item);
+
+        this.getParentService().update(novelId, previousParent);
+        this.getParentService().update(novelId, trashGroup);
+        this.update(novelId, trashGroup.getId(), item);
     }
+
 
     public S get(Long novelId, Long partId, Long itemId) {
         return this.getRepository().findById(itemId).orElseThrow(NotFoundException::new);

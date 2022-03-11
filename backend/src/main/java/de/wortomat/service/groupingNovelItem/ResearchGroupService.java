@@ -4,6 +4,8 @@ import de.wortomat.model.Research;
 import de.wortomat.model.ResearchGroup;
 import de.wortomat.model.ResearchTag;
 import de.wortomat.repository.*;
+import de.wortomat.service.novelItem.NovelItemService;
+import de.wortomat.service.novelItem.ResearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ public class ResearchGroupService extends GroupingNovelItemService<ResearchGroup
 
     @Autowired
     private ResearchRepository researchRepository;
+    @Autowired
+    private ResearchService researchService;
 
     @Autowired
     private ResearchTagRepository researchTagRepository;
@@ -27,6 +31,11 @@ public class ResearchGroupService extends GroupingNovelItemService<ResearchGroup
     @Override
     protected NovelItemRepository<Research> getChildRepository() {
         return this.researchRepository;
+    }
+
+    @Override
+    protected NovelItemService<ResearchGroup, Research, ResearchTag> getChildService() {
+        return this.researchService;
     }
 
     @Override

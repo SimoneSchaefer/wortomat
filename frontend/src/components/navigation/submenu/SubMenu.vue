@@ -1,134 +1,233 @@
 <template>
-    <div class="vertical-menu">
-        <button class="navigation-link" :title="$t(`sub_menu.add`)" @click="addParent">
-            <i class="fa fa-2x fa-plus"></i>
-        </button>
-        <button class="navigation-link" :title="$t(`sub_menu.display_settings`)" @click="setVisible('display_settings_visible')">
-            <i class="fa fa-2x fa-eye"></i>
-        </button>
-        <button class="navigation-link" :title="$t(`sub_menu.filter`)" @click="setVisible('filter_visible')">
-            <i class="fa fa-2x fa-filter"></i>
-        </button>
-        <button class="navigation-link" :title="$t(`sub_menu.export`)" @click="setVisible('export_visible')">
-            <i class="fa fa-2x fa-file-export"></i>
-        </button>
+  <div class="sub-menu">
+    <div class="mutation-options">
+      <SubMenuLink
+        class="add"
+        icon="plus"
+        :title="`sub_menu.${parentKey}.add`"
+        @click="addParent"
+      ></SubMenuLink>
+
+      <div class="trash" :title="$t(`sub_menu.${parentKey}.trash`)">
+        <draggable
+          :list="[]"
+          class="dropzone trashzone"
+          :group="{ name: 'trash', put: () => true }"
+        >
+          <i class="fa fa-2x fa-trash-alt"></i>
+        </draggable>
+      </div>
     </div>
 
-    <Sidebar v-model:visible="sidebarVisible" position="right">
-        <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
-        <FilterMenu v-if="filter_visible"></FilterMenu>
-        <ExportMenu v-if="export_visible"></ExportMenu>
+    <div class="option-list">
+      <SubMenuLink
+        class="setting"
+        icon="eye"
+        :title="`sub_menu.${parentKey}.display_settings`"
+        @click="setVisible('display_settings_visible')"
+      ></SubMenuLink>
+      <SubMenuLink
+        class="setting"
+        icon="filter"
+        :title="`sub_menu.${parentKey}.filter`"
+        @click="setVisible('filter_visible')"
+      ></SubMenuLink>
+      <SubMenuLink
+        class="setting"
+        icon="print"
+        :title="`sub_menu.${parentKey}.export`"
+        @click="setVisible('export_visible')"
+      ></SubMenuLink>
+    </div>
+
+    <Sidebar
+      v-model:visible="sidebarVisible"
+      :modal="true"
+      position="left"
+      :showCloseIcon="true"
+    >
+      <DisplaySettingsMenu
+        v-if="display_settings_visible"
+      ></DisplaySettingsMenu>
+      <FilterMenu v-if="filter_visible"></FilterMenu>
+      <ExportMenu v-if="export_visible"></ExportMenu>
     </Sidebar>
+  </div>
+
+  <!--
+    <Dialog v-model:visible="sidebarVisible" :modal="true" :dismissableMask="true">
+        <div class="menu-options">
+            <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
+            <FilterMenu v-if="filter_visible"></FilterMenu>
+            <ExportMenu v-if="export_visible"></ExportMenu>
+        </div>
+    </Dialog>-->
 </template>
 
 <script lang="ts">
-import { mixins, Options } from 'vue-class-component';
-import Navlink from '@/components/navigation/Navlink.vue'
-import DisplaySettingsMenu from '@/components/navigation/submenu/DisplaySettingsMenu.vue'
-import FilterMenu from '@/components/navigation/submenu/FilterMenu.vue'
-import ExportMenu from '@/components/navigation/submenu/ExportMenu.vue'
-import { PARENT_ITEM_KEYS } from '@/store/keys';
-import { BaseModel } from '@/models/Base.model';
-import NovelItemKeyAwareMixin from '../../mixins/NovelItemKeyAwareMixin';
-import { namespace } from 's-vuex-class';
+import { mixins, Options } from "vue-class-component";
+import Navlink from "@/components/navigation/Navlink.vue";
+import DisplaySettingsMenu from "@/components/navigation/submenu/DisplaySettingsMenu.vue";
+import FilterMenu from "@/components/navigation/submenu/FilterMenu.vue";
+import ExportMenu from "@/components/navigation/submenu/ExportMenu.vue";
+import { PARENT_ITEM_KEYS } from "@/store/keys";
+import { BaseModel } from "@/models/Base.model";
+import NovelItemKeyAwareMixin from "../../mixins/NovelItemKeyAwareMixin";
+import { namespace } from "s-vuex-class";
+import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
+import FilterAwareMixin from "@/components/mixins/FilterAwareMixin";
+import SubMenuLink from "./SubMenuLink.vue";
 
-
-type visible_flags = '' | 'filter_visible' | 'export_visible' | 'display_settings_visible';
+type visible_flags =
+  | ""
+  | "filter_visible"
+  | "export_visible"
+  | "display_settings_visible";
 const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
 
 @Options({
-    components: { Navlink, DisplaySettingsMenu, FilterMenu, ExportMenu }
+  components: {
+    Navlink,
+    DisplaySettingsMenu,
+    FilterMenu,
+    ExportMenu,
+    WConfirmDialog,
+    SubMenuLink,
+  },
 })
-export default class SubMenu extends mixins(NovelItemKeyAwareMixin) {
+export default class SubMenu extends mixins(
+  NovelItemKeyAwareMixin,
+  FilterAwareMixin
+) {
+  @novelDataModule.Action
+  deleteMultipleNovelItems!: (payload: {
+    view: PARENT_ITEM_KEYS;
+    novelItemIds: number[];
+  }) => Promise<void>;
 
-    @novelDataModule.Action
-    addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
-  
-    filter_visible = false;
-    export_visible = false;
-    display_settings_visible = false;
+  @selectionModule.State("_selectedItemIds")
+  _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
 
-    setVisible(flag: visible_flags) {
-        this.setAllInvisible();
-        this[flag] = true;
-    }
+  @novelDataModule.Action
+  addNovelItem!: (payload: {
+    view: PARENT_ITEM_KEYS;
+    novelItem: BaseModel;
+  }) => Promise<void>;
 
-    get sidebarVisible() {
-        return this.filter_visible || this.export_visible || this.display_settings_visible;
-    }
+  filter_visible = false;
+  export_visible = false;
+  display_settings_visible = false;
 
-    set sidebarVisible(_value: boolean) {
-        this.setAllInvisible();
-    }
+  setVisible(flag: visible_flags) {
+    this.setAllInvisible();
+    this[flag] = true;
+  }
 
-    setAllInvisible() {
-        this.filter_visible = false;
-        this.export_visible = false;
-        this.display_settings_visible = false;
-    }
+  get sidebarVisible() {
+    return (
+      this.filter_visible ||
+      this.export_visible ||
+      this.display_settings_visible
+    );
+  }
 
-    addParent(): void {
-        this.addNovelItem({ view: this.parentKey, novelItem: new BaseModel()});
-    }
+  set sidebarVisible(_value: boolean) {
+    this.setAllInvisible();
+  }
+
+  setAllInvisible() {
+    this.filter_visible = false;
+    this.export_visible = false;
+    this.display_settings_visible = false;
+  }
+
+  addParent(): void {
+    this.addNovelItem({ view: this.parentKey, novelItem: new BaseModel() });
+  }
+
+  confirmDeleteSelected($event): void {
+    $event.stopPropagation();
+    (this.$refs.confirmDeleteSelected as WConfirmDialog).getDecision();
+  }
 }
 </script>
 
 <style >
-.p-sidebar.p-sidebar-active.p-sidebar-right {
-    right: 80px;
+.p-sidebar.p-sidebar-active.p-sidebar-top {
+  top: 8rem;
+  height: auto !important;
+}
+
+.p-dialog-header {
+  justify-content: right !important;
 }
 </style>
 
 <style scoped>
-.vertical-menu {
+.sub-menu {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   height: 100%;
-  width: 80px;
   flex-shrink: 0;
-  background: var(--tabmenu-background);
-  border-left: 3px solid #2d2b2b94;
+  background: var(--middle-dark-background);
   z-index: 1102;
 }
 
-.navigation-link{
-    height: 5em;
-    width: 5em !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #efefef7e;
-    border: none;
-    border-bottom: 1px solid #efefef7e;
-    text-decoration: none;
-    background: transparent
+.sub-menu .option-list {
+  margin: 1rem 0;
 }
 
-.navigation-link.active {
-    color: white;
-}
-.navigation-link:hover {
-    color: white;
-    cursor: pointer;
+.add {
+  background-color: rgb(80, 80, 248);
+  color: #efefef;
 }
 
-.vertical-menu .p-button.p-button-secondary, 
-.vertical-menu .p-buttonset.p-button-secondary > .p-button, 
-.vertical-menu .p-splitbutton.p-button-secondary > .p-button {
-  background-color: transparent;
-  border: none;
-  border-bottom: 1px solid #2d2b2b;
+.add:hover {
+  color: white;
+  background-color: rgb(47, 47, 228);
 }
 
+.setting {
+  color: white;
+  background-color: rgba(153, 153, 153, 0.466);
+}
+
+.setting:hover {
+  color: white;
+  background-color: rgba(206, 206, 206, 0.466);
+}
+
+.trash {
+  background-color: rgb(173, 35, 35);
+  color: #efefef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  width: 4rem;
+  height: 4rem;
+}
+
+.trash:hover {
+  color: white;
+  background-color: rgb(224, 48, 48);
+}
+
+.mutation-options {
+  margin: 1rem 0;
+}
 
 .toggle-switch {
-    line-height: 3.0em;
-    display: flex;
-    align-items: center;
+  line-height: 3em;
+  display: flex;
+  align-items: center;
 }
 
 .toggle-switch .label {
-    margin-left: 1em;;
+  margin-left: 1em;
 }
 </style>
