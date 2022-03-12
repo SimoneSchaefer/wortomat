@@ -85,7 +85,7 @@ export default class GroupingNovelItem extends Vue {
 <style scoped>
 .grouping-item-view {
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 5rem);
   display: flex;
 }
 
@@ -95,7 +95,6 @@ export default class GroupingNovelItem extends Vue {
   width: 5rem;
   height: calc(100vh - 5rem);
   z-index: 1;
-
   border-bottom: 1px solid rgba(0, 0, 0, 0.63);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5);

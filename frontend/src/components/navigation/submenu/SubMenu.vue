@@ -170,7 +170,7 @@ export default class SubMenu extends mixins(
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
+  width: 5rem;
   height: 100%;
   flex-shrink: 0;
   background: var(--middle-dark-background);
