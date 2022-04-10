@@ -156,8 +156,8 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     }
 
     private void sortChildren(T parent) {
-        // List<S> filteredChildren = parent.getChildren().stream().filter(child -> child.getDeletedAt() == null).collect(Collectors.toList());
-        // parent.setChildren(filteredChildren);
+        List<S> filteredChildren = parent.getChildren().stream().filter(child -> child.getDeletedAt() == null).collect(Collectors.toList());
+        parent.setChildren(filteredChildren);
         parent.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
     }
 }

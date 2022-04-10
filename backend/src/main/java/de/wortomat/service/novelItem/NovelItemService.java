@@ -72,12 +72,7 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
         T previousParent = item.getParent();
         previousParent.getChildren().remove(item);
 
-        T trashGroup = this.getParentService().getTrashGroup(novelId);
-        trashGroup.getChildren().add(item);
-
         this.getParentService().update(novelId, previousParent);
-        this.getParentService().update(novelId, trashGroup);
-        this.update(novelId, trashGroup.getId(), item);
     }
 
 
