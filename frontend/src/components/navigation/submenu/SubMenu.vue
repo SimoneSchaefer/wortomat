@@ -21,16 +21,16 @@
 
     <div class="option-list">
       <SubMenuLink
+        class="setting" v-bind:class="{ 'filter-active': tagFilterEnabled || statusFilterEnabled}"
+        icon="filter"
+        :title="`sub_menu.${parentKey}.filter`"
+        @click="setVisible('filter_visible')"
+      ></SubMenuLink>
+      <SubMenuLink
         class="setting"
         icon="eye"
         :title="`sub_menu.${parentKey}.display_settings`"
         @click="setVisible('display_settings_visible')"
-      ></SubMenuLink>
-      <SubMenuLink
-        class="setting"
-        icon="filter"
-        :title="`sub_menu.${parentKey}.filter`"
-        @click="setVisible('filter_visible')"
       ></SubMenuLink>
       <SubMenuLink
         class="setting"
@@ -199,6 +199,11 @@ export default class SubMenu extends mixins(
 .setting:hover {
   color: white;
   background-color: rgba(206, 206, 206, 0.466);
+}
+
+.setting.filter-active {
+  color: #495057;
+  background-color: rgb(202, 230, 255);
 }
 
 .trash {
