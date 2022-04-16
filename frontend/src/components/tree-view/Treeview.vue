@@ -104,6 +104,7 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     this.$store.subscribe((mutation, store) => {
       if (mutation.type === 'novelData/novelItemAdded' && this.isAboutChildItem(mutation)) {
         this.selectItemIds({ view: mutation.payload.view, itemIds: [ mutation.payload.novelItem.id ]} );
+        this.addTagsIfNeeded(mutation.payload.novelItem as ChildModel);
       }      
       if (mutation.type === 'novelData/novelItemDeleted' && this.isAboutChildItem(mutation)) {
         // TODO: In case the currently selected item has been deleted, we need to deselect, and, in case
@@ -177,7 +178,19 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     child.tags = [];
 
     this.addNovelItem({ view: this.parentKey, novelItem: child });
+
+ 
+
     this.toggle(true, selectedParent);
+  }
+
+  private addTagsIfNeeded(child: ChildModel) {
+   // in case a tag filter is active, we automatically add these tags. Otherwise the newly
+    // created item would not be visible which is confusing
+    if (this.tagFilterEnabled && this.selectedTags.length) {
+      console.log('adding tags: ' + JSON.stringify(this.selectedTags));
+      this.updateTags(child, this.selectedTags);      
+    }    
   }
 
   childMoved($event): void {
@@ -232,18 +245,6 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
     const $event = event.event;
     $event.stopPropagation();
     const selected = event.item;
-    /*let selectedItems: number[] = [];
-    if ($event['shiftKey']) {
-        selectedItems = this.handleShift(selected);
-    } else if ($event['ctrlKey']) {
-        selectedItems = this.handleCtrl(selected);
-    } else {
-        selectedItems = [selected.id];
-    }
-    if (selectedItems.find(selectedItem => selectedItem === selected.id)) {
-      this.lastChecked = selected;
-    } 
-    this.selectItemIds( { view: this.parentKey, itemIds: selectedItems });  */
     this.selectChild(selected, $event);  
   }
 
