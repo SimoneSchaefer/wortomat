@@ -52,6 +52,7 @@ const novelDataModule = namespace("novelData");
 export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
     @Prop() novelItemKey: PARENT_ITEM_KEYS;
     @Prop() selectedTags: TagModel[];
+    @Prop() addNewTagPossible: boolean;
    
     @novelDataModule.State('_tags')
     tags!: Map<PARENT_ITEM_KEYS,TagModel[]>; 
@@ -92,6 +93,9 @@ export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
 
     searchTags($event: { query: string }): void { 
         this.filteredTags = (this.tags.get(this.novelItemKey) || []).filter(tag => tag.name.toLocaleLowerCase().includes($event.query.toLocaleLowerCase()));
+        if (!this.addNewTagPossible) {
+            return;
+        }
         if (!this.filteredTags.find(tag => tag.name.toLocaleLowerCase() === $event.query.toLocaleLowerCase())) {
             this.filteredTags.splice(0, 0, { id: undefined, name: $event.query });
         }

@@ -9,7 +9,7 @@
                 <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="`fallback_labels.no_name.${childKey}`"></EditableLabel></div>
                 <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
                 <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
-                <EditableTags v-if="displayTags" :selectedTags="item.tags" @update-tags="updateTags(item, $event)" :novelItemKey="parentKey"></EditableTags>
+                <EditableTags v-if="displayTags" :addNewTagPossible="true" :selectedTags="item.tags" @update-tags="updateTags(item, $event)" :novelItemKey="parentKey"></EditableTags>
             </div>
         </div>
         <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent(item, $event)"></EditableText>        

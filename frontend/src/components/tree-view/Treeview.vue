@@ -188,7 +188,6 @@ export default class Treeview extends mixins(UpdatableItemMixin, FilterAwareMixi
    // in case a tag filter is active, we automatically add these tags. Otherwise the newly
     // created item would not be visible which is confusing
     if (this.tagFilterEnabled && this.selectedTags.length) {
-      console.log('adding tags: ' + JSON.stringify(this.selectedTags));
       this.updateTags(child, this.selectedTags);      
     }    
   }
