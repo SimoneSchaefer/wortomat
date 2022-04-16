@@ -34,10 +34,3 @@ export default class Button extends Vue {
     }
 }
 </script>
-
-<style>
-.p-button {
-    border-radius: 0 !important;
-    min-width: 2.5em;
-}
-</style>

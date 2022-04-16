@@ -8,11 +8,12 @@
         <div v-if="tagFilterEnabled">
             <div class="hint">
                 <i class="fa fa-info"></i>
-                See only items including the following tags 
+                See only items including at least one of the following tags. <br>If no tags are selected, all items without any tags are displayed. 
             </div>
             <EditableTags
                 :novelItemKey="parentKey"
                 :selectedTags="selectedTags" 
+                :addNewTagPossible="false"
                 @update-tags="updateTags($event)"></EditableTags>
         </div>
     </div>
@@ -26,7 +27,8 @@
         <div v-if="statusFilterEnabled">
             <div class="hint">
                 <i class="fa fa-info"></i>
-                See only items that have at least one of the following status markers
+                See only items that have at least one of the following status markers.<br>
+                If no status markers are selected, only items without any marker are shown.
             </div>
             <div class="choice">
                 <Checkbox v-for="status of allStatus" :key="status"

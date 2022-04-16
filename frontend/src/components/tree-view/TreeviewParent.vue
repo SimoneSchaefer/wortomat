@@ -1,7 +1,7 @@
 <template>
   <Accordion :open="open" @toggle="toggle">
     <template v-slot:header>
-      <div class="accordion-header w-100">
+      <div class="parent-header w-100">
         <div class="title">
           <WEditableLabel
             :value="item.name"
@@ -12,9 +12,9 @@
         </div>
         <div class="options">
           <WButton
-            type="text"
             color="primary"
             icon="fa fa-plus"
+            :rounded="true"
             :title="`add_child.${parentKey}`"
             @click="addChild"
           >
@@ -171,22 +171,24 @@ export default class TreeviewParent extends mixins(
   color: rgba(128, 128, 128, 0.411);
 }
 
-.accordion-header {
+.parent-header {
   display: flex;
   justify-content: space-between;
   font-size: 1rem;
+  height: 100%;
+  align-items: center;
 }
 
-.accordion-header .title {
+.parent-header .title {
   flex-grow: 1;
 }
 
-.accordion-header .options {
+.parent-header .options {
   flex-grow: 0;
   height: 100%;
 }
 
-.accordion-header .options button {
+.parent-header .options button {
   height: 100%;
 }
 </style>

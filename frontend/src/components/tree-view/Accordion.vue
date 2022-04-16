@@ -31,6 +31,8 @@ export default class Accordion extends Vue {
 .accordion-header {
   display: flex;
   width: 100%;
+  height: 100%;
+  justify-content: center;
   align-items: center;
   font-weight: 600;
   background: var(--middle-background);
