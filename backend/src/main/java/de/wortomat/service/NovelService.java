@@ -60,22 +60,7 @@ public class NovelService {
         novel.setResearchGroups(Collections.emptyList());
         novel = this.novelRepository.save(novel);
 
-        Part part = (Part) setupTrashGroup(new Part(), novel);
-        CharacterGroup characterGroup = (CharacterGroup) setupTrashGroup(new CharacterGroup(), novel);
-        ResearchGroup researchGroup = (ResearchGroup) setupTrashGroup(new ResearchGroup(), novel);
-        LocationGroup locationGroup = (LocationGroup) setupTrashGroup(new LocationGroup(), novel);
-
-        partService.create(novel.getId(), part);
-        characterGroupService.create(novel.getId(), characterGroup);
-        researchGroupService.create(novel.getId(), researchGroup);
-        locationGroupService.create(novel.getId(), locationGroup);
         return this.get(novel.getId());
-    }
-
-    private GroupingNovelItem setupTrashGroup(GroupingNovelItem item, Novel novel) {
-        item.setIsTrash(true);
-        item.setNovel(novel);
-        return item;
     }
 
     @Transactional

@@ -77,11 +77,6 @@ public class Novel implements IGroupingNovelItem {
     }
 
     @Override
-    public Boolean getIsTrash() {
-        return false;
-    }
-
-    @Override
     @JsonIgnore
     public List<? extends INovelItem> getChildren() {
         return Collections.emptyList();
