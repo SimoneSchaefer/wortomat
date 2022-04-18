@@ -30,17 +30,10 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
 
     public List<T> get(Long novelId) {
         List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
-        allParts = allParts.stream().filter(p -> p.getIsTrash() == null || !p.getIsTrash()).collect(Collectors.toList());
         for (T parent : allParts) {
             sortChildren(parent);
         }
         return allParts;
-    }
-
-    public T getTrashGroup(Long novelId) {
-        List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
-        return allParts.stream().filter(p -> p.getIsTrash() != null && p.getIsTrash()).collect(Collectors.toList()).get(0);
-
     }
 
     public T get(Long novelId, Long itemId) {
