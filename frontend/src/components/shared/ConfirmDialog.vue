@@ -16,7 +16,7 @@ export default class ConfirmDialog extends Vue {
     confirm(additionalData): void {
         if (this.isVisible) {
             this.$confirm.require({
-                message: this.$t(this.message || this.$t('confirm_proceed')),
+                message: this.$t(this.message || this.$t(additionalData.message) || this.$t('confirm_proceed')),
                 header: this.header || this.$t('please_confirm'),
                 icon: 'pi pi-exclamation-triangle',
                 accept: () => {

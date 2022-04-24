@@ -1,5 +1,5 @@
 <template>
-  <WConfirmDialog
+ <!-- <WConfirmDialog
     ref="confirmDeleteParent"
     @cancel="reload"
     @accept="deleteNovelItemParent"
@@ -10,16 +10,18 @@
     @cancel="reload"
     @accept="deleteNovelItemChild"
     message="delete_confirm"
-  ></WConfirmDialog>
+  ></WConfirmDialog>-->
   <div class="tree">
     <draggable
       :list="items"
       group="parents"
       class="list-group"
       ghost-class="ghost"
+
+        drag-class="dragging"
       @change="parentMoved"
     >
-      <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+      <transition-group type="transition" :name="'flip-list'">
         <div
           class="list-group-item tree-view-item"
           v-for="item in items"
@@ -275,13 +277,16 @@ export default class Treeview extends mixins(
 
   childMoved($event): void {
     const childId = $event.clone.id.replace("child-", "");
-    if ($event.to.className.includes("trashzone")) {
+    /*if ($event.to.className.includes("trashzone")) {
       this.confirmDeleteChild(
         { view: this.parentKey, novelItem: childId },
         $event
       );
       // this.deleteNovelItemChild({ view: this.parentKey, novelItem: childId});
-    } else {
+    } */
+    if (!$event.to.className.includes("trashzone")) {
+
+    //else {
       const parentTo = $event.to.id.replace("parent-", "");
       const newPosition = $event.newIndex;
       this.moveChild({
@@ -304,13 +309,15 @@ export default class Treeview extends mixins(
   }
 
   parentMoved($event): void {
-    if ($event.removed) {
+    /*if ($event.removed) {
       const parentId = $event.removed.element.id;
       this.confirmDeleteParent(
         { view: this.parentKey, novelItem: parentId },
         $event
       );
-    } else {
+    } */
+    if (!$event.removed) 
+    {
       const parentId = $event.moved.element.id;
       const newIndex = $event.moved.newIndex;
       const oldIndex = $event.moved.oldIndex;

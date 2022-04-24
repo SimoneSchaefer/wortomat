@@ -8,20 +8,17 @@
         @click="addParent"
       ></SubMenuLink>
 
-      <div class="trash" :title="$t(`sub_menu.${parentKey}.trash`)">
-        <draggable
-          :list="[]"
-          class="dropzone trashzone"
-          :group="{ name: 'trash', put: () => true }"
-        >
-          <i class="fa fa-2x fa-trash-alt"></i>
-        </draggable>
+      <div class="trash-menu">
+        <TrashButton></TrashButton>
       </div>
     </div>
 
     <div class="option-list">
       <SubMenuLink
-        class="setting" v-bind:class="{ 'filter-active': tagFilterEnabled || statusFilterEnabled}"
+        class="setting"
+        v-bind:class="{
+          'filter-active': tagFilterEnabled || statusFilterEnabled,
+        }"
         icon="filter"
         :title="`sub_menu.${parentKey}.filter`"
         @click="setVisible('filter_visible')"
@@ -53,15 +50,6 @@
       <ExportMenu v-if="export_visible"></ExportMenu>
     </Sidebar>
   </div>
-
-  <!--
-    <Dialog v-model:visible="sidebarVisible" :modal="true" :dismissableMask="true">
-        <div class="menu-options">
-            <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
-            <FilterMenu v-if="filter_visible"></FilterMenu>
-            <ExportMenu v-if="export_visible"></ExportMenu>
-        </div>
-    </Dialog>-->
 </template>
 
 <script lang="ts">
@@ -77,6 +65,7 @@ import { namespace } from "s-vuex-class";
 import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import FilterAwareMixin from "@/components/mixins/FilterAwareMixin";
 import SubMenuLink from "./SubMenuLink.vue";
+import TrashButton from "./TrashButton.vue";
 
 type visible_flags =
   | ""
@@ -94,12 +83,15 @@ const selectionModule = namespace("selection");
     ExportMenu,
     WConfirmDialog,
     SubMenuLink,
+    TrashButton,
   },
 })
 export default class SubMenu extends mixins(
   NovelItemKeyAwareMixin,
   FilterAwareMixin
 ) {
+  trashHovered = false;
+
   @novelDataModule.Action
   deleteMultipleNovelItems!: (payload: {
     view: PARENT_ITEM_KEYS;
@@ -181,6 +173,12 @@ export default class SubMenu extends mixins(
   margin: 1rem 0;
 }
 
+.trash-menu {
+  position: relative;
+  top: 1em;
+  margin-top: 2em;
+}
+
 .add {
   background-color: rgb(80, 80, 248);
   color: #efefef;
@@ -204,132 +202,6 @@ export default class SubMenu extends mixins(
 .setting.filter-active {
   color: #495057;
   background-color: rgb(202, 230, 255);
-}
-
-
-
-
-
-
-
-
-/*
-
-.trash {
-	background:#ff6873;
-	width: 4em;
-	height: 4em;
-	display: inline-block;
-	margin:0 auto;
-	
-	position: relative;
-	-webkit-border-bottom-right-radius: 6px;
-	-webkit-border-bottom-left-radius: 6px;
-	-moz-border-radius-bottomright: 6px;
-	-moz-border-radius-bottomleft: 6px;
-	border-bottom-right-radius: 6px;
-	border-bottom-left-radius: 6px;
-}
-.trash:after {
-	content: 'Mouse hover on Recile Bin';
-	position: absolute;
-	left: -99px;
-	right: 0;
-	bottom: -50px;
-	width: 300px;
-}
-.trash span {
-	position: absolute;
-	height: 12px;
-	background: #ff6873;
-	top: -19px;
-	left: -10px;
-	right: -10px;
-	
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
-	transform: rotate(0deg);
-	transition: transform 250ms;
-	transform-origin: 19% 100%;
-}
-.trash span:after {
-	content: '';
-	position: absolute;
-	width: 27px;
-	height: 7px;
-	background: #ff6873;
-	top: -10px;
-	
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
-	transform: rotate(0deg);
-	transition: transform 250ms;
-	transform-origin: 19% 100%;
-	left: 27px;
-}
-
-
-.trash i {
-	position:relative;
-	width: 5px;
-	height:50px;
-	background:#fff;
-	display:block;
-	margin:14px auto;
-	border-radius: 5px;
-}
-.trash i:after {
-	content: '';
-	width: 5px;
-	height: 50px;
-	background: #fff;
-	position: absolute;
-	left: -18px;
-	border-radius: 5px;
-}
-.trash i:before {
-	content: '';
-	width: 5px;
-	height: 50px;
-	background: #fff;
-	position: absolute;
-	right: -18px;
-	border-radius: 5px;
-}
-
-.trash:hover span {
-	transform: rotate(-45deg);
-	transition: transform 250ms;
-}*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.trash {
-  background-color: rgb(173, 35, 35);
-  color: #efefef;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  width: 4rem;
-  height: 4rem;
-}
-
-.trash:hover {
-  color: white;
-  background-color: rgb(224, 48, 48);
 }
 
 .mutation-options {
