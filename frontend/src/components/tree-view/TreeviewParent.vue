@@ -27,19 +27,22 @@
         :list="item['children']"
         class="list-group"
         ghost-class="ghost"
+        drag-class="dragging"
         group="children"
         @end="childMoved($event)"
         :id="`parent-${item.id}`"
       >
-        <WTreeviewListItem
-          v-for="child in item.children"
-          :key="child.id"
-          @select="selectChild"
-          @deleteChild="deleteChild"
-          :element="child"
-          :selected="isSelected(child)"
-        >
-        </WTreeviewListItem>
+        <transition-group type="transition" :name="!drag ? 'flip-list' : null">
+          <WTreeviewListItem
+            v-for="child in item.children"
+            :key="child.id"
+            @select="selectChild"
+            @deleteChild="deleteChild"
+            :element="child"
+            :selected="isSelected(child)"
+          >
+          </WTreeviewListItem>
+        </transition-group>
       </draggable>
       <div v-if="item['children'].length === 0 && open" class="no-children">
         {{ $t("no_children") }}
@@ -163,6 +166,35 @@ export default class TreeviewParent extends mixins(
   }
 }
 </script>
+
+<style>
+.dragging {
+  opacity: 0;
+}
+
+.trashzone .sortable-ghost {
+  position: absolute;
+  visibility: hidden;
+}
+
+.trashzone .sortable-ghost:before {
+  visibility: visible;
+  font-weight: 900;
+  font-family: "Font Awesome 5 Free";
+  content: "\f1d8";
+  display: flex;
+  margin: auto;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  font-size: 2rem;
+  border-radius: 50%;
+  width: 4rem;
+  height: 4rem;
+  background-color: rgba(255, 121, 121, 0.452);
+  color: gray;
+}
+</style>
 
 <style scoped>
 .no-children {
