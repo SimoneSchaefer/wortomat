@@ -22,13 +22,13 @@
         "select_parent": {
             "parts": "Select part",
             "research_groups": "Select Research Group"
-
         }
     },
     "sub_menu": {
         "PARTS": {
-            "add": "Add part",
+            "add": "Create a new part",
             "delete": "Delete chapters",
+            "select_child": "Select chapter",
             "display_settings": "Configure view",
             "export": "Export chapters",
             "filter": "Filter view",
@@ -37,29 +37,29 @@
         "CHARACTER_GROUPS": {
             "add": "Add character group",
             "delete": "Delete characters",
+            "select_child": "Select character",
             "display_settings": "Configure view",
             "export": "Export characters",
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
-
         },
         "RESEARCH_GROUPS": {
             "add": "Add research group",
             "delete": "Delete selected research items",
+            "select_child": "Select research",
             "display_settings": "Configure view",
             "export": "Export research",
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
-
         },
         "LOCATION_GROUPS": {
             "add": "Add location group",
             "delete": "Delete selected locations",
+            "select_child": "Select location",
             "display_settings": "Configure view",
             "export": "Export locations",
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
-
         },
         "add": "Add item",
         "export": "Export",
@@ -90,17 +90,16 @@
     },
     "fallback_labels": {
         "no_name": {
-            "RESEARCH_GROUPS":  "Unnamed research group",
+            "RESEARCH_GROUPS": "Unnamed research group",
             "RESEARCH": "Unnamed research item",
             "PARTS": "Unnamed part",
             "CHAPTERS": "Unnamed chapter",
-            "CHARACTERS":  "Unnamed character",
-            "CHARACTER_GROUPS":  "Unnamed character group",
+            "CHARACTERS": "Unnamed character",
+            "CHARACTER_GROUPS": "Unnamed character group",
             "LOCATIONS": "Unnamed location",
-            "LOCATION_GROUPS":  "Unnamed location group",
+            "LOCATION_GROUPS": "Unnamed location group",
             "novel": "Unnamed novel",
             "TIMELINE": "Unnamed event"
-
         },
         "no_summary": "No summary added yet",
         "no_extended_summary": "No detailed summary added yet",
@@ -131,17 +130,16 @@
         "ol": "ordered list",
         "ul": "bullet list",
         "strike": "strikethrough",
-        "code": "code", 
+        "code": "code",
         "quote": "quote",
         "redo": "Redo",
-        "undo": "Undo", 
+        "undo": "Undo",
         "clear": "Clear all formatting",
         "highlight_idea": "Mark as idea",
         "highlight_fixme": "Mark as FIXME",
         "highlight_todo": "Mark as TODO",
         "cancel": "Discard changes",
         "save": "Save changes"
-
     },
     "display_settings": {
         "header": "Display settings",
@@ -173,8 +171,49 @@
     "cancel": "Cancel",
     "no_children": "No items added yet",
     "trash": "Trash can",
-    "trash_hint": "Drop items here to remove them"
-
+    "trash_hint": "Drop items here to remove them",
+    "tutorial": {
+        "novel": {
+            "name": "Getting started",
+            "summary": "Open this novel to learn about wortomat"
+        },
+        "tag_1": "Tutorial",
+        "tag_2": "Demo",
+        "part_1": {
+            "name": "First steps",
+            "chapter_1": {
+                "name": "Welcome 👋",
+                "summary": "Some tipps to get you started",
+                "content": "<p>You are here, which means - you decided to write your very own novel! Congratulations for that! 🎉</p><p>The following chapters will give you a small tour of what you can do.</p><h2>👉 Let's go!</h2><blockquote><p>In the chapter list, select the next chapter to proceed!</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-select-next-chapter.gif\"></blockquote><blockquote><p>💡 By the way: You can select multiple items by using the Shift or Ctrl Key while clicking on an item.</p></blockquote><p></p><p></p><p></p><p></p><p></p>"
+            },
+            "chapter_2": {
+                "name": "How chapters are organized ➕",
+                "summary": "Adding parts and chapters",
+                "content": "<p>You may already have noticed the tab menu on top of the application and seen that wortomat gives you space for organizing your <em>chapters, characters, research </em>and <em>locations</em>.</p><p>All of these items are organized into groups, e.g. a <em>part</em> consists of multiple <em>chapters</em>.</p><h2>👉<strong> Create a new group</strong></h2><blockquote><p>To create new group, click on the big plus button in the side menu.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-add-group.gif\"></blockquote><h2>👉<strong> Rename the group</strong></h2><blockquote><p>You see the placeholder text where the name of the new group should be? Click on it, and give your new group some nice title.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-rename-group.gif\"></blockquote><blockquote><p>You can also use enter and escape keys for confirming or canceling your changes.</p></blockquote><h2>👉<strong> Create a new item within the new group</strong></h2><blockquote><p>To add a new chapter click on the plus button next to the newly created group. The new chapter will automatically be selected, so make sure to come back here afterwards 😉</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-add-child.gif\"></blockquote><p></p>"
+            },
+            "chapter_3": {
+                "name": "Renaming and editing 🖊️",
+                "summary": "",
+                "content": "<p>You maybe already noticed that each chapter has</p><ul><li><p>A title</p></li><li><p>A summary</p></li><li><p>Tags</p></li><li><p>The content</p></li></ul><p>The chapter you are <strong>currently</strong> reading does not have a summary or any tags yet - you just see some placeholder text instead.</p><h2>👉 Edit the summary</h2><blockquote><p>Click on the placeholder text for the summary and give it some nice summary.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-edit-summary.gif\"></blockquote><h2>👉 Add a tag</h2><blockquote><p>Click on the placeholder text for the tags and add the tag <em>Tutorial</em>You can also create a new tag just by typing it into the field</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-edit-tags.gif\"></blockquote><h2>👉 Explore the content editor</h2><blockquote><p>Click on the content (the thing you are currently reading) and have a look around at what you can do in the text editor</p></blockquote><blockquote><p></p></blockquote><h2></h2>"
+            }
+        },
+        "part_2": {
+            "name": "Staying focused",
+            "chapter_1": {
+                "name": "Using tags",
+                "summary": "",
+                "content": "Hello there"
+            },
+            "chapter_2": {
+                "name": "Adding status markers",
+                "summary": "",
+                "content": "Hello there"
+            },
+            "chapter_3": {
+                "name": "Seeing the tree or the forest",
+                "summary": "",
+                "content": "Hello there"
+            }
+        }
+    }
 }
-
-

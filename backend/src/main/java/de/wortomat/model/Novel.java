@@ -29,6 +29,8 @@ public class Novel implements IGroupingNovelItem {
 
     private String author = "";
 
+    private Boolean containsTranslation;
+
     @JsonIgnore
     @OneToMany(mappedBy = "novel")
     @ToString.Exclude

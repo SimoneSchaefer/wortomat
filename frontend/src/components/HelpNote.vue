@@ -1,8 +1,15 @@
 <template>
-    <div class="help-note">
-        <iframe style="font-family: Roboto"        
-          :src="`/assets/help-notes/en/${itemKey}.html`" /> <!-- TODO consider user's language -->
-    </div>     
+  <div class="help-note-container">
+    <!--<ScrollPanel style="height: 100%">-->
+      <div class="sheet">
+        <h1>There is nothing to see here!</h1>
+        <!-- <iframe
+        style="font-family: Roboto"
+        :src="`/assets/help-notes/en/${itemKey}.html`"
+      />-->
+        <!-- TODO consider user's language -->
+      </div><!--</ScrollPanel>-->
+  </div>
 </template>
 
 <script lang="ts">
@@ -10,8 +17,8 @@ import { NOVEL_ITEM_KEYS } from "@/store/keys";
 import { Vue } from "vue-class-component";
 import { Prop } from "vue-property-decorator";
 
-export default class HelpNote extends  Vue {
-    @Prop() itemKey: NOVEL_ITEM_KEYS;
+export default class HelpNote extends Vue {
+  @Prop() itemKey: NOVEL_ITEM_KEYS;
 }
 </script>
 
@@ -21,6 +28,15 @@ iframe {
   height: 30em;
   border: none;
 }
+.help-note-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  margin: 3em;
+}
+
 .help-note {
   height: 30em;
   min-width: 40em;
@@ -28,7 +44,35 @@ iframe {
   background-color: #fff;
   border-radius: 5px;
   padding: 1em;
+}
 
+.sheet {
+  border: var(--sheet-border);
+  margin: 3em;
+  width: 100%;
+  max-width: 300em;
+  padding: 5em;
+  position: relative;
+  top: 1em;
+  bottom: 3em;
+  background: var(--sheet-background);
+}
+
+hr {
+  border-color: #c8c8c875;
+}
+
+.header-container {
+  display: flex;
+}
+
+.meta {
+  flex-grow: 1;
+}
+
+.header {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 p {

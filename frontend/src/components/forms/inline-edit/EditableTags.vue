@@ -4,11 +4,11 @@
         <template v-slot:editing>
             <AutoComplete :multiple="true" v-model="tagsDraft" :suggestions="filteredTags" @complete="searchTags($event)" ref="editableRef" >
                 <template #item="slotProps">
-                    <div v-if="slotProps.item.id">{{slotProps.item.name}}</div>
+                    <div v-if="slotProps.item.id">{{translatedName(slotProps.item)}}</div>
                     <div v-else>Add item: {{slotProps.item.name}}</div>
                 </template>
                 <template #chip="slotProps">
-                    {{ slotProps.value.name }}
+                    {{ translatedName(slotProps.value)}}
                 </template>
             </AutoComplete>
         </template>
@@ -19,7 +19,7 @@
                 </div>
                 <div v-for="tag in selectedTags" :key="tag.id" class="tag-chip">
                     <Chip>
-                        {{ tag.name }}
+                        {{ translatedName(tag) }}
                     </Chip>
                 </div>
             </div>
@@ -53,6 +53,10 @@ export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
     @Prop() novelItemKey: PARENT_ITEM_KEYS;
     @Prop() selectedTags: TagModel[];
     @Prop() addNewTagPossible: boolean;
+
+    translatedName(tag: TagModel) {
+        return tag.containsTranslation ? this.$t(tag.name) : tag.name;
+    }
    
     @novelDataModule.State('_tags')
     tags!: Map<PARENT_ITEM_KEYS,TagModel[]>; 
@@ -92,11 +96,11 @@ export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
     }
 
     searchTags($event: { query: string }): void { 
-        this.filteredTags = (this.tags.get(this.novelItemKey) || []).filter(tag => tag.name.toLocaleLowerCase().includes($event.query.toLocaleLowerCase()));
+        this.filteredTags = (this.tags.get(this.novelItemKey) || []).filter(tag => this.translatedName(tag).toLocaleLowerCase().includes($event.query.toLocaleLowerCase()));
         if (!this.addNewTagPossible) {
             return;
         }
-        if (!this.filteredTags.find(tag => tag.name.toLocaleLowerCase() === $event.query.toLocaleLowerCase())) {
+        if (!this.filteredTags.find(tag => this.translatedName(tag).toLocaleLowerCase() === $event.query.toLocaleLowerCase())) {
             this.filteredTags.splice(0, 0, { id: undefined, name: $event.query });
         }
     }

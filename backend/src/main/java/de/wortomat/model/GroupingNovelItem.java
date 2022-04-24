@@ -25,6 +25,8 @@ public abstract class GroupingNovelItem<C extends INovelItem<?>> implements IGro
 
     private Integer position;
 
+    private Boolean containsTranslation;
+
     @JsonIgnore
     @ManyToOne
     private Novel novel;

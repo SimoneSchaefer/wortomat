@@ -18,7 +18,7 @@ export default class MissingValueTolerantLabel extends Vue {
     }
 
     get hasValue(): boolean {
-        return !!this.value && (this.value.length > 0);
+        return this.value && (this.value.length > 0);
     }
 }
 </script>

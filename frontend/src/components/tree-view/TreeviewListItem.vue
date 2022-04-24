@@ -5,14 +5,15 @@
             <div class="link">
               <a href="#"
                   @click="select"  
+                  :title="$t(`sub_menu.${parentKey}.select_child`)"
                   :key="element.id">
                   <WMissingValueTolerantLabel 
-                      :value="element.name" 
+                      :value="translatedName" 
                       :fallback="$t(`fallback_labels.no_name.${childKey}`)">
                   </WMissingValueTolerantLabel>&nbsp;
                   <i v-if="element.summary && element.summary.length">
                       <WMissingValueTolerantLabel 
-                          :value="element.summary" 
+                          :value="translatedSummary" 
                           :fallback="$t('fallback_labels.no_summary')">
                       </WMissingValueTolerantLabel>
                   </i>
@@ -25,12 +26,6 @@
               <Badge v-if="getIdeaCount(element.content)" :value="getIdeaCount(element.content)" severity="info"></Badge>
             </div>
           </div>
-       <!-- <div class="child-options">
-            <WButton type="text" color="danger" icon="fa fa-trash"  
-                :title="`remove_child.${parentKey}`" 
-                @click="confirmDeleteChild(element, $event)">
-            </WButton>     
-        </div>-->
     </div>     
 </template>
 
@@ -45,14 +40,19 @@ import WButton from '@/components/forms/Button.vue';
 import WConfirmDialog from '@/components/shared/ConfirmDialog.vue';
 import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
 import TodoMarkerAwareMixin from '@/components/mixins/TodoMarkerAwareMixin';
+import TranslatableNovelItemMixin from "../mixins/TranslatableNovelItemMixin";
 
 @Options({
     components: { WMissingValueTolerantLabel, WButton, WConfirmDialog },
     emits: ['delete-child', 'select']
 })
-export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, TodoMarkerAwareMixin) {
+export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, TodoMarkerAwareMixin, TranslatableNovelItemMixin) {
     @Prop() element!: BaseModel;
     @Prop() selected!: boolean;
+
+    get item() {
+      return this.element;
+    }
 
     @Emit('delete-child')
     deleteChild() {

@@ -32,9 +32,18 @@ export default abstract class DisplaySettingsAwareMixin extends mixins(NovelItem
     }
     private isEnabled(view: DISPLAY_SETTINGS_KEYS): boolean {
         const settingsForKey = this.displaySettings[this.parentKey];
-        if (!settingsForKey) return true;
-        if (!Object.keys(settingsForKey).includes(view)) return true;
+        if (!settingsForKey) return this.getDefault(view);
+        if (!Object.keys(settingsForKey).includes(view)) return this.getDefault(view);
         return settingsForKey[view];
+     }
+     private getDefault(view: DISPLAY_SETTINGS_KEYS): boolean {
+         if (view === DISPLAY_SETTINGS_KEYS.SHOW_IMAGES && this.parentKey === PARENT_ITEM_KEYS.PARTS) {
+             return false;
+         }
+         if (view === DISPLAY_SETTINGS_KEYS.SHOW_EXTENDED_SUMMARY) {
+             return false;
+         }
+         return true;
      }
   }
   

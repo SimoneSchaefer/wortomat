@@ -4,7 +4,7 @@
       <div class="parent-header w-100">
         <div class="title">
           <WEditableLabel
-            :value="item.name"
+            :value="translatedName"
             :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
             @update-label="updateParentName($event)"
           >
@@ -65,6 +65,7 @@ import WTreeviewHeader from "@/components/tree-view/TreeviewHeader.vue";
 import WTreeviewListItem from "@/components/tree-view/TreeviewListItem.vue";
 import NovelItemKeyAwareMixin from "../mixins/NovelItemKeyAwareMixin";
 import FilterAwareMixin from "../mixins/FilterAwareMixin";
+import TranslatableNovelItemMixin from "../mixins/TranslatableNovelItemMixin";
 import { ParentModel } from "@/models/ParentModel";
 
 const selectionModule = namespace("selection");
@@ -91,7 +92,8 @@ const applicationStateModule = namespace("applicationState");
 })
 export default class TreeviewParent extends mixins(
   NovelItemKeyAwareMixin,
-  FilterAwareMixin
+  FilterAwareMixin,
+  TranslatableNovelItemMixin
 ) {
   @Prop() item: ParentModel;
   @Prop() open: boolean;
@@ -136,7 +138,6 @@ export default class TreeviewParent extends mixins(
 
   @Emit("toggle")
   toggle($event) {
-    console.log("EVENT", $event);
     return $event;
   }
 
