@@ -129,7 +129,7 @@ section {
 .trash {
   background: var(--trash-color);
   width: 20px;
-  height: 30px;
+  height: 25px;
   display: inline-block;
   margin: 0 auto;
 
@@ -181,7 +181,7 @@ section {
 .trash i {
   position: relative;
   width: 2px;
-  height: 24px;
+  height: 20px;
   background: var(--dark-background);
   display: block;
   margin: 3px auto;
@@ -190,7 +190,7 @@ section {
 .trash i:after {
   content: "";
   width: 2px;
-  height: 24px;
+  height: 20px;
   background: var(--dark-background);
   position: absolute;
   left: -6px;
@@ -199,7 +199,7 @@ section {
 .trash i:before {
   content: "";
   width: 2px;
-  height: 24px;
+  height: 20px;
   background: var(--dark-background);
   position: absolute;
   right: -6px;
@@ -217,7 +217,7 @@ section {
 }
 
 .trash-hovered span,
-.trash:hover span {
+.trashzone:hover .trash span {
   transform: rotate(-45deg);
   transition: transform 250ms;
 }

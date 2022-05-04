@@ -15,8 +15,12 @@ INSERT INTO chapter (id, parent_id, name, summary, content, contains_translation
 INSERT INTO chapter (id, parent_id, name, summary, content, contains_translation, position) values (5, 2, 'tutorial.part_2.chapter_2.name', 'tutorial.part_2.chapter_2.summary', 'tutorial.part_2.chapter_2.content', true, 1);
 INSERT INTO chapter (id, parent_id, name, summary, content, contains_translation, position) values (6, 2, 'tutorial.part_2.chapter_3.name', 'tutorial.part_2.chapter_3.summary', 'tutorial.part_2.chapter_3.content', true, 2);
 
+INSERT INTO part (id, novel_id, name, contains_translation, position) values (3, 1, 'tutorial.part_3.name', true, 1);
+INSERT INTO chapter (id, parent_id, name, summary, content, contains_translation, position) values (7, 3, 'tutorial.part_3.chapter_1.name', 'tutorial.part_3.chapter_1.summary', 'tutorial.part_3.chapter_1.content', true, 0);
+
 INSERT INTO chapter_tags (chapter_id, tags_id) VALUES (1, 1);
 INSERT INTO chapter_tags (chapter_id, tags_id) VALUES (2, 1);
 INSERT INTO chapter_tags (chapter_id, tags_id) VALUES (4, 1);
 INSERT INTO chapter_tags (chapter_id, tags_id) VALUES (5, 1);
 INSERT INTO chapter_tags (chapter_id, tags_id) VALUES (6, 1);
+INSERT INTO chapter_tags (chapter_id, tags_id) VALUES (7, 1);

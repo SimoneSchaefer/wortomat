@@ -175,7 +175,6 @@ export default class SubMenu extends mixins(
 
 .trash-menu {
   position: relative;
-  top: 1em;
 }
 
 .add {
