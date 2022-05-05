@@ -8,20 +8,17 @@
         @click="addParent"
       ></SubMenuLink>
 
-      <div class="trash" :title="$t(`sub_menu.${parentKey}.trash`)">
-        <draggable
-          :list="[]"
-          class="dropzone trashzone"
-          :group="{ name: 'trash', put: () => true }"
-        >
-          <i class="fa fa-2x fa-trash-alt"></i>
-        </draggable>
+      <div class="trash-menu">
+        <TrashButton></TrashButton>
       </div>
     </div>
 
     <div class="option-list">
       <SubMenuLink
-        class="setting" v-bind:class="{ 'filter-active': tagFilterEnabled || statusFilterEnabled}"
+        class="setting"
+        v-bind:class="{
+          'filter-active': tagFilterEnabled || statusFilterEnabled,
+        }"
         icon="filter"
         :title="`sub_menu.${parentKey}.filter`"
         @click="setVisible('filter_visible')"
@@ -53,15 +50,6 @@
       <ExportMenu v-if="export_visible"></ExportMenu>
     </Sidebar>
   </div>
-
-  <!--
-    <Dialog v-model:visible="sidebarVisible" :modal="true" :dismissableMask="true">
-        <div class="menu-options">
-            <DisplaySettingsMenu v-if="display_settings_visible"></DisplaySettingsMenu>
-            <FilterMenu v-if="filter_visible"></FilterMenu>
-            <ExportMenu v-if="export_visible"></ExportMenu>
-        </div>
-    </Dialog>-->
 </template>
 
 <script lang="ts">
@@ -77,6 +65,7 @@ import { namespace } from "s-vuex-class";
 import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import FilterAwareMixin from "@/components/mixins/FilterAwareMixin";
 import SubMenuLink from "./SubMenuLink.vue";
+import TrashButton from "./TrashButton.vue";
 
 type visible_flags =
   | ""
@@ -94,12 +83,15 @@ const selectionModule = namespace("selection");
     ExportMenu,
     WConfirmDialog,
     SubMenuLink,
+    TrashButton,
   },
 })
 export default class SubMenu extends mixins(
   NovelItemKeyAwareMixin,
   FilterAwareMixin
 ) {
+  trashHovered = false;
+
   @novelDataModule.Action
   deleteMultipleNovelItems!: (payload: {
     view: PARENT_ITEM_KEYS;
@@ -181,6 +173,10 @@ export default class SubMenu extends mixins(
   margin: 1rem 0;
 }
 
+.trash-menu {
+  position: relative;
+}
+
 .add {
   background-color: rgb(80, 80, 248);
   color: #efefef;
@@ -204,22 +200,6 @@ export default class SubMenu extends mixins(
 .setting.filter-active {
   color: #495057;
   background-color: rgb(202, 230, 255);
-}
-
-.trash {
-  background-color: rgb(173, 35, 35);
-  color: #efefef;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  width: 4rem;
-  height: 4rem;
-}
-
-.trash:hover {
-  color: white;
-  background-color: rgb(224, 48, 48);
 }
 
 .mutation-options {

@@ -6,13 +6,13 @@
             </div>
 
             <div class="meta">
-                <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="item.name" @update-label="updateName(item, $event)" :placeHolderTitle="`fallback_labels.no_name.${childKey}`"></EditableLabel></div>
-                <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="item.summary" @update-label="updateSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
+                <div v-if="displayTitle" class="header"><EditableLabel v-bind:value="translatedName" @update-label="updateName(item, $event)" :placeHolderTitle="`fallback_labels.no_name.${childKey}`"></EditableLabel></div>
+                <b v-if="displaySummary" class="summary"><EditableLabel v-bind:value="translatedSummary" @update-label="updateSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_summary`"></EditableLabel></b>
                 <span v-if="displayExtendedSummary" class="extended-summary"><EditableLabel v-bind:value="item.extended_summary" @update-label="updateExtendedSummary(item, $event)" :placeHolderTitle="`fallback_labels.no_extended_summary`"></EditableLabel></span>
                 <EditableTags v-if="displayTags" :addNewTagPossible="true" :selectedTags="item.tags" @update-tags="updateTags(item, $event)" :novelItemKey="parentKey"></EditableTags>
             </div>
         </div>
-        <EditableText v-if="displayContent" v-bind:value="item.content" v-bind:header="item.title" @update-text="updateContent(item, $event)"></EditableText>        
+        <EditableText v-if="displayContent" v-bind:value="translatedContent" v-bind:header="item.title" @update-text="updateContent(item, $event)"></EditableText>        
     </div>
 </template>
 
@@ -32,6 +32,7 @@ import EditableText from '@/components/forms/inline-edit/EditableText.vue';
 import EditableTags from '@/components/forms/inline-edit/EditableTags.vue';
 import DisplaySettingsAwareMixin from '@/components/mixins/DisplaySettingsAwareMixin';
 import UpdatableItemMixin from '@/components/mixins/UpdatableItemMixin';
+import TranslatableNovelItemMixin from "../../mixins/TranslatableNovelItemMixin";
 
 
 const novelDataModule = namespace("novelData");
@@ -39,7 +40,7 @@ const novelDataModule = namespace("novelData");
 @Options({
   components: { EditableLabel, EditableText, EditableTags, NovelItemSheet, ImageGallery }
 })
-export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySettingsAwareMixin) {
+export default class NovelItemSheet extends mixins(UpdatableItemMixin, DisplaySettingsAwareMixin, TranslatableNovelItemMixin) {
     @Prop() item!: BaseModel;
     @Prop() novelItemKey!: PARENT_ITEM_KEYS;
 

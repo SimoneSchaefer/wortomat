@@ -66,6 +66,10 @@ export default class App extends Vue {}
   /* z-indexes */
   --z-modal-backdrop: 5;
   --z-inline-edit: 101;
+
+
+    --trash-color: #fff;
+    --trash-color-hover: rgb(255, 8, 8);
 }
 
 html, body, div {

@@ -31,6 +31,9 @@ public abstract class NovelItem<T extends GroupingNovelItem> implements INovelIt
 
     private Integer position;
 
+    private Boolean containsTranslation;
+
+
     private Date deletedAt;
 
     @JsonIgnore

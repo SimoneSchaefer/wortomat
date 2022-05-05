@@ -1,7 +1,7 @@
 <template>
   <div class="grouping-item-view">
     <div class="submenu"><WSubMenu></WSubMenu></div>
-    <div class="content-view">
+    <div v-if="items.length" class="content-view">
       <Splitter style="height: 100%" :stateKey="novelItemKey">
         <SplitterPanel class="split-content-left" :size="30">
           <ScrollPanel style="height: 100%">
@@ -14,6 +14,9 @@
           </ScrollPanel>
         </SplitterPanel>
       </Splitter>
+    </div>
+    <div v-if="!items.length" style="width: 100%; height: 100%; display: flex">
+      <w-help-note></w-help-note>
     </div>
   </div>
 </template>

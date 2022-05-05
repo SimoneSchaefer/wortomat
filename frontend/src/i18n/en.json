@@ -22,13 +22,13 @@
         "select_parent": {
             "parts": "Select part",
             "research_groups": "Select Research Group"
-
         }
     },
     "sub_menu": {
         "PARTS": {
-            "add": "Add part",
+            "add": "Create a new part",
             "delete": "Delete chapters",
+            "select_child": "Select chapter",
             "display_settings": "Configure view",
             "export": "Export chapters",
             "filter": "Filter view",
@@ -37,29 +37,29 @@
         "CHARACTER_GROUPS": {
             "add": "Add character group",
             "delete": "Delete characters",
+            "select_child": "Select character",
             "display_settings": "Configure view",
             "export": "Export characters",
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
-
         },
         "RESEARCH_GROUPS": {
             "add": "Add research group",
             "delete": "Delete selected research items",
+            "select_child": "Select research",
             "display_settings": "Configure view",
             "export": "Export research",
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
-
         },
         "LOCATION_GROUPS": {
             "add": "Add location group",
             "delete": "Delete selected locations",
+            "select_child": "Select location",
             "display_settings": "Configure view",
             "export": "Export locations",
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
-
         },
         "add": "Add item",
         "export": "Export",
@@ -90,17 +90,16 @@
     },
     "fallback_labels": {
         "no_name": {
-            "RESEARCH_GROUPS":  "Unnamed research group",
+            "RESEARCH_GROUPS": "Unnamed research group",
             "RESEARCH": "Unnamed research item",
             "PARTS": "Unnamed part",
             "CHAPTERS": "Unnamed chapter",
-            "CHARACTERS":  "Unnamed character",
-            "CHARACTER_GROUPS":  "Unnamed character group",
+            "CHARACTERS": "Unnamed character",
+            "CHARACTER_GROUPS": "Unnamed character group",
             "LOCATIONS": "Unnamed location",
-            "LOCATION_GROUPS":  "Unnamed location group",
+            "LOCATION_GROUPS": "Unnamed location group",
             "novel": "Unnamed novel",
             "TIMELINE": "Unnamed event"
-
         },
         "no_summary": "No summary added yet",
         "no_extended_summary": "No detailed summary added yet",
@@ -131,17 +130,16 @@
         "ol": "ordered list",
         "ul": "bullet list",
         "strike": "strikethrough",
-        "code": "code", 
+        "code": "code",
         "quote": "quote",
         "redo": "Redo",
-        "undo": "Undo", 
+        "undo": "Undo",
         "clear": "Clear all formatting",
         "highlight_idea": "Mark as idea",
         "highlight_fixme": "Mark as FIXME",
         "highlight_todo": "Mark as TODO",
         "cancel": "Discard changes",
         "save": "Save changes"
-
     },
     "display_settings": {
         "header": "Display settings",
@@ -173,8 +171,57 @@
     "cancel": "Cancel",
     "no_children": "No items added yet",
     "trash": "Trash can",
-    "trash_hint": "Drop items here to remove them"
-
+    "trash_hint": "Drop items here to remove them",
+    "tutorial": {
+        "novel": {
+            "name": "Getting started",
+            "summary": "Open this novel to learn about wortomat"
+        },
+        "tag_1": "Tutorial",
+        "tag_2": "Demo",
+        "part_1": {
+            "name": "First steps",
+            "chapter_1": {
+                "name": "Welcome 👋",
+                "summary": "Some tipps to get you started",
+                "content": "<p>You are here, which means - you decided to write your very own novel! Congratulations for that! 🎉</p><p>The following chapters will give you a small tour of what you can do.</p><h2>👉 Let's go!</h2><blockquote><p>In the chapter list, select the next chapter to proceed!</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-select-next-chapter.gif\"></blockquote><blockquote><p>💡 By the way: You can select multiple items by using the Shift or Ctrl Key while clicking on an item.</p></blockquote><p></p><p></p><p></p><p></p><p></p>"
+            },
+            "chapter_2": {
+                "name": "How chapters are organized ➕",
+                "summary": "Adding parts and chapters",
+                "content": "<p>You may already have noticed the tab menu on top of the application and seen that wortomat gives you space for organizing your <em>chapters, characters, research </em>and <em>locations</em>.</p><p>All of these items are organized into groups, e.g. a <em>part</em> consists of multiple <em>chapters</em>.</p><h2>👉<strong> Create a new part</strong></h2><blockquote><p>To create new part, click on the big plus button in the side menu.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-add-group.gif\"></blockquote><h2>👉<strong> Rename the part</strong></h2><blockquote><p>You see the placeholder text where the name of the new part should be? Click on it, and give your new part some nice title.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-rename-group.gif\"></blockquote><blockquote><p>💡 You can also use enter and escape keys for confirming or canceling your changes.</p></blockquote><h2>👉<strong> Create a new chapter within the new part</strong></h2><blockquote><p>To add a new chapter click on the plus button next to the part name. The new chapter will automatically be selected, so make sure to come back here afterwards 😉</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-add-child.gif\"></blockquote><h2>👉<strong> Delete the part</strong></h2><blockquote><p>Drag and drop parts or chapters on the trash can in the side menu if you want to delete them.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-delete-part.gif\"></blockquote><blockquote><p>.</p></blockquote>"
+            },
+            "chapter_3": {
+                "name": "Renaming and editing 🖊️",
+                "summary": "",
+                "content": "<p>You maybe already noticed that each chapter has</p><ul><li><p>A title</p></li><li><p>A summary</p></li><li><p>Tags</p></li><li><p>The content</p></li></ul><p>The chapter you are <strong>currently</strong> reading does not have a summary or any tags yet - you just see some placeholder text instead.</p><h2>👉 Edit the summary</h2><blockquote><p>Click on the placeholder text for the summary and give it some nice summary.</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-edit-summary.gif\"></blockquote><h2>👉 Add a tag</h2><blockquote><p>Click on the placeholder text for the tags and add the tag <em>Tutorial</em>You can also create a new tag just by typing it into the field</p><img class=\"my-custom-class\" src=\"/assets/images/getting-started/en/getting-started-edit-tags.gif\"></blockquote><h2>👉 Explore the content editor</h2><blockquote><p>Click on the content (the thing you are currently reading) and have a look around at what you can do in the text editor</p></blockquote><blockquote><p></p></blockquote><h2></h2>"
+            }
+        },
+        "part_2": {
+            "name": "Staying focused",
+            "chapter_1": {
+                "name": "Using tags",
+                "summary": "Focus on plotlines",
+                "content": "<p>In the previous chapters, you already learned about the usage of tags.</p><p>Tags can help you to focus on what is currently important for you.</p><p>Let's say '<em>Frodo and Sam hike to Mordor</em>' would be one plotline in <em>Lord of the rings</em> and '<em>The other guys defend Helm's Klamm</em>' would be another plotline.</p><p>Tolkien could have tagged all the Frodo-and-Sam chapters with '<em>Hike to Mordor</em>' and the other chapters with '<em>Defending Helm's Klamm</em>'.</p><p>Whenever he was focussing on the '<em>Hike to Mordor' </em>he could easily hide all the other chapters so they don't distract him from his current work.</p><h2>👉 Add a new tag 'staying-focused'</h2><p>Add a new tag to the current chapter by clicking on the existing tag. Just type the name of the new tag ('staying-focused') and use the <i>Add new item</i> link.</p><h2>👉 Filter for tag 'staying-focused'</h2><p>Open the filter menu in the side menu and activate the tag filter. Select the 'staying-focused' tag and confirm.</p><p>See how all the getting-started chapters are hidden now?</p><h2>👉 Deactivate the filter again</h2><p>Now deactivate the tag filter again so all chapters are visible again.</p>"
+            },
+            "chapter_2": {
+                "name": "Adding status markers",
+                "summary": "Keep track of open issues",
+                "content": "<p>I don't know about you, but when I am working on my novel, ideas or doubts come up all the time and distract me from what I am currently working on. You can either write it on some piece of paper so it does not get lost or you just put it directly in your chapter where it matters and mark it as a TODO 😌</p><p>You can set such status markers anywhere in your content, like this:</p><p><mark data-color=\"black\" style=\"color: black; background-color: yellow\" data-background-color=\"yellow\">TODO: Explain that there are three types of status markers, namely TODO, FIXME and IDEA.</mark></p><p>You see the number of status markers in your chapter list, and you can also filter for open todo items.</p><h2>👉  Set a status marker</h2><blockquote><p>Mark some content in this text and highlight it as a TODO</p></blockquote><h2>👉  Filter for TODO items </h2><blockquote><p>Open the filter menu in the side menu and activate the status filter - filter for TODOs only. You will now only see one chapter, because this chapter is the only chapter having a TODO status marker!</p></blockquote><h2>👉 Deactivate the filter again</h2><blockquote><p>Deactivate the status filter so you can see all chapters again. </p></blockquote>"
+            },
+            "chapter_3": {
+                "name": "Seeing the tree or the forest",
+                "summary": "Configure view",
+                "content": "<p>Sometimes you just need to take a step back. Getting an overview about what is happening in your novel. For this case, you can activate and deactivate specific parts of the view.</p><h2>👉  Hide the content</h2><blockquote>Open the display menu and toggle the <i>Show content</i> button.</blockquote><h2>👉  Show the extended summary</h2><blockquote>You probably noticed that there are some additional display options that are disabled by default. The extended summary might come in handy if you want to export a resume for your novel.</blockquote>"
+            }
+        },
+        "part_3": {
+            "name": "What's next?",
+            "chapter_1": {
+                "name": "Support and contribute",
+                "summary": "",
+                "content": "If you need support, head over to <a href=\"https://github.com/SimoneSchaefer/wortomat\">github</a> and leave an issue. But please keep in mind that I am doing all this in my free time.</p><p>Any support is appreciated. If you want to contribute (development, translations, ideas, UI improvements...) please also leave an issue on github."
+            }
+        }
+    }
 }
-
-

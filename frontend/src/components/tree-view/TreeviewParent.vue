@@ -4,7 +4,7 @@
       <div class="parent-header w-100">
         <div class="title">
           <WEditableLabel
-            :value="item.name"
+            :value="translatedName"
             :placeHolderTitle="`fallback_labels.no_name.${parentKey}`"
             @update-label="updateParentName($event)"
           >
@@ -27,19 +27,22 @@
         :list="item['children']"
         class="list-group"
         ghost-class="ghost"
+        drag-class="dragging"
         group="children"
         @end="childMoved($event)"
         :id="`parent-${item.id}`"
       >
-        <WTreeviewListItem
-          v-for="child in item.children"
-          :key="child.id"
-          @select="selectChild"
-          @deleteChild="deleteChild"
-          :element="child"
-          :selected="isSelected(child)"
-        >
-        </WTreeviewListItem>
+        <transition-group type="transition" :name="'flip-list'">
+          <WTreeviewListItem
+            v-for="child in item.children"
+            :key="child.id"
+            @select="selectChild"
+            @deleteChild="deleteChild"
+            :element="child"
+            :selected="isSelected(child)"
+          >
+          </WTreeviewListItem>
+        </transition-group>
       </draggable>
       <div v-if="item['children'].length === 0 && open" class="no-children">
         {{ $t("no_children") }}
@@ -65,6 +68,7 @@ import WTreeviewHeader from "@/components/tree-view/TreeviewHeader.vue";
 import WTreeviewListItem from "@/components/tree-view/TreeviewListItem.vue";
 import NovelItemKeyAwareMixin from "../mixins/NovelItemKeyAwareMixin";
 import FilterAwareMixin from "../mixins/FilterAwareMixin";
+import TranslatableNovelItemMixin from "../mixins/TranslatableNovelItemMixin";
 import { ParentModel } from "@/models/ParentModel";
 
 const selectionModule = namespace("selection");
@@ -91,7 +95,8 @@ const applicationStateModule = namespace("applicationState");
 })
 export default class TreeviewParent extends mixins(
   NovelItemKeyAwareMixin,
-  FilterAwareMixin
+  FilterAwareMixin,
+  TranslatableNovelItemMixin
 ) {
   @Prop() item: ParentModel;
   @Prop() open: boolean;
@@ -120,7 +125,6 @@ export default class TreeviewParent extends mixins(
 
   @Emit("update-parent-name")
   updateParentName(newValue: string) {
-    console.log("NEW VALUE", newValue);
     return newValue;
   }
 
@@ -136,7 +140,6 @@ export default class TreeviewParent extends mixins(
 
   @Emit("toggle")
   toggle($event) {
-    console.log("EVENT", $event);
     return $event;
   }
 
@@ -162,6 +165,13 @@ export default class TreeviewParent extends mixins(
   }
 }
 </script>
+
+<style>
+.dragging {
+  opacity: 0;
+}
+
+</style>
 
 <style scoped>
 .no-children {

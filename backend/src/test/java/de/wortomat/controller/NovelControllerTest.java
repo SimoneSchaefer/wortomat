@@ -110,7 +110,8 @@ public class NovelControllerTest {
                 "\"name\":\"%s\"," +
                 "\"summary\":\"%s\"," +
                 "\"position\":%d," +
-                "\"author\":\"%s\"}",
+                "\"author\":\"%s\"," +
+                "\"containsTranslation\":null}",
                 novel.getId(), novel.getName(), novel.getSummary(), novel.getPosition(), novel.getAuthor());
     }
 
