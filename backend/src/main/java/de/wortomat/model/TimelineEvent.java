@@ -23,6 +23,12 @@ public class TimelineEvent {
 
     private String color;
 
+    private Integer position;
+
+
+    @ManyToMany
+    private List<Image> images;
+    
     @JsonIgnore
     @ManyToOne
     private Novel novel;
@@ -42,6 +48,7 @@ public class TimelineEvent {
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Character> characters = new ArrayList<>();
+
 
     public void setNovel(Novel novel) {
         this.novel = novel;

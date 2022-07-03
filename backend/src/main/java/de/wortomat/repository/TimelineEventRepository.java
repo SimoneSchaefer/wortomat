@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface TimelineEventRepository extends CrudRepository<TimelineEvent,Long> {
-    List<TimelineEvent> findAllByNovelIdOrderByEventDate(Long novelId);
+    List<TimelineEvent> findAllByNovelIdOrderByPosition(Long novelId);
 }

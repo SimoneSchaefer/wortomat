@@ -115,11 +115,11 @@ public class TimelineEventService {
     }
 
     public void deleteAll(Long novelId) {
-        List<TimelineEvent> allItems = this.timelineEventRepository.findAllByNovelIdOrderByEventDate(novelId);
+        List<TimelineEvent> allItems = this.timelineEventRepository.findAllByNovelIdOrderByPosition(novelId);
         this.timelineEventRepository.deleteAll(allItems);
     }
 
     public List<TimelineEvent> getAll(Long novelId) {
-        return this.timelineEventRepository.findAllByNovelIdOrderByEventDate(novelId);
+        return this.timelineEventRepository.findAllByNovelIdOrderByPosition(novelId);
     }
 }

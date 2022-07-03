@@ -1,37 +1,21 @@
 <template>
+ <ScrollPanel style="height: 100%" class="scroll-timeline">
   <div class="timeline">
     <div class="connection"></div>
     <div class="events">
-      <div class="row">
-        <div class="summary">November 2021</div>
+      <div v-for="event of sortedTimelineEvents" class="row" v-bind:key="event.id">
+         <div class="summary">
+           {{event.details}}
+           {{event.name}}
+          </div>
         <div class="thumbnail">
           <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
         </div>
-        <div class="details">Hans pflückt eine Blume</div>
-      </div>
-      <div class="row">
-        <div class="summary">Jan 2022</div>
-        <div class="thumbnail">
-          <img src="/assets/images/dummy-gallery-item/RESEARCH.jpg" />
-        </div>
-        <div class="details">Die Blume verwelkt</div>
-      </div>
-      <div class="row">
-        <div class="summary">Feb 2021</div>
-        <div class="thumbnail">
-          <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
-        </div>
-        <div class="details">Eine neue Blume wächst</div>
-      </div>
-      <div class="row">
-        <div class="summary">Mar 2022</div>
-        <div class="thumbnail">
-          <img src="/assets/images/dummy-gallery-item/RESEARCH.jpg" />
-        </div>
-        <div class="details">Elke trampelt die Blume platt</div>
+        <div class="details">{{event.summary}}</div>
       </div>
     </div>
   </div>
+ </ScrollPanel>
 </template>
 
 <script lang="ts">
@@ -210,7 +194,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
   width: 20%;
   margin: 0.5em 0 0.5em 0;
   background-color: #fff;
-  border: 3px solid black;
+  border: 3px solid #3e3e3e;
   padding: 0.5em;
   font-size: 1.2em;
 }
@@ -218,7 +202,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
 .details {
   padding-top: 1em;
   color: #fff;
-  border: 1px solid #3e3e3e;
+  border: 3px solid #3e3e3e;
   padding-left: 100px;
   flex-grow: 1;
   margin-left: -100px;
@@ -228,7 +212,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid black;
+  border: 3px solid #3e3e3e;
   position: relative;
   left: -50px;
   overflow: hidden;
@@ -242,7 +226,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
 
 .connection {
   width: 3px;
-  background-color: black;
+  background-color: #3e3e3e;
   height: 100%;
   left: 20%;
   position: relative;
