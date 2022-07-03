@@ -1,37 +1,36 @@
 <template>
-  <WSidebarOpener icon="fa fa-2x fa-plus" @click="add" />
-  <div class="plot">
-    <div v-if="!sortedTimelineEvents.length && loading" class="empty">
-      <WHelpNote :itemKey="parentKey"></WHelpNote>
-    </div>
-    <div v-else class="timeline">
-        <Splitter style="height: 100%" stateKey="timeline">
-          <SplitterPanel>      
-              <ScrollPanel style="height: 100%" class="scroll-timeline">
-                <WTimeline 
-                  :events="sortedTimelineEvents" 
-                  :selectedEvents="selectedItemIds"
-                  @update-date="updateDate"
-                  @update-name="updateName"
-                  @select="select"
-                  @deleteEvent="deleteEvent($event)"></WTimeline>
-              </ScrollPanel>
-          </SplitterPanel>
-          <SplitterPanel class="split-content-right sheet-list">
-            <ScrollPanel style="height: 100%">
-              <div v-if="selectedItems.length" class="selected-item sheet-list"> 
-                <div v-for="selectedItem of selectedItems" :key="selectedItem.id">
-                  <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
-                    <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
-                      <NovelItemSheet :novelItemKey="referenceType" :item="eventReference"></NovelItemSheet>
-                    </div>
-                  </div>  
-                </div>                    
-              </div>
-            </ScrollPanel>
-          </SplitterPanel>
-        </Splitter>
+  <div class="timeline">
+    <div class="connection"></div>
+    <div class="events">
+      <div class="row">
+        <div class="summary">November 2021</div>
+        <div class="thumbnail">
+          <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
+        </div>
+        <div class="details">Hans pflückt eine Blume</div>
       </div>
+      <div class="row">
+        <div class="summary">Jan 2022</div>
+        <div class="thumbnail">
+          <img src="/assets/images/dummy-gallery-item/RESEARCH.jpg" />
+        </div>
+        <div class="details">Die Blume verwelkt</div>
+      </div>
+      <div class="row">
+        <div class="summary">Feb 2021</div>
+        <div class="thumbnail">
+          <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
+        </div>
+        <div class="details">Eine neue Blume wächst</div>
+      </div>
+      <div class="row">
+        <div class="summary">Mar 2022</div>
+        <div class="thumbnail">
+          <img src="/assets/images/dummy-gallery-item/RESEARCH.jpg" />
+        </div>
+        <div class="details">Elke trampelt die Blume platt</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -50,8 +49,9 @@ import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
 import EditableDate from "@/components/forms/inline-edit/EditableDate.vue";
 import WSidebarOpener from "@/components/shared/menu/SidebarOpener.vue";
 import WTimeline from "@/components/timeline/Timeline.vue";
-import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
-import WHelpNote from '@/components/HelpNote.vue';
+import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
+import WHelpNote from "@/components/HelpNote.vue";
+import WSubMenuLink from "@/components/navigation/submenu/SubMenuLink.vue";
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
@@ -64,43 +64,65 @@ const selectionModule = namespace("selection");
     WSidebarOpener,
     WTimeline,
     WNovelItemDropdown,
-    WHelpNote
+    WHelpNote,
+    WSubMenuLink,
   },
 })
 export default class Plot extends mixins(TimelineEventMixin) {
   @novelDataModule.Action
-  loadNovelItems!: ({ view: PARENT_ITEM_KEYS, novelId: number }) => Promise<void>;
-  
-  @novelDataModule.Action
-  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }) => Promise<void>;
+  loadNovelItems!: ({
+    view: PARENT_ITEM_KEYS,
+    novelId: number,
+  }) => Promise<void>;
 
   @novelDataModule.Action
-  updateNovelItem: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+  addNovelItem!: (payload: {
+    view: PARENT_ITEM_KEYS;
+    novelItem: BaseModel;
+  }) => Promise<void>;
 
   @novelDataModule.Action
-  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+  updateNovelItem: (payload: {
+    view: PARENT_ITEM_KEYS;
+    novelItem: BaseModel;
+  }) => Promise<void>;
+
+  @novelDataModule.Action
+  deleteNovelItem!: (payload: {
+    view: PARENT_ITEM_KEYS;
+    novelItem: BaseModel;
+  }) => Promise<void>;
 
   @selectionModule.Action
-  selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+  selectItemIds!: (payload: {
+    view: PARENT_ITEM_KEYS;
+    itemIds: number[];
+  }) => Promise<void>;
 
-  @selectionModule.State('_selectedItemIds')
-  _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;  
-    
-  @novelDataModule.State('_loading')
+  @selectionModule.State("_selectedItemIds")
+  _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;
+
+  @novelDataModule.State("_loading")
   loading!: boolean;
-    
+
   @novelDataModule.Getter
   sortedTimelineEvents!: TimelineEventModel[];
 
   mounted(): void {
-    this.loadNovelItems({ view: PARENT_ITEM_KEYS.TIMELINE, novelId: this.$route.params.id})
+    this.loadNovelItems({
+      view: PARENT_ITEM_KEYS.TIMELINE,
+      novelId: this.$route.params.id,
+    });
     for (let key of this.allowedReferences) {
-      this.loadNovelItems({ view: key, novelId: this.$route.params.id})
+      this.loadNovelItems({ view: key, novelId: this.$route.params.id });
     }
   }
 
   add() {
-    this.addNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: new TimelineEventModel() });
+    this.addNovelItem({
+      view: PARENT_ITEM_KEYS.TIMELINE,
+      novelItem: new TimelineEventModel(),
+    });
   }
 
   getExistingEventReferences(event: TimelineEventModel, key: PARENT_ITEM_KEYS) {
@@ -108,129 +130,122 @@ export default class Plot extends mixins(TimelineEventMixin) {
   }
 
   select(item): void {
-    this.selectItemIds({ view: PARENT_ITEM_KEYS.TIMELINE, itemIds: [item.id]});
+    this.selectItemIds({ view: PARENT_ITEM_KEYS.TIMELINE, itemIds: [item.id] });
   }
 
   deleteEvent(event: TimelineEventModel) {
     this.deleteNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: event });
   }
 
-  updateName(update: { newValue: string, item: TimelineEventModel }): void {
-    this.updateItem(update.item, { name: update.newValue });   
-  } 
+  updateName(update: { newValue: string; item: TimelineEventModel }): void {
+    this.updateItem(update.item, { name: update.newValue });
+  }
 
-  updateDate(update: { newValue: string, item: TimelineEventModel }): void {
-    this.updateItem(update.item, { eventDate: update.newValue });   
-  }  
+  updateDate(update: { newValue: string; item: TimelineEventModel }): void {
+    this.updateItem(update.item, { eventDate: update.newValue });
+  }
 
   selected(item: TimelineEventModel): boolean {
-    return !!this.selectedItemIds.find(selected => selected === item.id);
+    return !!this.selectedItemIds.find((selected) => selected === item.id);
   }
 
   private updateItem(item, overrideValues): void {
-    const newItem =  Object.assign({}, item, overrideValues);  
-    this.updateNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: newItem});  
+    const newItem = Object.assign({}, item, overrideValues);
+    this.updateNovelItem({
+      view: PARENT_ITEM_KEYS.TIMELINE,
+      novelItem: newItem,
+    });
   }
 
-  private referencedItems(event: TimelineEventModel, parentKey: PARENT_ITEM_KEYS, mustInclude = true) {
-    const itemIds: number[] = event['references'][childKeyForParentKey(parentKey).toUpperCase()];
-    return this.getFlatList(
-      parentKey, 
-    ).filter(child => itemIds.includes(child.id) === mustInclude);
+  private referencedItems(
+    event: TimelineEventModel,
+    parentKey: PARENT_ITEM_KEYS,
+    mustInclude = true
+  ) {
+    const itemIds: number[] =
+      event["references"][childKeyForParentKey(parentKey).toUpperCase()];
+    return this.getFlatList(parentKey).filter(
+      (child) => itemIds.includes(child.id) === mustInclude
+    );
   }
 
   get parentKey() {
     return PARENT_ITEM_KEYS.TIMELINE;
-  }   
+  }
   get selectedItemIds(): number[] {
     return this._selectedItemIds[PARENT_ITEM_KEYS.TIMELINE] || [];
   }
   get selectedItems(): TimelineEventModel[] {
-    return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
+    return this.sortedTimelineEvents.filter((event) =>
+      this.selectedItemIds.includes(event.id)
+    );
   }
 }
 </script>
 
-<style>
-
-.empty {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-}
-
-.scroll-timeline {
-  background: var(--light-background)
-}
-
-.p-scrollpanel-wrapper {
-
-  z-index: inherit !important;
-}
-
-.reference-options {
-  display: flex;
-  background: var(--editor-toolbar-background);
-}
-
-.sheet-list {
-  background: var(--sheet-list-background)
-}
-
-.selected-item {
-  margin: 1em;
-}
-
-.selected-event {
-  background-color: pink;
-  height: 100%;
-}
-
-.split-panel {
-  height: 100%;
-}
-.plot {
-  display: flex;
-  width: 100%;
-}
-
-.timeline-event-container {
-  padding: 0.5em 2em;
-}
-
+<style scoped>
 .timeline {
-  flex-grow: 2;
-  height: calc(100vh);
-}
-
-.timeline-wrapper {
-  margin-top: 1em;
-}
-
-.custom-marker {
   display: flex;
-  z-index: 2;
-  background-color: #2d2b2b;
-  border-radius: 50%;
-  width: 1.5em;
-  height: 1.5em;
-  position: absolute;
-  top: 1.5em;
-  cursor: pointer;
-
-  justify-content: center;
-  align-items: center;
-
-  text-align: center;
-  color: white;
+  height: 100%;
+  margin: 0 3em;
 }
 
-.event-date {
-  display: flex;
-  align-items: center;
+.events {
   width: 100%;
+  margin-top: 3em;
+}
+
+.row {
+  width: 100%;
+  display: flex;
+  margin: 1em 0;
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    rgba(224, 224, 224, 0.534) 20%
+  );
+}
+
+.summary {
+  width: 20%;
+  margin: 0.5em 0 0.5em 0;
+  background-color: #fff;
+  border: 3px solid black;
+  padding: 0.5em;
+  font-size: 1.2em;
+}
+
+.details {
+  padding-top: 1em;
+  color: #fff;
+  border: 1px solid #3e3e3e;
+  padding-left: 100px;
+  flex-grow: 1;
+  margin-left: -100px;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid black;
+  position: relative;
+  left: -50px;
+  overflow: hidden;
+}
+
+.thumbnail > img {
+  object-fit: cover;
+  width: 100px;
+  height: 100px;
+}
+
+.connection {
+  width: 3px;
+  background-color: black;
+  height: 100%;
+  left: 20%;
+  position: relative;
 }
 </style>
 

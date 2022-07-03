@@ -1,0 +1,311 @@
+<template>
+<div class="timeline">
+  <div class="sub-menu">
+    <div class="mutation-options">
+      <WSubMenuLink
+        class="add"
+        icon="plus"
+        :title="`sub_menu.${parentKey}.add`"
+        @click="add"
+      ></WSubMenuLink>
+    </div>
+  </div>
+  <div class="plot">
+    <div v-if="!sortedTimelineEvents.length && !loading" class="empty">
+      <WHelpNote :itemKey="parentKey"></WHelpNote>
+    </div>
+    <div v-else class="timeline">
+        <Splitter style="height: 100%" stateKey="timeline">
+          <SplitterPanel>      
+              <ScrollPanel style="height: 100%" class="scroll-timeline">
+                <WTimeline 
+                  :events="sortedTimelineEvents" 
+                  :selectedEvents="selectedItemIds"
+                  @update-date="updateDate"
+                  @update-name="updateName"
+                  @select="select"
+                  @deleteEvent="deleteEvent($event)"></WTimeline>
+              </ScrollPanel>
+          </SplitterPanel>
+          <SplitterPanel class="split-content-right sheet-list">
+            <ScrollPanel style="height: 100%">
+              <div v-if="selectedItems.length" class="selected-item sheet-list"> 
+                <div v-for="selectedItem of selectedItems" :key="selectedItem.id">
+                  <div v-for="referenceType of allowedReferences" v-bind:key="referenceType">
+                    <div v-for="eventReference of getExistingEventReferences(selectedItem, referenceType)" v-bind:key="eventReference.id" class="existing-reference">
+                      <NovelItemSheet :novelItemKey="referenceType" :item="eventReference"></NovelItemSheet>
+                    </div>
+                  </div>  
+                </div>                    
+              </div>
+            </ScrollPanel>
+          </SplitterPanel>
+        </Splitter>
+      </div>
+  </div>
+</div>
+</template>
+
+<script lang="ts">
+import { mixins, Options } from "vue-class-component";
+import { namespace } from "s-vuex-class";
+
+import { childKeyForParentKey, PARENT_ITEM_KEYS } from "@/store/keys";
+
+import { BaseModel } from "@/models/Base.model";
+import { TimelineEventModel } from "@/models/TimelineEvent";
+
+import NovelItemSheet from "@/components/shared/novel-item/NovelItemSheet.vue";
+import TimelineEventMixin from "@/components/mixins/TimelineEventMixin";
+import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
+import EditableDate from "@/components/forms/inline-edit/EditableDate.vue";
+import WSidebarOpener from "@/components/shared/menu/SidebarOpener.vue";
+import WTimeline from "@/components/timeline/Timeline.vue";
+import WNovelItemDropdown from '@/components/shared/NovelItemDropdown.vue';
+import WHelpNote from '@/components/HelpNote.vue';
+import WSubMenuLink from "@/components/navigation/submenu/SubMenuLink.vue";
+
+const novelDataModule = namespace("novelData");
+const selectionModule = namespace("selection");
+
+@Options({
+  components: {
+    EditableLabel,
+    EditableDate,
+    NovelItemSheet,
+    WSidebarOpener,
+    WTimeline,
+    WNovelItemDropdown,
+    WHelpNote,
+    WSubMenuLink    
+  },
+})
+export default class Plot extends mixins(TimelineEventMixin) {
+  @novelDataModule.Action
+  loadNovelItems!: ({ view: PARENT_ITEM_KEYS, novelId: number }) => Promise<void>;
+  
+  @novelDataModule.Action
+  addNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel }) => Promise<void>;
+
+  @novelDataModule.Action
+  updateNovelItem: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @novelDataModule.Action
+  deleteNovelItem!: (payload: { view: PARENT_ITEM_KEYS, novelItem: BaseModel}) => Promise<void>;
+
+  @selectionModule.Action
+  selectItemIds!: ( payload: { view: PARENT_ITEM_KEYS, itemIds: number[]} ) => Promise<void>;
+
+  @selectionModule.State('_selectedItemIds')
+  _selectedItemIds!: Record<PARENT_ITEM_KEYS, number[]>;  
+    
+  @novelDataModule.State('_loading')
+  loading!: boolean;
+    
+  @novelDataModule.Getter
+  sortedTimelineEvents!: TimelineEventModel[];
+
+  mounted(): void {
+    this.loadNovelItems({ view: PARENT_ITEM_KEYS.TIMELINE, novelId: this.$route.params.id})
+    for (let key of this.allowedReferences) {
+      this.loadNovelItems({ view: key, novelId: this.$route.params.id})
+    }
+  }
+
+  add() {
+    this.addNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: new TimelineEventModel() });
+  }
+
+  getExistingEventReferences(event: TimelineEventModel, key: PARENT_ITEM_KEYS) {
+    return this.referencedItems(event, key);
+  }
+
+  select(item): void {
+    this.selectItemIds({ view: PARENT_ITEM_KEYS.TIMELINE, itemIds: [item.id]});
+  }
+
+  deleteEvent(event: TimelineEventModel) {
+    this.deleteNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: event });
+  }
+
+  updateName(update: { newValue: string, item: TimelineEventModel }): void {
+    this.updateItem(update.item, { name: update.newValue });   
+  } 
+
+  updateDate(update: { newValue: string, item: TimelineEventModel }): void {
+    this.updateItem(update.item, { eventDate: update.newValue });   
+  }  
+
+  selected(item: TimelineEventModel): boolean {
+    return !!this.selectedItemIds.find(selected => selected === item.id);
+  }
+
+  private updateItem(item, overrideValues): void {
+    const newItem =  Object.assign({}, item, overrideValues);  
+    this.updateNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: newItem});  
+  }
+
+  private referencedItems(event: TimelineEventModel, parentKey: PARENT_ITEM_KEYS, mustInclude = true) {
+    const itemIds: number[] = event['references'][childKeyForParentKey(parentKey).toUpperCase()];
+    return this.getFlatList(
+      parentKey, 
+    ).filter(child => itemIds.includes(child.id) === mustInclude);
+  }
+
+  get parentKey() {
+    return PARENT_ITEM_KEYS.TIMELINE;
+  }   
+  get selectedItemIds(): number[] {
+    return this._selectedItemIds[PARENT_ITEM_KEYS.TIMELINE] || [];
+  }
+  get selectedItems(): TimelineEventModel[] {
+    return this.sortedTimelineEvents.filter(event => this.selectedItemIds.includes(event.id));
+  }
+}
+</script>
+
+<style>
+
+.empty {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.scroll-timeline {
+  background: var(--light-background)
+}
+.timeline {
+  display: flex;
+}
+.p-scrollpanel-wrapper {
+
+  z-index: inherit !important;
+}
+
+.reference-options {
+  display: flex;
+  background: var(--editor-toolbar-background);
+}
+
+.sheet-list {
+  background: var(--sheet-list-background)
+}
+
+.selected-item {
+  margin: 1em;
+}
+
+.selected-event {
+  background-color: pink;
+  height: 100%;
+}
+
+.split-panel {
+  height: 100%;
+}
+.plot {
+  display: flex;
+  width: 100%;
+}
+
+.timeline-event-container {
+  padding: 0.5em 2em;
+}
+
+.timeline {
+  flex-grow: 2;
+  height: calc(100vh);
+}
+
+.timeline-wrapper {
+  margin-top: 1em;
+}
+
+.custom-marker {
+  display: flex;
+  z-index: 2;
+  background-color: #2d2b2b;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  position: absolute;
+  top: 1.5em;
+  cursor: pointer;
+
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  color: white;
+}
+
+.event-date {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+
+.sub-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 5rem;
+  height: 100%;
+  flex-shrink: 0;
+  background: var(--middle-dark-background);
+  z-index: 1102;
+}
+
+.sub-menu .option-list {
+  margin: 1rem 0;
+}
+
+.trash-menu {
+  position: relative;
+}
+
+.add {
+  background-color: rgb(80, 80, 248) !important;
+  color: #efefef !important;
+}
+
+.add:hover {
+  color: white;
+  background-color: rgb(47, 47, 228);
+}
+
+.setting {
+  color: white;
+  background-color: rgba(153, 153, 153, 0.466);
+}
+
+.setting:hover {
+  color: white;
+  background-color: rgba(206, 206, 206, 0.466);
+}
+
+.setting.filter-active {
+  color: #495057;
+  background-color: rgb(202, 230, 255);
+}
+
+.mutation-options {
+  margin: 1rem 0;
+}
+
+.toggle-switch {
+  line-height: 3em;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-switch .label {
+  margin-left: 1em;
+}
+</style>
+

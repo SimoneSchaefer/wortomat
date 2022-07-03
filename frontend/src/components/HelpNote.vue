@@ -1,14 +1,6 @@
 <template>
   <div class="help-note-container">
-    <!--<ScrollPanel style="height: 100%">-->
-      <div class="sheet">
-        <h1>There is nothing to see here!</h1>
-        <!-- <iframe
-        style="font-family: Roboto"
-        :src="`/assets/help-notes/en/${itemKey}.html`"
-      />-->
-        <!-- TODO consider user's language -->
-      </div><!--</ScrollPanel>-->
+    <h1 class="empty-info">{{$t('empty_info')}}</h1>
   </div>
 </template>
 
@@ -56,6 +48,10 @@ iframe {
   top: 1em;
   bottom: 3em;
   background: var(--sheet-background);
+}
+
+.empty-info {
+  color: #fff;
 }
 
 hr {
