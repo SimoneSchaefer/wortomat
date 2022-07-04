@@ -17,6 +17,8 @@ public class TimelineEvent {
 
     private String name;
 
+    private String details;
+
     private String summary;
 
     private Date eventDate;
@@ -28,7 +30,7 @@ public class TimelineEvent {
 
     @ManyToMany
     private List<Image> images;
-    
+
     @JsonIgnore
     @ManyToOne
     private Novel novel;

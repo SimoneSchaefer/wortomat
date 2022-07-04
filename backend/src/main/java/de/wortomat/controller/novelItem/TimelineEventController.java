@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/novels/{novelId}/timeline/")
@@ -24,6 +25,15 @@ public class TimelineEventController {
     @PutMapping
     public ResponseEntity<TimelineEvent> update(@PathVariable("novelId") Long novelId, @RequestBody TimelineEvent timelineEvent) {
         return ResponseEntity.ok(this.timelineEventService.update(novelId, timelineEvent));
+    }
+
+    @PutMapping("move")
+    public ResponseEntity<List<TimelineEvent>> move(@PathVariable("novelId") Long novelId, @RequestBody Map<String, String> updatedPositions) {
+        List<TimelineEvent> events = this.timelineEventService.move(
+                novelId,
+                Long.parseLong(updatedPositions.get("eventId")),
+                Integer.parseInt(updatedPositions.get("newPosition")));
+        return ResponseEntity.ok(events);
     }
 
     @DeleteMapping("{timelineEventId}")

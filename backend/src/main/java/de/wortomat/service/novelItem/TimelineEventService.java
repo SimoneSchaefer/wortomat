@@ -8,6 +8,7 @@ import de.wortomat.service.NovelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -45,6 +46,20 @@ public class TimelineEventService {
         timelineEvent.setNovel(novelService.get(novelId));
 
         return this.timelineEventRepository.save(timelineEvent);
+    }
+
+    @Transactional
+    public List<TimelineEvent> move(Long novelId, Long timelineEventId, Integer newPosition) {
+        TimelineEvent event = timelineEventRepository.findById(timelineEventId).orElseThrow(NotFoundException::new);
+        List<TimelineEvent> events = timelineEventRepository.findAllByNovelIdOrderByPosition(novelId);
+        events.remove(event);
+        events.add(newPosition, event);
+
+        for (int i = 0; i < events.size(); i++) {
+            events.get(i).setPosition(i);
+        }
+        timelineEventRepository.saveAll(events);
+        return this.timelineEventRepository.findAllByNovelIdOrderByPosition(novelId);
     }
 
     public TimelineEvent deleteChapterReference(Long novelId, Long timelineEventId, Long chapterId) {

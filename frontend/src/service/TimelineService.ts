@@ -11,6 +11,13 @@ export class TimelineService extends NovelItemService {
      return `timeline`;
     }
 
+    move(novelId: number, itemId: number, newPosition:  number) {
+        return API.put(`${super.getBasePath(novelId)}/move`, {
+            eventId: itemId,
+            newPosition: newPosition
+        })
+    }
+
     addReference(novelId: number, timelineEvent: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS) {
         return API.put(`${super.getBasePath(novelId)}/addReference?timelineEventId=${timelineEvent.id}&itemId=${item.id}&type=${childKeyForParentKey(key).toLocaleLowerCase()}`);
     }

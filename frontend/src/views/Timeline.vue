@@ -1,21 +1,52 @@
 <template>
- <ScrollPanel style="height: 100%" class="scroll-timeline">
-  <div class="timeline">
-    <div class="connection"></div>
-    <div class="events">
-      <div v-for="event of sortedTimelineEvents" class="row" v-bind:key="event.id">
-         <div class="summary">
-           {{event.details}}
-           {{event.name}}
-          </div>
-        <div class="thumbnail">
-          <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
-        </div>
-        <div class="details">{{event.summary}}</div>
+  <ScrollPanel style="height: 100%" class="scroll-timeline">
+    <div class="timeline">
+      <div class="connection"></div>
+      <div class="events">
+        <draggable
+          :list="sortedTimelineEvents"
+          class="list-group"
+          ghost-class="ghost"
+          drag-class="dragging"
+          group="children"
+          @end="childMoved($event)"
+          :id="`events`"
+        >
+          <transition-group type="transition" :name="'flip-list'">
+            <div
+              v-for="event of sortedTimelineEvents"
+              class="row"
+              :id="event.id"
+              v-bind:key="event.id"
+            >
+              <div class="summary">
+                <div class="date">
+                  <h1>
+                    <EditableLabel
+                      v-bind:value="event.details"
+                      @update-label="updateDetails(event, $event)"
+                      :placeHolderTitle="`fallback_labels.no_name.TIMELINE_DATE`"
+                    ></EditableLabel>
+                  </h1>
+                </div>
+                <div class="name">
+                  <EditableLabel
+                    v-bind:value="event.name"
+                    @update-label="updateName(event, $event)"
+                    :placeHolderTitle="`fallback_labels.no_name.TIMELINE`"
+                  ></EditableLabel>
+                </div>
+              </div>
+              <div class="thumbnail">
+                <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
+              </div>
+              <div class="details">{{ event.summary }}</div>
+            </div>
+          </transition-group>
+        </draggable>
       </div>
     </div>
-  </div>
- </ScrollPanel>
+  </ScrollPanel>
 </template>
 
 <script lang="ts">
@@ -36,6 +67,7 @@ import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import WHelpNote from "@/components/HelpNote.vue";
 import WSubMenuLink from "@/components/navigation/submenu/SubMenuLink.vue";
+import { TimelineService } from "@/service/TimelineService";
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
@@ -102,6 +134,18 @@ export default class Plot extends mixins(TimelineEventMixin) {
     }
   }
 
+  childMoved($event) {
+    console.log("moved", $event.newIndex, $event.clone.id);
+    new TimelineService()
+      .move(this.novelId, $event.clone.id, $event.newIndex)
+      .then(() => {
+        this.loadNovelItems({
+          view: PARENT_ITEM_KEYS.TIMELINE,
+          novelId: this.$route.params.id,
+        });
+      });
+  }
+
   add() {
     this.addNovelItem({
       view: PARENT_ITEM_KEYS.TIMELINE,
@@ -121,8 +165,13 @@ export default class Plot extends mixins(TimelineEventMixin) {
     this.deleteNovelItem({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: event });
   }
 
-  updateName(update: { newValue: string; item: TimelineEventModel }): void {
-    this.updateItem(update.item, { name: update.newValue });
+  updateName(item, $event): void {
+    this.updateItem(item, { name: $event });
+  }
+
+  updateDetails(item, $event): void {
+    console.log(item, $event);
+    this.updateItem(item, { details: $event });
   }
 
   updateDate(update: { newValue: string; item: TimelineEventModel }): void {
@@ -196,7 +245,11 @@ export default class Plot extends mixins(TimelineEventMixin) {
   background-color: #fff;
   border: 3px solid #3e3e3e;
   padding: 0.5em;
+}
+
+.summary .date h1 {
   font-size: 1.2em;
+  margin: 0;
 }
 
 .details {
@@ -205,7 +258,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
   border: 3px solid #3e3e3e;
   padding-left: 100px;
   flex-grow: 1;
-  margin-left: -100px;
+  margin-left: -103px;
 }
 
 .thumbnail {

@@ -103,7 +103,8 @@
             "LOCATIONS": "Unnamed location",
             "LOCATION_GROUPS": "Unnamed location group",
             "novel": "Unnamed novel",
-            "TIMELINE": "Unnamed event"
+            "TIMELINE": "Unnamed event",
+            "TIMELINE_DATE": "Unknown time"
         },
         "no_summary": "No summary added yet",
         "no_extended_summary": "No detailed summary added yet",
