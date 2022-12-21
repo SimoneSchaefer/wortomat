@@ -210,7 +210,7 @@ public abstract class NovelItemService<T extends IGroupingNovelItem<S>, S extend
     }
 
     private void ensurePosition(S child, Long novelId, Long parentId) {
-        if (child.getId() == null) {
+        if (child.getId() == null && child.getPosition() == null) {
             child.setPosition((getMaxPosition(novelId, parentId)));
         }
     }

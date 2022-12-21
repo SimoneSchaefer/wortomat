@@ -1,42 +1,40 @@
 package de.wortomat.service.groupingNovelItem;
 
-import de.wortomat.model.Chapter;
-import de.wortomat.model.ChapterTag;
-import de.wortomat.model.Part;
+import de.wortomat.model.*;
 import de.wortomat.repository.*;
-import de.wortomat.service.novelItem.ChapterService;
 import de.wortomat.service.novelItem.NovelItemService;
+import de.wortomat.service.novelItem.PlotlineEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PlotlineService extends GroupingNovelItemService<Part, Chapter, ChapterTag> {
+public class PlotlineService extends GroupingNovelItemService<Plotline, PlotlineEvent, PlotlineEventTag> {
 
     @Autowired
-    private PartsRepository partsRepository;
+    private PlotlineRepository plotlineRepository;
 
     @Autowired
-    private ChapterService chapterService;
+    private PlotlineEventRepository plotlineEventRepository;
 
     @Autowired
-    private ChapterRepository chapterRepository;
+    private PlotlineEventService plotlineEventService;
 
     @Autowired
     private ChapterTagRepository chapterTagRepository;
 
     @Override
-    protected GroupingItemRepository<Part, Long> getParentRepository() {
-        return this.partsRepository;
+    protected GroupingItemRepository<Plotline, Long> getParentRepository() {
+        return this.plotlineRepository;
     }
 
     @Override
-    protected NovelItemRepository<Chapter> getChildRepository() {
-        return this.chapterRepository;
+    protected NovelItemRepository<PlotlineEvent> getChildRepository() {
+        return this.plotlineEventRepository;
     }
 
     @Override
-    protected NovelItemService<Part, Chapter, ChapterTag> getChildService() {
-        return this.chapterService;
+    protected NovelItemService<Plotline, PlotlineEvent, PlotlineEventTag> getChildService() {
+        return this.plotlineEventService;
     }
 
     @Override

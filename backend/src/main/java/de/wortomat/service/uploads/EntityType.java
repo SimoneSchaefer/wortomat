@@ -4,5 +4,6 @@ public enum EntityType {
     CHARACTERS,
     RESEARCH,
     LOCATIONS,
-    CHAPTERS
+    CHAPTERS,
+    PLOTLINES
 }

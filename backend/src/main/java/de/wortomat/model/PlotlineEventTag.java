@@ -10,4 +10,4 @@ import javax.persistence.Entity;
 @Data
 @Setter
 @Getter
-public class PlotlineEventTag extends NovelItemTag<Chapter> {}
+public class PlotlineEventTag extends NovelItemTag<PlotlineEvent> {}

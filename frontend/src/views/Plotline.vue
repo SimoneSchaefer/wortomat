@@ -6,53 +6,72 @@
         </div>
 
 
-        <ScrollPanel  style="width: 100%; height: 100%" >
-            <div class="plotlines">
-                <div v-for="plotline in enrichedPlotlines" class="plotline" v-bind:key="plotline.id">
-                    <h2 class="list-group-item tree-view-item">
-                        <EditableLabel v-bind:value="plotline.name" @update-label="updateName(plotline, $event)"
-                            :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel>
-                    </h2>
-                    <div class="plotline-content">
-                        <div class="left"></div>
-                        <div class="divider"></div>
-                        <div class="right">
+        <ScrollPanel style="width: 100%; height: 100%">
+            <div class="">
+                <draggable :list="enrichedPlotlines" group="parents" class="list-group plotlines" ghost-class="ghost"
+                    drag-class="dragging" @change="parentMoved">
+                    <transition-group type="transition" :name="'flip-list'">
 
-                            <div class="plotline-event" v-for="item in plotline.children" :key="item.id">
-                                <div class="connection"></div>
-                                <div class="list-group-item tree-view-item">
-                                    <div v-if="item.id">
-                                        <b>
-                                            <EditableLabel v-bind:value="item.name"
-                                                @update-label="updateName(item, $event)"
-                                                :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`">
-                                            </EditableLabel>
-                                        </b>
-                                        <div>
-                                            <EditableLabel v-bind:value="item.summary"
-                                                @update-label="updateSummary(item, $event)"
-                                                :placeHolderTitle="`fallback_labels.no_summary`">
-                                            </EditableLabel>
-                                        </div>
-                                    </div>
-                                    <div v-else>
-                                        <i>Empty slot</i><br>
-                                        <Button data-cy="add-event" label="Create a new event"
-                                            class="p-button-text p-button-lg add-button" icon="pi pi-plus"
-                                            v-on:click="addChild(plotline, item.position)"></Button>
-                                    </div>
+
+                        <div v-for="plotline in enrichedPlotlines" class="plotline" v-bind:key="plotline.id">
+                            <h2 class="list-group-item tree-view-item">
+                                <EditableLabel v-bind:value="plotline.name" @update-label="updateName(plotline, $event)"
+                                    :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel>
+                            </h2>
+                            <div class="plotline-content">
+                                <div class="left"></div>
+                                <div class="divider"></div>
+                                <div class="right">
+
+
+
+                                    <draggable :list="plotline.children" group="children" ghost-class="ghost"
+                                        drag-class="dragging" @change="childMoved" :id="`parent-${plotline.id}`">
+                                        <transition-group type="transition" :name="'flip-list'">
+                                            <div class="plotline-event" v-for="(item, index) in plotline.children"
+                                                :key="index">
+                                                <div class="connection"></div>
+                                                <div class="list-group-item tree-view-item">
+                                                    {{ item.position }} - {{ item.id }}
+
+                                                    <div v-if="item.id">
+                                                        <b>
+                                                            <EditableLabel v-bind:value="item.name"
+                                                                @update-label="updateName(item, $event)"
+                                                                :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`">
+                                                            </EditableLabel>
+                                                        </b>
+                                                        <div>
+                                                            <EditableLabel v-bind:value="item.summary"
+                                                                @update-label="updateSummary(item, $event)"
+                                                                :placeHolderTitle="`fallback_labels.no_summary`">
+                                                            </EditableLabel>
+                                                        </div>
+                                                    </div>
+                                                    <div v-else>
+                                                        <i>Empty slot</i><br>
+                                                        <Button data-cy="add-event" label="Create a new event"
+                                                            class="p-button-text p-button-lg add-button"
+                                                            icon="pi pi-plus"
+                                                            v-on:click="addChild(plotline, item.position)"></Button>
+                                                    </div>
+
+
+                                                </div>
+
+                                            </div>
+                                        </transition-group>
+                                    </draggable>
+
 
 
                                 </div>
-
                             </div>
 
-
-
                         </div>
-                    </div>
+                    </transition-group>
+                </draggable>
 
-                </div>
             </div>
         </ScrollPanel>
 
@@ -85,7 +104,7 @@ const novelModule = namespace("novelData");
         EditableLabel
     },
 })
-export default class Plotline extends mixins(UpdatableItemMixin) {
+export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
     @novelDataModule.State("_novelItems")
     novelItems!: Map<PARENT_ITEM_KEYS, ParentModel[]>;
 
@@ -122,6 +141,14 @@ export default class Plotline extends mixins(UpdatableItemMixin) {
         novelId: number,
     }) => Promise<void>;
 
+    parentMoved($event) {
+        console.log('event', $event)
+
+    }
+    childMoved($event) {
+        console.log('event', $event)
+
+    }
 
     addChild(selectedParent: ParentModel, position: number): void {
         const child = new ChildModel();
@@ -135,17 +162,22 @@ export default class Plotline extends mixins(UpdatableItemMixin) {
     get enrichedPlotlines() {
         const enrichedPlotlines: ParentModel[] = [];
         const allPositions = this.getAllPositions();
-        console.log('ALL POSITIONS', allPositions)
+        console.log('ALL POSITIONS', allPositions);
+        console.log('ALL PLOTLINES', this.plotlines);
         for (let plotline of this.plotlines) {
-            const plotlineCopy = { ...plotline };
+            const plotlineCopy = Object.assign({}, plotline );
             for (let position of allPositions) {
                 const childAtPosition = plotlineCopy.children.find(child => child.position === position);
                 if (!childAtPosition) {
-                    console.log('insert child for ' + plotline.name + ' at position ' + position);
                     const dummyChild = { ...new ChildModel(), ...{ position: position } };
                     plotlineCopy.children.splice(position, 0, dummyChild);
                 }
             }
+
+            const lastPosition = Math.max(...allPositions) + 1;
+            const dummyChild = { ...new ChildModel(), ...{ position: lastPosition } };
+            plotlineCopy.children.splice(lastPosition, 0, dummyChild);
+
             enrichedPlotlines.push(plotlineCopy);
         }
 
@@ -153,9 +185,6 @@ export default class Plotline extends mixins(UpdatableItemMixin) {
 
     }
 
-    checkMove(e) {
-        window.console.log("Future index: " + e.draggedContext.futureIndex);
-    }
 
     private getAllPositions() {
         const allPositions = new Set<number>();
@@ -170,8 +199,38 @@ export default class Plotline extends mixins(UpdatableItemMixin) {
         return PARENT_ITEM_KEYS.PLOTLINES
     }
 
+    get parentKey() {
+        return PARENT_ITEM_KEYS.PLOTLINES
+    }
+
     get plotlines() {
+        console.log('PLOTLINES NOW', this.novelItems.get(this.novelItemKey) )
         return this.novelItems.get(this.novelItemKey) || [];
+    }
+
+    updateName(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { name: newValue });
+    }
+
+    updateSummary(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { summary: newValue });
+    }
+
+    updateExtendedSummary(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { extended_summary: newValue });
+    }
+
+    updateContent(oldItem: BaseModel, newValue: string): void {
+        this.updateItem(oldItem, { content: newValue });
+    }
+
+    updateImages(oldItem: BaseModel, images: Array<{ id: number, name: string }>): void {
+        this.updateItem(oldItem, { images: images });
+    }
+
+    updateItem(oldItem: BaseModel, overrideValues: Record<string, any>) {
+        const newItem = Object.assign({}, oldItem, overrideValues);
+        this.updateNovelItem({ view: this.parentKey, novelItem: newItem });
     }
 }
 </script>
@@ -252,6 +311,7 @@ export default class Plotline extends mixins(UpdatableItemMixin) {
     text-overflow: ellipsis;
     white-space: nowrap;
     background: var(--light-background);
+    width: 100%;
 
 }
 
