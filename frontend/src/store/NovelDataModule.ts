@@ -28,23 +28,6 @@ export default class NovelDataModule extends VuexModule {
 
     get sortedTimelineEvents(): TimelineEventModel[] {
         const allItems = (this._novelItems.get(PARENT_ITEM_KEYS.TIMELINE) || []) as TimelineEventModel[];
-        /*allItems.sort(function(a, b) {
-            if (a.eventDate === null && b.eventDate === null) {
-                return Number(a.id < b.id);
-            }
-            if (a.eventDate === null) {
-                return -1;
-            }
-            if (b.eventDate === null) {
-                return 1;
-            }
-            if (a.eventDate < b.eventDate) {
-                return -1;
-            }
-            if (a.eventDate > b.eventDate) {
-                return 1;
-            }      
-        });*/
         return allItems;
     }
 

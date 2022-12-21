@@ -104,7 +104,8 @@
             "LOCATION_GROUPS": "Unnamed location group",
             "novel": "Unnamed novel",
             "TIMELINE": "Unnamed event",
-            "TIMELINE_DATE": "Unknown time"
+            "TIMELINE_DATE": "Unknown time",
+            "PLOTLINES": "Unnamed event"
         },
         "no_summary": "No summary added yet",
         "no_extended_summary": "No detailed summary added yet",

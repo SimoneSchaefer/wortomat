@@ -5,6 +5,7 @@ import Chapters from '../views/Chapters.vue'
 import Characters from '../views/Characters.vue'
 import Locations from '../views/Locations.vue'
 import Research from '../views/Research.vue'
+import Plotline from '../views/Plotline.vue'
 import Timeline from '../views/Timeline.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -30,8 +31,12 @@ const routes: Array<RouteRecordRaw> = [
         component: Locations,
       },
       {
+        path: 'timeline',
+        component: Timeline,
+      },
+      {
         path: 'plot',
-        component: Timeline
+        component: Plotline,
       }
     ]
   }

@@ -9,7 +9,7 @@
           ghost-class="ghost"
           drag-class="dragging"
           group="children"
-          @end="childMoved($event)"
+          @end="moved($event)"
           :id="`events`"
         >
           <transition-group type="transition" :name="'flip-list'">
@@ -19,6 +19,8 @@
               :id="event.id"
               v-bind:key="event.id"
             >
+            <WTimelineEvent :event="event"></WTimelineEvent>
+            <!--
               <div class="summary">
                 <div class="date">
                   <h1>
@@ -38,10 +40,22 @@
                 </div>
               </div>
               <div class="thumbnail">
+                <FileUpload
+                  ref="fileupload"
+                  name="upload[]"
+                  mode="basic"
+                  accept="image/*"
+                  :auto="true"
+                  :customUpload="true"
+                  @uploader="customUpload"
+                  :chooseLabel="''"
+                ></FileUpload>
+
                 <img src="/assets/images/dummy-gallery-item/CHARACTERS.jpg" />
               </div>
-              <div class="details">{{ event.summary }}</div>
+              <div class="details">{{ event.summary }}</div>-->
             </div>
+          
           </transition-group>
         </draggable>
       </div>
@@ -67,7 +81,9 @@ import WTimeline from "@/components/timeline/Timeline.vue";
 import WNovelItemDropdown from "@/components/shared/NovelItemDropdown.vue";
 import WHelpNote from "@/components/HelpNote.vue";
 import WSubMenuLink from "@/components/navigation/submenu/SubMenuLink.vue";
+import WTimelineEvent from "@/components/timeline/TimelineEvent.vue";
 import { TimelineService } from "@/service/TimelineService";
+import { BACKEND_URL } from "@/service/Env";
 
 const novelDataModule = namespace("novelData");
 const selectionModule = namespace("selection");
@@ -79,6 +95,7 @@ const selectionModule = namespace("selection");
     NovelItemSheet,
     WSidebarOpener,
     WTimeline,
+    WTimelineEvent,
     WNovelItemDropdown,
     WHelpNote,
     WSubMenuLink,
@@ -134,7 +151,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
     }
   }
 
-  childMoved($event) {
+  moved($event) {
     console.log("moved", $event.newIndex, $event.clone.id);
     new TimelineService()
       .move(this.novelId, $event.clone.id, $event.newIndex)
@@ -145,6 +162,38 @@ export default class Plot extends mixins(TimelineEventMixin) {
         });
       });
   }
+
+  /*customUpload(event) {
+    let xhr = new XMLHttpRequest();
+    let formData = new FormData();
+
+    for (let file of event.files) {
+      formData.append("upload[]", file, file.name);
+    }
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          this.$emit("upload-image", JSON.parse(xhr.response));
+        } else {
+          this.$toast.add({
+            severity: "error",
+            summary: "Could not upload image",
+            life: 10000,
+          });
+        }
+        (this.$refs.fileupload as any).clear();
+      }
+    };
+
+    xhr.open("POST", this.uploadUrl(1), true);
+    xhr.withCredentials = false;
+    xhr.send(formData);
+  }
+
+  private uploadUrl(eventId: number) {
+    return `${BACKEND_URL}/novels/${this.novelId}/timeline/${eventId}/files/upload`;
+  }*/
 
   add() {
     this.addNovelItem({
@@ -228,60 +277,11 @@ export default class Plot extends mixins(TimelineEventMixin) {
   margin-top: 3em;
 }
 
-.row {
-  width: 100%;
-  display: flex;
-  margin: 1em 0;
-  background: linear-gradient(
-    90deg,
-    transparent 20%,
-    rgba(224, 224, 224, 0.534) 20%
-  );
-}
-
-.summary {
-  width: 20%;
-  margin: 0.5em 0 0.5em 0;
-  background-color: #fff;
-  border: 3px solid #3e3e3e;
-  padding: 0.5em;
-}
-
-.summary .date h1 {
-  font-size: 1.2em;
-  margin: 0;
-}
-
-.details {
-  padding-top: 1em;
-  color: #fff;
-  border: 3px solid #3e3e3e;
-  padding-left: 100px;
-  flex-grow: 1;
-  margin-left: -103px;
-}
-
-.thumbnail {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 3px solid #3e3e3e;
-  position: relative;
-  left: -50px;
-  overflow: hidden;
-}
-
-.thumbnail > img {
-  object-fit: cover;
-  width: 100px;
-  height: 100px;
-}
-
 .connection {
   width: 3px;
   background-color: #3e3e3e;
   height: 100%;
-  left: 20%;
+  left: 30%;
   position: relative;
 }
 </style>
