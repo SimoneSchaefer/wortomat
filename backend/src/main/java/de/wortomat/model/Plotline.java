@@ -11,6 +11,8 @@ import java.util.List;
 @Data
 public class Plotline extends GroupingNovelItem<PlotlineEvent>  {
 
+    String color;
+
     @OneToMany(mappedBy = "parent")
     private List<PlotlineEvent> children = Collections.emptyList();
 

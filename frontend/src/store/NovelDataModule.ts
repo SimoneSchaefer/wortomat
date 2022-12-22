@@ -59,9 +59,9 @@ export default class NovelDataModule extends VuexModule {
             const parent = this.findParentForChild(update.view, update.novelItem);
             const index = parent['children'].findIndex(child => child.id === update.novelItem.id);
             parent['children'].splice(index, 1, update.novelItem);
-
-            console.log('ADD CHILD AT INDEX', index)
-        } else {
+            const newParents = [...this._novelItems.get(update.view)];
+            this._novelItems.set(update.view, newParents);
+       } else {
             const index = this.findParentIndex(update.view, update.novelItem);
             if (index > -1) this._novelItems.get(update.view).splice(index, 1, update.novelItem);
         }
@@ -71,13 +71,9 @@ export default class NovelDataModule extends VuexModule {
     public novelItemAdded(update: { view: PARENT_ITEM_KEYS, novelItem: NovelModel }): void {
         if (update.novelItem.parentId) {
             const parent = this.findParentForChild(update.view, update.novelItem);
-            if (update.novelItem.position) {
-                console.log('ADD CHILD AT INDEX', update.novelItem.position);
-
-                parent['children'].splice(update.novelItem.position, 1, update.novelItem);
-            } else {
-                parent['children'].push(update.novelItem);
-            }
+            parent['children'].splice(update.novelItem.position, 0, update.novelItem);
+            const newParents = [...this._novelItems.get(update.view)];
+            this._novelItems.set(update.view, newParents);
         } else {
             this._novelItems.get(update.view).push(update.novelItem);
         }

@@ -2,37 +2,93 @@
 
     <div class="grouping-item-view">
         <div class="submenu">
-            <WSubMenu></WSubMenu>
+            <WSubMenu :createModel="createModel"></WSubMenu>
         </div>
 
 
         <ScrollPanel style="width: 100%; height: 100%">
-            <div class="">
+
+            <draggable :list="plotlines" group="parents" class="list-group plotlines" ghost-class="ghost"
+                drag-class="dragging" @change="parentMoved">
+                <transition-group type="transition" :name="'flip-list'">
+                    <div v-for="plotline in plotlines" class="plotline" v-bind:key="plotline.id">
+                        <div class="divider" :style="{
+                            height: '100%',
+                            width: '10px',
+                            backgroundColor: plotline.color,
+                            flex: '0.5em 0 0',
+                        }"></div>
+                        <div class="events">
+
+                            <draggable :list="plotline.children" group="children" class="list-group plotline-events"
+                                ghost-class="ghost" drag-class="dragging" @change="childMoved">
+                                <transition-group type="transition" :name="'flip-list'">
+                                    <div v-for="position in getAllPositions()" v-bind:key="position">
+                                        <div v-if="getChildAtPosition(plotline, position)" class="plotline-event">
+                                            <div class="connection"></div>
+                                            <div class="list-group-item tree-view-item">
+                                                <b>
+                                                    <EditableLabel
+                                                        v-bind:value="getChildAtPosition(plotline, position).name"
+                                                        @update-label="updateName(getChildAtPosition(plotline, position), $event)"
+                                                        :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`">
+                                                    </EditableLabel>
+                                                </b>
+                                                <div>
+                                                    <EditableLabel
+                                                        v-bind:value="getChildAtPosition(plotline, position).summary"
+                                                        @update-label="updateSummary(getChildAtPosition(plotline, position), $event)"
+                                                        :placeHolderTitle="`fallback_labels.no_summary`">
+                                                    </EditableLabel>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-else class="add-event">
+                                            <Button class="p-button p-button-lg p-button-rounded add-button"
+                                                icon="pi pi-plus" v-on:click="addChild(plotline, position)"></Button>
+                                        </div>
+                                    </div>
+                                </transition-group>
+                            </draggable>
+
+                        </div>
+                    </div>
+                </transition-group>
+            </draggable>
+
+
+
+
+
+
+
+
+
+
+            <!-- <div class="">
                 <draggable :list="enrichedPlotlines" group="parents" class="list-group plotlines" ghost-class="ghost"
                     drag-class="dragging" @change="parentMoved">
                     <transition-group type="transition" :name="'flip-list'">
 
 
                         <div v-for="plotline in enrichedPlotlines" class="plotline" v-bind:key="plotline.id">
-                            <h2 class="list-group-item tree-view-item">
-                                <EditableLabel v-bind:value="plotline.name" @update-label="updateName(plotline, $event)"
-                                    :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`"></EditableLabel>
-                            </h2>
                             <div class="plotline-content">
                                 <div class="left"></div>
-                                <div class="divider"></div>
+                                <div :style="{
+                                    backgroundColor: plotline.color,
+                                    flex: '0.5em 0 0',
+                                    cursor: 'grab'
+                                }"></div>
                                 <div class="right">
-
-
-
                                     <draggable :list="plotline.children" group="children" ghost-class="ghost"
-                                        drag-class="dragging" @change="childMoved" :id="`parent-${plotline.id}`">
+                                        :options="{ draggable: '.draggingEnabled' }" drag-class="dragging"
+                                        @start="checkMove" @change="childMoved" :id="`parent-${plotline.id}`">
                                         <transition-group type="transition" :name="'flip-list'">
                                             <div class="plotline-event" v-for="(item, index) in plotline.children"
-                                                :key="index">
+                                                :key="index"
+                                                :class="{ 'draggingEnabled': !!item.id, 'draggingDisabled': !!!item.id }">
                                                 <div class="connection"></div>
                                                 <div class="list-group-item tree-view-item">
-                                                    {{ item.position }} - {{ item.id }}
 
                                                     <div v-if="item.id">
                                                         <b>
@@ -55,42 +111,32 @@
                                                             icon="pi pi-plus"
                                                             v-on:click="addChild(plotline, item.position)"></Button>
                                                     </div>
-
-
                                                 </div>
-
                                             </div>
                                         </transition-group>
                                     </draggable>
-
-
-
                                 </div>
                             </div>
-
                         </div>
                     </transition-group>
                 </draggable>
-
-            </div>
+            </div>-->
         </ScrollPanel>
-
     </div>
-
 </template>
 
 <script lang="ts">
+import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
 import WSubMenu from "@/components/navigation/submenu/SubMenu.vue";
 import NovelList from '@/components/novels/NovelList.vue';
 import { BaseModel } from '@/models/Base.model';
-import { ParentModel } from '@/models/ParentModel';
-import { PARENT_ITEM_KEYS } from '@/store/keys';
-import { namespace } from "s-vuex-class";
-import { mixins, Options, Vue } from 'vue-class-component';
-import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
-import UpdatableItemMixin from "@/components/mixins/UpdatableItemMixin";
 import { ChildModel } from "@/models/ChildModel";
+import { ParentModel } from '@/models/ParentModel';
+import { PlotlineModel } from '@/models/Plotline.model';
+import { PARENT_ITEM_KEYS } from '@/store/keys';
 import ScrollPanel from "primevue/scrollpanel";
+import { namespace } from "s-vuex-class";
+import { Options, Vue } from 'vue-class-component';
 
 const applicationStateModule = namespace("applicationState");
 const novelDataModule = namespace("novelData");
@@ -137,17 +183,32 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
 
     @novelDataModule.Action
     loadNovelItems!: ({
-        view: PARENT_ITEM_KEYS,
-        novelId: number,
+        view,
+        novelId,
     }) => Promise<void>;
+
+    checkMove($event) {
+        return $event.item.className.includes('draggingEnabled');
+    }
 
     parentMoved($event) {
         console.log('event', $event)
 
     }
     childMoved($event) {
-        console.log('event', $event)
+        console.log('child moved', $event);
 
+
+    }
+
+    getChildAtPosition(parent: ParentModel, position: number) {
+        return parent.children.find(child => child.position === position);
+    }
+
+    createModel() {
+        const plotline = new PlotlineModel();
+        plotline.color = ` #${Math.floor(Math.random() * 16777215).toString(16)}`;
+        return plotline;
     }
 
     addChild(selectedParent: ParentModel, position: number): void {
@@ -160,12 +221,13 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
     }
 
     get enrichedPlotlines() {
-        const enrichedPlotlines: ParentModel[] = [];
+        const enrichedPlotlines: PlotlineModel[] = [];
         const allPositions = this.getAllPositions();
-        console.log('ALL POSITIONS', allPositions);
-        console.log('ALL PLOTLINES', this.plotlines);
-        for (let plotline of this.plotlines) {
-            const plotlineCopy = Object.assign({}, plotline );
+
+        const plotlines = this.plotlines;
+        for (let plotline of plotlines) {
+            const plotlineCopy = Object.assign(new PlotlineModel(), plotline);
+            plotlineCopy.children = [...plotline.children];
             for (let position of allPositions) {
                 const childAtPosition = plotlineCopy.children.find(child => child.position === position);
                 if (!childAtPosition) {
@@ -186,13 +248,17 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
     }
 
 
-    private getAllPositions() {
+    getAllPositions() {
         const allPositions = new Set<number>();
         for (let plotline of this.plotlines) {
             const positions = plotline.children.map(child => child.position)
             positions.forEach((position) => allPositions.add(position));
         }
-        return allPositions;
+        const maxPosition = Math.max(...allPositions);
+        allPositions.add(maxPosition + 1);
+
+        const sorted = Array.from(allPositions).sort()
+        return sorted;
     }
 
     get novelItemKey() {
@@ -203,9 +269,12 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
         return PARENT_ITEM_KEYS.PLOTLINES
     }
 
-    get plotlines() {
-        console.log('PLOTLINES NOW', this.novelItems.get(this.novelItemKey) )
-        return this.novelItems.get(this.novelItemKey) || [];
+    get plotlines(): PlotlineModel[] {
+        const fromStore = this.novelItems.get(this.novelItemKey);
+        if (fromStore) {
+            return fromStore.slice() as PlotlineModel[];
+        }
+        return [];
     }
 
     updateName(oldItem: BaseModel, newValue: string): void {
@@ -236,6 +305,11 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
 </script>
 
 <style scoped>
+.draggingDisabled {
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .plotline-content {
     display: flex;
 }
@@ -245,6 +319,20 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
     display: flex;
     margin-bottom: 1em;
 
+}
+
+.add-event {
+    position: relative;
+    left: -25px;
+    height: 5em;
+    margin-bottom: 1em;
+    top: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.events {
+    flex: 100% 0 1;
 }
 
 .connection {
@@ -279,6 +367,14 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
     display: flex;
 }
 
+.draggingEnabled {
+    cursor: grab;
+}
+
+.draggingDisabled {
+    cursor: not-allowed;
+}
+
 .submenu {
     flex-grow: 0;
     justify-content: center;
@@ -299,9 +395,10 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
 }
 
 .plotline {
-    width: 20em;
+    width: 30em;
     height: 100%;
     padding: 1em;
+    display: flex;
 }
 
 .list-group-item {

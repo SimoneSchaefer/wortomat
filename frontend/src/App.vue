@@ -1,7 +1,8 @@
 <template>
   <ErrorBoundary>
-    <Spinner></Spinner>
     <Backdrop />
+
+    <Spinner></Spinner>
 
     <router-view/>
     <ConfirmDialog></ConfirmDialog>
