@@ -31,6 +31,7 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         return null;
     }
 
+
     public List<T> get(Long novelId) {
         List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId).stream().filter(Objects::nonNull).collect(Collectors.toList());
         for (T parent : allParts) {
@@ -128,26 +129,21 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         this.getParentRepository().save(newParent);
     }
 
-    private void moveChildWithinParent(S child, int newPosition) {
+    protected void moveChildWithinParent(S child, int newPosition) {
         sortChildren(child.getParent());
         List<S> children = child.getParent().getChildren();
         children.remove(child);
-
-        int fillCounter = children.size();
-        while (fillCounter <= newPosition) {
-            children.add(fillCounter, null);
-            fillCounter++;
-        }
         children.add(newPosition, child);
         updatePositions(children);
     }
 
-    private void updatePositions(List<S> novelItems) {
+    void updatePositions(List<S> novelItems) {
         for (int i = 0; i < novelItems.size(); i++) {
             if (novelItems.get(i) != null) {
                 novelItems.get(i).setPosition(i);
             }
         }
+
         this.getChildRepository().saveAll(novelItems.stream().filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
@@ -159,7 +155,7 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         return maxPosition.getPosition() + 1;
     }
 
-    private void sortChildren(T parent) {
+    void sortChildren(T parent) {
         List<S> filteredChildren = parent.getChildren().stream().filter(child -> child != null && child.getDeletedAt() == null).collect(Collectors.toList());
         parent.setChildren(filteredChildren);
         parent.getChildren().sort(Comparator.comparing(INovelItem::getPosition));

@@ -12,6 +12,7 @@
                 <transition-group type="transition" :name="'flip-list'">
                     <div v-for="plotline in plotlines" class="plotline" v-bind:key="plotline.id">
                         <div class="divider" :style="{
+                            cursor: 'grab',
                             height: '100%',
                             width: '10px',
                             backgroundColor: plotline.color,
@@ -23,7 +24,8 @@
                                 :id="`parent-id-${plotline.id}`" ghost-class="ghost" drag-class="dragging"
                                 @end="childMoved">
                                 <transition-group type="transition" :name="'flip-list'">
-                                    <div v-for="position in getAllPositions()" v-bind:key="position">
+                                    <div v-for="position in getAllPositions()" v-bind:key="position"
+                                        :id="`position-${position}`">
                                         <div v-if="getChildAtPosition(plotline, position)" class="plotline-event"
                                             :id="`child-id-${getChildAtPosition(plotline, position).id}`">
                                             <div class="connection"></div>
@@ -71,12 +73,10 @@ import { PlotlineModel } from '@/models/Plotline.model';
 import { PARENT_ITEM_KEYS } from '@/store/keys';
 import ScrollPanel from "primevue/scrollpanel";
 import { namespace } from "s-vuex-class";
-import { mixins, Options, Vue } from 'vue-class-component';
+import { mixins, Options } from 'vue-class-component';
 
 const applicationStateModule = namespace("applicationState");
 const novelDataModule = namespace("novelData");
-
-const novelModule = namespace("novelData");
 
 @Options({
     components: {
@@ -122,6 +122,14 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
         novelId,
     }) => Promise<void>;
 
+    @novelDataModule.Action
+    moveParent!: (payload: {
+        key: PARENT_ITEM_KEYS;
+        novelId: number;
+        parentId: number;
+        oldPosition: number;
+        newPosition: number;
+    }) => Promise<void>;
 
     @novelDataModule.Action
     moveChild!: (payload: {
@@ -132,27 +140,34 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
         newPosition: number;
     }) => Promise<void>;
 
-    checkMove($event) {
-        return $event.item.className.includes('draggingEnabled');
-    }
-
     parentMoved($event) {
-        console.log('event', $event)
+        if (!$event.removed) {
+            const parentId = $event.moved.element.id;
+            const newIndex = $event.moved.newIndex;
+            const oldIndex = $event.moved.oldIndex;
+            this.moveParent({
+                key: this.parentKey,
+                novelId: this.novelId,
+                parentId: parentId,
+                oldPosition: oldIndex,
+                newPosition: newIndex,
+            });
+        }
 
     }
     childMoved($event) {
-
-        console.log('CHILD MOVED', $event);
-        const parentTo = $event.to.id.replace("parent-id-", "");
-        const newPosition = $event.newIndex;
-        const childId = $event.clone.children[0].id.replace("child-id-", "");
-        this.moveChild({
-            key: this.parentKey,
-            novelId: this.novelId,
-            childToMove: childId,
-            newParentId: parentTo,
-            newPosition: newPosition,
-        });
+        if (!$event.to.className.includes("trashzone")) {
+            const parentTo = $event.to.id.replace("parent-id-", "");
+            const newPosition = $event.newIndex;
+            const childId = $event.clone.children[0].id.replace("child-id-", "");
+            this.moveChild({
+                key: this.parentKey,
+                novelId: this.novelId,
+                childToMove: childId,
+                newParentId: parentTo,
+                newPosition: newPosition,
+            });
+        }
     }
 
     getChildAtPosition(parent: ParentModel, position: number) {
@@ -205,14 +220,15 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
     getAllPositions() {
         const allPositions = new Set<number>();
         for (let plotline of this.plotlines) {
-            const positions = plotline.children.map(child => child.position)
+            const positions = plotline.children.map(child => child?.position)
             positions.forEach((position) => allPositions.add(position));
         }
-        const maxPosition = Math.max(...allPositions);
-        allPositions.add(maxPosition + 1);
-
-        const sorted = Array.from(allPositions).sort()
-        return sorted;
+        const maxPosition = allPositions.size > 0 ? Math.max(...allPositions) + 1 : 0;
+        const allPos = [];
+        for (let i = 0; i <= maxPosition; i++) {
+            allPos.push(i);
+        }
+        return allPos;
     }
 
     get novelItemKey() {
