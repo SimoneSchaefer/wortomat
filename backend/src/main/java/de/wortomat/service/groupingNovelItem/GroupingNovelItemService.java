@@ -10,26 +10,29 @@ import de.wortomat.service.novelItem.NovelItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, S extends INovelItem<T>, U extends INovelItemTag> {
 
+    @Autowired
+    protected NovelService novelService;
+
     protected abstract GroupingItemRepository<T, Long> getParentRepository();
+
     protected abstract NovelItemRepository<S> getChildRepository();
+
     protected abstract NovelItemService<T, S, U> getChildService();
 
     NovelItemTagRepository getTagRepository() { // TODO make abstract
         return null;
     }
-    @Autowired
-    protected NovelService novelService;
 
     public List<T> get(Long novelId) {
-        List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
+        List<T> allParts = this.getParentRepository().findAllByNovelIdOrderByPosition(novelId).stream().filter(Objects::nonNull).collect(Collectors.toList());
         for (T parent : allParts) {
             sortChildren(parent);
         }
@@ -74,7 +77,7 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         return getTagRepository().findByNovelIdOrderByName(novelId);
     }
 
-    public Object createTag( Long novelId, U tag) {
+    public Object createTag(Long novelId, U tag) {
         Novel novel = novelService.get(novelId);
         tag.setNovel(novel);
         NovelItemTagRepository repo = getTagRepository();
@@ -129,15 +132,23 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         sortChildren(child.getParent());
         List<S> children = child.getParent().getChildren();
         children.remove(child);
+
+        int fillCounter = children.size();
+        while (fillCounter <= newPosition) {
+            children.add(fillCounter, null);
+            fillCounter++;
+        }
         children.add(newPosition, child);
         updatePositions(children);
     }
 
     private void updatePositions(List<S> novelItems) {
         for (int i = 0; i < novelItems.size(); i++) {
-            novelItems.get(i).setPosition(i);
+            if (novelItems.get(i) != null) {
+                novelItems.get(i).setPosition(i);
+            }
         }
-        this.getChildRepository().saveAll(novelItems);
+        this.getChildRepository().saveAll(novelItems.stream().filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     private int getMaxPosition(Long novelId) {
@@ -149,7 +160,7 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
     }
 
     private void sortChildren(T parent) {
-        List<S> filteredChildren = parent.getChildren().stream().filter(child -> child.getDeletedAt() == null).collect(Collectors.toList());
+        List<S> filteredChildren = parent.getChildren().stream().filter(child -> child != null && child.getDeletedAt() == null).collect(Collectors.toList());
         parent.setChildren(filteredChildren);
         parent.getChildren().sort(Comparator.comparing(INovelItem::getPosition));
     }

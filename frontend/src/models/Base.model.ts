@@ -8,4 +8,5 @@ export class BaseModel {
     public content: string;
     public parentId?: number;
     public containsTranslation?: boolean;
+    public summary: string;
 }

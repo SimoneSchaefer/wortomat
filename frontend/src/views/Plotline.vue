@@ -7,7 +7,6 @@
 
 
         <ScrollPanel style="width: 100%; height: 100%">
-
             <draggable :list="plotlines" group="parents" class="list-group plotlines" ghost-class="ghost"
                 drag-class="dragging" @change="parentMoved">
                 <transition-group type="transition" :name="'flip-list'">
@@ -21,10 +20,12 @@
                         <div class="events">
 
                             <draggable :list="plotline.children" group="children" class="list-group plotline-events"
-                                ghost-class="ghost" drag-class="dragging" @change="childMoved">
+                                :id="`parent-id-${plotline.id}`" ghost-class="ghost" drag-class="dragging"
+                                @end="childMoved">
                                 <transition-group type="transition" :name="'flip-list'">
                                     <div v-for="position in getAllPositions()" v-bind:key="position">
-                                        <div v-if="getChildAtPosition(plotline, position)" class="plotline-event">
+                                        <div v-if="getChildAtPosition(plotline, position)" class="plotline-event"
+                                            :id="`child-id-${getChildAtPosition(plotline, position).id}`">
                                             <div class="connection"></div>
                                             <div class="list-group-item tree-view-item">
                                                 <b>
@@ -50,83 +51,17 @@
                                     </div>
                                 </transition-group>
                             </draggable>
-
                         </div>
                     </div>
                 </transition-group>
             </draggable>
-
-
-
-
-
-
-
-
-
-
-            <!-- <div class="">
-                <draggable :list="enrichedPlotlines" group="parents" class="list-group plotlines" ghost-class="ghost"
-                    drag-class="dragging" @change="parentMoved">
-                    <transition-group type="transition" :name="'flip-list'">
-
-
-                        <div v-for="plotline in enrichedPlotlines" class="plotline" v-bind:key="plotline.id">
-                            <div class="plotline-content">
-                                <div class="left"></div>
-                                <div :style="{
-                                    backgroundColor: plotline.color,
-                                    flex: '0.5em 0 0',
-                                    cursor: 'grab'
-                                }"></div>
-                                <div class="right">
-                                    <draggable :list="plotline.children" group="children" ghost-class="ghost"
-                                        :options="{ draggable: '.draggingEnabled' }" drag-class="dragging"
-                                        @start="checkMove" @change="childMoved" :id="`parent-${plotline.id}`">
-                                        <transition-group type="transition" :name="'flip-list'">
-                                            <div class="plotline-event" v-for="(item, index) in plotline.children"
-                                                :key="index"
-                                                :class="{ 'draggingEnabled': !!item.id, 'draggingDisabled': !!!item.id }">
-                                                <div class="connection"></div>
-                                                <div class="list-group-item tree-view-item">
-
-                                                    <div v-if="item.id">
-                                                        <b>
-                                                            <EditableLabel v-bind:value="item.name"
-                                                                @update-label="updateName(item, $event)"
-                                                                :placeHolderTitle="`fallback_labels.no_name.${novelItemKey}`">
-                                                            </EditableLabel>
-                                                        </b>
-                                                        <div>
-                                                            <EditableLabel v-bind:value="item.summary"
-                                                                @update-label="updateSummary(item, $event)"
-                                                                :placeHolderTitle="`fallback_labels.no_summary`">
-                                                            </EditableLabel>
-                                                        </div>
-                                                    </div>
-                                                    <div v-else>
-                                                        <i>Empty slot</i><br>
-                                                        <Button data-cy="add-event" label="Create a new event"
-                                                            class="p-button-text p-button-lg add-button"
-                                                            icon="pi pi-plus"
-                                                            v-on:click="addChild(plotline, item.position)"></Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </transition-group>
-                                    </draggable>
-                                </div>
-                            </div>
-                        </div>
-                    </transition-group>
-                </draggable>
-            </div>-->
         </ScrollPanel>
     </div>
 </template>
 
 <script lang="ts">
 import EditableLabel from "@/components/forms/inline-edit/EditableLabel.vue";
+import NovelItemKeyAwareMixin from '@/components/mixins/NovelItemKeyAwareMixin';
 import WSubMenu from "@/components/navigation/submenu/SubMenu.vue";
 import NovelList from '@/components/novels/NovelList.vue';
 import { BaseModel } from '@/models/Base.model';
@@ -136,7 +71,7 @@ import { PlotlineModel } from '@/models/Plotline.model';
 import { PARENT_ITEM_KEYS } from '@/store/keys';
 import ScrollPanel from "primevue/scrollpanel";
 import { namespace } from "s-vuex-class";
-import { Options, Vue } from 'vue-class-component';
+import { mixins, Options, Vue } from 'vue-class-component';
 
 const applicationStateModule = namespace("applicationState");
 const novelDataModule = namespace("novelData");
@@ -150,7 +85,7 @@ const novelModule = namespace("novelData");
         EditableLabel
     },
 })
-export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
+export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
     @novelDataModule.State("_novelItems")
     novelItems!: Map<PARENT_ITEM_KEYS, ParentModel[]>;
 
@@ -187,6 +122,16 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
         novelId,
     }) => Promise<void>;
 
+
+    @novelDataModule.Action
+    moveChild!: (payload: {
+        key: PARENT_ITEM_KEYS;
+        novelId: number;
+        childToMove: number;
+        newParentId: number;
+        newPosition: number;
+    }) => Promise<void>;
+
     checkMove($event) {
         return $event.item.className.includes('draggingEnabled');
     }
@@ -196,9 +141,18 @@ export default class Plotline extends Vue/*mixins(UpdatableItemMixin)*/ {
 
     }
     childMoved($event) {
-        console.log('child moved', $event);
 
-
+        console.log('CHILD MOVED', $event);
+        const parentTo = $event.to.id.replace("parent-id-", "");
+        const newPosition = $event.newIndex;
+        const childId = $event.clone.children[0].id.replace("child-id-", "");
+        this.moveChild({
+            key: this.parentKey,
+            novelId: this.novelId,
+            childToMove: childId,
+            newParentId: parentTo,
+            newPosition: newPosition,
+        });
     }
 
     getChildAtPosition(parent: ParentModel, position: number) {
