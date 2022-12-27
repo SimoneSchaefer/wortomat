@@ -2,9 +2,8 @@
 
     <div class="grouping-item-view">
         <div class="submenu">
-            <WSubMenu :createModel="createModel"></WSubMenu>
+            <WSubMenu :createModel="createModel" :displayOptions="false"></WSubMenu>
         </div>
-
 
         <ScrollPanel style="width: 100%; height: 100%">
             <draggable :list="plotlines" group="parents" class="list-group plotlines" ghost-class="ghost"

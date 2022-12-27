@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="option-list">
+    <div v-if="displayOptions" class="option-list">
       <SubMenuLink
         class="setting"
         v-bind:class="{
@@ -95,6 +95,9 @@ export default class SubMenu extends mixins(
 
   @Prop()
   createModel?: () => BaseModel;
+
+  @Prop()
+  displayOptions?: boolean = true;
 
   @novelDataModule.Action
   deleteMultipleNovelItems!: (payload: {
