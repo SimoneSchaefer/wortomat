@@ -63,6 +63,11 @@
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
         },
+        "PLOTLINES": {
+            "add": "Add plotline",
+            "add_child": "Add event",
+            "trash": "Drop items here to delete them"
+        },
         "TIMELINE": {
             "add": "Add event"
         },

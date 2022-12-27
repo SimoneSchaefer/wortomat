@@ -9,16 +9,16 @@
             <draggable :list="plotlines" group="parents" class="list-group plotlines" ghost-class="ghost"
                 drag-class="dragging" @change="parentMoved">
                 <transition-group type="transition" :name="'flip-list'">
-                    <div v-for="plotline in plotlines" class="plotline" v-bind:key="plotline.id">
+                    <div v-for="plotline in plotlines" class="plotline" v-bind:key="plotline.id" :style="{ height: getHeight()}">
                         <div class="divider" :style="{
                             cursor: 'grab',
                             height: '100%',
                             width: '10px',
                             backgroundColor: plotline.color,
                             flex: '0.5em 0 0',
+                        
                         }"></div>
                         <div class="events">
-
                             <draggable :list="plotline.children" group="children" class="list-group plotline-events"
                                 :id="`parent-id-${plotline.id}`" ghost-class="ghost" drag-class="dragging"
                                 @end="childMoved">
@@ -47,7 +47,7 @@
                                         </div>
                                         <div v-else class="add-event">
                                             <Button class="p-button p-button-lg p-button-rounded add-button"
-                                                icon="pi pi-plus" v-on:click="addChild(plotline, position)"></Button>
+                                                icon="pi pi-plus" v-on:click="addChild(plotline, position)" :title="$t('sub_menu.PLOTLINES.add_child')"></Button>
                                         </div>
                                     </div>
                                 </transition-group>
@@ -169,6 +169,10 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
         }
     }
 
+    getHeight() {
+        return `${this.getAllPositions().length * 6}em`;
+    }
+
     getChildAtPosition(parent: ParentModel, position: number) {
         return parent.children.find(child => child.position === position);
     }
@@ -187,34 +191,6 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
 
         this.addNovelItem({ view: this.parentKey, novelItem: child });
     }
-
-    get enrichedPlotlines() {
-        const enrichedPlotlines: PlotlineModel[] = [];
-        const allPositions = this.getAllPositions();
-
-        const plotlines = this.plotlines;
-        for (let plotline of plotlines) {
-            const plotlineCopy = Object.assign(new PlotlineModel(), plotline);
-            plotlineCopy.children = [...plotline.children];
-            for (let position of allPositions) {
-                const childAtPosition = plotlineCopy.children.find(child => child.position === position);
-                if (!childAtPosition) {
-                    const dummyChild = { ...new ChildModel(), ...{ position: position } };
-                    plotlineCopy.children.splice(position, 0, dummyChild);
-                }
-            }
-
-            const lastPosition = Math.max(...allPositions) + 1;
-            const dummyChild = { ...new ChildModel(), ...{ position: lastPosition } };
-            plotlineCopy.children.splice(lastPosition, 0, dummyChild);
-
-            enrichedPlotlines.push(plotlineCopy);
-        }
-
-        return enrichedPlotlines;
-
-    }
-
 
     getAllPositions() {
         const allPositions = new Set<number>();
