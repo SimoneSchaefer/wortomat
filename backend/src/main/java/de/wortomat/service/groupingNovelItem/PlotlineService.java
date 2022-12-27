@@ -1,5 +1,6 @@
 package de.wortomat.service.groupingNovelItem;
 
+import de.wortomat.exceptions.NotFoundException;
 import de.wortomat.model.Plotline;
 import de.wortomat.model.PlotlineEvent;
 import de.wortomat.model.PlotlineEventTag;
@@ -46,6 +47,27 @@ public class PlotlineService extends GroupingNovelItemService<Plotline, Plotline
     NovelItemTagRepository getTagRepository() {
         return this.chapterTagRepository;
     }
+
+
+    protected void moveChildToOtherParent(PlotlineEvent child, int newPosition, Long newParentId) {
+        Plotline oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
+        Plotline newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
+
+        List<PlotlineEvent> toMoveUp = newParent.getChildren().stream().filter(c -> c.getPosition() >= newPosition).collect(Collectors.toList());
+        toMoveUp.forEach(c -> c.setPosition(c.getPosition() + 1));
+        plotlineEventRepository.saveAll(toMoveUp);
+
+        oldParent.getChildren().remove(child);
+
+        child.setParent(newParent);
+        newParent.getChildren().add(child);
+        child.setPosition(newPosition);
+
+        plotlineEventRepository.save(child);
+        plotlineRepository.save(oldParent);
+        plotlineRepository.save(newParent);
+    }
+
 
     protected void moveChildWithinParent(PlotlineEvent child, int newPosition) {
         int oldPosition = child.getPosition();

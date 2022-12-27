@@ -113,7 +113,7 @@ public abstract class GroupingNovelItemService<T extends IGroupingNovelItem<S>, 
         return this.getParentRepository().findAllByNovelIdOrderByPosition(novelId);
     }
 
-    private void moveChildToOtherParent(S child, int newPosition, Long newParentId) {
+    protected void moveChildToOtherParent(S child, int newPosition, Long newParentId) {
         T oldParent = this.getParentRepository().findById(child.getParent().getId()).orElseThrow(NotFoundException::new);
         T newParent = this.getParentRepository().findById(newParentId).orElseThrow(NotFoundException::new);
 
