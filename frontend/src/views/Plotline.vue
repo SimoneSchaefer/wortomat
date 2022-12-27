@@ -46,7 +46,7 @@
                                             </div>
                                         </div>
                                         <div v-else class="add-event">
-                                            <Button class="p-button p-button-lg p-button-rounded add-button"
+                                            <Button class="p-button p-button-lg p-button-rounded add-button" style="height:2.357rem"
                                                 icon="pi pi-plus" v-on:click="addChild(plotline, position)" :title="$t('sub_menu.PLOTLINES.add_child')"></Button>
                                         </div>
                                     </div>
