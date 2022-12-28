@@ -46,7 +46,7 @@
                                             </div>
                                         </div>
                                         <div v-else class="add-event">
-                                            <Button class="p-button p-button-lg p-button-rounded add-button" style="height:2.357rem"
+                                            <Button class="p-button p-button-lg p-button-rounded add-button"
                                                 icon="pi pi-plus" v-on:click="addChild(plotline, position)" :title="$t('sub_menu.PLOTLINES.add_child')"></Button>
                                         </div>
                                     </div>
@@ -358,7 +358,7 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
 }
 
 .add-button {
-    width: 100%;
-    height: 100%;
+    width: 2.357rem;
+    height: 2.357rem;
 }
 </style>
