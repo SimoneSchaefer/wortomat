@@ -1,6 +1,6 @@
 <template>
   <div class="grouping-item-view">
-    <div class="submenu"><WSubMenu></WSubMenu></div>
+    <div class="submenu"><WSubMenu :displayOptions="true"></WSubMenu></div>
     <div v-if="items.length" class="content-view">
       <Splitter style="height: 100%" :stateKey="novelItemKey">
         <SplitterPanel class="split-content-left" :size="30">
