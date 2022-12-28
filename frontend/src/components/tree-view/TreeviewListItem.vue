@@ -6,11 +6,11 @@
               <a href="#"
                   @click="select"  
                   :title="$t(`sub_menu.${parentKey}.select_child`)"
-                  :key="element.id">
+                  :key="element.id"><b>
                   <WMissingValueTolerantLabel 
                       :value="translatedName" 
                       :fallback="$t(`fallback_labels.no_name.${childKey}`)">
-                  </WMissingValueTolerantLabel>&nbsp;
+                  </WMissingValueTolerantLabel>&nbsp;</b>
                   <i v-if="element.summary && element.summary.length">
                       <WMissingValueTolerantLabel 
                           :value="translatedSummary" 

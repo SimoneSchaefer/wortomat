@@ -10,12 +10,14 @@
     <%= htmlWebpackPlugin.options.title %>
   </title>
   <link href="<%= BASE_URL %>styles/primeflex.min.css" rel="stylesheet">
+ <!-- <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Sora"> -->
   <style>
     @font-face {
-      font-family: 'Sora', serif;
+      font-family: 'Sora';
+      /*src: url("<%= BASE_URL %>styles/fonts/Sora/Sora-VariableFont.wght.ttf") format('truetype');*/
+      src: url("<%= BASE_URL %>styles/fonts/Sora/static/Sora-Regular.ttf") format('truetype');
+      font-weight: normal;
       font-style: normal;
-      font-weight: 300;
-      src: url(<%= BASE_URL %>fonts/Sora/Sora-VariableFont.wght.ttf) format('ttf');
     }
 
     html,
