@@ -30,6 +30,8 @@ public abstract class NovelItem<T extends GroupingNovelItem> implements INovelIt
     private String extended_summary;
 
     private Integer position;
+    
+    private Integer status;
 
     private Boolean containsTranslation;
 

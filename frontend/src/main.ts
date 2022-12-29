@@ -35,6 +35,7 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Timeline from 'primevue/timeline';
 import Dropdown from 'primevue/dropdown';
 import Sidebar from 'primevue/sidebar';
+import Rating from 'primevue/rating';
 import InputSwitch from 'primevue/inputswitch';
 
 // import draggable from 'vue-draggable-next'
@@ -94,6 +95,7 @@ const app = createApp(App)
     .component('Timeline', Timeline)
     .component('Dropdown', Dropdown)
     .component('Sidebar', Sidebar)
+    .component('Rating', Rating)
     .component('draggable', VueDraggableNext)
 
  app.mount("#app");

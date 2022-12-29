@@ -1,5 +1,6 @@
 <template>
   <div class="sheet" v-if="item">
+    <div style="float: right"><Status :selected="item.status" @selectStatus="updateStatus"></Status></div>
     <Ribbon v-if="item.hasOwnProperty('plotline')" :color="getPlotlineColor()" title="Select plotline" :colors="getAllPlotlineColors()" @selectColor="updateColor"></Ribbon>
     <div class="header-container">
       <div v-if="displayImages">
@@ -50,6 +51,7 @@ import DisplaySettingsAwareMixin from "@/components/mixins/DisplaySettingsAwareM
 import UpdatableItemMixin from "@/components/mixins/UpdatableItemMixin";
 import TranslatableNovelItemMixin from "../../mixins/TranslatableNovelItemMixin";
 import Ribbon from './Ribbon.vue';
+import Status from './Status.vue';
 import { ParentModel } from '@/models/ParentModel';
 import { PlotlineModel } from '@/models/Plotline.model';
 
@@ -62,7 +64,8 @@ const novelDataModule = namespace("novelData");
     EditableTags,
     NovelItemSheet,
     ImageGallery,
-    Ribbon
+    Ribbon,
+    Status
   },
 })
 export default class NovelItemSheet extends mixins(
@@ -104,6 +107,11 @@ export default class NovelItemSheet extends mixins(
   updateColor(color: string) {
     const plotline = this.plotlines.find(p => p.color === color);
     this.updateItem(this.item, { plotline: plotline});
+  }
+
+  updateStatus(status: number) {
+    console.log('UPDATE STATUS', status);
+    this.updateItem(this.item, { status: status});
   }
 
   deleteImage(image: ImageParam): void {
