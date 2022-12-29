@@ -77,7 +77,7 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
       case STATUS.FIRST_DRAFT:
         return 'exclamation'
       case STATUS.TODO:
-        return 'exclamation-triangle'
+        return 'heart-broken'
       default:
         return 'question'
 
