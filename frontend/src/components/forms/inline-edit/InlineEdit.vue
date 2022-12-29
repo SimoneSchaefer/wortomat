@@ -104,7 +104,7 @@ export default class InlineEdit extends Vue {
 }
 
 .inline-edit.readonly:hover {
-    /*cursor: url("/assets/cursors/edit.png"), pointer;*/ /*FIXME*/
+    cursor: url("../../../../public/assets/cursors/edit.png"), pointer;
     background: var(--editable-background-hover);
 }
 

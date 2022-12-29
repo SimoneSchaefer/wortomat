@@ -10,7 +10,7 @@ export class GroupingItemPage {
             this.headers.should('not.exist');
         } else {
             this.headers.should('have.length', expectedTitles.length);
-            for (let i = 0; i < expectedTitles.length; i++) {
+            for (const i = 0; i < expectedTitles.length; i++) {
                 this.assertHeader(i, expectedTitles[i]);
             }
         }
@@ -73,7 +73,7 @@ export class GroupingItemPage {
 
     childSelected(parentIndex: number, childIndex: number) {
         this.children(parentIndex).its('length').then($numberOfChildren => {
-            for (let i = 0; i < $numberOfChildren; i++) {
+            for (const i = 0; i < $numberOfChildren; i++) {
                 const expected = childIndex === i ? 'have.class' : 'not.have.class';
                 this.children(parentIndex).eq(i).should(expected, 'selected');
             }
@@ -102,7 +102,7 @@ export class GroupingItemPage {
             this.children(index).should('not.exist');
         } else {
             this.children(index).should('have.length', expectedTitles.length);
-            for (let i = 0; i < expectedTitles.length; i++) {
+            for (const i = 0; i < expectedTitles.length; i++) {
                 this.assertChild(index, i, expectedTitles[i]);
             }
         }
