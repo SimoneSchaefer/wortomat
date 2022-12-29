@@ -1,12 +1,16 @@
 <template>
-    <div class="ribbon down" :style="{ 'background-color': color || '#d2d2d2' }" :title="$t(title)" @click="toggle">
-        <div class="content" :style="{ 'background-color': color || '#d2d2d2' }" >
+    <div class="ribbon down" :style="{ 'filter': `drop-shadow(2px 3px 2px ${colorOrDefault})` }" :title="$t(title)" @click="toggle">
+        <div class="content" :style="{ 'background': `${colorOrDefault} linear-gradient(45deg, ${colorOrDefault} 0%, rgba(255, 255, 255, 0.54) 100%)`}">
             <i class="fa fa-clock"></i>
         </div>
     </div>
     <OverlayPanel ref="overlay">
         <div>
             <div v-if="colors.length" class="color-selection">
+
+                <div class="color-field" :style="{ 'background-color': 'white' }" @click="selectColor(null, $event)">
+                    <i class="fa fa-times fa-2y"></i>
+                </div>
                 <div v-for="color of colors" v-bind:key="color">
                     <div class="color-field" :style="{ 'background-color': color }" @click="selectColor(color, $event)">
                     </div>
@@ -45,6 +49,10 @@ export default class Ribbon extends Vue {
         return color;
     }
 
+    get colorOrDefault() {
+        return this.color || '#d2d2d2';
+    }
+
 
 }
 </script>
@@ -62,6 +70,9 @@ export default class Ribbon extends Vue {
     border-radius: 50%;
     border: 1px solid #d2d2d2;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .ribbon {
@@ -69,7 +80,7 @@ export default class Ribbon extends Vue {
     right: 10px;
     top: -3px;
     cursor: pointer;
-    filter: drop-shadow(2px 3px 2px rgba(black, 0.5));
+    filter: drop-shadow(2px 3px 2px #0000007d);
 }
 
 .content {
@@ -77,14 +88,18 @@ export default class Ribbon extends Vue {
     font-size: 1.25rem;
     text-align: center;
     font-weight: 400;
-    background: var(--color, #2ca7d8) linear-gradient(45deg, rgba(black, 0) 0%, rgba(white, 0.25) 100%);
     padding: 8px 2px 4px;
 
 
     clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 100%, 0 100%);
 
-    width: var(--width, 32px);
-    min-height: var(--height, 36px);
+    width: var(--width, 40px);
+    min-height: var(--height, 50px);
+
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
 
     transition: clip-path 1s, padding 1s, background 1s;
 }
@@ -98,8 +113,7 @@ export default class Ribbon extends Vue {
 }
 
 .down>.content {
-    /*clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 50% 100%, 0 calc(100% - 8px));*/
-    clip-path: polygon(0px 0px, 100% 0px, 100% calc(100% - 8px), 53.13% 143.25%, 0px calc(100% - 8px));
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 50% 100%, 0 calc(100% - 8px));
 }
 
 .up>.content {

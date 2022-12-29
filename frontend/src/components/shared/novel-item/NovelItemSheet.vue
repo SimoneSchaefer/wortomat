@@ -1,6 +1,6 @@
 <template>
   <div class="sheet" v-if="item">
-    <Ribbon :color="getPlotlineColor()" title="Select plotline" :colors="getAllPlotlineColors()" @selectColor="updateColor"></Ribbon>
+    <Ribbon v-if="item.hasOwnProperty('plotline')" :color="getPlotlineColor()" title="Select plotline" :colors="getAllPlotlineColors()" @selectColor="updateColor"></Ribbon>
     <div class="header-container">
       <div v-if="displayImages">
         <ImageGallery :novelItemKey="childKey" :imageUrls="images" :uploadUrl="getUploadUrl()"
