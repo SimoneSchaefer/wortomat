@@ -64,8 +64,8 @@ export default class EditableTags extends mixins(NovelItemKeyAwareMixin) {
     @novelDataModule.Mutation
     tagAdded!: (update: { view: PARENT_ITEM_KEYS, tag: TagModel}) => Promise<void>; 
 
-    private tagsDraft = [];
-    private filteredTags = [];
+    tagsDraft = [];
+    filteredTags = [];
     private service = new GroupingNovelItemService();
 
 

@@ -233,7 +233,7 @@ export default class Treeview extends mixins(
   get childItems() {
     const flatChildren = [];
     const filteredItems = this.getFilteredItems();
-    for (let parent of filteredItems) {
+    for (const parent of filteredItems) {
       flatChildren.push(...parent["children"]);
     }
     return flatChildren;

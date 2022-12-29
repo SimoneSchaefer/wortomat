@@ -3,24 +3,12 @@
     <div class="timeline">
       <div class="connection"></div>
       <div class="events">
-        <draggable
-          :list="sortedTimelineEvents"
-          class="list-group"
-          ghost-class="ghost"
-          drag-class="dragging"
-          group="children"
-          @end="moved($event)"
-          :id="`events`"
-        >
+        <draggable :list="sortedTimelineEvents" class="list-group" ghost-class="ghost" drag-class="dragging"
+          group="children" @end="moved($event)" :id="`events`">
           <transition-group type="transition" :name="'flip-list'">
-            <div
-              v-for="event of sortedTimelineEvents"
-              class="row"
-              :id="event.id"
-              v-bind:key="event.id"
-            >
-            <WTimelineEvent :event="event"></WTimelineEvent>
-            <!--
+            <div v-for="event of sortedTimelineEvents" class="row" :id="`${event.id}`" v-bind:key="event.id">
+              <WTimelineEvent :event="event"></WTimelineEvent>
+              <!--
               <div class="summary">
                 <div class="date">
                   <h1>
@@ -55,7 +43,7 @@
               </div>
               <div class="details">{{ event.summary }}</div>-->
             </div>
-          
+
           </transition-group>
         </draggable>
       </div>
@@ -104,9 +92,9 @@ const selectionModule = namespace("selection");
 export default class Plot extends mixins(TimelineEventMixin) {
   @novelDataModule.Action
   loadNovelItems!: ({
-    view: PARENT_ITEM_KEYS,
-    novelId: number,
-  }) => Promise<void>;
+    view,
+    novelId,
+  }: { view: PARENT_ITEM_KEYS, novelId: number }) => Promise<void>;
 
   @novelDataModule.Action
   addNovelItem!: (payload: {
@@ -144,10 +132,12 @@ export default class Plot extends mixins(TimelineEventMixin) {
   mounted(): void {
     this.loadNovelItems({
       view: PARENT_ITEM_KEYS.TIMELINE,
-      novelId: this.$route.params.id,
+      novelId: Number(this.$route.params.id as string),
     });
-    for (let key of this.allowedReferences) {
-      this.loadNovelItems({ view: key, novelId: this.$route.params.id });
+    for (const key of this.allowedReferences) {
+      this.loadNovelItems({
+        view: key, novelId: Number(this.$route.params.id as string),
+      });
     }
   }
 
@@ -158,7 +148,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
       .then(() => {
         this.loadNovelItems({
           view: PARENT_ITEM_KEYS.TIMELINE,
-          novelId: this.$route.params.id,
+          novelId: Number(this.$route.params.id as string),
         });
       });
   }
@@ -167,7 +157,7 @@ export default class Plot extends mixins(TimelineEventMixin) {
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
-    for (let file of event.files) {
+    for (const file of event.files) {
       formData.append("upload[]", file, file.name);
     }
 

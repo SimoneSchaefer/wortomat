@@ -1,5 +1,5 @@
 <template>
-    <Rating v-model="status" :stars="5" onIcon="fa pi-heart-fill" offIcon="pi pi-heart" cancelIcon="pi pi-times"/>
+    <Rating v-model="status" :stars="5" onIcon="pi pi-heart-fill" offIcon="pi pi-heart" cancelIcon="pi pi-times"/>
 </template>
   
 <script lang="ts">

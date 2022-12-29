@@ -91,7 +91,7 @@ export default class EditableLabel extends Vue {
 div.content:hover {
     border: 3px solid transparent;
     cursor: pointer;
-    cursor: url("/assets/cursors/edit.png"), pointer;
+    /*cursor: url("/assets/cursors/edit.png"), pointer;*/ /* FIXME*/
     background: var(--editable-background-hover);
 }
 .readonly.underline {

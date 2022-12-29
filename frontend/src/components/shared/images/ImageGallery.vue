@@ -55,10 +55,10 @@ export default class ImageGallery extends Vue {
     }
 
     customUpload(event) {
-        let xhr = new XMLHttpRequest();
-        let formData = new FormData();
+        const xhr = new XMLHttpRequest();
+        const formData = new FormData();
 
-        for (let file of event.files) {
+        for (const file of event.files) {
             formData.append('upload[]', file, file.name);
         }
 

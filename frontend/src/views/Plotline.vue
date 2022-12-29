@@ -194,7 +194,7 @@ export default class Plotline extends mixins(NovelItemKeyAwareMixin) {
 
     getAllPositions() {
         const allPositions = new Set<number>();
-        for (let plotline of this.plotlines) {
+        for (const plotline of this.plotlines) {
             const positions = plotline.children.map(child => child?.position)
             positions.forEach((position) => allPositions.add(position));
         }
