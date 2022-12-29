@@ -1,6 +1,8 @@
 <template>
   <div class="grouping-item-view">
-    <div class="submenu"><WSubMenu :displayOptions="true"></WSubMenu></div>
+    <div class="submenu">
+      <WSubMenu :displayOptions="true"></WSubMenu>
+    </div>
     <div v-if="items.length" class="content-view">
       <Splitter style="height: 100%" :stateKey="novelItemKey">
         <SplitterPanel class="split-content-left" :size="30">
@@ -58,7 +60,7 @@ export default class GroupingNovelItem extends Vue {
     this.setActiveView(this.novelItemKey); // TODO: Move this to link click
     this.loadNovelItems({
       view: this.novelItemKey,
-      novelId: this.$route.params.id,
+      novelId: Number(this.$route.params.id as string),
     });
   }
 
@@ -67,9 +69,9 @@ export default class GroupingNovelItem extends Vue {
 
   @novelDataModule.Action
   loadNovelItems!: ({
-    view: PARENT_ITEM_KEYS,
-    novelId: number,
-  }) => Promise<void>;
+    view,
+    novelId,
+  }: { view: PARENT_ITEM_KEYS, novelId: number }) => Promise<void>;
 
   get items(): BaseModel[] {
     return this.novelItems.get(this.novelItemKey) || [];

@@ -18,7 +18,7 @@ xdescribe('Novel items', () => {
         novelList.addNovel();
     });
 
-    for (let spec of novelItemsSpecDefinition) { 
+    for (const spec of novelItemsSpecDefinition) { 
         describe(spec.specName, () => {
             beforeEach(() => {
                 cy.visit('');

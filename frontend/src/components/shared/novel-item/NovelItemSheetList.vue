@@ -45,8 +45,8 @@ export default class NovelItemSheetList extends mixins(NovelItemKeyAwareMixin, F
 
     get selected(): BaseModel[] {
         let allSelectedItems = [];
-        for (let part of this.getFilteredItems()) {
-            allSelectedItems = allSelectedItems.concat((part['children'] || []).filter(chapter => this.selectedItems.includes(chapter.id)));
+        for (const item of this.getFilteredItems()) {
+            allSelectedItems = allSelectedItems.concat((item['children'] || []).filter(child => this.selectedItems.includes(child.id)));
         }
         return allSelectedItems;        
     }
