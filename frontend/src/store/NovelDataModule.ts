@@ -226,11 +226,13 @@ export default class NovelDataModule extends VuexModule {
         Promise.all([
             this._groupingNovelItemService.list(view, novelId),
             // this._groupingNovelItemService.listDeleted( view, novelId),
-            this._groupingNovelItemService.tags(view, novelId)
+            this._groupingNovelItemService.tags(view, novelId),
+            this._groupingNovelItemService.list(PARENT_ITEM_KEYS.PLOTLINES, novelId),
         ]).then(result => {
             this.novelItemsLoaded({ view: view, novelItems: result[0].data });
             // this.deletedNovelItemsLoaded( { view: view, novelItems: result[1].data });
             this.tagsLoaded({ view: view, tags: result[1].data });
+            this.novelItemsLoaded({ view: PARENT_ITEM_KEYS.PLOTLINES, novelItems: result[2].data });
             this.isLoading(false);
         });
     }
