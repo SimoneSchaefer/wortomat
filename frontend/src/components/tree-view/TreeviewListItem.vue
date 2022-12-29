@@ -3,7 +3,9 @@
     <WConfirmDialog ref="confirmDeleteChild" @accept="deleteChild" message="delete_confirm"></WConfirmDialog>
     <div class="tree-view-item-child">
       <div class="link">
-        <div class="plotline" :style="{ 'background-color': getPlotlineColor() }"></div>
+        <div class="plotline" :style="{ 'background-color': getPlotlineColor() }">
+          <i :class="`status-icon fa fa-${getIcon()}`"></i>
+        </div>
         <a href="#" @click="select" :title="$t(`sub_menu.${parentKey}.select_child`)" :key="element.id"><b>
             <WMissingValueTolerantLabel :value="translatedName" :fallback="$t(`fallback_labels.no_name.${childKey}`)">
             </WMissingValueTolerantLabel>&nbsp;
@@ -41,6 +43,7 @@ import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { ParentModel } from '@/models/ParentModel';
 import { PlotlineModel } from '@/models/Plotline.model';
 import { ChildModel } from '@/models/ChildModel';
+import { STATUS } from '@/models/Status';
 const novelDataModule = namespace("novelData");
 
 @Options({
@@ -63,6 +66,26 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
     return this.element;
   }
 
+  getIcon() {
+    switch (this.element.status - 1) {
+      case STATUS.PERFECT:
+        return 'heart'
+      case STATUS.DONE:
+        return 'check-double'
+      case STATUS.REVISED_DRAFT:
+        return 'check'
+      case STATUS.FIRST_DRAFT:
+        return 'exclamation'
+      case STATUS.TODO:
+        return 'heart-broken'
+      default:
+        return 'question'
+
+
+    }
+
+  }
+
   @Emit('select')
   select($event) {
     $event.preventDefault();
@@ -77,7 +100,7 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
   getAllPlotlineColors() {
     return this.plotlines.map((p) => (p as PlotlineModel).color) || [];
   }
-  
+
   confirmDeleteChild(): void {
     (this.$refs.confirmDeleteChild as WConfirmDialog).getDecision(this.element);
   }
@@ -102,7 +125,16 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
 
 .plotline {
   height: 100%;
-  flex: 1em 0 0;
+  flex: 2em 0 0;
+}
+
+.status-icon {
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  height: 100%;
 }
 
 .link {
