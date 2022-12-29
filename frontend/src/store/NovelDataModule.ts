@@ -17,7 +17,7 @@ import { ParentModel } from "@/models/ParentModel";
 export default class NovelDataModule extends VuexModule {
     private _groupingNovelItemService = new GroupingNovelItemService();
     private _timelineService = new TimelineService();
-    private _novelService = new NovelService(); 
+    private _novelService = new NovelService();
 
     private _novelId: number = undefined;
     private _novels = [];
@@ -28,23 +28,6 @@ export default class NovelDataModule extends VuexModule {
 
     get sortedTimelineEvents(): TimelineEventModel[] {
         const allItems = (this._novelItems.get(PARENT_ITEM_KEYS.TIMELINE) || []) as TimelineEventModel[];
-        allItems.sort(function(a, b) {
-            if (a.eventDate === null && b.eventDate === null) {
-                return Number(a.id < b.id);
-            }
-            if (a.eventDate === null) {
-                return -1;
-            }
-            if (b.eventDate === null) {
-                return 1;
-            }
-            if (a.eventDate < b.eventDate) {
-                return -1;
-            }
-            if (a.eventDate > b.eventDate) {
-                return 1;
-            }      
-        });
         return allItems;
     }
 
@@ -67,7 +50,7 @@ export default class NovelDataModule extends VuexModule {
     @Mutation
     public novelUpdated(novel: NovelModel): void {
         const index = this._novels.findIndex(n => n.id === novel.id);
-        if (index > -1) this._novels.splice(index, 1, novel);    
+        if (index > -1) this._novels.splice(index, 1, novel);
     }
 
     @Mutation
@@ -76,20 +59,24 @@ export default class NovelDataModule extends VuexModule {
             const parent = this.findParentForChild(update.view, update.novelItem);
             const index = parent['children'].findIndex(child => child.id === update.novelItem.id);
             parent['children'].splice(index, 1, update.novelItem);
-        } else {
+            const newParents = [...this._novelItems.get(update.view)];
+            this._novelItems.set(update.view, newParents);
+       } else {
             const index = this.findParentIndex(update.view, update.novelItem);
-            if (index > -1) this._novelItems.get(update.view).splice(index, 1, update.novelItem);   
-        } 
+            if (index > -1) this._novelItems.get(update.view).splice(index, 1, update.novelItem);
+        }
     }
 
     @Mutation
     public novelItemAdded(update: { view: PARENT_ITEM_KEYS, novelItem: NovelModel }): void {
         if (update.novelItem.parentId) {
             const parent = this.findParentForChild(update.view, update.novelItem);
-            parent['children'].push(update.novelItem);
+            parent['children'].splice(update.novelItem.position, 0, update.novelItem);
+            const newParents = [...this._novelItems.get(update.view)];
+            this._novelItems.set(update.view, newParents);
         } else {
             this._novelItems.get(update.view).push(update.novelItem);
-        } 
+        }
     }
 
     @Mutation
@@ -107,7 +94,7 @@ export default class NovelDataModule extends VuexModule {
         } else {
             const index = this._novelItems.get(update.view).findIndex(parent => parent.id === update.novelItem.id);
             this._novelItems.get(update.view).splice(index, 1);
-        } 
+        }
     }
     @Mutation
     public novelItemChildDeleted(update: { view: PARENT_ITEM_KEYS, novelItem: number }): void {
@@ -123,16 +110,16 @@ export default class NovelDataModule extends VuexModule {
 
     @Mutation
     public isLoading(loading: boolean): void {
-        this._loading = loading; 
+        this._loading = loading;
     }
 
     @Mutation
     public novelItemsLoaded(update: { view: PARENT_ITEM_KEYS, novelItems: BaseModel[] }): void {
         this._novelItems.set(update.view, update.novelItems);
-    }    
-    
+    }
+
     @Mutation
-    public deletedNovelItemsLoaded(update: { view: PARENT_ITEM_KEYS, novelItems: BaseModel}): void {
+    public deletedNovelItemsLoaded(update: { view: PARENT_ITEM_KEYS, novelItems: BaseModel }): void {
         this._deletedNovelItems.set(update.view, update.novelItems);
     }
 
@@ -142,17 +129,17 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Action
-    public async addReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
+    public async addReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS }): Promise<void> {
         this._timelineService.addReference(this._novelId, payload.event, payload.item, payload.key).then(result => {
-            this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data})
-          });   
+            this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data })
+        });
     }
 
     @Action
-    public async deleteReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS} ): Promise<void> {
+    public async deleteReference(payload: { event: TimelineEventModel, item: BaseModel, key: PARENT_ITEM_KEYS }): Promise<void> {
         this._timelineService.deleteReference(this._novelId, payload.event, payload.item, payload.key).then(result => {
-            this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data})
-          });   
+            this.novelItemUpdated({ view: PARENT_ITEM_KEYS.TIMELINE, novelItem: result.data })
+        });
     }
 
     @Action
@@ -221,14 +208,14 @@ export default class NovelDataModule extends VuexModule {
     public async deleteNovelItemChild(payload: { view: PARENT_ITEM_KEYS, novelItem: number }): Promise<void> {
         this._groupingNovelItemService.deleteChild(payload.view, this._novelId, payload.novelItem).then((result) => {
             this.loadNovelItems({ view: payload.view, novelId: this._novelId });
-           // this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+            // this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
         });
     }
     @Action
     public async deleteNovelItemParent(payload: { view: PARENT_ITEM_KEYS, novelItem: number }): Promise<void> {
         this._groupingNovelItemService.deleteParent(payload.view, this._novelId, payload.novelItem).then((result) => {
             this.loadNovelItems({ view: payload.view, novelId: this._novelId });
-          //  this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+            //  this.novelItemsLoaded({ view: payload.view, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
         });
     }
 
@@ -237,44 +224,48 @@ export default class NovelDataModule extends VuexModule {
         this.isLoading(true);
         const { view, novelId } = payload;
         Promise.all([
-            this._groupingNovelItemService.list( view, novelId),
+            this._groupingNovelItemService.list(view, novelId),
             // this._groupingNovelItemService.listDeleted( view, novelId),
-            this._groupingNovelItemService.tags( view, novelId)
-          ]).then(result => {
-            this.novelItemsLoaded( { view: view, novelItems: result[0].data });
+            this._groupingNovelItemService.tags(view, novelId),
+            this._groupingNovelItemService.list(PARENT_ITEM_KEYS.PLOTLINES, novelId),
+        ]).then(result => {
+            this.novelItemsLoaded({ view: view, novelItems: result[0].data });
             // this.deletedNovelItemsLoaded( { view: view, novelItems: result[1].data });
-            this.tagsLoaded( { view: view, tags: result[1].data });
-            this.isLoading(false);            
+            this.tagsLoaded({ view: view, tags: result[1].data });
+            this.novelItemsLoaded({ view: PARENT_ITEM_KEYS.PLOTLINES, novelItems: result[2].data });
+            this.isLoading(false);
         });
-    }  
-    
+    }
+
     @Action
-    public async moveParent(payload: { key: PARENT_ITEM_KEYS, 
-        novelId: number, 
+    public async moveParent(payload: {
+        key: PARENT_ITEM_KEYS,
+        novelId: number,
         parentId: number,
         oldPosition: number
         newPosition: number
-        }): Promise<void> {
-        const {key, novelId, parentId, oldPosition, newPosition} = payload;
+    }): Promise<void> {
+        const { key, novelId, parentId, oldPosition, newPosition } = payload;
         this._groupingNovelItemService.moveParent(key, novelId, parentId, oldPosition, newPosition).then((result) => {
-            this.novelItemsLoaded({ view: key, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
+            this.novelItemsLoaded({ view: key, novelItems: result.data }); // TODO do not reload everything, only the relevant parts
         });
-    }    
+    }
 
     @Action
-    public async moveChild(payload: { key: PARENT_ITEM_KEYS, 
-        novelId: number, 
+    public async moveChild(payload: {
+        key: PARENT_ITEM_KEYS,
+        novelId: number,
         childToMove: number,
         newParentId: number,
         newPosition: number
-        }): Promise<void> {
-        const {key, novelId, childToMove, newParentId, newPosition} = payload;
+    }): Promise<void> {
+        const { key, novelId, childToMove, newParentId, newPosition } = payload;
         this._groupingNovelItemService.moveChild(key, novelId, childToMove, newParentId, newPosition).then((result) => {
-            this.novelItemsLoaded({ view: key, novelItems: result.data}); // TODO do not reload everything, only the relevant parts
-        });      
+            this.novelItemsLoaded({ view: key, novelItems: result.data }); // TODO do not reload everything, only the relevant parts
+        });
     }
-    
-    
+
+
     private findParentIndex(view: PARENT_ITEM_KEYS, parent: BaseModel): number {
         return this._novelItems.get(view).findIndex(n => n.id === parent.id);
     }
@@ -289,7 +280,7 @@ export default class NovelDataModule extends VuexModule {
                 }
             }
         }
-        return this._novelItems.get(view).find(parent => parent.id === (child as BaseModel) .parentId);
+        return this._novelItems.get(view).find(parent => parent.id === (child as BaseModel).parentId);
     }
 
     private isNumber(n) {

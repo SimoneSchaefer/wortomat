@@ -78,6 +78,7 @@ export class GroupingNovelItemService {
     } 
 
     public create(view: PARENT_ITEM_KEYS, novelId: number, item: BaseModel): Promise<AxiosResponse> {
+        console.log('CREATE', item)
         return API.post(`/novels/${novelId}/${this.getAPIPath(view, item.parentId)}/`, item)
     }
 

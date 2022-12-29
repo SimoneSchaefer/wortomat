@@ -135,6 +135,7 @@
 										<include>favicon.ico</include>
 										<include>assets/</include>
 										<include>css/</include>
+										<include>styles/</include>
 										<include>fonts/</include>
 										<include>img/</include>
 										<include>js/</include>

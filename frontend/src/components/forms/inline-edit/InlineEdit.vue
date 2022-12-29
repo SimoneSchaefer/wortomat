@@ -1,4 +1,5 @@
 <template>
+    <Backdrop :modalOpen="editing"></Backdrop>
     <div class="inline-edit" 
         :title="editing ? '' : 'Click to edit'" 
         :class=" { editing: editing, readonly: !editing }" 
@@ -19,24 +20,16 @@
 </template>
 
 <script lang="ts">
+import AppButton from "@/components/forms/Button.vue";
+import Backdrop from '@/components/shared/Backdrop.vue';
 import { Options, Vue } from "vue-class-component";
 import { Emit, Prop } from "vue-property-decorator";
-import AppButton from "@/components/forms/Button.vue";
-import { namespace } from "s-vuex-class";
-
-const applicationStateModule = namespace("applicationState");
 
 @Options({
-    components: { AppButton },
+    components: { AppButton, Backdrop },
     emits: ['start-edit', 'update', 'cancel']
 })  
 export default class InlineEdit extends Vue {
-    @applicationStateModule.State('_modalOpen')
-    modalOpen!: boolean;    
-    
-    @applicationStateModule.Action
-    setModalOpen!: (value: boolean) => Promise<void>;
-
     editing = false;
     @Prop() currentValue: string;
     @Prop() validationRegex: RegExp;
@@ -77,7 +70,6 @@ export default class InlineEdit extends Vue {
     }
 
     private toggleEditMode(active: boolean): void {
-        this.setModalOpen(active);
         this.editing = active;
     }
 

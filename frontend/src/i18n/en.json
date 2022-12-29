@@ -1,4 +1,5 @@
 {
+    "empty_info": "No items added yet.",
     "vertical_menu": {
         "home": "Novel overview",
         "timeline": "Timeline",
@@ -6,6 +7,7 @@
         "chapters": "Chapters",
         "research": "Research",
         "location": "Locations",
+        "plotlines": "Plotlines",
         "export": "Export"
     },
     "side_bar": {
@@ -61,6 +63,14 @@
             "filter": "Filter view",
             "trash": "Drop items here to delete them"
         },
+        "PLOTLINES": {
+            "add": "Add plotline",
+            "add_child": "Add event",
+            "trash": "Drop items here to delete them"
+        },
+        "TIMELINE": {
+            "add": "Add event"
+        },
         "add": "Add item",
         "export": "Export",
         "filter": "Filter",
@@ -99,7 +109,9 @@
             "LOCATIONS": "Unnamed location",
             "LOCATION_GROUPS": "Unnamed location group",
             "novel": "Unnamed novel",
-            "TIMELINE": "Unnamed event"
+            "TIMELINE": "Unnamed event",
+            "TIMELINE_DATE": "Unknown time",
+            "PLOTLINES": "Unnamed event"
         },
         "no_summary": "No summary added yet",
         "no_extended_summary": "No detailed summary added yet",

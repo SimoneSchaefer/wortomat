@@ -71,6 +71,11 @@ public class Novel implements IGroupingNovelItem {
     @ToString.Exclude
     private List<LocationTag> locationTags;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "novel")
+    @ToString.Exclude
+    private List<Plotline> plotlines;
+
     // @Override
     @JsonIgnore
     public List<? extends INovelItemTag> getTags() {

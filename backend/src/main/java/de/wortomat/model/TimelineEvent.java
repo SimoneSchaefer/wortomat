@@ -17,11 +17,19 @@ public class TimelineEvent {
 
     private String name;
 
+    private String details;
+
     private String summary;
 
     private Date eventDate;
 
     private String color;
+
+    private Integer position;
+
+
+    @ManyToMany
+    private List<Image> images;
 
     @JsonIgnore
     @ManyToOne
@@ -42,6 +50,7 @@ public class TimelineEvent {
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Character> characters = new ArrayList<>();
+
 
     public void setNovel(Novel novel) {
         this.novel = novel;

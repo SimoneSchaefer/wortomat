@@ -7,12 +7,14 @@
 
 import { namespace } from "s-vuex-class";
 import { Options, Vue } from "vue-class-component";
+import { Prop } from 'vue-property-decorator';
 
 const applicationStateModule = namespace("applicationState");
 
 @Options({})  
 export default class Backdrop extends Vue {
-    @applicationStateModule.State('_modalOpen')
+    // @applicationStateModule.State('_modalOpen')
+    @Prop()
     modalOpen!: boolean;   
 }
 </script>

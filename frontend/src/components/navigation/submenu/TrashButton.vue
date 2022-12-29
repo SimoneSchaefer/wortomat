@@ -1,10 +1,4 @@
 <template>
-  <!-- <WConfirmDialog
-    ref="confirmDeleteParent"
-    @cancel="reload"
-    @accept="deleteNovelItemParent"
-    message="delete_confirm"
-  ></WConfirmDialog>-->
   <WConfirmDialog
     ref="confirmDelete"
     @cancel="reload"
@@ -48,16 +42,13 @@ export default class TrashButton extends mixins(NovelItemKeyAwareMixin) {
   trashHovered = false;
 
   dragLeave() {
-    console.log("DRAG LEAVE");
     this.trashHovered = false;
   }
   dragEnter() {
-    console.log("DRAG ENTER");
     this.trashHovered = true;
   }
 
   dragEnd() {
-    console.log("DRAG END");
     this.trashHovered = true;
   }
 
@@ -78,17 +69,8 @@ export default class TrashButton extends mixins(NovelItemKeyAwareMixin) {
     view: PARENT_ITEM_KEYS;
     novelItem: number;
   }) => Promise<void>;
-  /* confirmDeleteParent(item, $event): void {
-    (this.$refs.confirmDeleteParent as WConfirmDialog).getDecision(item);
-  }
-
-  confirmDeleteChild(item, $event): void {
-    $event.stopPropagation();
-    (this.$refs.confirmDeleteChild as WConfirmDialog).getDecision(item);
-  } */
 
   deleteItem(item) {
-    console.log("DELETE ITEM", item);
     if (item.parentId) {
       this.deleteNovelItemChild({
         view: this.parentKey,
@@ -224,12 +206,14 @@ section {
 </style>
 <style>
 .trashzone {
+  width: 4em;
   height: 4em;
   margin-top: 1em;
 }
 .trashzone .sortable-ghost {
   /* position: absolute;*/
   visibility: hidden;
+  display: none;
   height: 0;
   width: 0;
   top: -80px;

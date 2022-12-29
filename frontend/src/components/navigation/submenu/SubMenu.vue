@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="option-list">
+    <div v-if="displayOptions" class="option-list">
       <SubMenuLink
         class="setting"
         v-bind:class="{
@@ -66,6 +66,7 @@ import WConfirmDialog from "@/components/shared/ConfirmDialog.vue";
 import FilterAwareMixin from "@/components/mixins/FilterAwareMixin";
 import SubMenuLink from "./SubMenuLink.vue";
 import TrashButton from "./TrashButton.vue";
+import { Prop } from "vue-property-decorator";
 
 type visible_flags =
   | ""
@@ -91,6 +92,12 @@ export default class SubMenu extends mixins(
   FilterAwareMixin
 ) {
   trashHovered = false;
+
+  @Prop()
+  createModel?: () => BaseModel;
+
+  @Prop()
+  displayOptions?: boolean = true;
 
   @novelDataModule.Action
   deleteMultipleNovelItems!: (payload: {
@@ -135,7 +142,7 @@ export default class SubMenu extends mixins(
   }
 
   addParent(): void {
-    this.addNovelItem({ view: this.parentKey, novelItem: new BaseModel() });
+    this.addNovelItem({ view: this.parentKey, novelItem: this.createModel? this.createModel() : new BaseModel() });
   }
 
   confirmDeleteSelected($event): void {
