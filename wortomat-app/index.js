@@ -3,11 +3,16 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
+const log = require('electron-log');
+
+log.info('Starting wortomat');
 
 let mainWindow;
 let serverProcess;
 
 const createWindow = () => {
+    log.info('creating window');
+
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -28,18 +33,24 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
     let filename = path.join(__dirname, 'jar/wortomat.jar')
-    console.log('loading jar file: ' + filename)
-    serverProcess = require('child_process').spawn('java', ['-jar'].concat(filename));
-    serverProcess.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-        if (data.includes('Started WortomatApplication in')) {
-            console.log('Finished loading application')
-            mainWindow.loadURL('http://localhost:8085');
-        }
-        if(data.includes('Application run failed')) {
-            mainWindow.loadFile('error.html')
-        }
-    });
+    log.info('loading jar file: ' + filename)
+    try {
+        serverProcess = require('child_process').spawn('java', ['-jar'].concat(filename));
+        serverProcess.stdout.on('data', (data) => {
+            log.info(`stdout: ${data}`);
+            if (data.includes('Started WortomatApplication in')) {
+                log.info('Finished loading application')
+                mainWindow.loadURL('http://localhost:8085');
+            } else if (data.includes('APPLICATION FAILED TO START')) {
+                log.error('Could not start wortomat application');
+                mainWindow.loadFile('error.html')
+            }
+        });
+    } catch (e) {
+        log.error('Could not start wortomat application, reason being: ');
+        log.error(data);
+        mainWindow.loadFile('error.html')
+    }
 
     createWindow()
 
