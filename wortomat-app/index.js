@@ -19,13 +19,17 @@ const createWindow = () => {
         height: 868
     })
 
-    // mainWindow.removeMenu();
 
     // and load the index.html of the app.
     mainWindow.loadFile('index.html')
 
-    // Open the DevTools.
-     mainWindow.webContents.openDevTools()
+    const devMode = process.argv.find(arg => arg === '--dev');
+    log.debug('using dev mode: ' + devMode);
+    if (devMode) {
+        mainWindow.webContents.openDevTools()
+    } else {
+        mainWindow.removeMenu();
+    }
 }
 
 // This method will be called when Electron has finished
@@ -47,8 +51,7 @@ app.whenReady().then(() => {
             }
         });
     } catch (e) {
-        log.error('Could not start wortomat application, reason being: ');
-        log.error(data);
+        log.error('Could not start wortomat application');
         mainWindow.loadFile('error.html')
     }
 
