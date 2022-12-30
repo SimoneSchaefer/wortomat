@@ -47,7 +47,7 @@ jobs:
     #     path: cypress/videos
 
     - name: Package app
-      run: cp backend/target/backend-0.0.1-SNAPSHOT.jar electron/jar/wortomat.jar && cd electron && npm install && npm run make
+      run: cp backend/target/backend-0.0.1-SNAPSHOT.jar electron/jar/ && mv electron/jar/backend-0.0.1-SNAPSHOT.jar electron/jar/wortomat.jar && cd electron && npm install && npm run make
         
     - uses: actions/upload-artifact@v2
       if: success()
