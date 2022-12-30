@@ -37,7 +37,6 @@ export default class NovelDataModule extends VuexModule {
         this._novelId = novelId;
     }
 
-    @Mutation
     public clearNovel() {
         this._novelId = undefined;
         this._novelItems = new Map();
