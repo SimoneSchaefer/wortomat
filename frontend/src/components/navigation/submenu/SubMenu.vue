@@ -97,7 +97,7 @@ export default class SubMenu extends mixins(
   createModel?: () => BaseModel;
 
   @Prop()
-  displayOptions?: boolean = true;
+  displayOptions: boolean;
 
   @novelDataModule.Action
   deleteMultipleNovelItems!: (payload: {
