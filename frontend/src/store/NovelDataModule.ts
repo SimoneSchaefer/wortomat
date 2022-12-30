@@ -33,7 +33,15 @@ export default class NovelDataModule extends VuexModule {
 
     @Mutation
     public novelOpened(novelId: number): void {
+        this.clearNovel();
         this._novelId = novelId;
+    }
+
+    @Mutation
+    public clearNovel() {
+        this._novelId = undefined;
+        this._novelItems = new Map();
+        this._tags = new Map();
     }
 
     @Mutation
@@ -172,6 +180,7 @@ export default class NovelDataModule extends VuexModule {
     public async loadNovels(): Promise<void> {
         this._novelService.getAll().then(result => {
             this.novelsLoaded(result.data);
+
         });
     }
 
