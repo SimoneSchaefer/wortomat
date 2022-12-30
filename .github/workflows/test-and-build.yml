@@ -58,7 +58,13 @@ jobs:
     - uses: actions/upload-artifact@v2
       if: success()
       with:
-        name: WortomatAPP
-        path: electron/out/make/
+        name: WortomatAPP-deb
+        path: electron/out/make/deb
+
+    - uses: actions/upload-artifact@v2
+      if: success()
+      with:
+        name: WortomatAPP-rpm
+        path: electron/out/make/rpm
     
 
