@@ -2,26 +2,18 @@
     <div class="editor" v-if="editor">
         <div id="editor-toolbar">
             <div class="tools">
-                <button class="padding-left editor-button" :title="$t('editor.bold')" @click="runCommand('toggleBold')" :class="{ 'is-active': editor.isActive('bold') }"><i class="fa fa-bold"></i></button>
-                <button class="editor-button" :title="$t('editor.italic')" @click="runCommand('toggleItalic')" :class="{ 'is-active': editor.isActive('italic') }"><i class="fa fa-italic"></i></button>
-                <button class="editor-button" :title="$t('editor.strike')" @click="runCommand('toggleStrike')" :class="{ 'is-active': editor.isActive('strike') }"><i class="fa fa-strikethrough"></i></button>
-             <!--   <button class="editor-button" :title="$t('editor.link')" @click="enterUrl" :class="{ 'is-active': editor.isActive('link') }"><i class="fa fa-url"></i></button>-->
-                <button class="editor-button" :title="$t('editor.code')" @click="runCommand('toggleCode')" :class="{ 'is-active': editor.isActive('code') }"><i class="fa fa-code"></i></button>
-                <button class="editor-button" :title="$t('editor.heading')" @click="runCommand('toggleHeading', { level: 1})" :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"><i class="fa fa-heading"></i></button>
-                <button class="editor-button"  :title="$t('editor.ul')" @click="runCommand('toggleBulletList')" :class="{ 'is-active': editor.isActive('bulletList') }"><i class="fa fa-list-ul"></i></button>
-                <button class="editor-button" :title="$t('editor.ol')" @click="runCommand('toggleOrderedList')" :class="{ 'is-active': editor.isActive('orderedList') }"><i class="fa fa-list-ol"></i></button>
-                <button class="editor-button" :title="$t('editor.quote')" @click="runCommand('toggleBlockquote')" :class="{ 'is-active': editor.isActive('blockquote') }"><i class="fa fa-quote-right"></i></button>
-                <button class="editor-button padding-left" :title="$t('editor.highlight_idea')" @click="runCommand('toggleHighlight', markerColors['idea'])" :class="{ 'is-active': editor.isActive('TodoMarker', markerColors['idea'])}"><i class="fa fa-lightbulb"></i></button>
-                <button class="editor-button" :title="$t('editor.highlight_todo')" @click="runCommand('toggleHighlight', markerColors['todo'])" :class="{ 'is-active': editor.isActive('TodoMarker', markerColors['todo'])}"><i class="fa fa-clipboard-list"></i></button>
-                <button class="editor-button" :title="$t('editor.highlight_fixme')" @click="runCommand('toggleHighlight', markerColors['fixme'])" :class="{ 'is-active': editor.isActive('TodoMarker', markerColors['fixme'])}"><i class="fa fa-band-aid"></i></button>
-
-                <button class="editor-button padding-left" :title="$t('editor.clear')" @click="runCommand('unsetAllMarks') && this.runCommand('clearNodes')"><i class="fa fa-eraser"></i></button>
-                <button class="editor-button"  :title="$t('editor.undo')" @click="runCommand('undo')"><i class="fa fa-undo"></i></button>
-                <button class="editor-button" :title="$t('editor.redo')" @click="runCommand('redo')" ><i class="fa fa-redo"></i></button>
+                <editor-option-button :menuItems="textFormatMenuItems" :toggleLabel="'editor.format_options'"></editor-option-button>
+                <editor-option-button :menuItems="headerMenuItems" :toggleLabel="'editor.header_options'"></editor-option-button>
+                <editor-option-button :menuItems="listMenuItems" :toggleLabel="'editor.list_options'"></editor-option-button>
+                <editor-option-button :menuItems="markerMenuItems" :toggleLabel="'editor.marker_options'"></editor-option-button>
+                <editor-option-button :menuItems="alignmentMenuItems" :toggleLabel="'editor.alignment_options'"></editor-option-button>
+                <button class="p-button editor-button padding-left" :title="$t('editor.clear')" @click="runCommand('unsetAllMarks') && this.runCommand('clearNodes')"><i class="fa fa-eraser"></i></button>
+                <button class="p-button editor-button"  :title="$t('editor.undo')" @click="runCommand('undo')"><i class="fa fa-undo"></i></button>
+                <button class="p-button editor-button" :title="$t('editor.redo')" @click="runCommand('redo')" ><i class="fa fa-redo"></i></button>
             </div>
             <div class="other">
-                <AppButton color="success" icon="fa fa-check" title="editor.save" v-on:click="save"></AppButton>            
-                <AppButton color="danger" icon="fa fa-times" title="editor.cancel" v-on:click="cancel"></AppButton>   
+                <AppButton type="button" color="success" icon="fa fa-check" title="editor.save" v-on:click="save"></AppButton>            
+                <AppButton type="button" color="danger" icon="fa fa-times" title="editor.cancel" v-on:click="cancel"></AppButton>   
             </div>
         </div>
         <div class="editor-content">
@@ -31,32 +23,44 @@
 </template>
 
 <script lang="ts">
+import { Editor, EditorContent } from '@tiptap/vue-3';
 import { Options, Vue } from 'vue-class-component';
 import { Emit, Prop } from 'vue-property-decorator';
-import { Editor, EditorContent } from '@tiptap/vue-3'
 
-import StarterKit from '@tiptap/starter-kit'
-import TipTapLink from '@tiptap/extension-link'
+import StarterKit from '@tiptap/starter-kit';
+import Typography from '@tiptap/extension-typography';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
 
-import TodoMarker from './todo-marker'
-import AppButton from '@/components/forms/Button.vue'
+import AppButton from '@/components/forms/Button.vue';
+import EditorOptionButton from './EditorOptionButton.vue';
+import TodoMarker from './todo-marker';
+import QuotesHandler from './quotes-handler';
 
 
 @Options({
-  components: { EditorContent, AppButton },
+  components: { EditorContent, AppButton, EditorOptionButton },
   emits: [ 'save', 'cancel']
 })
 export default class TipTap extends Vue { 
     @Prop() content: string;
     editor: Editor = null;
 
-    menuItems = [];
+    
 
     markerColors = {
-        "todo": { backgroundColor: 'yellow', color: 'black'},
-        "fixme": { backgroundColor: 'red', color: 'white'},
-        "idea": { backgroundColor: 'blue', color: 'white'},
+        "todo": { backgroundColor: '#fffc45', color: '#000'},
+        "fixme": { backgroundColor: '#e31f14', color: '#fff'},
+        "idea": { backgroundColor: '#5b63f0', color: '#000'},
     }
+
+
+    textFormatMenuItems = [];
+    headerMenuItems = [];
+    listMenuItems = [];
+    markerMenuItems = [];
+    alignmentMenuItems = [];
+
 
 
     mounted(): void {
@@ -65,33 +69,165 @@ export default class TipTap extends Vue {
             autofocus: true,
             extensions: [
                 StarterKit,
+                Typography.configure({
+                    openDoubleQuote: false,
+                    closeDoubleQuote: false,
+                    openSingleQuote: false,
+                    closeSingleQuote: false
+                }),
+                QuotesHandler,
+                Underline,
+                TextAlign.configure({
+                    types: ['heading', 'paragraph'],
+                }),
                 TodoMarker.configure(),
+                
                 /*TipTapLink.configure({
                     openOnClick: false,
                     linkOnPaste: false,
                 })*/
             ],
         });
+
+        this.textFormatMenuItems = [{
+            label: this.$t('editor.bold'),
+            icon: 'fa fa-bold',
+            command: () => {
+                this.runCommand('toggleBold')
+            }
+            },{
+                label: this.$t('editor.italic'),
+                icon: 'fa fa-italic',
+                command: () => {
+                    this.runCommand('toggleItalic')
+                }
+            },{
+                label: this.$t('editor.strike'),
+                icon: 'fa fa-strikethrough',
+                command: () => {
+                    this.runCommand('toggleStrike')
+                }
+            },{
+                label: this.$t('editor.underline'),
+                icon: 'fa fa-underline',
+                command: () => {
+                    this.runCommand('toggleUnderline')
+                }
+            }, {
+                label: this.$t('editor.code'),
+                icon: 'pi pi-code',
+                command: () => {
+                    this.runCommand('toggleCode')
+                }
+            },{
+                label: this.$t('editor.quote'),
+                icon: 'fa fa-quote-right',
+                command: () => {
+                    this.runCommand('toggleBlockquote')
+                }
+            },
+        ];
+
+        this.headerMenuItems = [{
+                label: 'H1',
+                icon: 'fa fa-heading',
+                command: () => {
+                    this.runCommand('toggleHeading', { level: 1})
+                }
+            },{
+                label: 'H2',
+                icon: 'fa fa-heading',
+                command: () => {
+                    this.runCommand('toggleHeading', { level: 2})
+                }
+            },{
+                label: 'H3',
+                icon: 'fa fa-heading',
+                command: () => {
+                    this.runCommand('toggleHeading', { level: 3})
+                }
+            },{
+                label: 'H4',
+                icon: 'fa fa-heading',
+                command: () => {
+                    this.runCommand('toggleHeading', { level: 4})
+                }
+            },{
+                label: 'H5',
+                icon: 'fa fa-heading',
+                command: () => {
+                    this.runCommand('toggleHeading', { level: 5})
+                }
+            },{
+                label: 'H6',
+                icon: 'fa fa-heading',
+                command: () => {
+                    this.runCommand('toggleHeading', { level: 6})
+                }
+            }
+        ];
+
+        this.listMenuItems = [{
+            label: this.$t('editor.ul'),
+            icon: 'fa fa-list-ul',
+            command: () => {
+                this.runCommand('toggleBulletList')
+            }
+        }, {
+            label: this.$t('editor.ol'),
+            icon: 'fa fa-list-ol',
+            command: () => {
+                this.runCommand('toggleOrderedList')
+            }
+        }];
+
+        this.alignmentMenuItems = [{
+            label: this.$t('editor.align_left'),
+            icon: 'fa fa-list-ul',
+            command: () => {
+                this.runCommand('setTextAlign', 'left')
+            }
+        }, {
+            label: this.$t('editor.align_center'),
+            icon: 'fa fa-list-ol',
+            command: () => {
+                this.runCommand('setTextAlign', 'center')
+            }
+        }, {
+            label: this.$t('editor.align_right'),
+            icon: 'fa fa-list-ol',
+            command: () => {
+                this.runCommand('setTextAlign', 'right')
+            }
+        }, {
+            label: this.$t('editor.align_justify'),
+            icon: 'fa fa-list-ol',
+            command: () => {
+                this.runCommand('setTextAlign', 'justify')
+            }
+        }];
+
+        this.markerMenuItems = [{
+            label: this.$t('editor.highlight_idea'),
+            icon: 'fa fa-lightbulb',
+            command: () => {
+                this.runCommand('toggleHighlight', this.markerColors['idea'])
+            }
+        },{
+            label: this.$t('editor.highlight_todo'),
+            icon: 'fa fa-clipboard-list',
+            command: () => {
+                this.runCommand('toggleHighlight', this.markerColors['todo'])
+            }
+        },{
+            label: this.$t('editor.highlight_fixme'),
+            icon: 'fa fa-toolbox',
+            command: () => {
+                this.runCommand('toggleHighlight', this.markerColors['fixme'])
+            }
+        }]
     }  
 
-    enterUrl() {
-        const previousUrl = this.editor.getAttributes('link').href;
-        const url = window.prompt('URL', previousUrl);
-
-        // cancelled
-        if (url === null) {
-            return
-        }
-
-        // empty
-        if (url === '') {
-            this.editor.chain().focus().extendMarkRange('link').unsetLink().run();
-            return
-        }
-
-        // update link
-        this.editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-    }
     
     @Emit('save') 
     save() {
@@ -105,7 +241,8 @@ export default class TipTap extends Vue {
     }
 
     runCommand(command: string, args?) {
-        this.editor.chain().focus()[command](args).run()
+        this.editor.chain().focus()[command](args).run();
+        return true;
     }
 
     getContent(): string {
@@ -166,7 +303,7 @@ export default class TipTap extends Vue {
     color: #cececee0;
     background: var(--dark-background);
     height: 4em;
-    width: 4em;
+    min-width:4em;
     border:none;
 
 }

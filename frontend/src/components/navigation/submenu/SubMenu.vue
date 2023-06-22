@@ -31,7 +31,7 @@
       ></SubMenuLink>
       <SubMenuLink
         class="setting"
-        icon="print"
+        icon="file-export"
         :title="`sub_menu.${parentKey}.export`"
         @click="setVisible('export_visible')"
       ></SubMenuLink>

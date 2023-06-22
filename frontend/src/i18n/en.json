@@ -8,7 +8,8 @@
         "research": "Research",
         "location": "Locations",
         "plotlines": "Plotlines",
-        "export": "Export"
+        "export": "Export",
+        "stats": "Statistics"
     },
     "side_bar": {
         "add_item": "Create new group",
@@ -136,14 +137,24 @@
         "delete_event": "Delete this timeline event"
     },
     "editor": {
+        "format_options": "Text format",
+        "header_options": "Header",
+        "list_options": "Lists",
+        "marker_options": "Marker",
+        "alignment_options": "Text align",
         "bold": "Bold",
         "italic": "Italic",
         "heading": "Headline",
         "ol": "ordered list",
         "ul": "bullet list",
         "strike": "strikethrough",
+        "underline": "underline",
         "code": "code",
         "quote": "quote",
+        "align_left": "Left",
+        "align_right": "Right",
+        "align_center": "Center",
+        "align_justify": "Justify",       
         "redo": "Redo",
         "undo": "Undo",
         "clear": "Clear all formatting",
@@ -160,20 +171,29 @@
         "SHOW_EXTENDED_SUMMARY": "Show extended summary",
         "SHOW_TAGS": "Show tags",
         "SHOW_IMAGES": "Show images",
-        "SHOW_CONTENT": "Show content"
+        "SHOW_CONTENT": "Show content",
+        "SHOW_RATING": "Show rating"
     },
     "filter_settings": {
         "tag_filter_enabled": "Filter by tag",
         "status_filter_enabled": "Filter by status",
-        "status_filter_TODO": "TODO",
-        "status_filter_FIXME": "FIXME",
-        "status_filter_IDEA": "IDEA"
+        "status_filter_0": "TODO",
+        "status_filter_1": "Idea",
+        "status_filter_2": "Outline",
+        "status_filter_3": "First draft",
+        "status_filter_4": "Revised draft",
+        "status_filter_5": "Done",
+        "marker_filter_enabled": "Filter by marker",
+        "marker_filter_TODO": "TODO",
+        "marker_filter_FIXME": "FIXME",
+        "marker_filter_": "IDEA"
     },
     "export_settings": {
         "include_SHOW_TITLE": "Include title",
         "include_SHOW_SUMMARY": "Include summary",
         "include_SHOW_EXTENDED_SUMMARY": "Include extended summary",
-        "include_SHOW_CONTENT": "Include content"
+        "include_SHOW_CONTENT": "Include content",
+        "auto_number": "Include chapter numbers"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
     "delete_multiple_confirm": "Are you sure you want to delete the selected items?",
@@ -235,5 +255,13 @@
                 "content": "If you need support, head over to <a href=\"https://github.com/SimoneSchaefer/wortomat\">github</a> and leave an issue. But please keep in mind that I am doing all this in my free time.</p><p>Any support is appreciated. If you want to contribute (development, translations, ideas, UI improvements...) please also leave an issue on github."
             }
         }
+    },
+    "rating": {
+        "no_rating": "No rating",
+        "idea": "Just an idea so far",
+        "outline": "Outline is done",
+        "first_draft": "First draft",
+        "revised_draft": "Revised draft", 
+        "done": "Done"
     }
 }

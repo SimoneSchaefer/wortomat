@@ -24,14 +24,14 @@
 </template>
 
 <script lang="ts">
-import { mixins, Options, Vue } from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
 import { namespace } from "s-vuex-class";
+import { mixins, Options } from 'vue-class-component';
+import { Prop } from 'vue-property-decorator';
 
 import EditableLabel from '@/components/forms/inline-edit/EditableLabel.vue';
-import ImageGallery, { ImageParam } from '@/components/shared/images/ImageGallery.vue';
-import { NovelModel } from '@/models/Novel.model';
 import ConfirmDialog from "@/components/shared/ConfirmDialog.vue";
+import ImageGallery from '@/components/shared/images/ImageGallery.vue';
+import { NovelModel } from '@/models/Novel.model';
 import TranslatableNovelItemMixin from "../mixins/TranslatableNovelItemMixin";
 
 

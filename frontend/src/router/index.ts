@@ -7,6 +7,7 @@ import Locations from '../views/Locations.vue'
 import Research from '../views/Research.vue'
 import Plotline from '../views/Plotline.vue'
 import Timeline from '../views/Timeline.vue'
+import Stats from '../views/Stats.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -37,6 +38,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'plot',
         component: Plotline,
+      },
+      {
+        path: 'stats',
+        component: Stats,
       }
     ]
   }

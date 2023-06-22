@@ -20,10 +20,14 @@ export default class BooksOverview extends Vue {
   novels!: NovelModel[];
 
   mounted(): void {
+    this.loadSettings();
     this.loadNovels();
   }
 
   @novelModule.Action
   private loadNovels!: () => Promise<void>;
+
+  @novelModule.Action
+  private loadSettings!: () => Promise<void>;
 }
 </script>

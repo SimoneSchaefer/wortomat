@@ -5,6 +5,7 @@ import { DISPLAY_SETTINGS_KEYS, PARENT_ITEM_KEYS } from "./keys";
 export default class ExportSettingsModule extends VuexModule {
   private _exportIncludes: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS,boolean>> = Object()
   private _exportFormat: Record<PARENT_ITEM_KEYS, EXPORT_FORMAT>;
+  private _autoNumber: Record<PARENT_ITEM_KEYS, boolean> = Object()
 
   @Mutation
   public updateExportIncludes(newDisplaySettings: Record<PARENT_ITEM_KEYS, Record<DISPLAY_SETTINGS_KEYS, boolean>>) {
@@ -15,7 +16,19 @@ export default class ExportSettingsModule extends VuexModule {
   public updateExportFormat(format: Record<PARENT_ITEM_KEYS,EXPORT_FORMAT>) {
     this._exportFormat = format;
   }
+  @Mutation
+  public updateAutoNumber(value: Record<PARENT_ITEM_KEYS, boolean>) {
+    this._autoNumber = value;
+  }
 
+  @Action
+  public async setAutoNumber(payload: { novelItemKey: PARENT_ITEM_KEYS, value: boolean }): Promise<void> {
+    
+    const formatSetting = { ...this._autoNumber };
+    formatSetting[payload.novelItemKey] = payload.value;
+    this.updateAutoNumber(formatSetting);
+  }  
+  
   @Action
   public async setExportFormat(payload: { novelItemKey: PARENT_ITEM_KEYS, format: EXPORT_FORMAT }): Promise<void> {
     const formatSetting = { ...this._exportFormat };
@@ -37,8 +50,9 @@ export default class ExportSettingsModule extends VuexModule {
 
 export enum EXPORT_FORMAT {
  HTML = 'HTML',
- PDF = 'PDF',
- PDF_LATEX = 'PDF_LATEX'
+ WORD = 'WORD'
+ // PDF = 'PDF',
+ // PDF_LATEX = 'PDF_LATEX'
 }
 
 export interface ExportSettings {

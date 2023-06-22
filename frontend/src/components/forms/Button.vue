@@ -20,8 +20,8 @@ export default class Button extends Vue {
     @Prop() title: string;
     @Prop() label : string;
     @Prop() disabled = false;
-    @Prop() color: 'primary' | 'secondary' | 'danger' | 'success' = 'primary';
-    @Prop() type: 'button' | 'text' = 'text';
+    @Prop() color: 'primary' | 'secondary' | 'danger' | 'success';
+    @Prop() type: 'button' | 'text';
     @Prop() rounded = false;
 
     @Emit('click') 
@@ -30,7 +30,13 @@ export default class Button extends Vue {
     }
 
     get cssClass() {
-        return `p-button-${this.type} p-button-${this.color} ${this.rounded ? 'p-button-rounded' : ''}`;
+        return `p-button-${this.type || 'text'} p-button-${this.color || 'primary'} ${this.rounded ? 'p-button-rounded' : ''}`;
     }
 }
 </script>
+
+<style scoped>
+.p-button {
+    border-radius: 0;
+}
+</style>

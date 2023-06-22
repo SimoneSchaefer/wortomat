@@ -9,8 +9,8 @@
                 <slot name="editing"></slot>
             </div>
             <div class="options">
-                <AppButton color="success" icon="fa fa-check" title="save" v-on:click="validateAndUpdate"></AppButton>            
-                <AppButton color="danger" icon="fa fa-times" title="cancel" v-on:click="cancel"></AppButton>            
+                <AppButton color="success" icon="fa fa-check" title="save" type="button" v-on:click="validateAndUpdate"></AppButton>            
+                <AppButton color="danger" icon="fa fa-times" title="cancel" type="button" v-on:click="cancel"></AppButton>            
             </div>
         </div>
         <div v-else class="readonly">
@@ -82,7 +82,7 @@ export default class InlineEdit extends Vue {
 
 
 <style>
-.readonly  .underline {
+.readonly .underline {
     border-bottom: 2px dotted rgba(99, 99, 99, 0.445);
 }
 </style>

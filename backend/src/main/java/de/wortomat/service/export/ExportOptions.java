@@ -6,4 +6,5 @@ public class ExportOptions {
     public boolean includeSummary;
     public boolean includeExtendedSummary;
     public boolean includeContent;
+    public boolean autoNumberChapters;
 }
