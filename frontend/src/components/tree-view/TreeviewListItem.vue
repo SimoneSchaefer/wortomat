@@ -43,7 +43,7 @@ import { PARENT_ITEM_KEYS } from '@/store/keys';
 import { ParentModel } from '@/models/ParentModel';
 import { PlotlineModel } from '@/models/Plotline.model';
 import { ChildModel } from '@/models/ChildModel';
-import { STATUS } from '@/models/Status';
+import { STATUS, STATUS_TO_ICON } from '@/models/Status';
 const novelDataModule = namespace("novelData");
 
 @Options({
@@ -67,23 +67,7 @@ export default class TreeviewListItem extends mixins(NovelItemKeyAwareMixin, Tod
   }
 
   getIcon() {
-    switch (this.element.status - 1) {
-      case STATUS.PERFECT:
-        return 'heart'
-      case STATUS.DONE:
-        return 'check-double'
-      case STATUS.REVISED_DRAFT:
-        return 'check'
-      case STATUS.FIRST_DRAFT:
-        return 'exclamation'
-      case STATUS.TODO:
-        return 'heart-broken'
-      default:
-        return 'question'
-
-
-    }
-
+    return STATUS_TO_ICON[this.element.status] || 'question';
   }
 
   @Emit('select')

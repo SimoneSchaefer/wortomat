@@ -63,7 +63,6 @@ export default class InlineEdit extends Vue {
 
     editModeActivated($event): void {
         this.stopEvent($event);
-        console.log('editModeActivated', $event, window.getSelection())
         if (this.editing) {
             return;
         }

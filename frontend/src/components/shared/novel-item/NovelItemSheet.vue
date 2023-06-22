@@ -1,6 +1,5 @@
 <template>
   <div class="sheet" v-if="item">
-    <div style="float: right"><Status :selected="item.status" @selectStatus="updateStatus"></Status></div>
     <Ribbon v-if="item.hasOwnProperty('plotline')" :color="getPlotlineColor()" title="Select plotline" :colors="getAllPlotlineColors()" @selectColor="updateColor"></Ribbon>
     <div class="header-container">
       <div v-if="displayImages">
@@ -23,6 +22,8 @@
         </span>
         <EditableTags v-if="displayTags" :addNewTagPossible="true" :selectedTags="item.tags"
           @update-tags="updateTags(item, $event)" :novelItemKey="parentKey"></EditableTags>
+        <div class="status-rating" v-if="displayRating"><Status :selected="item.status" @selectStatus="updateStatus"></Status></div>
+
       </div>
     </div>
     <EditableText v-if="displayContent" v-bind:value="translatedContent" v-bind:header="item.name"
@@ -188,6 +189,10 @@ export default class NovelItemSheet extends mixins(
 
 hr {
   border-color: #c8c8c875;
+}
+
+.status-rating {
+  padding: 0.5em;
 }
 
 .header-container {

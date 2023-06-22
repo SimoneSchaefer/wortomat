@@ -171,14 +171,22 @@
         "SHOW_EXTENDED_SUMMARY": "Show extended summary",
         "SHOW_TAGS": "Show tags",
         "SHOW_IMAGES": "Show images",
-        "SHOW_CONTENT": "Show content"
+        "SHOW_CONTENT": "Show content",
+        "SHOW_RATING": "Show rating"
     },
     "filter_settings": {
         "tag_filter_enabled": "Filter by tag",
         "status_filter_enabled": "Filter by status",
         "status_filter_TODO": "TODO",
-        "status_filter_FIXME": "FIXME",
-        "status_filter_IDEA": "IDEA"
+        "status_filter_IDEA": "Idea",
+        "status_filter_OUTLINE": "Outline",
+        "status_filter_FIRST_DRAFT": "First draft",
+        "status_filter_REVISED_DRAFT": "Revised draft",
+        "status_filter_DONE": "Done",
+        "marker_filter_enabled": "Filter by marker",
+        "marker_filter_TODO": "TODO",
+        "marker_filter_FIXME": "FIXME",
+        "marker_filter_": "IDEA"
     },
     "export_settings": {
         "include_SHOW_TITLE": "Include title",
@@ -247,5 +255,13 @@
                 "content": "If you need support, head over to <a href=\"https://github.com/SimoneSchaefer/wortomat\">github</a> and leave an issue. But please keep in mind that I am doing all this in my free time.</p><p>Any support is appreciated. If you want to contribute (development, translations, ideas, UI improvements...) please also leave an issue on github."
             }
         }
+    },
+    "rating": {
+        "no_rating": "No rating",
+        "idea": "Just an idea so far",
+        "outline": "Outline is done",
+        "first_draft": "First draft",
+        "revised_draft": "Revised draft", 
+        "done": "Done"
     }
 }
