@@ -8,7 +8,8 @@
         "research": "Research",
         "location": "Locations",
         "plotlines": "Plotlines",
-        "export": "Export"
+        "export": "Export",
+        "stats": "Statistics"
     },
     "side_bar": {
         "add_item": "Create new group",
@@ -136,12 +137,18 @@
         "delete_event": "Delete this timeline event"
     },
     "editor": {
+        "format_options": "Text format",
+        "header_options": "Header",
+        "list_options": "Lists",
+        "marker_options": "Marker",
+        "alignment_options": "Text align",
         "bold": "Bold",
         "italic": "Italic",
         "heading": "Headline",
         "ol": "ordered list",
         "ul": "bullet list",
         "strike": "strikethrough",
+        "underline": "underline",
         "code": "code",
         "quote": "quote",
         "redo": "Redo",

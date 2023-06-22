@@ -37,6 +37,8 @@ import Dropdown from 'primevue/dropdown';
 import Sidebar from 'primevue/sidebar';
 import Rating from 'primevue/rating';
 import InputSwitch from 'primevue/inputswitch';
+import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 
 // import draggable from 'vue-draggable-next'
 import { VueDraggableNext } from 'vue-draggable-next'
@@ -96,6 +98,8 @@ const app = createApp(App)
     .component('Dropdown', Dropdown)
     .component('Sidebar', Sidebar)
     .component('Rating', Rating)
+    .component('InputText', InputText)
+    .component('InputNumber', InputNumber)
     .component('draggable', VueDraggableNext)
 
  app.mount("#app");

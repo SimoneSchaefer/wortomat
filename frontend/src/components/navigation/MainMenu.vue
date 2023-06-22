@@ -6,6 +6,7 @@
         <Navlink :menuItem="{ label: 'research', to: 'research', icon: 'fa fa-flask'}"></Navlink>
         <Navlink :menuItem="{ label: 'location', to: 'location', icon: 'fa fa-map'}"></Navlink>
         <Navlink :menuItem="{ label: 'plotlines', to: 'plot', icon: 'fa fa-clock'}"></Navlink>
+        <Navlink :menuItem="{ label: 'stats', to: 'stats', icon: 'fa fa-chart-bar'}"></Navlink>
       <!--  <Navlink :menuItem="{ label: 'timeline', to: 'timeline', icon: 'fa fa-calendar'}"></Navlink> -->
       </div>
       <div class="home">
