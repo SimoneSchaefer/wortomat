@@ -43,14 +43,14 @@
         <ToggleSwitch 
             :enabled="statusFilterEnabled" 
             :label="`filter_settings.status_filter_enabled`"
-            @toggle="toggleMarkerFilter($event)"></ToggleSwitch>
+            @toggle="toggleStatusFilter($event)"></ToggleSwitch>
         
         <div v-if="statusFilterEnabled">           
             <div class="choice">
                 <Checkbox v-for="status of allStatus" :key="status"
-                    :enabled="selected(status)" 
+                    :enabled="statusSelected(status)" 
                     :label="`filter_settings.status_filter_${status}`" 
-                    @toggle="toggleMarker(status, $event)" />
+                    @toggle="toggleStatus(status, $event)" />
             </div>
         </div>
     </div>
@@ -118,11 +118,19 @@ export default class FilterMenu extends mixins(NovelItemKeyAwareMixin, FilterAwa
         return this.checkedMarker.includes(status);
     }
 
+    statusSelected(status: STATUS) {
+        return this.checkedStatus.includes(status);
+    }
+
     toggleTagFilter($event) {
         this.setTagFilter({ novelItemKey: this.parentKey, enabled: $event, tags: this.selectedTags });
     }
 
     toggleMarkerFilter($event) {
+        this.setMarkerFilter({ novelItemKey: this.parentKey, enabled: $event, checkedStatus: []})
+    }
+
+    toggleStatusFilter($event) {
         this.setStatusFilter({ novelItemKey: this.parentKey, enabled: $event, checkedStatus: []})
     }
 
@@ -135,7 +143,7 @@ export default class FilterMenu extends mixins(NovelItemKeyAwareMixin, FilterAwa
     }
 
     get allStatus() {
-        return getAllEnumValues(STATUS);
+        return [0, 1, 2, 3, 4, 5];
     }
 
     get checkedMarker() {

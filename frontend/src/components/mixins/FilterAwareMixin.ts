@@ -7,6 +7,7 @@ import { MARKER, MarkerFilterSetting, StatusFilterSetting, TagFilterSetting } fr
 import { ParentModel } from "@/models/ParentModel";
 import { ChildModel } from "@/models/ChildModel";
 import TodoMarkerAwareMixin from "./TodoMarkerAwareMixin";
+import { STATUS } from '@/models/Status';
 
 
 const filterModule = namespace("filter");
@@ -63,7 +64,23 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
         if (!visibleByTag) {
             return false;
         }
-        return this.visibleByMarker(child);
+        const visibleByMarker = this.visibleByMarker(child);
+        if (!visibleByMarker) {
+            return false;
+        }
+        return this.visibleByStatus(child);
+    }
+
+
+    visibleByStatus(child: ChildModel) {
+        if (!this._statusFilterSettings) {
+            return true;
+        }
+        if (this.selectedStatus.length === 0) {
+            return true;
+        }
+        const cleanStatus = child.status || 0;
+        return this.selectedStatus.includes(cleanStatus);
     }
 
     visibleByMarker(child: ChildModel) {
@@ -75,16 +92,16 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
         const ideaMarker = this.getIdeaCount(child.content);
         // in case no status have been selected, we only display the children that do 
         // not have any marker
-        if (this.selectedStatus.length === 0 && todoMarker === 0 && fixmeMarker === 0 && ideaMarker === 0) {
+        if (this.selectedMarker.length === 0 && todoMarker === 0 && fixmeMarker === 0 && ideaMarker === 0) {
             return true;
         }
-        if (this.selectedStatus.includes(MARKER.TODO) && todoMarker > 0) {
+        if (this.selectedMarker.includes(MARKER.TODO) && todoMarker > 0) {
             return true;
         }
-        if (this.selectedStatus.includes(MARKER.FIXME) && fixmeMarker > 0) {
+        if (this.selectedMarker.includes(MARKER.FIXME) && fixmeMarker > 0) {
             return true;
         }
-        if (this.selectedStatus.includes(MARKER.IDEA) && ideaMarker > 0) {
+        if (this.selectedMarker.includes(MARKER.IDEA) && ideaMarker > 0) {
             return true;
         }
         return false;
@@ -112,8 +129,12 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
         return this._tagFilterSettings[this.parentKey]?.tags || [];
     }
 
-    get selectedStatus() {
+    get selectedMarker() {
         return this._markerFilterSettings[this.parentKey]?.status || [];
+    }
+
+    get selectedStatus() {
+        return this._statusFilterSettings[this.parentKey]?.status || [];
     }
 
     get tagFilterEnabled() {

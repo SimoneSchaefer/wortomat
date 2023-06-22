@@ -12,6 +12,7 @@ import { TimelineService } from "@/service/TimelineService";
 import { PARENT_ITEM_KEYS } from "./keys";
 import { ParentModel } from "@/models/ParentModel";
 import { SettingsService } from '@/service/SettingsService';
+import { STATUS } from '@/models/Status';
 
 
 @Module({ generateMutationSetters: true })
@@ -252,6 +253,19 @@ export default class NovelDataModule extends VuexModule {
             this._groupingNovelItemService.tags(view, novelId),
             this._groupingNovelItemService.list(PARENT_ITEM_KEYS.PLOTLINES, novelId),
         ]).then(result => {
+            const cleanNovelItems = [...result[0].data].map((parent) => {
+                const cleanChildren = parent.children.map((child) => {
+                    return {
+                        ...child,
+                        status: STATUS[child.status]
+                    }
+                })
+                return {
+                    ...parent,
+                    children: cleanChildren
+                }
+
+            })
             this.novelItemsLoaded({ view: view, novelItems: result[0].data });
             // this.deletedNovelItemsLoaded( { view: view, novelItems: result[1].data });
             this.tagsLoaded({ view: view, tags: result[1].data });

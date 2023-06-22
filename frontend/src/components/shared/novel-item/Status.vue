@@ -115,6 +115,6 @@ export default class Status extends Vue {
 }
 .dummy {
     color: rgba(128, 128, 128, 0.5);
-    width: 10em;
+    max-width: 14em;
 }
 </style>
