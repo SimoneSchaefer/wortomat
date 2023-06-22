@@ -1,6 +1,7 @@
 
 const keysToStore = [
     'displaySettings/updateDisplaySettings',
+    'novels/settingsLoaded',
     'treeState/itemsToggled',
     'selection/itemsSelected',
     'export/updateExportIncludes',

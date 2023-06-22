@@ -11,6 +11,7 @@ import { TimelineService } from "@/service/TimelineService";
 
 import { PARENT_ITEM_KEYS } from "./keys";
 import { ParentModel } from "@/models/ParentModel";
+import { SettingsService } from '@/service/SettingsService';
 
 
 @Module({ generateMutationSetters: true })
@@ -18,9 +19,11 @@ export default class NovelDataModule extends VuexModule {
     private _groupingNovelItemService = new GroupingNovelItemService();
     private _timelineService = new TimelineService();
     private _novelService = new NovelService();
+    private _settingsService = new SettingsService();
 
     private _novelId: number = undefined;
     private _novels = [];
+    private _settings = {};
     private _loading = false;
     private _novelItems: Map<PARENT_ITEM_KEYS, BaseModel[]> = new Map(); // TODO: make BaseModel
     private _deletedNovelItems: Map<PARENT_ITEM_KEYS, BaseModel> = new Map(); // TODO: make BaseModel
@@ -116,6 +119,11 @@ export default class NovelDataModule extends VuexModule {
     }
 
     @Mutation
+    public settingsLoaded(settings: Record<string,boolean>): void {
+        this._settings = settings;
+    }
+
+    @Mutation
     public isLoading(loading: boolean): void {
         this._loading = loading;
     }
@@ -180,6 +188,13 @@ export default class NovelDataModule extends VuexModule {
         this._novelService.getAll().then(result => {
             this.novelsLoaded(result.data);
 
+        });
+    }
+
+    @Action
+    public async loadSettings(): Promise<void> {
+        this._settingsService.getAll().then(result => {
+            this.settingsLoaded(result.data);
         });
     }
 

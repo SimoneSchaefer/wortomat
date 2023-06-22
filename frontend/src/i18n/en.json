@@ -151,6 +151,10 @@
         "underline": "underline",
         "code": "code",
         "quote": "quote",
+        "align_left": "Left",
+        "align_right": "Right",
+        "align_center": "Center",
+        "align_justify": "Justify",       
         "redo": "Redo",
         "undo": "Undo",
         "clear": "Clear all formatting",
@@ -180,7 +184,8 @@
         "include_SHOW_TITLE": "Include title",
         "include_SHOW_SUMMARY": "Include summary",
         "include_SHOW_EXTENDED_SUMMARY": "Include extended summary",
-        "include_SHOW_CONTENT": "Include content"
+        "include_SHOW_CONTENT": "Include content",
+        "auto_number": "Include chapter numbers"
     },
     "delete_confirm": "Are you sure you want to delete this item?",
     "delete_multiple_confirm": "Are you sure you want to delete the selected items?",

@@ -2,15 +2,14 @@
     <div class="editor" v-if="editor">
         <div id="editor-toolbar">
             <div class="tools">
-
                 <editor-option-button :menuItems="textFormatMenuItems" :toggleLabel="'editor.format_options'"></editor-option-button>
                 <editor-option-button :menuItems="headerMenuItems" :toggleLabel="'editor.header_options'"></editor-option-button>
                 <editor-option-button :menuItems="listMenuItems" :toggleLabel="'editor.list_options'"></editor-option-button>
                 <editor-option-button :menuItems="markerMenuItems" :toggleLabel="'editor.marker_options'"></editor-option-button>
                 <editor-option-button :menuItems="alignmentMenuItems" :toggleLabel="'editor.alignment_options'"></editor-option-button>
-                <button class="editor-button padding-left" :title="$t('editor.clear')" @click="runCommand('unsetAllMarks') && this.runCommand('clearNodes')"><i class="fa fa-eraser"></i></button>
-                <button class="editor-button"  :title="$t('editor.undo')" @click="runCommand('undo')"><i class="fa fa-undo"></i></button>
-                <button class="editor-button" :title="$t('editor.redo')" @click="runCommand('redo')" ><i class="fa fa-redo"></i></button>
+                <button class="p-button editor-button padding-left" :title="$t('editor.clear')" @click="runCommand('unsetAllMarks') && this.runCommand('clearNodes')"><i class="fa fa-eraser"></i></button>
+                <button class="p-button editor-button"  :title="$t('editor.undo')" @click="runCommand('undo')"><i class="fa fa-undo"></i></button>
+                <button class="p-button editor-button" :title="$t('editor.redo')" @click="runCommand('redo')" ><i class="fa fa-redo"></i></button>
             </div>
             <div class="other">
                 <AppButton type="button" color="success" icon="fa fa-check" title="editor.save" v-on:click="save"></AppButton>            
@@ -209,7 +208,7 @@ export default class TipTap extends Vue {
         }];
 
         this.markerMenuItems = [{
-            label: this.$t('editor.align_right'),
+            label: this.$t('editor.highlight_idea'),
             icon: 'fa fa-lightbulb',
             command: () => {
                 this.runCommand('toggleHighlight', this.markerColors['idea'])

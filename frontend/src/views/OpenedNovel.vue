@@ -20,10 +20,15 @@ const novelDataModule = namespace("novelData");
 export default class OpenedNovel extends Vue {
   mounted(): void {
     this.openNovel(Number(this.$route.params.id));
+    this.loadSettings();
   }
 
   @novelDataModule.Action
   openNovel: (novelId: number) => Promise<void>;
+
+
+  @novelDataModule.Action
+  private loadSettings!: () => Promise<void>;
 
   get menuItems(): Array<MenuModel> {
     return [
