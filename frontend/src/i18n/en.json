@@ -186,7 +186,7 @@
         "marker_filter_enabled": "Filter by marker",
         "marker_filter_TODO": "TODO",
         "marker_filter_FIXME": "FIXME",
-        "marker_filter_": "IDEA"
+        "marker_filter_IDEA": "IDEA"
     },
     "export_settings": {
         "include_SHOW_TITLE": "Include title",

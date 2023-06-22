@@ -1,6 +1,6 @@
 {
   "name": "wortomat",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "novel writing app",
   "main": "index.js",
   "scripts": {

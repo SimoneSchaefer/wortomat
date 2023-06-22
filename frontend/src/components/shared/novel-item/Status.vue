@@ -55,7 +55,7 @@ export default class Status extends Vue {
     }
 
     getTranslation(status: number) {
-        return this.$t(STATUS_TO_TRANSLATION[status]);
+        return this.$t(STATUS_TO_TRANSLATION[status || 0]);
     }
 
     updateStatus() {

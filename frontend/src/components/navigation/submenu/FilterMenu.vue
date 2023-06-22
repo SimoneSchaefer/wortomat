@@ -31,9 +31,9 @@
                 If no status markers are selected, only items without any marker are shown.
             </div>
             <div class="choice">
-                <Checkbox v-for="status of allStatus" :key="status"
+                <Checkbox v-for="status of allMarkers" :key="status"
                     :enabled="selected(status)" 
-                    :label="`filter_settings.status_filter_${status}`" 
+                    :label="`filter_settings.marker_filter_${status}`" 
                     @toggle="toggleMarker(status, $event)" />
             </div>
         </div>
