@@ -219,6 +219,7 @@ export default class Treeview extends mixins(
   }
 
   get items() {
+    console.log('GET ITEMS', this.getFilteredItems())
     return this.getFilteredItems();
   }
 

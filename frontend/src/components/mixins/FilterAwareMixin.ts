@@ -29,6 +29,7 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
     
     getFilteredItems(novelItems?: ParentModel[] ) {
         const allParents = novelItems || this._novelItems?.get(this.parentKey) || [];
+        console.log('ALL PARENTS', allParents)
         if (!this.tagFilterEnabled && !this._markerFilterSettings) {
             return allParents;
         }  
@@ -36,12 +37,14 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
         for (const parent of allParents) {
             const newParent = {...parent};
             newParent.children = [];
+
             for (const child of parent.children) {
                 if (this.isChildVisible(child)) {
                     newParent.children.push(child);
                 }
             }
-            if (newParent.children.length > 0) {
+            // if (newParent.children.length > 0) 
+            {
                 filteredItems.push(newParent);
             }
         }
