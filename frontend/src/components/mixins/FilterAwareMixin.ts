@@ -90,10 +90,13 @@ export default abstract class FilterAwareMixin extends mixins(NovelItemKeyAwareM
         if (!this._markerFilterSettings) {
             return true;
         }
+        if (!this._markerFilterSettings[this.parentKey]?.enabled) {
+            return true;
+        }
         const todoMarker = this.getTodoCount(child.content);
         const fixmeMarker = this.getFixmeCount(child.content);
         const ideaMarker = this.getIdeaCount(child.content);
-        // in case no status have been selected, we only display the children that do 
+        // in case no marker have been selected, we only display the children that do 
         // not have any marker
         if (this.selectedMarker.length === 0 && todoMarker === 0 && fixmeMarker === 0 && ideaMarker === 0) {
             return true;

@@ -17,7 +17,7 @@
       <SubMenuLink
         class="setting"
         v-bind:class="{
-          'filter-active': tagFilterEnabled || statusFilterEnabled,
+          'filter-active': tagFilterEnabled || statusFilterEnabled || markerFilterEnabled,
         }"
         icon="filter"
         :title="`sub_menu.${parentKey}.filter`"
