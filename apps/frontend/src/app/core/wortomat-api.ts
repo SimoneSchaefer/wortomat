@@ -6,6 +6,7 @@ import type {
   CreateProjectRequest,
   ImageInfo,
   ManuscriptNode,
+  MoveNodeRequest,
   ProjectInfo,
   SaveSceneContentRequest,
   SceneContent,
@@ -56,6 +57,11 @@ export class WortomatApi {
 
   updateNode(id: string, request: UpdateNodeRequest): Promise<ManuscriptNode> {
     return this.call(this.http.patch<ManuscriptNode>(`/api/nodes/${id}`, request));
+  }
+
+  /** Liefert den kompletten Baum nach dem Verschieben. */
+  moveNode(id: string, request: MoveNodeRequest): Promise<ManuscriptNode[]> {
+    return this.call(this.http.post<ManuscriptNode[]>(`/api/nodes/${id}/move`, request));
   }
 
   deleteNode(id: string): Promise<void> {

@@ -4,6 +4,7 @@ import type {
   CreateNodeRequest,
   EditorDoc,
   ManuscriptNode,
+  MoveNodeRequest,
   NodeKind,
   SaveSceneContentRequest,
   SceneContent,
@@ -78,25 +79,58 @@ export class ManuscriptService {
   update(id: string, request: UpdateNodeRequest): ManuscriptNode {
     const node = this.get(id);
     const title = request.title === undefined ? node.title : requireTitle(request.title);
-    const parentId = request.parentId === undefined ? node.parentId : request.parentId;
-    const sortOrder = request.sortOrder ?? node.sortOrder;
-
-    if (parentId !== node.parentId) {
-      this.assertValidParent(node.kind, parentId);
+    if (title === node.title) {
+      return node;
     }
-
     transaction(this.db, () => {
       this.db
-        .prepare(
-          'UPDATE nodes SET title = ?, parent_id = ?, sort_order = ?, updated_at = ? WHERE id = ?',
-        )
-        .run(title, parentId, sortOrder, nowIso(), id);
-      if (title !== node.title) {
-        this.db.prepare('UPDATE scene_fts SET title = ? WHERE node_id = ?').run(title, id);
-      }
+        .prepare('UPDATE nodes SET title = ?, updated_at = ? WHERE id = ?')
+        .run(title, nowIso(), id);
+      this.db.prepare('UPDATE scene_fts SET title = ? WHERE node_id = ?').run(title, id);
       this.projects.touch();
     });
     return this.get(id);
+  }
+
+  /**
+   * Verschiebt einen Knoten samt Unterknoten. Die Geschwister am Ziel werden dabei
+   * neu durchnummeriert (1, 2, 3 …), damit die Reihenfolge nie „ausfranst“.
+   *
+   * @returns der komplette, aktualisierte Baum
+   */
+  move(id: string, request: MoveNodeRequest): ManuscriptNode[] {
+    const node = this.get(id);
+    const parentId = request?.parentId ?? null;
+    const beforeId = request?.beforeId ?? null;
+    if (parentId === id || beforeId === id) {
+      throw new BadRequestException(
+        'Ein Element kann nicht in oder vor sich selbst verschoben werden.',
+      );
+    }
+    this.assertValidParent(node.kind, parentId);
+
+    transaction(this.db, () => {
+      const siblings = (
+        this.db
+          .prepare('SELECT id FROM nodes WHERE parent_id IS ? AND id != ? ORDER BY sort_order')
+          .all(parentId, id) as Array<{ id: string }>
+      ).map((row) => row.id);
+
+      const index = beforeId === null ? siblings.length : siblings.indexOf(beforeId);
+      if (index < 0) {
+        throw new BadRequestException('Das Bezugselement liegt nicht an der Zielposition.');
+      }
+      siblings.splice(index, 0, id);
+
+      const now = nowIso();
+      this.db
+        .prepare('UPDATE nodes SET parent_id = ?, updated_at = ? WHERE id = ?')
+        .run(parentId, now, id);
+      const setOrder = this.db.prepare('UPDATE nodes SET sort_order = ? WHERE id = ?');
+      siblings.forEach((siblingId, position) => setOrder.run(position + 1, siblingId));
+      this.projects.touch();
+    });
+    return this.list();
   }
 
   /** Löscht den Knoten mitsamt allen Unterknoten und Inhalten. */

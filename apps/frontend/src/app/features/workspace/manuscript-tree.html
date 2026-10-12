@@ -1,8 +1,15 @@
 <ng-template #itemTemplate let-items>
   <ul>
     @for (item of items; track item.node.id) {
-      <li [class]="item.node.kind">
-        <div class="row">
+      <li
+        [class]="item.node.kind"
+        [class.dragging]="draggingId() === item.node.id"
+        [attr.data-drop]="dropMarker(item.node.id)"
+        [attr.draggable]="editingId() === item.node.id ? null : 'true'"
+        (dragstart)="onDragStart($event, item.node)"
+        (dragend)="onDragEnd()"
+      >
+        <div class="row" (dragover)="onDragOverItem($event, item.node)">
           @if (editingId() === item.node.id) {
             <input
               #titleInput
@@ -17,6 +24,7 @@
             <a
               [routerLink]="['/write/scene', item.node.id]"
               routerLinkActive="active"
+              draggable="false"
               (dblclick)="editingId.set(item.node.id)"
             >
               {{ item.node.title }}
@@ -58,12 +66,19 @@
   </ul>
 </ng-template>
 
-<nav aria-label="Manuskript">
+<nav
+  aria-label="Manuskript"
+  (dragover)="onDragOverFreeSpace($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
   @if (store.tree().length) {
     <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: store.tree() }" />
   } @else {
     <p class="muted empty">Noch leer. Leg dein erstes Kapitel an.</p>
   }
+
+  <div class="root-marker" [attr.data-drop]="dropMarker(null)"></div>
 
   <div class="add">
     <button type="button" class="link" (click)="add('chapter', null)">+ Kapitel</button>

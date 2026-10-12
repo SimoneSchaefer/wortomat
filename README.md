@@ -101,7 +101,8 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | POST | `/api/project/create` · `/open` · `/close` | Projektdatei anlegen / öffnen / schließen |
 | PATCH | `/api/project` | Titel, Autor |
 | GET · POST | `/api/nodes` | Manuskript-Baum (Teil → Kapitel → Szene) |
-| PATCH · DELETE | `/api/nodes/:id` | umbenennen, verschieben, löschen (inkl. Unterelemente) |
+| PATCH · DELETE | `/api/nodes/:id` | umbenennen, löschen (inkl. Unterelemente) |
+| POST | `/api/nodes/:id/move` | verschieben: `{ parentId, beforeId }` → kompletter Baum |
 | GET · PUT | `/api/scenes/:id/content` | Szenentext laden / speichern |
 | POST | `/api/images` | Bild hochladen (multipart, Feld `file`) |
 | GET | `/api/images/:id` | Bild abrufen |
@@ -111,7 +112,7 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 
 - App-Icon: `apps/desktop/build/icon.png` (1024×1024) ablegen
 - Code-Signing für Windows und macOS (sonst warnen SmartScreen bzw. Gatekeeper)
-- Szenen per Drag & Drop umsortieren (API unterstützt `sortOrder` und `parentId` bereits)
+- Umsortieren per Tastatur (Drag & Drop ist nur mit der Maus bedienbar)
 - Versionen/Snapshots von Szenen, nicht mehr verwendete Bilder aufräumen
 - Export (DOCX, EPUB, PDF über `webContents.printToPDF`)
 - Import der Daten aus Wortomat 1.x

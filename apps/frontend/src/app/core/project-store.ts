@@ -1,5 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import type { CreateNodeRequest, ManuscriptNode, ProjectInfo } from '@wortomat/shared';
+import type {
+  CreateNodeRequest,
+  ManuscriptNode,
+  MoveNodeRequest,
+  ProjectInfo,
+} from '@wortomat/shared';
 import { WortomatApi } from './wortomat-api';
 
 export interface TreeItem {
@@ -56,6 +61,10 @@ export class ProjectStore {
   async renameNode(id: string, title: string): Promise<void> {
     const updated = await this.api.updateNode(id, { title });
     this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
+  }
+
+  async moveNode(id: string, request: MoveNodeRequest): Promise<void> {
+    this.nodes.set(await this.api.moveNode(id, request));
   }
 
   async deleteNode(id: string): Promise<void> {

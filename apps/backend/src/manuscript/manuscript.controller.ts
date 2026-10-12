@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put } from
 import type {
   CreateNodeRequest,
   ManuscriptNode,
+  MoveNodeRequest,
   SaveSceneContentRequest,
   SceneContent,
   UpdateNodeRequest,
@@ -25,6 +26,12 @@ export class ManuscriptController {
   @Patch('nodes/:id')
   update(@Param('id') id: string, @Body() body: UpdateNodeRequest): ManuscriptNode {
     return this.manuscript.update(id, body);
+  }
+
+  @Post('nodes/:id/move')
+  @HttpCode(200)
+  move(@Param('id') id: string, @Body() body: MoveNodeRequest): ManuscriptNode[] {
+    return this.manuscript.move(id, body);
   }
 
   @Delete('nodes/:id')

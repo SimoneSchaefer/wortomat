@@ -129,6 +129,64 @@ describe('REST-API', () => {
     assert.deepEqual(await api('GET', '/api/search?q=hauser'), []);
   });
 
+  it('verschiebt Szenen und Kapitel und nummeriert neu', async () => {
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const move = (id: string, parentId: string | null, beforeId: string | null) =>
+      api<ManuscriptNode[]>('POST', `/api/nodes/${id}/move`, { parentId, beforeId });
+    const titlesUnder = (nodes: ManuscriptNode[], parentId: string | null) =>
+      nodes
+        .filter((n) => n.parentId === parentId)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((n) => n.title);
+
+    const k1 = await node(null, 'chapter', 'K1');
+    const k2 = await node(null, 'chapter', 'K2');
+    const a = await node(k1.id, 'scene', 'A');
+    const b = await node(k1.id, 'scene', 'B');
+    const c = await node(k1.id, 'scene', 'C');
+
+    // C vor A
+    let nodes = await move(c.id, k1.id, a.id);
+    assert.deepEqual(titlesUnder(nodes, k1.id), ['C', 'A', 'B']);
+    assert.deepEqual(
+      nodes
+        .filter((n) => n.parentId === k1.id)
+        .map((n) => n.sortOrder)
+        .sort(),
+      [1, 2, 3],
+    );
+
+    // A ans Ende von K2
+    nodes = await move(a.id, k2.id, null);
+    assert.deepEqual(titlesUnder(nodes, k1.id), ['C', 'B']);
+    assert.deepEqual(titlesUnder(nodes, k2.id), ['A']);
+
+    // Kapitel umsortieren, dann in einen Teil schieben (Szenen wandern mit)
+    nodes = await move(k2.id, null, k1.id);
+    assert.deepEqual(titlesUnder(nodes, null), ['K2', 'K1']);
+    const teil = await node(null, 'part', 'Teil I');
+    nodes = await move(k1.id, teil.id, null);
+    assert.deepEqual(titlesUnder(nodes, teil.id), ['K1']);
+    assert.deepEqual(titlesUnder(nodes, k1.id), ['C', 'B']);
+
+    const rejected = async (id: string, parentId: string | null, beforeId: string | null) => {
+      const response = await fetch(`${server.url}/api/nodes/${id}/move`, {
+        method: 'POST',
+        headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parentId, beforeId }),
+      });
+      return response.status;
+    };
+    assert.equal(await rejected(b.id, null, null), 400, 'Szene auf oberster Ebene');
+    assert.equal(await rejected(teil.id, k2.id, null), 400, 'Teil in Kapitel');
+    assert.equal(await rejected(b.id, k2.id, c.id), 400, 'Bezugselement aus anderem Kapitel');
+    assert.equal(await rejected(k2.id, k2.id, null), 400, 'in sich selbst');
+
+    await api('DELETE', `/api/nodes/${teil.id}`);
+    await api('DELETE', `/api/nodes/${k2.id}`);
+  });
+
   it('verweigert Szenen direkt auf oberster Ebene', async () => {
     const response = await fetch(`${server.url}/api/nodes`, {
       method: 'POST',

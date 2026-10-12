@@ -69,8 +69,17 @@ export interface CreateNodeRequest {
 
 export interface UpdateNodeRequest {
   title?: string;
-  parentId?: string | null;
-  sortOrder?: number;
+}
+
+/**
+ * Verschiebt einen Knoten (samt Unterknoten) an eine neue Stelle im Baum.
+ * Die Reihenfolge berechnet das Backend; der Client nennt nur den Nachbarn.
+ */
+export interface MoveNodeRequest {
+  /** Neues Elternelement; `null` = oberste Ebene. */
+  parentId: string | null;
+  /** Geschwister, vor dem eingefügt wird; `null` = ans Ende. */
+  beforeId: string | null;
 }
 
 // ---------------------------------------------------------------------------
