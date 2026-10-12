@@ -1,0 +1,91 @@
+import { computed, inject, Injectable, signal } from '@angular/core';
+import type { CreateNodeRequest, ManuscriptNode, ProjectInfo } from '@wortomat/shared';
+import { WortomatApi } from './wortomat-api';
+
+export interface TreeItem {
+  node: ManuscriptNode;
+  children: TreeItem[];
+}
+
+/** Zustand des geöffneten Projekts: Metadaten und Manuskript-Baum. */
+@Injectable({ providedIn: 'root' })
+export class ProjectStore {
+  private readonly api = inject(WortomatApi);
+  private initialLoad: Promise<ProjectInfo | null> | null = null;
+
+  readonly project = signal<ProjectInfo | null>(null);
+  readonly nodes = signal<ManuscriptNode[]>([]);
+  readonly tree = computed(() => buildTree(this.nodes()));
+  readonly totalWords = computed(() => this.nodes().reduce((sum, node) => sum + node.wordCount, 0));
+
+  /** Lädt beim ersten Aufruf das im Backend geöffnete Projekt (z. B. per Doppelklick gestartet). */
+  ensureLoaded(): Promise<ProjectInfo | null> {
+    this.initialLoad ??= this.reload();
+    return this.initialLoad;
+  }
+
+  async reload(): Promise<ProjectInfo | null> {
+    const project = await this.api.currentProject();
+    this.project.set(project);
+    this.nodes.set(project ? await this.api.listNodes() : []);
+    return project;
+  }
+
+  async create(filePath: string, title: string): Promise<void> {
+    this.project.set(await this.api.createProject({ filePath, title }));
+    this.nodes.set([]);
+  }
+
+  async open(filePath: string): Promise<void> {
+    this.project.set(await this.api.openProject(filePath));
+    this.nodes.set(await this.api.listNodes());
+  }
+
+  async close(): Promise<void> {
+    await this.api.closeProject();
+    this.project.set(null);
+    this.nodes.set([]);
+  }
+
+  async addNode(request: CreateNodeRequest): Promise<ManuscriptNode> {
+    const node = await this.api.createNode(request);
+    this.nodes.update((nodes) => [...nodes, node]);
+    return node;
+  }
+
+  async renameNode(id: string, title: string): Promise<void> {
+    const updated = await this.api.updateNode(id, { title });
+    this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
+  }
+
+  async deleteNode(id: string): Promise<void> {
+    await this.api.deleteNode(id);
+    // Unterknoten werden im Backend mitgelöscht; einfach neu laden.
+    this.nodes.set(await this.api.listNodes());
+  }
+
+  setWordCount(id: string, wordCount: number): void {
+    this.nodes.update((nodes) =>
+      nodes.map((node) => (node.id === id ? { ...node, wordCount } : node)),
+    );
+  }
+
+  findNode(id: string): ManuscriptNode | undefined {
+    return this.nodes().find((node) => node.id === id);
+  }
+}
+
+function buildTree(nodes: readonly ManuscriptNode[]): TreeItem[] {
+  const items = new Map(nodes.map((node) => [node.id, { node, children: [] as TreeItem[] }]));
+  const roots: TreeItem[] = [];
+  for (const item of items.values()) {
+    const parent = item.node.parentId ? items.get(item.node.parentId) : undefined;
+    (parent ? parent.children : roots).push(item);
+  }
+  const sort = (list: TreeItem[]) => {
+    list.sort((a, b) => a.node.sortOrder - b.node.sortOrder);
+    list.forEach((item) => sort(item.children));
+  };
+  sort(roots);
+  return roots;
+}

@@ -1,0 +1,46 @@
+<div class="layout">
+  <aside class="sidebar">
+    <header>
+      <h1 [title]="store.project()?.filePath ?? ''">{{ store.project()?.title }}</h1>
+      <p class="muted">{{ store.totalWords() | number }} Wörter</p>
+    </header>
+
+    <input
+      class="search"
+      type="search"
+      placeholder="Im Buch suchen …"
+      [value]="query()"
+      (input)="onSearchInput($any($event.target).value)"
+      (keydown.escape)="clearSearch()"
+    />
+
+    @if (query().trim()) {
+      <ul class="hits">
+        @for (hit of hits(); track hit.nodeId) {
+          <li>
+            <a [routerLink]="['/write/scene', hit.nodeId]">
+              <strong>{{ hit.title }}</strong>
+              <span [innerHTML]="hit.snippetHtml"></span>
+            </a>
+          </li>
+        } @empty {
+          <li class="muted">Keine Treffer.</li>
+        }
+      </ul>
+    } @else {
+      <wm-manuscript-tree />
+    }
+
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <footer>
+      <button type="button" class="link" (click)="closeProject()">Projekt schließen</button>
+    </footer>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

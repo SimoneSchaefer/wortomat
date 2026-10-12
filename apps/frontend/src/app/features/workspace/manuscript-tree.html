@@ -1,0 +1,76 @@
+<ng-template #itemTemplate let-items>
+  <ul>
+    @for (item of items; track item.node.id) {
+      <li [class]="item.node.kind">
+        <div class="row">
+          @if (editingId() === item.node.id) {
+            <input
+              #titleInput
+              [value]="item.node.title"
+              (keydown.enter)="titleInput.blur()"
+              (keydown.escape)="editingId.set(null)"
+              (blur)="rename(item.node, titleInput.value)"
+              [attr.aria-label]="'Titel von ' + item.node.title"
+              wmAutofocus
+            />
+          } @else if (item.node.kind === 'scene') {
+            <a
+              [routerLink]="['/write/scene', item.node.id]"
+              routerLinkActive="active"
+              (dblclick)="editingId.set(item.node.id)"
+            >
+              {{ item.node.title }}
+            </a>
+            <span class="count">{{ item.node.wordCount }}</span>
+          } @else {
+            <span class="label" (dblclick)="editingId.set(item.node.id)">{{
+              item.node.title
+            }}</span>
+          }
+
+          <span class="actions">
+            @if (item.node.kind === 'chapter') {
+              <button type="button" title="Szene hinzufügen" (click)="add('scene', item.node.id)">
+                +
+              </button>
+            }
+            @if (item.node.kind === 'part') {
+              <button
+                type="button"
+                title="Kapitel hinzufügen"
+                (click)="add('chapter', item.node.id)"
+              >
+                +
+              </button>
+            }
+            <button type="button" title="Umbenennen" (click)="editingId.set(item.node.id)">
+              ✎
+            </button>
+            <button type="button" title="Löschen" (click)="remove(item.node)">×</button>
+          </span>
+        </div>
+
+        @if (item.children.length) {
+          <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item.children }" />
+        }
+      </li>
+    }
+  </ul>
+</ng-template>
+
+<nav aria-label="Manuskript">
+  @if (store.tree().length) {
+    <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: store.tree() }" />
+  } @else {
+    <p class="muted empty">Noch leer. Leg dein erstes Kapitel an.</p>
+  }
+
+  <div class="add">
+    <button type="button" class="link" (click)="add('chapter', null)">+ Kapitel</button>
+    <button type="button" class="link" (click)="add('part', null)">+ Teil</button>
+  </div>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+</nav>

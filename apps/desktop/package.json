@@ -1,0 +1,24 @@
+{
+  "name": "@wortomat/desktop",
+  "productName": "Wortomat",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Electron-Shell: startet das Backend im Hauptprozess und zeigt das Angular-Frontend an.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/bundle.mjs",
+    "dev": "npm run build -w @wortomat/backend && node scripts/bundle.mjs --dev && wait-on -t 120000 http-get://localhost:4200 && electron app --dev",
+    "start": "electron app",
+    "dist": "electron-builder --config electron-builder.yml",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.0",
+    "@wortomat/backend": "*",
+    "@wortomat/shared": "*",
+    "electron": "44.7.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "wait-on": "^9.5.1"
+  }
+}

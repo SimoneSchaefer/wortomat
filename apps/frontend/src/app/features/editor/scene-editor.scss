@@ -1,0 +1,73 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 1rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+
+  button {
+    min-width: 2rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid transparent;
+    background: none;
+
+    &.on {
+      background: var(--hover);
+      border-color: var(--border);
+    }
+  }
+
+  .sep {
+    width: 1px;
+    height: 1.25rem;
+    margin: 0 0.35rem;
+    background: var(--border);
+  }
+}
+
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 6rem;
+
+  h1 {
+    font-family: var(--font-prose);
+    font-weight: 400;
+    font-size: 1.9rem;
+    margin: 0 0 1.5rem;
+  }
+}
+
+.statusbar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 1.25rem;
+  padding: 0.35rem 1rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+
+  .status.unsaved,
+  .status.saving {
+    color: var(--accent);
+  }
+
+  .status.error,
+  .error {
+    color: var(--danger);
+  }
+}

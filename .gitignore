@@ -1,0 +1,12 @@
+node_modules/
+dist/
+release/
+.angular/
+*.tsbuildinfo
+*.wortomat
+*.wortomat-wal
+*.wortomat-shm
+.env
+.DS_Store
+dist-test/
+/apps/desktop/app/

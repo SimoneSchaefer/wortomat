@@ -1,0 +1,101 @@
+<div class="toolbar" role="toolbar" aria-label="Formatierung">
+  <button
+    type="button"
+    title="Fett (Strg+B)"
+    [class.on]="isActive('bold')"
+    (click)="command('bold')"
+  >
+    <b>F</b>
+  </button>
+  <button
+    type="button"
+    title="Kursiv (Strg+I)"
+    [class.on]="isActive('italic')"
+    (click)="command('italic')"
+  >
+    <i>K</i>
+  </button>
+  <span class="sep"></span>
+  <button
+    type="button"
+    title="Überschrift"
+    [class.on]="isActive('heading', { level: 2 })"
+    (click)="command('heading2')"
+  >
+    Ü1
+  </button>
+  <button
+    type="button"
+    title="Unterüberschrift"
+    [class.on]="isActive('heading', { level: 3 })"
+    (click)="command('heading3')"
+  >
+    Ü2
+  </button>
+  <button
+    type="button"
+    title="Zitat"
+    [class.on]="isActive('blockquote')"
+    (click)="command('quote')"
+  >
+    „“
+  </button>
+  <span class="sep"></span>
+  <button type="button" title="Bild einfügen" (click)="imagePicker.click()">Bild</button>
+  <input
+    #imagePicker
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+    multiple
+    hidden
+    (change)="onImagesPicked(imagePicker)"
+  />
+  <span class="sep"></span>
+  <button
+    type="button"
+    title="Rückgängig (Strg+Z)"
+    [disabled]="!can('undo')"
+    (click)="command('undo')"
+  >
+    ↶
+  </button>
+  <button
+    type="button"
+    title="Wiederholen (Strg+Umschalt+Z)"
+    [disabled]="!can('redo')"
+    (click)="command('redo')"
+  >
+    ↷
+  </button>
+</div>
+
+<article class="page">
+  <h1>{{ node()?.title }}</h1>
+  <div #editorHost class="editor-host"></div>
+</article>
+
+<footer class="statusbar">
+  <span>{{ wordCount() | number }} Wörter</span>
+  <span class="status" [class]="status()">
+    @switch (status()) {
+      @case ('loading') {
+        Lade …
+      }
+      @case ('saved') {
+        Gespeichert
+      }
+      @case ('unsaved') {
+        Ungespeichert
+      }
+      @case ('saving') {
+        Speichere …
+      }
+      @case ('error') {
+        Fehler
+      }
+    }
+  </span>
+  @if (error(); as message) {
+    <span class="error" role="alert">{{ message }}</span>
+  }
+</footer>

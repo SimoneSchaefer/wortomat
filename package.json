@@ -1,0 +1,30 @@
+{
+  "name": "wortomat",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Wortomat – Software zum Schreiben von Büchern und Romanen",
+  "workspaces": [
+    "libs/shared",
+    "apps/backend",
+    "apps/frontend",
+    "apps/desktop"
+  ],
+  "engines": {
+    "node": ">=24.15"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n backend,frontend -c blue,magenta \"npm run dev -w @wortomat/backend\" \"npm run start -w @wortomat/frontend\"",
+    "dev:desktop": "concurrently -k -n frontend,desktop -c magenta,green \"npm run start -w @wortomat/frontend\" \"npm run dev -w @wortomat/desktop\"",
+    "build": "npm run build -w @wortomat/backend && npm run build -w @wortomat/frontend && npm run build -w @wortomat/desktop",
+    "start:desktop": "npm run build && npm run start -w @wortomat/desktop",
+    "dist": "npm run build && npm run dist -w @wortomat/desktop",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,html,scss}\" \"apps/desktop/scripts/*.mjs\" \"libs/*/src/**/*.ts\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2"
+  }
+}

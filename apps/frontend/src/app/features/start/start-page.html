@@ -1,0 +1,55 @@
+<main class="start">
+  <header>
+    <h1>Wortomat</h1>
+    <p class="muted">Dein Buch. Deine Datei. Kein Server.</p>
+  </header>
+
+  <section class="card">
+    <h2>Neues Buch beginnen</h2>
+    <form (ngSubmit)="createProject()">
+      <label>
+        Titel
+        <input name="title" [(ngModel)]="title" placeholder="z. B. Die Häuser am Fluss" autofocus />
+      </label>
+      @if (!desktop) {
+        <label>
+          Speicherort
+          <input name="newPath" [(ngModel)]="newPath" />
+        </label>
+      }
+      <button class="primary" type="submit" [disabled]="busy()">
+        {{ desktop ? 'Anlegen …' : 'Anlegen' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Vorhandenes Buch öffnen</h2>
+    @if (desktop) {
+      <button type="button" (click)="openProject()" [disabled]="busy()">
+        Projektdatei öffnen …
+      </button>
+    } @else {
+      <form (ngSubmit)="openProject()">
+        <label>
+          Pfad zur .wortomat-Datei
+          <input name="openPath" [(ngModel)]="openPath" />
+        </label>
+        <button type="submit" [disabled]="busy() || !openPath().trim()">Öffnen</button>
+      </form>
+    }
+  </section>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <footer class="muted">
+    @if (appInfo.value(); as info) {
+      Version {{ info.version }}
+      @if (info.mode === 'browser') {
+        · Browser-Modus (Entwicklung)
+      }
+    }
+  </footer>
+</main>

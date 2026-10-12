@@ -1,0 +1,177 @@
+// Globale Designwerte. Komponenten verwenden nur diese Variablen.
+:root {
+  color-scheme: light dark;
+
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-prose: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+
+  --bg: #fbfaf7;
+  --surface: #f3f1ec;
+  --hover: #e9e6df;
+  --border: #dedad2;
+  --text: #22201c;
+  --text-muted: #6f6a61;
+  --accent: #9a5b1e;
+  --danger: #b3261e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1b19;
+    --surface: #232220;
+    --hover: #2f2d2a;
+    --border: #3a3834;
+    --text: #e8e4dc;
+    --text-muted: #9c968c;
+    --accent: #e0a464;
+    --danger: #f2827a;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+input:not([type='file']) {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--bg);
+
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+  }
+}
+
+button {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--hover);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  &.primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+
+    &:hover:not(:disabled) {
+      background: var(--accent);
+      filter: brightness(1.1);
+    }
+  }
+
+  &.link {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+
+    &:hover:not(:disabled) {
+      background: none;
+      color: var(--text);
+    }
+  }
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.error {
+  color: var(--danger);
+  white-space: pre-line;
+}
+
+mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: inherit;
+  border-radius: 0.15rem;
+}
+
+// ---------------------------------------------------------------------------
+// Fließtext im Editor (ProseMirror-DOM entsteht außerhalb von Angular → global)
+// ---------------------------------------------------------------------------
+
+.wm-prose {
+  font-family: var(--font-prose);
+  font-size: 1.15rem;
+  line-height: 1.7;
+  outline: none;
+  min-height: 50vh;
+  hyphens: auto;
+
+  p {
+    margin: 0;
+  }
+
+  // Buchsatz: Absätze per Einzug statt Leerzeile
+  p + p {
+    text-indent: 1.5em;
+  }
+
+  h2,
+  h3 {
+    font-weight: 400;
+    margin: 2rem 0 0.75rem;
+  }
+
+  blockquote {
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 3px solid var(--border);
+    font-style: italic;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem auto;
+    border-radius: 0.25rem;
+
+    &.ProseMirror-selectednode {
+      outline: 3px solid var(--accent);
+    }
+  }
+
+  p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+}

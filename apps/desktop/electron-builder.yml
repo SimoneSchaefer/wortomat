@@ -1,0 +1,37 @@
+# Erzeugt Installer für Windows, macOS und Linux: `npm run dist` (im Repo-Root).
+# Jede Plattform baut man am besten auf ihrem eigenen Betriebssystem (z. B. per GitHub Actions).
+appId: de.wortomat.app
+productName: Wortomat
+copyright: Copyright © 2026 Wortomat
+
+directories:
+  app: app
+  output: release
+  buildResources: build   # hier icon.png (1024×1024) ablegen
+
+files:
+  - "**/*"
+
+asar: true
+
+fileAssociations:
+  - ext: wortomat
+    name: Wortomat-Projekt
+    description: Wortomat-Projekt
+    role: Editor
+
+win:
+  target: [nsis]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
+mac:
+  target: [dmg]
+  category: public.app-category.productivity
+
+linux:
+  target: [AppImage, deb]
+  category: Office
+  syncDesktopName: true
+  synopsis: Software zum Schreiben von Büchern und Romanen

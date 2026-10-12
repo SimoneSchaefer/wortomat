@@ -1,0 +1,15 @@
+{
+  "name": "@wortomat/shared",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Gemeinsame Typen (API-Vertrag) für Frontend, Backend und Desktop. Nur Typen, kein Laufzeitcode.",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
