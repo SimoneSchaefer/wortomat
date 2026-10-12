@@ -231,3 +231,13 @@ input.doc-title {
   color: var(--text-muted);
   font-style: italic;
 }
+
+// Während eine Breite gezogen wird: überall der passende Cursor, keine Textauswahl.
+body.wm-resizing {
+  cursor: col-resize;
+  user-select: none;
+
+  * {
+    cursor: col-resize !important;
+  }
+}

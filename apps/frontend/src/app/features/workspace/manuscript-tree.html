@@ -30,15 +30,19 @@
               [routerLink]="['/write/scene', item.node.id]"
               routerLinkActive="active"
               draggable="false"
+              [title]="item.node.title"
               (dblclick)="editingId.set(item.node.id)"
             >
               {{ item.node.title }}
             </a>
             <span class="count">{{ item.node.wordCount }}</span>
           } @else {
-            <span class="label" (dblclick)="editingId.set(item.node.id)">{{
-              item.node.title
-            }}</span>
+            <span
+              class="label"
+              [title]="item.node.title"
+              (dblclick)="editingId.set(item.node.id)"
+              >{{ item.node.title }}</span
+            >
           }
 
           <span class="actions">

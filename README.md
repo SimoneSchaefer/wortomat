@@ -62,6 +62,11 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
 - **Aufbau des Arbeitsbereichs:** Oben eine Leiste für das ganze Buch (Titel, Wortzahl, Suche,
   „Projekt schließen“), darunter Menüleiste, Liste des aktuellen Bereichs und Inhalt. Die Suche
   (Strg+K / ⌘K) durchsucht Szenen und Notizen und zeigt die Treffer nach Bereich gruppiert.
+  Die Seitenleiste lässt sich am rechten Rand breiter ziehen (auch per Tastatur, Doppelklick =
+  Standard).
+- **App-Einstellungen** (z. B. diese Breite) liegen in `settings.json` im App-Datenordner, nicht im
+  `localStorage`: Electron startet das Backend auf einem zufälligen Port, und `localStorage` hängt
+  am Origin – er wäre nach jedem Start leer.
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
   zusätzlich vor dem Schließen des Fensters bzw. Beenden der App.
@@ -125,6 +130,7 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | Methode | Pfad | Zweck |
 |---|---|---|
 | GET | `/api/app` | Version, Modus (desktop/browser) |
+| GET · PATCH | `/api/settings` | App-Einstellungen (z. B. `sidebarWidth`), auch ohne geöffnetes Projekt |
 | GET | `/api/project` | geöffnetes Projekt oder `null` |
 | POST | `/api/project/create` · `/open` · `/close` | Projektdatei anlegen / öffnen / schließen |
 | PATCH | `/api/project` | Titel, Autor |

@@ -15,6 +15,8 @@ import { ProjectsController } from './project/projects.controller.js';
 import { RecentProjectsService } from './project/recent-projects.service.js';
 import { SearchController } from './search/search.controller.js';
 import { SearchService } from './search/search.service.js';
+import { AppSettingsController } from './settings/app-settings.controller.js';
+import { AppSettingsService } from './settings/app-settings.service.js';
 import { TagsController } from './tags/tags.controller.js';
 import { TagsService } from './tags/tags.service.js';
 
@@ -31,6 +33,7 @@ export class AppModule {
         NotesController,
         LinksController,
         TagsController,
+        AppSettingsController,
         ImagesController,
         SearchController,
       ],
@@ -42,6 +45,7 @@ export class AppModule {
         NotesService,
         LinksService,
         TagsService,
+        AppSettingsService,
         ImagesService,
         SearchService,
       ],

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
+  AppSettings,
   CreateNodeRequest,
   CreateNoteRequest,
   CreateProjectRequest,
@@ -18,6 +19,7 @@ import type {
   SearchHit,
   Tag,
   TagSummary,
+  UpdateAppSettingsRequest,
   UpdateNodeRequest,
   UpdateNoteRequest,
 } from '@wortomat/shared';
@@ -33,6 +35,14 @@ export class WortomatApi {
 
   appInfo(): Promise<AppInfo> {
     return this.call(this.http.get<AppInfo>('/api/app'));
+  }
+
+  settings(): Promise<AppSettings> {
+    return this.call(this.http.get<AppSettings>('/api/settings'));
+  }
+
+  updateSettings(request: UpdateAppSettingsRequest): Promise<AppSettings> {
+    return this.call(this.http.patch<AppSettings>('/api/settings', request));
   }
 
   // Projekt -----------------------------------------------------------------

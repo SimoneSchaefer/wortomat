@@ -596,6 +596,53 @@ describe('REST-API', () => {
     assert.equal(nodes.find((n) => n.id === szene.id)?.status, 'idea');
   });
 
+  it('speichert App-Einstellungen dauerhaft – auch ohne geöffnetes Projekt', async () => {
+    const openProject = await api<ProjectInfo>('GET', '/api/project');
+    await api('POST', '/api/project/close');
+    assert.deepEqual(await api('GET', '/api/settings'), { sidebarWidth: null });
+
+    assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: 340.6 }), {
+      sidebarWidth: 341,
+    });
+
+    // Zweiter Server mit demselben Datenordner (= App-Neustart) liest den Wert
+    const restarted = await startServer({
+      mode: 'desktop',
+      version: 'test',
+      defaultProjectDir: tmpDir,
+      dataDir: path.join(tmpDir, 'appdata'),
+      token: TOKEN,
+      logger: false,
+    });
+    try {
+      const response = await fetch(`${restarted.url}/api/settings`, {
+        headers: { [AUTH_HEADER]: TOKEN },
+      });
+      assert.deepEqual(await response.json(), { sidebarWidth: 341 });
+    } finally {
+      await restarted.close();
+    }
+
+    const invalid = async (sidebarWidth: unknown) =>
+      (
+        await fetch(`${server.url}/api/settings`, {
+          method: 'PATCH',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sidebarWidth }),
+        })
+      ).status;
+    assert.equal(await invalid(20), 400);
+    assert.equal(await invalid('breit'), 400);
+
+    // Zurück auf Standard
+    assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: null }), {
+      sidebarWidth: null,
+    });
+
+    // Für die folgenden Tests wieder öffnen
+    await api('POST', '/api/project/open', { filePath: openProject.filePath });
+  });
+
   it('verweigert Szenen direkt auf oberster Ebene', async () => {
     const response = await fetch(`${server.url}/api/nodes`, {
       method: 'POST',

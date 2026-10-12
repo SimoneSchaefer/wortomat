@@ -18,6 +18,14 @@ export interface AppInfo {
   defaultProjectDir: string;
 }
 
+/** Einstellungen der App (nicht des Buchs) – z. B. Breite der Seitenleiste. */
+export interface AppSettings {
+  /** Breite der Seitenleiste in Pixeln; `null` = Standardbreite. */
+  sidebarWidth: number | null;
+}
+
+export type UpdateAppSettingsRequest = Partial<AppSettings>;
+
 // ---------------------------------------------------------------------------
 // Projekt (= eine .wortomat-Datei, intern eine SQLite-Datenbank)
 // ---------------------------------------------------------------------------

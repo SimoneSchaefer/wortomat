@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import type { NoteKind } from '@wortomat/shared';
 import { filter, map } from 'rxjs';
+import { AppSettingsStore } from '../../core/app-settings';
 import { errorMessage } from '../../core/errors';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
@@ -12,8 +13,13 @@ import { NoteList } from '../notes/note-list';
 import { NotesStore } from '../notes/notes-store';
 import { GlobalSearch } from './global-search';
 import { ManuscriptTree } from './manuscript-tree';
+import { ResizeHandle } from './resize-handle';
 
 type Section = 'manuscript' | NoteKind;
+
+const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem
+const MIN_SIDEBAR_WIDTH = 192; // 12rem
+const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
 
 interface MenuItem {
   section: Section;
@@ -33,11 +39,12 @@ const MENU: readonly MenuItem[] = [
 
 @Component({
   selector: 'wm-workspace-page',
-  imports: [RouterOutlet, DecimalPipe, ManuscriptTree, NoteList, GlobalSearch],
+  imports: [RouterOutlet, DecimalPipe, ManuscriptTree, NoteList, GlobalSearch, ResizeHandle],
   templateUrl: './workspace-page.html',
   styleUrl: './workspace-page.scss',
   // Pro geöffnetem Projekt frisch – die Notizen gehören zum Projekt.
   providers: [NotesStore],
+  host: { '(window:resize)': 'onWindowResize()' },
 })
 export class WorkspacePage {
   private readonly router = inject(Router);
@@ -45,7 +52,23 @@ export class WorkspacePage {
   protected readonly store = inject(ProjectStore);
   protected readonly notes = inject(NotesStore);
 
+  protected readonly settings = inject(AppSettingsStore);
+
   protected readonly menu = MENU;
+
+  // Breite der Seitenleiste: gespeichert in den App-Einstellungen, begrenzt auf
+  // mindestens 12rem und höchstens die halbe Fensterbreite (der Text braucht Platz).
+  protected readonly minSidebarWidth = MIN_SIDEBAR_WIDTH;
+  protected readonly windowWidth = signal(window.innerWidth);
+  protected readonly maxSidebarWidth = computed(() =>
+    Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, Math.floor(this.windowWidth() / 2))),
+  );
+  protected readonly sidebarWidth = computed(() =>
+    Math.min(
+      this.maxSidebarWidth(),
+      Math.max(MIN_SIDEBAR_WIDTH, this.settings.settings().sidebarWidth ?? DEFAULT_SIDEBAR_WIDTH),
+    ),
+  );
   protected readonly error = signal<string | null>(null);
 
   private readonly url = toSignal(
@@ -69,6 +92,10 @@ export class WorkspacePage {
   constructor() {
     effect(() => this.lastUrls.set(this.section(), this.url()));
     this.notes.load().catch((error: unknown) => this.error.set(errorMessage(error)));
+  }
+
+  protected onWindowResize(): void {
+    this.windowWidth.set(window.innerWidth);
   }
 
   protected openSection(item: MenuItem): void {

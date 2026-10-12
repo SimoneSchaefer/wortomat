@@ -11,7 +11,7 @@
             <wm-note-avatar [note]="note" />
           }
           <span class="text">
-            <span class="title">{{ note.title }}</span>
+            <span class="title" [title]="note.title">{{ note.title }}</span>
             @if (note.summary) {
               <span class="summary">{{ note.summary }}</span>
             }
