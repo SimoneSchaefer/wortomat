@@ -15,6 +15,9 @@ interface NoteKindTexts {
   singular: string;
   newTitle: string;
   addLabel: string;
+  /** Titel des „+“ an einer Gruppe in der Seitenleiste. */
+  addToGroup: string;
+  confirmDeleteGroup: (name: string) => string;
   emptyList: string;
   /** In der Auswahl einer Szene, wenn es noch keine Einträge gibt. */
   pickerEmpty: string;
@@ -132,6 +135,9 @@ export const de = {
       singular: 'Charakter',
       newTitle: 'Neuer Charakter',
       addLabel: '+ Charakter',
+      addToGroup: 'Charakter in dieser Gruppe anlegen',
+      confirmDeleteGroup: (name: string) =>
+        `Gruppe „${name}“ löschen? Die Charaktere darin bleiben erhalten.`,
       emptyList: 'Noch keine Charaktere.',
       pickerEmpty: 'Noch keine Charaktere – tippe einen Namen, um anzulegen.',
       create: (title: string) => `„${title}“ als neuen Charakter anlegen`,
@@ -150,6 +156,9 @@ export const de = {
       singular: 'Ort',
       newTitle: 'Neuer Ort',
       addLabel: '+ Ort',
+      addToGroup: 'Ort in dieser Gruppe anlegen',
+      confirmDeleteGroup: (name: string) =>
+        `Gruppe „${name}“ löschen? Die Orte darin bleiben erhalten.`,
       emptyList: 'Noch keine Orte.',
       pickerEmpty: 'Noch keine Orte – tippe einen Namen, um anzulegen.',
       create: (title: string) => `„${title}“ als neuen Ort anlegen`,
@@ -162,6 +171,9 @@ export const de = {
       singular: 'Recherche',
       newTitle: 'Neue Recherche',
       addLabel: '+ Recherche',
+      addToGroup: 'Recherche in dieser Gruppe anlegen',
+      confirmDeleteGroup: (name: string) =>
+        `Gruppe „${name}“ löschen? Die Recherchen darin bleiben erhalten.`,
       emptyList: 'Noch keine Recherchen.',
       pickerEmpty: 'Noch keine Recherchen – tippe einen Titel, um anzulegen.',
       create: (title: string) => `„${title}“ als neue Recherche anlegen`,
@@ -175,6 +187,19 @@ export const de = {
     confirmDelete: (title: string) => `„${title}“ wirklich löschen?`,
     notFound: 'Dieser Eintrag existiert nicht mehr.',
     summary: 'Kurzbeschreibung',
+    group: 'Gruppe',
+    ungrouped: 'Ohne Gruppe',
+    addGroupButton: '+ Gruppe',
+    newGroup: 'Neue Gruppe',
+    groupName: (name: string) => `Name der Gruppe „${name}“`,
+    emptyGroup: 'Leer – hierher ziehen',
+    assignGroup: 'Gruppe zuweisen',
+    changeGroup: 'Gruppe ändern',
+    removeFromGroup: 'Aus der Gruppe nehmen',
+    searchGroup: 'Gruppe suchen oder neu …',
+    createGroup: (name: string) => `„${name}“ als neue Gruppe anlegen`,
+    noGroups: 'Noch keine Gruppen – tippe einen Namen, um eine anzulegen.',
+    noOtherGroups: 'Keine weiteren Gruppen – tippe einen Namen, um eine anzulegen.',
     profileImage: 'Profilbild',
     appearsIn: 'Kommt vor in',
     appearsNowhere: 'noch keiner Szene – verknüpfen lässt sich direkt in der Szene.',

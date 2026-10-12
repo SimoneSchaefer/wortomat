@@ -8,6 +8,7 @@ import type {
   ImageInfo,
   ManuscriptNode,
   NoteContent,
+  NoteGroup,
   NoteSummary,
   ProjectInfo,
   ProjectListEntry,
@@ -281,6 +282,42 @@ describe('REST-API', () => {
     });
     assert.equal(updated.title, 'Anna Berger');
     assert.equal(updated.summary, 'Protagonistin, 34, Ärztin');
+    assert.equal(updated.groupId, null);
+
+    // Gruppen: auch leer vorhanden, umbenennbar; Löschen lässt die Notizen stehen
+    const family = await api<NoteGroup>('POST', '/api/note-groups', {
+      kind: 'character',
+      name: '  Familie Berger ',
+    });
+    assert.equal(family.name, 'Familie Berger');
+    const grouped = await api<NoteSummary>('PATCH', `/api/notes/${anna.id}`, {
+      groupId: family.id,
+    });
+    assert.equal(grouped.groupId, family.id);
+    assert.equal(grouped.summary, 'Protagonistin, 34, Ärztin'); // bleibt unverändert
+    const places = await api<NoteGroup>('POST', '/api/note-groups', {
+      kind: 'place',
+      name: 'Küste',
+    });
+    const wrongKind = await fetch(`${server.url}/api/notes/${anna.id}`, {
+      method: 'PATCH',
+      headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ groupId: places.id }),
+    });
+    assert.equal(wrongKind.status, 400);
+    await api('PATCH', `/api/note-groups/${family.id}`, { name: 'Die Bergers' });
+    assert.deepEqual(
+      (await api<NoteGroup[]>('GET', '/api/note-groups')).map((g) => [g.kind, g.name]),
+      [
+        ['character', 'Die Bergers'],
+        ['place', 'Küste'],
+      ],
+    );
+    await api('DELETE', `/api/note-groups/${family.id}`);
+    assert.equal(
+      (await api<NoteSummary[]>('GET', '/api/notes')).find((n) => n.id === anna.id)!.groupId,
+      null,
+    );
 
     const doc = { type: 'doc', content: [{ type: 'paragraph' }] };
     await api('PUT', `/api/notes/${hafen.id}/content`, {
@@ -659,7 +696,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

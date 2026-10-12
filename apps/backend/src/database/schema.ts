@@ -124,6 +124,29 @@ const MIGRATIONS: readonly string[] = [
   /* 8: Titelbild des Buchs (z. B. Cover im E-Book) */ `
     ALTER TABLE project ADD COLUMN cover_image_id TEXT REFERENCES images(id) ON DELETE SET NULL;
   `,
+  /* 9: Gruppe je Notiz (z. B. „Familie Berger“); leer = ohne Gruppe */ `
+    ALTER TABLE notes ADD COLUMN group_name TEXT NOT NULL DEFAULT '';
+  `,
+  /* 10: Gruppen als eigene Einträge (auch leer, umbenennbar); übernimmt die Namen aus 9 */ `
+    CREATE TABLE note_groups (
+      id          TEXT PRIMARY KEY,
+      kind        TEXT NOT NULL CHECK (kind IN ('character', 'place', 'research')),
+      name        TEXT NOT NULL,
+      created_at  TEXT NOT NULL
+    );
+    ALTER TABLE notes ADD COLUMN group_id TEXT REFERENCES note_groups(id) ON DELETE SET NULL;
+
+    -- Gleich geschriebene Namen („familie“, „Familie“) werden eine Gruppe.
+    INSERT INTO note_groups (id, kind, name, created_at)
+      SELECT lower(hex(randomblob(16))), kind, MIN(group_name), MIN(created_at)
+        FROM notes WHERE group_name <> ''
+       GROUP BY kind, lower(group_name);
+    UPDATE notes SET group_id = (
+      SELECT g.id FROM note_groups g
+       WHERE g.kind = notes.kind AND lower(g.name) = lower(notes.group_name)
+    ) WHERE group_name <> '';
+    ALTER TABLE notes DROP COLUMN group_name;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

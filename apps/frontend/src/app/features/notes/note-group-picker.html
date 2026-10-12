@@ -1,0 +1,77 @@
+<span class="label">{{ t().notes.group }}</span>
+<div class="add-wrapper">
+  @if (group(); as group) {
+    <span class="chip">
+      <button
+        type="button"
+        class="open"
+        [attr.aria-expanded]="open()"
+        [title]="t().notes.changeGroup"
+        (click)="toggle()"
+      >
+        {{ group.name }}
+      </button>
+      <button
+        type="button"
+        class="remove"
+        [title]="t().notes.removeFromGroup"
+        [attr.aria-label]="t().notes.removeFromGroup"
+        (click)="removeFromGroup()"
+      >
+        ×
+      </button>
+    </span>
+  } @else {
+    <button
+      type="button"
+      class="add"
+      [class.open]="open()"
+      [attr.aria-expanded]="open()"
+      [title]="t().notes.assignGroup"
+      (click)="toggle()"
+    >
+      +
+    </button>
+  }
+
+  @if (open()) {
+    <div class="picker" role="dialog" [attr.aria-label]="t().notes.assignGroup">
+      <input
+        wmAutofocus
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-activedescendant]="'group-option-' + activeIndex()"
+        [placeholder]="t().notes.searchGroup"
+        [value]="query()"
+        (input)="onQuery($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+      />
+      <ul role="listbox">
+        @for (option of options(); track $index; let i = $index) {
+          <li
+            role="option"
+            [id]="'group-option-' + i"
+            [class.active]="i === activeIndex()"
+            [attr.aria-selected]="i === activeIndex()"
+            (pointerenter)="activeIndex.set(i)"
+            (click)="choose(option)"
+          >
+            @if (option.type === 'group') {
+              <span class="option-text">
+                <span>{{ option.group.name }}</span>
+              </span>
+              <small class="count">{{ option.count }}</small>
+            } @else {
+              <span class="create">+ {{ t().notes.createGroup(option.name) }}</span>
+            }
+          </li>
+        } @empty {
+          <li class="hint">{{ emptyHint() }}</li>
+        }
+      </ul>
+    </div>
+  }
+</div>
+@if (error(); as message) {
+  <span class="error" role="alert">{{ message }}</span>
+}

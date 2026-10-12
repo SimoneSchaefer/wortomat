@@ -14,17 +14,47 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type {
+  CreateNoteGroupRequest,
   CreateNoteRequest,
   ImageInfo,
   NoteContent,
+  NoteGroup,
   NoteKind,
   NoteSummary,
   ReorderImagesRequest,
   SaveDocumentRequest,
+  UpdateNoteGroupRequest,
   UpdateNoteRequest,
 } from '@wortomat/shared';
 import { MAX_IMAGE_BYTES } from '../images/images.service.js';
 import { NotesService } from './notes.service.js';
+
+/** Gruppen der Notizliste, z. B. „Familie Berger“. */
+@Controller('note-groups')
+export class NoteGroupsController {
+  constructor(private readonly notes: NotesService) {}
+
+  @Get()
+  list(): NoteGroup[] {
+    return this.notes.listGroups();
+  }
+
+  @Post()
+  create(@Body() body: CreateNoteGroupRequest): NoteGroup {
+    return this.notes.createGroup(body);
+  }
+
+  @Patch(':id')
+  rename(@Param('id') id: string, @Body() body: UpdateNoteGroupRequest): NoteGroup {
+    return this.notes.renameGroup(id, body);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id') id: string): void {
+    this.notes.removeGroup(id);
+  }
+}
 
 @Controller('notes')
 export class NotesController {

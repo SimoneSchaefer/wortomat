@@ -9,7 +9,7 @@ import { LinksController } from './links/links.controller.js';
 import { LinksService } from './links/links.service.js';
 import { ManuscriptController } from './manuscript/manuscript.controller.js';
 import { ManuscriptService } from './manuscript/manuscript.service.js';
-import { NotesController } from './notes/notes.controller.js';
+import { NoteGroupsController, NotesController } from './notes/notes.controller.js';
 import { NotesService } from './notes/notes.service.js';
 import { ProjectController } from './project/project.controller.js';
 import { ProjectService } from './project/project.service.js';
@@ -33,6 +33,7 @@ export class AppModule {
         ProjectsController,
         ManuscriptController,
         NotesController,
+        NoteGroupsController,
         LinksController,
         TagsController,
         AppSettingsController,

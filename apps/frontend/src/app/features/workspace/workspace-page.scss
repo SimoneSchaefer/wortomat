@@ -124,6 +124,9 @@
   wm-note-list {
     flex: 1;
     overflow-y: auto;
+    // Platz für die Scrollleiste immer freihalten (kein Springen) und Luft zum Inhalt
+    scrollbar-gutter: stable;
+    padding-right: 0.4rem;
   }
 }
 

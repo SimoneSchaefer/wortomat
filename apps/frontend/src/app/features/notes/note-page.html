@@ -25,6 +25,7 @@
           [value]="summaryDraft()"
           (input)="onSummaryInput($any($event.target).value)"
         />
+        <wm-note-group-picker [noteId]="id()" [kind]="kind()" />
         @if (config().linkable) {
           <wm-note-appearances [noteId]="id()" />
         }

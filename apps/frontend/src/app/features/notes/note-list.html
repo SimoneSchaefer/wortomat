@@ -1,30 +1,107 @@
 <nav [attr.aria-label]="texts().label">
-  <ul>
-    @for (note of notes(); track note.id) {
-      <li>
-        <a
-          [routerLink]="['/write', config().path, note.id]"
-          routerLinkActive="active"
-          [class.with-avatar]="config().gallery"
+  <ng-template #noteItems let-notes>
+    <ul>
+      @for (note of notes; track note.id) {
+        <li
+          draggable="true"
+          [class.dragging]="draggingId() === note.id"
+          (dragstart)="onDragStart($event, note)"
+          (dragend)="draggingId.set(null)"
         >
-          @if (config().gallery) {
-            <wm-note-avatar [note]="note" />
-          }
-          <span class="text">
-            <span class="title" [title]="note.title">{{ note.title }}</span>
-            @if (note.summary) {
-              <span class="summary">{{ note.summary }}</span>
+          <a
+            [routerLink]="['/write', config().path, note.id]"
+            routerLinkActive="active"
+            draggable="false"
+            [class.with-avatar]="config().gallery"
+          >
+            @if (config().gallery) {
+              <wm-note-avatar [note]="note" />
             }
-          </span>
-        </a>
-        <button type="button" class="remove" [title]="t().common.delete" (click)="remove(note)">
-          ×
-        </button>
-      </li>
-    } @empty {
-      <li class="muted empty">{{ texts().emptyList }}</li>
+            <span class="text">
+              <span class="title" [title]="note.title">{{ note.title }}</span>
+              @if (note.summary) {
+                <span class="summary">{{ note.summary }}</span>
+              }
+            </span>
+          </a>
+          <button type="button" class="remove" [title]="t().common.delete" (click)="remove(note)">
+            ×
+          </button>
+        </li>
+      } @empty {
+        <li class="muted empty">{{ t().notes.emptyGroup }}</li>
+      }
+    </ul>
+  </ng-template>
+
+  @if (showGroups()) {
+    @for (entry of groups(); track entry.group?.id ?? '') {
+      @let id = entry.group?.id ?? null;
+      <section
+        class="group"
+        [class.drop-target]="dropGroupId() === (id ?? '')"
+        (dragover)="onDragOver($event, id)"
+        (dragleave)="onDragLeave($event, id)"
+        (drop)="onDrop($event, id)"
+      >
+        <div class="group-head">
+          <button
+            type="button"
+            class="collapse"
+            [attr.aria-expanded]="!isCollapsed(id)"
+            [title]="isCollapsed(id) ? t().tree.expand : t().tree.collapse"
+            [attr.aria-label]="
+              (isCollapsed(id) ? t().tree.expand : t().tree.collapse) +
+              ': ' +
+              (entry.group?.name ?? t().notes.ungrouped)
+            "
+            (click)="toggle(id)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>
+          </button>
+          @if (entry.group; as group) {
+            @if (editingGroupId() === group.id) {
+              <input
+                #nameInput
+                [value]="group.name"
+                [attr.aria-label]="t().notes.groupName(group.name)"
+                (keydown.enter)="nameInput.blur()"
+                (keydown.escape)="editingGroupId.set(null)"
+                (blur)="renameGroup(group, nameInput.value)"
+                wmAutofocus
+              />
+            } @else {
+              <span
+                class="group-name"
+                [title]="t().tree.renameHint(group.name)"
+                (dblclick)="editingGroupId.set(group.id)"
+                >{{ group.name }}</span
+              >
+              <span class="group-count">{{ entry.notes.length }}</span>
+              <span class="actions">
+                <button type="button" [title]="texts().addToGroup" (click)="add(group.id)">
+                  +
+                </button>
+                <button type="button" [title]="t().common.delete" (click)="removeGroup(group)">
+                  ×
+                </button>
+              </span>
+            }
+          } @else {
+            <span class="group-name">{{ t().notes.ungrouped }}</span>
+            <span class="group-count">{{ entry.notes.length }}</span>
+          }
+        </div>
+        @if (!isCollapsed(id)) {
+          <ng-container *ngTemplateOutlet="noteItems; context: { $implicit: entry.notes }" />
+        }
+      </section>
     }
-  </ul>
+  } @else if (groups().length) {
+    <ng-container *ngTemplateOutlet="noteItems; context: { $implicit: groups()[0].notes }" />
+  } @else {
+    <p class="muted empty">{{ texts().emptyList }}</p>
+  }
 
   @if (error(); as message) {
     <p class="error" role="alert">{{ message }}</p>

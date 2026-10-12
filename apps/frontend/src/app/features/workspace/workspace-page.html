@@ -63,6 +63,9 @@
           <button type="button" class="link" (click)="noteList()?.add()">
             {{ t().noteKinds[kind].addLabel }}
           </button>
+          <button type="button" class="link" (click)="noteList()?.addGroup()">
+            {{ t().notes.addGroupButton }}
+          </button>
         } @else {
           <button type="button" class="link" (click)="tree()?.add('chapter', null)">
             {{ t().tree.addChapterButton }}

@@ -1,13 +1,16 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
+  CreateNoteGroupRequest,
   CreateNoteRequest,
   EditorDoc,
   ImageInfo,
   NoteContent,
+  NoteGroup,
   NoteKind,
   NoteSummary,
   SaveDocumentRequest,
+  UpdateNoteGroupRequest,
   UpdateNoteRequest,
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
@@ -18,7 +21,7 @@ import { localized } from '../i18n.js';
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
 
 /** Spalten für NoteSummary; das Profilbild ist das erste Bild der Galerie. */
-const SUMMARY_COLUMNS = `id, kind, title, summary, updated_at,
+const SUMMARY_COLUMNS = `id, kind, title, summary, group_id, updated_at,
   (SELECT image_id FROM note_images WHERE note_id = notes.id ORDER BY sort_order LIMIT 1)
     AS cover_image_id`;
 
@@ -27,6 +30,7 @@ interface NoteRow {
   kind: NoteKind;
   title: string;
   summary: string;
+  group_id: string | null;
   updated_at: string;
   cover_image_id: string | null;
 }
@@ -77,16 +81,83 @@ export class NotesService {
     const title = request?.title === undefined ? note.title : requireTitle(request.title);
     const summary =
       typeof request?.summary === 'string' ? request.summary.trim().slice(0, 500) : note.summary;
+    const groupId =
+      request?.groupId === undefined ? note.groupId : this.requireGroup(request.groupId, note.kind);
     transaction(this.db, () => {
       this.db
-        .prepare('UPDATE notes SET title = ?, summary = ?, updated_at = ? WHERE id = ?')
-        .run(title, summary, nowIso(), id);
+        .prepare(
+          'UPDATE notes SET title = ?, summary = ?, group_id = ?, updated_at = ? WHERE id = ?',
+        )
+        .run(title, summary, groupId, nowIso(), id);
       this.db
         .prepare('UPDATE note_fts SET title = ?, summary = ? WHERE note_id = ?')
         .run(title, summary, id);
       this.projects.touch();
     });
     return this.get(id);
+  }
+
+  /** `null` bleibt `null`; sonst muss die Gruppe existieren und zur selben Art gehören. */
+  private requireGroup(groupId: unknown, kind: NoteKind): string | null {
+    if (groupId === null) return null;
+    const group = this.db
+      .prepare('SELECT kind FROM note_groups WHERE id = ?')
+      .get(typeof groupId === 'string' ? groupId : '') as { kind: NoteKind } | undefined;
+    if (!group || group.kind !== kind) {
+      throw new BadRequestException(localized('Unbekannte Gruppe.', 'Unknown group.'));
+    }
+    return groupId as string;
+  }
+
+  // -------------------------------------------------------------------------
+  // Gruppen
+  // -------------------------------------------------------------------------
+
+  listGroups(): NoteGroup[] {
+    return this.db
+      .prepare('SELECT id, kind, name FROM note_groups ORDER BY created_at')
+      .all() as unknown as NoteGroup[];
+  }
+
+  createGroup(request: CreateNoteGroupRequest): NoteGroup {
+    const kind = requireKind(request?.kind);
+    const name = requireGroupName(request?.name);
+    const id = randomUUID();
+    transaction(this.db, () => {
+      this.db
+        .prepare('INSERT INTO note_groups (id, kind, name, created_at) VALUES (?, ?, ?, ?)')
+        .run(id, kind, name, nowIso());
+      this.projects.touch();
+    });
+    return { id, kind, name };
+  }
+
+  renameGroup(id: string, request: UpdateNoteGroupRequest): NoteGroup {
+    const group = this.getGroup(id);
+    const name = requireGroupName(request?.name);
+    transaction(this.db, () => {
+      this.db.prepare('UPDATE note_groups SET name = ? WHERE id = ?').run(name, id);
+      this.projects.touch();
+    });
+    return { ...group, name };
+  }
+
+  /** Die Notizen bleiben erhalten und stehen danach ohne Gruppe da. */
+  removeGroup(id: string): void {
+    this.getGroup(id);
+    transaction(this.db, () => {
+      this.db.prepare('DELETE FROM note_groups WHERE id = ?').run(id); // group_id per SET NULL
+      this.projects.touch();
+    });
+  }
+
+  private getGroup(id: string): NoteGroup {
+    const group = this.db.prepare('SELECT id, kind, name FROM note_groups WHERE id = ?').get(id) as
+      NoteGroup | undefined;
+    if (!group) {
+      throw new NotFoundException(localized('Gruppe nicht gefunden.', 'Group not found.'));
+    }
+    return group;
   }
 
   remove(id: string): void {
@@ -244,6 +315,7 @@ function toSummary(row: NoteRow): NoteSummary {
     kind: row.kind,
     title: row.title,
     summary: row.summary,
+    groupId: row.group_id,
     updatedAt: row.updated_at,
     coverImageUrl: row.cover_image_id ? `/api/images/${row.cover_image_id}` : null,
   };
@@ -263,4 +335,13 @@ function requireTitle(title: unknown): string {
     );
   }
   return title.trim();
+}
+
+function requireGroupName(name: unknown): string {
+  if (typeof name !== 'string' || !name.trim()) {
+    throw new BadRequestException(
+      localized('Der Name darf nicht leer sein.', 'The name must not be empty.'),
+    );
+  }
+  return name.trim().slice(0, 100);
 }

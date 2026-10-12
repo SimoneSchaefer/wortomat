@@ -199,6 +199,8 @@ export interface NoteSummary {
   title: string;
   /** Einzeilige Kurzbeschreibung für die Liste, z. B. „Protagonistin, 34, Ärztin“. */
   summary: string;
+  /** Gruppe in der Liste (`NoteGroup`); `null` = ohne Gruppe. */
+  groupId: string | null;
   updatedAt: string;
   /** Erstes Bild der Galerie (Profilbild), z. B. `/api/images/<id>`; `null` ohne Bilder. */
   coverImageUrl: string | null;
@@ -219,6 +221,24 @@ export interface CreateNoteRequest {
 export interface UpdateNoteRequest {
   title?: string;
   summary?: string;
+  /** `null` nimmt die Notiz aus ihrer Gruppe. */
+  groupId?: string | null;
+}
+
+/** Gruppe in der Notizliste, z. B. „Familie Berger“ – gehört zu genau einer Notizart. */
+export interface NoteGroup {
+  id: string;
+  kind: NoteKind;
+  name: string;
+}
+
+export interface CreateNoteGroupRequest {
+  kind: NoteKind;
+  name: string;
+}
+
+export interface UpdateNoteGroupRequest {
+  name: string;
 }
 
 /** Verknüpft eine Notiz (Charakter, Ort …) mit einer Szene. */

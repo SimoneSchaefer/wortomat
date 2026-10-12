@@ -76,6 +76,141 @@ a.with-avatar {
 }
 
 .empty {
+  margin: 0;
   padding: 0.5rem;
   font-size: 0.85rem;
+}
+
+li.empty {
+  padding: 0.3rem 0.5rem 0.4rem 1.4rem;
+  font-size: 0.8rem;
+  font-style: italic;
+
+  &:hover {
+    background: none;
+  }
+}
+
+// Gruppen: Kopfzeile wie ein Teil im Manuskript – einklappbar, Doppelklick benennt um,
+// beim Überfahren „+“ (neuer Eintrag in der Gruppe) und × (Gruppe löschen).
+.group {
+  border-radius: 0.4rem;
+
+  & + & {
+    margin-top: 0.35rem;
+  }
+
+  &.drop-target {
+    background: var(--hover);
+    outline: 1px dashed var(--accent);
+  }
+}
+
+.group-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0 0.5rem;
+  border-radius: 0.4rem;
+
+  &:hover {
+    background: var(--hover);
+
+    .actions {
+      visibility: visible;
+    }
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+.group-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.group-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.collapse {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-left: -0.3rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--text-muted);
+
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.15s;
+  }
+
+  &[aria-expanded='true'] svg {
+    transform: rotate(90deg);
+  }
+
+  &:hover:not(:disabled) {
+    background: none;
+    color: var(--text);
+  }
+}
+
+.actions {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 0.3rem 0 0.75rem;
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: linear-gradient(to right, transparent, var(--hover) 0.6rem);
+
+  button {
+    border: none;
+    background: none;
+    padding: 0 0.3rem;
+    color: var(--text-muted);
+
+    &:hover:not(:disabled) {
+      background: none;
+      color: var(--text);
+    }
+  }
+}
+
+li[draggable='true'] {
+  cursor: grab;
+}
+
+li.dragging {
+  opacity: 0.4;
 }

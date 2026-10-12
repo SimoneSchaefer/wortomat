@@ -4,6 +4,7 @@ import type {
   AppInfo,
   AppSettings,
   CreateNodeRequest,
+  CreateNoteGroupRequest,
   CreateNoteRequest,
   CreateProjectRequest,
   ExportCapabilities,
@@ -13,6 +14,7 @@ import type {
   ManuscriptNode,
   MoveNodeRequest,
   NoteContent,
+  NoteGroup,
   NoteSummary,
   ProjectInfo,
   ProjectListEntry,
@@ -25,6 +27,7 @@ import type {
   TagSummary,
   UpdateAppSettingsRequest,
   UpdateNodeRequest,
+  UpdateNoteGroupRequest,
   UpdateNoteRequest,
   UpdateProjectRequest,
 } from '@wortomat/shared';
@@ -129,6 +132,22 @@ export class WortomatApi {
 
   deleteNote(id: string): Promise<void> {
     return this.call(this.http.delete<void>(`/api/notes/${id}`));
+  }
+
+  listNoteGroups(): Promise<NoteGroup[]> {
+    return this.call(this.http.get<NoteGroup[]>('/api/note-groups'));
+  }
+
+  createNoteGroup(request: CreateNoteGroupRequest): Promise<NoteGroup> {
+    return this.call(this.http.post<NoteGroup>('/api/note-groups', request));
+  }
+
+  updateNoteGroup(id: string, request: UpdateNoteGroupRequest): Promise<NoteGroup> {
+    return this.call(this.http.patch<NoteGroup>(`/api/note-groups/${id}`, request));
+  }
+
+  deleteNoteGroup(id: string): Promise<void> {
+    return this.call(this.http.delete<void>(`/api/note-groups/${id}`));
   }
 
   noteContent(id: string): Promise<NoteContent> {

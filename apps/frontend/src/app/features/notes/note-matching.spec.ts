@@ -2,7 +2,15 @@ import type { NoteSummary } from '@wortomat/shared';
 import { filterCandidates, hasExactTitle, normalizeForSearch } from './note-matching';
 
 function note(id: string, title: string, summary = ''): NoteSummary {
-  return { id, kind: 'character', title, summary, updatedAt: '', coverImageUrl: null };
+  return {
+    id,
+    kind: 'character',
+    title,
+    summary,
+    groupId: null,
+    updatedAt: '',
+    coverImageUrl: null,
+  };
 }
 
 const notes = [
