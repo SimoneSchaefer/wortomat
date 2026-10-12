@@ -1,27 +1,35 @@
 .cover {
   display: flex;
-  gap: 0.9rem;
+  gap: 1rem;
   align-items: flex-start;
 }
 
-.cover-preview {
+// Rahmen, leeres Feld und Bildleiste wie in der Bildergalerie der Notizen
+.cover-frame {
+  position: relative;
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 5.5rem;
+  width: 8rem;
   aspect-ratio: 1 / 1.6;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 0.25rem;
-  background: var(--hover);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.12);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  outline-offset: 2px;
 
-  &.empty {
-    border-style: dashed;
-    box-shadow: none;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    text-align: center;
+  &.drop-active {
+    outline: 2px dashed var(--accent);
+  }
+
+  &:hover .toolbar,
+  &:focus-within .toolbar {
+    opacity: 1;
+  }
+
+  // Touchscreens kennen kein Hover – Bedienelemente immer zeigen.
+  @media (hover: none) {
+    .toolbar {
+      opacity: 1;
+    }
   }
 
   img {
@@ -31,23 +39,67 @@
   }
 }
 
+.toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  button {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.75rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--text-muted);
+  text-align: center;
+
+  svg {
+    width: 2.75rem;
+    height: 2.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+  }
+
+  span {
+    font-size: 0.8rem;
+  }
+
+  small {
+    font-size: 0.7rem;
+  }
+}
+
 .cover-actions {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.6rem;
 
   p {
     margin: 0;
     font-size: 0.8rem;
-  }
-}
-
-.cover-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-
-  button {
-    font-size: 0.85rem;
-    padding: 0.3rem 0.7rem;
   }
 }

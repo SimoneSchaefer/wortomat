@@ -28,6 +28,7 @@ export class CoverPicker {
     return id ? `/api/images/${id}` : null;
   });
   protected readonly busy = signal(false);
+  protected readonly dropActive = signal(false);
   protected readonly error = signal<string | null>(null);
   /** Welcher Stil als Nächstes gestaltet wird – jeder Klick zeigt einen anderen. */
   private nextPalette = 0;
@@ -36,7 +37,28 @@ export class CoverPicker {
   protected async pick(input: HTMLInputElement): Promise<void> {
     const file = input.files?.[0];
     input.value = '';
-    if (!file) return;
+    if (file) await this.upload(file);
+  }
+
+  protected onDragOver(event: DragEvent): void {
+    if (event.dataTransfer?.types.includes('Files')) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      this.dropActive.set(true);
+    }
+  }
+
+  protected onDrop(event: DragEvent): void {
+    this.dropActive.set(false);
+    const file = event.dataTransfer?.files[0];
+    if (file) {
+      event.preventDefault();
+      void this.upload(file);
+    }
+  }
+
+  private async upload(file: File): Promise<void> {
+    if (this.busy()) return;
     if (!isSupportedImage(file)) {
       this.error.set(this.t().export.unsupportedImage);
       return;

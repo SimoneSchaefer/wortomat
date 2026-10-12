@@ -1,9 +1,45 @@
 <div class="cover">
-  <div class="cover-preview" [class.empty]="!coverUrl()">
+  <!-- Aufgebaut wie die Bildergalerie der Notizen (Charakterbild & Co.) -->
+  <div
+    class="cover-frame"
+    [class.drop-active]="dropActive()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="dropActive.set(false)"
+    (drop)="onDrop($event)"
+  >
     @if (coverUrl(); as url) {
       <img [src]="url" [alt]="t().export.cover" />
+      <div class="toolbar">
+        <span class="spacer"></span>
+        <button
+          type="button"
+          [title]="t().export.chooseImage"
+          [attr.aria-label]="t().export.chooseImage"
+          [disabled]="busy()"
+          (click)="picker.click()"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          [title]="t().export.removeCover"
+          [attr.aria-label]="t().export.removeCover"
+          [disabled]="busy()"
+          (click)="remove()"
+        >
+          ×
+        </button>
+      </div>
     } @else {
-      <span>{{ t().export.noCover }}</span>
+      <button type="button" class="empty" [disabled]="busy()" (click)="picker.click()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <circle cx="9" cy="9.5" r="1.8" />
+          <path d="M3.5 18.5l5.5-5.5 4 4 2.5-2.5 5 5" />
+        </svg>
+        <span>{{ busy() ? t().gallery.uploading : t().gallery.addFirst(t().export.cover) }}</span>
+        <small>{{ t().export.coverDropHint }}</small>
+      </button>
     }
   </div>
   <div class="cover-actions">
@@ -11,18 +47,10 @@
       {{ hint() }}
       {{ t().export.coverSize }}
     </p>
-    <div class="cover-buttons">
-      <button type="button" [disabled]="busy()" (click)="picker.click()">
-        {{ t().export.chooseImage }}
-      </button>
+    <div>
       <button type="button" [disabled]="busy()" (click)="design()">
         {{ designedOnce() ? t().export.otherColors : t().export.designCover }}
       </button>
-      @if (coverUrl()) {
-        <button type="button" [disabled]="busy()" (click)="remove()">
-          {{ t().export.removeCover }}
-        </button>
-      }
     </div>
     @if (error(); as message) {
       <p class="error" role="alert">{{ message }}</p>

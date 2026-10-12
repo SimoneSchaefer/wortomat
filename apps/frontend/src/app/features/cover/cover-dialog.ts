@@ -7,12 +7,18 @@ import { CoverPicker } from './cover-picker';
   selector: 'wm-cover-dialog',
   imports: [CoverPicker],
   template: `
-    <dialog #dialog aria-labelledby="cover-dialog-title" (click)="closeOnBackdrop($event)">
+    <!-- Anfangsfokus auf dem Dialog selbst: kein Button wirkt beim Öffnen hervorgehoben -->
+    <dialog
+      #dialog
+      tabindex="-1"
+      aria-labelledby="cover-dialog-title"
+      (click)="closeOnBackdrop($event)"
+    >
       <div class="body">
         <h2 id="cover-dialog-title">{{ t().export.cover }}</h2>
         <wm-cover-picker [hint]="t().workspace.coverHint" />
         <footer>
-          <button type="button" autofocus (click)="close()">{{ t().export.close }}</button>
+          <button type="button" (click)="close()">{{ t().export.close }}</button>
         </footer>
       </div>
     </dialog>
@@ -26,6 +32,7 @@ import { CoverPicker } from './cover-picker';
       background: var(--bg);
       color: var(--text);
       box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+      outline: none;
 
       &::backdrop {
         background: rgb(0 0 0 / 0.35);
@@ -56,7 +63,9 @@ export class CoverDialog {
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
   open(): void {
-    this.dialog().nativeElement.showModal();
+    const dialog = this.dialog().nativeElement;
+    dialog.showModal();
+    dialog.focus();
   }
 
   protected close(): void {
