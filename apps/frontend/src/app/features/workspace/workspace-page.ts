@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router
 import type { NoteKind } from '@wortomat/shared';
 import { filter, map } from 'rxjs';
 import { AppSettingsStore } from '../../core/app-settings';
+import { Appearance } from '../../core/appearance';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
@@ -20,10 +21,10 @@ import { SceneFilterPanel } from './scene-filter-panel';
 
 type Section = 'manuscript' | NoteKind;
 
-const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem
+const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem bei mittlerer Schriftgröße
 // Platz für Überschrift und „+“-Buttons daneben – auch die längste Variante
 // („MANUSCRIPT  + Chapter  + Part“, gemessen ca. 246px) passt in eine Zeile.
-const MIN_SIDEBAR_WIDTH = 256; // 16rem
+const MIN_SIDEBAR_WIDTH = 256; // 16rem bei mittlerer Schriftgröße
 const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
 
 interface MenuItem {
@@ -70,17 +71,23 @@ export class WorkspacePage {
 
   // Breite der Seitenleiste: gespeichert in den App-Einstellungen, begrenzt auf
   // mindestens 16rem und höchstens die halbe Fensterbreite (der Text braucht Platz).
-  protected readonly minSidebarWidth = MIN_SIDEBAR_WIDTH;
+  // Mindest- und Standardbreite wachsen mit der eingestellten Schriftgröße.
+  private readonly fontScale = inject(Appearance).fontScale;
+  protected readonly minSidebarWidth = computed(() =>
+    Math.round(MIN_SIDEBAR_WIDTH * this.fontScale()),
+  );
   protected readonly windowWidth = signal(window.innerWidth);
   protected readonly maxSidebarWidth = computed(() =>
-    Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, Math.floor(this.windowWidth() / 2))),
-  );
-  protected readonly sidebarWidth = computed(() =>
-    Math.min(
-      this.maxSidebarWidth(),
-      Math.max(MIN_SIDEBAR_WIDTH, this.settings.settings().sidebarWidth ?? DEFAULT_SIDEBAR_WIDTH),
+    Math.max(
+      this.minSidebarWidth(),
+      Math.min(MAX_SIDEBAR_WIDTH, Math.floor(this.windowWidth() / 2)),
     ),
   );
+  protected readonly sidebarWidth = computed(() => {
+    const stored = this.settings.settings().sidebarWidth;
+    const width = stored ?? Math.round(DEFAULT_SIDEBAR_WIDTH * this.fontScale());
+    return Math.min(this.maxSidebarWidth(), Math.max(this.minSidebarWidth(), width));
+  });
   protected readonly error = signal<string | null>(null);
 
   private readonly url = toSignal(

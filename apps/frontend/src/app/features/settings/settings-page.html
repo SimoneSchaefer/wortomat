@@ -30,6 +30,54 @@
   <section class="card">
     <fieldset>
       <legend>
+        <h2>{{ t().settings.theme }}</h2>
+      </legend>
+      <div class="choices three">
+        @for (theme of themes; track theme) {
+          <label class="choice" [class.selected]="settings.settings().theme === theme">
+            <input
+              type="radio"
+              name="theme"
+              [value]="theme"
+              [checked]="settings.settings().theme === theme"
+              (change)="chooseTheme(theme)"
+            />
+            <span class="theme-preview" [attr.data-preview]="theme" aria-hidden="true">Aa</span>
+            <span class="choice-label">{{ t().settings.themes[theme] }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="card">
+    <fieldset>
+      <legend>
+        <h2>{{ t().settings.fontSize }}</h2>
+      </legend>
+      <p class="muted hint">{{ t().settings.fontSizeHint }}</p>
+      <div class="choices three">
+        @for (size of fontSizes; track size) {
+          <label class="choice" [class.selected]="settings.settings().fontSize === size">
+            <input
+              type="radio"
+              name="fontSize"
+              [value]="size"
+              [checked]="settings.settings().fontSize === size"
+              (change)="chooseFontSize(size)"
+            />
+            <!-- In px, damit die Beispiele nicht selbst mit der Einstellung wachsen -->
+            <span class="size-sample" [style.font-size.px]="20 * fontScale[size]">Aa</span>
+            <span class="choice-label">{{ t().settings.fontSizes[size] }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="card">
+    <fieldset>
+      <legend>
         <h2>{{ t().settings.quotes }}</h2>
       </legend>
       <p class="muted hint">{{ t().settings.quotesHint }}</p>

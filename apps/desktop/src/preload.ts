@@ -29,6 +29,7 @@ const bridge: DesktopBridge = {
   openPath: (filePath) => ipcRenderer.invoke(IPC.openPath, filePath),
   showItemInFolder: (filePath) => ipcRenderer.invoke(IPC.showItemInFolder, filePath),
   setLanguage: (language) => ipcRenderer.send(IPC.setLanguage, language),
+  setTheme: (theme) => ipcRenderer.send(IPC.setTheme, theme),
 };
 
 contextBridge.exposeInMainWorld('wortomat', bridge);

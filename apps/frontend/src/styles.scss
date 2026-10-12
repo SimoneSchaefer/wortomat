@@ -31,27 +31,51 @@
   --pill-font-size: 0.78rem;
 }
 
+// Dunkle Farben – je nach Einstellung immer, nie oder wie das System (data-theme an <html>)
+@mixin dark-theme {
+  color-scheme: dark;
+
+  --bg: #1c1b19;
+  --surface: #232220;
+  --hover: #2f2d2a;
+  --border: #3a3834;
+  --text: #e8e4dc;
+  --text-muted: #9c968c;
+  --accent: #e0a464;
+  --danger: #f2827a;
+
+  --status-idea: #8f897f;
+  --status-outline: #7fb0d8;
+  --status-draft: #e6b44f;
+  --status-revised: #a98fd9;
+  --status-final: #6dbf7d;
+
+  --annotation-todo: #f2c94c;
+  --annotation-idea: #4fc1b0;
+  --annotation-fixme: #f07070;
+}
+
+:root[data-theme='dark'] {
+  @include dark-theme;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1b19;
-    --surface: #232220;
-    --hover: #2f2d2a;
-    --border: #3a3834;
-    --text: #e8e4dc;
-    --text-muted: #9c968c;
-    --accent: #e0a464;
-    --danger: #f2827a;
-
-    --status-idea: #8f897f;
-    --status-outline: #7fb0d8;
-    --status-draft: #e6b44f;
-    --status-revised: #a98fd9;
-    --status-final: #6dbf7d;
-
-    --annotation-todo: #f2c94c;
-    --annotation-idea: #4fc1b0;
-    --annotation-fixme: #f07070;
+  :root:not([data-theme='light']) {
+    @include dark-theme;
   }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+// Schriftgröße der ganzen Oberfläche: alle Größen sind in rem angegeben und wachsen mit.
+:root[data-font-size='small'] {
+  font-size: 87.5%;
+}
+
+:root[data-font-size='large'] {
+  font-size: 112.5%;
 }
 
 *,

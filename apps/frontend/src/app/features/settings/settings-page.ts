@@ -1,8 +1,9 @@
 import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import type { Language, QuoteStyle } from '@wortomat/shared';
+import type { FontSize, Language, QuoteStyle, Theme } from '@wortomat/shared';
 import { AppSettingsStore } from '../../core/app-settings';
+import { FONT_SCALE } from '../../core/appearance';
 import { errorMessage } from '../../core/errors';
 import { I18n, LANGUAGES } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
@@ -24,10 +25,21 @@ export class SettingsPage {
 
   protected readonly languages = LANGUAGES;
   protected readonly quoteStyles = QUOTE_STYLES;
+  protected readonly themes: readonly Theme[] = ['system', 'light', 'dark'];
+  protected readonly fontSizes: readonly FontSize[] = ['small', 'medium', 'large'];
+  protected readonly fontScale = FONT_SCALE;
   protected readonly error = signal<string | null>(null);
 
   protected chooseLanguage(language: Language): Promise<void> {
     return this.save(() => this.settings.setLanguage(language));
+  }
+
+  protected chooseTheme(theme: Theme): Promise<void> {
+    return this.save(() => this.settings.setTheme(theme));
+  }
+
+  protected chooseFontSize(fontSize: FontSize): Promise<void> {
+    return this.save(() => this.settings.setFontSize(fontSize));
   }
 
   protected chooseQuoteStyle(style: QuoteStyle): Promise<void> {

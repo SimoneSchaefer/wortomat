@@ -91,6 +91,41 @@ legend {
   font-size: 0.85rem;
 }
 
+.choices.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+// Kleine Vorschau je Farbschema – feste Farben, unabhängig vom gerade aktiven Schema
+.theme-preview {
+  display: grid;
+  place-items: center;
+  height: 3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  font-family: var(--font-prose);
+  font-size: 1.2rem;
+
+  &[data-preview='light'] {
+    background: #fbfaf7;
+    color: #22201c;
+  }
+
+  &[data-preview='dark'] {
+    background: #1c1b19;
+    color: #e8e4dc;
+  }
+
+  &[data-preview='system'] {
+    background: linear-gradient(135deg, #fbfaf7 50%, #1c1b19 50%);
+    color: #9a5b1e;
+  }
+}
+
+.size-sample {
+  font-family: var(--font-prose);
+  line-height: 1.6;
+}
+
 .language-name {
   font-size: 1rem;
 }

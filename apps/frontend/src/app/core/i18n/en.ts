@@ -288,6 +288,19 @@ export const en: Texts = {
     title: 'Settings',
     language: 'Language',
     languageHint: 'Language of the user interface. Your text and the export are not affected.',
+    theme: 'Color scheme',
+    themes: {
+      system: 'Same as system',
+      light: 'Light',
+      dark: 'Dark',
+    },
+    fontSize: 'Font size',
+    fontSizeHint: 'Applies to the whole interface and the text in the editor.',
+    fontSizes: {
+      small: 'Small',
+      medium: 'Medium',
+      large: 'Large',
+    },
     quotes: 'Quotation marks',
     quotesHint:
       'While you write, " and \' are automatically replaced by these characters. Pressing Backspace right afterwards undoes the replacement. Text you have already written stays as it is.',

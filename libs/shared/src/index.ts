@@ -32,6 +32,12 @@ export type QuoteStyle = 'de' | 'de-guillemets' | 'ch' | 'en' | 'fr' | 'off';
 /** Sprache der Oberfläche (nicht des Buchs). */
 export type Language = 'de' | 'en';
 
+/** Farbschema: `system` folgt der Einstellung des Betriebssystems. */
+export type Theme = 'system' | 'light' | 'dark';
+
+/** Schriftgröße der ganzen Oberfläche (inkl. Editor). */
+export type FontSize = 'small' | 'medium' | 'large';
+
 /** Einstellungen der App (nicht des Buchs) – z. B. Breite der Seitenleiste. */
 export interface AppSettings {
   /** Sprache der Oberfläche; `null` = wie das System (Deutsch, sonst Englisch). */
@@ -40,6 +46,8 @@ export interface AppSettings {
   sidebarWidth: number | null;
   /** Typografische Anführungszeichen beim Schreiben. */
   quoteStyle: QuoteStyle;
+  theme: Theme;
+  fontSize: FontSize;
 }
 
 export type UpdateAppSettingsRequest = Partial<AppSettings>;
@@ -350,4 +358,6 @@ export interface DesktopBridge {
   showItemInFolder(filePath: string): Promise<void>;
   /** Sprache für native Menüs und Dialoge (Kontextmenü, „Speichern unter“ …). */
   setLanguage(language: Language): void;
+  /** Farbschema für Fensterrahmen, Menüs und Dialoge. */
+  setTheme(theme: Theme): void;
 }

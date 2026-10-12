@@ -13,6 +13,7 @@ import {
   type IpcMainEvent,
   type IpcMainInvokeEvent,
   Menu,
+  nativeTheme,
   session,
   shell,
 } from 'electron';
@@ -305,6 +306,13 @@ function registerIpcHandlers(): void {
 
   ipcMain.on(IPC.setLanguage, (event, value: unknown) => {
     if (isTrusted(event) && isLanguage(value)) language = value;
+  });
+
+  // Fensterrahmen, Kontextmenü und Dialoge im gewählten Farbschema
+  ipcMain.on(IPC.setTheme, (event, value: unknown) => {
+    if (isTrusted(event) && (value === 'system' || value === 'light' || value === 'dark')) {
+      nativeTheme.themeSource = value;
+    }
   });
 }
 

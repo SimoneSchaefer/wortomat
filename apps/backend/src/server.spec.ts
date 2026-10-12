@@ -681,23 +681,31 @@ describe('REST-API', () => {
       language: null,
       sidebarWidth: null,
       quoteStyle: 'de',
+      theme: 'system',
+      fontSize: 'medium',
     });
 
     assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: 340.6 }), {
       language: null,
       sidebarWidth: 341,
       quoteStyle: 'de',
+      theme: 'system',
+      fontSize: 'medium',
     });
     // Einzelne Werte ändern lässt die anderen stehen
     assert.deepEqual(await api('PATCH', '/api/settings', { quoteStyle: 'de-guillemets' }), {
       language: null,
       sidebarWidth: 341,
       quoteStyle: 'de-guillemets',
+      theme: 'system',
+      fontSize: 'medium',
     });
     assert.deepEqual(await api('PATCH', '/api/settings', { language: 'en' }), {
       language: 'en',
       sidebarWidth: 341,
       quoteStyle: 'de-guillemets',
+      theme: 'system',
+      fontSize: 'medium',
     });
 
     // Zweiter Server mit demselben Datenordner (= App-Neustart) liest den Wert
@@ -717,6 +725,8 @@ describe('REST-API', () => {
         language: 'en',
         sidebarWidth: 341,
         quoteStyle: 'de-guillemets',
+        theme: 'system',
+        fontSize: 'medium',
       });
     } finally {
       await restarted.close();
@@ -734,11 +744,26 @@ describe('REST-API', () => {
     assert.equal(await invalid({ sidebarWidth: 'breit' }), 400);
     assert.equal(await invalid({ quoteStyle: 'klingonisch' }), 400);
     assert.equal(await invalid({ language: 'tlh' }), 400);
+    assert.equal(await invalid({ theme: 'sepia' }), 400);
+    assert.equal(await invalid({ fontSize: 'riesig' }), 400);
+    assert.deepEqual(await api('PATCH', '/api/settings', { theme: 'dark', fontSize: 'large' }), {
+      language: 'en',
+      sidebarWidth: 341,
+      quoteStyle: 'de-guillemets',
+      theme: 'dark',
+      fontSize: 'large',
+    });
 
     // Zurück auf Standard
     assert.deepEqual(
-      await api('PATCH', '/api/settings', { language: null, sidebarWidth: null, quoteStyle: 'de' }),
-      { language: null, sidebarWidth: null, quoteStyle: 'de' },
+      await api('PATCH', '/api/settings', {
+        language: null,
+        sidebarWidth: null,
+        quoteStyle: 'de',
+        theme: 'system',
+        fontSize: 'medium',
+      }),
+      { language: null, sidebarWidth: null, quoteStyle: 'de', theme: 'system', fontSize: 'medium' },
     );
 
     // Für die folgenden Tests wieder öffnen

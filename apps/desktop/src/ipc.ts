@@ -8,4 +8,5 @@ export const IPC = {
   openPath: 'shell:open-path',
   showItemInFolder: 'shell:show-item-in-folder',
   setLanguage: 'app:set-language',
+  setTheme: 'app:set-theme',
 } as const;

@@ -1,4 +1,11 @@
-import type { AnnotationKind, NoteKind, QuoteStyle, SceneStatus } from '@wortomat/shared';
+import type {
+  AnnotationKind,
+  FontSize,
+  NoteKind,
+  QuoteStyle,
+  SceneStatus,
+  Theme,
+} from '@wortomat/shared';
 
 const numberFormat = new Intl.NumberFormat('de');
 
@@ -307,6 +314,19 @@ export const de = {
     title: 'Einstellungen',
     language: 'Sprache',
     languageHint: 'Sprache der Oberfläche. Dein Text und der Export bleiben davon unberührt.',
+    theme: 'Farbschema',
+    themes: {
+      system: 'Wie das System',
+      light: 'Hell',
+      dark: 'Dunkel',
+    } satisfies Record<Theme, string>,
+    fontSize: 'Schriftgröße',
+    fontSizeHint: 'Gilt für die ganze Oberfläche und den Text im Editor.',
+    fontSizes: {
+      small: 'Klein',
+      medium: 'Mittel',
+      large: 'Groß',
+    } satisfies Record<FontSize, string>,
     quotes: 'Anführungszeichen',
     quotesHint:
       'Beim Schreiben werden " und \' automatisch durch diese Zeichen ersetzt. Die Rücktaste direkt danach macht die Ersetzung rückgängig. Bereits geschriebener Text bleibt unverändert.',

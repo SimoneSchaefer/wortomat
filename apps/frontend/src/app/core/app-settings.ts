@@ -1,5 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core';
-import type { AppSettings, Language, QuoteStyle } from '@wortomat/shared';
+import type { AppSettings, FontSize, Language, QuoteStyle, Theme } from '@wortomat/shared';
 import { WortomatApi } from './wortomat-api';
 
 const SAVE_DELAY_MS = 400;
@@ -14,6 +14,8 @@ export class AppSettingsStore {
     language: null,
     sidebarWidth: null,
     quoteStyle: 'de',
+    theme: 'system',
+    fontSize: 'medium',
   });
 
   /** Fehler sind hier kein Grund, die App nicht zu starten – dann gelten die Standardwerte. */
@@ -44,8 +46,16 @@ export class AppSettingsStore {
     return this.saveNow('quoteStyle', quoteStyle);
   }
 
+  setTheme(theme: Theme): Promise<void> {
+    return this.saveNow('theme', theme);
+  }
+
+  setFontSize(fontSize: FontSize): Promise<void> {
+    return this.saveNow('fontSize', fontSize);
+  }
+
   /** Sofort übernehmen und speichern; schlägt das Speichern fehl, gilt wieder der alte Wert. */
-  private async saveNow<K extends 'language' | 'quoteStyle'>(
+  private async saveNow<K extends Exclude<keyof AppSettings, 'sidebarWidth'>>(
     key: K,
     value: AppSettings[K],
   ): Promise<void> {

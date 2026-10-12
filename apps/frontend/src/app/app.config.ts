@@ -8,6 +8,7 @@ import {
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { AppSettingsStore } from './core/app-settings';
+import { Appearance } from './core/appearance';
 import { I18n, languageInterceptor } from './core/i18n/i18n';
 
 export const appConfig: ApplicationConfig = {
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     // Einstellungen vor dem ersten Rendern laden, damit z. B. Sprache und Seitenleiste stimmen.
     provideAppInitializer(() => {
       inject(I18n); // setzt <html lang> und meldet die Sprache an Electron
+      inject(Appearance); // Farbschema und Schriftgröße
       return inject(AppSettingsStore).load();
     }),
   ],

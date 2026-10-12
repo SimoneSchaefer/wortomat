@@ -1,7 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import type { AppSettings, Language, QuoteStyle, UpdateAppSettingsRequest } from '@wortomat/shared';
+import type {
+  AppSettings,
+  FontSize,
+  Language,
+  QuoteStyle,
+  Theme,
+  UpdateAppSettingsRequest,
+} from '@wortomat/shared';
 import { localized } from '../i18n.js';
 import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 
@@ -11,8 +18,16 @@ export const SIDEBAR_WIDTH_LIMITS = { min: 150, max: 1000 } as const;
 const QUOTE_STYLES: readonly QuoteStyle[] = ['de', 'de-guillemets', 'ch', 'en', 'fr', 'off'];
 
 const LANGUAGES: readonly Language[] = ['de', 'en'];
+const THEMES: readonly Theme[] = ['system', 'light', 'dark'];
+const FONT_SIZES: readonly FontSize[] = ['small', 'medium', 'large'];
 
-const DEFAULTS: AppSettings = { language: null, sidebarWidth: null, quoteStyle: 'de' };
+const DEFAULTS: AppSettings = {
+  language: null,
+  sidebarWidth: null,
+  quoteStyle: 'de',
+  theme: 'system',
+  fontSize: 'medium',
+};
 
 /**
  * Einstellungen der App, unabhängig vom geöffneten Buch, als JSON im App-Datenordner.
@@ -68,6 +83,28 @@ export class AppSettingsService {
       }
       next.quoteStyle = request.quoteStyle;
     }
+    if (request?.theme !== undefined) {
+      if (!THEMES.includes(request.theme)) {
+        throw new BadRequestException(
+          localized(
+            `Unbekanntes Farbschema: ${String(request.theme)}`,
+            `Unknown color scheme: ${String(request.theme)}`,
+          ),
+        );
+      }
+      next.theme = request.theme;
+    }
+    if (request?.fontSize !== undefined) {
+      if (!FONT_SIZES.includes(request.fontSize)) {
+        throw new BadRequestException(
+          localized(
+            `Unbekannte Schriftgröße: ${String(request.fontSize)}`,
+            `Unknown font size: ${String(request.fontSize)}`,
+          ),
+        );
+      }
+      next.fontSize = request.fontSize;
+    }
     mkdirSync(path.dirname(this.file), { recursive: true });
     // Erst in eine Temp-Datei schreiben, dann umbenennen: nie eine halb geschriebene Datei.
     const tmpFile = `${this.file}.tmp`;
@@ -84,6 +121,8 @@ function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
   const width = stored?.sidebarWidth;
   if (isValidWidth(width)) result.sidebarWidth = Math.round(width);
   if (isQuoteStyle(stored?.quoteStyle)) result.quoteStyle = stored.quoteStyle;
+  if (THEMES.includes(stored?.theme as Theme)) result.theme = stored.theme;
+  if (FONT_SIZES.includes(stored?.fontSize as FontSize)) result.fontSize = stored.fontSize;
   return result;
 }
 
