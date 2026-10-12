@@ -6,7 +6,7 @@ import type {
   ManuscriptNode,
   MoveNodeRequest,
   NodeKind,
-  SaveSceneContentRequest,
+  SaveDocumentRequest,
   SceneContent,
   UpdateNodeRequest,
 } from '@wortomat/shared';
@@ -168,7 +168,7 @@ export class ManuscriptService {
     };
   }
 
-  saveContent(nodeId: string, request: SaveSceneContentRequest): SceneContent {
+  saveContent(nodeId: string, request: SaveDocumentRequest): SceneContent {
     const node = this.requireScene(nodeId);
     if (request?.doc?.type !== 'doc') {
       throw new BadRequestException('Ungültiges Dokument.');

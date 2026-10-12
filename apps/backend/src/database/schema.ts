@@ -58,6 +58,27 @@ const MIGRATIONS: readonly string[] = [
       tokenize = 'unicode61 remove_diacritics 2'
     );
   `,
+  /* 2: Notizen (Charaktere, Orte, Forschung) */ `
+    CREATE TABLE notes (
+      id          TEXT PRIMARY KEY,
+      kind        TEXT NOT NULL CHECK (kind IN ('character', 'place', 'research')),
+      title       TEXT NOT NULL,
+      summary     TEXT NOT NULL DEFAULT '',
+      doc         TEXT,
+      word_count  INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT NOT NULL,
+      updated_at  TEXT NOT NULL
+    );
+    CREATE INDEX notes_by_kind ON notes(kind);
+
+    CREATE VIRTUAL TABLE note_fts USING fts5(
+      note_id UNINDEXED,
+      title,
+      summary,
+      body,
+      tokenize = 'unicode61 remove_diacritics 2'
+    );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

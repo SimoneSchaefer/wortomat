@@ -175,3 +175,46 @@ mark {
     pointer-events: none;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Kopfbereich über dem Editor (wird in <wm-document-editor> hineinprojiziert)
+// ---------------------------------------------------------------------------
+
+.doc-title {
+  font-family: var(--font-prose);
+  font-weight: 400;
+  font-size: 1.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.doc-kind {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+// Titel und Kurzbeschreibung sehen aus wie Text, sind aber Eingabefelder.
+input.doc-input {
+  display: block;
+  width: 100%;
+  padding: 0.1rem 0.25rem;
+  margin-left: -0.25rem;
+  border: 1px solid transparent;
+  background: none;
+
+  &:hover {
+    border-color: var(--border);
+  }
+}
+
+input.doc-title {
+  margin-bottom: 0.25rem;
+}
+
+.doc-summary {
+  margin-bottom: 1.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}

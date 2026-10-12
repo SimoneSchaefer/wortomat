@@ -1,0 +1,32 @@
+@if (note()) {
+  <wm-document-editor
+    [documentId]="id()"
+    [source]="source"
+    [template]="config().template"
+    [placeholder]="config().textPlaceholder"
+  >
+    <p class="doc-kind">{{ config().singular }}</p>
+    <input
+      #titleInput
+      class="doc-title doc-input"
+      aria-label="Titel"
+      [value]="titleDraft()"
+      (input)="onTitleInput($any($event.target).value)"
+      (blur)="onTitleBlur()"
+      (keydown.enter)="summaryInput.focus()"
+    />
+    <input
+      #summaryInput
+      class="doc-summary doc-input"
+      aria-label="Kurzbeschreibung"
+      [placeholder]="config().summaryPlaceholder"
+      [value]="summaryDraft()"
+      (input)="onSummaryInput($any($event.target).value)"
+    />
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </wm-document-editor>
+} @else {
+  <p class="muted not-found">Dieser Eintrag existiert nicht mehr.</p>
+}

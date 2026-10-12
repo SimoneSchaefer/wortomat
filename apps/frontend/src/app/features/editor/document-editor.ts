@@ -1,7 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
-  computed,
   DestroyRef,
   effect,
   type ElementRef,
@@ -16,12 +15,11 @@ import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
-import type { EditorDoc, SaveSceneContentRequest } from '@wortomat/shared';
+import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
-import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 
 /** Nach dieser Tipp-Pause wird gespeichert. */
@@ -30,25 +28,34 @@ const AUTOSAVE_DELAY_MS = 800;
 type SaveStatus = 'loading' | 'saved' | 'unsaved' | 'saving' | 'error';
 type ToolbarCommand = 'bold' | 'italic' | 'heading2' | 'heading3' | 'quote' | 'undo' | 'redo';
 
+/** Woher der Editor ein Dokument lädt und wohin er speichert (Szene, Charakter, Ort …). */
+export interface DocumentSource {
+  load(id: string): Promise<{ doc: EditorDoc | null; wordCount: number }>;
+  save(id: string, request: SaveDocumentRequest): Promise<void>;
+}
+
+/**
+ * Rich-Text-Editor mit Autosave, Bildern und Toolbar – für Szenen wie für Notizen.
+ * Überschriften o. Ä. werden per Content-Projection über dem Text eingefügt.
+ */
 @Component({
-  selector: 'wm-scene-editor',
+  selector: 'wm-document-editor',
   imports: [DecimalPipe],
-  templateUrl: './scene-editor.html',
-  styleUrl: './scene-editor.scss',
+  templateUrl: './document-editor.html',
+  styleUrl: './document-editor.scss',
   host: { '(window:beforeunload)': 'onBeforeUnload($event)' },
 })
-export class SceneEditor {
-  /** Szenen-ID aus der Route `write/scene/:id`. */
-  readonly id = input.required<string>();
+export class DocumentEditor {
+  readonly documentId = input.required<string>();
+  readonly source = input.required<DocumentSource>();
+  readonly placeholder = input('Es war einmal …');
+  /** Startinhalt für Dokumente, die noch nie gespeichert wurden (z. B. Gliederung eines Charakters). */
+  readonly template = input<EditorDoc | null>(null);
 
   private readonly api = inject(WortomatApi);
-  private readonly store = inject(ProjectStore);
   private readonly desktop = inject(DESKTOP_BRIDGE);
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
 
-  protected readonly node = computed(() =>
-    this.store.nodes().find((node) => node.id === this.id()),
-  );
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
   protected readonly error = signal<string | null>(null);
@@ -56,7 +63,7 @@ export class SceneEditor {
   private readonly editorTick = signal(0);
 
   private editor: Editor | null = null;
-  private sceneId: string | null = null;
+  private currentId: string | null = null;
   private dirty = false;
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
   /** Speichervorgänge laufen strikt nacheinander. */
@@ -75,7 +82,7 @@ export class SceneEditor {
     });
 
     effect(() => {
-      const id = this.id();
+      const id = this.documentId();
       untracked(() => void this.load(id));
     });
   }
@@ -91,14 +98,14 @@ export class SceneEditor {
     this.error.set(null);
 
     try {
-      const content = await this.api.sceneContent(id);
-      if (loadId !== this.loadCounter) return; // inzwischen wurde eine andere Szene gewählt
+      const content = await this.source().load(id);
+      if (loadId !== this.loadCounter) return; // inzwischen wurde ein anderes Dokument gewählt
 
-      // Pro Szene ein eigener Editor, damit sich der Undo-Verlauf nicht vermischt.
+      // Pro Dokument ein eigener Editor, damit sich der Undo-Verlauf nicht vermischt.
       this.editor?.destroy();
-      this.sceneId = id;
+      this.currentId = id;
       this.dirty = false;
-      this.editor = this.createEditor(content.doc);
+      this.editor = this.createEditor(content.doc ?? this.template());
       this.wordCount.set(content.wordCount);
       this.status.set('saved');
     } catch (error) {
@@ -118,12 +125,13 @@ export class SceneEditor {
   /** Speichert sofort, falls es ungespeicherte Änderungen gibt. */
   flush(): Promise<void> {
     clearTimeout(this.saveTimer);
-    if (!this.dirty || !this.editor || !this.sceneId) {
+    if (!this.dirty || !this.editor || !this.currentId) {
       return this.saveQueue;
     }
 
-    const sceneId = this.sceneId;
-    const request: SaveSceneContentRequest = {
+    const documentId = this.currentId;
+    const source = this.source();
+    const request: SaveDocumentRequest = {
       doc: this.editor.getJSON() as EditorDoc,
       text: this.editor.getText({ blockSeparator: '\n' }),
       wordCount: this.editor.storage.characterCount.words(),
@@ -133,12 +141,11 @@ export class SceneEditor {
 
     this.saveQueue = this.saveQueue.then(async () => {
       try {
-        await this.api.saveSceneContent(sceneId, request);
-        this.store.setWordCount(sceneId, request.wordCount);
-        if (this.sceneId === sceneId && !this.dirty) this.status.set('saved');
+        await source.save(documentId, request);
+        if (this.currentId === documentId && !this.dirty) this.status.set('saved');
       } catch (error) {
-        if (error instanceof HttpErrorResponse && error.status === 404) return; // Szene wurde gelöscht
-        if (this.sceneId === sceneId) {
+        if (error instanceof HttpErrorResponse && error.status === 404) return; // wurde gelöscht
+        if (this.currentId === documentId) {
           this.dirty = true; // beim nächsten Tastendruck erneut versuchen
           this.status.set('error');
           this.error.set(errorMessage(error));
@@ -170,7 +177,7 @@ export class SceneEditor {
         }),
         Image.configure({ allowBase64: false }),
         CharacterCount,
-        Placeholder.configure({ placeholder: 'Es war einmal …' }),
+        Placeholder.configure({ placeholder: this.placeholder() }),
       ],
       editorProps: {
         attributes: { class: 'wm-prose', spellcheck: 'true', lang: 'de' },
@@ -198,7 +205,7 @@ export class SceneEditor {
   }
 
   protected async insertImages(files: File[], position?: number): Promise<void> {
-    const sceneId = this.sceneId;
+    const documentId = this.currentId;
     for (const file of files) {
       try {
         const image = await prepareImage(file);
@@ -208,7 +215,7 @@ export class SceneEditor {
           image.width,
           image.height,
         );
-        if (!this.editor || this.sceneId !== sceneId) return;
+        if (!this.editor || this.currentId !== documentId) return;
         const content = {
           type: 'image',
           attrs: { src: info.url, alt: file.name.replace(/\.[^.]+$/, '') },

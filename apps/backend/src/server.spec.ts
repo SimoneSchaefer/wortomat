@@ -2,10 +2,13 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { after, before, describe, it } from 'node:test';
 import type {
   ImageInfo,
   ManuscriptNode,
+  NoteContent,
+  NoteSummary,
   ProjectInfo,
   ProjectListEntry,
   SceneContent,
@@ -113,7 +116,8 @@ describe('REST-API', () => {
 
     const hits = await api<SearchHit[]>('GET', '/api/search?q=hauser');
     assert.equal(hits.length, 1);
-    assert.equal(hits[0]!.nodeId, scene.id);
+    assert.equal(hits[0]!.id, scene.id);
+    assert.equal(hits[0]!.kind, 'scene');
     assert.match(hits[0]!.snippetHtml, /<mark>Häuser<\/mark>/);
 
     await api('POST', '/api/project/close');
@@ -241,6 +245,85 @@ describe('REST-API', () => {
       list.some((p) => p.filePath === zweites.filePath),
       false,
     );
+  });
+
+  it('verwaltet Charaktere, Orte und Forschung und findet sie in der Suche', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'notizen', 'Buch'),
+      title: 'Buch',
+    });
+    const anna = await api<NoteSummary>('POST', '/api/notes', {
+      kind: 'character',
+      title: 'Anna Berger',
+    });
+    const hafen = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Hafen' });
+    await api<NoteSummary>('POST', '/api/notes', { kind: 'research', title: 'Gezeiten' });
+
+    assert.deepEqual(
+      (await api<NoteSummary[]>('GET', '/api/notes?kind=character')).map((n) => n.title),
+      ['Anna Berger'],
+    );
+    assert.equal((await api<NoteSummary[]>('GET', '/api/notes')).length, 3);
+
+    // Gleich nach dem Anlegen über den Titel auffindbar
+    let hits = await api<SearchHit[]>('GET', '/api/search?q=berger');
+    assert.deepEqual(
+      hits.map((h) => [h.kind, h.id]),
+      [['character', anna.id]],
+    );
+
+    const updated = await api<NoteSummary>('PATCH', `/api/notes/${anna.id}`, {
+      summary: 'Protagonistin, 34, Ärztin',
+    });
+    assert.equal(updated.title, 'Anna Berger');
+    assert.equal(updated.summary, 'Protagonistin, 34, Ärztin');
+
+    const doc = { type: 'doc', content: [{ type: 'paragraph' }] };
+    await api('PUT', `/api/notes/${hafen.id}/content`, {
+      doc,
+      text: 'Fischkutter liegen am Kai.',
+      wordCount: 4,
+    });
+    const content = await api<NoteContent>('GET', `/api/notes/${hafen.id}/content`);
+    assert.deepEqual(content.doc, doc);
+    assert.equal(content.wordCount, 4);
+
+    // Kurzbeschreibung und Text sind durchsuchbar
+    hits = await api<SearchHit[]>('GET', '/api/search?q=arztin');
+    assert.equal(hits[0]?.id, anna.id);
+    hits = await api<SearchHit[]>('GET', '/api/search?q=fischkutter');
+    assert.deepEqual(
+      hits.map((h) => [h.kind, h.id]),
+      [['place', hafen.id]],
+    );
+    assert.match(hits[0]!.snippetHtml, /<mark>Fischkutter<\/mark>/);
+
+    await api('DELETE', `/api/notes/${hafen.id}`);
+    assert.deepEqual(await api('GET', '/api/search?q=fischkutter'), []);
+
+    const invalid = await fetch(`${server.url}/api/notes`, {
+      method: 'POST',
+      headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: 'monster', title: 'X' }),
+    });
+    assert.equal(invalid.status, 400);
+  });
+
+  it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
+    const project = await api<ProjectInfo>('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
+      title: 'Altes Buch',
+    });
+    await api('POST', '/api/project/close');
+
+    // Datei auf den Stand vor den Notizen (Schema 1) zurücksetzen
+    const old = new DatabaseSync(project.filePath);
+    old.exec('DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;');
+    old.close();
+
+    await api('POST', '/api/project/open', { filePath: project.filePath });
+    const note = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Mühle' });
+    assert.equal(note.title, 'Mühle');
   });
 
   it('verweigert Szenen direkt auf oberster Ebene', async () => {

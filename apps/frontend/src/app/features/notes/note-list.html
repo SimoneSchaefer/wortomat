@@ -1,0 +1,25 @@
+<nav [attr.aria-label]="config().label">
+  <ul>
+    @for (note of notes(); track note.id) {
+      <li>
+        <a [routerLink]="['/write', config().path, note.id]" routerLinkActive="active">
+          <span class="title">{{ note.title }}</span>
+          @if (note.summary) {
+            <span class="summary">{{ note.summary }}</span>
+          }
+        </a>
+        <button type="button" class="remove" title="Löschen" (click)="remove(note)">×</button>
+      </li>
+    } @empty {
+      <li class="muted empty">{{ config().emptyList }}</li>
+    }
+  </ul>
+
+  <div class="add">
+    <button type="button" class="link" (click)="add()">{{ config().addLabel }}</button>
+  </div>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+</nav>

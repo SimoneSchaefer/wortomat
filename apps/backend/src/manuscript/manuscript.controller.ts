@@ -3,7 +3,7 @@ import type {
   CreateNodeRequest,
   ManuscriptNode,
   MoveNodeRequest,
-  SaveSceneContentRequest,
+  SaveDocumentRequest,
   SceneContent,
   UpdateNodeRequest,
 } from '@wortomat/shared';
@@ -46,7 +46,7 @@ export class ManuscriptController {
   }
 
   @Put('scenes/:id/content')
-  saveContent(@Param('id') id: string, @Body() body: SaveSceneContentRequest): SceneContent {
+  saveContent(@Param('id') id: string, @Body() body: SaveDocumentRequest): SceneContent {
     return this.manuscript.saveContent(id, body);
   }
 }

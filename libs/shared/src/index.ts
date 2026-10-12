@@ -124,11 +124,44 @@ export interface SceneContent {
   updatedAt: string | null;
 }
 
-export interface SaveSceneContentRequest {
+/** Speichern eines Editor-Dokuments – gleich für Szenen und Notizen. */
+export interface SaveDocumentRequest {
   doc: EditorDoc;
   /** Reiner Text für die Volltextsuche, kommt aus `editor.getText()`. */
   text: string;
   wordCount: number;
+}
+
+// ---------------------------------------------------------------------------
+// Notizen: Charaktere, Orte, Forschung
+// ---------------------------------------------------------------------------
+
+export type NoteKind = 'character' | 'place' | 'research';
+
+export interface NoteSummary {
+  id: string;
+  kind: NoteKind;
+  title: string;
+  /** Einzeilige Kurzbeschreibung für die Liste, z. B. „Protagonistin, 34, Ärztin“. */
+  summary: string;
+  updatedAt: string;
+}
+
+export interface NoteContent {
+  id: string;
+  doc: EditorDoc | null;
+  wordCount: number;
+  updatedAt: string | null;
+}
+
+export interface CreateNoteRequest {
+  kind: NoteKind;
+  title: string;
+}
+
+export interface UpdateNoteRequest {
+  title?: string;
+  summary?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +187,9 @@ export interface ImageInfo {
 // ---------------------------------------------------------------------------
 
 export interface SearchHit {
-  nodeId: string;
+  /** Szene oder Art der Notiz – bestimmt, wohin ein Klick führt. */
+  kind: 'scene' | NoteKind;
+  id: string;
   title: string;
   /** Textausschnitt; Treffer sind mit <mark>…</mark> markiert, sonst HTML-escaped. */
   snippetHtml: string;

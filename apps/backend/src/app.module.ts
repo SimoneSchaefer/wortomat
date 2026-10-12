@@ -5,6 +5,8 @@ import { ImagesController } from './images/images.controller.js';
 import { ImagesService } from './images/images.service.js';
 import { ManuscriptController } from './manuscript/manuscript.controller.js';
 import { ManuscriptService } from './manuscript/manuscript.service.js';
+import { NotesController } from './notes/notes.controller.js';
+import { NotesService } from './notes/notes.service.js';
 import { ProjectController } from './project/project.controller.js';
 import { ProjectService } from './project/project.service.js';
 import { ProjectsController } from './project/projects.controller.js';
@@ -22,6 +24,7 @@ export class AppModule {
         ProjectController,
         ProjectsController,
         ManuscriptController,
+        NotesController,
         ImagesController,
         SearchController,
       ],
@@ -30,6 +33,7 @@ export class AppModule {
         ProjectService,
         RecentProjectsService,
         ManuscriptService,
+        NotesService,
         ImagesService,
         SearchService,
       ],

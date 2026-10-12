@@ -25,7 +25,7 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
 |---|---|
 | [`libs/shared`](libs/shared/src/index.ts) | API-Vertrag: nur TypeScript-Typen, von allen anderen Paketen genutzt |
 | [`apps/backend`](apps/backend/src) | NestJS 12 – Projektdatei, Manuskript, Bilder, Volltextsuche |
-| [`apps/frontend`](apps/frontend/src) | Angular 22 (zoneless, Signals) mit Tiptap-Editor |
+| [`apps/frontend`](apps/frontend/src) | Angular 22 (zoneless, Signals): Manuskript, Charaktere, Orte, Forschung; Tiptap-Editor |
 | [`apps/desktop`](apps/desktop/src) | Electron-Shell: startet das Backend, Fenster, native Dialoge |
 
 ### Wichtige Entscheidungen
@@ -37,6 +37,11 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Dadurch gibt es **keine nativen Module** und kein plattformspezifisches Neukompilieren.
 - **Ein Bundle:** Electron-Hauptprozess und Backend werden mit esbuild zu *einer* Datei gebündelt
   ([`bundle.mjs`](apps/desktop/scripts/bundle.mjs)). Die fertige App enthält keinen `node_modules`-Ordner.
+- **Charaktere, Orte, Forschung** sind „Notizen“ (Tabelle `notes`): Titel, einzeilige Kurzbeschreibung
+  und ein Text im selben Editor wie die Szenen. Neue Charaktere und Orte starten mit vorgeschlagenen
+  Zwischenüberschriften ([`note-kinds.ts`](apps/frontend/src/app/features/notes/note-kinds.ts)).
+  Der Editor ([`document-editor.ts`](apps/frontend/src/app/features/editor/document-editor.ts)) ist
+  für Szenen und Notizen derselbe; was er lädt und speichert, bestimmt eine `DocumentSource`.
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
   zusätzlich vor dem Schließen des Fensters bzw. Beenden der App.
@@ -111,7 +116,10 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | GET · PUT | `/api/scenes/:id/content` | Szenentext laden / speichern |
 | POST | `/api/images` | Bild hochladen (multipart, Feld `file`) |
 | GET | `/api/images/:id` | Bild abrufen |
-| GET | `/api/search?q=…` | Volltextsuche (findet „Häuser“ auch mit „hauser“) |
+| GET · POST | `/api/notes` (`?kind=character\|place\|research`) | Charaktere, Orte, Recherchen |
+| PATCH · DELETE | `/api/notes/:id` | Titel, Kurzbeschreibung; löschen |
+| GET · PUT | `/api/notes/:id/content` | Text einer Notiz laden / speichern |
+| GET | `/api/search?q=…` | Volltextsuche über Szenen und Notizen (findet „Häuser“ auch mit „hauser“) |
 
 ## Offene Punkte / nächste Schritte
 

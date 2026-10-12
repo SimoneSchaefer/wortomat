@@ -3,16 +3,20 @@ import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
   CreateNodeRequest,
+  CreateNoteRequest,
   CreateProjectRequest,
   ImageInfo,
   ManuscriptNode,
   MoveNodeRequest,
+  NoteContent,
+  NoteSummary,
   ProjectInfo,
   ProjectListEntry,
-  SaveSceneContentRequest,
+  SaveDocumentRequest,
   SceneContent,
   SearchHit,
   UpdateNodeRequest,
+  UpdateNoteRequest,
 } from '@wortomat/shared';
 import { firstValueFrom, type Observable } from 'rxjs';
 
@@ -83,8 +87,34 @@ export class WortomatApi {
     return this.call(this.http.get<SceneContent>(`/api/scenes/${id}/content`));
   }
 
-  saveSceneContent(id: string, request: SaveSceneContentRequest): Promise<SceneContent> {
+  saveSceneContent(id: string, request: SaveDocumentRequest): Promise<SceneContent> {
     return this.call(this.http.put<SceneContent>(`/api/scenes/${id}/content`, request));
+  }
+
+  // Notizen (Charaktere, Orte, Forschung) -----------------------------------
+
+  listNotes(): Promise<NoteSummary[]> {
+    return this.call(this.http.get<NoteSummary[]>('/api/notes'));
+  }
+
+  createNote(request: CreateNoteRequest): Promise<NoteSummary> {
+    return this.call(this.http.post<NoteSummary>('/api/notes', request));
+  }
+
+  updateNote(id: string, request: UpdateNoteRequest): Promise<NoteSummary> {
+    return this.call(this.http.patch<NoteSummary>(`/api/notes/${id}`, request));
+  }
+
+  deleteNote(id: string): Promise<void> {
+    return this.call(this.http.delete<void>(`/api/notes/${id}`));
+  }
+
+  noteContent(id: string): Promise<NoteContent> {
+    return this.call(this.http.get<NoteContent>(`/api/notes/${id}/content`));
+  }
+
+  saveNoteContent(id: string, request: SaveDocumentRequest): Promise<NoteContent> {
+    return this.call(this.http.put<NoteContent>(`/api/notes/${id}/content`, request));
   }
 
   // Bilder & Suche ----------------------------------------------------------
