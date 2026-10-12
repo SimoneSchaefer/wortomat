@@ -40,6 +40,9 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
   zusätzlich vor dem Schließen des Fensters bzw. Beenden der App.
+- **Projektliste:** Jede angelegte oder geöffnete Datei wird in `projects.json` im App-Datenordner
+  vermerkt (Electron: `userData`, z. B. `~/.config/Wortomat`; `npm run dev`: `~/.wortomat-dev`).
+  Gespeichert sind nur Pfade – Titel und Wortzahl liest die Startseite jedes Mal frisch aus den Dateien.
 - **Bilder** werden im Frontend auf max. 2400 px verkleinert (WebP) und als BLOB in der Projektdatei
   gespeichert. Das Backend prüft das Format anhand der Dateisignatur; SVG ist bewusst nicht erlaubt.
 - **Sicherheit des lokalen Servers:** nur `127.0.0.1`, Host-Header-Prüfung (gegen DNS-Rebinding),
@@ -100,6 +103,8 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | GET | `/api/project` | geöffnetes Projekt oder `null` |
 | POST | `/api/project/create` · `/open` · `/close` | Projektdatei anlegen / öffnen / schließen |
 | PATCH | `/api/project` | Titel, Autor |
+| GET | `/api/projects` | alle bekannten Projekte für die Startseite (zuletzt verwendet zuerst) |
+| POST | `/api/projects/forget` | Projekt aus der Liste nehmen (Datei bleibt erhalten) |
 | GET · POST | `/api/nodes` | Manuskript-Baum (Teil → Kapitel → Szene) |
 | PATCH · DELETE | `/api/nodes/:id` | umbenennen, löschen (inkl. Unterelemente) |
 | POST | `/api/nodes/:id/move` | verschieben: `{ parentId, beforeId }` → kompletter Baum |
@@ -116,4 +121,4 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 - Versionen/Snapshots von Szenen, nicht mehr verwendete Bilder aufräumen
 - Export (DOCX, EPUB, PDF über `webContents.printToPDF`)
 - Import der Daten aus Wortomat 1.x
-- Zuletzt geöffnete Projekte, automatische Backups (`VACUUM INTO`)
+- Automatische Backups (`VACUUM INTO`)

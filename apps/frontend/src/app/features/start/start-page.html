@@ -4,12 +4,69 @@
     <p class="muted">Dein Buch. Deine Datei. Kein Server.</p>
   </header>
 
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <section class="card">
+    <div class="section-head">
+      <h2>Meine Bücher</h2>
+      @if (desktop) {
+        <button type="button" class="link" (click)="openProject()" [disabled]="busy()">
+          Andere Datei öffnen …
+        </button>
+      }
+    </div>
+
+    @if (projects.value(); as list) {
+      <ul class="books">
+        @for (project of list; track project.filePath) {
+          <li [class.missing]="!project.available">
+            <button
+              type="button"
+              class="book"
+              [disabled]="busy() || !project.available"
+              [title]="project.filePath"
+              (click)="openFromList(project)"
+            >
+              <span class="book-title">{{ project.title }}</span>
+              <span class="book-meta">
+                @if (project.available) {
+                  {{ project.wordCount | number }} Wörter · bearbeitet
+                  {{ relativeTime(project.updatedAt ?? project.lastOpenedAt) }}
+                } @else {
+                  Datei nicht gefunden – verschoben oder gelöscht?
+                }
+              </span>
+              <span class="book-path">{{ project.filePath }}</span>
+            </button>
+            <button
+              type="button"
+              class="forget"
+              title="Aus der Liste entfernen (die Datei bleibt erhalten)"
+              [attr.aria-label]="project.title + ' aus der Liste entfernen'"
+              (click)="forget(project)"
+            >
+              ×
+            </button>
+          </li>
+        } @empty {
+          <li class="muted empty">Noch keine Bücher – leg unten dein erstes an.</li>
+        }
+      </ul>
+    } @else if (projects.error()) {
+      <p class="error">Die Liste konnte nicht geladen werden.</p>
+    } @else {
+      <p class="muted">Lade …</p>
+    }
+  </section>
+
   <section class="card">
     <h2>Neues Buch beginnen</h2>
     <form (ngSubmit)="createProject()">
       <label>
         Titel
-        <input name="title" [(ngModel)]="title" placeholder="z. B. Die Häuser am Fluss" autofocus />
+        <input name="title" [(ngModel)]="title" placeholder="z. B. Die Häuser am Fluss" />
       </label>
       @if (!desktop) {
         <label>
@@ -23,13 +80,9 @@
     </form>
   </section>
 
-  <section class="card">
-    <h2>Vorhandenes Buch öffnen</h2>
-    @if (desktop) {
-      <button type="button" (click)="openProject()" [disabled]="busy()">
-        Projektdatei öffnen …
-      </button>
-    } @else {
+  @if (!desktop) {
+    <section class="card">
+      <h2>Andere Datei öffnen</h2>
       <form (ngSubmit)="openProject()">
         <label>
           Pfad zur .wortomat-Datei
@@ -37,11 +90,7 @@
         </label>
         <button type="submit" [disabled]="busy() || !openPath().trim()">Öffnen</button>
       </form>
-    }
-  </section>
-
-  @if (error(); as message) {
-    <p class="error" role="alert">{{ message }}</p>
+    </section>
   }
 
   <footer class="muted">

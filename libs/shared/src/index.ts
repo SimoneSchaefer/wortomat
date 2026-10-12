@@ -40,6 +40,27 @@ export interface OpenProjectRequest {
   filePath: string;
 }
 
+/** Eintrag der Projektliste auf der Startseite. */
+export interface ProjectListEntry {
+  filePath: string;
+  /** Aus der Datei gelesen; bei fehlender Datei der Dateiname. */
+  title: string;
+  author: string;
+  /** `false`, wenn die Datei verschoben, gelöscht oder unlesbar ist. */
+  available: boolean;
+  /** Gerade geöffnet? */
+  isOpen: boolean;
+  wordCount: number;
+  /** Letzte Änderung am Buch (aus der Datei); `null` wenn nicht lesbar. */
+  updatedAt: string | null;
+  /** Wann das Buch zuletzt in Wortomat geöffnet wurde. */
+  lastOpenedAt: string;
+}
+
+export interface ForgetProjectRequest {
+  filePath: string;
+}
+
 export interface UpdateProjectRequest {
   title?: string;
   author?: string;

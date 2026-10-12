@@ -23,10 +23,15 @@ export class ProjectStore {
   readonly tree = computed(() => buildTree(this.nodes()));
   readonly totalWords = computed(() => this.nodes().reduce((sum, node) => sum + node.wordCount, 0));
 
-  /** Lädt beim ersten Aufruf das im Backend geöffnete Projekt (z. B. per Doppelklick gestartet). */
-  ensureLoaded(): Promise<ProjectInfo | null> {
+  /**
+   * Liefert das aktuell geöffnete Projekt. Beim ersten Aufruf wird das Backend gefragt
+   * (es kann schon ein Projekt offen sein, z. B. per Doppelklick gestartet); danach gilt
+   * der Zustand des Stores, der bei create/open/close aktualisiert wird.
+   */
+  async ensureLoaded(): Promise<ProjectInfo | null> {
     this.initialLoad ??= this.reload();
-    return this.initialLoad;
+    await this.initialLoad;
+    return this.project();
   }
 
   async reload(): Promise<ProjectInfo | null> {

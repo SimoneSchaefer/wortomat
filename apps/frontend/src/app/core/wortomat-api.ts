@@ -8,6 +8,7 @@ import type {
   ManuscriptNode,
   MoveNodeRequest,
   ProjectInfo,
+  ProjectListEntry,
   SaveSceneContentRequest,
   SceneContent,
   SearchHit,
@@ -31,6 +32,16 @@ export class WortomatApi {
 
   currentProject(): Promise<ProjectInfo | null> {
     return this.call(this.http.get<ProjectInfo | null>('/api/project'));
+  }
+
+  /** Alle bekannten Projekte, zuletzt verwendete zuerst. */
+  listProjects(): Promise<ProjectListEntry[]> {
+    return this.call(this.http.get<ProjectListEntry[]>('/api/projects'));
+  }
+
+  /** Entfernt ein Projekt aus der Liste; die Datei bleibt erhalten. */
+  forgetProject(filePath: string): Promise<void> {
+    return this.call(this.http.post<void>('/api/projects/forget', { filePath }));
   }
 
   createProject(request: CreateProjectRequest): Promise<ProjectInfo> {

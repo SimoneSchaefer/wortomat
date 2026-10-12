@@ -7,6 +7,8 @@ import { ManuscriptController } from './manuscript/manuscript.controller.js';
 import { ManuscriptService } from './manuscript/manuscript.service.js';
 import { ProjectController } from './project/project.controller.js';
 import { ProjectService } from './project/project.service.js';
+import { ProjectsController } from './project/projects.controller.js';
+import { RecentProjectsService } from './project/recent-projects.service.js';
 import { SearchController } from './search/search.controller.js';
 import { SearchService } from './search/search.service.js';
 
@@ -18,6 +20,7 @@ export class AppModule {
       controllers: [
         AppController,
         ProjectController,
+        ProjectsController,
         ManuscriptController,
         ImagesController,
         SearchController,
@@ -25,6 +28,7 @@ export class AppModule {
       providers: [
         { provide: SERVER_OPTIONS, useValue: options },
         ProjectService,
+        RecentProjectsService,
         ManuscriptService,
         ImagesService,
         SearchService,

@@ -70,6 +70,7 @@ async function start(): Promise<void> {
     mode: 'desktop',
     version: app.getVersion(),
     defaultProjectDir: app.getPath('documents'),
+    dataDir: app.getPath('userData'),
     port: isDev ? DEV_BACKEND_PORT : 0,
     token,
     staticDir: isDev ? undefined : path.join(appDir, 'frontend'),

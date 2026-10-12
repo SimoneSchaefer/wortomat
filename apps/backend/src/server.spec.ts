@@ -7,6 +7,7 @@ import type {
   ImageInfo,
   ManuscriptNode,
   ProjectInfo,
+  ProjectListEntry,
   SceneContent,
   SearchHit,
 } from '@wortomat/shared';
@@ -40,6 +41,7 @@ describe('REST-API', () => {
       mode: 'desktop',
       version: 'test',
       defaultProjectDir: tmpDir,
+      dataDir: path.join(tmpDir, 'appdata'),
       token: TOKEN,
       logger: false,
     });
@@ -185,6 +187,60 @@ describe('REST-API', () => {
 
     await api('DELETE', `/api/nodes/${teil.id}`);
     await api('DELETE', `/api/nodes/${k2.id}`);
+  });
+
+  it('führt eine Liste aller angelegten und geöffneten Projekte', async () => {
+    const titles = (list: ProjectListEntry[]) => list.map((p) => p.title);
+    const create = (name: string) =>
+      api<ProjectInfo>('POST', '/api/project/create', {
+        filePath: path.join(tmpDir, 'liste', name),
+        title: name,
+      });
+
+    const erstes = await create('Erstes Buch');
+    const zweites = await create('Zweites Buch');
+    let list = await api<ProjectListEntry[]>('GET', '/api/projects');
+    // zuletzt verwendet zuerst; das "Roman"-Projekt aus dem vorigen Test steht dahinter
+    assert.deepEqual(titles(list).slice(0, 2), ['Zweites Buch', 'Erstes Buch']);
+    assert.equal(list.find((p) => p.isOpen)?.title, 'Zweites Buch');
+
+    // Erneutes Öffnen schiebt nach vorne; Titeländerungen und Wörter kommen frisch aus der Datei
+    await api('POST', '/api/project/open', { filePath: erstes.filePath });
+    await api('PATCH', '/api/project', { title: 'Erstes Buch (neu)' });
+    const chapter = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const scene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: chapter.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    await api('PUT', `/api/scenes/${scene.id}/content`, {
+      doc: { type: 'doc' },
+      text: 'eins zwei drei',
+      wordCount: 3,
+    });
+    list = await api<ProjectListEntry[]>('GET', '/api/projects');
+    assert.equal(list[0]!.title, 'Erstes Buch (neu)');
+    assert.equal(list[0]!.wordCount, 3);
+    assert.equal(list[0]!.isOpen, true);
+    assert.equal(list[1]!.isOpen, false);
+
+    // Gelöschte Datei bleibt sichtbar, aber als nicht verfügbar
+    await rm(zweites.filePath);
+    list = await api<ProjectListEntry[]>('GET', '/api/projects');
+    const missing = list.find((p) => p.filePath === zweites.filePath)!;
+    assert.equal(missing.available, false);
+    assert.equal(missing.title, 'Zweites Buch'); // Dateiname als Ersatz
+
+    await api('POST', '/api/projects/forget', { filePath: zweites.filePath });
+    list = await api<ProjectListEntry[]>('GET', '/api/projects');
+    assert.equal(
+      list.some((p) => p.filePath === zweites.filePath),
+      false,
+    );
   });
 
   it('verweigert Szenen direkt auf oberster Ebene', async () => {

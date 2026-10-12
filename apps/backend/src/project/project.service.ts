@@ -23,6 +23,7 @@ import {
   readApplicationId,
 } from '../database/schema.js';
 import { nowIso } from '../database/sqlite.js';
+import { RecentProjectsService } from './recent-projects.service.js';
 
 const PROJECT_EXTENSION = '.wortomat';
 
@@ -46,6 +47,8 @@ interface ProjectRow {
 export class ProjectService implements OnApplicationShutdown {
   private readonly logger = new Logger(ProjectService.name);
   private current: OpenProject | null = null;
+
+  constructor(private readonly recent: RecentProjectsService) {}
 
   get db(): DatabaseSync {
     if (!this.current) {
@@ -178,6 +181,12 @@ export class ProjectService implements OnApplicationShutdown {
   private replaceCurrent(next: OpenProject): void {
     this.close();
     this.current = next;
+    try {
+      this.recent.remember(next.filePath);
+    } catch (error) {
+      // Die Projektliste ist Komfort – ein Fehler dort darf das Öffnen nicht verhindern.
+      this.logger.warn(`Projektliste konnte nicht aktualisiert werden: ${String(error)}`);
+    }
   }
 }
 
