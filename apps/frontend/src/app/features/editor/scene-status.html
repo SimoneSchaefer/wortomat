@@ -1,0 +1,25 @@
+<span class="label" id="scene-status-label">Status</span>
+<div
+  class="steps"
+  role="radiogroup"
+  aria-labelledby="scene-status-label"
+  [style.--current-color]="current().color"
+  (keydown)="onKeydown($event)"
+>
+  @for (info of statuses; track info.status; let i = $index) {
+    <button
+      type="button"
+      role="radio"
+      [attr.aria-checked]="i === currentIndex()"
+      [attr.tabindex]="i === currentIndex() ? 0 : -1"
+      [class.done]="i < currentIndex()"
+      [class.current]="i === currentIndex()"
+      (click)="select(info.status)"
+    >
+      {{ info.label }}
+    </button>
+  }
+</div>
+@if (error(); as message) {
+  <span class="error" role="alert">{{ message }}</span>
+}

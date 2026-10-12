@@ -3,18 +3,35 @@ import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from './document-editor';
 import { SceneLinks } from './scene-links';
+import { SceneStatusPicker } from './scene-status';
 
 /** Eine Szene des Manuskripts: Route `write/scene/:id`. */
 @Component({
   selector: 'wm-scene-page',
-  imports: [DocumentEditor, SceneLinks],
+  imports: [DocumentEditor, SceneLinks, SceneStatusPicker],
   template: `
     <wm-document-editor [documentId]="id()" [source]="source">
       <h1 class="doc-title">{{ node()?.title }}</h1>
-      <wm-scene-links [sceneId]="id()" />
+      <div class="scene-meta">
+        @if (node(); as scene) {
+          <wm-scene-status [node]="scene" />
+        }
+        <wm-scene-links [sceneId]="id()" />
+      </div>
     </wm-document-editor>
   `,
-  styles: ':host { display: block; min-height: 100%; }',
+  styles: `
+    :host {
+      display: block;
+      min-height: 100%;
+    }
+
+    .scene-meta {
+      display: grid;
+      gap: 0.4rem;
+      margin: -0.75rem 0 2rem;
+    }
+  `,
 })
 export class ScenePage {
   readonly id = input.required<string>();

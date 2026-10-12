@@ -72,6 +72,13 @@ input {
   padding: 0.2rem 0.4rem;
 }
 
+.status-dot {
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
 .count {
   font-size: 0.75rem;
   color: var(--text-muted);

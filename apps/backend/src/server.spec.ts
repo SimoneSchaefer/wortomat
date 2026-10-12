@@ -460,6 +460,52 @@ describe('REST-API', () => {
     assert.deepEqual(await linked(ankunft.id), []);
   });
 
+  it('führt einen Status je Szene', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'status', 'Buch'),
+      title: 'Buch',
+    });
+    const kapitel = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const szene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: kapitel.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    assert.equal(szene.status, 'idea'); // neue Szenen starten als Idee
+    assert.equal(kapitel.status, null); // Kapitel haben keinen Status
+
+    const updated = await api<ManuscriptNode>('PATCH', `/api/nodes/${szene.id}`, {
+      status: 'revised',
+    });
+    assert.equal(updated.status, 'revised');
+    assert.equal(updated.title, 'S');
+    // Umbenennen lässt den Status in Ruhe
+    await api('PATCH', `/api/nodes/${szene.id}`, { title: 'S neu' });
+    const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    assert.deepEqual(
+      nodes.map((n) => [n.title, n.status]),
+      [
+        ['K', null],
+        ['S neu', 'revised'],
+      ],
+    );
+
+    const status = async (id: string, body: unknown) =>
+      (
+        await fetch(`${server.url}/api/nodes/${id}`, {
+          method: 'PATCH',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+    assert.equal(await status(szene.id, { status: 'fast fertig' }), 400);
+    assert.equal(await status(kapitel.id, { status: 'final' }), 400);
+  });
+
   it('vergibt Tags an Szenen, verwendet sie wieder und räumt ungenutzte auf', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'tags', 'Buch'),
@@ -523,18 +569,31 @@ describe('REST-API', () => {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
       title: 'Altes Buch',
     });
+    const kapitel = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const szene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: kapitel.id,
+      kind: 'scene',
+      title: 'S',
+    });
     await api('POST', '/api/project/close');
 
-    // Datei auf den Stand vor den Notizen (Schema 1) zurücksetzen
+    // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 
     await api('POST', '/api/project/open', { filePath: project.filePath });
     const note = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Mühle' });
     assert.equal(note.title, 'Mühle');
+    // Bestehende Szenen bekommen beim Upgrade den Status „Idee“
+    const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    assert.equal(nodes.find((n) => n.id === szene.id)?.status, 'idea');
   });
 
   it('verweigert Szenen direkt auf oberster Ebene', async () => {

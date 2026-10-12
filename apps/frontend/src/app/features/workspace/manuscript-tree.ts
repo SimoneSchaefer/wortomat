@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
 import { errorMessage } from '../../core/errors';
+import { statusInfo } from '../../core/scene-status';
 import { ProjectStore } from '../../core/project-store';
 import {
   changesPosition,
@@ -72,6 +73,10 @@ export class ManuscriptTree {
         await this.router.navigate(['/write']);
       }
     });
+  }
+
+  protected status(node: ManuscriptNode) {
+    return statusInfo(node.status ?? 'idea');
   }
 
   // Drag & Drop --------------------------------------------------------------

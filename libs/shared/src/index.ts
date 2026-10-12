@@ -72,6 +72,9 @@ export interface UpdateProjectRequest {
 
 export type NodeKind = 'part' | 'chapter' | 'scene';
 
+/** Arbeitsstand einer Szene – in dieser Reihenfolge. */
+export type SceneStatus = 'idea' | 'outline' | 'draft' | 'revised' | 'final';
+
 export interface ManuscriptNode {
   id: string;
   parentId: string | null;
@@ -80,6 +83,8 @@ export interface ManuscriptNode {
   sortOrder: number;
   /** Nur bei Szenen > 0. */
   wordCount: number;
+  /** Nur bei Szenen gesetzt, sonst `null`. */
+  status: SceneStatus | null;
 }
 
 export interface CreateNodeRequest {
@@ -90,6 +95,8 @@ export interface CreateNodeRequest {
 
 export interface UpdateNodeRequest {
   title?: string;
+  /** Nur für Szenen. */
+  status?: SceneStatus;
 }
 
 /**

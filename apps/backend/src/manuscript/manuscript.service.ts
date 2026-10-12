@@ -9,6 +9,7 @@ import type {
   SaveDocumentRequest,
   SceneContent,
   SceneReference,
+  SceneStatus,
   UpdateNodeRequest,
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
@@ -27,6 +28,7 @@ interface NodeRow {
   kind: NodeKind;
   title: string;
   sort_order: number;
+  status: SceneStatus;
   word_count: number;
 }
 
@@ -45,7 +47,7 @@ export class ManuscriptService {
   list(): ManuscriptNode[] {
     const rows = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, COALESCE(c.word_count, 0) AS word_count
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count
            FROM nodes n
            LEFT JOIN scene_content c ON c.node_id = n.id
           ORDER BY n.sort_order`,
@@ -79,15 +81,26 @@ export class ManuscriptService {
 
   update(id: string, request: UpdateNodeRequest): ManuscriptNode {
     const node = this.get(id);
-    const title = request.title === undefined ? node.title : requireTitle(request.title);
-    if (title === node.title) {
+    const title = request?.title === undefined ? node.title : requireTitle(request.title);
+    let status = node.status;
+    if (request?.status !== undefined) {
+      if (node.kind !== 'scene') {
+        throw new BadRequestException('Nur Szenen haben einen Status.');
+      }
+      status = requireStatus(request.status);
+    }
+    if (title === node.title && status === node.status) {
       return node;
     }
     transaction(this.db, () => {
       this.db
-        .prepare('UPDATE nodes SET title = ?, updated_at = ? WHERE id = ?')
-        .run(title, nowIso(), id);
-      this.db.prepare('UPDATE scene_fts SET title = ? WHERE node_id = ?').run(title, id);
+        .prepare(
+          'UPDATE nodes SET title = ?, status = COALESCE(?, status), updated_at = ? WHERE id = ?',
+        )
+        .run(title, status, nowIso(), id);
+      if (title !== node.title) {
+        this.db.prepare('UPDATE scene_fts SET title = ? WHERE node_id = ?').run(title, id);
+      }
       this.projects.touch();
     });
     return this.get(id);
@@ -201,7 +214,7 @@ export class ManuscriptService {
   private get(id: string): ManuscriptNode {
     const row = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, COALESCE(c.word_count, 0) AS word_count
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count
            FROM nodes n
            LEFT JOIN scene_content c ON c.node_id = n.id
           WHERE n.id = ?`,
@@ -267,6 +280,7 @@ function toNode(row: NodeRow): ManuscriptNode {
     title: row.title,
     sortOrder: row.sort_order,
     wordCount: row.word_count,
+    status: row.kind === 'scene' ? row.status : null,
   };
 }
 
@@ -275,6 +289,15 @@ function requireKind(kind: unknown): NodeKind {
     throw new BadRequestException('Unbekannter Elementtyp.');
   }
   return kind;
+}
+
+const SCENE_STATUSES: readonly SceneStatus[] = ['idea', 'outline', 'draft', 'revised', 'final'];
+
+function requireStatus(status: unknown): SceneStatus {
+  if (!SCENE_STATUSES.includes(status as SceneStatus)) {
+    throw new BadRequestException('Unbekannter Status.');
+  }
+  return status as SceneStatus;
 }
 
 function requireTitle(title: unknown): string {

@@ -4,6 +4,7 @@ import type {
   ManuscriptNode,
   MoveNodeRequest,
   ProjectInfo,
+  SceneStatus,
 } from '@wortomat/shared';
 import { WortomatApi } from './wortomat-api';
 
@@ -65,6 +66,11 @@ export class ProjectStore {
 
   async renameNode(id: string, title: string): Promise<void> {
     const updated = await this.api.updateNode(id, { title });
+    this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
+  }
+
+  async setStatus(id: string, status: SceneStatus): Promise<void> {
+    const updated = await this.api.updateNode(id, { status });
     this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
   }
 

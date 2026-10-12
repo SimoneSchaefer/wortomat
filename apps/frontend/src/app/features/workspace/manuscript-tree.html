@@ -21,6 +21,11 @@
               wmAutofocus
             />
           } @else if (item.node.kind === 'scene') {
+            <span
+              class="status-dot"
+              [style.background]="status(item.node).color"
+              [title]="'Status: ' + status(item.node).label"
+            ></span>
             <a
               [routerLink]="['/write/scene', item.node.id]"
               routerLinkActive="active"

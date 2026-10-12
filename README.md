@@ -52,6 +52,9 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Chips unter dem Titel – mit Suche, die Umlaute ignoriert, und Neuanlage direkt aus der Suche.
   Charaktere und Orte zeigen umgekehrt „Kommt vor in“ in Manuskript-Reihenfolge. Welche
   Notizarten verknüpfbar sind, steuert `linkable` in `note-kinds.ts`.
+- **Szenenstatus:** Idee → Struktur → Erster Entwurf → Überarbeiteter Entwurf → Fertig (Spalte
+  `nodes.status`, per `CHECK` abgesichert; neue und bestehende Szenen starten als „Idee“). In der
+  Szene als Stufenleiste, im Manuskript-Baum als farbiger Punkt; Farben in `styles.scss`.
 - **Tags:** freie Schlagwörter je Szene (Tabellen `tags`, `scene_tags`), in derselben Leiste wie die
   Verknüpfungen. Tags gehören zum Projekt und werden über den Namen wiederverwendet – Groß-/
   Kleinschreibung (auch Umlaute) und ein führendes `#` spielen keine Rolle. Ungenutzte Tags
@@ -128,7 +131,7 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | GET | `/api/projects` | alle bekannten Projekte für die Startseite (zuletzt verwendet zuerst) |
 | POST | `/api/projects/forget` | Projekt aus der Liste nehmen (Datei bleibt erhalten) |
 | GET · POST | `/api/nodes` | Manuskript-Baum (Teil → Kapitel → Szene) |
-| PATCH · DELETE | `/api/nodes/:id` | umbenennen, löschen (inkl. Unterelemente) |
+| PATCH · DELETE | `/api/nodes/:id` | umbenennen / Szenenstatus setzen (`{ title?, status? }`), löschen (inkl. Unterelemente) |
 | POST | `/api/nodes/:id/move` | verschieben: `{ parentId, beforeId }` → kompletter Baum |
 | GET · PUT | `/api/scenes/:id/content` | Szenentext laden / speichern |
 | POST | `/api/images` | Bild hochladen (multipart, Feld `file`) |

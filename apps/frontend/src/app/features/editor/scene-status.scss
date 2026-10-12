@@ -1,0 +1,68 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-ui);
+}
+
+// gleiche Spaltenbreite wie die Beschriftungen der Verknüpfungen darunter
+.label {
+  width: 5.5rem;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+button {
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+
+  &:first-child {
+    border-radius: 999px 0 0 999px;
+  }
+
+  &:last-child {
+    border-radius: 0 999px 999px 0;
+  }
+
+  &:hover:not(.current) {
+    background: var(--hover);
+    color: var(--text);
+  }
+
+  // erledigte Stufen: leicht in der Farbe des aktuellen Status gefüllt
+  &.done {
+    border-color: color-mix(in srgb, var(--current-color) 45%, var(--border));
+    background: color-mix(in srgb, var(--current-color) 16%, var(--bg));
+    color: var(--text);
+  }
+
+  &.current {
+    border-color: var(--current-color);
+    background: var(--current-color);
+    color: var(--bg);
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+}
+
+.error {
+  font-size: 0.8rem;
+}

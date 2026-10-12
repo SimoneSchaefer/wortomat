@@ -111,6 +111,10 @@ const MIGRATIONS: readonly string[] = [
     );
     CREATE INDEX scene_tags_by_tag ON scene_tags(tag_id);
   `,
+  /* 6: Arbeitsstand je Szene; vorhandene Szenen starten als „Idee“ */ `
+    ALTER TABLE nodes ADD COLUMN status TEXT NOT NULL DEFAULT 'idea'
+      CHECK (status IN ('idea', 'outline', 'draft', 'revised', 'final'));
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

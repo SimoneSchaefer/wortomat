@@ -2,7 +2,15 @@ import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
 import { changesPosition, planDrop, planRootDrop } from './drop-plan';
 
 function node(id: string, kind: NodeKind, parentId: string | null, sortOrder: number) {
-  return { id, kind, parentId, sortOrder, title: id, wordCount: 0 } satisfies ManuscriptNode;
+  return {
+    id,
+    kind,
+    parentId,
+    sortOrder,
+    title: id,
+    wordCount: 0,
+    status: kind === 'scene' ? 'idea' : null,
+  } satisfies ManuscriptNode;
 }
 
 // Teil T
