@@ -9,6 +9,7 @@ import { errorMessage } from '../../core/errors';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
+import { ExportDialog } from '../export/export-dialog';
 import { NoteList } from '../notes/note-list';
 import { NotesStore } from '../notes/notes-store';
 import { GlobalSearch } from './global-search';
@@ -39,7 +40,15 @@ const MENU: readonly MenuItem[] = [
 
 @Component({
   selector: 'wm-workspace-page',
-  imports: [RouterOutlet, DecimalPipe, ManuscriptTree, NoteList, GlobalSearch, ResizeHandle],
+  imports: [
+    RouterOutlet,
+    DecimalPipe,
+    ManuscriptTree,
+    NoteList,
+    GlobalSearch,
+    ResizeHandle,
+    ExportDialog,
+  ],
   templateUrl: './workspace-page.html',
   styleUrl: './workspace-page.scss',
   // Pro geöffnetem Projekt frisch – die Notizen gehören zum Projekt.

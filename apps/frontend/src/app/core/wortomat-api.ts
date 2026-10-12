@@ -6,6 +6,9 @@ import type {
   CreateNodeRequest,
   CreateNoteRequest,
   CreateProjectRequest,
+  ExportCapabilities,
+  ExportRequest,
+  ExportResult,
   ImageInfo,
   ManuscriptNode,
   MoveNodeRequest,
@@ -194,6 +197,34 @@ export class WortomatApi {
 
   removeSceneTag(sceneId: string, tagId: string): Promise<Tag[]> {
     return this.call(this.http.delete<Tag[]>(`/api/scenes/${sceneId}/tags/${tagId}`));
+  }
+
+  // Export --------------------------------------------------------------------
+
+  exportCapabilities(): Promise<ExportCapabilities> {
+    return this.call(this.http.get<ExportCapabilities>('/api/export/capabilities'));
+  }
+
+  /** Desktop: Backend schreibt die Datei an `filePath`. */
+  exportToFile(request: ExportRequest & { filePath: string }): Promise<ExportResult> {
+    return this.call(this.http.post<ExportResult>('/api/export', request));
+  }
+
+  /** Browser-Modus: Datei kommt als Download zurück. */
+  async exportDownload(
+    request: ExportRequest,
+  ): Promise<{ blob: Blob; fileName: string; warnings: string[] }> {
+    const response = await this.call(
+      this.http.post('/api/export', request, { observe: 'response', responseType: 'blob' }),
+    );
+    const disposition = response.headers.get('Content-Disposition') ?? '';
+    const encodedName = /filename\*=UTF-8''([^;]+)/.exec(disposition)?.[1];
+    const warnings = response.headers.get('X-Export-Warnings');
+    return {
+      blob: response.body!,
+      fileName: encodedName ? decodeURIComponent(encodedName) : `Manuskript.${request.format}`,
+      warnings: warnings ? (JSON.parse(decodeURIComponent(warnings)) as string[]) : [],
+    };
   }
 
   // Bilder & Suche ----------------------------------------------------------

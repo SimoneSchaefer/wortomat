@@ -263,6 +263,41 @@ export interface SearchHit {
 }
 
 // ---------------------------------------------------------------------------
+// Export des Manuskripts
+// ---------------------------------------------------------------------------
+
+export type ExportFormat = 'html' | 'docx' | 'pdf';
+
+/** Vorlage für Word und PDF (HTML hat ein festes Layout). */
+export type ExportTemplate = 'normseite' | 'roman';
+
+export interface ExportRequest {
+  format: ExportFormat;
+  template: ExportTemplate;
+  /** Szenentitel als Zwischenüberschriften drucken (sonst nur Szenentrenner). */
+  includeSceneTitles: boolean;
+  /**
+   * Zielpfad (Desktop: aus dem Speichern-Dialog). Ohne Pfad liefert der Server die Datei
+   * direkt als Download aus (Browser-Modus).
+   */
+  filePath?: string;
+}
+
+export interface ExportResult {
+  filePath: string;
+  /** Hinweise, z. B. Bilder, die in diesem Format nicht übernommen werden konnten. */
+  warnings: string[];
+}
+
+export interface ExportCapabilities {
+  pdf: {
+    available: boolean;
+    /** z. B. „pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023)“ */
+    version: string | null;
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Electron-Bridge (vom Preload-Skript als `window.wortomat` bereitgestellt)
 // ---------------------------------------------------------------------------
 
@@ -277,4 +312,10 @@ export interface DesktopBridge {
    * Das Fenster wartet (mit Timeout), bis das Promise erfüllt ist – Zeit, um zu speichern.
    */
   onBeforeClose(handler: () => Promise<void>): void;
+  /** „Speichern unter“ für einen Export. `null` = abgebrochen. */
+  showExportDialog(suggestedName: string, format: ExportFormat): Promise<string | null>;
+  /** Öffnet eine exportierte Datei mit dem Standardprogramm. */
+  openPath(filePath: string): Promise<void>;
+  /** Zeigt eine Datei im Dateimanager. */
+  showItemInFolder(filePath: string): Promise<void>;
 }

@@ -35,8 +35,10 @@
     font-size: 1.15rem;
   }
 
-  .close {
+  .top-actions {
     justify-self: end;
+    display: flex;
+    gap: 1.25rem;
   }
 }
 

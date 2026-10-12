@@ -1,6 +1,8 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { SERVER_OPTIONS, type ServerOptions } from './config.js';
+import { ExportController } from './export/export.controller.js';
+import { ExportService } from './export/export.service.js';
 import { ImagesController } from './images/images.controller.js';
 import { ImagesService } from './images/images.service.js';
 import { LinksController } from './links/links.controller.js';
@@ -34,6 +36,7 @@ export class AppModule {
         LinksController,
         TagsController,
         AppSettingsController,
+        ExportController,
         ImagesController,
         SearchController,
       ],
@@ -46,6 +49,7 @@ export class AppModule {
         LinksService,
         TagsService,
         AppSettingsService,
+        ExportService,
         ImagesService,
         SearchService,
       ],

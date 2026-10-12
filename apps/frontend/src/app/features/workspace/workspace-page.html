@@ -6,7 +6,10 @@
       <span class="muted">{{ store.totalWords() | number }} Wörter</span>
     </div>
     <wm-global-search />
-    <button type="button" class="link close" (click)="closeProject()">Projekt schließen</button>
+    <div class="top-actions">
+      <button type="button" class="link" (click)="exportDialog.open()">Exportieren …</button>
+      <button type="button" class="link" (click)="closeProject()">Projekt schließen</button>
+    </div>
   </header>
 
   <nav class="rail" aria-label="Bereiche">
@@ -74,3 +77,5 @@
     }
   </main>
 </div>
+
+<wm-export-dialog #exportDialog />

@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -247,6 +248,57 @@ function registerIpcHandlers(): void {
     });
     return result.canceled ? null : (result.filePath ?? null);
   });
+
+  ipcMain.handle(IPC.exportDialog, async (event, suggestedName: unknown, format: unknown) => {
+    const window = trustedWindow(event);
+    const target = EXPORT_FORMATS[format as keyof typeof EXPORT_FORMATS];
+    if (!target) throw new Error('Unbekanntes Exportformat.');
+    const name = typeof suggestedName === 'string' ? sanitizeFileName(suggestedName) : '';
+    const result = await dialog.showSaveDialog(window, {
+      title: 'Manuskript exportieren',
+      defaultPath: path.join(
+        app.getPath('documents'),
+        `${name || 'Manuskript'}.${target.extension}`,
+      ),
+      filters: [{ name: target.label, extensions: [target.extension] }],
+      properties: ['createDirectory', 'showOverwriteConfirmation'],
+    });
+    return result.canceled ? null : (result.filePath ?? null);
+  });
+
+  ipcMain.handle(IPC.openPath, async (event, filePath: unknown) => {
+    trustedWindow(event);
+    const message = await shell.openPath(requireExportedFile(filePath));
+    if (message) throw new Error(message);
+  });
+
+  ipcMain.handle(IPC.showItemInFolder, (event, filePath: unknown) => {
+    trustedWindow(event);
+    shell.showItemInFolder(requireExportedFile(filePath));
+  });
+}
+
+const EXPORT_FORMATS = {
+  html: { extension: 'html', label: 'Webseite (HTML)' },
+  docx: { extension: 'docx', label: 'Word-Dokument' },
+  pdf: { extension: 'pdf', label: 'PDF-Dokument' },
+} as const;
+
+/**
+ * Nur exportierte Dateien öffnen: vorhandene .html/.docx/.pdf. So kann selbst eine
+ * kompromittierte Seite über diesen Weg keine Programme starten (unter Windows würde
+ * „Öffnen“ einer .exe sie ausführen).
+ */
+function requireExportedFile(filePath: unknown): string {
+  if (
+    typeof filePath !== 'string' ||
+    !path.isAbsolute(filePath) ||
+    !/\.(html|docx|pdf)$/i.test(filePath) ||
+    !existsSync(filePath)
+  ) {
+    throw new Error('Diese Datei kann nicht geöffnet werden.');
+  }
+  return filePath;
 }
 
 /** IPC nur von unserer eigenen Seite akzeptieren. */

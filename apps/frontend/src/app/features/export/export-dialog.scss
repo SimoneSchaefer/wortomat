@@ -1,0 +1,155 @@
+dialog.export {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+
+  &::backdrop {
+    background: rgb(0 0 0 / 0.35);
+  }
+}
+
+form {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--font-prose);
+  font-weight: 400;
+  font-size: 1.4rem;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+legend {
+  margin-bottom: 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+
+  &.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.choice {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &:hover:not(.disabled) {
+    background: var(--hover);
+  }
+
+  &.selected {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Tastaturfokus sichtbar, aber anders als „ausgewählt“ (gestrichelt, mit Abstand)
+  &:has(input:focus-visible) {
+    outline: 2px dashed var(--accent);
+    outline-offset: 3px;
+  }
+
+  // Radio-Button unsichtbar, aber per Tastatur bedienbar
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.choice-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.choice-description {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+
+  .muted {
+    font-size: 0.8rem;
+  }
+}
+
+.result {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--status-final) 14%, var(--bg));
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .path {
+    word-break: break-all;
+  }
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  button {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+.warnings {
+  margin: 0;
+  padding: 0.6rem 0.8rem 0.6rem 1.8rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--annotation-todo) 16%, var(--bg));
+  font-size: 0.82rem;
+}
+
+.error {
+  margin: 0;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

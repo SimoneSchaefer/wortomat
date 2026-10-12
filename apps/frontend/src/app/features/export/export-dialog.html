@@ -1,0 +1,106 @@
+<dialog #dialog class="export" aria-labelledby="export-title">
+  <form (submit)="$event.preventDefault(); run()">
+    <h2 id="export-title">Manuskript exportieren</h2>
+
+    <fieldset>
+      <legend>Format</legend>
+      <div class="choices">
+        @for (choice of formats; track choice.value) {
+          <label
+            class="choice"
+            [class.selected]="format() === choice.value"
+            [class.disabled]="isDisabled(choice.value)"
+          >
+            <input
+              type="radio"
+              name="format"
+              [attr.autofocus]="format() === choice.value ? '' : null"
+              [value]="choice.value"
+              [checked]="format() === choice.value"
+              [disabled]="isDisabled(choice.value)"
+              (change)="choose(choice.value)"
+            />
+            <span class="choice-label">{{ choice.label }}</span>
+            <span class="choice-description">
+              @if (choice.value === 'pdf' && capabilities() && !capabilities()!.pdf.available) {
+                pdfLaTeX wurde auf diesem Rechner nicht gefunden. Mit TeX Live, MacTeX oder MiKTeX
+                kannst du auch PDFs erzeugen.
+              } @else if (choice.value === 'pdf' && !capabilities()) {
+                Suche pdfLaTeX …
+              } @else {
+                {{ choice.description }}
+              }
+            </span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    @if (format() !== 'html') {
+      <fieldset>
+        <legend>Vorlage</legend>
+        <div class="choices two">
+          @for (choice of templates; track choice.value) {
+            <label class="choice" [class.selected]="template() === choice.value">
+              <input
+                type="radio"
+                name="template"
+                [value]="choice.value"
+                [checked]="template() === choice.value"
+                (change)="template.set(choice.value)"
+              />
+              <span class="choice-label">{{ choice.label }}</span>
+              <span class="choice-description">{{ choice.description }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    <label class="check">
+      <input
+        type="checkbox"
+        [checked]="includeSceneTitles()"
+        (change)="includeSceneTitles.set($any($event.target).checked)"
+      />
+      Szenentitel als Zwischenüberschriften drucken
+      <span class="muted">(sonst stehen zwischen Szenen nur Trenner)</span>
+    </label>
+
+    @if (result(); as done) {
+      <div class="result" role="status">
+        <p>
+          <strong>Exportiert:</strong> <span class="path">{{ done.filePath }}</span>
+        </p>
+        <div class="result-actions">
+          <button type="button" (click)="openFile()">Öffnen</button>
+          <button type="button" (click)="showInFolder()">Im Ordner zeigen</button>
+        </div>
+      </div>
+    }
+    @if (downloaded(); as done) {
+      <div class="result" role="status">
+        <p><strong>Heruntergeladen:</strong> {{ done.fileName }}</p>
+      </div>
+    }
+    @if (result()?.warnings ?? downloaded()?.warnings; as warnings) {
+      @if (warnings.length) {
+        <ul class="warnings" aria-label="Hinweise">
+          @for (warning of warnings; track warning) {
+            <li>{{ warning }}</li>
+          }
+        </ul>
+      }
+    }
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <footer>
+      <button type="button" (click)="close()">Schließen</button>
+      <button class="primary" type="submit" [disabled]="busy() || isDisabled(format())">
+        {{ busy() ? 'Exportiere …' : desktop ? 'Exportieren …' : 'Herunterladen' }}
+      </button>
+    </footer>
+  </form>
+</dialog>

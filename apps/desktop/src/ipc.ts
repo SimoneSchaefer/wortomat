@@ -4,4 +4,7 @@ export const IPC = {
   createProjectDialog: 'dialog:create-project',
   flushRequest: 'app:flush-request',
   flushDone: 'app:flush-done',
+  exportDialog: 'dialog:export',
+  openPath: 'shell:open-path',
+  showItemInFolder: 'shell:show-item-in-folder',
 } as const;
