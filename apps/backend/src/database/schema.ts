@@ -96,6 +96,21 @@ const MIGRATIONS: readonly string[] = [
     );
     CREATE INDEX scene_links_by_note ON scene_links(note_id);
   `,
+  /* 5: Tags für Szenen – projektweit, damit gleiche Tags wiederverwendet werden */ `
+    CREATE TABLE tags (
+      id    TEXT PRIMARY KEY,
+      name  TEXT NOT NULL,
+      -- normalisierte Form (klein, ohne #): "Rückblende" und "#rückblende" sind derselbe Tag
+      key   TEXT NOT NULL UNIQUE
+    );
+
+    CREATE TABLE scene_tags (
+      scene_id  TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+      tag_id    TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+      PRIMARY KEY (scene_id, tag_id)
+    );
+    CREATE INDEX scene_tags_by_tag ON scene_tags(tag_id);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

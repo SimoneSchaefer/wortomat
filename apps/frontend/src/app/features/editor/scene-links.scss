@@ -155,3 +155,21 @@
 .error {
   font-size: 0.8rem;
 }
+
+// Tags: ohne Avatar, mit „#“ davor
+.chip.tag .open {
+  padding: 0.2rem 0.15rem 0.2rem 0.6rem;
+  cursor: default;
+}
+
+.hash {
+  margin-right: 0.1rem;
+  color: var(--accent);
+}
+
+.picker .count {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}

@@ -179,6 +179,25 @@ export interface SceneReference {
   path: string[];
 }
 
+// ---------------------------------------------------------------------------
+// Tags (projektweit, an Szenen vergeben)
+// ---------------------------------------------------------------------------
+
+export interface Tag {
+  id: string;
+  name: string;
+}
+
+/** Tag mit Anzahl der Szenen, in denen er vorkommt – für Vorschläge. */
+export interface TagSummary extends Tag {
+  sceneCount: number;
+}
+
+/** Vergibt einen Tag per Name; gibt es ihn (ohne Groß-/Kleinschreibung) schon, wird er wiederverwendet. */
+export interface AddTagRequest {
+  name: string;
+}
+
 /** Neue Reihenfolge der Galerie; das erste Bild ist das Profilbild. */
 export interface ReorderImagesRequest {
   imageIds: string[];

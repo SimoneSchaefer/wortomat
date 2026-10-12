@@ -16,6 +16,8 @@ import type {
   SaveDocumentRequest,
   SceneContent,
   SearchHit,
+  Tag,
+  TagSummary,
   UpdateNodeRequest,
   UpdateNoteRequest,
 } from '@wortomat/shared';
@@ -162,6 +164,26 @@ export class WortomatApi {
   /** Szenen, in denen eine Notiz vorkommt – in Manuskript-Reihenfolge. */
   noteScenes(noteId: string): Promise<SceneReference[]> {
     return this.call(this.http.get<SceneReference[]>(`/api/notes/${noteId}/scenes`));
+  }
+
+  // Tags --------------------------------------------------------------------------
+
+  /** Alle verwendeten Tags des Projekts (mit Anzahl der Szenen). */
+  listTags(): Promise<TagSummary[]> {
+    return this.call(this.http.get<TagSummary[]>('/api/tags'));
+  }
+
+  sceneTags(sceneId: string): Promise<Tag[]> {
+    return this.call(this.http.get<Tag[]>(`/api/scenes/${sceneId}/tags`));
+  }
+
+  /** Vergibt einen Tag per Name (vorhandene werden wiederverwendet). */
+  addSceneTag(sceneId: string, name: string): Promise<Tag[]> {
+    return this.call(this.http.post<Tag[]>(`/api/scenes/${sceneId}/tags`, { name }));
+  }
+
+  removeSceneTag(sceneId: string, tagId: string): Promise<Tag[]> {
+    return this.call(this.http.delete<Tag[]>(`/api/scenes/${sceneId}/tags/${tagId}`));
   }
 
   // Bilder & Suche ----------------------------------------------------------

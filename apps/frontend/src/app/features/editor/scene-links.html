@@ -1,24 +1,28 @@
-@for (group of groups(); track group.config.kind) {
+@for (row of rows(); track row.target) {
   <div class="group">
-    <span class="label">{{ group.config.label }}</span>
+    <span class="label">{{ row.label }}</span>
     <ul class="chips">
-      @for (note of group.notes; track note.id) {
-        <li class="chip">
-          <button
-            type="button"
-            class="open"
-            [title]="note.summary || note.title"
-            (click)="open(note)"
-          >
-            <wm-note-avatar [note]="note" />
-            {{ note.title }}
-          </button>
+      @for (chip of row.chips; track chip.id) {
+        <li class="chip" [class.tag]="!chip.note">
+          @if (chip.note; as note) {
+            <button
+              type="button"
+              class="open"
+              [title]="note.summary || note.title"
+              (click)="open(note)"
+            >
+              <wm-note-avatar [note]="note" />
+              {{ chip.title }}
+            </button>
+          } @else {
+            <span class="open"><span class="hash">#</span>{{ chip.title }}</span>
+          }
           <button
             type="button"
             class="remove"
-            [attr.aria-label]="note.title + ' aus dieser Szene entfernen'"
+            [attr.aria-label]="chip.title + ' aus dieser Szene entfernen'"
             title="Aus dieser Szene entfernen"
-            (click)="unlink(note)"
+            (click)="remove(row, chip)"
           >
             ×
           </button>
@@ -28,26 +32,22 @@
         <button
           type="button"
           class="add"
-          [class.open]="pickerKind() === group.config.kind"
-          [attr.aria-expanded]="pickerKind() === group.config.kind"
-          [title]="group.config.singular + ' hinzufügen'"
-          (click)="openPicker(group.config.kind)"
+          [class.open]="pickerTarget() === row.target"
+          [attr.aria-expanded]="pickerTarget() === row.target"
+          [title]="row.singular + ' hinzufügen'"
+          (click)="openPicker(row.target)"
         >
           +
         </button>
 
-        @if (pickerKind() === group.config.kind) {
-          <div
-            class="picker"
-            role="dialog"
-            [attr.aria-label]="group.config.singular + ' hinzufügen'"
-          >
+        @if (pickerTarget() === row.target) {
+          <div class="picker" role="dialog" [attr.aria-label]="row.singular + ' hinzufügen'">
             <input
               wmAutofocus
               role="combobox"
               aria-autocomplete="list"
               [attr.aria-activedescendant]="'option-' + activeIndex()"
-              [placeholder]="group.config.singular + ' suchen …'"
+              [placeholder]="row.singular + ' suchen oder neu …'"
               [value]="query()"
               (input)="onQuery($any($event.target).value)"
               (keydown)="onPickerKeydown($event)"
@@ -70,6 +70,11 @@
                         <small>{{ option.note.summary }}</small>
                       }
                     </span>
+                  } @else if (option.type === 'tag') {
+                    <span class="option-text">
+                      <span><span class="hash">#</span>{{ option.tag.name }}</span>
+                    </span>
+                    <small class="count">{{ sceneCountLabel(option.tag.sceneCount) }}</small>
                   } @else {
                     <span class="create">+ {{ createLabel(option.title) }}</span>
                   }

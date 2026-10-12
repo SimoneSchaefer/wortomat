@@ -14,6 +14,8 @@ import type {
   SceneContent,
   SceneReference,
   SearchHit,
+  Tag,
+  TagSummary,
 } from '@wortomat/shared';
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
 
@@ -455,6 +457,64 @@ describe('REST-API', () => {
     assert.deepEqual(await linked(ankunft.id), []);
   });
 
+  it('vergibt Tags an Szenen, verwendet sie wieder und räumt ungenutzte auf', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'tags', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const addTag = (sceneId: string, name: string) =>
+      api<Tag[]>('POST', `/api/scenes/${sceneId}/tags`, { name });
+    const names = (tags: Tag[]) => tags.map((t) => t.name);
+    const allTags = () => api<TagSummary[]>('GET', '/api/tags');
+
+    const kapitel = await node(null, 'chapter', 'K');
+    const s1 = await node(kapitel.id, 'scene', 'S1');
+    const s2 = await node(kapitel.id, 'scene', 'S2');
+
+    assert.deepEqual(names(await addTag(s1.id, '  Rückblende ')), ['Rückblende']);
+    await addTag(s1.id, 'Spannung');
+    // Gleicher Tag trotz anderer Schreibweise (auch bei Umlauten) und mit "#"
+    assert.deepEqual(names(await addTag(s2.id, '#RÜCKBLENDE')), ['Rückblende']);
+    assert.deepEqual(names(await addTag(s1.id, 'rückblende')), ['Rückblende', 'Spannung']);
+    await addTag(s2.id, 'Arc  Anna'); // Leerraum wird zusammengefasst
+
+    assert.deepEqual(await allTags().then((t) => t.map((x) => [x.name, x.sceneCount])), [
+      ['Arc Anna', 1],
+      ['Rückblende', 2],
+      ['Spannung', 1],
+    ]);
+
+    // Entfernen; der letzte Einsatz eines Tags lässt ihn verschwinden
+    const spannung = (await allTags()).find((t) => t.name === 'Spannung')!;
+    assert.deepEqual(
+      names(await api<Tag[]>('DELETE', `/api/scenes/${s1.id}/tags/${spannung.id}`)),
+      ['Rückblende'],
+    );
+    assert.equal(
+      (await allTags()).some((t) => t.name === 'Spannung'),
+      false,
+    );
+
+    // Szene löschen: ihre Tags tauchen nicht mehr als Vorschlag auf
+    await api('DELETE', `/api/nodes/${s2.id}`);
+    assert.deepEqual(await allTags().then((t) => t.map((x) => [x.name, x.sceneCount])), [
+      ['Rückblende', 1],
+    ]);
+
+    const invalid = async (name: string) =>
+      (
+        await fetch(`${server.url}/api/scenes/${s1.id}/tags`, {
+          method: 'POST',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        })
+      ).status;
+    assert.equal(await invalid('  # '), 400);
+    assert.equal(await invalid('x'.repeat(41)), 400);
+  });
+
   it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -465,7 +525,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor den Notizen (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 
