@@ -30,8 +30,7 @@ import { SmartQuotes } from './smart-quotes';
 const AUTOSAVE_DELAY_MS = 800;
 
 type SaveStatus = 'loading' | 'saved' | 'unsaved' | 'saving' | 'error';
-type ToolbarCommand =
-  'bold' | 'italic' | 'underline' | 'strike' | 'heading2' | 'heading3' | 'undo' | 'redo';
+type ToolbarCommand = 'bold' | 'italic' | 'underline' | 'strike' | 'clearFormat' | 'undo' | 'redo';
 
 /** Woher der Editor ein Dokument lädt und wohin er speichert (Szene, Charakter, Ort …). */
 export interface DocumentSource {
@@ -282,11 +281,10 @@ export class DocumentEditor {
       case 'strike':
         chain.toggleStrike();
         break;
-      case 'heading2':
-        chain.toggleHeading({ level: 2 });
-        break;
-      case 'heading3':
-        chain.toggleHeading({ level: 3 });
+      case 'clearFormat':
+        // Alle Marks (Fett, Kursiv, Links, Todo/Idee/Fixme …) entfernen und
+        // Überschriften/Zitate zu normalen Absätzen machen.
+        chain.unsetAllMarks().clearNodes();
         break;
       case 'undo':
         chain.undo();

@@ -35,6 +35,17 @@
     }
   }
 
+  .clear svg {
+    display: block;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin: 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
   // Todo/Idee/Fixme mit Farbmuster wie im Text
   .annotation {
     display: inline-flex;
