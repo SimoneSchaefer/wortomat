@@ -1,11 +1,12 @@
-import { NgTemplateOutlet } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
-import { ANNOTATION_KINDS } from '../../core/annotations';
+import { addCounts, ANNOTATION_KINDS, NO_ANNOTATIONS } from '../../core/annotations';
 import { errorMessage } from '../../core/errors';
 import { statusInfo } from '../../core/scene-status';
+import { StatusIcon } from '../../core/status-icon';
 import { NEW_SCENE_TITLE, ProjectStore } from '../../core/project-store';
 import {
   changesPosition,
@@ -26,7 +27,7 @@ const DEFAULT_TITLES: Record<NodeKind, string> = {
 
 @Component({
   selector: 'wm-manuscript-tree',
-  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, Autofocus],
+  imports: [DecimalPipe, NgTemplateOutlet, RouterLink, RouterLinkActive, Autofocus, StatusIcon],
   templateUrl: './manuscript-tree.html',
   styleUrl: './manuscript-tree.scss',
 })
@@ -78,7 +79,16 @@ export class ManuscriptTree {
     });
   }
 
-  protected readonly annotationKinds = ANNOTATION_KINDS;
+  /**
+   * Arten, die irgendwo im Buch vorkommen. Jede bekommt in allen Zeilen eine feste Spalte –
+   * auch wo sie fehlt –, damit die Zähler untereinander stehen.
+   */
+  protected readonly annotationKinds = computed(() => {
+    const total = this.store
+      .tree()
+      .reduce((sum, item) => addCounts(sum, item.annotations), NO_ANNOTATIONS);
+    return ANNOTATION_KINDS.filter((info) => total[info.kind] > 0);
+  });
 
   protected status(node: ManuscriptNode) {
     return statusInfo(node.status ?? 'idea');

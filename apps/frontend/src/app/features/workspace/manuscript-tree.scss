@@ -19,6 +19,7 @@ li li {
 }
 
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -72,16 +73,17 @@ input {
   padding: 0.2rem 0.4rem;
 }
 
-.status-dot {
-  flex-shrink: 0;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
+.status {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
-.annotations {
+// Feste Spalten: Badges zentriert, Wortzahl rechtsbündig
+.slot {
+  flex-shrink: 0;
   display: flex;
-  gap: 0.2rem;
+  justify-content: center;
+  width: 1.4rem;
 }
 
 .badge {
@@ -98,14 +100,27 @@ input {
 }
 
 .count {
+  flex-shrink: 0;
+  width: 3.2rem;
+  text-align: right;
   font-size: 0.75rem;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 
+// Liegt beim Überfahren über Zählern und Wortzahl – nimmt sonst keinen Platz weg,
+// sodass alle Zeilen rechts bündig bleiben.
 .actions {
   visibility: hidden;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
+  align-items: center;
+  padding: 0 0.3rem 0 0.75rem;
+  border-radius: 0 0.4rem 0.4rem 0;
+  background: linear-gradient(to right, transparent, var(--hover) 0.6rem);
 
   button {
     border: none;

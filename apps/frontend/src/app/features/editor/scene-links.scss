@@ -1,6 +1,7 @@
 :host {
   display: grid;
   gap: 0.4rem;
+  min-width: 0; // sonst wächst die Komponente mit langen Chip-Zeilen über die Textspalte
   font-family: var(--font-ui);
 }
 
@@ -8,6 +9,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  min-width: 0;
 }
 
 .label {
@@ -19,36 +21,94 @@
   color: var(--text-muted);
 }
 
+// Rahmen für die scrollende Zeile; die Pfeile liegen als Overlay an den Rändern.
+.scroller {
+  position: relative;
+  min-width: 0;
+}
+
+// Eine Zeile; was nicht passt, wird über Pfeile oder Mausrad seitlich gescrollt.
 .chips {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
   margin: 0;
-  padding: 0;
+  padding: 2px 0; // Platz für den Fokusrahmen
   list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: var(--pill-height);
+  height: var(--pill-height);
+  padding: 0 0 2px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  // weicher Übergang: die Chips verschwinden unter dem Pfeil statt hart abgeschnitten
+  box-shadow: 0 0 0.5rem 0.5rem var(--bg);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  visibility: hidden;
+  touch-action: none;
+
+  &.left {
+    left: 0;
+  }
+
+  &.right {
+    right: 0;
+  }
+
+  &.visible {
+    visibility: visible;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--bg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 }
 
 .chip {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
+  white-space: nowrap;
   border: 1px solid var(--border);
   border-radius: 999px;
+  height: var(--pill-height);
   background: var(--surface);
   font-size: 0.82rem;
 
-  --avatar-size: 1.4rem;
+  // Avatar füllt die Pille bis auf einen schmalen Rand (2 × Rahmen + 2 × 2px)
+  --avatar-size: calc(var(--pill-height) - 6px);
 
   .open {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.15rem 0.2rem 0.15rem 0.2rem;
+    height: 100%;
+    padding: 0 0.2rem 0 2px;
     border: none;
     background: none;
   }
 
   .remove {
+    height: 100%;
     padding: 0 0.5rem 0 0.15rem;
     border: none;
     background: none;
@@ -64,11 +124,12 @@
 
 .add-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
 
 .add {
-  width: 1.7rem;
-  height: 1.7rem;
+  width: var(--pill-height);
+  height: var(--pill-height);
   padding: 0;
   border: 1px dashed var(--border);
   border-radius: 50%;
@@ -157,7 +218,7 @@
 
 // Tags: ohne Avatar, mit „#“ davor
 .chip.tag .open {
-  padding: 0.2rem 0.15rem 0.2rem 0.6rem;
+  padding: 0 0.15rem 0 0.6rem;
   cursor: default;
 }
 

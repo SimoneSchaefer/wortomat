@@ -1,9 +1,11 @@
 import {
+  afterNextRender,
   Component,
   computed,
   effect,
   ElementRef,
   inject,
+  Injector,
   input,
   signal,
   untracked,
@@ -11,6 +13,7 @@ import {
 import { Router } from '@angular/router';
 import type { NoteKind, NoteSummary, Tag, TagSummary } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
+import { HorizontalScroll } from '../../core/horizontal-scroll';
 import { errorMessage } from '../../core/errors';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NoteAvatar } from '../notes/note-avatar';
@@ -49,7 +52,7 @@ type Option =
  */
 @Component({
   selector: 'wm-scene-links',
-  imports: [NoteAvatar, Autofocus],
+  imports: [NoteAvatar, Autofocus, HorizontalScroll],
   templateUrl: './scene-links.html',
   styleUrl: './scene-links.scss',
   host: { '(document:pointerdown)': 'onDocumentPointerDown($event)' },
@@ -61,6 +64,7 @@ export class SceneLinks {
   private readonly store = inject(NotesStore);
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   /** Nur IDs merken – Titel und Profilbild kommen aktuell aus dem NotesStore. */
   private readonly linkedIds = signal<ReadonlySet<string>>(new Set());
@@ -233,7 +237,19 @@ export class SceneLinks {
             : await this.store.create(target, 'title' in option ? option.title : '');
         this.setLinked(await this.api.linkNote(sceneId, note.id));
       }
+      this.scrollToEnd(target);
     });
+  }
+
+  /** Neu hinzugefügte Einträge stehen hinten – dorthin scrollen, damit man sie sieht. */
+  private scrollToEnd(target: Target): void {
+    afterNextRender(
+      () => {
+        const list = this.host.nativeElement.querySelector(`.chips[data-target="${target}"]`);
+        list?.scrollTo({ left: list.scrollWidth, behavior: 'smooth' });
+      },
+      { injector: this.injector },
+    );
   }
 
   protected async remove(row: Row, chip: Chip): Promise<void> {

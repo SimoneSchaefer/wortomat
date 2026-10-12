@@ -22,7 +22,11 @@
 }
 
 button {
-  padding: 0.2rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: var(--pill-height);
+  padding: 0 0.65rem;
   border: 1px solid var(--border);
   border-radius: 0;
   background: var(--bg);
@@ -55,6 +59,8 @@ button {
     background: var(--current-color);
     color: var(--bg);
     font-weight: 600;
+    // Haken im Fertig-Icon in der Statusfarbe, sonst verschwände er auf der Füllung
+    --status-icon-contrast: var(--current-color);
   }
 
   &:focus-visible {

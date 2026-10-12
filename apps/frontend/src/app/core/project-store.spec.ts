@@ -7,8 +7,9 @@ function node(
   parentId: string | null,
   sortOrder: number,
   annotations: AnnotationCounts | null = null,
+  wordCount = 0,
 ): ManuscriptNode {
-  return { id, kind, parentId, sortOrder, title: id, wordCount: 0, status: null, annotations };
+  return { id, kind, parentId, sortOrder, title: id, wordCount, status: null, annotations };
 }
 
 describe('buildTree', () => {
@@ -29,5 +30,21 @@ describe('buildTree', () => {
       { todo: 0, idea: 0, fixme: 4 },
     ]);
     expect(leer!.annotations).toEqual({ todo: 0, idea: 0, fixme: 0 });
+  });
+
+  it('summiert die Wortzahlen der Szenen für Kapitel und Teile', () => {
+    const tree = buildTree([
+      node('teil', 'part', null, 1),
+      node('k1', 'chapter', 'teil', 1),
+      node('s1', 'scene', 'k1', 1, null, 120),
+      node('s2', 'scene', 'k1', 2, null, 80),
+      node('k2', 'chapter', 'teil', 2),
+      node('s3', 'scene', 'k2', 1, null, 5),
+      node('leer', 'chapter', null, 2),
+    ]);
+    const [teil, leer] = tree;
+    expect(teil!.wordCount).toBe(205);
+    expect(teil!.children.map((c) => c.wordCount)).toEqual([200, 5]);
+    expect(leer!.wordCount).toBe(0);
   });
 });

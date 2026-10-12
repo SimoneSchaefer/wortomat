@@ -1,92 +1,125 @@
 @for (row of rows(); track row.target) {
   <div class="group">
     <span class="label">{{ row.label }}</span>
-    <ul class="chips">
-      @for (chip of row.chips; track chip.id) {
-        <li class="chip" [class.tag]="!chip.note">
-          @if (chip.note; as note) {
-            <button
-              type="button"
-              class="open"
-              [title]="note.summary || note.title"
-              (click)="open(note)"
-            >
-              <wm-note-avatar [note]="note" />
-              {{ chip.title }}
-            </button>
-          } @else {
-            <span class="open"><span class="hash">#</span>{{ chip.title }}</span>
+    <!-- Eine Zeile; bei vielen Einträgen seitlich scrollbar über die Pfeile (gedrückt halten
+         scrollt weiter) oder das Mausrad. Das + steht immer sichtbar dahinter. -->
+    @if (row.chips.length) {
+      <div class="scroller">
+        <ul
+          class="chips"
+          wmHorizontalScroll
+          #list="horizontalScroll"
+          [attr.data-target]="row.target"
+        >
+          @for (chip of row.chips; track chip.id) {
+            <li class="chip" [class.tag]="!chip.note">
+              @if (chip.note; as note) {
+                <button
+                  type="button"
+                  class="open"
+                  [title]="note.summary || note.title"
+                  (click)="open(note)"
+                >
+                  <wm-note-avatar [note]="note" />
+                  {{ chip.title }}
+                </button>
+              } @else {
+                <span class="open"><span class="hash">#</span>{{ chip.title }}</span>
+              }
+              <button
+                type="button"
+                class="remove"
+                [attr.aria-label]="chip.title + ' aus dieser Szene entfernen'"
+                title="Aus dieser Szene entfernen"
+                (click)="remove(row, chip)"
+              >
+                ×
+              </button>
+            </li>
           }
-          <button
-            type="button"
-            class="remove"
-            [attr.aria-label]="chip.title + ' aus dieser Szene entfernen'"
-            title="Aus dieser Szene entfernen"
-            (click)="remove(row, chip)"
-          >
-            ×
-          </button>
-        </li>
-      }
-      <li class="add-wrapper">
+        </ul>
         <button
           type="button"
-          class="add"
-          [class.open]="pickerTarget() === row.target"
-          [attr.aria-expanded]="pickerTarget() === row.target"
-          [title]="row.singular + ' hinzufügen'"
-          (click)="openPicker(row.target)"
+          class="scroll-button left"
+          tabindex="-1"
+          aria-label="Nach links scrollen"
+          title="Nach links – gedrückt halten zum Weiterscrollen"
+          [class.visible]="list.canScrollLeft()"
+          (pointerdown)="list.start(-1, $event)"
         >
-          +
+          ‹
         </button>
+        <button
+          type="button"
+          class="scroll-button right"
+          tabindex="-1"
+          aria-label="Nach rechts scrollen"
+          title="Nach rechts – gedrückt halten zum Weiterscrollen"
+          [class.visible]="list.canScrollRight()"
+          (pointerdown)="list.start(1, $event)"
+        >
+          ›
+        </button>
+      </div>
+    }
+    <div class="add-wrapper">
+      <button
+        type="button"
+        class="add"
+        [class.open]="pickerTarget() === row.target"
+        [attr.aria-expanded]="pickerTarget() === row.target"
+        [title]="row.singular + ' hinzufügen'"
+        (click)="openPicker(row.target)"
+      >
+        +
+      </button>
 
-        @if (pickerTarget() === row.target) {
-          <div class="picker" role="dialog" [attr.aria-label]="row.singular + ' hinzufügen'">
-            <input
-              wmAutofocus
-              role="combobox"
-              aria-autocomplete="list"
-              [attr.aria-activedescendant]="'option-' + activeIndex()"
-              [placeholder]="row.singular + ' suchen oder neu …'"
-              [value]="query()"
-              (input)="onQuery($any($event.target).value)"
-              (keydown)="onPickerKeydown($event)"
-            />
-            <ul role="listbox">
-              @for (option of options(); track $index; let i = $index) {
-                <li
-                  role="option"
-                  [id]="'option-' + i"
-                  [class.active]="i === activeIndex()"
-                  [attr.aria-selected]="i === activeIndex()"
-                  (pointerenter)="activeIndex.set(i)"
-                  (click)="choose(option)"
-                >
-                  @if (option.type === 'note') {
-                    <wm-note-avatar [note]="option.note" />
-                    <span class="option-text">
-                      <span>{{ option.note.title }}</span>
-                      @if (option.note.summary) {
-                        <small>{{ option.note.summary }}</small>
-                      }
-                    </span>
-                  } @else if (option.type === 'tag') {
-                    <span class="option-text">
-                      <span><span class="hash">#</span>{{ option.tag.name }}</span>
-                    </span>
-                    <small class="count">{{ sceneCountLabel(option.tag.sceneCount) }}</small>
-                  } @else {
-                    <span class="create">+ {{ createLabel(option.title) }}</span>
-                  }
-                </li>
-              } @empty {
-                <li class="hint">{{ emptyHint() }}</li>
-              }
-            </ul>
-          </div>
-        }
-      </li>
-    </ul>
+      @if (pickerTarget() === row.target) {
+        <div class="picker" role="dialog" [attr.aria-label]="row.singular + ' hinzufügen'">
+          <input
+            wmAutofocus
+            role="combobox"
+            aria-autocomplete="list"
+            [attr.aria-activedescendant]="'option-' + activeIndex()"
+            [placeholder]="row.singular + ' suchen oder neu …'"
+            [value]="query()"
+            (input)="onQuery($any($event.target).value)"
+            (keydown)="onPickerKeydown($event)"
+          />
+          <ul role="listbox">
+            @for (option of options(); track $index; let i = $index) {
+              <li
+                role="option"
+                [id]="'option-' + i"
+                [class.active]="i === activeIndex()"
+                [attr.aria-selected]="i === activeIndex()"
+                (pointerenter)="activeIndex.set(i)"
+                (click)="choose(option)"
+              >
+                @if (option.type === 'note') {
+                  <wm-note-avatar [note]="option.note" />
+                  <span class="option-text">
+                    <span>{{ option.note.title }}</span>
+                    @if (option.note.summary) {
+                      <small>{{ option.note.summary }}</small>
+                    }
+                  </span>
+                } @else if (option.type === 'tag') {
+                  <span class="option-text">
+                    <span><span class="hash">#</span>{{ option.tag.name }}</span>
+                  </span>
+                  <small class="count">{{ sceneCountLabel(option.tag.sceneCount) }}</small>
+                } @else {
+                  <span class="create">+ {{ createLabel(option.title) }}</span>
+                }
+              </li>
+            } @empty {
+              <li class="hint">{{ emptyHint() }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
   </div>
 }
 

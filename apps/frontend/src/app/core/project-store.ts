@@ -15,6 +15,8 @@ export interface TreeItem {
   children: TreeItem[];
   /** Bei Szenen deren Markierungen, bei Kapiteln/Teilen die Summe darunter. */
   annotations: AnnotationCounts;
+  /** Bei Szenen deren Wortzahl, bei Kapiteln/Teilen die Summe darunter. */
+  wordCount: number;
 }
 
 /** Titel, den eine frisch angelegte Szene bekommt; die Szenenseite markiert ihn dann zum Überschreiben. */
@@ -110,7 +112,10 @@ export class ProjectStore {
 
 export function buildTree(nodes: readonly ManuscriptNode[]): TreeItem[] {
   const items = new Map<string, TreeItem>(
-    nodes.map((node) => [node.id, { node, children: [], annotations: NO_ANNOTATIONS }]),
+    nodes.map((node) => [
+      node.id,
+      { node, children: [], annotations: NO_ANNOTATIONS, wordCount: 0 },
+    ]),
   );
   const roots: TreeItem[] = [];
   for (const item of items.values()) {
@@ -124,6 +129,10 @@ export function buildTree(nodes: readonly ManuscriptNode[]): TreeItem[] {
       item.annotations =
         item.node.annotations ??
         item.children.reduce((sum, child) => addCounts(sum, child.annotations), NO_ANNOTATIONS);
+      item.wordCount =
+        item.node.kind === 'scene'
+          ? item.node.wordCount
+          : item.children.reduce((sum, child) => sum + child.wordCount, 0);
     }
   };
   finish(roots);

@@ -16,6 +16,7 @@
       [class.current]="i === currentIndex()"
       (click)="select(info.status)"
     >
+      <wm-status-icon [status]="info.status" />
       {{ info.label }}
     </button>
   }

@@ -1,7 +1,9 @@
-<!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter -->
-<ng-template #annotationBadges let-counts>
-  <span class="annotations">
-    @for (info of annotationKinds; track info.kind) {
+<!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter.
+     Eine Spalte je Art (leer, wo sie fehlt), dahinter die Wortzahl (ebenfalls summiert) –
+     alles bündig untereinander. -->
+<ng-template #rowStats let-counts let-words="words">
+  @for (info of annotationKinds(); track info.kind) {
+    <span class="slot">
       @if (counts[info.kind]; as count) {
         <span
           class="badge"
@@ -10,8 +12,9 @@
           >{{ count }}</span
         >
       }
-    }
-  </span>
+    </span>
+  }
+  <span class="count">{{ words | number }}</span>
 </ng-template>
 
 <ng-template #itemTemplate let-items>
@@ -37,11 +40,12 @@
               wmAutofocus
             />
           } @else if (item.node.kind === 'scene') {
-            <span
-              class="status-dot"
-              [style.background]="status(item.node).color"
+            <wm-status-icon
+              class="status"
+              [status]="status(item.node).status"
+              [style.color]="status(item.node).color"
               [title]="'Status: ' + status(item.node).label"
-            ></span>
+            />
             <a
               [routerLink]="['/write/scene', item.node.id]"
               routerLinkActive="active"
@@ -51,9 +55,11 @@
               {{ item.node.title }}
             </a>
             <ng-container
-              *ngTemplateOutlet="annotationBadges; context: { $implicit: item.annotations }"
+              *ngTemplateOutlet="
+                rowStats;
+                context: { $implicit: item.annotations, words: item.wordCount }
+              "
             />
-            <span class="count">{{ item.node.wordCount }}</span>
           } @else {
             <span
               class="label"
@@ -62,27 +68,32 @@
               >{{ item.node.title }}</span
             >
             <ng-container
-              *ngTemplateOutlet="annotationBadges; context: { $implicit: item.annotations }"
+              *ngTemplateOutlet="
+                rowStats;
+                context: { $implicit: item.annotations, words: item.wordCount }
+              "
             />
           }
 
-          <span class="actions">
-            @if (item.node.kind === 'chapter') {
-              <button type="button" title="Szene hinzufügen" (click)="add('scene', item.node.id)">
-                +
-              </button>
-            }
-            @if (item.node.kind === 'part') {
-              <button
-                type="button"
-                title="Kapitel hinzufügen"
-                (click)="add('chapter', item.node.id)"
-              >
-                +
-              </button>
-            }
-            <button type="button" title="Löschen" (click)="remove(item.node)">×</button>
-          </span>
+          @if (editingId() !== item.node.id) {
+            <span class="actions">
+              @if (item.node.kind === 'chapter') {
+                <button type="button" title="Szene hinzufügen" (click)="add('scene', item.node.id)">
+                  +
+                </button>
+              }
+              @if (item.node.kind === 'part') {
+                <button
+                  type="button"
+                  title="Kapitel hinzufügen"
+                  (click)="add('chapter', item.node.id)"
+                >
+                  +
+                </button>
+              }
+              <button type="button" title="Löschen" (click)="remove(item.node)">×</button>
+            </span>
+          }
         </div>
 
         @if (item.children.length) {

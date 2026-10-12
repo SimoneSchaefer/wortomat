@@ -3,6 +3,7 @@ import type { ManuscriptNode, SceneStatus } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { ProjectStore } from '../../core/project-store';
 import { SCENE_STATUSES, statusInfo } from '../../core/scene-status';
+import { StatusIcon } from '../../core/status-icon';
 
 /**
  * Arbeitsstand der Szene als Stufenleiste: Idee → … → Fertig.
@@ -10,6 +11,7 @@ import { SCENE_STATUSES, statusInfo } from '../../core/scene-status';
  */
 @Component({
   selector: 'wm-scene-status',
+  imports: [StatusIcon],
   templateUrl: './scene-status.html',
   styleUrl: './scene-status.scss',
 })

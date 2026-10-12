@@ -11,8 +11,8 @@ export interface SceneStatusInfo {
 export const SCENE_STATUSES: readonly SceneStatusInfo[] = [
   { status: 'idea', label: 'Idee', color: 'var(--status-idea)' },
   { status: 'outline', label: 'Struktur', color: 'var(--status-outline)' },
-  { status: 'draft', label: 'Erster Entwurf', color: 'var(--status-draft)' },
-  { status: 'revised', label: 'Überarbeiteter Entwurf', color: 'var(--status-revised)' },
+  { status: 'draft', label: 'Entwurf', color: 'var(--status-draft)' },
+  { status: 'revised', label: 'Überarbeitet', color: 'var(--status-revised)' },
   { status: 'final', label: 'Fertig', color: 'var(--status-final)' },
 ];
 
