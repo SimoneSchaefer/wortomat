@@ -18,10 +18,12 @@
 .steps {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
 }
 
+// Nahtlos aneinander: benachbarte Rahmen überlappen um 1px, dazwischen bleibt eine Linie.
+// Farbige Rahmen (erledigt, aktuell) liegen oben, damit sie nicht halb verdeckt werden.
 button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -33,6 +35,10 @@ button {
   color: var(--text-muted);
   font-size: var(--pill-font-size);
   white-space: nowrap;
+
+  & + & {
+    margin-left: -1px;
+  }
 
   &:first-child {
     border-radius: 999px 0 0 999px;
@@ -49,12 +55,14 @@ button {
 
   // erledigte Stufen: leicht in der Farbe des aktuellen Status gefüllt
   &.done {
+    z-index: 1;
     border-color: color-mix(in srgb, var(--current-color) 45%, var(--border));
     background: color-mix(in srgb, var(--current-color) 16%, var(--bg));
     color: var(--text);
   }
 
   &.current {
+    z-index: 2;
     border-color: var(--current-color);
     background: var(--current-color);
     color: var(--bg);
@@ -64,6 +72,7 @@ button {
   }
 
   &:focus-visible {
+    z-index: 3;
     outline: 2px solid var(--accent);
     outline-offset: 1px;
   }
