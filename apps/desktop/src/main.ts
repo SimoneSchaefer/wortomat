@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AUTH_HEADER, type RunningServer, startServer } from '@wortomat/backend';
@@ -31,6 +32,8 @@ let appUrl = '';
 let mainWindow: BrowserWindow | null = null;
 /** Projektdatei, mit der die App gestartet wurde (Doppelklick auf eine .wortomat-Datei). */
 let pendingProjectPath = findProjectPath(process.argv);
+/** Läuft, bis das Backend gestartet und das Fenster erzeugt ist. */
+let starting: Promise<void> | null = null;
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -56,7 +59,7 @@ if (!app.requestSingleInstanceLock()) {
     }
   });
 
-  app
+  starting = app
     .whenReady()
     .then(start)
     .catch((error: unknown) => {
@@ -163,6 +166,9 @@ function createMainWindow(): BrowserWindow {
   });
 
   closeAfterFlush(window);
+  // Windows: Abmelden/Herunterfahren schickt kein Signal, sondern WM_ENDSESSION.
+  // `query-session-end` lassen wir in Ruhe – das Abmelden kann noch abgebrochen werden.
+  window.on('session-end', () => app.quit());
   window.on('closed', () => {
     if (mainWindow === window) mainWindow = null;
   });
@@ -186,18 +192,24 @@ function closeAfterFlush(window: BrowserWindow): void {
 }
 
 function flushRenderer(window: BrowserWindow): Promise<void> {
+  const contents = window.webContents;
+  // Ist das Frontend schon weg (z. B. SIGTERM an alle Prozesse beim Abmelden),
+  // kann es nichts mehr speichern – dann nicht unnötig auf den Timeout warten.
+  if (window.isDestroyed() || contents.isCrashed()) return Promise.resolve();
   return new Promise((resolve) => {
     const done = () => {
       clearTimeout(timer);
       ipcMain.removeListener(IPC.flushDone, onDone);
+      contents.removeListener('render-process-gone', done);
       resolve();
     };
     const onDone = (event: Electron.IpcMainEvent) => {
-      if (event.sender === window.webContents) done();
+      if (event.sender === contents) done();
     };
     const timer = setTimeout(done, FLUSH_TIMEOUT_MS);
     ipcMain.on(IPC.flushDone, onDone);
-    window.webContents.send(IPC.flushRequest);
+    contents.once('render-process-gone', done);
+    contents.send(IPC.flushRequest);
   });
 }
 
@@ -313,8 +325,23 @@ app.on('before-quit', (event) => {
   }
 });
 
+// SIGTERM (kill, Abmelden/Herunterfahren unter Linux, systemd) und SIGINT (Strg+C im
+// Terminal) laufen ausdrücklich über das normale Beenden oben. Ein zweites Signal
+// während des Beendens bricht hart ab, falls das Speichern hängt.
+for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+  process.on(signal, () => {
+    if (shutdownStarted || !app.isReady()) {
+      app.exit(128 + os.constants.signals[signal]);
+      return;
+    }
+    app.quit();
+  });
+}
+
 async function shutdown(): Promise<void> {
   try {
+    // Kommt das Beenden mitten im Start, erst fertig starten – sonst bliebe das Backend offen.
+    await starting;
     await Promise.all(BrowserWindow.getAllWindows().map((window) => flushRenderer(window)));
     await server?.close();
   } catch (error) {

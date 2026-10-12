@@ -61,7 +61,9 @@ function serveFrontend(app: NestExpressApplication, staticDir: string): void {
     const isAppRoute =
       req.method === 'GET' && !req.path.startsWith('/api/') && !path.extname(req.path);
     if (isAppRoute) {
-      res.sendFile(indexHtml);
+      // Mit `root` prüft Express nur den Teil danach auf Punkt-Ordner – sonst gäbe es
+      // z. B. im AppImage (/tmp/.mount_…) immer 404.
+      res.sendFile('index.html', { root: staticDir });
     } else {
       next();
     }
