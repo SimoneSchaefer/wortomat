@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import type {
   CreateNoteGroupRequest,
   CreateNoteRequest,
+  MoveNoteGroupRequest,
   EditorDoc,
   ImageInfo,
   NoteContent,
@@ -113,9 +114,10 @@ export class NotesService {
   // Gruppen
   // -------------------------------------------------------------------------
 
+  /** Alle Gruppen in ihrer Reihenfolge (je Art). */
   listGroups(): NoteGroup[] {
     return this.db
-      .prepare('SELECT id, kind, name FROM note_groups ORDER BY created_at')
+      .prepare('SELECT id, kind, name FROM note_groups ORDER BY kind, sort_order')
       .all() as unknown as NoteGroup[];
   }
 
@@ -124,9 +126,14 @@ export class NotesService {
     const name = requireGroupName(request?.name);
     const id = randomUUID();
     transaction(this.db, () => {
+      const { next } = this.db
+        .prepare('SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM note_groups WHERE kind = ?')
+        .get(kind) as { next: number };
       this.db
-        .prepare('INSERT INTO note_groups (id, kind, name, created_at) VALUES (?, ?, ?, ?)')
-        .run(id, kind, name, nowIso());
+        .prepare(
+          'INSERT INTO note_groups (id, kind, name, sort_order, created_at) VALUES (?, ?, ?, ?, ?)',
+        )
+        .run(id, kind, name, next, nowIso());
       this.projects.touch();
     });
     return { id, kind, name };
@@ -140,6 +147,38 @@ export class NotesService {
       this.projects.touch();
     });
     return { ...group, name };
+  }
+
+  /**
+   * Verschiebt eine Gruppe vor eine andere derselben Art (oder ans Ende); die Gruppen
+   * der Art werden dabei neu durchnummeriert.
+   *
+   * @returns alle Gruppen in der neuen Reihenfolge
+   */
+  moveGroup(id: string, request: MoveNoteGroupRequest): NoteGroup[] {
+    const group = this.getGroup(id);
+    const beforeId = request?.beforeId ?? null;
+    transaction(this.db, () => {
+      const others = (
+        this.db
+          .prepare('SELECT id FROM note_groups WHERE kind = ? AND id != ? ORDER BY sort_order')
+          .all(group.kind, id) as Array<{ id: string }>
+      ).map((row) => row.id);
+      const index = beforeId === null ? others.length : others.indexOf(beforeId);
+      if (index < 0) {
+        throw new BadRequestException(
+          localized(
+            'Die Bezugsgruppe gehört nicht zu dieser Art.',
+            'The reference group does not belong to this kind.',
+          ),
+        );
+      }
+      others.splice(index, 0, id);
+      const setOrder = this.db.prepare('UPDATE note_groups SET sort_order = ? WHERE id = ?');
+      others.forEach((groupId, position) => setOrder.run(position + 1, groupId));
+      this.projects.touch();
+    });
+    return this.listGroups();
   }
 
   /** Die Notizen bleiben erhalten und stehen danach ohne Gruppe da. */

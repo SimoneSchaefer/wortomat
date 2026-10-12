@@ -147,6 +147,15 @@ const MIGRATIONS: readonly string[] = [
     ) WHERE group_name <> '';
     ALTER TABLE notes DROP COLUMN group_name;
   `,
+  /* 11: Reihenfolge der Gruppen (per Ziehen); vorhandene starten alphabetisch */ `
+    ALTER TABLE note_groups ADD COLUMN sort_order REAL NOT NULL DEFAULT 0;
+    UPDATE note_groups SET sort_order = 1 + (
+      SELECT COUNT(*) FROM note_groups g
+       WHERE g.kind = note_groups.kind
+         AND (lower(g.name) < lower(note_groups.name)
+              OR (lower(g.name) = lower(note_groups.name) AND g.id < note_groups.id))
+    );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

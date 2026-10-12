@@ -10,6 +10,13 @@ import { NOTE_KINDS } from './note-kinds';
 import { NotesStore } from './notes-store';
 
 const DRAG_TYPE = 'application/x-wortomat-note';
+const GROUP_DRAG_TYPE = 'application/x-wortomat-note-group';
+
+/** Wohin eine gezogene Gruppe käme: vor oder hinter den Abschnitt (`''` = „Ohne Gruppe“). */
+interface GroupDrop {
+  targetId: string;
+  position: 'before' | 'after';
+}
 
 /** Seitenleiste für Charaktere, Orte oder Recherchen. */
 @Component({
@@ -37,6 +44,9 @@ export class NoteList {
   protected readonly draggingId = signal<string | null>(null);
   /** Gruppe, über der gerade eine Notiz schwebt (`''` = ohne Gruppe). */
   protected readonly dropGroupId = signal<string | null>(null);
+
+  protected readonly draggingGroupId = signal<string | null>(null);
+  protected readonly groupDrop = signal<GroupDrop | null>(null);
 
   /** Von der Kopfzeile der Seitenleiste aus aufgerufen – oder mit Gruppe über deren „+“. */
   async add(groupId: string | null = null): Promise<void> {
@@ -90,6 +100,10 @@ export class NoteList {
   }
 
   protected onDragOver(event: DragEvent, groupId: string | null): void {
+    if (this.draggingGroupId()) {
+      this.onGroupDragOver(event, groupId);
+      return;
+    }
     if (!this.draggingId() || !event.dataTransfer?.types.includes(DRAG_TYPE)) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
@@ -98,6 +112,12 @@ export class NoteList {
 
   protected onDragLeave(event: DragEvent, groupId: string | null): void {
     const target = event.currentTarget as HTMLElement;
+    if (
+      this.groupDrop()?.targetId === (groupId ?? '') &&
+      !target.contains(event.relatedTarget as Node | null)
+    ) {
+      this.groupDrop.set(null);
+    }
     if (
       this.dropGroupId() === (groupId ?? '') &&
       !target.contains(event.relatedTarget as Node | null)
@@ -108,12 +128,63 @@ export class NoteList {
 
   protected async onDrop(event: DragEvent, groupId: string | null): Promise<void> {
     event.preventDefault();
+    if (this.draggingGroupId()) {
+      await this.onGroupDrop();
+      return;
+    }
     const id = event.dataTransfer?.getData(DRAG_TYPE);
     this.dropGroupId.set(null);
     this.draggingId.set(null);
     const note = id ? this.store.find(id) : undefined;
     if (!note || (this.store.findGroup(note.groupId)?.id ?? null) === groupId) return;
     await this.run(() => this.store.update(note.id, { groupId }));
+  }
+
+  // Gruppen umsortieren --------------------------------------------------------
+
+  protected onGroupDragStart(event: DragEvent, groupId: string | null): void {
+    if (!groupId || !event.dataTransfer) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData(GROUP_DRAG_TYPE, groupId);
+    this.draggingGroupId.set(groupId);
+  }
+
+  protected onGroupDragEnd(): void {
+    this.draggingGroupId.set(null);
+    this.groupDrop.set(null);
+  }
+
+  /** Obere Hälfte des Abschnitts: davor, untere: dahinter. „Ohne Gruppe“ bleibt immer unten. */
+  private onGroupDragOver(event: DragEvent, groupId: string | null): void {
+    if (!event.dataTransfer?.types.includes(GROUP_DRAG_TYPE)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const upperHalf = event.clientY < rect.top + rect.height / 2;
+    const position = groupId !== null && upperHalf ? 'before' : 'after';
+    // Hinter der letzten Gruppe = vor „Ohne Gruppe“: dort als Linie oben anzeigen
+    this.groupDrop.set(
+      groupId === null ? { targetId: '', position: 'before' } : { targetId: groupId, position },
+    );
+  }
+
+  private async onGroupDrop(): Promise<void> {
+    const id = this.draggingGroupId();
+    const drop = this.groupDrop();
+    this.onGroupDragEnd();
+    if (!id || !drop) return;
+    const order = this.store.groupsOfKind(this.kind()).map((group) => group.id);
+    let beforeId: string | null;
+    if (drop.targetId === '') {
+      beforeId = null;
+    } else if (drop.position === 'before') {
+      beforeId = drop.targetId;
+    } else {
+      beforeId = order[order.indexOf(drop.targetId) + 1] ?? null;
+    }
+    // Schon an dieser Stelle? Dann nichts tun.
+    if (beforeId === id || (order[order.indexOf(id) + 1] ?? null) === beforeId) return;
+    await this.run(() => this.store.moveGroup(id, beforeId));
   }
 
   protected async remove(note: NoteSummary): Promise<void> {

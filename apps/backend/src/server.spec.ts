@@ -313,6 +313,32 @@ describe('REST-API', () => {
         ['place', 'Küste'],
       ],
     );
+
+    // Neue Gruppen kommen ans Ende; Verschieben ordnet nur innerhalb der Art um
+    const police = await api<NoteGroup>('POST', '/api/note-groups', {
+      kind: 'character',
+      name: 'Polizei',
+    });
+    const characterGroups = (groups: NoteGroup[]) =>
+      groups.filter((g) => g.kind === 'character').map((g) => g.name);
+    assert.deepEqual(characterGroups(await api('GET', '/api/note-groups')), [
+      'Die Bergers',
+      'Polizei',
+    ]);
+    let moved = await api<NoteGroup[]>('POST', `/api/note-groups/${police.id}/move`, {
+      beforeId: family.id,
+    });
+    assert.deepEqual(characterGroups(moved), ['Polizei', 'Die Bergers']);
+    moved = await api<NoteGroup[]>('POST', `/api/note-groups/${police.id}/move`, {
+      beforeId: null,
+    });
+    assert.deepEqual(characterGroups(moved), ['Die Bergers', 'Polizei']);
+    const crossKind = await fetch(`${server.url}/api/note-groups/${police.id}/move`, {
+      method: 'POST',
+      headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ beforeId: places.id }),
+    });
+    assert.equal(crossKind.status, 400);
     await api('DELETE', `/api/note-groups/${family.id}`);
     assert.equal(
       (await api<NoteSummary[]>('GET', '/api/notes')).find((n) => n.id === anna.id)!.groupId,

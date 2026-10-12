@@ -38,11 +38,9 @@ export class NotesStore {
       .sort((a, b) => collator.compare(a.title, b.title));
   }
 
-  /** Gruppen einer Art, alphabetisch. */
+  /** Gruppen einer Art in ihrer Reihenfolge (vom Backend so geliefert, neue hinten). */
   groupsOfKind(kind: NoteKind): NoteGroup[] {
-    return this.groups()
-      .filter((group) => group.kind === kind)
-      .sort((a, b) => collator.compare(a.name, b.name));
+    return this.groups().filter((group) => group.kind === kind);
   }
 
   findGroup(id: string | null): NoteGroup | undefined {
@@ -110,6 +108,11 @@ export class NotesStore {
   async renameGroup(id: string, name: string): Promise<void> {
     const updated = await this.api.updateNoteGroup(id, { name });
     this.groups.update((groups) => groups.map((group) => (group.id === id ? updated : group)));
+  }
+
+  /** Vor eine andere Gruppe derselben Art setzen; `null` = ans Ende. */
+  async moveGroup(id: string, beforeId: string | null): Promise<void> {
+    this.groups.set(await this.api.moveNoteGroup(id, { beforeId }));
   }
 
   /** Die Notizen der Gruppe bleiben erhalten und stehen danach ohne Gruppe da. */

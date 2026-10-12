@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type {
   CreateNoteGroupRequest,
   CreateNoteRequest,
+  MoveNoteGroupRequest,
   ImageInfo,
   NoteContent,
   NoteGroup,
@@ -47,6 +48,12 @@ export class NoteGroupsController {
   @Patch(':id')
   rename(@Param('id') id: string, @Body() body: UpdateNoteGroupRequest): NoteGroup {
     return this.notes.renameGroup(id, body);
+  }
+
+  @Post(':id/move')
+  @HttpCode(200)
+  move(@Param('id') id: string, @Body() body: MoveNoteGroupRequest): NoteGroup[] {
+    return this.notes.moveGroup(id, body);
   }
 
   @Delete(':id')

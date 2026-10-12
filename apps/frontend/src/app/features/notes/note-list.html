@@ -40,11 +40,18 @@
       <section
         class="group"
         [class.drop-target]="dropGroupId() === (id ?? '')"
+        [class.dragging]="id !== null && draggingGroupId() === id"
+        [attr.data-drop]="groupDrop()?.targetId === (id ?? '') ? groupDrop()?.position : null"
         (dragover)="onDragOver($event, id)"
         (dragleave)="onDragLeave($event, id)"
         (drop)="onDrop($event, id)"
       >
-        <div class="group-head">
+        <div
+          class="group-head"
+          [attr.draggable]="id !== null && editingGroupId() !== id ? 'true' : null"
+          (dragstart)="onGroupDragStart($event, id)"
+          (dragend)="onGroupDragEnd()"
+        >
           <button
             type="button"
             class="collapse"

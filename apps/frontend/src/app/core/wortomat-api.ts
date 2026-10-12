@@ -13,6 +13,7 @@ import type {
   ImageInfo,
   ManuscriptNode,
   MoveNodeRequest,
+  MoveNoteGroupRequest,
   NoteContent,
   NoteGroup,
   NoteSummary,
@@ -144,6 +145,10 @@ export class WortomatApi {
 
   updateNoteGroup(id: string, request: UpdateNoteGroupRequest): Promise<NoteGroup> {
     return this.call(this.http.patch<NoteGroup>(`/api/note-groups/${id}`, request));
+  }
+
+  moveNoteGroup(id: string, request: MoveNoteGroupRequest): Promise<NoteGroup[]> {
+    return this.call(this.http.post<NoteGroup[]>(`/api/note-groups/${id}/move`, request));
   }
 
   deleteNoteGroup(id: string): Promise<void> {

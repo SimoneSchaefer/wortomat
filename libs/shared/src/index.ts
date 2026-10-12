@@ -241,6 +241,12 @@ export interface UpdateNoteGroupRequest {
   name: string;
 }
 
+/** Verschiebt eine Gruppe innerhalb ihrer Notizart. */
+export interface MoveNoteGroupRequest {
+  /** Gruppe, vor der eingefügt wird; `null` = ans Ende. */
+  beforeId: string | null;
+}
+
 /** Verknüpft eine Notiz (Charakter, Ort …) mit einer Szene. */
 export interface LinkNoteRequest {
   noteId: string;
