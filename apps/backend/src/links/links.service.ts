@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { NoteSummary, SceneReference } from '@wortomat/shared';
+import type { NoteSummary, SceneReference, SceneRelations } from '@wortomat/shared';
 import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { NotesService } from '../notes/notes.service.js';
 import { ProjectService } from '../project/project.service.js';
@@ -38,6 +38,34 @@ export class LinksService {
       .run(sceneId, noteId);
     this.projects.touch();
     return this.notes.linkedToScene(sceneId);
+  }
+
+  /** Notizen und Tags aller Szenen, die überhaupt etwas zugeordnet haben. */
+  relations(): SceneRelations[] {
+    const db = this.projects.db;
+    const result = new Map<string, SceneRelations>();
+    const entry = (sceneId: string) => {
+      let relations = result.get(sceneId);
+      if (!relations) {
+        relations = { sceneId, noteIds: [], tags: [] };
+        result.set(sceneId, relations);
+      }
+      return relations;
+    };
+    const links = db.prepare('SELECT scene_id, note_id FROM scene_links').all() as Array<{
+      scene_id: string;
+      note_id: string;
+    }>;
+    for (const row of links) entry(row.scene_id).noteIds.push(row.note_id);
+    const tags = db
+      .prepare(
+        `SELECT st.scene_id, t.id, t.name FROM scene_tags st
+         JOIN tags t ON t.id = st.tag_id
+         ORDER BY t.name COLLATE NOCASE`,
+      )
+      .all() as Array<{ scene_id: string; id: string; name: string }>;
+    for (const row of tags) entry(row.scene_id).tags.push({ id: row.id, name: row.name });
+    return [...result.values()];
   }
 
   /** Szenen, in denen die Notiz vorkommt – in Manuskript-Reihenfolge. */

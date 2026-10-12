@@ -15,6 +15,8 @@ import { NotesStore } from '../notes/notes-store';
 import { GlobalSearch } from './global-search';
 import { ManuscriptTree } from './manuscript-tree';
 import { ResizeHandle } from './resize-handle';
+import { SceneFilter } from './scene-filter';
+import { SceneFilterPanel } from './scene-filter-panel';
 
 type Section = 'manuscript' | NoteKind;
 
@@ -45,11 +47,12 @@ const MENU: readonly MenuItem[] = [
     GlobalSearch,
     ResizeHandle,
     ExportDialog,
+    SceneFilterPanel,
   ],
   templateUrl: './workspace-page.html',
   styleUrl: './workspace-page.scss',
-  // Pro geöffnetem Projekt frisch – die Notizen gehören zum Projekt.
-  providers: [NotesStore],
+  // Pro geöffnetem Projekt frisch – Notizen und Szenenfilter gehören zum Projekt.
+  providers: [NotesStore, SceneFilter],
   host: { '(window:resize)': 'onWindowResize()' },
 })
 export class WorkspacePage {

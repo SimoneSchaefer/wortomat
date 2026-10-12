@@ -1,0 +1,116 @@
+<div class="bar">
+  <button
+    #toggle
+    type="button"
+    class="toggle"
+    [class.active]="filter.active()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="dialog"
+    aria-controls="scene-filter-options"
+    [title]="t().filter.hint"
+    (click)="toggleOpen()"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 5h16l-6 7.5V19l-4 1.5v-8z" />
+    </svg>
+    {{ t().filter.toggle }}
+    @if (filter.activeCount(); as count) {
+      <span class="badge">{{ count }}</span>
+    }
+  </button>
+  @if (filter.active()) {
+    <span class="summary" role="status">
+      {{ t().filter.count(filter.shownCount(), filter.totalCount()) }}
+    </span>
+    <button type="button" class="link reset" (click)="filter.reset()">
+      {{ t().filter.reset }}
+    </button>
+  }
+</div>
+
+@if (open()) {
+  <div
+    class="popover"
+    id="scene-filter-options"
+    role="dialog"
+    [attr.aria-label]="t().filter.toggle"
+  >
+    <div class="group" role="group" [attr.aria-label]="t().filter.status">
+      <span class="label">{{ t().filter.status }}</span>
+      <div class="pills">
+        @for (info of statuses; track info.status) {
+          <button
+            type="button"
+            class="pill"
+            [attr.aria-pressed]="filter.isSelected('statuses', info.status)"
+            (click)="filter.toggle('statuses', info.status)"
+          >
+            <wm-status-icon [status]="info.status" [style.color]="info.color" />
+            {{ t().sceneStatus.names[info.status] }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="group" role="group" [attr.aria-label]="t().filter.annotations">
+      <span class="label">{{ t().filter.annotations }}</span>
+      <div class="pills">
+        @for (info of annotationKinds; track info.kind) {
+          <button
+            type="button"
+            class="pill"
+            [style.--annotation-color]="info.color"
+            [attr.aria-pressed]="filter.isSelected('annotations', info.kind)"
+            (click)="filter.toggle('annotations', info.kind)"
+          >
+            <span class="swatch" aria-hidden="true"></span>
+            {{ t().annotations[info.kind].plural }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @for (group of noteGroups(); track group.kind) {
+      <div class="group" role="group" [attr.aria-label]="t().noteKinds[group.kind].label">
+        <span class="label">{{ t().noteKinds[group.kind].label }}</span>
+        <div class="pills">
+          @for (note of group.notes; track note.id) {
+            <button
+              type="button"
+              class="pill with-avatar"
+              [attr.aria-pressed]="filter.isSelected('noteIds', note.id)"
+              (click)="filter.toggle('noteIds', note.id)"
+            >
+              <wm-note-avatar [note]="note" />
+              {{ note.title }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (filter.tags().length) {
+      <div class="group" role="group" [attr.aria-label]="t().sceneLinks.tags">
+        <span class="label">{{ t().sceneLinks.tags }}</span>
+        <div class="pills">
+          @for (tag of filter.tags(); track tag.id) {
+            <button
+              type="button"
+              class="pill"
+              [attr.aria-pressed]="filter.isSelected('tagIds', tag.id)"
+              (click)="filter.toggle('tagIds', tag.id)"
+            >
+              <span class="hash">#</span>{{ tag.name }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <p class="rule">{{ t().filter.rule }}</p>
+  </div>
+}
+
+@if (error(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+}

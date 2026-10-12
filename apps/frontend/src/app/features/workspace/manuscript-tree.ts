@@ -16,6 +16,7 @@ import {
   planDrop,
   planRootDrop,
 } from './drop-plan';
+import { SceneFilter } from './scene-filter';
 
 /** Eigener Datentyp, damit Drags von außen (z. B. Dateien) den Baum nicht auslösen. */
 const DRAG_TYPE = 'application/x-wortomat-node';
@@ -30,6 +31,7 @@ export class ManuscriptTree {
   private readonly router = inject(Router);
   protected readonly t = inject(I18n).t;
   protected readonly store = inject(ProjectStore);
+  protected readonly filter = inject(SceneFilter);
 
   /** ID des Elements, dessen Titel gerade bearbeitet wird. */
   protected readonly editingId = signal<string | null>(null);
@@ -83,7 +85,7 @@ export class ManuscriptTree {
    * auch wo sie fehlt –, damit die Zähler untereinander stehen.
    */
   protected readonly annotationKinds = computed(() => {
-    const total = this.store
+    const total = this.filter
       .tree()
       .reduce((sum, item) => addCounts(sum, item.annotations), NO_ANNOTATIONS);
     return ANNOTATION_KINDS.filter((info) => total[info.kind] > 0);

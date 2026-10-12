@@ -76,6 +76,17 @@ export const en: Texts = {
       `Do you really want to delete “${title}” with all the scenes it contains?`,
   },
 
+  filter: {
+    toggle: 'Filter',
+    hint: 'Filter scenes by status, open marks, characters, places or tags',
+    reset: 'Reset',
+    status: 'Status',
+    annotations: 'Open',
+    rule: 'Within a row one match is enough; across rows everything must match.',
+    count: (shown: number, total: number) => `${shown} of ${total} scenes`,
+    noMatch: 'No scene matches the filter.',
+  },
+
   search: {
     label: 'Search the whole book',
     placeholder: 'Search the whole book …',

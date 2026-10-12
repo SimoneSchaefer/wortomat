@@ -1,11 +1,22 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import type { LinkNoteRequest, NoteSummary, SceneReference } from '@wortomat/shared';
+import type {
+  LinkNoteRequest,
+  NoteSummary,
+  SceneReference,
+  SceneRelations,
+} from '@wortomat/shared';
 import { LinksService } from './links.service.js';
 import { localized } from '../i18n.js';
 
 @Controller()
 export class LinksController {
   constructor(private readonly links: LinksService) {}
+
+  /** Charaktere, Orte und Tags aller Szenen auf einmal (für den Szenenfilter). */
+  @Get('scene-relations')
+  relations(): SceneRelations[] {
+    return this.links.relations();
+  }
 
   /** Charaktere, Orte … dieser Szene. */
   @Get('scenes/:id/links')

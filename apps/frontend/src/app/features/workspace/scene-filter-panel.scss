@@ -1,0 +1,158 @@
+:host {
+  position: relative; // Bezugspunkt fürs Popover
+  display: grid;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: var(--pill-height);
+  font-size: var(--pill-font-size);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: var(--pill-height);
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: var(--pill-font-size);
+
+  svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  &.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  &[aria-expanded='true'] {
+    background: var(--hover);
+  }
+
+  &:focus-visible {
+    outline: 2px dashed var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.badge {
+  min-width: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.7rem;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+.summary {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.reset {
+  margin-left: auto;
+  font-size: var(--pill-font-size);
+}
+
+// Wie die Auswahl im Szenenkopf: schwebt über dem Baum, darf breiter als die Seitenleiste sein
+.popover {
+  position: absolute;
+  top: calc(var(--pill-height) + 0.35rem);
+  left: 0.5rem;
+  z-index: 20;
+  display: grid;
+  gap: 0.6rem;
+  width: 21rem;
+  max-width: calc(100vw - 2rem);
+  max-height: min(32rem, calc(100vh - 10rem));
+  overflow-y: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--bg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
+}
+
+.group {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.label {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  height: var(--pill-height);
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: var(--pill-font-size);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.with-avatar {
+    padding-left: 2px;
+    --avatar-size: calc(var(--pill-height) - 6px);
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+    background: var(--surface);
+    color: var(--text);
+  }
+}
+
+.swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.15rem;
+  background: color-mix(in srgb, var(--annotation-color) 45%, transparent);
+  box-shadow: inset 0 -2px 0 var(--annotation-color);
+}
+
+.hash {
+  color: var(--accent);
+}
+
+.rule {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.error {
+  margin: 0;
+  font-size: 0.8rem;
+}

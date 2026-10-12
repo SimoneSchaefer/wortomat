@@ -240,6 +240,14 @@ export interface TagSummary extends Tag {
   sceneCount: number;
 }
 
+/** Was einer Szene zugeordnet ist (Charaktere, Orte, Tags) – z. B. für den Szenenfilter. */
+export interface SceneRelations {
+  sceneId: string;
+  /** Verknüpfte Notizen (Charaktere, Orte …). */
+  noteIds: string[];
+  tags: Tag[];
+}
+
 /** Vergibt einen Tag per Name; gibt es ihn (ohne Groß-/Kleinschreibung) schon, wird er wiederverwendet. */
 export interface AddTagRequest {
   name: string;

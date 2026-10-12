@@ -96,6 +96,17 @@ export const de = {
       `Möchtest du „${title}“ mit allen enthaltenen Szenen wirklich löschen?`,
   },
 
+  filter: {
+    toggle: 'Filter',
+    hint: 'Szenen nach Status, offenen Markierungen, Charakteren, Orten oder Tags filtern',
+    reset: 'Zurücksetzen',
+    status: 'Status',
+    annotations: 'Offen',
+    rule: 'Innerhalb einer Zeile reicht eins davon, zwischen den Zeilen muss alles passen.',
+    count: (shown: number, total: number) => `${shown} von ${total} Szenen`,
+    noMatch: 'Keine Szene passt zum Filter.',
+  },
+
   search: {
     label: 'Im ganzen Buch suchen',
     placeholder: 'Im ganzen Buch suchen …',

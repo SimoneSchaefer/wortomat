@@ -28,7 +28,7 @@
         [class]="item.node.kind"
         [class.dragging]="draggingId() === item.node.id"
         [attr.data-drop]="dropMarker(item.node.id)"
-        [attr.draggable]="editingId() === item.node.id ? null : 'true'"
+        [attr.draggable]="editingId() === item.node.id || filter.active() ? null : 'true'"
         (dragstart)="onDragStart($event, item.node)"
         (dragend)="onDragEnd()"
       >
@@ -120,8 +120,10 @@
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
-  @if (store.tree().length) {
-    <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: store.tree() }" />
+  @if (filter.tree().length) {
+    <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: filter.tree() }" />
+  } @else if (filter.active()) {
+    <p class="muted empty">{{ t().filter.noMatch }}</p>
   } @else {
     <p class="muted empty">{{ t().tree.empty }}</p>
   }

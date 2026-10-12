@@ -13,6 +13,7 @@ import type {
   ProjectListEntry,
   SceneContent,
   SceneReference,
+  SceneRelations,
   SearchHit,
   Tag,
   TagSummary,
@@ -594,6 +595,20 @@ describe('REST-API', () => {
       ['Rückblende', 2],
       ['Spannung', 1],
     ]);
+
+    // Alles auf einmal für den Szenenfilter: Tags (alphabetisch) und verknüpfte Notizen
+    const anna = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Anna' });
+    await api('POST', `/api/scenes/${s2.id}/links`, { noteId: anna.id });
+    const relations = await api<SceneRelations[]>('GET', '/api/scene-relations');
+    assert.deepEqual(
+      relations
+        .map((r) => [r.sceneId, r.noteIds, names(r.tags)])
+        .sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+      [
+        [s1.id, [], ['Rückblende', 'Spannung']],
+        [s2.id, [anna.id], ['Arc Anna', 'Rückblende']],
+      ].sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+    );
 
     // Entfernen; der letzte Einsatz eines Tags lässt ihn verschwinden
     const spannung = (await allTags()).find((t) => t.name === 'Spannung')!;

@@ -19,6 +19,7 @@ import type {
   SceneReference,
   SaveDocumentRequest,
   SceneContent,
+  SceneRelations,
   SearchHit,
   Tag,
   TagSummary,
@@ -185,6 +186,11 @@ export class WortomatApi {
   }
 
   // Tags --------------------------------------------------------------------------
+
+  /** Charaktere, Orte und Tags aller Szenen – für den Szenenfilter. */
+  sceneRelations(): Promise<SceneRelations[]> {
+    return this.call(this.http.get<SceneRelations[]>('/api/scene-relations'));
+  }
 
   /** Alle verwendeten Tags des Projekts (mit Anzahl der Szenen). */
   listTags(): Promise<TagSummary[]> {

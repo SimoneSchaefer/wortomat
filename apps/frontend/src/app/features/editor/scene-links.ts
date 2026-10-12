@@ -21,6 +21,7 @@ import { NoteAvatar } from '../notes/note-avatar';
 import { NOTE_KIND_LIST, NOTE_KINDS } from '../notes/note-kinds';
 import { filterCandidates, hasExactTitle } from '../notes/note-matching';
 import { NotesStore } from '../notes/notes-store';
+import { SceneFilter } from '../workspace/scene-filter';
 
 const MAX_SUGGESTIONS = 8;
 
@@ -64,6 +65,7 @@ export class SceneLinks {
   protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   private readonly store = inject(NotesStore);
+  private readonly filter = inject(SceneFilter);
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
@@ -238,6 +240,7 @@ export class SceneLinks {
             : await this.store.create(target, 'title' in option ? option.title : '');
         this.setLinked(await this.api.linkNote(sceneId, note.id));
       }
+      this.reportToFilter(sceneId);
       this.scrollToEnd(target);
     });
   }
@@ -261,7 +264,15 @@ export class SceneLinks {
       } else {
         this.setLinked(await this.api.unlinkNote(sceneId, chip.id));
       }
+      this.reportToFilter(sceneId);
     });
+  }
+
+  /** Damit der Szenenfilter im Baum gleich die neuen Charaktere, Orte und Tags kennt. */
+  private reportToFilter(sceneId: string): void {
+    if (sceneId === this.sceneId()) {
+      this.filter.updateScene(sceneId, [...this.linkedIds()], this.tags());
+    }
   }
 
   protected open(note: NoteSummary): void {
