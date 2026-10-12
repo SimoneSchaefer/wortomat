@@ -22,6 +22,13 @@ export const en: Texts = {
     unexpected: (message: string) => `Unexpected error: ${message}`,
   },
 
+  confirm: {
+    cancel: 'Cancel',
+    delete: 'Delete',
+    remove: 'Remove',
+    irreversible: 'This cannot be undone.',
+  },
+
   status: {
     dismiss: 'Dismiss message',
     dismissAll: 'Dismiss all',
@@ -99,9 +106,10 @@ export const en: Texts = {
     empty: 'Still empty. Start your first chapter.',
     addChapterButton: '+ Chapter',
     addPartButton: '+ Part',
-    confirmDeleteScene: 'Do you really want to delete the scene?',
-    confirmDeleteContainer: (title: string) =>
-      `Do you really want to delete “${title}” with all the scenes it contains?`,
+    deleteTitle: { part: 'Delete part?', chapter: 'Delete chapter?', scene: 'Delete scene?' },
+    deleteScene: (title: string) => `“${title}” will be deleted with all of its text.`,
+    deleteContainer: (title: string) =>
+      `“${title}” will be deleted along with all the scenes it contains.`,
   },
 
   filter: {
@@ -132,7 +140,8 @@ export const en: Texts = {
       newTitle: 'New character',
       addLabel: '+ Character',
       addToGroup: 'Add a character to this group',
-      confirmDeleteGroup: (name: string) => `Delete the group “${name}”? Its characters are kept.`,
+      deleteGroupMessage: (name: string) =>
+        `The group “${name}” will be deleted. Its characters are kept.`,
       emptyList: 'No characters yet.',
       pickerEmpty: 'No characters yet – type a name to create one.',
       create: (title: string) => `Create “${title}” as a new character`,
@@ -152,7 +161,8 @@ export const en: Texts = {
       newTitle: 'New place',
       addLabel: '+ Place',
       addToGroup: 'Add a place to this group',
-      confirmDeleteGroup: (name: string) => `Delete the group “${name}”? Its places are kept.`,
+      deleteGroupMessage: (name: string) =>
+        `The group “${name}” will be deleted. Its places are kept.`,
       emptyList: 'No places yet.',
       pickerEmpty: 'No places yet – type a name to create one.',
       create: (title: string) => `Create “${title}” as a new place`,
@@ -166,8 +176,8 @@ export const en: Texts = {
       newTitle: 'New research note',
       addLabel: '+ Research note',
       addToGroup: 'Add a research note to this group',
-      confirmDeleteGroup: (name: string) =>
-        `Delete the group “${name}”? Its research notes are kept.`,
+      deleteGroupMessage: (name: string) =>
+        `The group “${name}” will be deleted. Its research notes are kept.`,
       emptyList: 'No research notes yet.',
       pickerEmpty: 'No research notes yet – type a title to create one.',
       create: (title: string) => `Create “${title}” as a new research note`,
@@ -178,7 +188,9 @@ export const en: Texts = {
   },
 
   notes: {
-    confirmDelete: (title: string) => `Really delete “${title}”?`,
+    deleteTitle: (singular: string) => `Delete ${singular.toLowerCase()}?`,
+    deleteMessage: (title: string) => `“${title}” will be deleted with everything recorded for it.`,
+    deleteGroupTitle: 'Delete group?',
     notFound: 'This entry no longer exists.',
     summary: 'Short description',
     group: 'Group',
@@ -212,7 +224,8 @@ export const en: Texts = {
     uploading: 'Uploading …',
     addFirst: (label: string) => `Add ${label.toLowerCase()}`,
     dropHint: 'or drag images here',
-    confirmRemove: 'Remove this image?',
+    removeTitle: 'Remove image?',
+    removeMessage: 'The image will be removed from the gallery.',
   },
 
   editor: {

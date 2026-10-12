@@ -18,6 +18,7 @@ import {
 } from './drop-plan';
 import { SceneFilter } from './scene-filter';
 import { StatusMessages } from '../../core/status-messages';
+import { ConfirmDialog } from '../../core/confirm-dialog';
 
 /** Eigener Datentyp, damit Drags von außen (z. B. Dateien) den Baum nicht auslösen. */
 const DRAG_TYPE = 'application/x-wortomat-node';
@@ -37,6 +38,7 @@ export class ManuscriptTree {
   /** ID des Elements, dessen Titel gerade bearbeitet wird. */
   protected readonly editingId = signal<string | null>(null);
   private readonly error = inject(StatusMessages).channel();
+  private readonly confirm = inject(ConfirmDialog);
 
   /** Gerade gezogenes Element und wohin es beim Loslassen käme. */
   protected readonly draggingId = signal<string | null>(null);
@@ -67,10 +69,14 @@ export class ManuscriptTree {
   }
 
   protected async remove(node: ManuscriptNode): Promise<void> {
-    const { tree } = this.t();
-    const question =
-      node.kind === 'scene' ? tree.confirmDeleteScene : tree.confirmDeleteContainer(node.title);
-    if (!confirm(question)) return;
+    const t = this.t();
+    const confirmed = await this.confirm.ask({
+      title: t.tree.deleteTitle[node.kind],
+      message:
+        node.kind === 'scene' ? t.tree.deleteScene(node.title) : t.tree.deleteContainer(node.title),
+      confirmLabel: t.confirm.delete,
+    });
+    if (!confirmed) return;
     await this.run(async () => {
       await this.store.deleteNode(node.id);
       if (

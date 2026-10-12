@@ -9,6 +9,7 @@ import { NoteAvatar } from './note-avatar';
 import { NOTE_KINDS } from './note-kinds';
 import { NotesStore } from './notes-store';
 import { StatusMessages } from '../../core/status-messages';
+import { ConfirmDialog } from '../../core/confirm-dialog';
 
 const DRAG_TYPE = 'application/x-wortomat-note';
 const GROUP_DRAG_TYPE = 'application/x-wortomat-note-group';
@@ -41,6 +42,7 @@ export class NoteList {
   /** Gruppe, deren Name gerade bearbeitet wird. */
   protected readonly editingGroupId = signal<string | null>(null);
   private readonly error = inject(StatusMessages).channel();
+  private readonly confirm = inject(ConfirmDialog);
 
   protected readonly draggingId = signal<string | null>(null);
   /** Gruppe, über der gerade eine Notiz schwebt (`''` = ohne Gruppe). */
@@ -79,7 +81,12 @@ export class NoteList {
   }
 
   protected async removeGroup(group: NoteGroup): Promise<void> {
-    if (!confirm(this.texts().confirmDeleteGroup(group.name))) return;
+    const confirmed = await this.confirm.ask({
+      title: this.t().notes.deleteGroupTitle,
+      message: this.texts().deleteGroupMessage(group.name),
+      confirmLabel: this.t().confirm.delete,
+    });
+    if (!confirmed) return;
     await this.run(() => this.store.removeGroup(group.id));
   }
 
@@ -189,7 +196,12 @@ export class NoteList {
   }
 
   protected async remove(note: NoteSummary): Promise<void> {
-    if (!confirm(this.t().notes.confirmDelete(note.title))) return;
+    const confirmed = await this.confirm.ask({
+      title: this.t().notes.deleteTitle(this.texts().singular),
+      message: this.t().notes.deleteMessage(note.title),
+      confirmLabel: this.t().confirm.delete,
+    });
+    if (!confirmed) return;
     await this.run(async () => {
       await this.store.remove(note.id);
       if (this.router.url.endsWith(`/${note.id}`)) {

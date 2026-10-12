@@ -17,6 +17,7 @@ import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { WortomatApi } from '../../core/wortomat-api';
 import { StatusMessages } from '../../core/status-messages';
+import { ConfirmDialog } from '../../core/confirm-dialog';
 
 /** Ab dieser Zugstrecke (px) wechselt ein Maus-Drag zum nächsten Bild. */
 const DRAG_THRESHOLD = 40;
@@ -53,6 +54,7 @@ export class ImageGallery {
   protected readonly dropActive = signal(false);
   protected readonly dragging = signal(false);
   private readonly error = inject(StatusMessages).channel();
+  private readonly confirm = inject(ConfirmDialog);
 
   private drag: { pointerId: number; startX: number; startScroll: number } | null = null;
   private loadCounter = 0;
@@ -219,7 +221,13 @@ export class ImageGallery {
 
   protected async removeCurrent(): Promise<void> {
     const image = this.images()[this.index()];
-    if (!image || !confirm(this.t().gallery.confirmRemove)) return;
+    if (!image) return;
+    const confirmed = await this.confirm.ask({
+      title: this.t().gallery.removeTitle,
+      message: this.t().gallery.removeMessage,
+      confirmLabel: this.t().confirm.remove,
+    });
+    if (!confirmed) return;
     await this.run(async () => {
       this.update(await this.api.removeNoteImage(this.noteId(), image.id));
       this.goTo(this.index(), false, true);
