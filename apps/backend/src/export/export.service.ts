@@ -88,6 +88,7 @@ export class ExportService {
         ({ data, warnings } = await renderEpub(book, options, images, {
           identifier: bookIdentifier(project.createdAt),
           modified: new Date(),
+          cover: project.coverImageId ? images(`/api/images/${project.coverImageId}`) : null,
         }));
         break;
       case 'pdf': {

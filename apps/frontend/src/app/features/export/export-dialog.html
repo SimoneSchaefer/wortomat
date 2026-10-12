@@ -57,6 +57,51 @@
       </fieldset>
     }
 
+    @if (format() === 'epub') {
+      <fieldset>
+        <legend>Titelbild</legend>
+        <div class="cover">
+          <div class="cover-preview" [class.empty]="!coverUrl()">
+            @if (coverUrl(); as url) {
+              <img [src]="url" alt="Titelbild" />
+            } @else {
+              <span>Kein Titelbild</span>
+            }
+          </div>
+          <div class="cover-actions">
+            <p class="muted">
+              @if (coverUrl()) {
+                Erscheint im Reader als Cover und in der Bibliothek.
+              } @else {
+                Ohne Titelbild zeigen Reader das Buch als leere Kachel.
+              }
+              Am besten im Hochformat, etwa 1600 × 2560 Pixel.
+            </p>
+            <div class="cover-buttons">
+              <button type="button" [disabled]="coverBusy()" (click)="coverPicker.click()">
+                Bild wählen …
+              </button>
+              <button type="button" [disabled]="coverBusy()" (click)="designCover()">
+                {{ designedOnce() ? 'Andere Farben' : 'Aus Titel gestalten' }}
+              </button>
+              @if (coverUrl()) {
+                <button type="button" [disabled]="coverBusy()" (click)="removeCover()">
+                  Entfernen
+                </button>
+              }
+            </div>
+          </div>
+          <input
+            #coverPicker
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+            hidden
+            (change)="pickCover(coverPicker)"
+          />
+        </div>
+      </fieldset>
+    }
+
     <label class="check">
       <input
         type="checkbox"

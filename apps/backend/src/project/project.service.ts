@@ -35,6 +35,7 @@ interface OpenProject {
 interface ProjectRow {
   title: string;
   author: string;
+  cover_image_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -62,12 +63,15 @@ export class ProjectService implements OnApplicationShutdown {
       return null;
     }
     const row = this.current.db
-      .prepare('SELECT title, author, created_at, updated_at FROM project WHERE id = 1')
+      .prepare(
+        'SELECT title, author, cover_image_id, created_at, updated_at FROM project WHERE id = 1',
+      )
       .get() as unknown as ProjectRow;
     return {
       filePath: this.current.filePath,
       title: row.title,
       author: row.author,
+      coverImageId: row.cover_image_id,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };
@@ -140,6 +144,18 @@ export class ProjectService implements OnApplicationShutdown {
     const title = request.title?.trim();
     if (request.title !== undefined && !title) {
       throw new BadRequestException('Der Titel darf nicht leer sein.');
+    }
+    const cover = request.coverImageId;
+    if (cover !== undefined && cover !== null) {
+      const exists =
+        typeof cover === 'string' &&
+        this.db.prepare('SELECT 1 FROM images WHERE id = ?').get(cover) !== undefined;
+      if (!exists) {
+        throw new BadRequestException('Das Titelbild wurde nicht gefunden.');
+      }
+      this.db.prepare('UPDATE project SET cover_image_id = ? WHERE id = 1').run(cover);
+    } else if (cover === null) {
+      this.db.prepare('UPDATE project SET cover_image_id = NULL WHERE id = 1').run();
     }
     this.db
       .prepare(

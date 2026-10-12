@@ -5,11 +5,15 @@ import type {
   ProjectInfo,
   UpdateProjectRequest,
 } from '@wortomat/shared';
+import { ImagesService } from '../images/images.service.js';
 import { ProjectService } from './project.service.js';
 
 @Controller('project')
 export class ProjectController {
-  constructor(private readonly projects: ProjectService) {}
+  constructor(
+    private readonly projects: ProjectService,
+    private readonly images: ImagesService,
+  ) {}
 
   /** Liefert das geöffnete Projekt oder `null`. */
   @Get()
@@ -30,7 +34,13 @@ export class ProjectController {
 
   @Patch()
   update(@Body() body: UpdateProjectRequest): ProjectInfo {
-    return this.projects.update(body);
+    const previousCover = this.projects.info()?.coverImageId ?? null;
+    const updated = this.projects.update(body);
+    // Ein ersetztes Titelbild aus der Datei entfernen, wenn es sonst nirgends vorkommt
+    if (previousCover && previousCover !== updated.coverImageId) {
+      this.images.deleteIfUnused(previousCover);
+    }
+    return updated;
   }
 
   @Post('close')

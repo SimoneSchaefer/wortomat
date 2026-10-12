@@ -73,6 +73,12 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   neue Bilder werden daher als JPEG/PNG gespeichert; ältere WebP-Bilder erscheinen dort als
   Platzhalter mit Hinweis (im EPUB sind sie dabei, AVIF fällt dort weg). Die EPUB-Kennung wird aus
   dem Anlagezeitpunkt des Buchs abgeleitet und bleibt so über alle Exporte gleich.
+- **Titelbild** (im Export-Dialog bei EPUB): eigenes Bild wählen oder „Aus Titel gestalten“ – ein
+  typografisches Cover (1600 × 2560 px, JPEG) wird im Browser per Canvas gezeichnet
+  ([`cover-design.ts`](apps/frontend/src/app/core/cover-design.ts)), jeder weitere Klick wechselt
+  die Farben. Gespeichert als Bild in der Projektdatei (`project.cover_image_id`); ein ersetztes
+  Titelbild wird gelöscht, wenn es sonst nirgends vorkommt. Im EPUB als `cover-image` mit eigener,
+  seitenfüllender Cover-Seite (SVG, damit nichts verzerrt).
 - **Tags:** freie Schlagwörter je Szene (Tabellen `tags`, `scene_tags`), in derselben Leiste wie die
   Verknüpfungen. Tags gehören zum Projekt und werden über den Namen wiederverwendet – Groß-/
   Kleinschreibung (auch Umlaute) und ein führendes `#` spielen keine Rolle. Ungenutzte Tags
@@ -151,7 +157,7 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | GET · PATCH | `/api/settings` | App-Einstellungen (z. B. `sidebarWidth`), auch ohne geöffnetes Projekt |
 | GET | `/api/project` | geöffnetes Projekt oder `null` |
 | POST | `/api/project/create` · `/open` · `/close` | Projektdatei anlegen / öffnen / schließen |
-| PATCH | `/api/project` | Titel, Autor |
+| PATCH | `/api/project` | Titel, Autor, Titelbild (`coverImageId`, `null` entfernt) |
 | GET | `/api/projects` | alle bekannten Projekte für die Startseite (zuletzt verwendet zuerst) |
 | POST | `/api/projects/forget` | Projekt aus der Liste nehmen (Datei bleibt erhalten) |
 | GET · POST | `/api/nodes` | Manuskript-Baum (Teil → Kapitel → Szene) |
@@ -181,6 +187,5 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 - Code-Signing für Windows und macOS (sonst warnen SmartScreen bzw. Gatekeeper)
 - Umsortieren per Tastatur (Drag & Drop ist nur mit der Maus bedienbar)
 - Versionen/Snapshots von Szenen, nicht mehr verwendete Bilder aufräumen
-- Titelbild (Cover) für den EPUB-Export
 - Import der Daten aus Wortomat 1.x
 - Automatische Backups (`VACUUM INTO`)

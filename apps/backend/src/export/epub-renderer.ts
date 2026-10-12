@@ -1,11 +1,13 @@
 import JSZip from 'jszip';
-import type { Book, ExportOptions, ImageResolver } from './book.js';
+import type { Book, ExportOptions, ImageResolver, ResolvedImage } from './book.js';
 import { contentHtml, escapeHtml } from './html-renderer.js';
 
 export interface EpubMeta {
   /** Bleibt für ein Buch über alle Exporte gleich, damit Reader Neuauflagen zuordnen können. */
   identifier: string;
   modified: Date;
+  /** Titelbild; ohne zeigen Reader in der Bibliothek nur eine neutrale Kachel. */
+  cover: ResolvedImage | null;
 }
 
 /**
@@ -36,6 +38,9 @@ p.scene-break + p { text-indent: 0; }
 blockquote { margin: 1em 1.5em; font-style: italic; }
 figure { margin: 1.5em 0; text-align: center; }
 figure img { max-width: 100%; max-height: 90vh; }
+body.cover { margin: 0; padding: 0; text-align: center; }
+body.cover svg { display: block; width: 100%; height: 100%; }
+body.cover img { max-width: 100%; max-height: 100%; }
 `;
 
 /** Eintrag im Inhaltsverzeichnis: Teil oder Kapitel. */
@@ -92,13 +97,31 @@ export async function renderEpub(
     return href;
   };
 
-  const addPage = (id: string, title: string, body: string): Chapter => {
+  const addPage = (id: string, title: string, body: string, bodyClass?: string): Chapter => {
     const fileName = `text/${id}.xhtml`;
-    zip.file(`OEBPS/${fileName}`, page(title, body));
-    manifest.push(item(id, fileName, 'application/xhtml+xml'));
+    zip.file(`OEBPS/${fileName}`, page(title, body, bodyClass));
+    // Seiten mit eingebettetem SVG müssen das im Manifest angeben
+    const properties = body.includes('<svg') ? 'svg' : undefined;
+    manifest.push(item(id, fileName, 'application/xhtml+xml', properties));
     spine.push(`<itemref idref="${id}"/>`);
     return { id, fileName, title, children: [] };
   };
+
+  let hasCover = false;
+  if (meta.cover) {
+    const extension = CORE_IMAGE_TYPES[meta.cover.mimeType];
+    if (extension) {
+      const fileName = `images/titelbild.${extension}`;
+      zip.file(`OEBPS/${fileName}`, meta.cover.data);
+      manifest.push(item('titelbild', fileName, meta.cover.mimeType, 'cover-image'));
+      addPage('cover', book.title, coverBody(`../${fileName}`, meta.cover, book.title), 'cover');
+      hasCover = true;
+    } else {
+      warnings.push(
+        `Das Titelbild (${meta.cover.mimeType.replace('image/', '').toUpperCase()}) können E-Book-Reader nicht anzeigen und wurde weggelassen.`,
+      );
+    }
+  }
 
   addPage(
     'titel',
@@ -138,9 +161,9 @@ export async function renderEpub(
   }
 
   zip.file('OEBPS/styles.css', STYLE);
-  zip.file('OEBPS/nav.xhtml', navDocument(book, toc));
+  zip.file('OEBPS/nav.xhtml', navDocument(book, toc, hasCover));
   zip.file('OEBPS/toc.ncx', ncxDocument(book, meta, toc));
-  zip.file('OEBPS/content.opf', packageDocument(book, meta, manifest, spine));
+  zip.file('OEBPS/content.opf', packageDocument(book, meta, manifest, spine, hasCover));
 
   const data = await zip.generateAsync({
     type: 'nodebuffer',
@@ -159,7 +182,19 @@ const CONTAINER_XML = `<?xml version="1.0" encoding="UTF-8"?>
 </container>
 `;
 
-function page(title: string, body: string): string {
+/**
+ * Titelbild seitenfüllend. Mit bekannten Maßen als SVG, das skaliert in allen Readern sauber
+ * ohne Verzerrung; sonst als einfaches Bild.
+ */
+function coverBody(href: string, image: ResolvedImage, title: string): string {
+  const alt = escapeHtml(title);
+  if (!image.width || !image.height) {
+    return `<section epub:type="cover"><img src="${href}" alt="${alt}"/></section>`;
+  }
+  return `<section epub:type="cover"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 ${image.width} ${image.height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${alt}"><image width="${image.width}" height="${image.height}" xlink:href="${href}"/></svg></section>`;
+}
+
+function page(title: string, body: string, bodyClass?: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="de" lang="de">
@@ -168,7 +203,7 @@ function page(title: string, body: string): string {
 <title>${escapeHtml(title)}</title>
 <link rel="stylesheet" type="text/css" href="../styles.css"/>
 </head>
-<body>
+<body${bodyClass ? ` class="${bodyClass}"` : ''}>
 ${body}
 </body>
 </html>
@@ -181,7 +216,13 @@ function item(id: string, href: string, mediaType: string, properties?: string):
   }/>`;
 }
 
-function packageDocument(book: Book, meta: EpubMeta, manifest: string[], spine: string[]): string {
+function packageDocument(
+  book: Book,
+  meta: EpubMeta,
+  manifest: string[],
+  spine: string[],
+  hasCover: boolean,
+): string {
   // dcterms:modified verlangt Sekundengenauigkeit ohne Millisekunden
   const modified = meta.modified.toISOString().replace(/\.\d{3}Z$/, 'Z');
   const creator = book.author
@@ -195,7 +236,10 @@ function packageDocument(book: Book, meta: EpubMeta, manifest: string[], spine: 
     <dc:title>${escapeHtml(book.title)}</dc:title>${creator}
     <dc:language>de</dc:language>
     <meta property="dcterms:modified">${modified}</meta>
-    <meta name="generator" content="Wortomat"/>
+    <meta name="generator" content="Wortomat"/>${
+      // Für EPUB-2-Reader, die `properties="cover-image"` nicht kennen
+      hasCover ? '\n    <meta name="cover" content="titelbild"/>' : ''
+    }
   </metadata>
   <manifest>
     ${item('nav', 'nav.xhtml', 'application/xhtml+xml', 'nav')}
@@ -210,7 +254,7 @@ function packageDocument(book: Book, meta: EpubMeta, manifest: string[], spine: 
 `;
 }
 
-function navDocument(book: Book, toc: Chapter[]): string {
+function navDocument(book: Book, toc: Chapter[], hasCover: boolean): string {
   const list = (entries: Chapter[]): string =>
     `<ol>${entries
       .map(
@@ -234,7 +278,7 @@ function navDocument(book: Book, toc: Chapter[]): string {
 ${toc.length ? list(toc) : '<ol><li><a href="text/titel.xhtml">Titel</a></li></ol>'}
 </nav>
 <nav epub:type="landmarks" hidden="">
-<ol>
+<ol>${hasCover ? '\n<li><a epub:type="cover" href="text/cover.xhtml">Titelbild</a></li>' : ''}
 <li><a epub:type="titlepage" href="text/titel.xhtml">Titel</a></li>${
     first ? `\n<li><a epub:type="bodymatter" href="${first.fileName}">Beginn</a></li>` : ''
   }

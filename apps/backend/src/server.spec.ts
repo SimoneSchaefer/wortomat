@@ -644,11 +644,14 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 
-    await api('POST', '/api/project/open', { filePath: project.filePath });
+    const upgraded = await api<ProjectInfo>('POST', '/api/project/open', {
+      filePath: project.filePath,
+    });
+    assert.equal(upgraded.coverImageId, null);
     const note = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Mühle' });
     assert.equal(note.title, 'Mühle');
     // Bestehende Szenen bekommen beim Upgrade den Status „Idee“

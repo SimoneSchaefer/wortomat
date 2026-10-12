@@ -34,6 +34,8 @@ export interface ProjectInfo {
   filePath: string;
   title: string;
   author: string;
+  /** Titelbild (z. B. fürs E-Book); `null`, wenn keins gesetzt ist. */
+  coverImageId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -72,6 +74,8 @@ export interface ForgetProjectRequest {
 export interface UpdateProjectRequest {
   title?: string;
   author?: string;
+  /** Ein hochgeladenes Bild als Titelbild setzen; `null` entfernt es. */
+  coverImageId?: string | null;
 }
 
 // ---------------------------------------------------------------------------

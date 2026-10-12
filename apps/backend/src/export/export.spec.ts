@@ -4,7 +4,13 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { after, before, describe, it } from 'node:test';
-import type { ExportCapabilities, ExportResult, ImageInfo, ManuscriptNode } from '@wortomat/shared';
+import type {
+  ExportCapabilities,
+  ExportResult,
+  ImageInfo,
+  ManuscriptNode,
+  ProjectInfo,
+} from '@wortomat/shared';
 import JSZip from 'jszip';
 import { AUTH_HEADER, type RunningServer, startServer } from '../server.js';
 import { escape } from './latex-renderer.js';
@@ -54,6 +60,17 @@ describe('Export', () => {
     return { ...result, data: await readFile(result.filePath) };
   };
 
+  const upload = async (bytes: Buffer, name: string) => {
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(bytes)]), name);
+    const response = await fetch(`${server.url}/api/images`, {
+      method: 'POST',
+      headers: { [AUTH_HEADER]: TOKEN },
+      body: form,
+    });
+    return ((await response.json()) as ImageInfo).url;
+  };
+
   const text = (value: string, ...marks: string[]) => ({
     type: 'text',
     text: value,
@@ -82,16 +99,6 @@ describe('Export', () => {
       title: 'Die Häuser am Fluss',
       author: 'Ada Muster',
     });
-    const upload = async (bytes: Buffer, name: string) => {
-      const form = new FormData();
-      form.append('file', new Blob([new Uint8Array(bytes)]), name);
-      const response = await fetch(`${server.url}/api/images`, {
-        method: 'POST',
-        headers: { [AUTH_HEADER]: TOKEN },
-        body: form,
-      });
-      return ((await response.json()) as ImageInfo).url;
-    };
     const png = await upload(PNG_1PX, 'karte.png');
     const webp = await upload(WEBP_HEADER, 'foto.webp');
 
@@ -271,6 +278,85 @@ describe('Export', () => {
       .file('OEBPS/content.opf')!
       .async('string');
     assert.ok(againOpf.includes(identifier), 'Kennung bleibt bei jedem Export gleich');
+  });
+
+  it('setzt ein Titelbild und legt es als Cover ins EPUB', async () => {
+    const coverPng = await upload(PNG_1PX, 'cover.png');
+    const coverId = coverPng.split('/').pop()!;
+    const patch = async (body: object) =>
+      fetch(`${server.url}/api/project`, {
+        method: 'PATCH',
+        headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+    assert.equal((await patch({ coverImageId: 'gibt-es-nicht' })).status, 400);
+    const project = (await (await patch({ coverImageId: coverId })).json()) as ProjectInfo;
+    assert.equal(project.coverImageId, coverId);
+
+    const { data, warnings } = await exportTo('epub', 'roman');
+    assert.deepEqual(warnings, []);
+    const zip = await JSZip.loadAsync(data);
+    const opf = await zip.file('OEBPS/content.opf')!.async('string');
+    assert.match(
+      opf,
+      /<item id="titelbild" href="images\/titelbild\.png" media-type="image\/png" properties="cover-image"\/>/,
+    );
+    assert.match(opf, /<meta name="cover" content="titelbild"\/>/);
+    assert.match(opf, /<item id="cover" href="text\/cover\.xhtml" [^>]*properties="svg"\/>/);
+    const spine = [...opf.matchAll(/<itemref idref="([^"]+)"/g)].map((match) => match[1]);
+    assert.deepEqual(spine.slice(0, 2), ['cover', 'titel'], 'Titelbild vor der Titelseite');
+    assert.match(
+      await zip.file('OEBPS/text/cover.xhtml')!.async('string'),
+      /viewBox="0 0 1 1"[^>]*><image width="1" height="1" xlink:href="\.\.\/images\/titelbild\.png"\/>/,
+    );
+    assert.match(await zip.file('OEBPS/nav.xhtml')!.async('string'), /epub:type="cover"/);
+
+    // Ersetzen: das alte Titelbild verschwindet aus der Datei, weil es sonst nirgends vorkommt
+    const nextId = (await upload(PNG_1PX, 'neu.png')).split('/').pop()!;
+    await patch({ coverImageId: nextId });
+    const imageStatus = async (id: string) =>
+      (await fetch(`${server.url}/api/images/${id}`, { headers: { [AUTH_HEADER]: TOKEN } })).status;
+    assert.equal(await imageStatus(coverId), 404);
+    assert.equal(await imageStatus(nextId), 200);
+
+    // Entfernen: kein Cover mehr im EPUB
+    assert.equal(
+      ((await (await patch({ coverImageId: null })).json()) as ProjectInfo).coverImageId,
+      null,
+    );
+    assert.equal(await imageStatus(nextId), 404);
+    const withoutCover = await JSZip.loadAsync((await exportTo('epub', 'roman')).data);
+    assert.equal(withoutCover.file('OEBPS/text/cover.xhtml'), null);
+  });
+
+  it('behält ein Titelbild, das auch im Text vorkommt', async () => {
+    const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    const scene = nodes.find((node) => node.title === 'Markt')!;
+    const shared = await upload(PNG_1PX, 'beides.png');
+    const sharedId = shared.split('/').pop()!;
+    await api('PUT', `/api/scenes/${scene.id}/content`, {
+      doc: {
+        type: 'doc',
+        content: [
+          paragraph(text('Am Markt roch es nach Fisch.')),
+          { type: 'image', attrs: { src: shared } },
+        ],
+      },
+      text: '',
+      wordCount: 6,
+    });
+    await api('PATCH', '/api/project', { coverImageId: sharedId });
+    await api('PATCH', '/api/project', { coverImageId: null });
+    const response = await fetch(`${server.url}/api/images/${sharedId}`, {
+      headers: { [AUTH_HEADER]: TOKEN },
+    });
+    assert.equal(response.status, 200, 'Bild wird in der Szene noch gebraucht');
+    await api('PUT', `/api/scenes/${scene.id}/content`, {
+      doc: { type: 'doc', content: [paragraph(text('Am Markt roch es nach Fisch.'))] },
+      text: '',
+      wordCount: 6,
+    });
   });
 
   it('erzeugt PDFs mit pdfLaTeX (wenn installiert)', { timeout: 240_000 }, async (t) => {

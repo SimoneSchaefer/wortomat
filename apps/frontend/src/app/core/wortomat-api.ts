@@ -25,6 +25,7 @@ import type {
   UpdateAppSettingsRequest,
   UpdateNodeRequest,
   UpdateNoteRequest,
+  UpdateProjectRequest,
 } from '@wortomat/shared';
 import { firstValueFrom, type Observable } from 'rxjs';
 
@@ -70,6 +71,10 @@ export class WortomatApi {
 
   openProject(filePath: string): Promise<ProjectInfo> {
     return this.call(this.http.post<ProjectInfo>('/api/project/open', { filePath }));
+  }
+
+  updateProject(request: UpdateProjectRequest): Promise<ProjectInfo> {
+    return this.call(this.http.patch<ProjectInfo>('/api/project', request));
   }
 
   closeProject(): Promise<void> {

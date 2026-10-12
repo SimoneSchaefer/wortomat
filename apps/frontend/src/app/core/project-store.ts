@@ -56,6 +56,11 @@ export class ProjectStore {
     this.nodes.set(await this.api.listNodes());
   }
 
+  /** Titelbild setzen (hochgeladenes Bild) oder mit `null` entfernen. */
+  async setCover(imageId: string | null): Promise<void> {
+    this.project.set(await this.api.updateProject({ coverImageId: imageId }));
+  }
+
   async close(): Promise<void> {
     await this.api.closeProject();
     this.project.set(null);

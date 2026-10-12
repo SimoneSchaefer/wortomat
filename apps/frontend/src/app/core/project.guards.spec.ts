@@ -9,6 +9,7 @@ const PROJECT: ProjectInfo = {
   filePath: '/tmp/Roman.wortomat',
   title: 'Roman',
   author: '',
+  coverImageId: null,
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };

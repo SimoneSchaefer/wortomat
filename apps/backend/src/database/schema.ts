@@ -120,6 +120,9 @@ const MIGRATIONS: readonly string[] = [
     ALTER TABLE scene_content ADD COLUMN idea_count INTEGER NOT NULL DEFAULT 0;
     ALTER TABLE scene_content ADD COLUMN fixme_count INTEGER NOT NULL DEFAULT 0;
   `,
+  /* 8: Titelbild des Buchs (z. B. Cover im E-Book) */ `
+    ALTER TABLE project ADD COLUMN cover_image_id TEXT REFERENCES images(id) ON DELETE SET NULL;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
