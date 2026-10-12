@@ -9,15 +9,21 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type {
   CreateNoteRequest,
+  ImageInfo,
   NoteContent,
   NoteKind,
   NoteSummary,
+  ReorderImagesRequest,
   SaveDocumentRequest,
   UpdateNoteRequest,
 } from '@wortomat/shared';
+import { MAX_IMAGE_BYTES } from '../images/images.service.js';
 import { NotesService } from './notes.service.js';
 
 @Controller('notes')
@@ -54,5 +60,38 @@ export class NotesController {
   @Put(':id/content')
   saveContent(@Param('id') id: string, @Body() body: SaveDocumentRequest): NoteContent {
     return this.notes.saveContent(id, body);
+  }
+
+  // Bildergalerie --------------------------------------------------------------
+
+  @Get(':id/images')
+  images(@Param('id') id: string): ImageInfo[] {
+    return this.notes.galleryImages(id);
+  }
+
+  /** Multipart: Feld `file`, optional `width`/`height`. Liefert die ganze Galerie zurück. */
+  @Post(':id/images')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_IMAGE_BYTES, files: 1 } }))
+  addImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Body() body: { width?: string; height?: string },
+  ): ImageInfo[] {
+    return this.notes.addImage(id, {
+      buffer: file?.buffer as Buffer,
+      originalName: file?.originalname,
+      width: Number(body.width),
+      height: Number(body.height),
+    });
+  }
+
+  @Put(':id/images')
+  reorderImages(@Param('id') id: string, @Body() body: ReorderImagesRequest): ImageInfo[] {
+    return this.notes.reorderImages(id, body?.imageIds);
+  }
+
+  @Delete(':id/images/:imageId')
+  removeImage(@Param('id') id: string, @Param('imageId') imageId: string): ImageInfo[] {
+    return this.notes.removeImage(id, imageId);
   }
 }

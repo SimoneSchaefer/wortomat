@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+// Kopf: links Art, Titel, Kurzbeschreibung – bei Charakteren rechts die Bildergalerie.
+.note-head {
+  margin-bottom: 1.75rem;
+
+  &.with-gallery {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 13rem;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .doc-summary {
+    margin-bottom: 0;
+  }
+}
+
+// Schmales Fenster: Galerie über den Titel statt daneben.
+@media (max-width: 62rem) {
+  .note-head.with-gallery {
+    grid-template-columns: minmax(0, 1fr);
+
+    wm-image-gallery {
+      order: -1;
+      width: min(13rem, 100%);
+    }
+  }
+}
+.not-found {
+  padding: 2rem;
+}

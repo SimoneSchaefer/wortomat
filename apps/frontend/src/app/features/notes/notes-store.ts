@@ -42,6 +42,13 @@ export class NotesStore {
     this.notes.update((notes) => notes.map((note) => (note.id === id ? updated : note)));
   }
 
+  /** Nach Änderungen an der Galerie: Profilbild in der Liste aktualisieren. */
+  setCover(id: string, coverImageUrl: string | null): void {
+    this.notes.update((notes) =>
+      notes.map((note) => (note.id === id ? { ...note, coverImageUrl } : note)),
+    );
+  }
+
   async remove(id: string): Promise<void> {
     await this.api.deleteNote(id);
     this.notes.update((notes) => notes.filter((note) => note.id !== id));

@@ -11,6 +11,8 @@ export interface NoteKindConfig {
   emptyList: string;
   summaryPlaceholder: string;
   textPlaceholder: string;
+  /** Eigene Bildergalerie (erstes Bild = Profilbild, auch als Avatar in der Liste). */
+  gallery: boolean;
   /** Vorgeschlagene Gliederung für neue Einträge – frei änderbar. */
   template: EditorDoc | null;
 }
@@ -26,6 +28,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     emptyList: 'Noch keine Charaktere.',
     summaryPlaceholder: 'Kurzbeschreibung, z. B. „Protagonistin, 34, Ärztin in Hamburg“',
     textPlaceholder: 'Wer ist diese Figur?',
+    gallery: true,
     template: outline([
       'Äußeres',
       'Persönlichkeit',
@@ -44,6 +47,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     emptyList: 'Noch keine Orte.',
     summaryPlaceholder: 'Kurzbeschreibung, z. B. „Alter Fischereihafen, Nordseeküste“',
     textPlaceholder: 'Wie sieht es hier aus?',
+    gallery: false,
     template: outline(['Beschreibung', 'Atmosphäre', 'Bedeutung für die Geschichte']),
   },
   research: {
@@ -56,6 +60,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     emptyList: 'Noch keine Recherchen.',
     summaryPlaceholder: 'Worum geht es? z. B. „Gezeiten an der Nordsee“',
     textPlaceholder: 'Notizen, Zitate, Quellen …',
+    gallery: false,
     template: null,
   },
 };

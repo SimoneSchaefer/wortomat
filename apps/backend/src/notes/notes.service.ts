@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import type {
   CreateNoteRequest,
   EditorDoc,
+  ImageInfo,
   NoteContent,
   NoteKind,
   NoteSummary,
@@ -10,9 +11,15 @@ import type {
   UpdateNoteRequest,
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
+import { ImagesService, type UploadedImage } from '../images/images.service.js';
 import { ProjectService } from '../project/project.service.js';
 
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
+
+/** Spalten für NoteSummary; das Profilbild ist das erste Bild der Galerie. */
+const SUMMARY_COLUMNS = `id, kind, title, summary, updated_at,
+  (SELECT image_id FROM note_images WHERE note_id = notes.id ORDER BY sort_order LIMIT 1)
+    AS cover_image_id`;
 
 interface NoteRow {
   id: string;
@@ -20,12 +27,16 @@ interface NoteRow {
   title: string;
   summary: string;
   updated_at: string;
+  cover_image_id: string | null;
 }
 
 /** Charaktere, Orte und Forschungsnotizen – alles, was neben dem Manuskript zum Buch gehört. */
 @Injectable()
 export class NotesService {
-  constructor(private readonly projects: ProjectService) {}
+  constructor(
+    private readonly projects: ProjectService,
+    private readonly images: ImagesService,
+  ) {}
 
   private get db() {
     return this.projects.db;
@@ -33,9 +44,9 @@ export class NotesService {
 
   list(kind?: NoteKind): NoteSummary[] {
     const rows = (kind === undefined
-      ? this.db.prepare('SELECT id, kind, title, summary, updated_at FROM notes').all()
+      ? this.db.prepare(`SELECT ${SUMMARY_COLUMNS} FROM notes`).all()
       : this.db
-          .prepare('SELECT id, kind, title, summary, updated_at FROM notes WHERE kind = ?')
+          .prepare(`SELECT ${SUMMARY_COLUMNS} FROM notes WHERE kind = ?`)
           .all(requireKind(kind))) as unknown as NoteRow[];
     return rows.map(toSummary);
   }
@@ -79,11 +90,89 @@ export class NotesService {
 
   remove(id: string): void {
     this.get(id);
+    const imageIds = this.imageIds(id);
     transaction(this.db, () => {
       this.db.prepare('DELETE FROM note_fts WHERE note_id = ?').run(id);
-      this.db.prepare('DELETE FROM notes WHERE id = ?').run(id);
+      this.db.prepare('DELETE FROM notes WHERE id = ?').run(id); // Galerie-Einträge per CASCADE
+      imageIds.forEach((imageId) => this.images.deleteIfUnused(imageId));
       this.projects.touch();
     });
+  }
+
+  // -------------------------------------------------------------------------
+  // Bildergalerie
+  // -------------------------------------------------------------------------
+
+  galleryImages(id: string): ImageInfo[] {
+    this.get(id);
+    return this.imageIds(id).map((imageId) => this.images.info(imageId));
+  }
+
+  addImage(id: string, upload: UploadedImage): ImageInfo[] {
+    this.get(id);
+    transaction(this.db, () => {
+      const image = this.images.save(upload);
+      const { next } = this.db
+        .prepare(
+          'SELECT COALESCE(MAX(sort_order), 0) + 1 AS next FROM note_images WHERE note_id = ?',
+        )
+        .get(id) as { next: number };
+      this.db
+        .prepare('INSERT INTO note_images (note_id, image_id, sort_order) VALUES (?, ?, ?)')
+        .run(id, image.id, next);
+      this.touchNote(id);
+    });
+    return this.galleryImages(id);
+  }
+
+  removeImage(id: string, imageId: string): ImageInfo[] {
+    this.get(id);
+    transaction(this.db, () => {
+      const { changes } = this.db
+        .prepare('DELETE FROM note_images WHERE note_id = ? AND image_id = ?')
+        .run(id, imageId);
+      if (!changes) {
+        throw new NotFoundException('Bild nicht in dieser Galerie.');
+      }
+      this.images.deleteIfUnused(imageId);
+      this.touchNote(id);
+    });
+    return this.galleryImages(id);
+  }
+
+  /** Neue Reihenfolge; muss genau die vorhandenen Bilder enthalten. */
+  reorderImages(id: string, imageIds: unknown): ImageInfo[] {
+    this.get(id);
+    const current = this.imageIds(id);
+    const isPermutation =
+      Array.isArray(imageIds) &&
+      imageIds.length === current.length &&
+      new Set(imageIds).size === current.length &&
+      imageIds.every((imageId) => current.includes(imageId));
+    if (!isPermutation) {
+      throw new BadRequestException('Die Reihenfolge muss genau die Bilder der Galerie enthalten.');
+    }
+    transaction(this.db, () => {
+      const update = this.db.prepare(
+        'UPDATE note_images SET sort_order = ? WHERE note_id = ? AND image_id = ?',
+      );
+      (imageIds as string[]).forEach((imageId, index) => update.run(index + 1, id, imageId));
+      this.touchNote(id);
+    });
+    return this.galleryImages(id);
+  }
+
+  private imageIds(id: string): string[] {
+    return (
+      this.db
+        .prepare('SELECT image_id FROM note_images WHERE note_id = ? ORDER BY sort_order')
+        .all(id) as Array<{ image_id: string }>
+    ).map((row) => row.image_id);
+  }
+
+  private touchNote(id: string): void {
+    this.db.prepare('UPDATE notes SET updated_at = ? WHERE id = ?').run(nowIso(), id);
+    this.projects.touch();
   }
 
   getContent(id: string): NoteContent {
@@ -121,9 +210,8 @@ export class NotesService {
   }
 
   private get(id: string): NoteSummary {
-    const row = this.db
-      .prepare('SELECT id, kind, title, summary, updated_at FROM notes WHERE id = ?')
-      .get(id) as NoteRow | undefined;
+    const row = this.db.prepare(`SELECT ${SUMMARY_COLUMNS} FROM notes WHERE id = ?`).get(id) as
+      NoteRow | undefined;
     if (!row) {
       throw new NotFoundException('Notiz nicht gefunden.');
     }
@@ -138,6 +226,7 @@ function toSummary(row: NoteRow): NoteSummary {
     title: row.title,
     summary: row.summary,
     updatedAt: row.updated_at,
+    coverImageUrl: row.cover_image_id ? `/api/images/${row.cover_image_id}` : null,
   };
 }
 

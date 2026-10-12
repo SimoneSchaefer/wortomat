@@ -79,6 +79,15 @@ const MIGRATIONS: readonly string[] = [
       tokenize = 'unicode61 remove_diacritics 2'
     );
   `,
+  /* 3: Bildergalerie je Notiz (z. B. Profilbilder eines Charakters) */ `
+    CREATE TABLE note_images (
+      note_id     TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+      image_id    TEXT NOT NULL REFERENCES images(id),
+      sort_order  INTEGER NOT NULL,
+      PRIMARY KEY (note_id, image_id)
+    );
+    CREATE INDEX note_images_by_image ON note_images(image_id);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

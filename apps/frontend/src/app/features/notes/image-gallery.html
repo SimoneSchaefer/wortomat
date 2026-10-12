@@ -1,0 +1,103 @@
+<div
+  class="gallery"
+  role="region"
+  aria-roledescription="Bildergalerie"
+  [attr.aria-label]="label()"
+  [class.drop-active]="dropActive()"
+  [attr.tabindex]="images().length > 1 ? 0 : null"
+  (keydown)="onKeydown($event)"
+  (dragover)="onDragOver($event)"
+  (dragleave)="dropActive.set(false)"
+  (drop)="onDrop($event)"
+>
+  @if (images().length) {
+    <div
+      #track
+      class="track"
+      [class.dragging]="dragging()"
+      (scroll)="onScroll()"
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="onPointerUp($event)"
+    >
+      @for (image of images(); track image.id; let i = $index) {
+        <figure class="slide" [attr.aria-hidden]="i !== index()">
+          <img
+            [src]="image.url"
+            [alt]="label() + ' ' + (i + 1) + ' von ' + images().length"
+            draggable="false"
+          />
+        </figure>
+      }
+    </div>
+
+    @if (images().length > 1) {
+      <button
+        type="button"
+        class="nav prev"
+        aria-label="Vorheriges Bild"
+        [disabled]="index() === 0"
+        (click)="goTo(index() - 1)"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        class="nav next"
+        aria-label="Nächstes Bild"
+        [disabled]="index() === images().length - 1"
+        (click)="goTo(index() + 1)"
+      >
+        ›
+      </button>
+      <div class="dots">
+        @for (image of images(); track image.id; let i = $index) {
+          <button
+            type="button"
+            [class.active]="i === index()"
+            [attr.aria-label]="'Bild ' + (i + 1)"
+            (click)="goTo(i)"
+          ></button>
+        }
+      </div>
+    }
+
+    <div class="toolbar">
+      @if (index() === 0) {
+        <span class="badge">Profilbild</span>
+      } @else {
+        <button type="button" [disabled]="busy()" (click)="makeCover()">Als Profilbild</button>
+      }
+      <span class="spacer"></span>
+      <button type="button" title="Bild hinzufügen" [disabled]="busy()" (click)="picker.click()">
+        +
+      </button>
+      <button type="button" title="Bild entfernen" [disabled]="busy()" (click)="removeCurrent()">
+        ×
+      </button>
+    </div>
+  } @else if (!loading()) {
+    <button type="button" class="empty" [disabled]="busy()" (click)="picker.click()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8.5" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </svg>
+      <span>{{ busy() ? 'Lade hoch …' : 'Profilbild hinzufügen' }}</span>
+      <small>oder Bilder hierher ziehen</small>
+    </button>
+  }
+
+  <input
+    #picker
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+    multiple
+    hidden
+    (change)="onPicked(picker)"
+  />
+</div>
+
+@if (error(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+}

@@ -42,6 +42,12 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Zwischenüberschriften ([`note-kinds.ts`](apps/frontend/src/app/features/notes/note-kinds.ts)).
   Der Editor ([`document-editor.ts`](apps/frontend/src/app/features/editor/document-editor.ts)) ist
   für Szenen und Notizen derselbe; was er lädt und speichert, bestimmt eine `DocumentSource`.
+- **Profilbilder:** Charaktere haben eine eigene Bildergalerie (Tabelle `note_images`); das erste
+  Bild ist das Profilbild und erscheint als Avatar in der Liste. Gewischt wird über einen
+  horizontalen Streifen mit CSS-Scroll-Snapping (Touch/Trackpad nativ), dazu Maus-Ziehen,
+  Pfeiltasten, Pfeile und Punkte. Für weitere Notizarten per `gallery: true` in `note-kinds.ts`
+  einschaltbar. Entfernte Bilder werden aus der Datei gelöscht, sofern sie nirgends sonst
+  (Galerie oder Text) verwendet werden.
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
   zusätzlich vor dem Schließen des Fensters bzw. Beenden der App.
@@ -119,6 +125,8 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | GET · POST | `/api/notes` (`?kind=character\|place\|research`) | Charaktere, Orte, Recherchen |
 | PATCH · DELETE | `/api/notes/:id` | Titel, Kurzbeschreibung; löschen |
 | GET · PUT | `/api/notes/:id/content` | Text einer Notiz laden / speichern |
+| GET · POST · PUT | `/api/notes/:id/images` | Galerie abrufen / Bild hinzufügen (multipart) / umsortieren |
+| DELETE | `/api/notes/:id/images/:imageId` | Bild aus der Galerie entfernen |
 | GET | `/api/search?q=…` | Volltextsuche über Szenen und Notizen (findet „Häuser“ auch mit „hauser“) |
 
 ## Offene Punkte / nächste Schritte

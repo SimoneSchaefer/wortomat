@@ -2,11 +2,26 @@
   <ul>
     @for (note of notes(); track note.id) {
       <li>
-        <a [routerLink]="['/write', config().path, note.id]" routerLinkActive="active">
-          <span class="title">{{ note.title }}</span>
-          @if (note.summary) {
-            <span class="summary">{{ note.summary }}</span>
+        <a
+          [routerLink]="['/write', config().path, note.id]"
+          routerLinkActive="active"
+          [class.with-avatar]="config().gallery"
+        >
+          @if (config().gallery) {
+            <span class="avatar" aria-hidden="true">
+              @if (note.coverImageUrl) {
+                <img [src]="note.coverImageUrl" alt="" />
+              } @else {
+                {{ initials(note.title) }}
+              }
+            </span>
           }
+          <span class="text">
+            <span class="title">{{ note.title }}</span>
+            @if (note.summary) {
+              <span class="summary">{{ note.summary }}</span>
+            }
+          </span>
         </a>
         <button type="button" class="remove" title="Löschen" (click)="remove(note)">×</button>
       </li>

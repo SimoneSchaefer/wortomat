@@ -1,0 +1,179 @@
+:host {
+  display: block;
+}
+
+.gallery {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  outline-offset: 2px;
+
+  &.drop-active {
+    outline: 2px dashed var(--accent);
+  }
+
+  &:hover .nav:not(:disabled),
+  &:hover .toolbar,
+  &:focus-within .toolbar {
+    opacity: 1;
+  }
+
+  // Touchscreens kennen kein Hover – Bedienelemente immer zeigen.
+  @media (hover: none) {
+    .nav,
+    .toolbar {
+      opacity: 1;
+    }
+  }
+}
+
+// Horizontaler Streifen; Scroll-Snapping sorgt fürs Einrasten pro Bild.
+.track {
+  display: flex;
+  height: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  cursor: grab;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &.dragging {
+    scroll-snap-type: none;
+    cursor: grabbing;
+  }
+}
+
+.slide {
+  flex: 0 0 100%;
+  margin: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+  }
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  font-size: 1.3rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  &.prev {
+    left: 0.4rem;
+  }
+
+  &.next {
+    right: 0.4rem;
+  }
+
+  &:disabled {
+    display: none;
+  }
+}
+
+.dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.6rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+
+  button {
+    width: 0.5rem;
+    height: 0.5rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 25%, transparent);
+
+    &.active {
+      background: var(--accent);
+    }
+  }
+}
+
+.toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  font-size: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  button {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.75rem;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.badge {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--text-muted);
+
+  svg {
+    width: 3.5rem;
+    height: 3.5rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+  }
+
+  span {
+    font-size: 0.85rem;
+  }
+
+  small {
+    font-size: 0.72rem;
+  }
+}
+
+.error {
+  font-size: 0.8rem;
+}

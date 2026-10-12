@@ -117,6 +117,33 @@ export class WortomatApi {
     return this.call(this.http.put<NoteContent>(`/api/notes/${id}/content`, request));
   }
 
+  noteImages(id: string): Promise<ImageInfo[]> {
+    return this.call(this.http.get<ImageInfo[]>(`/api/notes/${id}/images`));
+  }
+
+  /** Hängt ein Bild an die Galerie an; liefert die ganze Galerie zurück. */
+  addNoteImage(
+    id: string,
+    image: Blob,
+    fileName: string,
+    width: number,
+    height: number,
+  ): Promise<ImageInfo[]> {
+    const form = new FormData();
+    form.append('file', image, fileName);
+    form.append('width', String(width));
+    form.append('height', String(height));
+    return this.call(this.http.post<ImageInfo[]>(`/api/notes/${id}/images`, form));
+  }
+
+  reorderNoteImages(id: string, imageIds: string[]): Promise<ImageInfo[]> {
+    return this.call(this.http.put<ImageInfo[]>(`/api/notes/${id}/images`, { imageIds }));
+  }
+
+  removeNoteImage(id: string, imageId: string): Promise<ImageInfo[]> {
+    return this.call(this.http.delete<ImageInfo[]>(`/api/notes/${id}/images/${imageId}`));
+  }
+
   // Bilder & Suche ----------------------------------------------------------
 
   uploadImage(image: Blob, fileName: string, width: number, height: number): Promise<ImageInfo> {

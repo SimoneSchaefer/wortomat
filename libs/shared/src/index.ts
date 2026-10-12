@@ -145,6 +145,8 @@ export interface NoteSummary {
   /** Einzeilige Kurzbeschreibung für die Liste, z. B. „Protagonistin, 34, Ärztin“. */
   summary: string;
   updatedAt: string;
+  /** Erstes Bild der Galerie (Profilbild), z. B. `/api/images/<id>`; `null` ohne Bilder. */
+  coverImageUrl: string | null;
 }
 
 export interface NoteContent {
@@ -162,6 +164,11 @@ export interface CreateNoteRequest {
 export interface UpdateNoteRequest {
   title?: string;
   summary?: string;
+}
+
+/** Neue Reihenfolge der Galerie; das erste Bild ist das Profilbild. */
+export interface ReorderImagesRequest {
+  imageIds: string[];
 }
 
 // ---------------------------------------------------------------------------

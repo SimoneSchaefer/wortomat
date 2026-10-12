@@ -33,6 +33,38 @@ a {
   }
 }
 
+// Mit Avatar: Bild links, Titel und Kurzbeschreibung rechts daneben.
+a.with-avatar {
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: 0.6rem;
+  align-items: center;
+}
+
+.text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--hover);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
 .title,
 .summary {
   overflow: hidden;

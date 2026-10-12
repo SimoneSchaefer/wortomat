@@ -13,11 +13,12 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import type { NoteKind, UpdateNoteRequest } from '@wortomat/shared';
+import type { ImageInfo, NoteKind, UpdateNoteRequest } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from '../editor/document-editor';
+import { ImageGallery } from './image-gallery';
 import { NOTE_KINDS } from './note-kinds';
 import { NotesStore } from './notes-store';
 
@@ -26,9 +27,9 @@ const META_SAVE_DELAY_MS = 600;
 /** Ein Charakter, Ort oder eine Recherche: Route `write/<art>/:id`. */
 @Component({
   selector: 'wm-note-page',
-  imports: [DocumentEditor],
+  imports: [DocumentEditor, ImageGallery],
   templateUrl: './note-page.html',
-  styles: ':host { display: block; min-height: 100%; }',
+  styleUrl: './note-page.scss',
 })
 export class NotePage {
   readonly id = input.required<string>();
@@ -103,6 +104,10 @@ export class NotePage {
     if (!this.titleDraft().trim()) {
       this.titleDraft.set(this.note()?.title ?? '');
     }
+  }
+
+  protected onGalleryChanged(images: ImageInfo[]): void {
+    this.store.setCover(this.id(), images[0]?.url ?? null);
   }
 
   protected onSummaryInput(value: string): void {

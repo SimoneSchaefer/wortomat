@@ -22,6 +22,14 @@ export class NoteList {
   protected readonly notes = computed(() => this.store.byKind(this.kind()));
   protected readonly error = signal<string | null>(null);
 
+  /** „Anna Berger“ → „AB“, als Platzhalter ohne Profilbild. */
+  protected initials(title: string): string {
+    const words = title.trim().split(/\s+/).filter(Boolean);
+    return (
+      (words[0]?.[0] ?? '') + (words.length > 1 ? (words.at(-1)?.[0] ?? '') : '')
+    ).toUpperCase();
+  }
+
   protected async add(): Promise<void> {
     this.error.set(null);
     try {

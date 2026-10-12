@@ -309,6 +309,72 @@ describe('REST-API', () => {
     assert.equal(invalid.status, 400);
   });
 
+  it('verwaltet eine Bildergalerie je Charakter und räumt ungenutzte Bilder auf', async () => {
+    const upload = async (noteId: string, name: string) => {
+      const form = new FormData();
+      form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), name);
+      const response = await fetch(`${server.url}/api/notes/${noteId}/images`, {
+        method: 'POST',
+        headers: { [AUTH_HEADER]: TOKEN },
+        body: form,
+      });
+      assert.equal(response.status, 201);
+      return (await response.json()) as ImageInfo[];
+    };
+    const imageExists = async (url: string) =>
+      (await fetch(server.url + url, { headers: { [AUTH_HEADER]: TOKEN } })).status === 200;
+    const cover = async (noteId: string) =>
+      (await api<NoteSummary[]>('GET', '/api/notes')).find((n) => n.id === noteId)!.coverImageUrl;
+
+    const ben = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Ben' });
+    assert.equal(ben.coverImageUrl, null);
+    assert.deepEqual(await api('GET', `/api/notes/${ben.id}/images`), []);
+
+    await upload(ben.id, 'eins.png');
+    await upload(ben.id, 'zwei.png');
+    const gallery = await upload(ben.id, 'drei.png');
+    assert.deepEqual(
+      gallery.map((image) => image.originalName),
+      ['eins.png', 'zwei.png', 'drei.png'],
+    );
+    const [eins, zwei, drei] = gallery as [ImageInfo, ImageInfo, ImageInfo];
+    assert.equal(await cover(ben.id), eins.url);
+
+    // "Als Profilbild": drei nach vorne
+    const reordered = await api<ImageInfo[]>('PUT', `/api/notes/${ben.id}/images`, {
+      imageIds: [drei.id, eins.id, zwei.id],
+    });
+    assert.deepEqual(
+      reordered.map((image) => image.id),
+      [drei.id, eins.id, zwei.id],
+    );
+    assert.equal(await cover(ben.id), drei.url);
+    const badOrder = await fetch(`${server.url}/api/notes/${ben.id}/images`, {
+      method: 'PUT',
+      headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageIds: [drei.id, eins.id] }),
+    });
+    assert.equal(badOrder.status, 400);
+
+    // Entfernen löscht das Bild aus der Datei …
+    await api('DELETE', `/api/notes/${ben.id}/images/${drei.id}`);
+    assert.equal(await imageExists(drei.url), false);
+    assert.equal(await cover(ben.id), eins.url);
+
+    // … außer es steckt noch im Text
+    await api('PUT', `/api/notes/${ben.id}/content`, {
+      doc: { type: 'doc', content: [{ type: 'image', attrs: { src: zwei.url } }] },
+      text: '',
+      wordCount: 0,
+    });
+    await api('DELETE', `/api/notes/${ben.id}/images/${zwei.id}`);
+    assert.equal(await imageExists(zwei.url), true);
+
+    // Notiz löschen räumt die Galerie mit auf
+    await api('DELETE', `/api/notes/${ben.id}`);
+    assert.equal(await imageExists(eins.url), false);
+  });
+
   it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -318,7 +384,9 @@ describe('REST-API', () => {
 
     // Datei auf den Stand vor den Notizen (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
-    old.exec('DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;');
+    old.exec(
+      'DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+    );
     old.close();
 
     await api('POST', '/api/project/open', { filePath: project.filePath });

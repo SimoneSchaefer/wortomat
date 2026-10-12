@@ -57,6 +57,25 @@ export class ImagesService {
     return this.info(id);
   }
 
+  /**
+   * Löscht ein Bild aus der Projektdatei, sofern es nirgends mehr verwendet wird:
+   * weder in einer Galerie noch im Text einer Szene oder Notiz.
+   */
+  deleteIfUnused(id: string): void {
+    const reference = `%/api/images/${id}%`;
+    const used = this.projects.db
+      .prepare(
+        `SELECT 1 FROM note_images WHERE image_id = ?
+         UNION ALL SELECT 1 FROM scene_content WHERE doc LIKE ?
+         UNION ALL SELECT 1 FROM notes WHERE doc LIKE ?
+         LIMIT 1`,
+      )
+      .get(id, reference, reference);
+    if (!used) {
+      this.projects.db.prepare('DELETE FROM images WHERE id = ?').run(id);
+    }
+  }
+
   info(id: string): ImageInfo {
     const row = this.projects.db
       .prepare(
