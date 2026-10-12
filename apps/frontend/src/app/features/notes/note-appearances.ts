@@ -2,6 +2,7 @@ import { Component, effect, inject, input, signal, untracked } from '@angular/co
 import { RouterLink } from '@angular/router';
 import type { SceneReference } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
 
 /** „Kommt vor in“: Szenen, mit denen ein Charakter oder Ort verknüpft ist. */
@@ -9,7 +10,7 @@ import { WortomatApi } from '../../core/wortomat-api';
   selector: 'wm-note-appearances',
   imports: [RouterLink],
   template: `
-    <span class="label">Kommt vor in</span>
+    <span class="label">{{ t().notes.appearsIn }}</span>
     @if (scenes(); as list) {
       @if (list.length) {
         <ol>
@@ -25,9 +26,7 @@ import { WortomatApi } from '../../core/wortomat-api';
           }
         </ol>
       } @else {
-        <span class="muted none"
-          >noch keiner Szene – verknüpfen lässt sich direkt in der Szene.</span
-        >
+        <span class="muted none">{{ t().notes.appearsNowhere }}</span>
       }
     }
     @if (error(); as message) {
@@ -81,6 +80,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 export class NoteAppearances {
   readonly noteId = input.required<string>();
 
+  protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   protected readonly scenes = signal<SceneReference[] | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -101,7 +101,7 @@ export class NoteAppearances {
       const scenes = await this.api.noteScenes(noteId);
       if (loadId === this.loadCounter) this.scenes.set(scenes);
     } catch (error) {
-      if (loadId === this.loadCounter) this.error.set(errorMessage(error));
+      if (loadId === this.loadCounter) this.error.set(errorMessage(error, this.t()));
     }
   }
 }

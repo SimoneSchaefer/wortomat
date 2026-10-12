@@ -10,35 +10,32 @@ export interface QuoteMarks {
   single: readonly [open: string, close: string];
 }
 
+/** Name des Stils: `t().settings.quoteStyles[style]`. */
 export interface QuoteStyleInfo {
   style: QuoteStyle;
-  label: string;
   /** `null`: nichts ersetzen. */
   marks: QuoteMarks | null;
 }
 
 export const QUOTE_STYLES: readonly QuoteStyleInfo[] = [
-  { style: 'de', label: 'Deutsch', marks: { double: ['„', '“'], single: ['‚', '‘'] } },
+  { style: 'de', marks: { double: ['„', '“'], single: ['‚', '‘'] } },
   {
     style: 'de-guillemets',
-    label: 'Deutsch, Buchsatz',
     marks: { double: ['»', '«'], single: ['›', '‹'] },
   },
   {
     style: 'ch',
-    label: 'Schweiz, Liechtenstein',
     marks: { double: ['«', '»'], single: ['‹', '›'] },
   },
-  { style: 'en', label: 'Englisch', marks: { double: ['“', '”'], single: ['‘', '’'] } },
+  { style: 'en', marks: { double: ['“', '”'], single: ['‘', '’'] } },
   {
     style: 'fr',
-    label: 'Französisch',
     marks: {
       double: [`«${NARROW_NBSP}`, `${NARROW_NBSP}»`],
       single: [`‹${NARROW_NBSP}`, `${NARROW_NBSP}›`],
     },
   },
-  { style: 'off', label: 'Nicht ersetzen', marks: null },
+  { style: 'off', marks: null },
 ];
 
 export function quoteMarks(style: QuoteStyle): QuoteMarks | null {

@@ -1,0 +1,294 @@
+import type { Texts } from './de';
+
+const numberFormat = new Intl.NumberFormat('en');
+
+/** Texte der Oberfläche auf Englisch. */
+export const en: Texts = {
+  number: (value: number) => numberFormat.format(value),
+  words: (count: number) => (count === 1 ? '1 word' : `${numberFormat.format(count)} words`),
+  keys: { ctrl: 'Ctrl', shift: 'Shift' },
+
+  common: {
+    back: '← Back',
+    settings: 'Settings',
+    delete: 'Delete',
+    loading: 'Loading …',
+    title: 'Title',
+  },
+
+  errors: {
+    backendUnreachable: 'The backend cannot be reached.',
+    status: (status: number) => `Error ${status}`,
+  },
+
+  start: {
+    tagline: 'Your book. Your file. No server.',
+    myBooks: 'My books',
+    openOtherFile: 'Open another file …',
+    edited: (when: string) => `edited ${when}`,
+    missing: 'File not found – moved or deleted?',
+    forgetHint: 'Remove from the list (the file is kept)',
+    forgetLabel: (title: string) => `Remove ${title} from the list`,
+    empty: 'No books yet – start your first one below.',
+    listFailed: 'The list could not be loaded.',
+    newBook: 'Start a new book',
+    titlePlaceholder: 'e.g. The Houses by the River',
+    location: 'Location',
+    create: 'Create',
+    createWithDialog: 'Create …',
+    openOtherHeading: 'Open another file',
+    path: 'Path to the .wortomat file',
+    open: 'Open',
+    version: (version: string) => `Version ${version}`,
+    browserMode: 'Browser mode (development)',
+    defaultFileName: 'New book',
+    titleRequired: 'Please give your book a title.',
+  },
+
+  workspace: {
+    export: 'Export …',
+    closeProject: 'Close project',
+    sections: 'Sections',
+    manuscript: 'Manuscript',
+    sidebarWidth: 'Sidebar width',
+    resizeHint: 'Drag to change the width – double-click to reset it',
+    chooseScene: 'Choose a scene on the left – or add a new one with “+” on a chapter.',
+    chooseNote: (addLabel: string) =>
+      `Choose an entry on the left – or add a new one with “${addLabel}”.`,
+  },
+
+  tree: {
+    newTitle: {
+      part: 'New part',
+      chapter: 'New chapter',
+      scene: 'New scene',
+    },
+    titleOf: (title: string) => `Title of ${title}`,
+    status: (status: string) => `Status: ${status}`,
+    renameHint: (title: string) => `${title} (double-click to rename)`,
+    addScene: 'Add scene',
+    addChapter: 'Add chapter',
+    empty: 'Still empty. Start your first chapter.',
+    addChapterButton: '+ Chapter',
+    addPartButton: '+ Part',
+    confirmDeleteScene: 'Do you really want to delete the scene?',
+    confirmDeleteContainer: (title: string) =>
+      `Do you really want to delete “${title}” with all the scenes it contains?`,
+  },
+
+  search: {
+    label: 'Search the whole book',
+    placeholder: 'Search the whole book …',
+    clear: 'Clear search',
+    results: 'Search results',
+    searching: 'Searching …',
+    noHits: (query: string) => `No results for “${query}”.`,
+    scenes: 'Scenes',
+  },
+
+  noteKinds: {
+    character: {
+      label: 'Characters',
+      singular: 'Character',
+      newTitle: 'New character',
+      addLabel: '+ Character',
+      emptyList: 'No characters yet.',
+      pickerEmpty: 'No characters yet – type a name to create one.',
+      create: (title: string) => `Create “${title}” as a new character`,
+      summaryPlaceholder: 'Short description, e.g. “Protagonist, 34, doctor in Hamburg”',
+      textPlaceholder: 'Who is this character?',
+      outline: [
+        'Appearance',
+        'Personality',
+        'Background',
+        'Goals & motivation',
+        'Role in the story',
+      ],
+    },
+    place: {
+      label: 'Places',
+      singular: 'Place',
+      newTitle: 'New place',
+      addLabel: '+ Place',
+      emptyList: 'No places yet.',
+      pickerEmpty: 'No places yet – type a name to create one.',
+      create: (title: string) => `Create “${title}” as a new place`,
+      summaryPlaceholder: 'Short description, e.g. “Old fishing harbour, North Sea coast”',
+      textPlaceholder: 'What does it look like here?',
+      outline: ['Description', 'Atmosphere', 'Significance for the story'],
+    },
+    research: {
+      label: 'Research',
+      singular: 'Research note',
+      newTitle: 'New research note',
+      addLabel: '+ Research note',
+      emptyList: 'No research notes yet.',
+      pickerEmpty: 'No research notes yet – type a title to create one.',
+      create: (title: string) => `Create “${title}” as a new research note`,
+      summaryPlaceholder: 'What is it about? e.g. “Tides in the North Sea”',
+      textPlaceholder: 'Notes, quotes, sources …',
+      outline: [],
+    },
+  },
+
+  notes: {
+    confirmDelete: (title: string) => `Really delete “${title}”?`,
+    notFound: 'This entry no longer exists.',
+    summary: 'Short description',
+    profileImage: 'Profile picture',
+    appearsIn: 'Appears in',
+    appearsNowhere: 'no scene yet – you can link it directly in a scene.',
+  },
+
+  gallery: {
+    roleDescription: 'Image gallery',
+    imageAlt: (label: string, position: number, count: number) =>
+      `${label} ${position} of ${count}`,
+    previous: 'Previous image',
+    next: 'Next image',
+    image: (position: number) => `Image ${position}`,
+    makeCover: (label: string) => `Make ${label.toLowerCase()}`,
+    add: 'Add image',
+    remove: 'Remove image',
+    uploading: 'Uploading …',
+    addFirst: (label: string) => `Add ${label.toLowerCase()}`,
+    dropHint: 'or drag images here',
+    confirmRemove: 'Remove this image?',
+  },
+
+  editor: {
+    toolbar: 'Formatting',
+    bold: 'Bold',
+    boldLetter: 'B',
+    italic: 'Italic',
+    italicLetter: 'I',
+    underline: 'Underline',
+    underlineLetter: 'U',
+    strike: 'Strikethrough',
+    strikeLetter: 'S',
+    heading: 'Heading',
+    headingLetter: 'H1',
+    subheading: 'Subheading',
+    subheadingLetter: 'H2',
+    annotate: (label: string) => `Mark as ${label} – click again to remove`,
+    undo: 'Undo',
+    redo: 'Redo',
+    placeholder: 'Once upon a time …',
+    saveStatus: {
+      loading: 'Loading …',
+      saved: 'Saved',
+      unsaved: 'Unsaved',
+      saving: 'Saving …',
+      error: 'Error',
+    },
+    imageFailed: (name: string, message: string) => `Image “${name}”: ${message}`,
+  },
+
+  sceneStatus: {
+    label: 'Status',
+    names: {
+      idea: 'Idea',
+      outline: 'Outline',
+      draft: 'Draft',
+      revised: 'Revised',
+      final: 'Final',
+    },
+  },
+
+  annotations: {
+    todo: { label: 'Todo', plural: 'Todos' },
+    idea: { label: 'Idea', plural: 'Ideas' },
+    fixme: { label: 'Fixme', plural: 'Fixmes' },
+  },
+
+  sceneLinks: {
+    tags: 'Tags',
+    tag: 'Tag',
+    remove: 'Remove from this scene',
+    removeLabel: (title: string) => `Remove ${title} from this scene`,
+    scrollLeft: 'Scroll left',
+    scrollLeftHint: 'Scroll left – hold to keep scrolling',
+    scrollRight: 'Scroll right',
+    scrollRightHint: 'Scroll right – hold to keep scrolling',
+    add: (singular: string) => `Add ${singular.toLowerCase()}`,
+    search: (singular: string) => `Search or create ${singular.toLowerCase()} …`,
+    sceneCount: (count: number) => (count === 1 ? '1 scene' : `${count} scenes`),
+    allTagsUsed: 'All tags are already assigned – type a new one.',
+    noTags: 'No tags yet – type one to create it.',
+    allLinked: 'All are already linked – type a name to create a new one.',
+    createTag: (name: string) => `Create “${name}” as a new tag`,
+  },
+
+  export: {
+    title: 'Export manuscript',
+    format: 'Format',
+    formats: {
+      html: { label: 'HTML', description: 'A single file to read in the browser – with images.' },
+      docx: {
+        label: 'Word (.docx)',
+        description: 'For further editing or for submitting to publishers and agents.',
+      },
+      pdf: { label: 'PDF (pdfLaTeX)', description: 'Print-ready typesetting with pdfLaTeX.' },
+      epub: {
+        label: 'E-book (EPUB)',
+        description: 'For e-readers such as Tolino or Kobo, Apple Books and Calibre.',
+      },
+    },
+    pdfMissing:
+      'pdfLaTeX was not found on this computer. With TeX Live, MacTeX or MiKTeX you can create PDFs as well.',
+    pdfSearching: 'Looking for pdfLaTeX …',
+    template: 'Template',
+    templates: {
+      normseite: {
+        label: 'Standard manuscript',
+        description:
+          'German “Normseite”: 30 lines of 60 characters in Courier – the standard for publishers and agents.',
+      },
+      roman: {
+        label: 'Novel',
+        description: 'Book layout 12.5 × 19 cm, justified with hyphenation.',
+      },
+    },
+    cover: 'Cover image',
+    noCover: 'No cover image',
+    coverShown: 'Shown as the cover in the reader and in the library.',
+    coverMissing: 'Without a cover image, readers show the book as an empty tile.',
+    coverSize: 'Portrait format works best, about 1600 × 2560 pixels.',
+    chooseImage: 'Choose image …',
+    designCover: 'Design from title',
+    otherColors: 'Other colours',
+    removeCover: 'Remove',
+    sceneTitles: 'Print scene titles as subheadings',
+    sceneTitlesHint: '(otherwise scenes are only separated by a break)',
+    exported: 'Exported:',
+    open: 'Open',
+    showInFolder: 'Show in folder',
+    downloaded: 'Downloaded:',
+    warnings: 'Notes',
+    close: 'Close',
+    exporting: 'Exporting …',
+    exportWithDialog: 'Export …',
+    download: 'Download',
+    defaultName: 'Manuscript',
+    unsupportedImage: 'Please choose an image in JPEG, PNG, WebP, GIF or AVIF format.',
+  },
+
+  settings: {
+    title: 'Settings',
+    language: 'Language',
+    languageHint: 'Language of the user interface. Your text and the export are not affected.',
+    quotes: 'Quotation marks',
+    quotesHint:
+      'While you write, " and \' are automatically replaced by these characters. Pressing Backspace right afterwards undoes the replacement. Text you have already written stays as it is.',
+    quoteStyles: {
+      de: 'German',
+      'de-guillemets': 'German, book typesetting',
+      ch: 'Switzerland, Liechtenstein',
+      en: 'English',
+      fr: 'French',
+      off: 'Do not replace',
+    },
+    quoteExample: (double: readonly string[], single: readonly string[], apostrophe: string) =>
+      `${double[0]}Say ${single[0]}please${single[1]}${double[1]}, she${apostrophe}s whispering.`,
+  },
+};

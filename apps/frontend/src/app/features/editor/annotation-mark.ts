@@ -1,7 +1,6 @@
 import { Mark, mergeAttributes } from '@tiptap/core';
 import type { Mark as ProseMirrorMark } from '@tiptap/pm/model';
 import type { AnnotationKind } from '@wortomat/shared';
-import { annotationLabel } from '../../core/annotations';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -24,17 +23,27 @@ declare module '@tiptap/core' {
  * im HTML: `<mark class="wm-annotation" data-annotation="todo">`.
  * Gezählt wird im Backend (apps/backend/src/manuscript/annotations.ts).
  */
-export const Annotation = Mark.create({
+export interface AnnotationOptions {
+  /** Tooltip der Markierung, z. B. „Todo“ – wird beim Darstellen gelesen. */
+  label: (kind: AnnotationKind) => string;
+}
+
+export const Annotation = Mark.create<AnnotationOptions>({
   name: 'annotation',
 
+  addOptions() {
+    return { label: (kind) => kind };
+  },
+
   addAttributes() {
+    const label = (kind: AnnotationKind) => this.options.label(kind);
     return {
       kind: {
         default: 'todo',
         parseHTML: (element) => element.getAttribute('data-annotation'),
         renderHTML: (attributes) => ({
           'data-annotation': attributes['kind'],
-          title: annotationLabel(attributes['kind'] as AnnotationKind),
+          title: label(attributes['kind'] as AnnotationKind),
         }),
       },
     };

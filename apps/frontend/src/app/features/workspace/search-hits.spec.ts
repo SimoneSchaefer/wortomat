@@ -16,10 +16,10 @@ describe('Suchtreffer', () => {
       hit('character', 'anna'),
       hit('scene', 's1'),
     ]);
-    expect(groups.map((g) => [g.label, g.hits.map((h) => h.id)])).toEqual([
-      ['Szenen', ['s2', 's1']],
-      ['Charaktere', ['anna']],
-      ['Orte', ['hafen']],
+    expect(groups.map((g) => [g.kind, g.hits.map((h) => h.id)])).toEqual([
+      ['scene', ['s2', 's1']],
+      ['character', ['anna']],
+      ['place', ['hafen']],
     ]);
   });
 

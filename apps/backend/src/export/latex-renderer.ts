@@ -1,12 +1,13 @@
 import type { ExportTemplate } from '@wortomat/shared';
 import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
 import { normseitenLabel, printMarks } from './book.js';
+import { type Localized, localized } from '../i18n.js';
 
 export interface LatexDocument {
   tex: string;
   /** Zusätzliche Dateien (Bilder) neben der .tex-Datei. */
   files: Map<string, Buffer>;
-  warnings: string[];
+  warnings: Localized[];
 }
 
 /**
@@ -114,7 +115,10 @@ export function renderLatex(
 
   if (ctx.unsupported > 0) {
     ctx.warnings.push(
-      `${ctx.unsupported} Zeichen (z. B. Emoji oder nicht-lateinische Schrift) kann pdfLaTeX nicht darstellen; sie erscheinen als „?“.`,
+      localized(
+        `${ctx.unsupported} Zeichen (z. B. Emoji oder nicht-lateinische Schrift) kann pdfLaTeX nicht darstellen; sie erscheinen als „?“.`,
+        `pdfLaTeX cannot display ${ctx.unsupported} characters (e.g. emoji or non-Latin script); they appear as “?”.`,
+      ),
     );
   }
   return { tex: out.join('\n'), files: ctx.files, warnings: ctx.warnings };
@@ -123,7 +127,7 @@ export function renderLatex(
 interface Context {
   images: ImageResolver;
   files: Map<string, Buffer>;
-  warnings: string[];
+  warnings: Localized[];
   unsupported: number;
   indentNext: boolean;
 }
@@ -203,14 +207,20 @@ function block(node: JsonNode, ctx: Context): string {
 }
 
 function image(node: JsonNode, ctx: Context): string {
-  const alt = String(node.attrs?.['alt'] ?? '') || 'ohne Namen';
+  const altText = String(node.attrs?.['alt'] ?? '');
+  const alt = altText || 'ohne Namen';
   const resolved = ctx.images(String(node.attrs?.['src'] ?? ''));
   // pdfLaTeX kann nur PNG, JPEG und PDF einbinden.
   const extension =
     resolved?.mimeType === 'image/png' ? 'png' : resolved?.mimeType === 'image/jpeg' ? 'jpg' : null;
   if (!resolved || !extension) {
-    const format = resolved ? resolved.mimeType.replace('image/', '').toUpperCase() : 'unbekannt';
-    ctx.warnings.push(`Bild „${alt}“ (${format}) kann pdfLaTeX nicht einbinden.`);
+    const format = resolved?.mimeType.replace('image/', '').toUpperCase();
+    ctx.warnings.push(
+      localized(
+        `Bild „${alt}“ (${format ?? 'unbekannt'}) kann pdfLaTeX nicht einbinden.`,
+        `pdfLaTeX cannot include image “${altText || 'unnamed'}” (${format ?? 'unknown'}).`,
+      ),
+    );
     return `\\begin{center}\\itshape [Bild: ${escape(alt, ctx)}]\\end{center}`;
   }
   const name = `bild-${ctx.files.size + 1}.${extension}`;

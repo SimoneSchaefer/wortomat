@@ -1,55 +1,55 @@
 <article class="page">
   <ng-content />
   <!-- Unter dem Kopfbereich: die Formatierung gilt nur für den Text darunter -->
-  <div class="toolbar" role="toolbar" aria-label="Formatierung">
+  <div class="toolbar" role="toolbar" [attr.aria-label]="t().editor.toolbar">
     <button
       type="button"
-      title="Fett (Strg+B)"
+      [title]="hint(t().editor.bold, 'B')"
       [class.on]="isActive('bold')"
       (click)="command('bold')"
     >
-      <b>F</b>
+      <b>{{ t().editor.boldLetter }}</b>
     </button>
     <button
       type="button"
-      title="Kursiv (Strg+I)"
+      [title]="hint(t().editor.italic, 'I')"
       [class.on]="isActive('italic')"
       (click)="command('italic')"
     >
-      <i>K</i>
+      <i>{{ t().editor.italicLetter }}</i>
     </button>
     <button
       type="button"
-      title="Unterstrichen (Strg+U)"
+      [title]="hint(t().editor.underline, 'U')"
       [class.on]="isActive('underline')"
       (click)="command('underline')"
     >
-      <u>U</u>
+      <u>{{ t().editor.underlineLetter }}</u>
     </button>
     <button
       type="button"
-      title="Durchgestrichen (Strg+Umschalt+S)"
+      [title]="hint(t().editor.strike, 'S', { shift: true })"
       [class.on]="isActive('strike')"
       (click)="command('strike')"
     >
-      <s>S</s>
+      <s>{{ t().editor.strikeLetter }}</s>
     </button>
     <span class="sep"></span>
     <button
       type="button"
-      title="Überschrift"
+      [title]="t().editor.heading"
       [class.on]="isActive('heading', { level: 2 })"
       (click)="command('heading2')"
     >
-      Ü1
+      {{ t().editor.headingLetter }}
     </button>
     <button
       type="button"
-      title="Unterüberschrift"
+      [title]="t().editor.subheading"
       [class.on]="isActive('heading', { level: 3 })"
       (click)="command('heading3')"
     >
-      Ü2
+      {{ t().editor.subheadingLetter }}
     </button>
     <span class="sep"></span>
     @for (info of annotationKinds; track info.kind) {
@@ -58,24 +58,18 @@
         class="annotation"
         [style.--annotation-color]="info.color"
         [title]="
-          'Als ' +
-          info.label +
-          ' markieren – nochmal klicken entfernt (' +
-          modifierKey +
-          '+Alt+' +
-          info.key +
-          ')'
+          hint(t().editor.annotate(t().annotations[info.kind].label), info.key, { alt: true })
         "
         [class.on]="isActive('annotation', { kind: info.kind })"
         (click)="annotate(info.kind)"
       >
-        <span class="swatch" aria-hidden="true"></span>{{ info.label }}
+        <span class="swatch" aria-hidden="true"></span>{{ t().annotations[info.kind].label }}
       </button>
     }
     <span class="sep"></span>
     <button
       type="button"
-      title="Rückgängig (Strg+Z)"
+      [title]="hint(t().editor.undo, 'Z')"
       [disabled]="!can('undo')"
       (click)="command('undo')"
     >
@@ -83,7 +77,7 @@
     </button>
     <button
       type="button"
-      title="Wiederholen (Strg+Umschalt+Z)"
+      [title]="hint(t().editor.redo, 'Z', { shift: true })"
       [disabled]="!can('redo')"
       (click)="command('redo')"
     >
@@ -94,26 +88,8 @@
 </article>
 
 <footer class="statusbar">
-  <span>{{ wordCount() | number }} Wörter</span>
-  <span class="status" [class]="status()">
-    @switch (status()) {
-      @case ('loading') {
-        Lade …
-      }
-      @case ('saved') {
-        Gespeichert
-      }
-      @case ('unsaved') {
-        Ungespeichert
-      }
-      @case ('saving') {
-        Speichere …
-      }
-      @case ('error') {
-        Fehler
-      }
-    }
-  </span>
+  <span>{{ t().words(wordCount()) }}</span>
+  <span class="status" [class]="status()">{{ t().editor.saveStatus[status()] }}</span>
   @if (error(); as message) {
     <span class="error" role="alert">{{ message }}</span>
   }

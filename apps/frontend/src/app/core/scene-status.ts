@@ -1,19 +1,19 @@
 import type { SceneStatus } from '@wortomat/shared';
 
+/** Name des Status: `t().sceneStatus.names[status]`. */
 export interface SceneStatusInfo {
   status: SceneStatus;
-  label: string;
   /** CSS-Variable mit der Farbe (in styles.scss, hell und dunkel). */
   color: string;
 }
 
 /** Alle Status in Arbeitsreihenfolge. */
 export const SCENE_STATUSES: readonly SceneStatusInfo[] = [
-  { status: 'idea', label: 'Idee', color: 'var(--status-idea)' },
-  { status: 'outline', label: 'Struktur', color: 'var(--status-outline)' },
-  { status: 'draft', label: 'Entwurf', color: 'var(--status-draft)' },
-  { status: 'revised', label: 'Überarbeitet', color: 'var(--status-revised)' },
-  { status: 'final', label: 'Fertig', color: 'var(--status-final)' },
+  { status: 'idea', color: 'var(--status-idea)' },
+  { status: 'outline', color: 'var(--status-outline)' },
+  { status: 'draft', color: 'var(--status-draft)' },
+  { status: 'revised', color: 'var(--status-revised)' },
+  { status: 'final', color: 'var(--status-final)' },
 ];
 
 export function statusInfo(status: SceneStatus): SceneStatusInfo {

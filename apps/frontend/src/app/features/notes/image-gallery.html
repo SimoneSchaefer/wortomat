@@ -1,7 +1,7 @@
 <div
   class="gallery"
   role="region"
-  aria-roledescription="Bildergalerie"
+  [attr.aria-roledescription]="t().gallery.roleDescription"
   [attr.aria-label]="label()"
   [class.drop-active]="dropActive()"
   [attr.tabindex]="images().length > 1 ? 0 : null"
@@ -25,7 +25,7 @@
         <figure class="slide" [attr.aria-hidden]="i !== index()">
           <img
             [src]="image.url"
-            [alt]="label() + ' ' + (i + 1) + ' von ' + images().length"
+            [alt]="t().gallery.imageAlt(label(), i + 1, images().length)"
             draggable="false"
           />
         </figure>
@@ -36,7 +36,7 @@
       <button
         type="button"
         class="nav prev"
-        aria-label="Vorheriges Bild"
+        [attr.aria-label]="t().gallery.previous"
         [disabled]="index() === 0"
         (click)="goTo(index() - 1)"
       >
@@ -45,7 +45,7 @@
       <button
         type="button"
         class="nav next"
-        aria-label="Nächstes Bild"
+        [attr.aria-label]="t().gallery.next"
         [disabled]="index() === images().length - 1"
         (click)="goTo(index() + 1)"
       >
@@ -56,7 +56,7 @@
           <button
             type="button"
             [class.active]="i === index()"
-            [attr.aria-label]="'Bild ' + (i + 1)"
+            [attr.aria-label]="t().gallery.image(i + 1)"
             (click)="goTo(i)"
           ></button>
         }
@@ -67,13 +67,20 @@
       @if (index() === 0) {
         <span class="badge">{{ label() }}</span>
       } @else {
-        <button type="button" [disabled]="busy()" (click)="makeCover()">Als {{ label() }}</button>
+        <button type="button" [disabled]="busy()" (click)="makeCover()">
+          {{ t().gallery.makeCover(label()) }}
+        </button>
       }
       <span class="spacer"></span>
-      <button type="button" title="Bild hinzufügen" [disabled]="busy()" (click)="picker.click()">
+      <button type="button" [title]="t().gallery.add" [disabled]="busy()" (click)="picker.click()">
         +
       </button>
-      <button type="button" title="Bild entfernen" [disabled]="busy()" (click)="removeCurrent()">
+      <button
+        type="button"
+        [title]="t().gallery.remove"
+        [disabled]="busy()"
+        (click)="removeCurrent()"
+      >
         ×
       </button>
     </div>
@@ -89,8 +96,8 @@
           <path d="M3.5 18.5l5.5-5.5 4 4 2.5-2.5 5 5" />
         }
       </svg>
-      <span>{{ busy() ? 'Lade hoch …' : label() + ' hinzufügen' }}</span>
-      <small>oder Bilder hierher ziehen</small>
+      <span>{{ busy() ? t().gallery.uploading : t().gallery.addFirst(label()) }}</span>
+      <small>{{ t().gallery.dropHint }}</small>
     </button>
   }
 

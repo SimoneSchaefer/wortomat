@@ -11,11 +11,11 @@ import {
 import { Router } from '@angular/router';
 import type { SearchHit } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
 import { groupHits, hitLink } from './search-hits';
 
 const SEARCH_DELAY_MS = 250;
-const IS_MAC = /Mac|iPhone|iPad/.test(navigator.userAgent);
 
 /**
  * Suche über das ganze Buch (Szenen, Charaktere, Orte, Forschung) in der oberen Leiste.
@@ -37,7 +37,9 @@ export class GlobalSearch {
   private readonly injector = inject(Injector);
   private readonly input = viewChild.required<ElementRef<HTMLInputElement>>('input');
 
-  protected readonly shortcut = IS_MAC ? '⌘K' : 'Strg+K';
+  private readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
+  protected readonly shortcut = computed(() => this.i18n.shortcut()('K'));
   protected readonly query = signal('');
   protected readonly hits = signal<SearchHit[]>([]);
   protected readonly loading = signal(false);
@@ -75,7 +77,7 @@ export class GlobalSearch {
           this.error.set(null);
         }
       } catch (error) {
-        this.error.set(errorMessage(error));
+        this.error.set(errorMessage(error, this.t()));
       } finally {
         if (this.query() === value) this.loading.set(false);
       }

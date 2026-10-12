@@ -7,29 +7,32 @@
     #input
     type="search"
     role="combobox"
-    aria-label="Im ganzen Buch suchen"
+    [attr.aria-label]="t().search.label"
     aria-controls="search-results"
     aria-autocomplete="list"
     [attr.aria-expanded]="showResults()"
     [attr.aria-activedescendant]="showResults() ? 'hit-' + activeIndex() : null"
-    placeholder="Im ganzen Buch suchen …"
+    [placeholder]="t().search.placeholder"
     [value]="query()"
     (input)="onInput($any($event.target).value)"
     (keydown)="onKeydown($event)"
     (focus)="open.set(true)"
   />
   @if (query()) {
-    <button type="button" class="clear" aria-label="Suche leeren" (click)="clear()">×</button>
+    <button type="button" class="clear" [attr.aria-label]="t().search.clear" (click)="clear()">
+      ×
+    </button>
   } @else {
-    <kbd>{{ shortcut }}</kbd>
+    <kbd>{{ shortcut() }}</kbd>
   }
 </div>
 
 @if (showResults()) {
-  <div id="search-results" class="results" role="listbox" aria-label="Suchergebnisse">
+  <div id="search-results" class="results" role="listbox" [attr.aria-label]="t().search.results">
     @for (group of groups(); track group.kind) {
       <div class="group-label" role="presentation">
-        {{ group.label }}<span>{{ group.hits.length }}</span>
+        {{ group.kind === 'scene' ? t().search.scenes : t().noteKinds[group.kind].label
+        }}<span>{{ group.hits.length }}</span>
       </div>
       @for (hit of group.hits; track hit.kind + hit.id) {
         <div
@@ -49,7 +52,7 @@
       }
     } @empty {
       <p class="empty">
-        {{ loading() ? 'Suche …' : 'Keine Treffer für „' + query().trim() + '“.' }}
+        {{ loading() ? t().search.searching : t().search.noHits(query().trim()) }}
       </p>
     }
     @if (error(); as message) {

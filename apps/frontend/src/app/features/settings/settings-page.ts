@@ -1,11 +1,12 @@
 import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import type { QuoteStyle } from '@wortomat/shared';
+import type { Language, QuoteStyle } from '@wortomat/shared';
 import { AppSettingsStore } from '../../core/app-settings';
 import { errorMessage } from '../../core/errors';
+import { I18n, LANGUAGES } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
-import { QUOTE_STYLES, type QuoteStyleInfo } from '../../core/quotes';
+import { APOSTROPHE, QUOTE_STYLES, type QuoteStyleInfo } from '../../core/quotes';
 
 /** Einstellungen der App: Route `settings`, mit und ohne geöffnetes Projekt erreichbar. */
 @Component({
@@ -15,27 +16,39 @@ import { QUOTE_STYLES, type QuoteStyleInfo } from '../../core/quotes';
 })
 export class SettingsPage {
   private readonly router = inject(Router);
+  protected readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
   private readonly location = inject(Location);
   private readonly project = inject(ProjectStore);
   protected readonly settings = inject(AppSettingsStore);
 
+  protected readonly languages = LANGUAGES;
   protected readonly quoteStyles = QUOTE_STYLES;
   protected readonly error = signal<string | null>(null);
 
-  protected async chooseQuoteStyle(style: QuoteStyle): Promise<void> {
-    this.error.set(null);
-    try {
-      await this.settings.setQuoteStyle(style);
-    } catch (error) {
-      this.error.set(errorMessage(error));
-    }
+  protected chooseLanguage(language: Language): Promise<void> {
+    return this.save(() => this.settings.setLanguage(language));
+  }
+
+  protected chooseQuoteStyle(style: QuoteStyle): Promise<void> {
+    return this.save(() => this.settings.setQuoteStyle(style));
   }
 
   /** Beispiel mit doppelten und einfachen Anführungszeichen und einem Apostroph. */
   protected example(info: QuoteStyleInfo): string {
-    if (!info.marks) return `"Sag 'bitte'", flüstert's.`;
-    const { double, single } = info.marks;
-    return `${double[0]}Sag ${single[0]}bitte${single[1]}${double[1]}, flüstert’s.`;
+    const { quoteExample } = this.t().settings;
+    return info.marks
+      ? quoteExample(info.marks.double, info.marks.single, APOSTROPHE)
+      : quoteExample(['"', '"'], ["'", "'"], "'");
+  }
+
+  private async save(action: () => Promise<void>): Promise<void> {
+    this.error.set(null);
+    try {
+      await action();
+    } catch (error) {
+      this.error.set(errorMessage(error, this.t()));
+    }
   }
 
   /** Dorthin zurück, woher man kam – beim direkten Aufruf zum Buch bzw. zur Startseite. */

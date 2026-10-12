@@ -10,7 +10,6 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
@@ -20,6 +19,7 @@ import { ANNOTATION_KINDS } from '../../core/annotations';
 import { AppSettingsStore } from '../../core/app-settings';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
@@ -45,7 +45,6 @@ export interface DocumentSource {
  */
 @Component({
   selector: 'wm-document-editor',
-  imports: [DecimalPipe],
   templateUrl: './document-editor.html',
   styleUrl: './document-editor.scss',
   host: { '(window:beforeunload)': 'onBeforeUnload($event)' },
@@ -53,10 +52,13 @@ export interface DocumentSource {
 export class DocumentEditor {
   readonly documentId = input.required<string>();
   readonly source = input.required<DocumentSource>();
-  readonly placeholder = input('Es war einmal …');
+  /** Platzhalter im leeren Dokument; ohne Angabe „Es war einmal …“. */
+  readonly placeholder = input<string>();
   /** Startinhalt für Dokumente, die noch nie gespeichert wurden (z. B. Gliederung eines Charakters). */
   readonly template = input<EditorDoc | null>(null);
 
+  private readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
   private readonly api = inject(WortomatApi);
   private readonly desktop = inject(DESKTOP_BRIDGE);
   private readonly settings = inject(AppSettingsStore);
@@ -117,7 +119,7 @@ export class DocumentEditor {
     } catch (error) {
       if (loadId !== this.loadCounter) return;
       this.status.set('error');
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 
@@ -154,7 +156,7 @@ export class DocumentEditor {
         if (this.currentId === documentId) {
           this.dirty = true; // beim nächsten Tastendruck erneut versuchen
           this.status.set('error');
-          this.error.set(errorMessage(error));
+          this.error.set(errorMessage(error, this.t()));
         }
       }
     });
@@ -183,9 +185,11 @@ export class DocumentEditor {
         }),
         Image.configure({ allowBase64: false }),
         CharacterCount,
-        Annotation,
+        Annotation.configure({ label: (kind) => this.t().annotations[kind].label }),
         SmartQuotes.configure({ style: () => this.settings.settings().quoteStyle }),
-        Placeholder.configure({ placeholder: this.placeholder() }),
+        Placeholder.configure({
+          placeholder: this.placeholder() ?? this.t().editor.placeholder,
+        }),
       ],
       editorProps: {
         attributes: { class: 'wm-prose', spellcheck: 'true', lang: 'de' },
@@ -235,7 +239,7 @@ export class DocumentEditor {
         ).run();
         position = undefined; // weitere Bilder hinter dem ersten einfügen
       } catch (error) {
-        this.error.set(`Bild „${file.name}“: ${errorMessage(error)}`);
+        this.error.set(this.t().editor.imageFailed(file.name, errorMessage(error, this.t())));
       }
     }
   }
@@ -253,7 +257,10 @@ export class DocumentEditor {
   }
 
   protected readonly annotationKinds = ANNOTATION_KINDS;
-  protected readonly modifierKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Strg';
+  /** z. B. „Fett (Strg+B)“ */
+  protected hint(label: string, key: string, options?: { shift?: boolean; alt?: boolean }): string {
+    return `${label} (${this.i18n.shortcut()(key, options)})`;
+  }
 
   protected annotate(kind: AnnotationKind): void {
     this.editor?.chain().focus().toggleAnnotation(kind).run();

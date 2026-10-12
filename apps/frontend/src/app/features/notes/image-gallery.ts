@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import type { ImageInfo } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { WortomatApi } from '../../core/wortomat-api';
 
@@ -33,12 +34,13 @@ const DRAG_THRESHOLD = 40;
 })
 export class ImageGallery {
   readonly noteId = input.required<string>();
-  readonly label = input('Bilder');
+  readonly label = input.required<string>();
   /** Symbol, solange die Galerie leer ist. */
   readonly placeholderIcon = input<'person' | 'picture'>('picture');
   /** Neue Bilderliste nach jeder Änderung (das erste ist das Profilbild). */
   readonly changed = output<ImageInfo[]>();
 
+  protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   private readonly injector = inject(Injector);
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
@@ -71,7 +73,7 @@ export class ImageGallery {
       this.images.set(images);
       this.goTo(0, false, true);
     } catch (error) {
-      if (loadId === this.loadCounter) this.error.set(errorMessage(error));
+      if (loadId === this.loadCounter) this.error.set(errorMessage(error, this.t()));
     } finally {
       if (loadId === this.loadCounter) this.loading.set(false);
     }
@@ -216,7 +218,7 @@ export class ImageGallery {
 
   protected async removeCurrent(): Promise<void> {
     const image = this.images()[this.index()];
-    if (!image || !confirm('Dieses Bild entfernen?')) return;
+    if (!image || !confirm(this.t().gallery.confirmRemove)) return;
     await this.run(async () => {
       this.update(await this.api.removeNoteImage(this.noteId(), image.id));
       this.goTo(this.index(), false, true);
@@ -250,7 +252,7 @@ export class ImageGallery {
     try {
       await action();
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     } finally {
       this.busy.set(false);
     }

@@ -15,12 +15,13 @@ import {
 } from '@angular/core';
 import type { ImageInfo, NoteKind, UpdateNoteRequest } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from '../editor/document-editor';
 import { ImageGallery } from './image-gallery';
 import { NoteAppearances } from './note-appearances';
-import { NOTE_KINDS } from './note-kinds';
+import { NOTE_KINDS, outlineDoc } from './note-kinds';
 import { NotesStore } from './notes-store';
 
 const META_SAVE_DELAY_MS = 600;
@@ -37,12 +38,15 @@ export class NotePage {
   /** Aus den Routendaten. */
   readonly kind = input.required<NoteKind>();
 
+  protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   private readonly store = inject(NotesStore);
   private readonly injector = inject(Injector);
   private readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
   protected readonly config = computed(() => NOTE_KINDS[this.kind()]);
+  protected readonly texts = computed(() => this.t().noteKinds[this.kind()]);
+  protected readonly template = computed(() => outlineDoc(this.texts().outline));
   protected readonly note = computed(() => this.store.find(this.id()));
   protected readonly error = signal<string | null>(null);
 
@@ -80,7 +84,7 @@ export class NotePage {
         void this.flushMeta(); // Änderungen der vorherigen Notiz
         this.error.set(null);
         // Frisch angelegt? Dann gleich den Titel zum Überschreiben markieren.
-        if (this.store.find(id)?.title === this.config().newTitle) {
+        if (this.store.find(id)?.title === this.texts().newTitle) {
           afterNextRender(
             () => {
               this.titleInput()?.nativeElement.focus();
@@ -132,7 +136,7 @@ export class NotePage {
     try {
       await this.store.update(pending.id, pending.request);
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 }

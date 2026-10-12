@@ -13,6 +13,7 @@ import type {
 import { nowIso, transaction } from '../database/sqlite.js';
 import { ImagesService, type UploadedImage } from '../images/images.service.js';
 import { ProjectService } from '../project/project.service.js';
+import { localized } from '../i18n.js';
 
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
 
@@ -132,7 +133,9 @@ export class NotesService {
         .prepare('DELETE FROM note_images WHERE note_id = ? AND image_id = ?')
         .run(id, imageId);
       if (!changes) {
-        throw new NotFoundException('Bild nicht in dieser Galerie.');
+        throw new NotFoundException(
+          localized('Bild nicht in dieser Galerie.', 'Image not in this gallery.'),
+        );
       }
       this.images.deleteIfUnused(imageId);
       this.touchNote(id);
@@ -150,7 +153,12 @@ export class NotesService {
       new Set(imageIds).size === current.length &&
       imageIds.every((imageId) => current.includes(imageId));
     if (!isPermutation) {
-      throw new BadRequestException('Die Reihenfolge muss genau die Bilder der Galerie enthalten.');
+      throw new BadRequestException(
+        localized(
+          'Die Reihenfolge muss genau die Bilder der Galerie enthalten.',
+          'The order must contain exactly the images of the gallery.',
+        ),
+      );
     }
     transaction(this.db, () => {
       const update = this.db.prepare(
@@ -180,7 +188,7 @@ export class NotesService {
       .prepare('SELECT doc, word_count, updated_at FROM notes WHERE id = ?')
       .get(id) as { doc: string | null; word_count: number; updated_at: string } | undefined;
     if (!row) {
-      throw new NotFoundException('Notiz nicht gefunden.');
+      throw new NotFoundException(localized('Notiz nicht gefunden.', 'Note not found.'));
     }
     return {
       id,
@@ -193,7 +201,7 @@ export class NotesService {
   saveContent(id: string, request: SaveDocumentRequest): NoteContent {
     this.get(id);
     if (request?.doc?.type !== 'doc') {
-      throw new BadRequestException('Ungültiges Dokument.');
+      throw new BadRequestException(localized('Ungültiges Dokument.', 'Invalid document.'));
     }
     const wordCount =
       Number.isInteger(request.wordCount) && request.wordCount >= 0 ? request.wordCount : 0;
@@ -224,7 +232,7 @@ export class NotesService {
     const row = this.db.prepare(`SELECT ${SUMMARY_COLUMNS} FROM notes WHERE id = ?`).get(id) as
       NoteRow | undefined;
     if (!row) {
-      throw new NotFoundException('Notiz nicht gefunden.');
+      throw new NotFoundException(localized('Notiz nicht gefunden.', 'Note not found.'));
     }
     return toSummary(row);
   }
@@ -243,14 +251,16 @@ function toSummary(row: NoteRow): NoteSummary {
 
 function requireKind(kind: unknown): NoteKind {
   if (!NOTE_KINDS.includes(kind as NoteKind)) {
-    throw new BadRequestException('Unbekannte Notizart.');
+    throw new BadRequestException(localized('Unbekannte Notizart.', 'Unknown note kind.'));
   }
   return kind as NoteKind;
 }
 
 function requireTitle(title: unknown): string {
   if (typeof title !== 'string' || !title.trim()) {
-    throw new BadRequestException('Der Titel darf nicht leer sein.');
+    throw new BadRequestException(
+      localized('Der Titel darf nicht leer sein.', 'The title must not be empty.'),
+    );
   }
   return title.trim();
 }

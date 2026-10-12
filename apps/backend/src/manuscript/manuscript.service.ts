@@ -16,6 +16,7 @@ import type {
 import { nowIso, transaction } from '../database/sqlite.js';
 import { ProjectService } from '../project/project.service.js';
 import { countAnnotations } from './annotations.js';
+import { localized } from '../i18n.js';
 
 /** Welche Knotenart unter welcher Elternart liegen darf (`null` = oberste Ebene). */
 const ALLOWED_PARENTS: Record<NodeKind, ReadonlyArray<NodeKind | null>> = {
@@ -92,7 +93,9 @@ export class ManuscriptService {
     let status = node.status;
     if (request?.status !== undefined) {
       if (node.kind !== 'scene') {
-        throw new BadRequestException('Nur Szenen haben einen Status.');
+        throw new BadRequestException(
+          localized('Nur Szenen haben einen Status.', 'Only scenes have a status.'),
+        );
       }
       status = requireStatus(request.status);
     }
@@ -125,7 +128,10 @@ export class ManuscriptService {
     const beforeId = request?.beforeId ?? null;
     if (parentId === id || beforeId === id) {
       throw new BadRequestException(
-        'Ein Element kann nicht in oder vor sich selbst verschoben werden.',
+        localized(
+          'Ein Element kann nicht in oder vor sich selbst verschoben werden.',
+          'An item cannot be moved into or before itself.',
+        ),
       );
     }
     this.assertValidParent(node.kind, parentId);
@@ -139,7 +145,12 @@ export class ManuscriptService {
 
       const index = beforeId === null ? siblings.length : siblings.indexOf(beforeId);
       if (index < 0) {
-        throw new BadRequestException('Das Bezugselement liegt nicht an der Zielposition.');
+        throw new BadRequestException(
+          localized(
+            'Das Bezugselement liegt nicht an der Zielposition.',
+            'The reference item is not at the target position.',
+          ),
+        );
       }
       siblings.splice(index, 0, id);
 
@@ -205,7 +216,7 @@ export class ManuscriptService {
   saveContent(nodeId: string, request: SaveDocumentRequest): SceneContent {
     const node = this.requireScene(nodeId);
     if (request?.doc?.type !== 'doc') {
-      throw new BadRequestException('Ungültiges Dokument.');
+      throw new BadRequestException(localized('Ungültiges Dokument.', 'Invalid document.'));
     }
     const wordCount =
       Number.isInteger(request.wordCount) && request.wordCount >= 0 ? request.wordCount : 0;
@@ -258,7 +269,7 @@ export class ManuscriptService {
       )
       .get(id) as NodeRow | undefined;
     if (!row) {
-      throw new NotFoundException('Element nicht gefunden.');
+      throw new NotFoundException(localized('Element nicht gefunden.', 'Item not found.'));
     }
     return toNode(row);
   }
@@ -294,7 +305,9 @@ export class ManuscriptService {
   requireScene(id: string): ManuscriptNode {
     const node = this.get(id);
     if (node.kind !== 'scene') {
-      throw new BadRequestException('Nur Szenen haben Textinhalt.');
+      throw new BadRequestException(
+        localized('Nur Szenen haben Textinhalt.', 'Only scenes have text content.'),
+      );
     }
     return node;
   }
@@ -303,7 +316,10 @@ export class ManuscriptService {
     const parentKind = parentId === null ? null : this.get(parentId).kind;
     if (!ALLOWED_PARENTS[kind].includes(parentKind)) {
       throw new BadRequestException(
-        `Ein Element vom Typ „${kind}“ kann hier nicht eingefügt werden.`,
+        localized(
+          `Ein Element vom Typ „${kind}“ kann hier nicht eingefügt werden.`,
+          `An item of type “${kind}” cannot be inserted here.`,
+        ),
       );
     }
   }
@@ -332,7 +348,7 @@ function annotationCounts(row: {
 
 function requireKind(kind: unknown): NodeKind {
   if (kind !== 'part' && kind !== 'chapter' && kind !== 'scene') {
-    throw new BadRequestException('Unbekannter Elementtyp.');
+    throw new BadRequestException(localized('Unbekannter Elementtyp.', 'Unknown item type.'));
   }
   return kind;
 }
@@ -341,14 +357,16 @@ const SCENE_STATUSES: readonly SceneStatus[] = ['idea', 'outline', 'draft', 'rev
 
 function requireStatus(status: unknown): SceneStatus {
   if (!SCENE_STATUSES.includes(status as SceneStatus)) {
-    throw new BadRequestException('Unbekannter Status.');
+    throw new BadRequestException(localized('Unbekannter Status.', 'Unknown status.'));
   }
   return status as SceneStatus;
 }
 
 function requireTitle(title: unknown): string {
   if (typeof title !== 'string' || !title.trim()) {
-    throw new BadRequestException('Der Titel darf nicht leer sein.');
+    throw new BadRequestException(
+      localized('Der Titel darf nicht leer sein.', 'The title must not be empty.'),
+    );
   }
   return title.trim();
 }

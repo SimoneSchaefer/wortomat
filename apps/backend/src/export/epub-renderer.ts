@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import type { Book, ExportOptions, ImageResolver, ResolvedImage } from './book.js';
 import { contentHtml, escapeHtml } from './html-renderer.js';
+import { type Localized, localized } from '../i18n.js';
 
 export interface EpubMeta {
   /** Bleibt für ein Buch über alle Exporte gleich, damit Reader Neuauflagen zuordnen können. */
@@ -61,8 +62,8 @@ export async function renderEpub(
   options: ExportOptions,
   images: ImageResolver,
   meta: EpubMeta,
-): Promise<{ data: Buffer; warnings: string[] }> {
-  const warnings: string[] = [];
+): Promise<{ data: Buffer; warnings: Localized[] }> {
+  const warnings: Localized[] = [];
   const zip = new JSZip();
   // Muss der erste Eintrag sein und unkomprimiert – daran erkennen Reader das Format.
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
@@ -86,8 +87,12 @@ export async function renderEpub(
         zip.file(`OEBPS/${fileName}`, image.data);
         manifest.push(item(id, fileName, image.mimeType));
       } else {
+        const format = image.mimeType.replace('image/', '').toUpperCase();
         warnings.push(
-          `Ein Bild (${image.mimeType.replace('image/', '').toUpperCase()}) können E-Book-Reader nicht anzeigen und wurde weggelassen.`,
+          localized(
+            `Ein Bild (${format}) können E-Book-Reader nicht anzeigen und wurde weggelassen.`,
+            `An image (${format}) cannot be displayed by e-book readers and was left out.`,
+          ),
         );
       }
     }
@@ -117,8 +122,12 @@ export async function renderEpub(
       addPage('cover', book.title, coverBody(`../${fileName}`, meta.cover, book.title), 'cover');
       hasCover = true;
     } else {
+      const format = meta.cover.mimeType.replace('image/', '').toUpperCase();
       warnings.push(
-        `Das Titelbild (${meta.cover.mimeType.replace('image/', '').toUpperCase()}) können E-Book-Reader nicht anzeigen und wurde weggelassen.`,
+        localized(
+          `Das Titelbild (${format}) können E-Book-Reader nicht anzeigen und wurde weggelassen.`,
+          `The cover image (${format}) cannot be displayed by e-book readers and was left out.`,
+        ),
       );
     }
   }

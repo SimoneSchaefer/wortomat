@@ -3,7 +3,6 @@ import { NOTE_KINDS } from '../notes/note-kinds';
 
 export interface HitGroup {
   kind: SearchHit['kind'];
-  label: string;
   hits: SearchHit[];
 }
 
@@ -17,7 +16,6 @@ const GROUP_ORDER: ReadonlyArray<SearchHit['kind']> = ['scene', 'character', 'pl
 export function groupHits(hits: readonly SearchHit[]): HitGroup[] {
   return GROUP_ORDER.map((kind) => ({
     kind,
-    label: kind === 'scene' ? 'Szenen' : NOTE_KINDS[kind].label,
     hits: hits.filter((hit) => hit.kind === kind),
   })).filter((group) => group.hits.length > 0);
 }

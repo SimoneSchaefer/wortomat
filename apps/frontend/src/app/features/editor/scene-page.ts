@@ -14,8 +14,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
-import { NEW_SCENE_TITLE, ProjectStore } from '../../core/project-store';
+import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from './document-editor';
 import { SceneLinks } from './scene-links';
@@ -32,7 +33,7 @@ const TITLE_SAVE_DELAY_MS = 600;
       <input
         #titleInput
         class="doc-title doc-input"
-        aria-label="Titel"
+        [attr.aria-label]="t().common.title"
         [value]="titleDraft()"
         (input)="onTitleInput($any($event.target).value)"
         (blur)="onTitleBlur()"
@@ -65,6 +66,7 @@ const TITLE_SAVE_DELAY_MS = 600;
 export class ScenePage {
   readonly id = input.required<string>();
 
+  protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   private readonly store = inject(ProjectStore);
   private readonly injector = inject(Injector);
@@ -103,8 +105,8 @@ export class ScenePage {
       untracked(() => {
         void this.flushTitle(); // Änderungen der vorherigen Szene
         this.error.set(null);
-        // Frisch angelegt? Dann gleich den Titel zum Überschreiben markieren.
-        if (this.store.findNode(id)?.title === NEW_SCENE_TITLE) {
+        // Frisch angelegt (Standardtitel)? Dann gleich den Titel zum Überschreiben markieren.
+        if (this.store.findNode(id)?.title === this.t().tree.newTitle.scene) {
           afterNextRender(
             () => {
               this.titleInput()?.nativeElement.focus();
@@ -142,7 +144,7 @@ export class ScenePage {
     try {
       await this.store.renameNode(pending.id, pending.title);
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 }

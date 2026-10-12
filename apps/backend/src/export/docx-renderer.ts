@@ -16,6 +16,7 @@ import {
 import type { ExportTemplate } from '@wortomat/shared';
 import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
 import { fitImage, normseitenLabel, printMarks } from './book.js';
+import { type Localized, localized } from '../i18n.js';
 
 /** Maße in Twips (1/20 Punkt; 1 cm = 567 Twips). */
 interface Layout {
@@ -91,9 +92,9 @@ export async function renderDocx(
   template: ExportTemplate,
   options: ExportOptions,
   images: ImageResolver,
-): Promise<{ data: Buffer; warnings: string[] }> {
+): Promise<{ data: Buffer; warnings: Localized[] }> {
   const layout = template === 'normseite' ? NORMSEITE : ROMAN;
-  const warnings: string[] = [];
+  const warnings: Localized[] = [];
   const textWidth = layout.page.width - layout.margin.left - layout.margin.right;
   const textHeight = layout.page.height - layout.margin.top - layout.margin.bottom;
   const ctx: Context = {
@@ -207,7 +208,7 @@ export async function renderDocx(
 interface Context {
   layout: Layout;
   images: ImageResolver;
-  warnings: string[];
+  warnings: Localized[];
   maxImage: { width: number; height: number };
   /** Einzug erst ab dem zweiten Absatz nach Überschrift oder Szenentrenner. */
   indentNext: boolean;
@@ -402,9 +403,12 @@ function imageParagraph(node: JsonNode, ctx: Context): Paragraph {
           ? 'gif'
           : null;
   if (!image || !type) {
-    const format = image ? image.mimeType.replace('image/', '').toUpperCase() : 'unbekannt';
+    const format = image?.mimeType.replace('image/', '').toUpperCase();
     ctx.warnings.push(
-      `Bild „${alt || 'ohne Namen'}“ (${format}) kann in Word nicht übernommen werden.`,
+      localized(
+        `Bild „${alt || 'ohne Namen'}“ (${format ?? 'unbekannt'}) kann in Word nicht übernommen werden.`,
+        `Image “${alt || 'unnamed'}” (${format ?? 'unknown'}) cannot be included in Word.`,
+      ),
     );
     return new Paragraph({
       alignment: AlignmentType.CENTER,

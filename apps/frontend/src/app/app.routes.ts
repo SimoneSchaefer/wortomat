@@ -1,5 +1,6 @@
 import type { Route, Routes } from '@angular/router';
 import type { NoteKind } from '@wortomat/shared';
+import type { Texts } from './core/i18n/i18n';
 import { noProjectGuard, projectOpenGuard } from './core/project.guards';
 import { NOTE_KINDS } from './features/notes/note-kinds';
 
@@ -13,7 +14,7 @@ function noteRoutes(kind: NoteKind): Route[] {
       path: config.path,
       loadComponent: emptyState,
       data: {
-        message: `Wähle links einen Eintrag aus – oder lege mit „${config.addLabel}“ einen neuen an.`,
+        message: (t: Texts) => t.workspace.chooseNote(t.noteKinds[kind].addLabel),
       },
     },
     {
@@ -39,9 +40,7 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: emptyState,
-        data: {
-          message: 'Wähle links eine Szene aus – oder lege mit „+“ an einem Kapitel eine neue an.',
-        },
+        data: { message: (t: Texts) => t.workspace.chooseScene },
       },
       {
         path: 'scene/:id',

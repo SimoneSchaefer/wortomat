@@ -1,4 +1,3 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -6,6 +5,7 @@ import type { NoteKind } from '@wortomat/shared';
 import { filter, map } from 'rxjs';
 import { AppSettingsStore } from '../../core/app-settings';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
@@ -24,18 +24,13 @@ const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
 
 interface MenuItem {
   section: Section;
-  label: string;
   /** Wohin der Menüpunkt führt, solange dort noch nichts geöffnet war. */
   url: string;
 }
 
 const MENU: readonly MenuItem[] = [
-  { section: 'manuscript', label: 'Manuskript', url: '/write' },
-  ...NOTE_KIND_LIST.map((config) => ({
-    section: config.kind,
-    label: config.label,
-    url: `/write/${config.path}`,
-  })),
+  { section: 'manuscript', url: '/write' },
+  ...NOTE_KIND_LIST.map((config) => ({ section: config.kind, url: `/write/${config.path}` })),
 ];
 
 @Component({
@@ -43,7 +38,6 @@ const MENU: readonly MenuItem[] = [
   imports: [
     RouterOutlet,
     RouterLink,
-    DecimalPipe,
     ManuscriptTree,
     NoteList,
     GlobalSearch,
@@ -58,6 +52,7 @@ const MENU: readonly MenuItem[] = [
 })
 export class WorkspacePage {
   private readonly router = inject(Router);
+  protected readonly t = inject(I18n).t;
   private readonly pendingSaves = inject(PendingSaves);
   protected readonly store = inject(ProjectStore);
   protected readonly notes = inject(NotesStore);
@@ -89,9 +84,7 @@ export class WorkspacePage {
     { initialValue: this.router.url },
   );
   protected readonly section = computed(() => sectionOf(this.url()));
-  protected readonly sectionLabel = computed(
-    () => MENU.find((item) => item.section === this.section())?.label ?? '',
-  );
+  protected readonly sectionLabel = computed(() => this.labelOf(this.section()));
   protected readonly noteKind = computed(() => {
     const section = this.section();
     return section === 'manuscript' ? null : section;
@@ -101,7 +94,12 @@ export class WorkspacePage {
 
   constructor() {
     effect(() => this.lastUrls.set(this.section(), this.url()));
-    this.notes.load().catch((error: unknown) => this.error.set(errorMessage(error)));
+    this.notes.load().catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
+  }
+
+  protected labelOf(section: Section): string {
+    const t = this.t();
+    return section === 'manuscript' ? t.workspace.manuscript : t.noteKinds[section].label;
   }
 
   protected onWindowResize(): void {
@@ -120,7 +118,7 @@ export class WorkspacePage {
       await this.store.close();
       await this.router.navigate(['/']);
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 }

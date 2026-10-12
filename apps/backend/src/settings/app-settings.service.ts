@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import type { AppSettings, QuoteStyle, UpdateAppSettingsRequest } from '@wortomat/shared';
+import type { AppSettings, Language, QuoteStyle, UpdateAppSettingsRequest } from '@wortomat/shared';
+import { localized } from '../i18n.js';
 import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 
 const SETTINGS_FILE = 'settings.json';
@@ -9,7 +10,9 @@ export const SIDEBAR_WIDTH_LIMITS = { min: 150, max: 1000 } as const;
 
 const QUOTE_STYLES: readonly QuoteStyle[] = ['de', 'de-guillemets', 'ch', 'en', 'fr', 'off'];
 
-const DEFAULTS: AppSettings = { sidebarWidth: null, quoteStyle: 'de' };
+const LANGUAGES: readonly Language[] = ['de', 'en'];
+
+const DEFAULTS: AppSettings = { language: null, sidebarWidth: null, quoteStyle: 'de' };
 
 /**
  * Einstellungen der App, unabhängig vom geöffneten Buch, als JSON im App-Datenordner.
@@ -40,13 +43,27 @@ export class AppSettingsService {
 
   update(request: UpdateAppSettingsRequest): AppSettings {
     const next: AppSettings = { ...this.get() };
+    if (request?.language !== undefined) {
+      if (request.language !== null && !isLanguage(request.language)) {
+        throw new BadRequestException(
+          localized(
+            `Unbekannte Sprache: ${String(request.language)}`,
+            `Unknown language: ${String(request.language)}`,
+          ),
+        );
+      }
+      next.language = request.language;
+    }
     if (request?.sidebarWidth !== undefined) {
       next.sidebarWidth = requireSidebarWidth(request.sidebarWidth);
     }
     if (request?.quoteStyle !== undefined) {
       if (!isQuoteStyle(request.quoteStyle)) {
         throw new BadRequestException(
-          `Unbekannte Anführungszeichen: ${String(request.quoteStyle)}`,
+          localized(
+            `Unbekannte Anführungszeichen: ${String(request.quoteStyle)}`,
+            `Unknown quote style: ${String(request.quoteStyle)}`,
+          ),
         );
       }
       next.quoteStyle = request.quoteStyle;
@@ -63,10 +80,15 @@ export class AppSettingsService {
 /** Unbekannte oder ungültige Werte aus der Datei ignorieren. */
 function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
   const result: Partial<AppSettings> = {};
+  if (isLanguage(stored?.language)) result.language = stored.language;
   const width = stored?.sidebarWidth;
   if (isValidWidth(width)) result.sidebarWidth = Math.round(width);
   if (isQuoteStyle(stored?.quoteStyle)) result.quoteStyle = stored.quoteStyle;
   return result;
+}
+
+function isLanguage(value: unknown): value is Language {
+  return LANGUAGES.includes(value as Language);
 }
 
 function isQuoteStyle(value: unknown): value is QuoteStyle {
@@ -76,8 +98,12 @@ function isQuoteStyle(value: unknown): value is QuoteStyle {
 function requireSidebarWidth(value: unknown): number | null {
   if (value === null) return null;
   if (!isValidWidth(value)) {
+    const { min, max } = SIDEBAR_WIDTH_LIMITS;
     throw new BadRequestException(
-      `Die Breite muss zwischen ${SIDEBAR_WIDTH_LIMITS.min} und ${SIDEBAR_WIDTH_LIMITS.max} Pixeln liegen.`,
+      localized(
+        `Die Breite muss zwischen ${min} und ${max} Pixeln liegen.`,
+        `The width must be between ${min} and ${max} pixels.`,
+      ),
     );
   }
   return Math.round(value);

@@ -7,12 +7,14 @@ import {
   Get,
   HttpCode,
   Post,
+  Req,
   Res,
   StreamableFile,
 } from '@nestjs/common';
 import type { ExportCapabilities, ExportRequest, ExportResult } from '@wortomat/shared';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { ExportService } from './export.service.js';
+import { localized, requestLanguage } from '../i18n.js';
 
 @Controller('export')
 export class ExportController {
@@ -33,13 +35,21 @@ export class ExportController {
   @HttpCode(200)
   async export(
     @Body() body: ExportRequest,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<ExportResult | StreamableFile> {
     const file = await this.exporter.export(body);
+    const language = requestLanguage(req);
+    const warnings = file.warnings.map((warning) => warning[language]);
 
     if (body.filePath !== undefined) {
       if (typeof body.filePath !== 'string' || !path.isAbsolute(body.filePath)) {
-        throw new BadRequestException('Bitte einen vollständigen Dateipfad angeben.');
+        throw new BadRequestException(
+          localized(
+            'Bitte einen vollständigen Dateipfad angeben.',
+            'Please specify a complete file path.',
+          ),
+        );
       }
       const extension = `.${file.extension}`;
       const filePath = body.filePath.toLowerCase().endsWith(extension)
@@ -47,14 +57,14 @@ export class ExportController {
         : body.filePath + extension;
       await mkdir(path.dirname(filePath), { recursive: true });
       await writeFile(filePath, file.data);
-      return { filePath, warnings: file.warnings };
+      return { filePath, warnings };
     }
 
     res.setHeader(
       'Content-Disposition',
       `attachment; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
     );
-    res.setHeader('X-Export-Warnings', encodeURIComponent(JSON.stringify(file.warnings)));
+    res.setHeader('X-Export-Warnings', encodeURIComponent(JSON.stringify(warnings)));
     return new StreamableFile(file.data, { type: file.mimeType, length: file.data.length });
   }
 }

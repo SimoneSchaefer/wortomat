@@ -29,8 +29,8 @@
               <button
                 type="button"
                 class="remove"
-                [attr.aria-label]="chip.title + ' aus dieser Szene entfernen'"
-                title="Aus dieser Szene entfernen"
+                [attr.aria-label]="t().sceneLinks.removeLabel(chip.title)"
+                [title]="t().sceneLinks.remove"
                 (click)="remove(row, chip)"
               >
                 ×
@@ -42,8 +42,8 @@
           type="button"
           class="scroll-button left"
           tabindex="-1"
-          aria-label="Nach links scrollen"
-          title="Nach links – gedrückt halten zum Weiterscrollen"
+          [attr.aria-label]="t().sceneLinks.scrollLeft"
+          [title]="t().sceneLinks.scrollLeftHint"
           [class.visible]="list.canScrollLeft()"
           (pointerdown)="list.start(-1, $event)"
         >
@@ -53,8 +53,8 @@
           type="button"
           class="scroll-button right"
           tabindex="-1"
-          aria-label="Nach rechts scrollen"
-          title="Nach rechts – gedrückt halten zum Weiterscrollen"
+          [attr.aria-label]="t().sceneLinks.scrollRight"
+          [title]="t().sceneLinks.scrollRightHint"
           [class.visible]="list.canScrollRight()"
           (pointerdown)="list.start(1, $event)"
         >
@@ -68,20 +68,20 @@
         class="add"
         [class.open]="pickerTarget() === row.target"
         [attr.aria-expanded]="pickerTarget() === row.target"
-        [title]="row.singular + ' hinzufügen'"
+        [title]="t().sceneLinks.add(row.singular)"
         (click)="openPicker(row.target)"
       >
         +
       </button>
 
       @if (pickerTarget() === row.target) {
-        <div class="picker" role="dialog" [attr.aria-label]="row.singular + ' hinzufügen'">
+        <div class="picker" role="dialog" [attr.aria-label]="t().sceneLinks.add(row.singular)">
           <input
             wmAutofocus
             role="combobox"
             aria-autocomplete="list"
             [attr.aria-activedescendant]="'option-' + activeIndex()"
-            [placeholder]="row.singular + ' suchen oder neu …'"
+            [placeholder]="t().sceneLinks.search(row.singular)"
             [value]="query()"
             (input)="onQuery($any($event.target).value)"
             (keydown)="onPickerKeydown($event)"
@@ -108,7 +108,9 @@
                   <span class="option-text">
                     <span><span class="hash">#</span>{{ option.tag.name }}</span>
                   </span>
-                  <small class="count">{{ sceneCountLabel(option.tag.sceneCount) }}</small>
+                  <small class="count">{{
+                    t().sceneLinks.sceneCount(option.tag.sceneCount)
+                  }}</small>
                 } @else {
                   <span class="create">+ {{ createLabel(option.title) }}</span>
                 }

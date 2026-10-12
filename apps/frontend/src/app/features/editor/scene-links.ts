@@ -15,6 +15,7 @@ import type { NoteKind, NoteSummary, Tag, TagSummary } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
 import { HorizontalScroll } from '../../core/horizontal-scroll';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NoteAvatar } from '../notes/note-avatar';
 import { NOTE_KIND_LIST, NOTE_KINDS } from '../notes/note-kinds';
@@ -60,6 +61,7 @@ type Option =
 export class SceneLinks {
   readonly sceneId = input.required<string>();
 
+  protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   private readonly store = inject(NotesStore);
   private readonly router = inject(Router);
@@ -76,8 +78,8 @@ export class SceneLinks {
   protected readonly rows = computed<Row[]>(() => [
     ...NOTE_KIND_LIST.filter((config) => config.linkable).map((config) => ({
       target: config.kind,
-      label: config.label,
-      singular: config.singular,
+      label: this.t().noteKinds[config.kind].label,
+      singular: this.t().noteKinds[config.kind].singular,
       chips: this.store
         .byKind(config.kind)
         .filter((note) => this.linkedIds().has(note.id))
@@ -85,8 +87,8 @@ export class SceneLinks {
     })),
     {
       target: 'tag' as const,
-      label: 'Tags',
-      singular: 'Tag',
+      label: this.t().sceneLinks.tags,
+      singular: this.t().sceneLinks.tag,
       chips: this.tags().map((tag) => ({ id: tag.id, title: tag.name })),
     },
   ]);
@@ -133,14 +135,13 @@ export class SceneLinks {
   protected readonly emptyHint = computed(() => {
     const target = this.pickerTarget();
     if (!target) return '';
+    const t = this.t();
     if (target === 'tag') {
-      return this.allTags().length
-        ? 'Alle Tags sind schon vergeben – tippe einen neuen.'
-        : 'Noch keine Tags – tippe einen, um ihn anzulegen.';
+      return this.allTags().length ? t.sceneLinks.allTagsUsed : t.sceneLinks.noTags;
     }
     return this.store.byKind(target).length
-      ? 'Alle sind schon verknüpft – tippe einen Namen, um neu anzulegen.'
-      : `Noch keine ${NOTE_KINDS[target].label} – tippe einen Namen, um anzulegen.`;
+      ? t.sceneLinks.allLinked
+      : t.noteKinds[target].pickerEmpty;
   });
 
   private loadCounter = 0;
@@ -168,7 +169,7 @@ export class SceneLinks {
       this.setLinked(notes);
       this.tags.set(tags);
     } catch (error) {
-      if (loadId === this.loadCounter) this.error.set(errorMessage(error));
+      if (loadId === this.loadCounter) this.error.set(errorMessage(error, this.t()));
     }
   }
 
@@ -270,12 +271,8 @@ export class SceneLinks {
   protected createLabel(title: string): string {
     const target = this.pickerTarget();
     if (!target) return '';
-    const what = target === 'tag' ? 'neuen Tag' : NOTE_KINDS[target].newAccusative;
-    return `„${title}“ als ${what} anlegen`;
-  }
-
-  protected sceneCountLabel(count: number): string {
-    return count === 1 ? '1 Szene' : `${count} Szenen`;
+    const t = this.t();
+    return target === 'tag' ? t.sceneLinks.createTag(title) : t.noteKinds[target].create(title);
   }
 
   private setLinked(notes: NoteSummary[]): void {
@@ -287,7 +284,7 @@ export class SceneLinks {
     try {
       await action();
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 }

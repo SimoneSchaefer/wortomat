@@ -1,6 +1,7 @@
 import { Component, computed, ElementRef, inject, input, signal } from '@angular/core';
 import type { ManuscriptNode, SceneStatus } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { SCENE_STATUSES, statusInfo } from '../../core/scene-status';
 import { StatusIcon } from '../../core/status-icon';
@@ -18,6 +19,7 @@ import { StatusIcon } from '../../core/status-icon';
 export class SceneStatusPicker {
   readonly node = input.required<ManuscriptNode>();
 
+  protected readonly t = inject(I18n).t;
   private readonly store = inject(ProjectStore);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
@@ -32,7 +34,7 @@ export class SceneStatusPicker {
     try {
       await this.store.setStatus(this.node().id, status);
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 

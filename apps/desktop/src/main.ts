@@ -4,17 +4,20 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { AUTH_HEADER, type RunningServer, startServer } from '@wortomat/backend';
+import type { Language } from '@wortomat/shared';
 import {
   app,
   BrowserWindow,
   dialog,
   ipcMain,
+  type IpcMainEvent,
   type IpcMainInvokeEvent,
   Menu,
   session,
   shell,
 } from 'electron';
 import { IPC } from './ipc.js';
+import { isLanguage, systemLanguage, TEXTS } from './texts.js';
 
 const isDev = process.argv.includes('--dev');
 /** Im Dev-Modus kommt das Frontend vom Angular-Dev-Server (mit Live-Reload). */
@@ -23,7 +26,6 @@ const DEV_FRONTEND_URL = 'http://localhost:4200';
 const DEV_BACKEND_PORT = 3000;
 /** So lange warten wir beim Schließen höchstens auf das Speichern im Frontend. */
 const FLUSH_TIMEOUT_MS = 5000;
-const PROJECT_FILTERS = [{ name: 'Wortomat-Projekt', extensions: ['wortomat'] }];
 
 const appDir = path.dirname(fileURLToPath(import.meta.url));
 const token = randomBytes(32).toString('base64url');
@@ -35,6 +37,21 @@ let mainWindow: BrowserWindow | null = null;
 let pendingProjectPath = findProjectPath(process.argv);
 /** Läuft, bis das Backend gestartet und das Fenster erzeugt ist. */
 let starting: Promise<void> | null = null;
+/** Sprache der Oberfläche, vom Frontend gemeldet; bis dahin die des Systems. */
+let language: Language | null = null;
+
+/** Erst nach `ready` aufrufen (vorher kennt Electron die Systemsprache nicht). */
+function currentLanguage(): Language {
+  return language ?? systemLanguage(app.getPreferredSystemLanguages());
+}
+
+function texts() {
+  return TEXTS[currentLanguage()];
+}
+
+function projectFilters() {
+  return [{ name: texts().projectFile, extensions: ['wortomat'] }];
+}
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -64,7 +81,7 @@ if (!app.requestSingleInstanceLock()) {
     .whenReady()
     .then(start)
     .catch((error: unknown) => {
-      dialog.showErrorBox('Wortomat konnte nicht gestartet werden', String(error));
+      dialog.showErrorBox(texts().startFailed, String(error));
       app.exit(1);
     });
 }
@@ -146,22 +163,23 @@ function createMainWindow(): BrowserWindow {
       label: suggestion,
       click: () => window.webContents.replaceMisspelling(suggestion),
     }));
+    const t = texts();
     const menu = Menu.buildFromTemplate([
       ...suggestions,
       ...(params.misspelledWord
         ? [
             {
-              label: 'Zum Wörterbuch hinzufügen',
+              label: t.addToDictionary,
               click: () =>
                 session.defaultSession.addWordToSpellCheckerDictionary(params.misspelledWord),
             },
             { type: 'separator' as const },
           ]
         : []),
-      { role: 'cut', label: 'Ausschneiden', enabled: params.editFlags.canCut },
-      { role: 'copy', label: 'Kopieren', enabled: params.editFlags.canCopy },
-      { role: 'paste', label: 'Einfügen', enabled: params.editFlags.canPaste },
-      { role: 'selectAll', label: 'Alles auswählen' },
+      { role: 'cut', label: t.cut, enabled: params.editFlags.canCut },
+      { role: 'copy', label: t.copy, enabled: params.editFlags.canCopy },
+      { role: 'paste', label: t.paste, enabled: params.editFlags.canPaste },
+      { role: 'selectAll', label: t.selectAll },
     ]);
     menu.popup({ window });
   });
@@ -230,9 +248,9 @@ function registerIpcHandlers(): void {
   ipcMain.handle(IPC.openProjectDialog, async (event) => {
     const window = trustedWindow(event);
     const result = await dialog.showOpenDialog(window, {
-      title: 'Projekt öffnen',
+      title: texts().openProject,
       properties: ['openFile'],
-      filters: PROJECT_FILTERS,
+      filters: projectFilters(),
     });
     return result.canceled ? null : (result.filePaths[0] ?? null);
   });
@@ -241,9 +259,12 @@ function registerIpcHandlers(): void {
     const window = trustedWindow(event);
     const name = typeof suggestedName === 'string' ? sanitizeFileName(suggestedName) : '';
     const result = await dialog.showSaveDialog(window, {
-      title: 'Neues Projekt anlegen',
-      defaultPath: path.join(app.getPath('documents'), `${name || 'Neues Buch'}.wortomat`),
-      filters: PROJECT_FILTERS,
+      title: texts().createProject,
+      defaultPath: path.join(
+        app.getPath('documents'),
+        `${name || texts().defaultProjectName}.wortomat`,
+      ),
+      filters: projectFilters(),
       properties: ['createDirectory', 'showOverwriteConfirmation'],
     });
     return result.canceled ? null : (result.filePath ?? null);
@@ -252,15 +273,20 @@ function registerIpcHandlers(): void {
   ipcMain.handle(IPC.exportDialog, async (event, suggestedName: unknown, format: unknown) => {
     const window = trustedWindow(event);
     const target = EXPORT_FORMATS[format as keyof typeof EXPORT_FORMATS];
-    if (!target) throw new Error('Unbekanntes Exportformat.');
+    if (!target) throw new Error(texts().unknownExportFormat);
     const name = typeof suggestedName === 'string' ? sanitizeFileName(suggestedName) : '';
     const result = await dialog.showSaveDialog(window, {
-      title: 'Manuskript exportieren',
+      title: texts().exportManuscript,
       defaultPath: path.join(
         app.getPath('documents'),
-        `${name || 'Manuskript'}.${target.extension}`,
+        `${name || texts().defaultExportName}.${target.extension}`,
       ),
-      filters: [{ name: target.label, extensions: [target.extension] }],
+      filters: [
+        {
+          name: texts().exportFormats[format as keyof typeof EXPORT_FORMATS],
+          extensions: [target.extension],
+        },
+      ],
       properties: ['createDirectory', 'showOverwriteConfirmation'],
     });
     return result.canceled ? null : (result.filePath ?? null);
@@ -276,13 +302,17 @@ function registerIpcHandlers(): void {
     trustedWindow(event);
     shell.showItemInFolder(requireExportedFile(filePath));
   });
+
+  ipcMain.on(IPC.setLanguage, (event, value: unknown) => {
+    if (isTrusted(event) && isLanguage(value)) language = value;
+  });
 }
 
 const EXPORT_FORMATS = {
-  html: { extension: 'html', label: 'Webseite (HTML)' },
-  docx: { extension: 'docx', label: 'Word-Dokument' },
-  pdf: { extension: 'pdf', label: 'PDF-Dokument' },
-  epub: { extension: 'epub', label: 'E-Book (EPUB)' },
+  html: { extension: 'html' },
+  docx: { extension: 'docx' },
+  pdf: { extension: 'pdf' },
+  epub: { extension: 'epub' },
 } as const;
 
 /**
@@ -297,7 +327,7 @@ function requireExportedFile(filePath: unknown): string {
     !/\.(html|docx|pdf|epub)$/i.test(filePath) ||
     !existsSync(filePath)
   ) {
-    throw new Error('Diese Datei kann nicht geöffnet werden.');
+    throw new Error(texts().cannotOpenFile);
   }
   return filePath;
 }
@@ -305,23 +335,31 @@ function requireExportedFile(filePath: unknown): string {
 /** IPC nur von unserer eigenen Seite akzeptieren. */
 function trustedWindow(event: IpcMainInvokeEvent): BrowserWindow {
   const window = BrowserWindow.fromWebContents(event.sender);
-  const frameUrl = event.senderFrame?.url;
-  if (!window || !frameUrl || new URL(frameUrl).origin !== new URL(appUrl).origin) {
+  if (!window || !isTrusted(event)) {
     throw new Error('IPC-Aufruf von unbekannter Herkunft abgelehnt.');
   }
   return window;
 }
 
+function isTrusted(event: IpcMainInvokeEvent | IpcMainEvent): boolean {
+  const frameUrl = event.senderFrame?.url;
+  return !!frameUrl && new URL(frameUrl).origin === new URL(appUrl).origin;
+}
+
 async function callBackend(urlPath: string, body: unknown): Promise<void> {
-  if (!server) throw new Error('Backend läuft nicht.');
+  if (!server) throw new Error(texts().backendNotRunning);
   const response = await fetch(server.url + urlPath, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', [AUTH_HEADER]: token },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept-Language': currentLanguage(),
+      [AUTH_HEADER]: token,
+    },
     body: JSON.stringify(body),
   });
   if (!response.ok) {
     const { message } = (await response.json().catch(() => ({}))) as { message?: string };
-    throw new Error(message ?? `Fehler ${response.status}`);
+    throw new Error(message ?? texts().status(response.status));
   }
 }
 

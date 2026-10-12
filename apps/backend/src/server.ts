@@ -2,11 +2,12 @@ import 'reflect-metadata';
 import { existsSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import path from 'node:path';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ExpressAdapter, type NestExpressApplication } from '@nestjs/platform-express';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module.js';
 import type { ServerOptions } from './config.js';
+import { LocalizedExceptionFilter } from './i18n.js';
 import { localAccessMiddleware } from './security/local-access.middleware.js';
 
 export { AUTH_HEADER, type ServerOptions } from './config.js';
@@ -35,6 +36,8 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
   app.useBodyParser('json', { limit: '50mb' });
   app.use(localAccessMiddleware(options.token));
   app.setGlobalPrefix('api');
+  // Fehlermeldungen in der Sprache der Oberfläche
+  app.useGlobalFilters(new LocalizedExceptionFilter(app.get(HttpAdapterHost).httpAdapter));
 
   if (options.staticDir) {
     serveFrontend(app, options.staticDir);

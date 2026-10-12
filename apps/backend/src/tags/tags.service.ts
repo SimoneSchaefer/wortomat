@@ -4,6 +4,7 @@ import type { Tag, TagSummary } from '@wortomat/shared';
 import { transaction } from '../database/sqlite.js';
 import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { ProjectService } from '../project/project.service.js';
+import { localized } from '../i18n.js';
 
 const MAX_TAG_LENGTH = 40;
 const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
@@ -94,10 +95,17 @@ export function normalizeTagName(raw: unknown): string {
   const name =
     typeof raw === 'string' ? raw.trim().replace(/^#+/, '').replace(/\s+/g, ' ').trim() : '';
   if (!name) {
-    throw new BadRequestException('Bitte einen Tag-Namen angeben.');
+    throw new BadRequestException(
+      localized('Bitte einen Tag-Namen angeben.', 'Please specify a tag name.'),
+    );
   }
   if (name.length > MAX_TAG_LENGTH) {
-    throw new BadRequestException(`Tags dürfen höchstens ${MAX_TAG_LENGTH} Zeichen lang sein.`);
+    throw new BadRequestException(
+      localized(
+        `Tags dürfen höchstens ${MAX_TAG_LENGTH} Zeichen lang sein.`,
+        `Tags can be at most ${MAX_TAG_LENGTH} characters long.`,
+      ),
+    );
   }
   return name;
 }

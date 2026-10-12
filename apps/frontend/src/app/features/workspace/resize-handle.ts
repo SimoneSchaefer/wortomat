@@ -1,4 +1,5 @@
 import { Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { I18n } from '../../core/i18n/i18n';
 
 const KEY_STEP = 16;
 const KEY_STEP_LARGE = 64;
@@ -20,7 +21,7 @@ const KEY_STEP_LARGE = 64;
     '[attr.aria-valuenow]': 'value()',
     '[attr.aria-valuemin]': 'min()',
     '[attr.aria-valuemax]': 'max()',
-    title: 'Ziehen, um die Breite zu ändern – Doppelklick setzt sie zurück',
+    '[attr.title]': 't().workspace.resizeHint',
     '(pointerdown)': 'onPointerDown($event)',
     '(keydown)': 'onKeydown($event)',
     '(dblclick)': 'reset.emit()',
@@ -31,12 +32,13 @@ export class ResizeHandle {
   readonly value = input.required<number>();
   readonly min = input.required<number>();
   readonly max = input.required<number>();
-  readonly label = input('Breite ändern');
+  readonly label = input.required<string>();
 
   /** Neue Breite (bereits auf min/max begrenzt). */
   readonly resized = output<number>();
   readonly reset = output<void>();
 
+  protected readonly t = inject(I18n).t;
   protected readonly dragging = signal(false);
   private stopDragging: (() => void) | null = null;
 

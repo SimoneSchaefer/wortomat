@@ -2,6 +2,7 @@ import { BadRequestException, Body, Controller, Get, HttpCode, Post } from '@nes
 import type { ForgetProjectRequest, ProjectListEntry } from '@wortomat/shared';
 import { ProjectService } from './project.service.js';
 import { RecentProjectsService } from './recent-projects.service.js';
+import { localized } from '../i18n.js';
 
 /** Liste aller bekannten Projekte für die Startseite. */
 @Controller('projects')
@@ -21,7 +22,9 @@ export class ProjectsController {
   @HttpCode(204)
   forget(@Body() body: ForgetProjectRequest): void {
     if (typeof body?.filePath !== 'string' || !body.filePath) {
-      throw new BadRequestException('Bitte einen Dateipfad angeben.');
+      throw new BadRequestException(
+        localized('Bitte einen Dateipfad angeben.', 'Please specify a file path.'),
+      );
     }
     this.recent.forget(body.filePath);
   }

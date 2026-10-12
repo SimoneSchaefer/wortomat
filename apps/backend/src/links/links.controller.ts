@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import type { LinkNoteRequest, NoteSummary, SceneReference } from '@wortomat/shared';
 import { LinksService } from './links.service.js';
+import { localized } from '../i18n.js';
 
 @Controller()
 export class LinksController {
@@ -16,7 +17,9 @@ export class LinksController {
   @Post('scenes/:id/links')
   link(@Param('id') sceneId: string, @Body() body: LinkNoteRequest): NoteSummary[] {
     if (typeof body?.noteId !== 'string' || !body.noteId) {
-      throw new BadRequestException('Bitte eine Notiz angeben.');
+      throw new BadRequestException(
+        localized('Bitte eine Notiz angeben.', 'Please specify a note.'),
+      );
     }
     return this.links.link(sceneId, body.noteId);
   }

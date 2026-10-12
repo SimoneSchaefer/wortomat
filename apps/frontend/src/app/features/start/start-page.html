@@ -1,7 +1,7 @@
 <main class="start">
   <header>
     <h1>Wortomat</h1>
-    <p class="muted">Dein Buch. Deine Datei. Kein Server.</p>
+    <p class="muted">{{ t().start.tagline }}</p>
   </header>
 
   @if (error(); as message) {
@@ -10,10 +10,10 @@
 
   <section class="card">
     <div class="section-head">
-      <h2>Meine Bücher</h2>
+      <h2>{{ t().start.myBooks }}</h2>
       @if (desktop) {
         <button type="button" class="link" (click)="openProject()" [disabled]="busy()">
-          Andere Datei öffnen …
+          {{ t().start.openOtherFile }}
         </button>
       }
     </div>
@@ -32,10 +32,10 @@
               <span class="book-title">{{ project.title }}</span>
               <span class="book-meta">
                 @if (project.available) {
-                  {{ project.wordCount | number }} Wörter · bearbeitet
-                  {{ relativeTime(project.updatedAt ?? project.lastOpenedAt) }}
+                  {{ t().words(project.wordCount) }} ·
+                  {{ t().start.edited(relativeTime(project.updatedAt ?? project.lastOpenedAt)) }}
                 } @else {
-                  Datei nicht gefunden – verschoben oder gelöscht?
+                  {{ t().start.missing }}
                 }
               </span>
               <span class="book-path">{{ project.filePath }}</span>
@@ -43,62 +43,66 @@
             <button
               type="button"
               class="forget"
-              title="Aus der Liste entfernen (die Datei bleibt erhalten)"
-              [attr.aria-label]="project.title + ' aus der Liste entfernen'"
+              [title]="t().start.forgetHint"
+              [attr.aria-label]="t().start.forgetLabel(project.title)"
               (click)="forget(project)"
             >
               ×
             </button>
           </li>
         } @empty {
-          <li class="muted empty">Noch keine Bücher – leg unten dein erstes an.</li>
+          <li class="muted empty">{{ t().start.empty }}</li>
         }
       </ul>
     } @else if (projects.error()) {
-      <p class="error">Die Liste konnte nicht geladen werden.</p>
+      <p class="error">{{ t().start.listFailed }}</p>
     } @else {
-      <p class="muted">Lade …</p>
+      <p class="muted">{{ t().common.loading }}</p>
     }
   </section>
 
   <section class="card">
-    <h2>Neues Buch beginnen</h2>
+    <h2>{{ t().start.newBook }}</h2>
     <form (ngSubmit)="createProject()">
       <label>
-        Titel
-        <input name="title" [(ngModel)]="title" placeholder="z. B. Die Häuser am Fluss" />
+        {{ t().common.title }}
+        <input name="title" [(ngModel)]="title" [placeholder]="t().start.titlePlaceholder" />
       </label>
       @if (!desktop) {
         <label>
-          Speicherort
+          {{ t().start.location }}
           <input name="newPath" [(ngModel)]="newPath" />
         </label>
       }
       <button class="primary" type="submit" [disabled]="busy()">
-        {{ desktop ? 'Anlegen …' : 'Anlegen' }}
+        {{ desktop ? t().start.createWithDialog : t().start.create }}
       </button>
     </form>
   </section>
 
   @if (!desktop) {
     <section class="card">
-      <h2>Andere Datei öffnen</h2>
+      <h2>{{ t().start.openOtherHeading }}</h2>
       <form (ngSubmit)="openProject()">
         <label>
-          Pfad zur .wortomat-Datei
+          {{ t().start.path }}
           <input name="openPath" [(ngModel)]="openPath" />
         </label>
-        <button type="submit" [disabled]="busy() || !openPath().trim()">Öffnen</button>
+        <button type="submit" [disabled]="busy() || !openPath().trim()">
+          {{ t().start.open }}
+        </button>
       </form>
     </section>
   }
 
   <footer class="muted">
-    <button type="button" class="link" routerLink="/settings">Einstellungen</button>
+    <button type="button" class="link" routerLink="/settings">
+      {{ t().common.settings }}
+    </button>
     @if (appInfo.value(); as info) {
-      · Version {{ info.version }}
+      · {{ t().start.version(info.version) }}
       @if (info.mode === 'browser') {
-        · Browser-Modus (Entwicklung)
+        · {{ t().start.browserMode }}
       }
     }
   </footer>

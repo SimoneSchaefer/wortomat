@@ -3,17 +3,23 @@
   <header class="topbar">
     <div class="book" [title]="store.project()?.filePath ?? ''">
       <span class="book-title">{{ store.project()?.title }}</span>
-      <span class="muted">{{ store.totalWords() | number }} Wörter</span>
+      <span class="muted">{{ t().words(store.totalWords()) }}</span>
     </div>
     <wm-global-search />
     <div class="top-actions">
-      <button type="button" class="link" (click)="exportDialog.open()">Exportieren …</button>
-      <button type="button" class="link" routerLink="/settings">Einstellungen</button>
-      <button type="button" class="link" (click)="closeProject()">Projekt schließen</button>
+      <button type="button" class="link" (click)="exportDialog.open()">
+        {{ t().workspace.export }}
+      </button>
+      <button type="button" class="link" routerLink="/settings">
+        {{ t().common.settings }}
+      </button>
+      <button type="button" class="link" (click)="closeProject()">
+        {{ t().workspace.closeProject }}
+      </button>
     </div>
   </header>
 
-  <nav class="rail" aria-label="Bereiche">
+  <nav class="rail" [attr.aria-label]="t().workspace.sections">
     @for (item of menu; track item.section) {
       <button
         type="button"
@@ -44,7 +50,7 @@
             }
           }
         </svg>
-        <span>{{ item.label }}</span>
+        <span>{{ labelOf(item.section) }}</span>
       </button>
     }
   </nav>
@@ -63,7 +69,7 @@
     }
 
     <wm-resize-handle
-      label="Breite der Seitenleiste"
+      [label]="t().workspace.sidebarWidth"
       [value]="sidebarWidth()"
       [min]="minSidebarWidth"
       [max]="maxSidebarWidth()"

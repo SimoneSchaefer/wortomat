@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import type { ImageInfo, ImageMimeType } from '@wortomat/shared';
 import { nowIso } from '../database/sqlite.js';
 import { ProjectService } from '../project/project.service.js';
+import { localized } from '../i18n.js';
 
 export const MAX_IMAGE_BYTES = 30 * 1024 * 1024;
 
@@ -28,13 +29,18 @@ export class ImagesService {
 
   save(upload: UploadedImage): ImageInfo {
     if (!upload.buffer?.length) {
-      throw new BadRequestException('Keine Bilddatei empfangen.');
+      throw new BadRequestException(
+        localized('Keine Bilddatei empfangen.', 'No image file received.'),
+      );
     }
     // Den Typ aus den Dateiinhalten bestimmen, nicht aus Dateiname oder Header.
     const mimeType = detectImageType(upload.buffer);
     if (!mimeType) {
       throw new BadRequestException(
-        'Nicht unterstütztes Bildformat. Erlaubt sind JPEG, PNG, WebP, GIF und AVIF.',
+        localized(
+          'Nicht unterstütztes Bildformat. Erlaubt sind JPEG, PNG, WebP, GIF und AVIF.',
+          'Unsupported image format. Allowed are JPEG, PNG, WebP, GIF and AVIF.',
+        ),
       );
     }
 
@@ -84,7 +90,7 @@ export class ImagesService {
       )
       .get(id) as ImageRow | undefined;
     if (!row) {
-      throw new NotFoundException('Bild nicht gefunden.');
+      throw new NotFoundException(localized('Bild nicht gefunden.', 'Image not found.'));
     }
     return {
       id: row.id,
@@ -102,7 +108,7 @@ export class ImagesService {
       .prepare('SELECT mime_type, data FROM images WHERE id = ?')
       .get(id) as { mime_type: ImageMimeType; data: Uint8Array } | undefined;
     if (!row) {
-      throw new NotFoundException('Bild nicht gefunden.');
+      throw new NotFoundException(localized('Bild nicht gefunden.', 'Image not found.'));
     }
     return { mimeType: row.mime_type, data: Buffer.from(row.data) };
   }

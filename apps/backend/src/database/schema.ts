@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
+import { LocalizedError, localized } from '../i18n.js';
 import { transaction } from './sqlite.js';
 
 /**
@@ -148,8 +149,11 @@ export function readSchemaVersion(db: DatabaseSync): number {
 export function migrate(db: DatabaseSync): void {
   const current = readSchemaVersion(db);
   if (current > SCHEMA_VERSION) {
-    throw new Error(
-      `Die Projektdatei wurde mit einer neueren Wortomat-Version erstellt (Schema ${current}, unterstützt: ${SCHEMA_VERSION}).`,
+    throw new LocalizedError(
+      localized(
+        `Die Projektdatei wurde mit einer neueren Wortomat-Version erstellt (Schema ${current}, unterstützt: ${SCHEMA_VERSION}).`,
+        `The project file was created with a newer Wortomat version (schema ${current}, supported: ${SCHEMA_VERSION}).`,
+      ),
     );
   }
   for (let version = current; version < SCHEMA_VERSION; version++) {

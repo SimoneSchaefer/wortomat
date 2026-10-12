@@ -28,6 +28,7 @@ import { renderEpub } from './epub-renderer.js';
 import { renderHtml } from './html-renderer.js';
 import { renderLatex } from './latex-renderer.js';
 import { compilePdf, findPdflatex } from './pdflatex.js';
+import { type Localized, LocalizedError, localized } from '../i18n.js';
 
 const FORMATS: Record<ExportFormat, { extension: string; mimeType: string }> = {
   html: { extension: 'html', mimeType: 'text/html; charset=utf-8' },
@@ -45,7 +46,7 @@ export interface ExportedFile {
   extension: string;
   mimeType: string;
   data: Buffer;
-  warnings: string[];
+  warnings: Localized[];
 }
 
 @Injectable()
@@ -64,19 +65,23 @@ export class ExportService {
   async export(request: ExportRequest): Promise<ExportedFile> {
     const format = request?.format;
     if (!format || !(format in FORMATS)) {
-      throw new BadRequestException('Unbekanntes Exportformat.');
+      throw new BadRequestException(
+        localized('Unbekanntes Exportformat.', 'Unknown export format.'),
+      );
     }
     const template = TEMPLATES.includes(request.template) ? request.template : 'normseite';
     const options = { includeSceneTitles: request.includeSceneTitles === true };
     const project = this.projects.info();
     if (!project) {
-      throw new ConflictException('Es ist kein Projekt geöffnet.');
+      throw new ConflictException(
+        localized('Es ist kein Projekt geöffnet.', 'No project is open.'),
+      );
     }
     const book = this.book(project);
     const images = this.imageResolver();
 
     let data: Buffer;
-    let warnings: string[] = [];
+    let warnings: Localized[] = [];
     switch (format) {
       case 'html':
         data = renderHtml(book, options, images);
@@ -94,7 +99,12 @@ export class ExportService {
       case 'pdf': {
         const pdflatex = await findPdflatex();
         if (!pdflatex) {
-          throw new ConflictException('pdfLaTeX wurde auf diesem Rechner nicht gefunden.');
+          throw new ConflictException(
+            localized(
+              'pdfLaTeX wurde auf diesem Rechner nicht gefunden.',
+              'pdfLaTeX was not found on this computer.',
+            ),
+          );
         }
         const document = renderLatex(book, template, options, images);
         warnings = document.warnings;
@@ -102,7 +112,7 @@ export class ExportService {
           data = await compilePdf(pdflatex, document);
         } catch (error) {
           throw new UnprocessableEntityException(
-            error instanceof Error ? error.message : String(error),
+            error instanceof LocalizedError ? error.text : localized(String(error), String(error)),
           );
         }
         break;
@@ -115,7 +125,7 @@ export class ExportService {
       mimeType: FORMATS[format].mimeType,
       data,
       // Gleiche Hinweise (z. B. dasselbe Bild mehrfach) nur einmal melden
-      warnings: [...new Set(warnings)],
+      warnings: [...new Map(warnings.map((warning) => [warning.de, warning])).values()],
     };
   }
 

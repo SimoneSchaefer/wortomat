@@ -1,16 +1,38 @@
 <main class="settings">
   <header>
-    <button type="button" class="link back" (click)="back()">← Zurück</button>
-    <h1>Einstellungen</h1>
+    <button type="button" class="link back" (click)="back()">{{ t().common.back }}</button>
+    <h1>{{ t().settings.title }}</h1>
   </header>
 
   <section class="card">
     <fieldset>
-      <legend><h2>Anführungszeichen</h2></legend>
-      <p class="muted hint">
-        Beim Schreiben werden " und ' automatisch durch diese Zeichen ersetzt. Die Rücktaste direkt
-        danach macht die Ersetzung rückgängig. Bereits geschriebener Text bleibt unverändert.
-      </p>
+      <legend>
+        <h2>{{ t().settings.language }}</h2>
+      </legend>
+      <p class="muted hint">{{ t().settings.languageHint }}</p>
+      <div class="choices">
+        @for (option of languages; track option.language) {
+          <label class="choice" [class.selected]="i18n.language() === option.language">
+            <input
+              type="radio"
+              name="language"
+              [value]="option.language"
+              [checked]="i18n.language() === option.language"
+              (change)="chooseLanguage(option.language)"
+            />
+            <span class="language-name" [attr.lang]="option.language">{{ option.name }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="card">
+    <fieldset>
+      <legend>
+        <h2>{{ t().settings.quotes }}</h2>
+      </legend>
+      <p class="muted hint">{{ t().settings.quotesHint }}</p>
       <div class="choices">
         @for (info of quoteStyles; track info.style) {
           <label class="choice" [class.selected]="settings.settings().quoteStyle === info.style">
@@ -21,15 +43,15 @@
               [checked]="settings.settings().quoteStyle === info.style"
               (change)="chooseQuoteStyle(info.style)"
             />
-            <span class="choice-label">{{ info.label }}</span>
+            <span class="choice-label">{{ t().settings.quoteStyles[info.style] }}</span>
             <span class="example">{{ example(info) }}</span>
           </label>
         }
       </div>
     </fieldset>
-
-    @if (error(); as message) {
-      <p class="error" role="alert">{{ message }}</p>
-    }
   </section>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
 </main>

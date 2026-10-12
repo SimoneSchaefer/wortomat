@@ -29,8 +29,13 @@ export interface AppInfo {
  */
 export type QuoteStyle = 'de' | 'de-guillemets' | 'ch' | 'en' | 'fr' | 'off';
 
+/** Sprache der Oberfläche (nicht des Buchs). */
+export type Language = 'de' | 'en';
+
 /** Einstellungen der App (nicht des Buchs) – z. B. Breite der Seitenleiste. */
 export interface AppSettings {
+  /** Sprache der Oberfläche; `null` = wie das System (Deutsch, sonst Englisch). */
+  language: Language | null;
   /** Breite der Seitenleiste in Pixeln; `null` = Standardbreite. */
   sidebarWidth: number | null;
   /** Typografische Anführungszeichen beim Schreiben. */
@@ -335,4 +340,6 @@ export interface DesktopBridge {
   openPath(filePath: string): Promise<void>;
   /** Zeigt eine Datei im Dateimanager. */
   showItemInFolder(filePath: string): Promise<void>;
+  /** Sprache für native Menüs und Dialoge (Kontextmenü, „Speichern unter“ …). */
+  setLanguage(language: Language): void;
 }

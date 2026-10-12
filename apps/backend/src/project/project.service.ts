@@ -24,6 +24,7 @@ import {
 } from '../database/schema.js';
 import { nowIso } from '../database/sqlite.js';
 import { RecentProjectsService } from './recent-projects.service.js';
+import { LocalizedError, localized } from '../i18n.js';
 
 const PROJECT_EXTENSION = '.wortomat';
 
@@ -53,7 +54,9 @@ export class ProjectService implements OnApplicationShutdown {
 
   get db(): DatabaseSync {
     if (!this.current) {
-      throw new ConflictException('Es ist kein Projekt geöffnet.');
+      throw new ConflictException(
+        localized('Es ist kein Projekt geöffnet.', 'No project is open.'),
+      );
     }
     return this.current.db;
   }
@@ -81,10 +84,17 @@ export class ProjectService implements OnApplicationShutdown {
     const filePath = normalizeProjectPath(request.filePath);
     const title = request.title?.trim();
     if (!title) {
-      throw new BadRequestException('Bitte einen Titel angeben.');
+      throw new BadRequestException(
+        localized('Bitte einen Titel angeben.', 'Please specify a title.'),
+      );
     }
     if (existsSync(filePath)) {
-      throw new ConflictException(`Die Datei existiert bereits: ${filePath}`);
+      throw new ConflictException(
+        localized(
+          `Die Datei existiert bereits: ${filePath}`,
+          `The file already exists: ${filePath}`,
+        ),
+      );
     }
     await mkdir(path.dirname(filePath), { recursive: true });
 
@@ -110,18 +120,24 @@ export class ProjectService implements OnApplicationShutdown {
   open(request: OpenProjectRequest): ProjectInfo {
     const filePath = path.resolve(requirePath(request.filePath));
     if (!existsSync(filePath)) {
-      throw new NotFoundException(`Datei nicht gefunden: ${filePath}`);
+      throw new NotFoundException(
+        localized(`Datei nicht gefunden: ${filePath}`, `File not found: ${filePath}`),
+      );
     }
 
     let db: DatabaseSync;
     try {
       db = new DatabaseSync(filePath);
     } catch {
-      throw new BadRequestException('Die Datei konnte nicht geöffnet werden.');
+      throw new BadRequestException(
+        localized('Die Datei konnte nicht geöffnet werden.', 'The file could not be opened.'),
+      );
     }
     try {
       if (readApplicationId(db) !== APPLICATION_ID) {
-        throw new BadRequestException('Das ist keine Wortomat-Projektdatei.');
+        throw new BadRequestException(
+          localized('Das ist keine Wortomat-Projektdatei.', 'This is not a Wortomat project file.'),
+        );
       }
       configureConnection(db);
       migrate(db);
@@ -131,7 +147,11 @@ export class ProjectService implements OnApplicationShutdown {
         throw error;
       }
       throw new BadRequestException(
-        error instanceof Error ? error.message : 'Die Datei ist beschädigt.',
+        error instanceof LocalizedError
+          ? error.text
+          : error instanceof Error
+            ? error.message
+            : localized('Die Datei ist beschädigt.', 'The file is damaged.'),
       );
     }
 
@@ -143,7 +163,9 @@ export class ProjectService implements OnApplicationShutdown {
   update(request: UpdateProjectRequest): ProjectInfo {
     const title = request.title?.trim();
     if (request.title !== undefined && !title) {
-      throw new BadRequestException('Der Titel darf nicht leer sein.');
+      throw new BadRequestException(
+        localized('Der Titel darf nicht leer sein.', 'The title must not be empty.'),
+      );
     }
     const cover = request.coverImageId;
     if (cover !== undefined && cover !== null) {
@@ -151,7 +173,9 @@ export class ProjectService implements OnApplicationShutdown {
         typeof cover === 'string' &&
         this.db.prepare('SELECT 1 FROM images WHERE id = ?').get(cover) !== undefined;
       if (!exists) {
-        throw new BadRequestException('Das Titelbild wurde nicht gefunden.');
+        throw new BadRequestException(
+          localized('Das Titelbild wurde nicht gefunden.', 'The cover image was not found.'),
+        );
       }
       this.db.prepare('UPDATE project SET cover_image_id = ? WHERE id = 1').run(cover);
     } else if (cover === null) {
@@ -208,7 +232,9 @@ export class ProjectService implements OnApplicationShutdown {
 
 function requirePath(filePath: unknown): string {
   if (typeof filePath !== 'string' || !filePath.trim()) {
-    throw new BadRequestException('Bitte einen Dateipfad angeben.');
+    throw new BadRequestException(
+      localized('Bitte einen Dateipfad angeben.', 'Please specify a file path.'),
+    );
   }
   return filePath.trim();
 }

@@ -662,14 +662,25 @@ describe('REST-API', () => {
   it('speichert App-Einstellungen dauerhaft – auch ohne geöffnetes Projekt', async () => {
     const openProject = await api<ProjectInfo>('GET', '/api/project');
     await api('POST', '/api/project/close');
-    assert.deepEqual(await api('GET', '/api/settings'), { sidebarWidth: null, quoteStyle: 'de' });
+    assert.deepEqual(await api('GET', '/api/settings'), {
+      language: null,
+      sidebarWidth: null,
+      quoteStyle: 'de',
+    });
 
     assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: 340.6 }), {
+      language: null,
       sidebarWidth: 341,
       quoteStyle: 'de',
     });
     // Einzelne Werte ändern lässt die anderen stehen
     assert.deepEqual(await api('PATCH', '/api/settings', { quoteStyle: 'de-guillemets' }), {
+      language: null,
+      sidebarWidth: 341,
+      quoteStyle: 'de-guillemets',
+    });
+    assert.deepEqual(await api('PATCH', '/api/settings', { language: 'en' }), {
+      language: 'en',
       sidebarWidth: 341,
       quoteStyle: 'de-guillemets',
     });
@@ -687,7 +698,11 @@ describe('REST-API', () => {
       const response = await fetch(`${restarted.url}/api/settings`, {
         headers: { [AUTH_HEADER]: TOKEN },
       });
-      assert.deepEqual(await response.json(), { sidebarWidth: 341, quoteStyle: 'de-guillemets' });
+      assert.deepEqual(await response.json(), {
+        language: 'en',
+        sidebarWidth: 341,
+        quoteStyle: 'de-guillemets',
+      });
     } finally {
       await restarted.close();
     }
@@ -703,15 +718,30 @@ describe('REST-API', () => {
     assert.equal(await invalid({ sidebarWidth: 20 }), 400);
     assert.equal(await invalid({ sidebarWidth: 'breit' }), 400);
     assert.equal(await invalid({ quoteStyle: 'klingonisch' }), 400);
+    assert.equal(await invalid({ language: 'tlh' }), 400);
 
     // Zurück auf Standard
     assert.deepEqual(
-      await api('PATCH', '/api/settings', { sidebarWidth: null, quoteStyle: 'de' }),
-      { sidebarWidth: null, quoteStyle: 'de' },
+      await api('PATCH', '/api/settings', { language: null, sidebarWidth: null, quoteStyle: 'de' }),
+      { language: null, sidebarWidth: null, quoteStyle: 'de' },
     );
 
     // Für die folgenden Tests wieder öffnen
     await api('POST', '/api/project/open', { filePath: openProject.filePath });
+  });
+
+  it('liefert Fehlermeldungen in der Sprache aus Accept-Language', async () => {
+    const message = async (language?: string) => {
+      const response = await fetch(`${server.url}/api/notes/gibt-es-nicht/content`, {
+        headers: { [AUTH_HEADER]: TOKEN, ...(language ? { 'Accept-Language': language } : {}) },
+      });
+      assert.equal(response.status, 404);
+      return ((await response.json()) as { message: string }).message;
+    };
+    assert.equal(await message(), 'Notiz nicht gefunden.');
+    assert.equal(await message('en'), 'Note not found.');
+    assert.equal(await message('en-US,en;q=0.9'), 'Note not found.');
+    assert.equal(await message('fr-FR,de;q=0.8'), 'Notiz nicht gefunden.');
   });
 
   it('verweigert Szenen direkt auf oberster Ebene', async () => {

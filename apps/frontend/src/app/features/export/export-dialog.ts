@@ -9,44 +9,15 @@ import type {
 import { COVER_HEIGHT, COVER_PALETTES, COVER_WIDTH, designCover } from '../../core/cover-design';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
+import { I18n, type Texts } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 
-interface Choice<T> {
-  value: T;
-  label: string;
-  description: string;
-}
-
-const FORMATS: ReadonlyArray<Choice<ExportFormat>> = [
-  { value: 'html', label: 'HTML', description: 'Eine Datei zum Lesen im Browser – mit Bildern.' },
-  {
-    value: 'docx',
-    label: 'Word (.docx)',
-    description: 'Zum Weiterbearbeiten oder Einreichen bei Verlag und Agentur.',
-  },
-  { value: 'pdf', label: 'PDF (pdfLaTeX)', description: 'Druckfertig gesetzt mit pdfLaTeX.' },
-  {
-    value: 'epub',
-    label: 'E-Book (EPUB)',
-    description: 'Für E-Reader wie Tolino oder Kobo, Apple Books und Calibre.',
-  },
-];
-
-const TEMPLATES: ReadonlyArray<Choice<ExportTemplate>> = [
-  {
-    value: 'normseite',
-    label: 'Normseite',
-    description: '30 Zeilen à 60 Zeichen in Courier – der Standard für Verlage und Agenturen.',
-  },
-  {
-    value: 'roman',
-    label: 'Roman',
-    description: 'Buchsatz 12,5 × 19 cm, Blocksatz mit Silbentrennung.',
-  },
-];
+/** Bezeichnung und Beschreibung: `t().export.formats[…]` bzw. `t().export.templates[…]`. */
+const FORMATS: readonly ExportFormat[] = ['html', 'docx', 'pdf', 'epub'];
+const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
 
 /** Dialog „Manuskript exportieren“: Format, Vorlage, Optionen – und danach Öffnen/Zeigen. */
 @Component({
@@ -56,6 +27,7 @@ const TEMPLATES: ReadonlyArray<Choice<ExportTemplate>> = [
 })
 export class ExportDialog {
   private readonly api = inject(WortomatApi);
+  protected readonly t = inject(I18n).t;
   private readonly pendingSaves = inject(PendingSaves);
   protected readonly project = inject(ProjectStore);
   protected readonly desktop = inject(DESKTOP_BRIDGE);
@@ -94,7 +66,7 @@ export class ExportDialog {
         this.capabilities.set(caps);
         if (!caps.pdf.available && this.format() === 'pdf') this.format.set('docx');
       })
-      .catch((error: unknown) => this.error.set(errorMessage(error)));
+      .catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
   }
 
   protected close(): void {
@@ -133,7 +105,7 @@ export class ExportDialog {
     this.busy.set(true);
     try {
       if (this.desktop) {
-        const title = this.project.project()?.title ?? 'Manuskript';
+        const title = this.project.project()?.title ?? this.t().export.defaultName;
         const filePath = await this.desktop.showExportDialog(title, request.format);
         if (!filePath) return;
         this.result.set(await this.api.exportToFile({ ...request, filePath }));
@@ -146,7 +118,7 @@ export class ExportDialog {
         this.downloaded.set({ fileName, warnings });
       }
     } catch (error) {
-      this.error.set(await exportErrorMessage(error));
+      this.error.set(await exportErrorMessage(error, this.t()));
     } finally {
       this.busy.set(false);
     }
@@ -157,7 +129,7 @@ export class ExportDialog {
     input.value = '';
     if (!file) return;
     if (!isSupportedImage(file)) {
-      this.error.set('Bitte ein Bild im Format JPEG, PNG, WebP, GIF oder AVIF wählen.');
+      this.error.set(this.t().export.unsupportedImage);
       return;
     }
     await this.changeCover(async () => {
@@ -191,7 +163,7 @@ export class ExportDialog {
       const image = await upload();
       await this.project.setCover(image?.id ?? null);
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     } finally {
       this.coverBusy.set(false);
     }
@@ -203,7 +175,7 @@ export class ExportDialog {
     try {
       await this.desktop.openPath(filePath);
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 
@@ -214,7 +186,7 @@ export class ExportDialog {
 }
 
 /** Beim Download kommt auch eine Fehlermeldung als Blob – dann den Text daraus lesen. */
-async function exportErrorMessage(error: unknown): Promise<string> {
+async function exportErrorMessage(error: unknown, t: Texts): Promise<string> {
   if (error instanceof HttpErrorResponse && error.error instanceof Blob) {
     try {
       const body = JSON.parse(await error.error.text()) as { message?: unknown };
@@ -223,5 +195,5 @@ async function exportErrorMessage(error: unknown): Promise<string> {
       // kein JSON – unten die allgemeine Meldung
     }
   }
-  return errorMessage(error);
+  return errorMessage(error, t);
 }

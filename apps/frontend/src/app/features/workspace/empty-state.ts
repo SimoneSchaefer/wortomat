@@ -1,9 +1,13 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
+import { I18n, type Texts } from '../../core/i18n/i18n';
 
-/** Platzhalter im Inhaltsbereich, solange links nichts ausgewählt ist. Text kommt aus den Routendaten. */
+/**
+ * Platzhalter im Inhaltsbereich, solange links nichts ausgewählt ist.
+ * Der Text kommt aus den Routendaten – als Funktion, damit er der Sprache folgt.
+ */
 @Component({
   selector: 'wm-empty-state',
-  template: `<p class="muted">{{ message() }}</p>`,
+  template: `<p class="muted">{{ message()?.(t()) }}</p>`,
   styles: `
     :host {
       display: grid;
@@ -15,5 +19,7 @@ import { Component, input } from '@angular/core';
   `,
 })
 export class EmptyState {
-  readonly message = input('');
+  readonly message = input<(t: Texts) => string>();
+
+  protected readonly t = inject(I18n).t;
 }

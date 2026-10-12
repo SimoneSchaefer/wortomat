@@ -91,11 +91,15 @@ legend {
   font-size: 0.85rem;
 }
 
+.language-name {
+  font-size: 1rem;
+}
+
 .example {
   font-family: var(--font-prose);
   font-size: 1.1rem;
 }
 
 .error {
-  margin: 1rem 0 0;
+  margin: 0;
 }

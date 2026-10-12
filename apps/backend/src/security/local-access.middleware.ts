@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { AUTH_HEADER } from '../config.js';
+import { requestLanguage } from '../i18n.js';
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -29,7 +30,8 @@ export function localAccessMiddleware(token: string | undefined) {
     const port = req.socket.localPort;
     const host = req.headers.host;
     if (host !== `127.0.0.1:${port}` && host !== `localhost:${port}`) {
-      res.status(403).json({ statusCode: 403, message: 'Ungültiger Host.' });
+      const message = requestLanguage(req) === 'en' ? 'Invalid host.' : 'Ungültiger Host.';
+      res.status(403).json({ statusCode: 403, message });
       return;
     }
 
@@ -41,7 +43,8 @@ export function localAccessMiddleware(token: string | undefined) {
         givenBuffer.length !== expected.length ||
         !timingSafeEqual(givenBuffer, expected)
       ) {
-        res.status(401).json({ statusCode: 401, message: 'Nicht autorisiert.' });
+        const message = requestLanguage(req) === 'en' ? 'Not authorized.' : 'Nicht autorisiert.';
+        res.status(401).json({ statusCode: 401, message });
         return;
       }
     }

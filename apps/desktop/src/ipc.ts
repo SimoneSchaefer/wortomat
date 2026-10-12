@@ -7,4 +7,5 @@ export const IPC = {
   exportDialog: 'dialog:export',
   openPath: 'shell:open-path',
   showItemInFolder: 'shell:show-item-in-folder',
+  setLanguage: 'app:set-language',
 } as const;

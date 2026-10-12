@@ -1,12 +1,13 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
+import { de } from '../../core/i18n/de';
 import { Annotation } from './annotation-mark';
 
 /** Echter Tiptap-Editor (jsdom) mit dem Satz „Hier fehlt noch was.“ */
 function createEditor(): Editor {
   return new Editor({
     element: document.createElement('div'),
-    extensions: [StarterKit, Annotation],
+    extensions: [StarterKit, Annotation.configure({ label: (kind) => de.annotations[kind].label })],
     content: '<p>Hier fehlt noch was.</p>',
   });
 }

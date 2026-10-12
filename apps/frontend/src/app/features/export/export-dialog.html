@@ -1,34 +1,33 @@
 <dialog #dialog class="export" aria-labelledby="export-title">
   <form (submit)="$event.preventDefault(); run()">
-    <h2 id="export-title">Manuskript exportieren</h2>
+    <h2 id="export-title">{{ t().export.title }}</h2>
 
     <fieldset>
-      <legend>Format</legend>
+      <legend>{{ t().export.format }}</legend>
       <div class="choices formats">
-        @for (choice of formats; track choice.value) {
+        @for (value of formats; track value) {
           <label
             class="choice"
-            [class.selected]="format() === choice.value"
-            [class.disabled]="isDisabled(choice.value)"
+            [class.selected]="format() === value"
+            [class.disabled]="isDisabled(value)"
           >
             <input
               type="radio"
               name="format"
-              [attr.autofocus]="format() === choice.value ? '' : null"
-              [value]="choice.value"
-              [checked]="format() === choice.value"
-              [disabled]="isDisabled(choice.value)"
-              (change)="choose(choice.value)"
+              [attr.autofocus]="format() === value ? '' : null"
+              [value]="value"
+              [checked]="format() === value"
+              [disabled]="isDisabled(value)"
+              (change)="choose(value)"
             />
-            <span class="choice-label">{{ choice.label }}</span>
+            <span class="choice-label">{{ t().export.formats[value].label }}</span>
             <span class="choice-description">
-              @if (choice.value === 'pdf' && capabilities() && !capabilities()!.pdf.available) {
-                pdfLaTeX wurde auf diesem Rechner nicht gefunden. Mit TeX Live, MacTeX oder MiKTeX
-                kannst du auch PDFs erzeugen.
-              } @else if (choice.value === 'pdf' && !capabilities()) {
-                Suche pdfLaTeX …
+              @if (value === 'pdf' && capabilities() && !capabilities()!.pdf.available) {
+                {{ t().export.pdfMissing }}
+              } @else if (value === 'pdf' && !capabilities()) {
+                {{ t().export.pdfSearching }}
               } @else {
-                {{ choice.description }}
+                {{ t().export.formats[value].description }}
               }
             </span>
           </label>
@@ -38,19 +37,19 @@
 
     @if (hasTemplates(format())) {
       <fieldset>
-        <legend>Vorlage</legend>
+        <legend>{{ t().export.template }}</legend>
         <div class="choices two">
-          @for (choice of templates; track choice.value) {
-            <label class="choice" [class.selected]="template() === choice.value">
+          @for (value of templates; track value) {
+            <label class="choice" [class.selected]="template() === value">
               <input
                 type="radio"
                 name="template"
-                [value]="choice.value"
-                [checked]="template() === choice.value"
-                (change)="template.set(choice.value)"
+                [value]="value"
+                [checked]="template() === value"
+                (change)="template.set(value)"
               />
-              <span class="choice-label">{{ choice.label }}</span>
-              <span class="choice-description">{{ choice.description }}</span>
+              <span class="choice-label">{{ t().export.templates[value].label }}</span>
+              <span class="choice-description">{{ t().export.templates[value].description }}</span>
             </label>
           }
         </div>
@@ -59,34 +58,30 @@
 
     @if (format() === 'epub') {
       <fieldset>
-        <legend>Titelbild</legend>
+        <legend>{{ t().export.cover }}</legend>
         <div class="cover">
           <div class="cover-preview" [class.empty]="!coverUrl()">
             @if (coverUrl(); as url) {
-              <img [src]="url" alt="Titelbild" />
+              <img [src]="url" [alt]="t().export.cover" />
             } @else {
-              <span>Kein Titelbild</span>
+              <span>{{ t().export.noCover }}</span>
             }
           </div>
           <div class="cover-actions">
             <p class="muted">
-              @if (coverUrl()) {
-                Erscheint im Reader als Cover und in der Bibliothek.
-              } @else {
-                Ohne Titelbild zeigen Reader das Buch als leere Kachel.
-              }
-              Am besten im Hochformat, etwa 1600 × 2560 Pixel.
+              {{ coverUrl() ? t().export.coverShown : t().export.coverMissing }}
+              {{ t().export.coverSize }}
             </p>
             <div class="cover-buttons">
               <button type="button" [disabled]="coverBusy()" (click)="coverPicker.click()">
-                Bild wählen …
+                {{ t().export.chooseImage }}
               </button>
               <button type="button" [disabled]="coverBusy()" (click)="designCover()">
-                {{ designedOnce() ? 'Andere Farben' : 'Aus Titel gestalten' }}
+                {{ designedOnce() ? t().export.otherColors : t().export.designCover }}
               </button>
               @if (coverUrl()) {
                 <button type="button" [disabled]="coverBusy()" (click)="removeCover()">
-                  Entfernen
+                  {{ t().export.removeCover }}
                 </button>
               }
             </div>
@@ -108,29 +103,31 @@
         [checked]="includeSceneTitles()"
         (change)="includeSceneTitles.set($any($event.target).checked)"
       />
-      Szenentitel als Zwischenüberschriften drucken
-      <span class="muted">(sonst stehen zwischen Szenen nur Trenner)</span>
+      {{ t().export.sceneTitles }}
+      <span class="muted">{{ t().export.sceneTitlesHint }}</span>
     </label>
 
     @if (result(); as done) {
       <div class="result" role="status">
         <p>
-          <strong>Exportiert:</strong> <span class="path">{{ done.filePath }}</span>
+          <strong>{{ t().export.exported }}</strong> <span class="path">{{ done.filePath }}</span>
         </p>
         <div class="result-actions">
-          <button type="button" (click)="openFile()">Öffnen</button>
-          <button type="button" (click)="showInFolder()">Im Ordner zeigen</button>
+          <button type="button" (click)="openFile()">{{ t().export.open }}</button>
+          <button type="button" (click)="showInFolder()">{{ t().export.showInFolder }}</button>
         </div>
       </div>
     }
     @if (downloaded(); as done) {
       <div class="result" role="status">
-        <p><strong>Heruntergeladen:</strong> {{ done.fileName }}</p>
+        <p>
+          <strong>{{ t().export.downloaded }}</strong> {{ done.fileName }}
+        </p>
       </div>
     }
     @if (result()?.warnings ?? downloaded()?.warnings; as warnings) {
       @if (warnings.length) {
-        <ul class="warnings" aria-label="Hinweise">
+        <ul class="warnings" [attr.aria-label]="t().export.warnings">
           @for (warning of warnings; track warning) {
             <li>{{ warning }}</li>
           }
@@ -142,9 +139,15 @@
     }
 
     <footer>
-      <button type="button" (click)="close()">Schließen</button>
+      <button type="button" (click)="close()">{{ t().export.close }}</button>
       <button class="primary" type="submit" [disabled]="busy() || isDisabled(format())">
-        {{ busy() ? 'Exportiere …' : desktop ? 'Exportieren …' : 'Herunterladen' }}
+        {{
+          busy()
+            ? t().export.exporting
+            : desktop
+              ? t().export.exportWithDialog
+              : t().export.download
+        }}
       </button>
     </footer>
   </form>

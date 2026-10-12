@@ -1,13 +1,14 @@
-import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
 import { addCounts, ANNOTATION_KINDS, NO_ANNOTATIONS } from '../../core/annotations';
 import { errorMessage } from '../../core/errors';
+import { I18n } from '../../core/i18n/i18n';
 import { statusInfo } from '../../core/scene-status';
 import { StatusIcon } from '../../core/status-icon';
-import { NEW_SCENE_TITLE, ProjectStore } from '../../core/project-store';
+import { ProjectStore } from '../../core/project-store';
 import {
   changesPosition,
   type DropPlan,
@@ -19,20 +20,15 @@ import {
 /** Eigener Datentyp, damit Drags von außen (z. B. Dateien) den Baum nicht auslösen. */
 const DRAG_TYPE = 'application/x-wortomat-node';
 
-const DEFAULT_TITLES: Record<NodeKind, string> = {
-  part: 'Neuer Teil',
-  chapter: 'Neues Kapitel',
-  scene: NEW_SCENE_TITLE,
-};
-
 @Component({
   selector: 'wm-manuscript-tree',
-  imports: [DecimalPipe, NgTemplateOutlet, RouterLink, RouterLinkActive, Autofocus, StatusIcon],
+  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, Autofocus, StatusIcon],
   templateUrl: './manuscript-tree.html',
   styleUrl: './manuscript-tree.scss',
 })
 export class ManuscriptTree {
   private readonly router = inject(Router);
+  protected readonly t = inject(I18n).t;
   protected readonly store = inject(ProjectStore);
 
   /** ID des Elements, dessen Titel gerade bearbeitet wird. */
@@ -45,7 +41,8 @@ export class ManuscriptTree {
 
   protected async add(kind: NodeKind, parentId: string | null): Promise<void> {
     await this.run(async () => {
-      const node = await this.store.addNode({ kind, parentId, title: DEFAULT_TITLES[kind] });
+      const title = this.t().tree.newTitle[kind];
+      const node = await this.store.addNode({ kind, parentId, title });
       if (node.kind === 'scene') {
         // Umbenannt wird auf der Szenenseite, die den neuen Titel gleich markiert.
         await this.router.navigate(['/write/scene', node.id]);
@@ -65,9 +62,10 @@ export class ManuscriptTree {
   }
 
   protected async remove(node: ManuscriptNode): Promise<void> {
-    const what =
-      node.kind === 'scene' ? 'die Szene' : `„${node.title}“ mit allen enthaltenen Szenen`;
-    if (!confirm(`Möchtest du ${what} wirklich löschen?`)) return;
+    const { tree } = this.t();
+    const question =
+      node.kind === 'scene' ? tree.confirmDeleteScene : tree.confirmDeleteContainer(node.title);
+    if (!confirm(question)) return;
     await this.run(async () => {
       await this.store.deleteNode(node.id);
       if (
@@ -170,7 +168,7 @@ export class ManuscriptTree {
     try {
       await action();
     } catch (error) {
-      this.error.set(errorMessage(error));
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 }

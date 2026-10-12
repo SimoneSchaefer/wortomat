@@ -409,7 +409,12 @@ describe('Export', () => {
   it('liefert ohne Pfad die Datei als Download (Browser-Modus)', async () => {
     const response = await fetch(`${server.url}/api/export`, {
       method: 'POST',
-      headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+      headers: {
+        [AUTH_HEADER]: TOKEN,
+        'Content-Type': 'application/json',
+        // Hinweise in der Sprache der Oberfläche
+        'Accept-Language': 'en',
+      },
       body: JSON.stringify({ format: 'docx', template: 'roman', includeSceneTitles: false }),
     });
     assert.equal(response.status, 200);
@@ -420,7 +425,7 @@ describe('Export', () => {
     const warnings = JSON.parse(
       decodeURIComponent(response.headers.get('x-export-warnings') ?? ''),
     );
-    assert.equal(warnings.length, 1);
+    assert.deepEqual(warnings, ['Image “Foto” (WEBP) cannot be included in Word.']);
     assert.equal(
       Buffer.from(await response.arrayBuffer())
         .subarray(0, 2)
@@ -465,11 +470,15 @@ describe('LaTeX-Hilfen', () => {
 
   it('übersetzt typische LaTeX-Fehler in verständliche Meldungen', () => {
     assert.match(
-      describeLatexError("! LaTeX Error: File `tgpagella.sty' not found.\n"),
+      describeLatexError("! LaTeX Error: File `tgpagella.sty' not found.\n").de,
       /Paket „tgpagella\.sty“ fehlt/,
     );
     assert.match(
-      describeLatexError('...\n! Undefined control sequence.\n'),
+      describeLatexError("! LaTeX Error: File `tgpagella.sty' not found.\n").en,
+      /package “tgpagella\.sty” is missing/,
+    );
+    assert.match(
+      describeLatexError('...\n! Undefined control sequence.\n').en,
       /Undefined control sequence/,
     );
   });

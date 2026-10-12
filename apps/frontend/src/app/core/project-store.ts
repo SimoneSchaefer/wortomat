@@ -19,9 +19,6 @@ export interface TreeItem {
   wordCount: number;
 }
 
-/** Titel, den eine frisch angelegte Szene bekommt; die Szenenseite markiert ihn dann zum Überschreiben. */
-export const NEW_SCENE_TITLE = 'Neue Szene';
-
 /** Zustand des geöffneten Projekts: Metadaten und Manuskript-Baum. */
 @Injectable({ providedIn: 'root' })
 export class ProjectStore {

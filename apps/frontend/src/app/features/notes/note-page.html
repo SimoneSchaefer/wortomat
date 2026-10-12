@@ -2,16 +2,16 @@
   <wm-document-editor
     [documentId]="id()"
     [source]="source"
-    [template]="config().template"
-    [placeholder]="config().textPlaceholder"
+    [template]="template()"
+    [placeholder]="texts().textPlaceholder"
   >
     <div class="note-head" [class.with-gallery]="config().gallery">
       <div class="note-meta">
-        <p class="doc-kind">{{ config().singular }}</p>
+        <p class="doc-kind">{{ texts().singular }}</p>
         <input
           #titleInput
           class="doc-title doc-input"
-          aria-label="Titel"
+          [attr.aria-label]="t().common.title"
           [value]="titleDraft()"
           (input)="onTitleInput($any($event.target).value)"
           (blur)="onTitleBlur()"
@@ -20,8 +20,8 @@
         <input
           #summaryInput
           class="doc-summary doc-input"
-          aria-label="Kurzbeschreibung"
-          [placeholder]="config().summaryPlaceholder"
+          [attr.aria-label]="t().notes.summary"
+          [placeholder]="texts().summaryPlaceholder"
           [value]="summaryDraft()"
           (input)="onSummaryInput($any($event.target).value)"
         />
@@ -32,7 +32,7 @@
       @if (config().gallery) {
         <wm-image-gallery
           [noteId]="id()"
-          label="Profilbild"
+          [label]="t().notes.profileImage"
           [placeholderIcon]="config().galleryIcon"
           (changed)="onGalleryChanged($event)"
         />
@@ -43,5 +43,5 @@
     }
   </wm-document-editor>
 } @else {
-  <p class="muted not-found">Dieser Eintrag existiert nicht mehr.</p>
+  <p class="muted not-found">{{ t().notes.notFound }}</p>
 }

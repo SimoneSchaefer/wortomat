@@ -1,4 +1,4 @@
-<span class="label" id="scene-status-label">Status</span>
+<span class="label" id="scene-status-label">{{ t().sceneStatus.label }}</span>
 <div
   class="steps"
   role="radiogroup"
@@ -17,7 +17,7 @@
       (click)="select(info.status)"
     >
       <wm-status-icon [status]="info.status" />
-      {{ info.label }}
+      {{ t().sceneStatus.names[info.status] }}
     </button>
   }
 </div>

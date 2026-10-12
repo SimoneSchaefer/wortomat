@@ -8,13 +8,17 @@
         <span
           class="badge"
           [style.--annotation-color]="info.color"
-          [title]="count + ' ' + (count === 1 ? info.label : info.plural)"
+          [title]="
+            count +
+            ' ' +
+            (count === 1 ? t().annotations[info.kind].label : t().annotations[info.kind].plural)
+          "
           >{{ count }}</span
         >
       }
     </span>
   }
-  <span class="count">{{ words | number }}</span>
+  <span class="count">{{ t().number(words) }}</span>
 </ng-template>
 
 <ng-template #itemTemplate let-items>
@@ -36,7 +40,7 @@
               (keydown.enter)="titleInput.blur()"
               (keydown.escape)="editingId.set(null)"
               (blur)="rename(item.node, titleInput.value)"
-              [attr.aria-label]="'Titel von ' + item.node.title"
+              [attr.aria-label]="t().tree.titleOf(item.node.title)"
               wmAutofocus
             />
           } @else if (item.node.kind === 'scene') {
@@ -44,7 +48,7 @@
               class="status"
               [status]="status(item.node).status"
               [style.color]="status(item.node).color"
-              [title]="'Status: ' + status(item.node).label"
+              [title]="t().tree.status(t().sceneStatus.names[status(item.node).status])"
             />
             <a
               [routerLink]="['/write/scene', item.node.id]"
@@ -63,7 +67,7 @@
           } @else {
             <span
               class="label"
-              [title]="item.node.title + ' (Doppelklick zum Umbenennen)'"
+              [title]="t().tree.renameHint(item.node.title)"
               (dblclick)="editingId.set(item.node.id)"
               >{{ item.node.title }}</span
             >
@@ -78,20 +82,26 @@
           @if (editingId() !== item.node.id) {
             <span class="actions">
               @if (item.node.kind === 'chapter') {
-                <button type="button" title="Szene hinzufügen" (click)="add('scene', item.node.id)">
+                <button
+                  type="button"
+                  [title]="t().tree.addScene"
+                  (click)="add('scene', item.node.id)"
+                >
                   +
                 </button>
               }
               @if (item.node.kind === 'part') {
                 <button
                   type="button"
-                  title="Kapitel hinzufügen"
+                  [title]="t().tree.addChapter"
                   (click)="add('chapter', item.node.id)"
                 >
                   +
                 </button>
               }
-              <button type="button" title="Löschen" (click)="remove(item.node)">×</button>
+              <button type="button" [title]="t().common.delete" (click)="remove(item.node)">
+                ×
+              </button>
             </span>
           }
         </div>
@@ -105,7 +115,7 @@
 </ng-template>
 
 <nav
-  aria-label="Manuskript"
+  [attr.aria-label]="t().workspace.manuscript"
   (dragover)="onDragOverFreeSpace($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
@@ -113,14 +123,18 @@
   @if (store.tree().length) {
     <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: store.tree() }" />
   } @else {
-    <p class="muted empty">Noch leer. Leg dein erstes Kapitel an.</p>
+    <p class="muted empty">{{ t().tree.empty }}</p>
   }
 
   <div class="root-marker" [attr.data-drop]="dropMarker(null)"></div>
 
   <div class="add">
-    <button type="button" class="link" (click)="add('chapter', null)">+ Kapitel</button>
-    <button type="button" class="link" (click)="add('part', null)">+ Teil</button>
+    <button type="button" class="link" (click)="add('chapter', null)">
+      {{ t().tree.addChapterButton }}
+    </button>
+    <button type="button" class="link" (click)="add('part', null)">
+      {{ t().tree.addPartButton }}
+    </button>
   </div>
 
   @if (error(); as message) {
