@@ -115,6 +115,11 @@ const MIGRATIONS: readonly string[] = [
     ALTER TABLE nodes ADD COLUMN status TEXT NOT NULL DEFAULT 'idea'
       CHECK (status IN ('idea', 'outline', 'draft', 'revised', 'final'));
   `,
+  /* 7: Anzahl der Todo/Idee/Fixme-Markierungen je Szene (beim Speichern gezählt) */ `
+    ALTER TABLE scene_content ADD COLUMN todo_count INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE scene_content ADD COLUMN idea_count INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE scene_content ADD COLUMN fixme_count INTEGER NOT NULL DEFAULT 0;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

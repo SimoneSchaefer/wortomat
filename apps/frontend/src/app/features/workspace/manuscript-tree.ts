@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
+import { ANNOTATION_KINDS } from '../../core/annotations';
 import { errorMessage } from '../../core/errors';
 import { statusInfo } from '../../core/scene-status';
 import { ProjectStore } from '../../core/project-store';
@@ -74,6 +75,8 @@ export class ManuscriptTree {
       }
     });
   }
+
+  protected readonly annotationKinds = ANNOTATION_KINDS;
 
   protected status(node: ManuscriptNode) {
     return statusInfo(node.status ?? 'idea');

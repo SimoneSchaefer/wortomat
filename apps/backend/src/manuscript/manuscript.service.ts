@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
+  AnnotationCounts,
   CreateNodeRequest,
   EditorDoc,
   ManuscriptNode,
@@ -14,6 +15,7 @@ import type {
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
 import { ProjectService } from '../project/project.service.js';
+import { countAnnotations } from './annotations.js';
 
 /** Welche Knotenart unter welcher Elternart liegen darf (`null` = oberste Ebene). */
 const ALLOWED_PARENTS: Record<NodeKind, ReadonlyArray<NodeKind | null>> = {
@@ -30,6 +32,9 @@ interface NodeRow {
   sort_order: number;
   status: SceneStatus;
   word_count: number;
+  todo_count: number;
+  idea_count: number;
+  fixme_count: number;
 }
 
 @Injectable()
@@ -47,7 +52,9 @@ export class ManuscriptService {
   list(): ManuscriptNode[] {
     const rows = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count,
+                COALESCE(c.todo_count, 0) AS todo_count, COALESCE(c.idea_count, 0) AS idea_count,
+                COALESCE(c.fixme_count, 0) AS fixme_count
            FROM nodes n
            LEFT JOIN scene_content c ON c.node_id = n.id
           ORDER BY n.sort_order`,
@@ -172,12 +179,25 @@ export class ManuscriptService {
   getContent(nodeId: string): SceneContent {
     this.requireScene(nodeId);
     const row = this.db
-      .prepare('SELECT doc, word_count, updated_at FROM scene_content WHERE node_id = ?')
-      .get(nodeId) as { doc: string; word_count: number; updated_at: string } | undefined;
+      .prepare(
+        `SELECT doc, word_count, todo_count, idea_count, fixme_count, updated_at
+           FROM scene_content WHERE node_id = ?`,
+      )
+      .get(nodeId) as
+      | {
+          doc: string;
+          word_count: number;
+          todo_count: number;
+          idea_count: number;
+          fixme_count: number;
+          updated_at: string;
+        }
+      | undefined;
     return {
       nodeId,
       doc: row ? (JSON.parse(row.doc) as EditorDoc) : null,
       wordCount: row?.word_count ?? 0,
+      annotations: row ? annotationCounts(row) : { todo: 0, idea: 0, fixme: 0 },
       updatedAt: row?.updated_at ?? null,
     };
   }
@@ -190,15 +210,30 @@ export class ManuscriptService {
     const wordCount =
       Number.isInteger(request.wordCount) && request.wordCount >= 0 ? request.wordCount : 0;
     const text = typeof request.text === 'string' ? request.text : '';
+    // Selbst zählen statt dem Client zu glauben – das Dokument ist die Wahrheit.
+    const annotations = countAnnotations(request.doc);
     const now = nowIso();
 
     transaction(this.db, () => {
       this.db
         .prepare(
-          `INSERT INTO scene_content (node_id, doc, word_count, updated_at) VALUES (?, ?, ?, ?)
-           ON CONFLICT (node_id) DO UPDATE SET doc = excluded.doc, word_count = excluded.word_count, updated_at = excluded.updated_at`,
+          `INSERT INTO scene_content
+             (node_id, doc, word_count, todo_count, idea_count, fixme_count, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT (node_id) DO UPDATE SET
+             doc = excluded.doc, word_count = excluded.word_count,
+             todo_count = excluded.todo_count, idea_count = excluded.idea_count,
+             fixme_count = excluded.fixme_count, updated_at = excluded.updated_at`,
         )
-        .run(nodeId, JSON.stringify(request.doc), wordCount, now);
+        .run(
+          nodeId,
+          JSON.stringify(request.doc),
+          wordCount,
+          annotations.todo,
+          annotations.idea,
+          annotations.fixme,
+          now,
+        );
       this.db.prepare('DELETE FROM scene_fts WHERE node_id = ?').run(nodeId);
       this.db
         .prepare('INSERT INTO scene_fts (node_id, title, body) VALUES (?, ?, ?)')
@@ -206,7 +241,7 @@ export class ManuscriptService {
       this.projects.touch();
     });
 
-    return { nodeId, doc: request.doc, wordCount, updatedAt: now };
+    return { nodeId, doc: request.doc, wordCount, annotations, updatedAt: now };
   }
 
   // -------------------------------------------------------------------------
@@ -214,7 +249,9 @@ export class ManuscriptService {
   private get(id: string): ManuscriptNode {
     const row = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count,
+                COALESCE(c.todo_count, 0) AS todo_count, COALESCE(c.idea_count, 0) AS idea_count,
+                COALESCE(c.fixme_count, 0) AS fixme_count
            FROM nodes n
            LEFT JOIN scene_content c ON c.node_id = n.id
           WHERE n.id = ?`,
@@ -281,7 +318,16 @@ function toNode(row: NodeRow): ManuscriptNode {
     sortOrder: row.sort_order,
     wordCount: row.word_count,
     status: row.kind === 'scene' ? row.status : null,
+    annotations: row.kind === 'scene' ? annotationCounts(row) : null,
   };
+}
+
+function annotationCounts(row: {
+  todo_count: number;
+  idea_count: number;
+  fixme_count: number;
+}): AnnotationCounts {
+  return { todo: row.todo_count, idea: row.idea_count, fixme: row.fixme_count };
 }
 
 function requireKind(kind: unknown): NodeKind {

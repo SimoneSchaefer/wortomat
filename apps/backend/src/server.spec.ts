@@ -460,6 +460,66 @@ describe('REST-API', () => {
     assert.deepEqual(await linked(ankunft.id), []);
   });
 
+  it('zählt Todo/Idee/Fixme-Markierungen beim Speichern und zeigt sie im Baum', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'markierungen', 'Buch'),
+      title: 'Buch',
+    });
+    const kapitel = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const szene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: kapitel.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    assert.deepEqual(szene.annotations, { todo: 0, idea: 0, fixme: 0 });
+    assert.equal(kapitel.annotations, null);
+
+    const mark = (kind: string) => ({ type: 'annotation', attrs: { kind } });
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Recherche ', marks: [mark('todo')] },
+            { type: 'text', text: 'Hafen', marks: [mark('todo'), { type: 'bold' }] },
+            { type: 'text', text: ' und ' },
+            { type: 'text', text: 'Möwe?', marks: [mark('idea')] },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Satz holpert', marks: [mark('fixme')] }],
+        },
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Datum prüfen', marks: [mark('todo')] }],
+        },
+      ],
+    };
+    // Die Zahlen des Clients werden ignoriert – das Backend zählt selbst.
+    const saved = await api<SceneContent>('PUT', `/api/scenes/${szene.id}/content`, {
+      doc,
+      text: '',
+      wordCount: 9,
+      annotations: { todo: 99, idea: 99, fixme: 99 },
+    });
+    assert.deepEqual(saved.annotations, { todo: 2, idea: 1, fixme: 1 });
+
+    const loaded = await api<SceneContent>('GET', `/api/scenes/${szene.id}/content`);
+    assert.deepEqual(loaded.annotations, { todo: 2, idea: 1, fixme: 1 });
+    const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    assert.deepEqual(nodes.find((n) => n.id === szene.id)?.annotations, {
+      todo: 2,
+      idea: 1,
+      fixme: 1,
+    });
+  });
+
   it('führt einen Status je Szene', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'status', 'Buch'),
@@ -584,7 +644,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

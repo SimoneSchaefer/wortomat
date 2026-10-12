@@ -15,12 +15,14 @@ import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
-import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
+import type { AnnotationKind, EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
+import { ANNOTATION_KINDS } from '../../core/annotations';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
+import { Annotation } from './annotation-mark';
 
 /** Nach dieser Tipp-Pause wird gespeichert. */
 const AUTOSAVE_DELAY_MS = 800;
@@ -177,6 +179,7 @@ export class DocumentEditor {
         }),
         Image.configure({ allowBase64: false }),
         CharacterCount,
+        Annotation,
         Placeholder.configure({ placeholder: this.placeholder() }),
       ],
       editorProps: {
@@ -248,6 +251,13 @@ export class DocumentEditor {
   protected can(action: 'undo' | 'redo'): boolean {
     this.editorTick();
     return this.editor?.can()[action]() ?? false;
+  }
+
+  protected readonly annotationKinds = ANNOTATION_KINDS;
+  protected readonly modifierKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Strg';
+
+  protected annotate(kind: AnnotationKind): void {
+    this.editor?.chain().focus().toggleAnnotation(kind).run();
   }
 
   protected command(command: ToolbarCommand): void {

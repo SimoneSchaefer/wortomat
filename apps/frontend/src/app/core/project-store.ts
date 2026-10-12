@@ -1,16 +1,20 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import type {
+  AnnotationCounts,
   CreateNodeRequest,
   ManuscriptNode,
   MoveNodeRequest,
   ProjectInfo,
   SceneStatus,
 } from '@wortomat/shared';
+import { addCounts, NO_ANNOTATIONS } from './annotations';
 import { WortomatApi } from './wortomat-api';
 
 export interface TreeItem {
   node: ManuscriptNode;
   children: TreeItem[];
+  /** Bei Szenen deren Markierungen, bei Kapiteln/Teilen die Summe darunter. */
+  annotations: AnnotationCounts;
 }
 
 /** Zustand des geöffneten Projekts: Metadaten und Manuskript-Baum. */
@@ -84,9 +88,10 @@ export class ProjectStore {
     this.nodes.set(await this.api.listNodes());
   }
 
-  setWordCount(id: string, wordCount: number): void {
+  /** Nach dem Speichern einer Szene: Wortzahl und Markierungen im Baum aktualisieren. */
+  updateSceneStats(id: string, wordCount: number, annotations: AnnotationCounts): void {
     this.nodes.update((nodes) =>
-      nodes.map((node) => (node.id === id ? { ...node, wordCount } : node)),
+      nodes.map((node) => (node.id === id ? { ...node, wordCount, annotations } : node)),
     );
   }
 
@@ -95,17 +100,24 @@ export class ProjectStore {
   }
 }
 
-function buildTree(nodes: readonly ManuscriptNode[]): TreeItem[] {
-  const items = new Map(nodes.map((node) => [node.id, { node, children: [] as TreeItem[] }]));
+export function buildTree(nodes: readonly ManuscriptNode[]): TreeItem[] {
+  const items = new Map<string, TreeItem>(
+    nodes.map((node) => [node.id, { node, children: [], annotations: NO_ANNOTATIONS }]),
+  );
   const roots: TreeItem[] = [];
   for (const item of items.values()) {
     const parent = item.node.parentId ? items.get(item.node.parentId) : undefined;
     (parent ? parent.children : roots).push(item);
   }
-  const sort = (list: TreeItem[]) => {
+  const finish = (list: TreeItem[]) => {
     list.sort((a, b) => a.node.sortOrder - b.node.sortOrder);
-    list.forEach((item) => sort(item.children));
+    for (const item of list) {
+      finish(item.children);
+      item.annotations =
+        item.node.annotations ??
+        item.children.reduce((sum, child) => addCounts(sum, child.annotations), NO_ANNOTATIONS);
+    }
   };
-  sort(roots);
+  finish(roots);
   return roots;
 }

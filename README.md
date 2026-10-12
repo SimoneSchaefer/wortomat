@@ -55,6 +55,12 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
 - **Szenenstatus:** Idee → Struktur → Erster Entwurf → Überarbeiteter Entwurf → Fertig (Spalte
   `nodes.status`, per `CHECK` abgesichert; neue und bestehende Szenen starten als „Idee“). In der
   Szene als Stufenleiste, im Manuskript-Baum als farbiger Punkt; Farben in `styles.scss`.
+- **Todo/Idee/Fixme im Text:** eigene Tiptap-Mark-Erweiterung
+  ([`annotation-mark.ts`](apps/frontend/src/app/features/editor/annotation-mark.ts)), Werkzeugleiste
+  oder Strg+Alt+T/I/F. Farbig hinterlegt und je Art anders unterstrichen (auch ohne Farbwahrnehmung
+  unterscheidbar). Das Backend zählt beim Speichern selbst
+  ([`annotations.ts`](apps/backend/src/manuscript/annotations.ts)) – zusammenhängend markierter Text
+  zählt einmal –, der Manuskript-Baum zeigt die Zahlen je Szene und als Summe je Kapitel/Teil.
 - **Tags:** freie Schlagwörter je Szene (Tabellen `tags`, `scene_tags`), in derselben Leiste wie die
   Verknüpfungen. Tags gehören zum Projekt und werden über den Namen wiederverwendet – Groß-/
   Kleinschreibung (auch Umlaute) und ein führendes `#` spielen keine Rolle. Ungenutzte Tags

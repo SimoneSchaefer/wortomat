@@ -1,3 +1,19 @@
+<!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter -->
+<ng-template #annotationBadges let-counts>
+  <span class="annotations">
+    @for (info of annotationKinds; track info.kind) {
+      @if (counts[info.kind]; as count) {
+        <span
+          class="badge"
+          [style.--annotation-color]="info.color"
+          [title]="count + ' ' + (count === 1 ? info.label : info.plural)"
+          >{{ count }}</span
+        >
+      }
+    }
+  </span>
+</ng-template>
+
 <ng-template #itemTemplate let-items>
   <ul>
     @for (item of items; track item.node.id) {
@@ -35,6 +51,9 @@
             >
               {{ item.node.title }}
             </a>
+            <ng-container
+              *ngTemplateOutlet="annotationBadges; context: { $implicit: item.annotations }"
+            />
             <span class="count">{{ item.node.wordCount }}</span>
           } @else {
             <span
@@ -43,6 +62,9 @@
               (dblclick)="editingId.set(item.node.id)"
               >{{ item.node.title }}</span
             >
+            <ng-container
+              *ngTemplateOutlet="annotationBadges; context: { $implicit: item.annotations }"
+            />
           }
 
           <span class="actions">

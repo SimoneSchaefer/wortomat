@@ -10,6 +10,7 @@ function node(id: string, kind: NodeKind, parentId: string | null, sortOrder: nu
     title: id,
     wordCount: 0,
     status: kind === 'scene' ? 'idea' : null,
+    annotations: kind === 'scene' ? { todo: 0, idea: 0, fixme: 0 } : null,
   } satisfies ManuscriptNode;
 }
 

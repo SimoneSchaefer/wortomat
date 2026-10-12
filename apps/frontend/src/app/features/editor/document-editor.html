@@ -41,6 +41,27 @@
     „“
   </button>
   <span class="sep"></span>
+  @for (info of annotationKinds; track info.kind) {
+    <button
+      type="button"
+      class="annotation"
+      [style.--annotation-color]="info.color"
+      [title]="
+        'Als ' +
+        info.label +
+        ' markieren – nochmal klicken entfernt (' +
+        modifierKey +
+        '+Alt+' +
+        info.key +
+        ')'
+      "
+      [class.on]="isActive('annotation', { kind: info.kind })"
+      (click)="annotate(info.kind)"
+    >
+      <span class="swatch" aria-hidden="true"></span>{{ info.label }}
+    </button>
+  }
+  <span class="sep"></span>
   <button type="button" title="Bild einfügen" (click)="imagePicker.click()">Bild</button>
   <input
     #imagePicker

@@ -80,6 +80,12 @@ export interface UpdateProjectRequest {
 
 export type NodeKind = 'part' | 'chapter' | 'scene';
 
+/** Markierungen im Text: Stellen, an denen noch etwas zu tun ist. */
+export type AnnotationKind = 'todo' | 'idea' | 'fixme';
+
+/** Anzahl markierter Stellen je Art; zusammenhängend markierter Text zählt einmal. */
+export type AnnotationCounts = Record<AnnotationKind, number>;
+
 /** Arbeitsstand einer Szene – in dieser Reihenfolge. */
 export type SceneStatus = 'idea' | 'outline' | 'draft' | 'revised' | 'final';
 
@@ -93,6 +99,8 @@ export interface ManuscriptNode {
   wordCount: number;
   /** Nur bei Szenen gesetzt, sonst `null`. */
   status: SceneStatus | null;
+  /** Todo/Idee/Fixme-Markierungen im Text; nur bei Szenen, sonst `null`. */
+  annotations: AnnotationCounts | null;
 }
 
 export interface CreateNodeRequest {
@@ -136,6 +144,8 @@ export interface SceneContent {
   nodeId: string;
   doc: EditorDoc | null;
   wordCount: number;
+  /** Vom Backend aus dem Dokument gezählt. */
+  annotations: AnnotationCounts;
   updatedAt: string | null;
 }
 

@@ -44,8 +44,8 @@ export class ScenePage {
   protected readonly source: DocumentSource = {
     load: (id) => this.api.sceneContent(id),
     save: async (id, request) => {
-      await this.api.saveSceneContent(id, request);
-      this.store.setWordCount(id, request.wordCount);
+      const saved = await this.api.saveSceneContent(id, request);
+      this.store.updateSceneStats(id, saved.wordCount, saved.annotations);
     },
   };
 }

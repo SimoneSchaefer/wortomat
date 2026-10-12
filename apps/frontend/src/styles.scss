@@ -20,6 +20,11 @@
   --status-draft: #c98f22;
   --status-revised: #8462bb;
   --status-final: #3f8f50;
+
+  // Markierungen im Text (Todo/Idee/Fixme)
+  --annotation-todo: #e0a800;
+  --annotation-idea: #2f9e8f;
+  --annotation-fixme: #d64545;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +43,10 @@
     --status-draft: #e6b44f;
     --status-revised: #a98fd9;
     --status-final: #6dbf7d;
+
+    --annotation-todo: #f2c94c;
+    --annotation-idea: #4fc1b0;
+    --annotation-fixme: #f07070;
   }
 }
 
@@ -177,6 +186,30 @@ mark {
 
     &.ProseMirror-selectednode {
       outline: 3px solid var(--accent);
+    }
+  }
+
+  // Todo/Idee/Fixme: farbig hinterlegt, zusätzlich unterschiedlich unterstrichen
+  // (damit die Arten auch ohne Farbwahrnehmung unterscheidbar sind).
+  mark.wm-annotation {
+    --annotation-color: var(--annotation-todo);
+    padding: 0.05em 0;
+    border-radius: 0.15em;
+    background: color-mix(in srgb, var(--annotation-color) 30%, transparent);
+    color: inherit;
+    text-decoration: underline solid var(--annotation-color) 2px;
+    text-underline-offset: 0.2em;
+    text-decoration-skip-ink: none;
+    box-decoration-break: clone;
+
+    &[data-annotation='idea'] {
+      --annotation-color: var(--annotation-idea);
+      text-decoration-style: dashed;
+    }
+
+    &[data-annotation='fixme'] {
+      --annotation-color: var(--annotation-fixme);
+      text-decoration-style: wavy;
     }
   }
 
