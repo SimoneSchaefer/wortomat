@@ -3,6 +3,7 @@ import { AppController } from './app.controller.js';
 import { SERVER_OPTIONS, type ServerOptions } from './config.js';
 import { ExportController } from './export/export.controller.js';
 import { ExportService } from './export/export.service.js';
+import { FilesController } from './files/files.controller.js';
 import { ImagesController } from './images/images.controller.js';
 import { ImagesService } from './images/images.service.js';
 import { LinksController } from './links/links.controller.js';
@@ -38,6 +39,7 @@ export class AppModule {
         TagsController,
         AppSettingsController,
         ExportController,
+        FilesController,
         ImagesController,
         SearchController,
       ],

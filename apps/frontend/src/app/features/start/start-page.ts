@@ -9,10 +9,11 @@ import { ProjectStore } from '../../core/project-store';
 import { relativeTime } from '../../core/relative-time';
 import { WortomatApi } from '../../core/wortomat-api';
 import { BookCover } from '../cover/book-cover';
+import { FilePickerDialog } from './file-picker-dialog';
 
 @Component({
   selector: 'wm-start-page',
-  imports: [FormsModule, RouterLink, BookCover],
+  imports: [FormsModule, RouterLink, BookCover, FilePickerDialog],
   templateUrl: './start-page.html',
   styleUrl: './start-page.scss',
 })
@@ -40,9 +41,14 @@ export class StartPage {
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  /** Nur im Browser-Modus: Pfade werden von Hand eingegeben (es gibt keinen nativen Dialog). */
+  /** Im Dialog gewählter Speicherort für neue Bücher; `null` = Standardordner. */
+  private readonly newDir = signal<string | null>(null);
+  /**
+   * Nur im Browser-Modus (es gibt keinen nativen Dialog): Ordner + Titel als Dateiname.
+   * Lässt sich von Hand ändern oder per „Durchsuchen …“ in einen anderen Ordner legen.
+   */
   protected readonly newPath = linkedSignal(() => {
-    const dir = this.appInfo.value()?.defaultProjectDir ?? '';
+    const dir = this.newDir() ?? this.appInfo.value()?.defaultProjectDir ?? '';
     const name = this.title().trim() || this.t().start.defaultFileName;
     return dir ? `${dir}/${name}.wortomat` : '';
   });
@@ -130,6 +136,20 @@ export class StartPage {
     } else {
       this.select(index);
     }
+  }
+
+  /** Speicherort wählen – startet im Ordner des aktuellen Pfads. */
+  protected browseLocation(picker: FilePickerDialog): void {
+    picker.open(this.newPath().trim() || undefined);
+  }
+
+  protected chooseLocation(dir: string): void {
+    this.newDir.set(dir.replace(/[\\/]+$/, '') || dir);
+  }
+
+  /** Startet beim eingetippten Pfad (bzw. dessen Ordner), sonst im Standardordner. */
+  protected browse(picker: FilePickerDialog): void {
+    picker.open(this.openPath().trim() || undefined);
   }
 
   protected async openFromList(entry: ProjectListEntry): Promise<void> {

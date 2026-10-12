@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { after, before, describe, it } from 'node:test';
 import type {
+  DirectoryListing,
   ImageInfo,
   ManuscriptNode,
   NoteContent,
@@ -876,6 +877,39 @@ describe('REST-API', () => {
     assert.equal(await message('en'), 'Note not found.');
     assert.equal(await message('en-US,en;q=0.9'), 'Note not found.');
     assert.equal(await message('fr-FR,de;q=0.8'), 'Notiz nicht gefunden.');
+  });
+
+  it('listet Ordner und Projektdateien für die Dateiauswahl', async () => {
+    const root = path.join(tmpDir, 'auswahl');
+    await mkdir(path.join(root, 'Kapitel 10'), { recursive: true });
+    await mkdir(path.join(root, 'Kapitel 2'));
+    await mkdir(path.join(root, '.versteckt'));
+    await writeFile(path.join(root, 'Roman.wortomat'), '');
+    await writeFile(path.join(root, 'notizen.txt'), '');
+
+    const listing = await api<DirectoryListing>(
+      'GET',
+      `/api/files?dir=${encodeURIComponent(root)}`,
+    );
+    assert.equal(listing.path, root);
+    assert.equal(listing.parent, tmpDir);
+    // erst Ordner (natürlich sortiert), dann Projekte; keine versteckten oder fremden Dateien
+    assert.deepEqual(
+      listing.entries.map((entry) => [entry.name, entry.kind]),
+      [
+        ['Kapitel 2', 'directory'],
+        ['Kapitel 10', 'directory'],
+        ['Roman.wortomat', 'project'],
+      ],
+    );
+
+    // Nicht vorhandener Ordner → nächster vorhandener darüber; ohne Angabe der Standardordner
+    const missing = await api<DirectoryListing>(
+      'GET',
+      `/api/files?dir=${encodeURIComponent(path.join(root, 'gibt', 'es', 'nicht'))}`,
+    );
+    assert.equal(missing.path, root);
+    assert.equal((await api<DirectoryListing>('GET', '/api/files')).path, tmpDir);
   });
 
   it('verweigert Szenen direkt auf oberster Ebene', async () => {

@@ -1,0 +1,70 @@
+<dialog #dialog aria-labelledby="file-picker-title" (click)="closeOnBackdrop($event)">
+  <div class="body">
+    <h2 id="file-picker-title">
+      {{ mode() === 'folder' ? t().filePicker.folderTitle : t().filePicker.title }}
+    </h2>
+
+    <div class="location">
+      <button
+        type="button"
+        class="up"
+        [title]="t().filePicker.up"
+        [attr.aria-label]="t().filePicker.up"
+        [disabled]="loading() || !listing()?.parent"
+        (click)="load(listing()!.parent!)"
+      >
+        ↑
+      </button>
+      <span class="path" [title]="listing()?.path ?? ''"
+        ><bdi>{{ listing()?.path }}</bdi></span
+      >
+    </div>
+
+    <ul class="entries" [class.loading]="loading()">
+      @for (entry of listing()?.entries ?? []; track entry.path) {
+        <li>
+          <button
+            type="button"
+            [class.selected]="selected() === entry.path"
+            [class.project]="entry.kind === 'project'"
+            [disabled]="mode() === 'folder' && entry.kind === 'project'"
+            (click)="click(entry)"
+            (dblclick)="entry.kind === 'project' && choose(entry.path)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              @if (entry.kind === 'directory') {
+                <path
+                  d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2.5h9A1.5 1.5 0 0 1 21 9v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"
+                />
+              } @else {
+                <path d="M5 19.5V5a2 2 0 0 1 2-2h12v15H7.5a2.5 2.5 0 0 0 0 5H19" />
+              }
+            </svg>
+            <span>{{ entry.name }}</span>
+          </button>
+        </li>
+      } @empty {
+        @if (listing() && !loading()) {
+          <li class="empty muted">{{ t().filePicker.empty }}</li>
+        }
+      }
+    </ul>
+
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+
+    <footer>
+      <button type="button" (click)="close()">{{ t().filePicker.cancel }}</button>
+      @if (mode() === 'folder') {
+        <button type="button" class="primary" [disabled]="!listing()" (click)="confirm()">
+          {{ t().filePicker.chooseFolder }}
+        </button>
+      } @else {
+        <button type="button" class="primary" [disabled]="!selected()" (click)="confirm()">
+          {{ t().filePicker.open }}
+        </button>
+      }
+    </footer>
+  </div>
+</dialog>

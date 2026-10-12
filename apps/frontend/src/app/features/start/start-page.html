@@ -149,8 +149,14 @@
       @if (!desktop) {
         <label>
           {{ t().start.location }}
-          <input name="newPath" [(ngModel)]="newPath" />
+          <span class="path-row">
+            <input name="newPath" [(ngModel)]="newPath" />
+            <button type="button" [disabled]="busy()" (click)="browseLocation(locationPicker)">
+              {{ t().start.browse }}
+            </button>
+          </span>
         </label>
+        <wm-file-picker-dialog #locationPicker mode="folder" (chosen)="chooseLocation($event)" />
       }
       <button class="primary" type="submit" [disabled]="busy()">
         {{ desktop ? t().start.createWithDialog : t().start.create }}
@@ -164,12 +170,18 @@
       <form (ngSubmit)="openProject()">
         <label>
           {{ t().start.path }}
-          <input name="openPath" [(ngModel)]="openPath" />
+          <span class="path-row">
+            <input name="openPath" [(ngModel)]="openPath" />
+            <button type="button" [disabled]="busy()" (click)="browse(filePicker)">
+              {{ t().start.browse }}
+            </button>
+          </span>
         </label>
         <button type="submit" [disabled]="busy() || !openPath().trim()">
           {{ t().start.open }}
         </button>
       </form>
+      <wm-file-picker-dialog #filePicker (chosen)="openPath.set($event); openProject()" />
     </section>
   }
 

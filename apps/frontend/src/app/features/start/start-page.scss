@@ -44,6 +44,21 @@ form button {
   justify-self: start;
 }
 
+// Pfadfeld mit „Durchsuchen …“ daneben
+.path-row {
+  display: flex;
+  gap: 0.5rem;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  button {
+    flex: none;
+  }
+}
+
 footer {
   font-size: 0.8rem;
   text-align: center;

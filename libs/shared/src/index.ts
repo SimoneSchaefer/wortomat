@@ -98,6 +98,21 @@ export interface ProjectListEntry {
   lastOpenedAt: string;
 }
 
+/** Eintrag im Dateiauswahl-Dialog (Browser-Modus): Ordner oder Projektdatei. */
+export interface DirectoryEntry {
+  name: string;
+  path: string;
+  kind: 'directory' | 'project';
+}
+
+/** Inhalt eines Ordners – nur Unterordner und .wortomat-Dateien, ohne versteckte. */
+export interface DirectoryListing {
+  path: string;
+  /** `null` im Wurzelverzeichnis. */
+  parent: string | null;
+  entries: DirectoryEntry[];
+}
+
 export interface ForgetProjectRequest {
   filePath: string;
 }

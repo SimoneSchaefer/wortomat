@@ -51,6 +51,17 @@ export const de = {
     status: (status: number) => `Fehler ${status}`,
   },
 
+  filePicker: {
+    title: 'Buch öffnen',
+    folderTitle: 'Speicherort wählen',
+    chooseFolder: 'Diesen Ordner wählen',
+    up: 'Übergeordneter Ordner',
+    empty: 'Hier gibt es keine Ordner oder Wortomat-Dateien.',
+    loadFailed: 'Der Ordner konnte nicht gelesen werden.',
+    cancel: 'Abbrechen',
+    open: 'Öffnen',
+  },
+
   start: {
     tagline: 'Dein Buch. Deine Datei. Kein Server.',
     myBooks: 'Meine Bücher',
@@ -68,6 +79,7 @@ export const de = {
     createWithDialog: 'Anlegen …',
     openOtherHeading: 'Andere Datei öffnen',
     path: 'Pfad zur .wortomat-Datei',
+    browse: 'Durchsuchen …',
     open: 'Öffnen',
     version: (version: string) => `Version ${version}`,
     browserMode: 'Browser-Modus (Entwicklung)',

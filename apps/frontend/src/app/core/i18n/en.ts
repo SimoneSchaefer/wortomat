@@ -21,6 +21,17 @@ export const en: Texts = {
     status: (status: number) => `Error ${status}`,
   },
 
+  filePicker: {
+    title: 'Open book',
+    folderTitle: 'Choose location',
+    chooseFolder: 'Choose this folder',
+    up: 'Parent folder',
+    empty: 'There are no folders or Wortomat files here.',
+    loadFailed: 'The folder could not be read.',
+    cancel: 'Cancel',
+    open: 'Open',
+  },
+
   start: {
     carousel: 'Books',
     previous: 'Previous book',
@@ -43,6 +54,7 @@ export const en: Texts = {
     createWithDialog: 'Create …',
     openOtherHeading: 'Open another file',
     path: 'Path to the .wortomat file',
+    browse: 'Browse …',
     open: 'Open',
     version: (version: string) => `Version ${version}`,
     browserMode: 'Browser mode (development)',

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
+  DirectoryListing,
   AppSettings,
   CreateNodeRequest,
   CreateNoteGroupRequest,
@@ -52,6 +53,12 @@ export class WortomatApi {
 
   updateSettings(request: UpdateAppSettingsRequest): Promise<AppSettings> {
     return this.call(this.http.patch<AppSettings>('/api/settings', request));
+  }
+
+  /** Ordnerinhalt für den Dateiauswahl-Dialog (Browser-Modus); ohne `dir` der Standardordner. */
+  listDirectory(dir?: string): Promise<DirectoryListing> {
+    const params: Record<string, string> = dir ? { dir } : {};
+    return this.call(this.http.get<DirectoryListing>('/api/files', { params }));
   }
 
   // Projekt -----------------------------------------------------------------
