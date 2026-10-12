@@ -93,6 +93,8 @@ export const de = {
     titleOf: (title: string) => `Titel von ${title}`,
     status: (status: string) => `Status: ${status}`,
     renameHint: (title: string) => `${title} (Doppelklick zum Umbenennen)`,
+    collapse: 'Einklappen',
+    expand: 'Ausklappen',
     addScene: 'Szene hinzufügen',
     addChapter: 'Kapitel hinzufügen',
     empty: 'Noch leer. Leg dein erstes Kapitel an.',

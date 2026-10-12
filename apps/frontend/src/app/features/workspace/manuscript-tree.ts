@@ -43,6 +43,7 @@ export class ManuscriptTree {
 
   /** Auch von der Kopfzeile der Seitenleiste aus aufgerufen (neues Kapitel/neuer Teil). */
   async add(kind: NodeKind, parentId: string | null): Promise<void> {
+    if (parentId) this.store.reveal(parentId); // Neues soll sichtbar sein
     await this.run(async () => {
       const title = this.t().tree.newTitle[kind];
       const node = await this.store.addNode({ kind, parentId, title });
@@ -90,6 +91,11 @@ export class ManuscriptTree {
       .reduce((sum, item) => addCounts(sum, item.annotations), NO_ANNOTATIONS);
     return ANNOTATION_KINDS.filter((info) => total[info.kind] > 0);
   });
+
+  /** Beim Filtern sind alle Teile offen – sonst lägen Treffer verborgen. */
+  protected isCollapsed(id: string): boolean {
+    return !this.filter.active() && this.store.collapsed().has(id);
+  }
 
   protected status(node: ManuscriptNode) {
     return statusInfo(node.status ?? 'idea');

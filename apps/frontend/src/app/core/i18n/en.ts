@@ -66,6 +66,8 @@ export const en: Texts = {
     titleOf: (title: string) => `Title of ${title}`,
     status: (status: string) => `Status: ${status}`,
     renameHint: (title: string) => `${title} (double-click to rename)`,
+    collapse: 'Collapse',
+    expand: 'Expand',
     addScene: 'Add scene',
     addChapter: 'Add chapter',
     empty: 'Still empty. Start your first chapter.',

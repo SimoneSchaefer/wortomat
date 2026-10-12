@@ -105,6 +105,7 @@ export class ScenePage {
       untracked(() => {
         void this.flushTitle(); // Änderungen der vorherigen Szene
         this.error.set(null);
+        this.store.reveal(id); // z. B. über die Suche geöffnet: im Baum aufklappen
         // Frisch angelegt (Standardtitel)? Dann gleich den Titel zum Überschreiben markieren.
         if (this.store.findNode(id)?.title === this.t().tree.newTitle.scene) {
           afterNextRender(

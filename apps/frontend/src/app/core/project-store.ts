@@ -29,6 +29,8 @@ export class ProjectStore {
   readonly nodes = signal<ManuscriptNode[]>([]);
   readonly tree = computed(() => buildTree(this.nodes()));
   readonly totalWords = computed(() => this.nodes().reduce((sum, node) => sum + node.wordCount, 0));
+  /** Eingeklappte Teile im Baum – nur Anzeige, gilt bis zum Schließen des Projekts. */
+  readonly collapsed = signal<ReadonlySet<string>>(new Set());
 
   /**
    * Liefert das aktuell geöffnete Projekt. Beim ersten Aufruf wird das Backend gefragt
@@ -51,11 +53,13 @@ export class ProjectStore {
   async create(filePath: string, title: string): Promise<void> {
     this.project.set(await this.api.createProject({ filePath, title }));
     this.nodes.set([]);
+    this.collapsed.set(new Set());
   }
 
   async open(filePath: string): Promise<void> {
     this.project.set(await this.api.openProject(filePath));
     this.nodes.set(await this.api.listNodes());
+    this.collapsed.set(new Set());
   }
 
   /** Titelbild setzen (hochgeladenes Bild) oder mit `null` entfernen. */
@@ -67,6 +71,7 @@ export class ProjectStore {
     await this.api.closeProject();
     this.project.set(null);
     this.nodes.set([]);
+    this.collapsed.set(new Set());
   }
 
   async addNode(request: CreateNodeRequest): Promise<ManuscriptNode> {
@@ -100,6 +105,25 @@ export class ProjectStore {
     this.nodes.update((nodes) =>
       nodes.map((node) => (node.id === id ? { ...node, wordCount, annotations } : node)),
     );
+  }
+
+  toggleCollapsed(id: string): void {
+    this.collapsed.update((collapsed) => {
+      const next = new Set(collapsed);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  }
+
+  /** Klappt alles auf, was über dem Element liegt – z. B. wenn eine Szene geöffnet wird. */
+  reveal(id: string): void {
+    const collapsed = this.collapsed();
+    const next = new Set(collapsed);
+    for (let node = this.findNode(id); node?.parentId; node = this.findNode(node.parentId)) {
+      next.delete(node.parentId);
+    }
+    next.delete(id);
+    if (next.size !== collapsed.size) this.collapsed.set(next);
   }
 
   findNode(id: string): ManuscriptNode | undefined {

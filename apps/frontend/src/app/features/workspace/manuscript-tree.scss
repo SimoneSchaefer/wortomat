@@ -14,7 +14,36 @@ ul {
   padding: 0;
 }
 
-li li {
+// Gliederung -------------------------------------------------------------------
+// Teile sind durch eine Linie getrennt, jedes Kapitel ist eine Karte mit seinen Szenen
+// (eingerückt). So bleibt auch ein langes Buch überschaubar.
+
+// Abstand und Linie vor jedem Teil
+nav > ul > li.part:not(:first-child) {
+  margin-top: 0.9rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+
+// Kapitel ohne Teil direkt nach einem Teil: deutlich abgesetzt, damit es nicht dazugehörig wirkt
+nav > ul > li.part + li.chapter {
+  margin-top: 0.9rem;
+}
+
+li.part > ul {
+  padding-left: 0.4rem;
+}
+
+li.chapter {
+  margin-top: 0.4rem;
+  padding: 0.15rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--bg);
+}
+
+li.chapter > ul {
+  margin: 0 0 0.2rem;
   padding-left: 0.9rem;
 }
 
@@ -67,10 +96,50 @@ a {
   }
 }
 
+// Geöffnete Szene zusätzlich hinterlegt
+.row:has(> a.active) {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
 input {
   flex: 1;
   min-width: 0;
   padding: 0.2rem 0.4rem;
+}
+
+// Auf-/Zuklappen der Teile; der Pfeil zeigt nach unten, solange der Teil offen ist
+.collapse {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-left: -0.3rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: none;
+  color: var(--text-muted);
+
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.15s;
+  }
+
+  &[aria-expanded='true'] svg {
+    transform: rotate(90deg);
+  }
+
+  &:hover:not(:disabled) {
+    background: none;
+    color: var(--text);
+  }
 }
 
 .status {
@@ -78,7 +147,15 @@ input {
   height: 0.75rem;
 }
 
-// Feste Spalten: Badges zentriert, Wortzahl rechtsbündig
+// Badges zentriert in gleich breiten Plätzen, Wortzahl rechtsbündig
+// Platz für so viele Badges, wie Arten im Buch vorkommen; vorhandene rücken nach rechts.
+.badges {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  width: calc(var(--slots) * 1.4rem);
+}
+
 .slot {
   flex-shrink: 0;
   display: flex;

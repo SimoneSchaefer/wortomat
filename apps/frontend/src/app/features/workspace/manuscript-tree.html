@@ -1,23 +1,25 @@
 <!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter.
-     Eine Spalte je Art (leer, wo sie fehlt), dahinter die Wortzahl (ebenfalls summiert) –
-     alles bündig untereinander. -->
+     Nur vorhandene Arten, rechtsbündig aufgerückt (keine Lücken). Der Bereich ist überall
+     gleich breit, damit die Wortzahl dahinter (ebenfalls summiert) bündig untereinander steht. -->
 <ng-template #rowStats let-counts let-words="words">
-  @for (info of annotationKinds(); track info.kind) {
-    <span class="slot">
+  <span class="badges" [style.--slots]="annotationKinds().length">
+    @for (info of annotationKinds(); track info.kind) {
       @if (counts[info.kind]; as count) {
-        <span
-          class="badge"
-          [style.--annotation-color]="info.color"
-          [title]="
-            count +
-            ' ' +
-            (count === 1 ? t().annotations[info.kind].label : t().annotations[info.kind].plural)
-          "
-          >{{ count }}</span
-        >
+        <span class="slot">
+          <span
+            class="badge"
+            [style.--annotation-color]="info.color"
+            [title]="
+              count +
+              ' ' +
+              (count === 1 ? t().annotations[info.kind].label : t().annotations[info.kind].plural)
+            "
+            >{{ count }}</span
+          >
+        </span>
       }
-    </span>
-  }
+    }
+  </span>
   <span class="count">{{ t().number(words) }}</span>
 </ng-template>
 
@@ -33,6 +35,22 @@
         (dragend)="onDragEnd()"
       >
         <div class="row" (dragover)="onDragOverItem($event, item.node)">
+          @if (item.node.kind === 'part' && !filter.active()) {
+            <button
+              type="button"
+              class="collapse"
+              [attr.aria-expanded]="!isCollapsed(item.node.id)"
+              [title]="isCollapsed(item.node.id) ? t().tree.expand : t().tree.collapse"
+              [attr.aria-label]="
+                (isCollapsed(item.node.id) ? t().tree.expand : t().tree.collapse) +
+                ': ' +
+                item.node.title
+              "
+              (click)="store.toggleCollapsed(item.node.id)"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>
+            </button>
+          }
           @if (editingId() === item.node.id) {
             <input
               #titleInput
@@ -106,7 +124,7 @@
           }
         </div>
 
-        @if (item.children.length) {
+        @if (item.children.length && !isCollapsed(item.node.id)) {
           <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item.children }" />
         }
       </li>
