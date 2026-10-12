@@ -65,9 +65,9 @@
 
     <div class="toolbar">
       @if (index() === 0) {
-        <span class="badge">Profilbild</span>
+        <span class="badge">{{ label() }}</span>
       } @else {
-        <button type="button" [disabled]="busy()" (click)="makeCover()">Als Profilbild</button>
+        <button type="button" [disabled]="busy()" (click)="makeCover()">Als {{ label() }}</button>
       }
       <span class="spacer"></span>
       <button type="button" title="Bild hinzufügen" [disabled]="busy()" (click)="picker.click()">
@@ -80,10 +80,16 @@
   } @else if (!loading()) {
     <button type="button" class="empty" [disabled]="busy()" (click)="picker.click()">
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="8.5" r="4" />
-        <path d="M4 21a8 8 0 0 1 16 0" />
+        @if (placeholderIcon() === 'person') {
+          <circle cx="12" cy="8.5" r="4" />
+          <path d="M4 21a8 8 0 0 1 16 0" />
+        } @else {
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <circle cx="9" cy="9.5" r="1.8" />
+          <path d="M3.5 18.5l5.5-5.5 4 4 2.5-2.5 5 5" />
+        }
       </svg>
-      <span>{{ busy() ? 'Lade hoch …' : 'Profilbild hinzufügen' }}</span>
+      <span>{{ busy() ? 'Lade hoch …' : label() + ' hinzufügen' }}</span>
       <small>oder Bilder hierher ziehen</small>
     </button>
   }

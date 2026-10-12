@@ -27,7 +27,12 @@
         />
       </div>
       @if (config().gallery) {
-        <wm-image-gallery [noteId]="id()" label="Profilbild" (changed)="onGalleryChanged($event)" />
+        <wm-image-gallery
+          [noteId]="id()"
+          label="Profilbild"
+          [placeholderIcon]="config().galleryIcon"
+          (changed)="onGalleryChanged($event)"
+        />
       }
     </div>
     @if (error(); as message) {

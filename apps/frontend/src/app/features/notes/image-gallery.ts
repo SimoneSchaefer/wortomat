@@ -34,6 +34,8 @@ const DRAG_THRESHOLD = 40;
 export class ImageGallery {
   readonly noteId = input.required<string>();
   readonly label = input('Bilder');
+  /** Symbol, solange die Galerie leer ist. */
+  readonly placeholderIcon = input<'person' | 'picture'>('picture');
   /** Neue Bilderliste nach jeder Änderung (das erste ist das Profilbild). */
   readonly changed = output<ImageInfo[]>();
 

@@ -42,11 +42,10 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Zwischenüberschriften ([`note-kinds.ts`](apps/frontend/src/app/features/notes/note-kinds.ts)).
   Der Editor ([`document-editor.ts`](apps/frontend/src/app/features/editor/document-editor.ts)) ist
   für Szenen und Notizen derselbe; was er lädt und speichert, bestimmt eine `DocumentSource`.
-- **Profilbilder:** Charaktere haben eine eigene Bildergalerie (Tabelle `note_images`); das erste
-  Bild ist das Profilbild und erscheint als Avatar in der Liste. Gewischt wird über einen
+- **Profilbilder:** Charaktere, Orte und Recherchen haben je eine eigene Bildergalerie (Tabelle
+  `note_images`); das erste Bild ist das Profilbild und erscheint als Avatar in der Liste. Gewischt wird über einen
   horizontalen Streifen mit CSS-Scroll-Snapping (Touch/Trackpad nativ), dazu Maus-Ziehen,
-  Pfeiltasten, Pfeile und Punkte. Für weitere Notizarten per `gallery: true` in `note-kinds.ts`
-  einschaltbar. Entfernte Bilder werden aus der Datei gelöscht, sofern sie nirgends sonst
+  Pfeiltasten, Pfeile und Punkte. Pro Notizart per `gallery` in `note-kinds.ts` abschaltbar. Entfernte Bilder werden aus der Datei gelöscht, sofern sie nirgends sonst
   (Galerie oder Text) verwendet werden.
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
