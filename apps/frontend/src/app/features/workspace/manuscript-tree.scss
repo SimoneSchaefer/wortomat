@@ -53,6 +53,19 @@ li.chapter {
   background: color-mix(in srgb, var(--bg) 50%, var(--surface));
 }
 
+// Aufeinanderfolgende Kapitel ohne Abstand: die Rahmen überlappen zu einer Linie,
+// gerundet sind nur die äußeren Ecken des Blocks
+li.chapter + li.chapter {
+  margin-top: -1px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+li.chapter:has(+ li.chapter) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 li.chapter > ul {
   margin: 0 0 0.2rem;
   padding-left: 0.9rem;
