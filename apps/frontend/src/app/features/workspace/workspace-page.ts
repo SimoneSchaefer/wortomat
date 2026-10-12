@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import type { NoteKind } from '@wortomat/shared';
@@ -60,6 +60,8 @@ export class WorkspacePage {
   protected readonly settings = inject(AppSettingsStore);
 
   protected readonly menu = MENU;
+  protected readonly tree = viewChild(ManuscriptTree);
+  protected readonly noteList = viewChild(NoteList);
 
   // Breite der Seitenleiste: gespeichert in den App-Einstellungen, begrenzt auf
   // mindestens 12rem und höchstens die halbe Fensterbreite (der Text braucht Platz).

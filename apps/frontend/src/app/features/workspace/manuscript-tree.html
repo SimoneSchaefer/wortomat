@@ -128,15 +128,6 @@
 
   <div class="root-marker" [attr.data-drop]="dropMarker(null)"></div>
 
-  <div class="add">
-    <button type="button" class="link" (click)="add('chapter', null)">
-      {{ t().tree.addChapterButton }}
-    </button>
-    <button type="button" class="link" (click)="add('part', null)">
-      {{ t().tree.addPartButton }}
-    </button>
-  </div>
-
   @if (error(); as message) {
     <p class="error" role="alert">{{ message }}</p>
   }

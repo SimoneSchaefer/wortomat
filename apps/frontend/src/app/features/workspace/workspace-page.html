@@ -56,7 +56,23 @@
   </nav>
 
   <aside class="sidebar" [attr.aria-label]="sectionLabel()">
-    <h2>{{ sectionLabel() }}</h2>
+    <div class="sidebar-head">
+      <h2>{{ sectionLabel() }}</h2>
+      <span class="head-actions">
+        @if (noteKind(); as kind) {
+          <button type="button" class="link" (click)="noteList()?.add()">
+            {{ t().noteKinds[kind].addLabel }}
+          </button>
+        } @else {
+          <button type="button" class="link" (click)="tree()?.add('chapter', null)">
+            {{ t().tree.addChapterButton }}
+          </button>
+          <button type="button" class="link" (click)="tree()?.add('part', null)">
+            {{ t().tree.addPartButton }}
+          </button>
+        }
+      </span>
+    </div>
 
     @if (noteKind(); as kind) {
       <wm-note-list [kind]="kind" />

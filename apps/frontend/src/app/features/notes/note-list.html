@@ -26,10 +26,6 @@
     }
   </ul>
 
-  <div class="add">
-    <button type="button" class="link" (click)="add()">{{ texts().addLabel }}</button>
-  </div>
-
   @if (error(); as message) {
     <p class="error" role="alert">{{ message }}</p>
   }

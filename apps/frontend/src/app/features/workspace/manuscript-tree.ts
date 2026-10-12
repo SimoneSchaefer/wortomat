@@ -39,7 +39,8 @@ export class ManuscriptTree {
   protected readonly draggingId = signal<string | null>(null);
   protected readonly dropPlan = signal<DropPlan | null>(null);
 
-  protected async add(kind: NodeKind, parentId: string | null): Promise<void> {
+  /** Auch von der Kopfzeile der Seitenleiste aus aufgerufen (neues Kapitel/neuer Teil). */
+  async add(kind: NodeKind, parentId: string | null): Promise<void> {
     await this.run(async () => {
       const title = this.t().tree.newTitle[kind];
       const node = await this.store.addNode({ kind, parentId, title });

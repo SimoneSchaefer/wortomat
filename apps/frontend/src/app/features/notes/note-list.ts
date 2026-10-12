@@ -26,7 +26,8 @@ export class NoteList {
   protected readonly notes = computed(() => this.store.byKind(this.kind()));
   protected readonly error = signal<string | null>(null);
 
-  protected async add(): Promise<void> {
+  /** Von der Kopfzeile der Seitenleiste aus aufgerufen. */
+  async add(): Promise<void> {
     this.error.set(null);
     try {
       const note = await this.store.create(this.kind(), this.texts().newTitle);

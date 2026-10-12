@@ -140,12 +140,6 @@ input {
   font-size: 0.85rem;
 }
 
-.add {
-  display: flex;
-  gap: 1rem;
-  padding: 0.5rem;
-}
-
 // Drag & Drop ------------------------------------------------------------------
 
 li[draggable='true'] > .row {
