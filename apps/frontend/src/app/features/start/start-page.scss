@@ -81,8 +81,6 @@ footer {
   min-width: 0;
   height: calc(var(--slide-width) * 1.6 + 1.5rem);
   overflow: hidden;
-  // Ränder weich ausblenden, damit die äußeren Bücher nicht hart abgeschnitten wirken
-  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
 }
 
 .slide {
@@ -95,21 +93,24 @@ footer {
   background: none;
   line-height: 0;
   z-index: calc(10 - var(--distance));
-  opacity: max(0, 1 - var(--distance) * 0.22);
-  filter: saturate(calc(1 - var(--distance) * 0.2));
+  // Hintere Bücher deckend, aber etwas dunkler und blasser – so treten sie zurück
+  filter: brightness(calc(1 - var(--distance) * 0.12)) saturate(calc(1 - var(--distance) * 0.2));
   transform: translateX(calc(-50% + var(--offset) * 58%)) scale(calc(1 - var(--distance) * 0.16));
   transform-origin: 50% 85%;
   transition:
     transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
     opacity 0.35s,
+    visibility 0.35s,
     filter 0.35s;
 
   &:hover:not(:disabled) {
     background: none;
   }
 
+  // Weiter außen ist kein Platz mehr: dort nur beim Blättern kurz ein- und ausblenden
   &.far {
     visibility: hidden;
+    opacity: 0;
   }
 
   &.current wm-book-cover {

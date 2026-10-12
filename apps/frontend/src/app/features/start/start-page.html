@@ -48,7 +48,7 @@
                 class="slide"
                 [class.current]="offset === 0"
                 [class.missing]="!project.available"
-                [class.far]="offset > 3 || offset < -3"
+                [class.far]="offset > 2 || offset < -2"
                 [style.--offset]="offset"
                 [style.--distance]="offset < 0 ? -offset : offset"
                 [attr.tabindex]="offset === 0 ? 0 : -1"
