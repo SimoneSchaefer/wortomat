@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import {
   BadRequestException,
   ConflictException,
@@ -9,6 +10,7 @@ import type {
   ExportFormat,
   ExportRequest,
   ExportTemplate,
+  ProjectInfo,
 } from '@wortomat/shared';
 import { ImagesService } from '../images/images.service.js';
 import { ManuscriptService } from '../manuscript/manuscript.service.js';
@@ -22,6 +24,7 @@ import {
   safeFileName,
 } from './book.js';
 import { renderDocx } from './docx-renderer.js';
+import { renderEpub } from './epub-renderer.js';
 import { renderHtml } from './html-renderer.js';
 import { renderLatex } from './latex-renderer.js';
 import { compilePdf, findPdflatex } from './pdflatex.js';
@@ -33,6 +36,7 @@ const FORMATS: Record<ExportFormat, { extension: string; mimeType: string }> = {
     mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   },
   pdf: { extension: 'pdf', mimeType: 'application/pdf' },
+  epub: { extension: 'epub', mimeType: 'application/epub+zip' },
 };
 const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
 
@@ -64,7 +68,11 @@ export class ExportService {
     }
     const template = TEMPLATES.includes(request.template) ? request.template : 'normseite';
     const options = { includeSceneTitles: request.includeSceneTitles === true };
-    const book = this.book();
+    const project = this.projects.info();
+    if (!project) {
+      throw new ConflictException('Es ist kein Projekt geöffnet.');
+    }
+    const book = this.book(project);
     const images = this.imageResolver();
 
     let data: Buffer;
@@ -75,6 +83,12 @@ export class ExportService {
         break;
       case 'docx':
         ({ data, warnings } = await renderDocx(book, template, options, images));
+        break;
+      case 'epub':
+        ({ data, warnings } = await renderEpub(book, options, images, {
+          identifier: bookIdentifier(project.createdAt),
+          modified: new Date(),
+        }));
         break;
       case 'pdf': {
         const pdflatex = await findPdflatex();
@@ -104,11 +118,7 @@ export class ExportService {
     };
   }
 
-  private book(): Book {
-    const project = this.projects.info();
-    if (!project) {
-      throw new ConflictException('Es ist kein Projekt geöffnet.');
-    }
+  private book(project: ProjectInfo): Book {
     const rows = this.projects.db.prepare('SELECT node_id, doc FROM scene_content').all() as Array<{
       node_id: string;
       doc: string;
@@ -142,4 +152,16 @@ export class ExportService {
       }
     };
   }
+}
+
+/**
+ * Stabile Kennung fürs EPUB: aus dem Anlagezeitpunkt des Buchs abgeleitet (ändert sich nicht,
+ * auch wenn der Titel geändert wird), im Format einer UUID (Version 5).
+ */
+export function bookIdentifier(createdAt: string): string {
+  const hash = createHash('sha1').update(`wortomat:${createdAt}`).digest();
+  hash[6] = (hash[6]! & 0x0f) | 0x50;
+  hash[8] = (hash[8]! & 0x3f) | 0x80;
+  const hex = hash.subarray(0, 16).toString('hex');
+  return `urn:uuid:${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }

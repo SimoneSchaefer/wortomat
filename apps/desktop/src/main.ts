@@ -282,10 +282,11 @@ const EXPORT_FORMATS = {
   html: { extension: 'html', label: 'Webseite (HTML)' },
   docx: { extension: 'docx', label: 'Word-Dokument' },
   pdf: { extension: 'pdf', label: 'PDF-Dokument' },
+  epub: { extension: 'epub', label: 'E-Book (EPUB)' },
 } as const;
 
 /**
- * Nur exportierte Dateien öffnen: vorhandene .html/.docx/.pdf. So kann selbst eine
+ * Nur exportierte Dateien öffnen: vorhandene .html/.docx/.pdf/.epub. So kann selbst eine
  * kompromittierte Seite über diesen Weg keine Programme starten (unter Windows würde
  * „Öffnen“ einer .exe sie ausführen).
  */
@@ -293,7 +294,7 @@ function requireExportedFile(filePath: unknown): string {
   if (
     typeof filePath !== 'string' ||
     !path.isAbsolute(filePath) ||
-    !/\.(html|docx|pdf)$/i.test(filePath) ||
+    !/\.(html|docx|pdf|epub)$/i.test(filePath) ||
     !existsSync(filePath)
   ) {
     throw new Error('Diese Datei kann nicht geöffnet werden.');

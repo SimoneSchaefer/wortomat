@@ -62,7 +62,8 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   ([`annotations.ts`](apps/backend/src/manuscript/annotations.ts)) – zusammenhängend markierter Text
   zählt einmal –, der Manuskript-Baum zeigt die Zahlen je Szene und als Summe je Kapitel/Teil.
 - **Export** (Schaltfläche „Exportieren …“ oben): HTML (eine Datei, Bilder eingebettet), Word
-  (.docx, Bibliothek `docx`) und – wenn pdfLaTeX gefunden wird – PDF. Für Word und PDF gibt es die
+  (.docx, Bibliothek `docx`), EPUB 3 (eine Datei je Kapitel, verschachteltes Inhaltsverzeichnis plus
+  `toc.ncx` für ältere Reader) und – wenn pdfLaTeX gefunden wird – PDF. Für Word und PDF gibt es die
   Vorlagen **Normseite** (A4, Courier 12 pt, 30 × 60 Anschläge, Titelseite mit Wort- und
   Normseitenzahl) und **Roman** (12,5 × 19 cm, Blocksatz, Silbentrennung). Code in
   [`apps/backend/src/export`](apps/backend/src/export): ein formatneutrales Buchmodell, je Format ein
@@ -70,7 +71,8 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   gesucht (Desktop-Apps sehen den Shell-PATH nicht) und läuft mit `-no-shell-escape`.
   Todo/Idee/Fixme-Markierungen werden nicht mitexportiert. Word und pdfLaTeX können kein WebP –
   neue Bilder werden daher als JPEG/PNG gespeichert; ältere WebP-Bilder erscheinen dort als
-  Platzhalter mit Hinweis.
+  Platzhalter mit Hinweis (im EPUB sind sie dabei, AVIF fällt dort weg). Die EPUB-Kennung wird aus
+  dem Anlagezeitpunkt des Buchs abgeleitet und bleibt so über alle Exporte gleich.
 - **Tags:** freie Schlagwörter je Szene (Tabellen `tags`, `scene_tags`), in derselben Leiste wie die
   Verknüpfungen. Tags gehören zum Projekt und werden über den Namen wiederverwendet – Groß-/
   Kleinschreibung (auch Umlaute) und ein führendes `#` spielen keine Rolle. Ungenutzte Tags
@@ -179,6 +181,6 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 - Code-Signing für Windows und macOS (sonst warnen SmartScreen bzw. Gatekeeper)
 - Umsortieren per Tastatur (Drag & Drop ist nur mit der Maus bedienbar)
 - Versionen/Snapshots von Szenen, nicht mehr verwendete Bilder aufräumen
-- EPUB-Export
+- Titelbild (Cover) für den EPUB-Export
 - Import der Daten aus Wortomat 1.x
 - Automatische Backups (`VACUUM INTO`)

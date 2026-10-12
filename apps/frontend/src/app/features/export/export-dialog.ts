@@ -26,6 +26,11 @@ const FORMATS: ReadonlyArray<Choice<ExportFormat>> = [
     description: 'Zum Weiterbearbeiten oder Einreichen bei Verlag und Agentur.',
   },
   { value: 'pdf', label: 'PDF (pdfLaTeX)', description: 'Druckfertig gesetzt mit pdfLaTeX.' },
+  {
+    value: 'epub',
+    label: 'E-Book (EPUB)',
+    description: 'Für E-Reader wie Tolino oder Kobo, Apple Books und Calibre.',
+  },
 ];
 
 const TEMPLATES: ReadonlyArray<Choice<ExportTemplate>> = [
@@ -83,6 +88,11 @@ export class ExportDialog {
 
   protected close(): void {
     this.dialog().nativeElement.close();
+  }
+
+  /** Vorlagen gibt es nur für Formate mit fester Seite. */
+  protected hasTemplates(format: ExportFormat): boolean {
+    return format === 'docx' || format === 'pdf';
   }
 
   protected isDisabled(format: ExportFormat): boolean {

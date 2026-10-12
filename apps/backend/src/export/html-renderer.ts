@@ -27,38 +27,42 @@ const STYLE = `
 
 /** Eine eigenständige HTML-Datei: Bilder sind eingebettet, kein Netz nötig. */
 export function renderHtml(book: Book, options: ExportOptions, images: ImageResolver): Buffer {
+  const embedImage = (src: string) => {
+    const image = images(src);
+    return image ? `data:${image.mimeType};base64,${image.data.toString('base64')}` : null;
+  };
   const parts: string[] = [];
   parts.push(
-    `<header class="title"><h1>${escape(book.title)}</h1>${
-      book.author ? `<p>${escape(book.author)}</p>` : ''
+    `<header class="title"><h1>${escapeHtml(book.title)}</h1>${
+      book.author ? `<p>${escapeHtml(book.author)}</p>` : ''
     }</header>`,
   );
 
   for (const item of book.items) {
     if (item.kind === 'part') {
-      parts.push(`<section class="part"><h1>${escape(item.title)}</h1></section>`);
+      parts.push(`<section class="part"><h1>${escapeHtml(item.title)}</h1></section>`);
       continue;
     }
     const scenes = item.scenes.map((scene, index) => {
       const heading = options.includeSceneTitles
-        ? `<h3 class="scene-title">${escape(scene.title)}</h3>`
+        ? `<h3 class="scene-title">${escapeHtml(scene.title)}</h3>`
         : index > 0
           ? '<p class="scene-break" aria-hidden="true">* * *</p>'
           : '';
-      return heading + blocks(scene.doc.content ?? [], images);
+      return heading + contentHtml(scene.doc.content ?? [], embedImage);
     });
     parts.push(
-      `<section class="chapter"><h2>${escape(item.title)}</h2>${scenes.join('')}</section>`,
+      `<section class="chapter"><h2>${escapeHtml(item.title)}</h2>${scenes.join('')}</section>`,
     );
   }
 
-  const author = book.author ? `<meta name="author" content="${escape(book.author)}">` : '';
+  const author = book.author ? `<meta name="author" content="${escapeHtml(book.author)}">` : '';
   const html = `<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escape(book.title)}</title>
+<title>${escapeHtml(book.title)}</title>
 ${author}
 <meta name="generator" content="Wortomat">
 <style>${STYLE}</style>
@@ -73,11 +77,21 @@ ${parts.join('\n')}
   return Buffer.from(html, 'utf8');
 }
 
-function blocks(nodes: JsonNode[], images: ImageResolver): string {
-  return nodes.map((node) => block(node, images)).join('');
+/**
+ * Liefert für eine Bild-`src` die Adresse im Export (Data-URI, Pfad im EPUB …) oder `null`,
+ * wenn das Bild weggelassen wird.
+ */
+export type ImageSource = (src: string) => string | null;
+
+/**
+ * Szeneninhalt als HTML. Die Ausgabe ist zugleich gültiges XHTML (`<br/>`, `<img … />`),
+ * damit sie auch im EPUB verwendet werden kann.
+ */
+export function contentHtml(nodes: JsonNode[], image: ImageSource): string {
+  return nodes.map((node) => block(node, image)).join('');
 }
 
-function block(node: JsonNode, images: ImageResolver): string {
+function block(node: JsonNode, image: ImageSource): string {
   switch (node.type) {
     case 'paragraph':
       return `<p>${inline(node.content ?? [])}</p>`;
@@ -86,38 +100,36 @@ function block(node: JsonNode, images: ImageResolver): string {
         ? `<h5>${inline(node.content ?? [])}</h5>`
         : `<h4>${inline(node.content ?? [])}</h4>`;
     case 'blockquote':
-      return `<blockquote>${blocks(node.content ?? [], images)}</blockquote>`;
+      return `<blockquote>${contentHtml(node.content ?? [], image)}</blockquote>`;
     case 'bulletList':
-      return `<ul>${blocks(node.content ?? [], images)}</ul>`;
+      return `<ul>${contentHtml(node.content ?? [], image)}</ul>`;
     case 'orderedList': {
       const start = Number(node.attrs?.['start'] ?? 1);
-      return `<ol${start !== 1 ? ` start="${start}"` : ''}>${blocks(node.content ?? [], images)}</ol>`;
+      return `<ol${start !== 1 ? ` start="${start}"` : ''}>${contentHtml(node.content ?? [], image)}</ol>`;
     }
     case 'listItem':
-      return `<li>${blocks(node.content ?? [], images)}</li>`;
+      return `<li>${contentHtml(node.content ?? [], image)}</li>`;
     case 'codeBlock':
-      return `<pre><code>${escape((node.content ?? []).map((t) => t.text ?? '').join(''))}</code></pre>`;
+      return `<pre><code>${escapeHtml((node.content ?? []).map((t) => t.text ?? '').join(''))}</code></pre>`;
     case 'horizontalRule':
       return '<p class="scene-break" aria-hidden="true">* * *</p>';
     case 'image': {
-      const src = String(node.attrs?.['src'] ?? '');
-      const image = images(src);
-      if (!image) return '';
-      const alt = escape(String(node.attrs?.['alt'] ?? ''));
-      const data = `data:${image.mimeType};base64,${image.data.toString('base64')}`;
-      return `<figure><img src="${data}" alt="${alt}"></figure>`;
+      const src = image(String(node.attrs?.['src'] ?? ''));
+      if (!src) return '';
+      const alt = escapeHtml(String(node.attrs?.['alt'] ?? ''));
+      return `<figure><img src="${escapeHtml(src)}" alt="${alt}"/></figure>`;
     }
     default:
-      return node.content ? blocks(node.content, images) : '';
+      return node.content ? contentHtml(node.content, image) : '';
   }
 }
 
 function inline(nodes: JsonNode[]): string {
   return nodes
     .map((node) => {
-      if (node.type === 'hardBreak') return '<br>';
+      if (node.type === 'hardBreak') return '<br/>';
       if (node.type !== 'text') return '';
-      let html = escape(node.text ?? '');
+      let html = escapeHtml(node.text ?? '');
       const marks = printMarks(node);
       if (marks.has('code')) html = `<code>${html}</code>`;
       if (marks.has('strike')) html = `<s>${html}</s>`;
@@ -126,15 +138,17 @@ function inline(nodes: JsonNode[]): string {
       if (marks.has('bold')) html = `<strong>${html}</strong>`;
       if (marks.has('link')) {
         const href = String(node.marks?.find((m) => m.type === 'link')?.attrs?.['href'] ?? '');
-        if (/^(https?:|mailto:)/i.test(href)) html = `<a href="${escape(href)}">${html}</a>`;
+        if (/^(https?:|mailto:)/i.test(href)) html = `<a href="${escapeHtml(href)}">${html}</a>`;
       }
       return html;
     })
     .join('');
 }
 
-function escape(text: string): string {
+/** Maskiert für HTML/XML; Steuerzeichen, die in XML verboten sind, fallen weg. */
+export function escapeHtml(text: string): string {
   return text
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')

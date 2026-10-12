@@ -4,7 +4,7 @@
 
     <fieldset>
       <legend>Format</legend>
-      <div class="choices">
+      <div class="choices formats">
         @for (choice of formats; track choice.value) {
           <label
             class="choice"
@@ -36,7 +36,7 @@
       </div>
     </fieldset>
 
-    @if (format() !== 'html') {
+    @if (hasTemplates(format())) {
       <fieldset>
         <legend>Vorlage</legend>
         <div class="choices two">

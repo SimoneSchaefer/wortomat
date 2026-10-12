@@ -266,9 +266,9 @@ export interface SearchHit {
 // Export des Manuskripts
 // ---------------------------------------------------------------------------
 
-export type ExportFormat = 'html' | 'docx' | 'pdf';
+export type ExportFormat = 'html' | 'docx' | 'pdf' | 'epub';
 
-/** Vorlage für Word und PDF (HTML hat ein festes Layout). */
+/** Vorlage für Word und PDF (HTML und EPUB haben ein festes Layout). */
 export type ExportTemplate = 'normseite' | 'roman';
 
 export interface ExportRequest {

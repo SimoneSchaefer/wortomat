@@ -130,6 +130,7 @@ describe('Export', () => {
     await save(s3.id, [
       paragraph(text('Sie winkte.')),
       { type: 'image', attrs: { src: webp, alt: 'Foto' } },
+      { type: 'image', attrs: { src: png, alt: 'Karte, noch einmal' } }, // dasselbe Bild erneut
     ]);
   });
 
@@ -208,6 +209,68 @@ describe('Export', () => {
     assert.match(roman.document, /<w:pgSz w:w="7087" w:h="10772"/); // 12,5 × 19 cm
     assert.match(roman.settings, /autoHyphenation/);
     assert.match(roman.document, /w:jc w:val="both"/); // Blocksatz
+  });
+
+  it('exportiert ein EPUB 3 mit Inhaltsverzeichnis, Kapiteldateien und Bildern', async () => {
+    const { data, filePath, warnings } = await exportTo('epub', 'roman');
+    assert.ok(filePath.endsWith('.epub'));
+    assert.deepEqual(warnings, [], 'PNG und WebP sind EPUB-Kernformate');
+    // Erster ZIP-Eintrag „mimetype“, unkomprimiert (Methode 0) – so erkennen Reader das Format
+    assert.equal(data.readUInt16LE(8), 0);
+    assert.equal(data.toString('latin1', 30, 38), 'mimetype');
+    assert.equal(data.toString('latin1', 38, 58), 'application/epub+zip');
+
+    const zip = await JSZip.loadAsync(data);
+    const read = (name: string) => zip.file(name)!.async('string');
+    assert.match(await read('META-INF/container.xml'), /full-path="OEBPS\/content\.opf"/);
+
+    const opf = await read('OEBPS/content.opf');
+    assert.match(opf, /<dc:title>Die Häuser am Fluss<\/dc:title>/);
+    assert.match(opf, /<dc:creator id="autor">Ada Muster<\/dc:creator>/);
+    assert.match(opf, /<dc:language>de<\/dc:language>/);
+    assert.match(opf, /<meta property="dcterms:modified">\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ<\/meta>/);
+    const identifier = /<dc:identifier id="buch-id">(urn:uuid:[0-9a-f-]{36})</.exec(opf)?.[1];
+    assert.ok(identifier, 'UUID als Kennung');
+    const spine = [...opf.matchAll(/<itemref idref="([^"]+)"/g)].map((match) => match[1]);
+    assert.deepEqual(spine, ['titel', 'teil-1', 'kapitel-1', 'kapitel-2']);
+    assert.match(opf, /href="images\/bild-1\.png" media-type="image\/png"/);
+    assert.match(opf, /href="images\/bild-2\.webp" media-type="image\/webp"/);
+    assert.equal(
+      opf.match(/media-type="image\//g)?.length,
+      2,
+      'mehrfach verwendetes Bild nur einmal',
+    );
+
+    const nav = await read('OEBPS/nav.xhtml');
+    assert.match(
+      nav,
+      /<li><a href="text\/teil-1\.xhtml">Erster Teil<\/a><ol><li><a href="text\/kapitel-1\.xhtml">Ankunft<\/a><\/li><li><a href="text\/kapitel-2\.xhtml">Abschied<\/a><\/li><\/ol><\/li>/,
+      'Kapitel stehen unter ihrem Teil',
+    );
+    assert.match(await read('OEBPS/toc.ncx'), /playOrder="3"><navLabel><text>Abschied</);
+
+    const kapitel = await read('OEBPS/text/kapitel-1.xhtml');
+    assert.match(kapitel, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
+    assert.match(kapitel, /<h2 class="chapter">Ankunft<\/h2>/);
+    assert.match(kapitel, /<strong>hielt<\/strong>/);
+    assert.match(kapitel, /&lt;&lt;Tag&gt;&gt; &quot;Zitat&quot;/);
+    assert.match(kapitel, /Smiley 😀 und Ελληνικά\./); // anders als pdfLaTeX: alles bleibt
+    assert.match(kapitel, /<img src="\.\.\/images\/bild-1\.png" alt="Karte"\/>/);
+    assert.equal(kapitel.match(/class="scene-break"/g)?.length, 1);
+    assert.doesNotMatch(kapitel, /annotation/);
+    assert.match(
+      await read('OEBPS/text/kapitel-2.xhtml'),
+      /<img src="\.\.\/images\/bild-1\.png" alt="Karte, noch einmal"\/>/,
+      'auch der zweite Verweis auf dasselbe Bild zeigt auf die Datei',
+    );
+
+    const again = await exportTo('epub', 'normseite');
+    const againOpf = await (
+      await JSZip.loadAsync(again.data)
+    )
+      .file('OEBPS/content.opf')!
+      .async('string');
+    assert.ok(againOpf.includes(identifier), 'Kennung bleibt bei jedem Export gleich');
   });
 
   it('erzeugt PDFs mit pdfLaTeX (wenn installiert)', { timeout: 240_000 }, async (t) => {
