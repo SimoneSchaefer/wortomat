@@ -87,6 +87,11 @@ export interface ProjectListEntry {
   /** Gerade geöffnet? */
   isOpen: boolean;
   wordCount: number;
+  /**
+   * Titelbild aus der Datei; `null`, wenn keins gesetzt ist. Abrufbar unter
+   * `/api/projects/cover?filePath=…&id=…` – auch wenn das Buch nicht geöffnet ist.
+   */
+  coverImageId: string | null;
   /** Letzte Änderung am Buch (aus der Datei); `null` wenn nicht lesbar. */
   updatedAt: string | null;
   /** Wann das Buch zuletzt in Wortomat geöffnet wurde. */

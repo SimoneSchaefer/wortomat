@@ -22,6 +22,11 @@ export const en: Texts = {
   },
 
   start: {
+    carousel: 'Books',
+    previous: 'Previous book',
+    next: 'Next book',
+    forget: 'Remove from list',
+    openBook: 'Open',
     tagline: 'Your book. Your file. No server.',
     myBooks: 'My books',
     openOtherFile: 'Open another file …',
@@ -48,6 +53,8 @@ export const en: Texts = {
   workspace: {
     export: 'Export …',
     closeProject: 'Close project',
+    changeCover: 'Change cover image',
+    coverHint: 'Shown on the start page and as the cover of the e-book.',
     sections: 'Sections',
     manuscript: 'Manuscript',
     sidebarWidth: 'Sidebar width',

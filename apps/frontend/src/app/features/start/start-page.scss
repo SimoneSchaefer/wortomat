@@ -61,49 +61,118 @@ footer {
   }
 }
 
-.books {
-  list-style: none;
-  margin: 0 -0.75rem;
-  padding: 0;
-
-  li {
-    display: flex;
-    align-items: center;
-    border-radius: 0.5rem;
-
-    &:hover {
-      background: var(--hover);
-
-      .forget {
-        visibility: visible;
-      }
-    }
-  }
-
-  .empty {
-    padding: 0.5rem 0.75rem;
-  }
+.empty {
+  margin: 0;
 }
 
-.book {
+// Karussell: das gewählte Buch groß in der Mitte, die Nachbarn kleiner und gestaffelt dahinter
+.carousel {
+  --slide-width: 8.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 -0.75rem;
+  touch-action: pan-y;
+}
+
+.stage {
+  position: relative;
   flex: 1;
   min-width: 0;
-  display: grid;
-  gap: 0.15rem;
-  padding: 0.6rem 0.75rem;
+  height: calc(var(--slide-width) * 1.6 + 1.5rem);
+  overflow: hidden;
+  // Ränder weich ausblenden, damit die äußeren Bücher nicht hart abgeschnitten wirken
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+
+.slide {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  width: var(--slide-width);
+  padding: 0;
   border: none;
   background: none;
-  text-align: left;
+  line-height: 0;
+  z-index: calc(10 - var(--distance));
+  opacity: max(0, 1 - var(--distance) * 0.22);
+  filter: saturate(calc(1 - var(--distance) * 0.2));
+  transform: translateX(calc(-50% + var(--offset) * 58%)) scale(calc(1 - var(--distance) * 0.16));
+  transform-origin: 50% 85%;
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.35s,
+    filter 0.35s;
 
   &:hover:not(:disabled) {
     background: none;
   }
 
-  &:disabled {
-    cursor: default;
+  &.far {
+    visibility: hidden;
   }
 
+  &.current wm-book-cover {
+    box-shadow:
+      inset 3px 0 0 rgb(0 0 0 / 0.12),
+      0 10px 24px rgb(0 0 0 / 0.28);
+  }
+
+  &.current:hover:not(:disabled) {
+    transform: translateX(-50%) translateY(-0.25rem);
+  }
+
+  &.missing wm-book-cover {
+    opacity: 0.45;
+    filter: grayscale(1);
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    wm-book-cover {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.arrow {
+  flex: none;
+  z-index: 20;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  line-height: 1;
+
+  &:hover:not(:disabled) {
+    background: var(--hover);
+    color: var(--text);
+  }
+
+  &:disabled {
+    visibility: hidden;
+  }
+}
+
+.details {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  margin-top: 0.75rem;
+  text-align: center;
+
   span {
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -112,12 +181,22 @@ footer {
 
 .book-title {
   font-family: var(--font-prose);
-  font-size: 1.1rem;
+  font-size: 1.3rem;
+}
+
+.book-author {
+  font-family: var(--font-prose);
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 .book-meta {
   font-size: 0.8rem;
   color: var(--text-muted);
+
+  .missing & {
+    color: var(--danger);
+  }
 }
 
 .book-path {
@@ -126,20 +205,39 @@ footer {
   opacity: 0.75;
 }
 
-.missing .book {
-  opacity: 0.6;
+.details-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.6rem;
+
+  .link {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
 }
 
-// Bei fehlenden Dateien immer sichtbar, sonst nur beim Überfahren.
-.forget {
-  visibility: hidden;
-  margin-right: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  border: none;
-  background: none;
-  color: var(--text-muted);
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 1rem;
 
-  .missing & {
-    visibility: visible;
+  button {
+    width: 0.45rem;
+    height: 0.45rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--border);
+
+    &:hover:not(:disabled) {
+      background: var(--text-muted);
+    }
+
+    &.active {
+      background: var(--accent);
+    }
   }
 }

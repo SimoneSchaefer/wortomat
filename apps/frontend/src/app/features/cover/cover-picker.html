@@ -1,0 +1,38 @@
+<div class="cover">
+  <div class="cover-preview" [class.empty]="!coverUrl()">
+    @if (coverUrl(); as url) {
+      <img [src]="url" [alt]="t().export.cover" />
+    } @else {
+      <span>{{ t().export.noCover }}</span>
+    }
+  </div>
+  <div class="cover-actions">
+    <p class="muted">
+      {{ hint() }}
+      {{ t().export.coverSize }}
+    </p>
+    <div class="cover-buttons">
+      <button type="button" [disabled]="busy()" (click)="picker.click()">
+        {{ t().export.chooseImage }}
+      </button>
+      <button type="button" [disabled]="busy()" (click)="design()">
+        {{ designedOnce() ? t().export.otherColors : t().export.designCover }}
+      </button>
+      @if (coverUrl()) {
+        <button type="button" [disabled]="busy()" (click)="remove()">
+          {{ t().export.removeCover }}
+        </button>
+      }
+    </div>
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </div>
+  <input
+    #picker
+    type="file"
+    accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+    hidden
+    (change)="pick(picker)"
+  />
+</div>

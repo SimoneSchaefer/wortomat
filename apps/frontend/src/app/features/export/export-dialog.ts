@@ -1,19 +1,18 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, type ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, type ElementRef, inject, signal, viewChild } from '@angular/core';
 import type {
   ExportCapabilities,
   ExportFormat,
   ExportResult,
   ExportTemplate,
 } from '@wortomat/shared';
-import { COVER_HEIGHT, COVER_PALETTES, COVER_WIDTH, designCover } from '../../core/cover-design';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
 import { I18n, type Texts } from '../../core/i18n/i18n';
-import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
+import { CoverPicker } from '../cover/cover-picker';
 
 /** Bezeichnung und Beschreibung: `t().export.formats[…]` bzw. `t().export.templates[…]`. */
 const FORMATS: readonly ExportFormat[] = ['html', 'docx', 'pdf', 'epub'];
@@ -22,6 +21,7 @@ const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
 /** Dialog „Manuskript exportieren“: Format, Vorlage, Optionen – und danach Öffnen/Zeigen. */
 @Component({
   selector: 'wm-export-dialog',
+  imports: [CoverPicker],
   templateUrl: './export-dialog.html',
   styleUrl: './export-dialog.scss',
 })
@@ -44,15 +44,6 @@ export class ExportDialog {
   protected readonly result = signal<ExportResult | null>(null);
   protected readonly downloaded = signal<{ fileName: string; warnings: string[] } | null>(null);
   protected readonly error = signal<string | null>(null);
-
-  protected readonly coverUrl = computed(() => {
-    const id = this.project.project()?.coverImageId;
-    return id ? `/api/images/${id}` : null;
-  });
-  protected readonly coverBusy = signal(false);
-  /** Welcher Stil als Nächstes gestaltet wird – jeder Klick zeigt einen anderen. */
-  private nextPalette = 0;
-  protected readonly designedOnce = signal(false);
 
   open(): void {
     this.result.set(null);
@@ -121,51 +112,6 @@ export class ExportDialog {
       this.error.set(await exportErrorMessage(error, this.t()));
     } finally {
       this.busy.set(false);
-    }
-  }
-
-  protected async pickCover(input: HTMLInputElement): Promise<void> {
-    const file = input.files?.[0];
-    input.value = '';
-    if (!file) return;
-    if (!isSupportedImage(file)) {
-      this.error.set(this.t().export.unsupportedImage);
-      return;
-    }
-    await this.changeCover(async () => {
-      const image = await prepareImage(file);
-      return this.api.uploadImage(image.blob, image.fileName, image.width, image.height);
-    });
-    this.designedOnce.set(false);
-  }
-
-  /** Typografisches Titelbild aus Titel und Autor; jeder weitere Klick wählt andere Farben. */
-  protected async designCover(): Promise<void> {
-    const project = this.project.project();
-    if (!project) return;
-    const palette = COVER_PALETTES[this.nextPalette % COVER_PALETTES.length]!;
-    this.nextPalette++;
-    await this.changeCover(async () => {
-      const blob = await designCover(project.title, project.author, palette);
-      return this.api.uploadImage(blob, 'titelbild.jpg', COVER_WIDTH, COVER_HEIGHT);
-    });
-    this.designedOnce.set(true);
-  }
-
-  protected async removeCover(): Promise<void> {
-    await this.changeCover(async () => null);
-  }
-
-  private async changeCover(upload: () => Promise<{ id: string } | null>): Promise<void> {
-    this.error.set(null);
-    this.coverBusy.set(true);
-    try {
-      const image = await upload();
-      await this.project.setCover(image?.id ?? null);
-    } catch (error) {
-      this.error.set(errorMessage(error, this.t()));
-    } finally {
-      this.coverBusy.set(false);
     }
   }
 

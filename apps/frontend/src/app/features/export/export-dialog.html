@@ -59,41 +59,9 @@
     @if (format() === 'epub') {
       <fieldset>
         <legend>{{ t().export.cover }}</legend>
-        <div class="cover">
-          <div class="cover-preview" [class.empty]="!coverUrl()">
-            @if (coverUrl(); as url) {
-              <img [src]="url" [alt]="t().export.cover" />
-            } @else {
-              <span>{{ t().export.noCover }}</span>
-            }
-          </div>
-          <div class="cover-actions">
-            <p class="muted">
-              {{ coverUrl() ? t().export.coverShown : t().export.coverMissing }}
-              {{ t().export.coverSize }}
-            </p>
-            <div class="cover-buttons">
-              <button type="button" [disabled]="coverBusy()" (click)="coverPicker.click()">
-                {{ t().export.chooseImage }}
-              </button>
-              <button type="button" [disabled]="coverBusy()" (click)="designCover()">
-                {{ designedOnce() ? t().export.otherColors : t().export.designCover }}
-              </button>
-              @if (coverUrl()) {
-                <button type="button" [disabled]="coverBusy()" (click)="removeCover()">
-                  {{ t().export.removeCover }}
-                </button>
-              }
-            </div>
-          </div>
-          <input
-            #coverPicker
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-            hidden
-            (change)="pickCover(coverPicker)"
-          />
-        </div>
+        <wm-cover-picker
+          [hint]="project.project()?.coverImageId ? t().export.coverShown : t().export.coverMissing"
+        />
       </fieldset>
     }
 

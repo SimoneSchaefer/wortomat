@@ -2,6 +2,22 @@
   <!-- Obere Leiste: alles, was das ganze Buch betrifft -->
   <header class="topbar">
     <div class="book" [title]="store.project()?.filePath ?? ''">
+      @if (store.project(); as project) {
+        <button
+          type="button"
+          class="cover-button"
+          [title]="t().workspace.changeCover"
+          [attr.aria-label]="t().workspace.changeCover"
+          (click)="coverDialog.open()"
+        >
+          <wm-book-cover
+            [url]="project.coverImageId ? '/api/images/' + project.coverImageId : null"
+            [title]="project.title"
+            [author]="project.author"
+            [seed]="project.filePath"
+          />
+        </button>
+      }
       <span class="book-title">{{ store.project()?.title }}</span>
       <span class="muted">{{ t().words(store.totalWords()) }}</span>
     </div>
@@ -106,3 +122,4 @@
 </div>
 
 <wm-export-dialog #exportDialog />
+<wm-cover-dialog #coverDialog />

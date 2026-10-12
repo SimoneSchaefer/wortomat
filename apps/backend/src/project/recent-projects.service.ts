@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import type { ProjectListEntry } from '@wortomat/shared';
+import type { ImageMimeType, ProjectListEntry } from '@wortomat/shared';
 import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 import { APPLICATION_ID, readApplicationId } from '../database/schema.js';
 import { nowIso } from '../database/sqlite.js';
@@ -25,6 +25,7 @@ interface ProjectSummary {
   author: string;
   updatedAt: string;
   wordCount: number;
+  coverImageId: string | null;
 }
 
 /**
@@ -53,10 +54,22 @@ export class RecentProjectsService {
           available: summary !== null,
           isOpen: openFilePath !== null && samePath(entry.filePath, openFilePath),
           wordCount: summary?.wordCount ?? 0,
+          coverImageId: summary?.coverImageId ?? null,
           updatedAt: summary?.updatedAt ?? null,
           lastOpenedAt: entry.lastOpenedAt,
         };
       });
+  }
+
+  /**
+   * Liest das Titelbild eines Buchs aus der Liste – auch wenn es gerade nicht geöffnet ist.
+   * Nur für Dateien, die in der Liste stehen, damit sich so keine beliebigen Dateien lesen lassen.
+   */
+  cover(filePath: string): { mimeType: ImageMimeType; data: Buffer } | null {
+    if (!this.read().some((entry) => samePath(entry.filePath, filePath))) {
+      return null;
+    }
+    return readCover(filePath);
   }
 
   remember(filePath: string): void {
@@ -110,8 +123,10 @@ function readSummary(filePath: string): ProjectSummary | null {
       return null;
     }
     const project = db
-      .prepare('SELECT title, author, updated_at FROM project WHERE id = 1')
-      .get() as { title: string; author: string; updated_at: string } | undefined;
+      .prepare('SELECT title, author, cover_image_id, updated_at FROM project WHERE id = 1')
+      .get() as
+      | { title: string; author: string; cover_image_id: string | null; updated_at: string }
+      | undefined;
     if (!project) {
       return null;
     }
@@ -123,7 +138,32 @@ function readSummary(filePath: string): ProjectSummary | null {
       author: project.author,
       updatedAt: project.updated_at,
       wordCount: words,
+      coverImageId: project.cover_image_id,
     };
+  } catch {
+    return null;
+  } finally {
+    db?.close();
+  }
+}
+
+function readCover(filePath: string): { mimeType: ImageMimeType; data: Buffer } | null {
+  if (!existsSync(filePath)) {
+    return null;
+  }
+  let db: DatabaseSync | undefined;
+  try {
+    db = new DatabaseSync(filePath, { readOnly: true });
+    if (readApplicationId(db) !== APPLICATION_ID) {
+      return null;
+    }
+    const row = db
+      .prepare(
+        `SELECT images.mime_type, images.data FROM project
+         JOIN images ON images.id = project.cover_image_id WHERE project.id = 1`,
+      )
+      .get() as { mime_type: ImageMimeType; data: Uint8Array } | undefined;
+    return row ? { mimeType: row.mime_type, data: Buffer.from(row.data) } : null;
   } catch {
     return null;
   } finally {

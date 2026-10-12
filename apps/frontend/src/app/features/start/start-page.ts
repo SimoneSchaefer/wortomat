@@ -1,4 +1,4 @@
-import { Component, inject, linkedSignal, resource, signal } from '@angular/core';
+import { Component, computed, inject, linkedSignal, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import type { ProjectListEntry } from '@wortomat/shared';
@@ -8,10 +8,11 @@ import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { relativeTime } from '../../core/relative-time';
 import { WortomatApi } from '../../core/wortomat-api';
+import { BookCover } from '../cover/book-cover';
 
 @Component({
   selector: 'wm-start-page',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, BookCover],
   templateUrl: './start-page.html',
   styleUrl: './start-page.scss',
 })
@@ -28,6 +29,13 @@ export class StartPage {
 
   protected readonly appInfo = resource({ loader: () => this.api.appInfo() });
   protected readonly projects = resource({ loader: () => this.api.listProjects() });
+  /** Das Buch in der Mitte des Karussells; nach dem Neuladen der Liste bleibt die Stelle. */
+  protected readonly selected = linkedSignal<ProjectListEntry[] | undefined, number>({
+    source: () => this.projects.value(),
+    computation: (list, previous) =>
+      Math.min(previous?.value ?? 0, Math.max(0, (list?.length ?? 0) - 1)),
+  });
+  protected readonly current = computed(() => this.projects.value()?.[this.selected()] ?? null);
   protected readonly title = signal('');
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -60,6 +68,67 @@ export class StartPage {
       : this.openPath().trim();
     if (filePath) {
       await this.run(() => this.store.open(filePath));
+    }
+  }
+
+  /** Adresse des Titelbilds; die ID macht sie bei jedem neuen Bild eindeutig (Cache). */
+  protected coverUrl(entry: ProjectListEntry): string | null {
+    if (!entry.coverImageId) return null;
+    const filePath = encodeURIComponent(entry.filePath);
+    return `/api/projects/cover?filePath=${filePath}&id=${entry.coverImageId}`;
+  }
+
+  protected select(index: number): void {
+    const count = this.projects.value()?.length ?? 0;
+    this.selected.set(Math.max(0, Math.min(count - 1, index)));
+  }
+
+  protected onCarouselKey(event: KeyboardEvent): void {
+    const count = this.projects.value()?.length ?? 0;
+    const target = {
+      ArrowLeft: this.selected() - 1,
+      ArrowRight: this.selected() + 1,
+      Home: 0,
+      End: count - 1,
+    }[event.key];
+    if (target === undefined) return;
+    event.preventDefault();
+    this.select(target);
+  }
+
+  /** Mausrad und Touchpad blättern – gesammelt, damit ein Wisch nicht durch alle Bücher rast. */
+  private wheelDelta = 0;
+  private wheelReset: ReturnType<typeof setTimeout> | undefined;
+  protected onCarouselWheel(event: WheelEvent): void {
+    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    event.preventDefault();
+    this.wheelDelta += delta;
+    clearTimeout(this.wheelReset);
+    this.wheelReset = setTimeout(() => (this.wheelDelta = 0), 200);
+    if (Math.abs(this.wheelDelta) >= 60) {
+      this.select(this.selected() + Math.sign(this.wheelDelta));
+      this.wheelDelta = 0;
+    }
+  }
+
+  /** Wischen auf Touchscreens. */
+  private swipeStart: number | null = null;
+  protected onPointerDown(event: PointerEvent): void {
+    this.swipeStart = event.pointerType === 'mouse' ? null : event.clientX;
+  }
+  protected onPointerUp(event: PointerEvent): void {
+    if (this.swipeStart === null) return;
+    const distance = event.clientX - this.swipeStart;
+    this.swipeStart = null;
+    if (Math.abs(distance) > 40) this.select(this.selected() - Math.sign(distance));
+  }
+
+  /** Klick auf ein Cover: das mittlere öffnet das Buch, die anderen holen es in die Mitte. */
+  protected async clickCover(entry: ProjectListEntry, index: number): Promise<void> {
+    if (index === this.selected()) {
+      await this.openFromList(entry);
+    } else {
+      this.select(index);
     }
   }
 

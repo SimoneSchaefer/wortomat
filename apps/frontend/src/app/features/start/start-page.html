@@ -19,41 +19,119 @@
     </div>
 
     @if (projects.value(); as list) {
-      <ul class="books">
-        @for (project of list; track project.filePath) {
-          <li [class.missing]="!project.available">
-            <button
-              type="button"
-              class="book"
-              [disabled]="busy() || !project.available"
-              [title]="project.filePath"
-              (click)="openFromList(project)"
-            >
-              <span class="book-title">{{ project.title }}</span>
-              <span class="book-meta">
-                @if (project.available) {
-                  {{ t().words(project.wordCount) }} ·
-                  {{ t().start.edited(relativeTime(project.updatedAt ?? project.lastOpenedAt)) }}
-                } @else {
-                  {{ t().start.missing }}
-                }
-              </span>
-              <span class="book-path">{{ project.filePath }}</span>
-            </button>
-            <button
-              type="button"
-              class="forget"
-              [title]="t().start.forgetHint"
-              [attr.aria-label]="t().start.forgetLabel(project.title)"
-              (click)="forget(project)"
-            >
-              ×
-            </button>
-          </li>
-        } @empty {
-          <li class="muted empty">{{ t().start.empty }}</li>
+      @if (list.length) {
+        <div
+          class="carousel"
+          role="group"
+          aria-roledescription="carousel"
+          [attr.aria-label]="t().start.carousel"
+          (keydown)="onCarouselKey($event)"
+          (wheel)="onCarouselWheel($event)"
+          (pointerdown)="onPointerDown($event)"
+          (pointerup)="onPointerUp($event)"
+        >
+          <button
+            type="button"
+            class="arrow"
+            [attr.aria-label]="t().start.previous"
+            [title]="t().start.previous"
+            [disabled]="selected() === 0"
+            (click)="select(selected() - 1)"
+          >
+            ‹
+          </button>
+          <div class="stage">
+            @for (project of list; track project.filePath; let index = $index) {
+              @let offset = index - selected();
+              <button
+                type="button"
+                class="slide"
+                [class.current]="offset === 0"
+                [class.missing]="!project.available"
+                [class.far]="offset > 3 || offset < -3"
+                [style.--offset]="offset"
+                [style.--distance]="offset < 0 ? -offset : offset"
+                [attr.tabindex]="offset === 0 ? 0 : -1"
+                [attr.aria-hidden]="offset === 0 ? null : 'true'"
+                [attr.aria-label]="
+                  project.available ? t().start.openBook + ': ' + project.title : project.title
+                "
+                [disabled]="busy()"
+                (click)="clickCover(project, index)"
+              >
+                <wm-book-cover
+                  [url]="coverUrl(project)"
+                  [title]="project.title"
+                  [author]="project.author"
+                  [seed]="project.filePath"
+                />
+              </button>
+            }
+          </div>
+          <button
+            type="button"
+            class="arrow"
+            [attr.aria-label]="t().start.next"
+            [title]="t().start.next"
+            [disabled]="selected() === list.length - 1"
+            (click)="select(selected() + 1)"
+          >
+            ›
+          </button>
+        </div>
+
+        @if (current(); as project) {
+          <div class="details" aria-live="polite" [class.missing]="!project.available">
+            <span class="book-title">{{ project.title }}</span>
+            @if (project.author) {
+              <span class="book-author">{{ project.author }}</span>
+            }
+            <span class="book-meta">
+              @if (project.available) {
+                {{ t().words(project.wordCount) }} ·
+                {{ t().start.edited(relativeTime(project.updatedAt ?? project.lastOpenedAt)) }}
+              } @else {
+                {{ t().start.missing }}
+              }
+            </span>
+            <span class="book-path" [title]="project.filePath">{{ project.filePath }}</span>
+            <div class="details-actions">
+              <button
+                type="button"
+                class="primary"
+                [disabled]="busy() || !project.available"
+                (click)="openFromList(project)"
+              >
+                {{ t().start.openBook }}
+              </button>
+              <button
+                type="button"
+                class="link"
+                [title]="t().start.forgetHint"
+                [attr.aria-label]="t().start.forgetLabel(project.title)"
+                (click)="forget(project)"
+              >
+                {{ t().start.forget }}
+              </button>
+            </div>
+          </div>
         }
-      </ul>
+
+        @if (list.length > 1) {
+          <div class="dots" aria-hidden="true">
+            @for (project of list; track project.filePath; let index = $index) {
+              <button
+                type="button"
+                tabindex="-1"
+                [class.active]="index === selected()"
+                (click)="select(index)"
+              ></button>
+            }
+          </div>
+        }
+      } @else {
+        <p class="muted empty">{{ t().start.empty }}</p>
+      }
     } @else if (projects.error()) {
       <p class="error">{{ t().start.listFailed }}</p>
     } @else {

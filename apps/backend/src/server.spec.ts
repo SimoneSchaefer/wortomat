@@ -236,6 +236,37 @@ describe('REST-API', () => {
     assert.equal(list[0]!.wordCount, 3);
     assert.equal(list[0]!.isOpen, true);
     assert.equal(list[1]!.isOpen, false);
+    assert.equal(list[0]!.coverImageId, null);
+
+    // Titelbild: steht in der Liste und ist abrufbar, auch wenn ein anderes Buch offen ist
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), 'c.png');
+    const image = (await (
+      await fetch(`${server.url}/api/images`, {
+        method: 'POST',
+        headers: { [AUTH_HEADER]: TOKEN },
+        body: form,
+      })
+    ).json()) as ImageInfo;
+    await api('PATCH', '/api/project', { coverImageId: image.id });
+    await api('POST', '/api/project/open', { filePath: zweites.filePath });
+    list = await api<ProjectListEntry[]>('GET', '/api/projects');
+    const withCover = list.find((p) => p.filePath === erstes.filePath)!;
+    assert.equal(withCover.coverImageId, image.id);
+    const coverUrl = (filePath: string) =>
+      `${server.url}/api/projects/cover?filePath=${encodeURIComponent(filePath)}`;
+    const coverResponse = await fetch(coverUrl(erstes.filePath), {
+      headers: { [AUTH_HEADER]: TOKEN },
+    });
+    assert.equal(coverResponse.status, 200);
+    assert.equal(coverResponse.headers.get('content-type'), 'image/png');
+    assert.deepEqual(Buffer.from(await coverResponse.arrayBuffer()), PNG_1PX);
+    // ohne Titelbild bzw. für Dateien, die nicht in der Liste stehen: nichts
+    for (const filePath of [zweites.filePath, path.join(tmpDir, 'fremd.wortomat')]) {
+      const response = await fetch(coverUrl(filePath), { headers: { [AUTH_HEADER]: TOKEN } });
+      assert.equal(response.status, 404);
+    }
+    await api('POST', '/api/project/open', { filePath: erstes.filePath });
 
     // Gelöschte Datei bleibt sichtbar, aber als nicht verfügbar
     await rm(zweites.filePath);

@@ -73,11 +73,18 @@ export const de = {
     browserMode: 'Browser-Modus (Entwicklung)',
     defaultFileName: 'Neues Buch',
     titleRequired: 'Bitte gib deinem Buch einen Titel.',
+    carousel: 'Bücher',
+    previous: 'Vorheriges Buch',
+    next: 'Nächstes Buch',
+    forget: 'Aus der Liste entfernen',
+    openBook: 'Öffnen',
   },
 
   workspace: {
     export: 'Exportieren …',
     closeProject: 'Projekt schließen',
+    changeCover: 'Titelbild ändern',
+    coverHint: 'Erscheint auf der Startseite und als Cover im E-Book.',
     sections: 'Bereiche',
     manuscript: 'Manuskript',
     sidebarWidth: 'Breite der Seitenleiste',

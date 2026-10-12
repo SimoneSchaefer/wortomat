@@ -10,6 +10,8 @@ import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
+import { BookCover } from '../cover/book-cover';
+import { CoverDialog } from '../cover/cover-dialog';
 import { ExportDialog } from '../export/export-dialog';
 import { NoteList } from '../notes/note-list';
 import { NotesStore } from '../notes/notes-store';
@@ -48,6 +50,8 @@ const MENU: readonly MenuItem[] = [
     GlobalSearch,
     ResizeHandle,
     ExportDialog,
+    CoverDialog,
+    BookCover,
     SceneFilterPanel,
   ],
   templateUrl: './workspace-page.html',
