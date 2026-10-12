@@ -93,15 +93,19 @@ li.empty {
 
 // Gruppen: Kopfzeile wie ein Teil im Manuskript – einklappbar, Doppelklick benennt um,
 // beim Überfahren „+“ (neuer Eintrag in der Gruppe) und × (Gruppe löschen).
+// Jede Gruppe ist eine Karte mit ihren Einträgen – wie die Kapitel im Manuskript.
 .group {
-  border-radius: 0.4rem;
+  padding: 0.15rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--bg);
 
   & + & {
-    margin-top: 0.35rem;
+    margin-top: 0.4rem;
   }
 
   &.drop-target {
-    background: var(--hover);
+    background: color-mix(in srgb, var(--accent) 18%, var(--bg));
     outline: 1px dashed var(--accent);
   }
 }
