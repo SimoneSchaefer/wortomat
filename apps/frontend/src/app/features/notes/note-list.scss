@@ -96,9 +96,10 @@ li.empty {
 // Jede Gruppe ist eine Karte mit ihren Einträgen – wie die Kapitel im Manuskript.
 .group {
   padding: 0.15rem;
-  border: 1px solid var(--border);
+  // wie die Kapitelkarten: halb Linienfarbe, halb Hintergrund der Seitenleiste
+  border: 1px solid color-mix(in srgb, var(--border) 50%, var(--surface));
   border-radius: 0.55rem;
-  background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 50%, var(--surface));
 
   & + & {
     margin-top: 0.4rem;

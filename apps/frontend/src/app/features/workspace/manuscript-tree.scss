@@ -18,11 +18,20 @@ ul {
 // Teile sind durch eine Linie getrennt, jedes Kapitel ist eine Karte mit seinen Szenen
 // (eingerückt). So bleibt auch ein langes Buch überschaubar.
 
-// Abstand und Linie vor jedem Teil
+// Abstand und Linie vor jedem Teil – die Linie geht über die ganze Breite der Seitenleiste
 nav > ul > li.part:not(:first-child) {
+  position: relative;
   margin-top: 0.9rem;
   padding-top: 0.6rem;
-  border-top: 1px solid var(--border);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(-1 * var(--sidebar-padding-x, 0px));
+    right: calc(-1 * var(--sidebar-padding-x, 0px));
+    border-top: 1px solid var(--border);
+  }
 }
 
 // Kapitel ohne Teil direkt nach einem Teil: deutlich abgesetzt, damit es nicht dazugehörig wirkt
@@ -37,9 +46,11 @@ li.part > ul {
 li.chapter {
   margin-top: 0.4rem;
   padding: 0.15rem;
-  border: 1px solid var(--border);
+  // zurückhaltender Rahmen: halb Linienfarbe, halb Hintergrund der Seitenleiste
+  border: 1px solid color-mix(in srgb, var(--border) 50%, var(--surface));
   border-radius: 0.55rem;
-  background: var(--bg);
+  // dezent abgesetzt: halb Seitenhintergrund, halb Hintergrund der Seitenleiste
+  background: color-mix(in srgb, var(--bg) 50%, var(--surface));
 }
 
 li.chapter > ul {

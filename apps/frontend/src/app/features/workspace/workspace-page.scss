@@ -91,7 +91,9 @@
   flex-direction: column;
   gap: 0.75rem;
   min-height: 0;
-  padding: 1rem 0.75rem;
+  // Seitlicher Innenabstand – als Variable, damit der Baum ihn für durchgehende Linien kennt
+  --sidebar-padding-x: 0.75rem;
+  padding: 1rem var(--sidebar-padding-x);
   background: var(--surface);
   border-right: 1px solid var(--border);
 
@@ -124,9 +126,20 @@
   wm-note-list {
     flex: 1;
     overflow-y: auto;
-    // Platz für die Scrollleiste immer freihalten (kein Springen) und Luft zum Inhalt
+  }
+
+  // Platz für die Scrollleiste immer freihalten (kein Springen) und Luft zum Inhalt
+  wm-note-list {
     scrollbar-gutter: stable;
     padding-right: 0.4rem;
+  }
+
+  // Der Baum reicht bis an die Ränder der Seitenleiste, damit die Linien zwischen den Teilen
+  // ganz durchgehen; den Abstand zum Inhalt hält er selbst. Ohne festen Scrollleisten-Platz,
+  // sonst endete jede Linie rechts davor.
+  wm-manuscript-tree {
+    margin: 0 calc(-1 * var(--sidebar-padding-x));
+    padding: 0 var(--sidebar-padding-x);
   }
 }
 
