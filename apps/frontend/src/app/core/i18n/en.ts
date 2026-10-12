@@ -19,6 +19,13 @@ export const en: Texts = {
   errors: {
     backendUnreachable: 'The backend cannot be reached.',
     status: (status: number) => `Error ${status}`,
+    unexpected: (message: string) => `Unexpected error: ${message}`,
+  },
+
+  status: {
+    dismiss: 'Dismiss message',
+    dismissAll: 'Dismiss all',
+    times: (count: number) => `${count}×`,
   },
 
   filePicker: {

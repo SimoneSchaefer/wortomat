@@ -5,6 +5,7 @@ import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { filterCandidates, hasExactTitle } from './note-matching';
 import { NotesStore } from './notes-store';
+import { StatusMessages } from '../../core/status-messages';
 
 /** Eintrag in der Auswahlliste: vorhandene Gruppe oder neue anlegen. */
 type Option = { type: 'group'; group: NoteGroup; count: number } | { type: 'create'; name: string };
@@ -31,7 +32,7 @@ export class NoteGroupPicker {
   protected readonly group = computed(() =>
     this.store.findGroup(this.store.find(this.noteId())?.groupId ?? null),
   );
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   protected readonly open = signal(false);
   protected readonly query = signal('');

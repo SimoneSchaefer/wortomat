@@ -17,6 +17,7 @@ import {
   planRootDrop,
 } from './drop-plan';
 import { SceneFilter } from './scene-filter';
+import { StatusMessages } from '../../core/status-messages';
 
 /** Eigener Datentyp, damit Drags von außen (z. B. Dateien) den Baum nicht auslösen. */
 const DRAG_TYPE = 'application/x-wortomat-node';
@@ -35,7 +36,7 @@ export class ManuscriptTree {
 
   /** ID des Elements, dessen Titel gerade bearbeitet wird. */
   protected readonly editingId = signal<string | null>(null);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   /** Gerade gezogenes Element und wohin es beim Loslassen käme. */
   protected readonly draggingId = signal<string | null>(null);

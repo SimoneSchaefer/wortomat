@@ -9,7 +9,6 @@ import {
   Injector,
   input,
   linkedSignal,
-  signal,
   untracked,
   viewChild,
 } from '@angular/core';
@@ -21,6 +20,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from './document-editor';
 import { SceneLinks } from './scene-links';
 import { SceneStatusPicker } from './scene-status';
+import { StatusMessages } from '../../core/status-messages';
 
 const TITLE_SAVE_DELAY_MS = 600;
 
@@ -45,9 +45,6 @@ const TITLE_SAVE_DELAY_MS = 600;
         }
         <wm-scene-links [sceneId]="id()" />
       </div>
-      @if (error(); as message) {
-        <p class="error" role="alert">{{ message }}</p>
-      }
     </wm-document-editor>
   `,
   styles: `
@@ -73,7 +70,7 @@ export class ScenePage {
   private readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
 
   protected readonly node = computed(() => this.store.findNode(this.id()));
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   // Nur beim Wechsel der Szene aus dem Store füllen – nicht nach jedem Speichern,
   // sonst könnte eine verspätete Antwort gerade Getipptes überschreiben.

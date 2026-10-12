@@ -10,6 +10,7 @@ import { relativeTime } from '../../core/relative-time';
 import { WortomatApi } from '../../core/wortomat-api';
 import { BookCover } from '../cover/book-cover';
 import { FilePickerDialog } from './file-picker-dialog';
+import { StatusMessages } from '../../core/status-messages';
 
 @Component({
   selector: 'wm-start-page',
@@ -39,7 +40,7 @@ export class StartPage {
   protected readonly current = computed(() => this.projects.value()?.[this.selected()] ?? null);
   protected readonly title = signal('');
   protected readonly busy = signal(false);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   /** Im Dialog gewählter Speicherort für neue Bücher; `null` = Standardordner. */
   private readonly newDir = signal<string | null>(null);

@@ -8,6 +8,7 @@ import { I18n } from '../../core/i18n/i18n';
 import { NoteAvatar } from './note-avatar';
 import { NOTE_KINDS } from './note-kinds';
 import { NotesStore } from './notes-store';
+import { StatusMessages } from '../../core/status-messages';
 
 const DRAG_TYPE = 'application/x-wortomat-note';
 const GROUP_DRAG_TYPE = 'application/x-wortomat-note-group';
@@ -39,7 +40,7 @@ export class NoteList {
   protected readonly showGroups = computed(() => this.groups().some((entry) => entry.group));
   /** Gruppe, deren Name gerade bearbeitet wird. */
   protected readonly editingGroupId = signal<string | null>(null);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   protected readonly draggingId = signal<string | null>(null);
   /** Gruppe, über der gerade eine Notiz schwebt (`''` = ohne Gruppe). */

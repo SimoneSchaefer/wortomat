@@ -25,6 +25,7 @@ import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { Annotation } from './annotation-mark';
 import { SmartQuotes } from './smart-quotes';
+import { StatusMessages } from '../../core/status-messages';
 
 /** Nach dieser Tipp-Pause wird gespeichert. */
 const AUTOSAVE_DELAY_MS = 800;
@@ -65,7 +66,7 @@ export class DocumentEditor {
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
   /** Wird bei jeder Editor-Transaktion erhöht, damit die Toolbar ihren Zustand neu berechnet. */
   private readonly editorTick = signal(0);
 

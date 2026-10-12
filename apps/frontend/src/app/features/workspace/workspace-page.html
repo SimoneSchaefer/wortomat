@@ -100,10 +100,6 @@
       <wm-manuscript-tree />
     }
 
-    @if (error(); as message) {
-      <p class="error" role="alert">{{ message }}</p>
-    }
-
     <wm-resize-handle
       [label]="t().workspace.sidebarWidth"
       [value]="sidebarWidth()"

@@ -14,6 +14,7 @@ import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
 import { groupHits, hitLink } from './search-hits';
+import { StatusMessages } from '../../core/status-messages';
 
 const SEARCH_DELAY_MS = 250;
 
@@ -43,7 +44,7 @@ export class GlobalSearch {
   protected readonly query = signal('');
   protected readonly hits = signal<SearchHit[]>([]);
   protected readonly loading = signal(false);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
   protected readonly open = signal(false);
   protected readonly activeIndex = signal(0);
 

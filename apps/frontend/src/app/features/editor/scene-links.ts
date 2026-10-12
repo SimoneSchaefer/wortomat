@@ -22,6 +22,7 @@ import { NOTE_KIND_LIST, NOTE_KINDS } from '../notes/note-kinds';
 import { filterCandidates, hasExactTitle } from '../notes/note-matching';
 import { NotesStore } from '../notes/notes-store';
 import { SceneFilter } from '../workspace/scene-filter';
+import { StatusMessages } from '../../core/status-messages';
 
 const MAX_SUGGESTIONS = 8;
 
@@ -75,7 +76,7 @@ export class SceneLinks {
   private readonly tags = signal<Tag[]>([]);
   /** Alle Tags des Projekts; wird beim Öffnen der Tag-Auswahl frisch geladen. */
   private readonly allTags = signal<TagSummary[]>([]);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   protected readonly rows = computed<Row[]>(() => [
     ...NOTE_KIND_LIST.filter((config) => config.linkable).map((config) => ({

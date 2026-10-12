@@ -8,6 +8,7 @@ import { NoteAvatar } from '../notes/note-avatar';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
 import { NotesStore } from '../notes/notes-store';
 import { SceneFilter } from './scene-filter';
+import { StatusMessages } from '../../core/status-messages';
 
 /**
  * Filter über dem Manuskript-Baum: ein Knopf, der ein Popover öffnet – darin je Zeile
@@ -35,7 +36,7 @@ export class SceneFilterPanel {
 
   protected readonly statuses = SCENE_STATUSES;
   protected readonly annotationKinds = ANNOTATION_KINDS;
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   /** Je verknüpfbarer Art (Charaktere, Orte) die Einträge, die in Szenen vorkommen. */
   protected readonly noteGroups = computed(() => {

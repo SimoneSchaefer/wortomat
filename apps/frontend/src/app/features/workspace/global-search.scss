@@ -126,13 +126,9 @@
   }
 }
 
-.empty,
-.error {
+.empty {
   margin: 0;
   padding: 0.6rem 0.5rem;
   font-size: 0.85rem;
-}
-
-.empty {
   color: var(--text-muted);
 }

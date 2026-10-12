@@ -49,6 +49,13 @@ export const de = {
   errors: {
     backendUnreachable: 'Das Backend ist nicht erreichbar.',
     status: (status: number) => `Fehler ${status}`,
+    unexpected: (message: string) => `Unerwarteter Fehler: ${message}`,
+  },
+
+  status: {
+    dismiss: 'Meldung schließen',
+    dismissAll: 'Alle schließen',
+    times: (count: number) => `${count}×`,
   },
 
   filePicker: {

@@ -55,8 +55,5 @@
         {{ loading() ? t().search.searching : t().search.noHits(query().trim()) }}
       </p>
     }
-    @if (error(); as message) {
-      <p class="error" role="alert">{{ message }}</p>
-    }
   </div>
 }

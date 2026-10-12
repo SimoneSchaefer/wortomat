@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import type { FontSize, Language, QuoteStyle, Theme } from '@wortomat/shared';
 import { AppSettingsStore } from '../../core/app-settings';
@@ -8,6 +8,7 @@ import { errorMessage } from '../../core/errors';
 import { I18n, LANGUAGES } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { APOSTROPHE, QUOTE_STYLES, type QuoteStyleInfo } from '../../core/quotes';
+import { StatusMessages } from '../../core/status-messages';
 
 /** Einstellungen der App: Route `settings`, mit und ohne geöffnetes Projekt erreichbar. */
 @Component({
@@ -28,7 +29,7 @@ export class SettingsPage {
   protected readonly themes: readonly Theme[] = ['system', 'light', 'dark'];
   protected readonly fontSizes: readonly FontSize[] = ['small', 'medium', 'large'];
   protected readonly fontScale = FONT_SCALE;
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   protected chooseLanguage(language: Language): Promise<void> {
     return this.save(() => this.settings.setLanguage(language));

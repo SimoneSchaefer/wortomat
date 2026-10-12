@@ -1,10 +1,11 @@
-import { Component, computed, ElementRef, inject, input, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input } from '@angular/core';
 import type { ManuscriptNode, SceneStatus } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { SCENE_STATUSES, statusInfo } from '../../core/scene-status';
 import { StatusIcon } from '../../core/status-icon';
+import { StatusMessages } from '../../core/status-messages';
 
 /**
  * Arbeitsstand der Szene als Stufenleiste: Idee → … → Fertig.
@@ -26,7 +27,7 @@ export class SceneStatusPicker {
   protected readonly statuses = SCENE_STATUSES;
   protected readonly current = computed(() => statusInfo(this.node().status ?? 'idea'));
   protected readonly currentIndex = computed(() => SCENE_STATUSES.indexOf(this.current()));
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   protected async select(status: SceneStatus): Promise<void> {
     if (status === this.current().status) return;

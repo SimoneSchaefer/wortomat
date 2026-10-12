@@ -9,7 +9,6 @@ import {
   Injector,
   input,
   linkedSignal,
-  signal,
   untracked,
   viewChild,
 } from '@angular/core';
@@ -24,6 +23,7 @@ import { NoteAppearances } from './note-appearances';
 import { NoteGroupPicker } from './note-group-picker';
 import { NOTE_KINDS, outlineDoc } from './note-kinds';
 import { NotesStore } from './notes-store';
+import { StatusMessages } from '../../core/status-messages';
 
 const META_SAVE_DELAY_MS = 600;
 /** Wie im Backend (`NotesService.update`). */
@@ -51,7 +51,7 @@ export class NotePage {
   protected readonly texts = computed(() => this.t().noteKinds[this.kind()]);
   protected readonly template = computed(() => outlineDoc(this.texts().outline));
   protected readonly note = computed(() => this.store.find(this.id()));
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
   protected readonly maxSummaryLength = MAX_SUMMARY_LENGTH;
 
   // Eingabefelder nur beim Wechsel der Notiz aus dem Store füllen – nicht nach jedem

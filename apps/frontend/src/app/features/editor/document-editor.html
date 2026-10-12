@@ -85,7 +85,4 @@
 <footer class="statusbar">
   <span>{{ t().words(wordCount()) }}</span>
   <span class="status" [class]="status()">{{ t().editor.saveStatus[status()] }}</span>
-  @if (error(); as message) {
-    <span class="error" role="alert">{{ message }}</span>
-  }
 </footer>

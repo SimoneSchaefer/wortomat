@@ -42,9 +42,6 @@
         />
       }
     </div>
-    @if (error(); as message) {
-      <p class="error" role="alert">{{ message }}</p>
-    }
   </wm-document-editor>
 } @else {
   <p class="muted not-found">{{ t().notes.notFound }}</p>

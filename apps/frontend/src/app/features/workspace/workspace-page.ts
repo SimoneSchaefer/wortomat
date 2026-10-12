@@ -20,6 +20,7 @@ import { ManuscriptTree } from './manuscript-tree';
 import { ResizeHandle } from './resize-handle';
 import { SceneFilter } from './scene-filter';
 import { SceneFilterPanel } from './scene-filter-panel';
+import { StatusMessages } from '../../core/status-messages';
 
 type Section = 'manuscript' | NoteKind;
 
@@ -92,7 +93,7 @@ export class WorkspacePage {
     const width = stored ?? Math.round(DEFAULT_SIDEBAR_WIDTH * this.fontScale());
     return Math.min(this.maxSidebarWidth(), Math.max(this.minSidebarWidth(), width));
   });
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   private readonly url = toSignal(
     this.router.events.pipe(

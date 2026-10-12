@@ -16,6 +16,7 @@ import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { WortomatApi } from '../../core/wortomat-api';
+import { StatusMessages } from '../../core/status-messages';
 
 /** Ab dieser Zugstrecke (px) wechselt ein Maus-Drag zum nächsten Bild. */
 const DRAG_THRESHOLD = 40;
@@ -51,7 +52,7 @@ export class ImageGallery {
   protected readonly busy = signal(false);
   protected readonly dropActive = signal(false);
   protected readonly dragging = signal(false);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
 
   private drag: { pointerId: number; startX: number; startScroll: number } | null = null;
   private loadCounter = 0;

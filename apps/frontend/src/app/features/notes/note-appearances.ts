@@ -4,6 +4,7 @@ import type { SceneReference } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
+import { StatusMessages } from '../../core/status-messages';
 
 /** „Kommt vor in“: Szenen, mit denen ein Charakter oder Ort verknüpft ist. */
 @Component({
@@ -28,9 +29,6 @@ import { WortomatApi } from '../../core/wortomat-api';
       } @else {
         <span class="muted none">{{ t().notes.appearsNowhere }}</span>
       }
-    }
-    @if (error(); as message) {
-      <span class="error">{{ message }}</span>
     }
   `,
   styles: `
@@ -83,7 +81,7 @@ export class NoteAppearances {
   protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   protected readonly scenes = signal<SceneReference[] | null>(null);
-  protected readonly error = signal<string | null>(null);
+  private readonly error = inject(StatusMessages).channel();
   private loadCounter = 0;
 
   constructor() {
