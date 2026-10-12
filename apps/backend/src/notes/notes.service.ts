@@ -20,6 +20,8 @@ import { ProjectService } from '../project/project.service.js';
 import { localized } from '../i18n.js';
 
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
+/** Wie im Frontend (`NotePage`), das die Eingabe gleich begrenzt. */
+const MAX_SUMMARY_LENGTH = 2000;
 
 /** Spalten für NoteSummary; das Profilbild ist das erste Bild der Galerie. */
 const SUMMARY_COLUMNS = `id, kind, title, summary, group_id, updated_at,
@@ -81,7 +83,9 @@ export class NotesService {
     const note = this.get(id);
     const title = request?.title === undefined ? note.title : requireTitle(request.title);
     const summary =
-      typeof request?.summary === 'string' ? request.summary.trim().slice(0, 500) : note.summary;
+      typeof request?.summary === 'string'
+        ? request.summary.trim().slice(0, MAX_SUMMARY_LENGTH)
+        : note.summary;
     const groupId =
       request?.groupId === undefined ? note.groupId : this.requireGroup(request.groupId, note.kind);
     transaction(this.db, () => {

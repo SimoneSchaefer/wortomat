@@ -26,6 +26,8 @@ import { NOTE_KINDS, outlineDoc } from './note-kinds';
 import { NotesStore } from './notes-store';
 
 const META_SAVE_DELAY_MS = 600;
+/** Wie im Backend (`NotesService.update`). */
+const MAX_SUMMARY_LENGTH = 2000;
 
 /** Ein Charakter, Ort oder eine Recherche: Route `write/<art>/:id`. */
 @Component({
@@ -50,6 +52,7 @@ export class NotePage {
   protected readonly template = computed(() => outlineDoc(this.texts().outline));
   protected readonly note = computed(() => this.store.find(this.id()));
   protected readonly error = signal<string | null>(null);
+  protected readonly maxSummaryLength = MAX_SUMMARY_LENGTH;
 
   // Eingabefelder nur beim Wechsel der Notiz aus dem Store füllen – nicht nach jedem
   // Speichern, sonst könnte eine verspätete Antwort gerade Getipptes überschreiben.

@@ -15,16 +15,19 @@
           [value]="titleDraft()"
           (input)="onTitleInput($any($event.target).value)"
           (blur)="onTitleBlur()"
-          (keydown.enter)="summaryInput.focus()"
+          (keydown.enter)="$event.preventDefault(); summaryInput.focus()"
         />
-        <input
+        <!-- Mehrzeilig: wächst mit dem Text (field-sizing), damit nichts abgeschnitten wird -->
+        <textarea
           #summaryInput
           class="doc-summary doc-input"
+          rows="1"
+          [attr.maxlength]="maxSummaryLength"
           [attr.aria-label]="t().notes.summary"
           [placeholder]="texts().summaryPlaceholder"
           [value]="summaryDraft()"
           (input)="onSummaryInput($any($event.target).value)"
-        />
+        ></textarea>
         <wm-note-group-picker [noteId]="id()" [kind]="kind()" />
         @if (config().linkable) {
           <wm-note-appearances [noteId]="id()" />

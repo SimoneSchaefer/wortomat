@@ -98,12 +98,14 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
   color: inherit;
 }
 
-input:not([type='file']) {
+input:not([type='file']),
+textarea {
   padding: 0.45rem 0.6rem;
   border: 1px solid var(--border);
   border-radius: 0.4rem;
@@ -270,7 +272,7 @@ mark {
 }
 
 // Titel und Kurzbeschreibung sehen aus wie Text, sind aber Eingabefelder.
-input.doc-input {
+.doc-input {
   display: block;
   width: 100%;
   padding: 0.1rem 0.25rem;
@@ -291,6 +293,15 @@ input.doc-title {
   margin-bottom: 1.75rem;
   color: var(--text-muted);
   font-style: italic;
+
+  // Mehrzeilige Kurzbeschreibung: so hoch wie ihr Text, ohne Ziehgriff und Scrollleiste
+  &:is(textarea) {
+    field-sizing: content;
+    min-height: 0;
+    resize: none;
+    overflow: hidden;
+    line-height: 1.4;
+  }
 }
 
 // Während eine Breite gezogen wird: überall der passende Cursor, keine Textauswahl.
