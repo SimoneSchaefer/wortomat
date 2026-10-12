@@ -88,6 +88,14 @@ const MIGRATIONS: readonly string[] = [
     );
     CREATE INDEX note_images_by_image ON note_images(image_id);
   `,
+  /* 4: Verknüpfungen Szene ↔ Notiz (wer/was kommt in welcher Szene vor) */ `
+    CREATE TABLE scene_links (
+      scene_id  TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+      note_id   TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+      PRIMARY KEY (scene_id, note_id)
+    );
+    CREATE INDEX scene_links_by_note ON scene_links(note_id);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

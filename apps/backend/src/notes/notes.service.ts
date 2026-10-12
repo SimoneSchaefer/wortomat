@@ -209,7 +209,18 @@ export class NotesService {
     return { id, doc: request.doc, wordCount, updatedAt: now };
   }
 
-  private get(id: string): NoteSummary {
+  /** Alle Notizen, die mit der Szene verknüpft sind. */
+  linkedToScene(sceneId: string): NoteSummary[] {
+    const rows = this.db
+      .prepare(
+        `SELECT ${SUMMARY_COLUMNS} FROM notes
+          WHERE id IN (SELECT note_id FROM scene_links WHERE scene_id = ?)`,
+      )
+      .all(sceneId) as unknown as NoteRow[];
+    return rows.map(toSummary);
+  }
+
+  get(id: string): NoteSummary {
     const row = this.db.prepare(`SELECT ${SUMMARY_COLUMNS} FROM notes WHERE id = ?`).get(id) as
       NoteRow | undefined;
     if (!row) {

@@ -2,14 +2,16 @@ import { Component, computed, inject, input } from '@angular/core';
 import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from './document-editor';
+import { SceneLinks } from './scene-links';
 
 /** Eine Szene des Manuskripts: Route `write/scene/:id`. */
 @Component({
   selector: 'wm-scene-page',
-  imports: [DocumentEditor],
+  imports: [DocumentEditor, SceneLinks],
   template: `
     <wm-document-editor [documentId]="id()" [source]="source">
       <h1 class="doc-title">{{ node()?.title }}</h1>
+      <wm-scene-links [sceneId]="id()" />
     </wm-document-editor>
   `,
   styles: ':host { display: block; min-height: 100%; }',

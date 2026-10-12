@@ -47,6 +47,11 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   horizontalen Streifen mit CSS-Scroll-Snapping (Touch/Trackpad nativ), dazu Maus-Ziehen,
   Pfeiltasten, Pfeile und Punkte. Pro Notizart per `gallery` in `note-kinds.ts` abschaltbar. Entfernte Bilder werden aus der Datei gelöscht, sofern sie nirgends sonst
   (Galerie oder Text) verwendet werden.
+- **Verknüpfungen:** Szenen lassen sich mit Charakteren und Orten verknüpfen (Tabelle
+  `scene_links`, Löschen räumt per Fremdschlüssel automatisch auf). In der Szene stehen sie als
+  Chips unter dem Titel – mit Suche, die Umlaute ignoriert, und Neuanlage direkt aus der Suche.
+  Charaktere und Orte zeigen umgekehrt „Kommt vor in“ in Manuskript-Reihenfolge. Welche
+  Notizarten verknüpfbar sind, steuert `linkable` in `note-kinds.ts`.
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
   zusätzlich vor dem Schließen des Fensters bzw. Beenden der App.
@@ -124,6 +129,9 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 | GET · POST | `/api/notes` (`?kind=character\|place\|research`) | Charaktere, Orte, Recherchen |
 | PATCH · DELETE | `/api/notes/:id` | Titel, Kurzbeschreibung; löschen |
 | GET · PUT | `/api/notes/:id/content` | Text einer Notiz laden / speichern |
+| GET · POST | `/api/scenes/:id/links` | verknüpfte Charaktere/Orte · verknüpfen `{ noteId }` |
+| DELETE | `/api/scenes/:id/links/:noteId` | Verknüpfung lösen |
+| GET | `/api/notes/:id/scenes` | Szenen, in denen eine Notiz vorkommt (Manuskript-Reihenfolge, mit Pfad) |
 | GET · POST · PUT | `/api/notes/:id/images` | Galerie abrufen / Bild hinzufügen (multipart) / umsortieren |
 | DELETE | `/api/notes/:id/images/:imageId` | Bild aus der Galerie entfernen |
 | GET | `/api/search?q=…` | Volltextsuche über Szenen und Notizen (findet „Häuser“ auch mit „hauser“) |

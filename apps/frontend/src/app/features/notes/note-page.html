@@ -25,6 +25,9 @@
           [value]="summaryDraft()"
           (input)="onSummaryInput($any($event.target).value)"
         />
+        @if (config().linkable) {
+          <wm-note-appearances [noteId]="id()" />
+        }
       </div>
       @if (config().gallery) {
         <wm-image-gallery

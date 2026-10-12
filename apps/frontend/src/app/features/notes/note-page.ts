@@ -19,6 +19,7 @@ import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from '../editor/document-editor';
 import { ImageGallery } from './image-gallery';
+import { NoteAppearances } from './note-appearances';
 import { NOTE_KINDS } from './note-kinds';
 import { NotesStore } from './notes-store';
 
@@ -27,7 +28,7 @@ const META_SAVE_DELAY_MS = 600;
 /** Ein Charakter, Ort oder eine Recherche: Route `write/<art>/:id`. */
 @Component({
   selector: 'wm-note-page',
-  imports: [DocumentEditor, ImageGallery],
+  imports: [DocumentEditor, ImageGallery, NoteAppearances],
   templateUrl: './note-page.html',
   styleUrl: './note-page.scss',
 })

@@ -7,6 +7,8 @@ export interface NoteKindConfig {
   label: string;
   singular: string;
   newTitle: string;
+  /** Für „… als neuen Charakter anlegen“. */
+  newAccusative: string;
   addLabel: string;
   emptyList: string;
   summaryPlaceholder: string;
@@ -15,6 +17,8 @@ export interface NoteKindConfig {
   gallery: boolean;
   /** Symbol in der leeren Galerie. */
   galleryIcon: 'person' | 'picture';
+  /** Mit Szenen verknüpfbar („kommt vor in …“). */
+  linkable: boolean;
   /** Vorgeschlagene Gliederung für neue Einträge – frei änderbar. */
   template: EditorDoc | null;
 }
@@ -26,12 +30,14 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     label: 'Charaktere',
     singular: 'Charakter',
     newTitle: 'Neuer Charakter',
+    newAccusative: 'neuen Charakter',
     addLabel: '+ Charakter',
     emptyList: 'Noch keine Charaktere.',
     summaryPlaceholder: 'Kurzbeschreibung, z. B. „Protagonistin, 34, Ärztin in Hamburg“',
     textPlaceholder: 'Wer ist diese Figur?',
     gallery: true,
     galleryIcon: 'person',
+    linkable: true,
     template: outline([
       'Äußeres',
       'Persönlichkeit',
@@ -46,12 +52,14 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     label: 'Orte',
     singular: 'Ort',
     newTitle: 'Neuer Ort',
+    newAccusative: 'neuen Ort',
     addLabel: '+ Ort',
     emptyList: 'Noch keine Orte.',
     summaryPlaceholder: 'Kurzbeschreibung, z. B. „Alter Fischereihafen, Nordseeküste“',
     textPlaceholder: 'Wie sieht es hier aus?',
     gallery: true,
     galleryIcon: 'picture',
+    linkable: true,
     template: outline(['Beschreibung', 'Atmosphäre', 'Bedeutung für die Geschichte']),
   },
   research: {
@@ -60,12 +68,14 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     label: 'Forschung',
     singular: 'Recherche',
     newTitle: 'Neue Recherche',
+    newAccusative: 'neue Recherche',
     addLabel: '+ Recherche',
     emptyList: 'Noch keine Recherchen.',
     summaryPlaceholder: 'Worum geht es? z. B. „Gezeiten an der Nordsee“',
     textPlaceholder: 'Notizen, Zitate, Quellen …',
     gallery: true,
     galleryIcon: 'picture',
+    linkable: false,
     template: null,
   },
 };

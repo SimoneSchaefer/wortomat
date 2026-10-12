@@ -8,6 +8,7 @@ import type {
   NodeKind,
   SaveDocumentRequest,
   SceneContent,
+  SceneReference,
   UpdateNodeRequest,
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
@@ -212,7 +213,35 @@ export class ManuscriptService {
     return toNode(row);
   }
 
-  private requireScene(id: string): ManuscriptNode {
+  /**
+   * Die angegebenen Szenen in der Reihenfolge, in der sie im Manuskript stehen,
+   * jeweils mit dem Pfad aus Teil- und Kapiteltiteln.
+   */
+  sceneReferences(sceneIds: ReadonlySet<string>): SceneReference[] {
+    const nodes = this.list();
+    const children = new Map<string | null, ManuscriptNode[]>();
+    for (const node of nodes) {
+      const siblings = children.get(node.parentId) ?? [];
+      siblings.push(node);
+      children.set(node.parentId, siblings);
+    }
+
+    const result: SceneReference[] = [];
+    const visit = (parentId: string | null, path: string[]) => {
+      const siblings = (children.get(parentId) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
+      for (const node of siblings) {
+        if (node.kind === 'scene') {
+          if (sceneIds.has(node.id)) result.push({ id: node.id, title: node.title, path });
+        } else {
+          visit(node.id, [...path, node.title]);
+        }
+      }
+    };
+    visit(null, []);
+    return result;
+  }
+
+  requireScene(id: string): ManuscriptNode {
     const node = this.get(id);
     if (node.kind !== 'scene') {
       throw new BadRequestException('Nur Szenen haben Textinhalt.');

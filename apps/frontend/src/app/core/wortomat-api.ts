@@ -12,6 +12,7 @@ import type {
   NoteSummary,
   ProjectInfo,
   ProjectListEntry,
+  SceneReference,
   SaveDocumentRequest,
   SceneContent,
   SearchHit,
@@ -142,6 +143,25 @@ export class WortomatApi {
 
   removeNoteImage(id: string, imageId: string): Promise<ImageInfo[]> {
     return this.call(this.http.delete<ImageInfo[]>(`/api/notes/${id}/images/${imageId}`));
+  }
+
+  // Verknüpfungen Szene ↔ Charakter/Ort ----------------------------------------
+
+  sceneLinks(sceneId: string): Promise<NoteSummary[]> {
+    return this.call(this.http.get<NoteSummary[]>(`/api/scenes/${sceneId}/links`));
+  }
+
+  linkNote(sceneId: string, noteId: string): Promise<NoteSummary[]> {
+    return this.call(this.http.post<NoteSummary[]>(`/api/scenes/${sceneId}/links`, { noteId }));
+  }
+
+  unlinkNote(sceneId: string, noteId: string): Promise<NoteSummary[]> {
+    return this.call(this.http.delete<NoteSummary[]>(`/api/scenes/${sceneId}/links/${noteId}`));
+  }
+
+  /** Szenen, in denen eine Notiz vorkommt – in Manuskript-Reihenfolge. */
+  noteScenes(noteId: string): Promise<SceneReference[]> {
+    return this.call(this.http.get<SceneReference[]>(`/api/notes/${noteId}/scenes`));
   }
 
   // Bilder & Suche ----------------------------------------------------------

@@ -1,0 +1,90 @@
+@for (group of groups(); track group.config.kind) {
+  <div class="group">
+    <span class="label">{{ group.config.label }}</span>
+    <ul class="chips">
+      @for (note of group.notes; track note.id) {
+        <li class="chip">
+          <button
+            type="button"
+            class="open"
+            [title]="note.summary || note.title"
+            (click)="open(note)"
+          >
+            <wm-note-avatar [note]="note" />
+            {{ note.title }}
+          </button>
+          <button
+            type="button"
+            class="remove"
+            [attr.aria-label]="note.title + ' aus dieser Szene entfernen'"
+            title="Aus dieser Szene entfernen"
+            (click)="unlink(note)"
+          >
+            ×
+          </button>
+        </li>
+      }
+      <li class="add-wrapper">
+        <button
+          type="button"
+          class="add"
+          [class.open]="pickerKind() === group.config.kind"
+          [attr.aria-expanded]="pickerKind() === group.config.kind"
+          [title]="group.config.singular + ' hinzufügen'"
+          (click)="openPicker(group.config.kind)"
+        >
+          +
+        </button>
+
+        @if (pickerKind() === group.config.kind) {
+          <div
+            class="picker"
+            role="dialog"
+            [attr.aria-label]="group.config.singular + ' hinzufügen'"
+          >
+            <input
+              wmAutofocus
+              role="combobox"
+              aria-autocomplete="list"
+              [attr.aria-activedescendant]="'option-' + activeIndex()"
+              [placeholder]="group.config.singular + ' suchen …'"
+              [value]="query()"
+              (input)="onQuery($any($event.target).value)"
+              (keydown)="onPickerKeydown($event)"
+            />
+            <ul role="listbox">
+              @for (option of options(); track $index; let i = $index) {
+                <li
+                  role="option"
+                  [id]="'option-' + i"
+                  [class.active]="i === activeIndex()"
+                  [attr.aria-selected]="i === activeIndex()"
+                  (pointerenter)="activeIndex.set(i)"
+                  (click)="choose(option)"
+                >
+                  @if (option.type === 'note') {
+                    <wm-note-avatar [note]="option.note" />
+                    <span class="option-text">
+                      <span>{{ option.note.title }}</span>
+                      @if (option.note.summary) {
+                        <small>{{ option.note.summary }}</small>
+                      }
+                    </span>
+                  } @else {
+                    <span class="create">+ {{ createLabel(option.title) }}</span>
+                  }
+                </li>
+              } @empty {
+                <li class="hint">{{ emptyHint() }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </li>
+    </ul>
+  </div>
+}
+
+@if (error(); as message) {
+  <p class="error" role="alert">{{ message }}</p>
+}

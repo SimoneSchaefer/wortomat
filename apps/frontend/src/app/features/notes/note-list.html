@@ -8,13 +8,7 @@
           [class.with-avatar]="config().gallery"
         >
           @if (config().gallery) {
-            <span class="avatar" aria-hidden="true">
-              @if (note.coverImageUrl) {
-                <img [src]="note.coverImageUrl" alt="" />
-              } @else {
-                {{ initials(note.title) }}
-              }
-            </span>
+            <wm-note-avatar [note]="note" />
           }
           <span class="text">
             <span class="title">{{ note.title }}</span>

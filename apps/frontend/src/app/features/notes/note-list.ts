@@ -2,13 +2,14 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import type { NoteKind, NoteSummary } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { NoteAvatar } from './note-avatar';
 import { NOTE_KINDS } from './note-kinds';
 import { NotesStore } from './notes-store';
 
 /** Seitenleiste für Charaktere, Orte oder Recherchen. */
 @Component({
   selector: 'wm-note-list',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NoteAvatar],
   templateUrl: './note-list.html',
   styleUrl: './note-list.scss',
 })
@@ -21,14 +22,6 @@ export class NoteList {
   protected readonly config = computed(() => NOTE_KINDS[this.kind()]);
   protected readonly notes = computed(() => this.store.byKind(this.kind()));
   protected readonly error = signal<string | null>(null);
-
-  /** „Anna Berger“ → „AB“, als Platzhalter ohne Profilbild. */
-  protected initials(title: string): string {
-    const words = title.trim().split(/\s+/).filter(Boolean);
-    return (
-      (words[0]?.[0] ?? '') + (words.length > 1 ? (words.at(-1)?.[0] ?? '') : '')
-    ).toUpperCase();
-  }
 
   protected async add(): Promise<void> {
     this.error.set(null);

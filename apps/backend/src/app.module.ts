@@ -3,6 +3,8 @@ import { AppController } from './app.controller.js';
 import { SERVER_OPTIONS, type ServerOptions } from './config.js';
 import { ImagesController } from './images/images.controller.js';
 import { ImagesService } from './images/images.service.js';
+import { LinksController } from './links/links.controller.js';
+import { LinksService } from './links/links.service.js';
 import { ManuscriptController } from './manuscript/manuscript.controller.js';
 import { ManuscriptService } from './manuscript/manuscript.service.js';
 import { NotesController } from './notes/notes.controller.js';
@@ -25,6 +27,7 @@ export class AppModule {
         ProjectsController,
         ManuscriptController,
         NotesController,
+        LinksController,
         ImagesController,
         SearchController,
       ],
@@ -34,6 +37,7 @@ export class AppModule {
         RecentProjectsService,
         ManuscriptService,
         NotesService,
+        LinksService,
         ImagesService,
         SearchService,
       ],

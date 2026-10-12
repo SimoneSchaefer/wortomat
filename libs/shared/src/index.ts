@@ -166,6 +166,19 @@ export interface UpdateNoteRequest {
   summary?: string;
 }
 
+/** Verknüpft eine Notiz (Charakter, Ort …) mit einer Szene. */
+export interface LinkNoteRequest {
+  noteId: string;
+}
+
+/** Szene, in der eine Notiz vorkommt – mit Pfad im Manuskript für die Anzeige. */
+export interface SceneReference {
+  id: string;
+  title: string;
+  /** Titel der übergeordneten Teile/Kapitel, von außen nach innen. */
+  path: string[];
+}
+
 /** Neue Reihenfolge der Galerie; das erste Bild ist das Profilbild. */
 export interface ReorderImagesRequest {
   imageIds: string[];

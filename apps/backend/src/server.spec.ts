@@ -12,6 +12,7 @@ import type {
   ProjectInfo,
   ProjectListEntry,
   SceneContent,
+  SceneReference,
   SearchHit,
 } from '@wortomat/shared';
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
@@ -375,6 +376,85 @@ describe('REST-API', () => {
     assert.equal(await imageExists(eins.url), false);
   });
 
+  it('verknüpft Szenen mit Charakteren und Orten – in beide Richtungen', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'links', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const note = (kind: string, title: string) =>
+      api<NoteSummary>('POST', '/api/notes', { kind, title });
+    const linked = (sceneId: string) =>
+      api<NoteSummary[]>('GET', `/api/scenes/${sceneId}/links`).then((notes) =>
+        notes.map((n) => n.title).sort(),
+      );
+    const appearances = (noteId: string) =>
+      api<SceneReference[]>('GET', `/api/notes/${noteId}/scenes`);
+
+    const teil = await node(null, 'part', 'Teil I');
+    const k1 = await node(teil.id, 'chapter', 'Kapitel 1');
+    const k2 = await node(null, 'chapter', 'Kapitel 2');
+    const ankunft = await node(k1.id, 'scene', 'Ankunft');
+    const abschied = await node(k2.id, 'scene', 'Abschied');
+    const markt = await node(k1.id, 'scene', 'Markt');
+    const anna = await note('character', 'Anna');
+    const hafen = await note('place', 'Hafen');
+
+    // Szene → Notizen
+    await api('POST', `/api/scenes/${abschied.id}/links`, { noteId: anna.id });
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: anna.id });
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: hafen.id });
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: hafen.id }); // doppelt: egal
+    await api('POST', `/api/scenes/${markt.id}/links`, { noteId: anna.id });
+    assert.deepEqual(await linked(ankunft.id), ['Anna', 'Hafen']);
+
+    // Notiz → Szenen, in Manuskript-Reihenfolge mit Pfad
+    assert.deepEqual(await appearances(anna.id), [
+      { id: ankunft.id, title: 'Ankunft', path: ['Teil I', 'Kapitel 1'] },
+      { id: markt.id, title: 'Markt', path: ['Teil I', 'Kapitel 1'] },
+      { id: abschied.id, title: 'Abschied', path: ['Kapitel 2'] },
+    ]);
+    // Umsortieren wirkt sich auf die Reihenfolge aus
+    await api('POST', `/api/nodes/${k2.id}/move`, { parentId: null, beforeId: teil.id });
+    assert.deepEqual(
+      (await appearances(anna.id)).map((s) => s.title),
+      ['Abschied', 'Ankunft', 'Markt'],
+    );
+
+    // Lösen
+    const afterUnlink = await api<NoteSummary[]>(
+      'DELETE',
+      `/api/scenes/${ankunft.id}/links/${hafen.id}`,
+    );
+    assert.deepEqual(
+      afterUnlink.map((n) => n.title),
+      ['Anna'],
+    );
+
+    // Ungültige Ziele
+    const status = async (sceneId: string, noteId: string) =>
+      (
+        await fetch(`${server.url}/api/scenes/${sceneId}/links`, {
+          method: 'POST',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ noteId }),
+        })
+      ).status;
+    assert.equal(await status(k1.id, anna.id), 400, 'Kapitel statt Szene');
+    assert.equal(await status(ankunft.id, 'gibt-es-nicht'), 404, 'unbekannte Notiz');
+
+    // Löschen räumt Verknüpfungen mit auf: Szene, ganzes Kapitel, Notiz
+    await api('DELETE', `/api/nodes/${markt.id}`);
+    await api('DELETE', `/api/nodes/${k2.id}`);
+    assert.deepEqual(
+      (await appearances(anna.id)).map((s) => s.title),
+      ['Ankunft'],
+    );
+    await api('DELETE', `/api/notes/${anna.id}`);
+    assert.deepEqual(await linked(ankunft.id), []);
+  });
+
   it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -385,7 +465,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor den Notizen (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

@@ -1,0 +1,157 @@
+:host {
+  display: grid;
+  gap: 0.4rem;
+  margin: -0.75rem 0 2rem;
+  font-family: var(--font-ui);
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.label {
+  width: 5.5rem;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.82rem;
+
+  --avatar-size: 1.4rem;
+
+  .open {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.2rem 0.15rem 0.2rem;
+    border: none;
+    background: none;
+  }
+
+  .remove {
+    padding: 0 0.5rem 0 0.15rem;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    visibility: hidden;
+  }
+
+  &:hover .remove,
+  .remove:focus-visible {
+    visibility: visible;
+  }
+}
+
+.add-wrapper {
+  position: relative;
+}
+
+.add {
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px dashed var(--border);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+
+  &.open,
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: none;
+  }
+}
+
+.picker {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 10;
+  width: 17rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--bg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
+
+  input {
+    width: 100%;
+    margin-bottom: 0.3rem;
+  }
+
+  ul {
+    max-height: 16rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.45rem;
+    border-radius: 0.4rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+
+    --avatar-size: 1.6rem;
+
+    &.active {
+      background: var(--hover);
+    }
+
+    &.hint {
+      cursor: default;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.option-text {
+  display: grid;
+  min-width: 0;
+
+  span,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: var(--text-muted);
+  }
+}
+
+.create {
+  color: var(--accent);
+}
+
+.error {
+  font-size: 0.8rem;
+}
