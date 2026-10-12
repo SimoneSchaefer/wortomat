@@ -136,6 +136,13 @@ describe('Export', () => {
     const s3 = await node(k2.id, 'scene', 'Kai');
     await save(s3.id, [
       paragraph(text('Sie winkte.')),
+      paragraph(
+        text('Ein '),
+        text('Stand', 'underline'),
+        text(' war '),
+        text('leer', 'strike'),
+        text('.'),
+      ),
       { type: 'image', attrs: { src: webp, alt: 'Foto' } },
       { type: 'image', attrs: { src: png, alt: 'Karte, noch einmal' } }, // dasselbe Bild erneut
     ]);
@@ -169,6 +176,8 @@ describe('Export', () => {
     assert.equal(html.match(/scene-break/g)?.length, 2, 'ein Szenentrenner (+ CSS-Regel)');
     assert.match(html, /<strong>hielt<\/strong>/);
     assert.match(html, /<em>Hafen<\/em>/);
+    assert.match(html, /<u>Stand<\/u>/);
+    assert.match(html, /<s>leer<\/s>/);
     assert.match(html, /&lt;&lt;Tag&gt;&gt;/);
     assert.doesNotMatch(html, /annotation|wm-annotation/);
     assert.match(html, /Recherche nötig/);
@@ -389,6 +398,7 @@ describe('Export', () => {
           'Ankunft',
           'Am Markt roch es nach Fisch',
           '100 % & $ # _ ~ \\ <<Tag>> "Zitat" ,,unten“',
+          'Ein Stand war leer.',
         ]) {
           assert.ok(pdfText.includes(needle), `${template}: „${needle}“ fehlt im PDF`);
         }

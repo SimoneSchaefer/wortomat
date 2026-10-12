@@ -28,7 +28,8 @@ import { Annotation } from './annotation-mark';
 const AUTOSAVE_DELAY_MS = 800;
 
 type SaveStatus = 'loading' | 'saved' | 'unsaved' | 'saving' | 'error';
-type ToolbarCommand = 'bold' | 'italic' | 'heading2' | 'heading3' | 'quote' | 'undo' | 'redo';
+type ToolbarCommand =
+  'bold' | 'italic' | 'underline' | 'strike' | 'heading2' | 'heading3' | 'quote' | 'undo' | 'redo';
 
 /** Woher der Editor ein Dokument lädt und wohin er speichert (Szene, Charakter, Ort …). */
 export interface DocumentSource {
@@ -235,12 +236,6 @@ export class DocumentEditor {
     }
   }
 
-  protected onImagesPicked(input: HTMLInputElement): void {
-    const files = Array.from(input.files ?? []).filter(isSupportedImage);
-    input.value = '';
-    void this.insertImages(files);
-  }
-
   // Toolbar -------------------------------------------------------------------
 
   protected isActive(name: string, attributes?: Record<string, unknown>): boolean {
@@ -269,6 +264,12 @@ export class DocumentEditor {
         break;
       case 'italic':
         chain.toggleItalic();
+        break;
+      case 'underline':
+        chain.toggleUnderline();
+        break;
+      case 'strike':
+        chain.toggleStrike();
         break;
       case 'heading2':
         chain.toggleHeading({ level: 2 });

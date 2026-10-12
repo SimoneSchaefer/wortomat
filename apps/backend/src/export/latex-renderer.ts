@@ -23,6 +23,8 @@ const PREAMBLE: Record<ExportTemplate, string> = {
 \usepackage{graphicx}
 \usepackage[a4paper,left=2.5cm,top=3cm,textwidth=432pt,textheight=534pt,headheight=15pt,headsep=24pt]{geometry}
 \usepackage{fancyhdr}
+% Unterstreichen/Durchstreichen mit Zeilenumbruch; ohne ulem bleibt nur \underline bzw. nichts
+\IfFileExists{ulem.sty}{\usepackage[normalem]{ulem}\newcommand{\wmuline}[1]{\uline{##1}}\newcommand{\wmstrike}[1]{\sout{##1}}}{\newcommand{\wmuline}[1]{\underline{##1}}\newcommand{\wmstrike}[1]{##1}}
 \renewcommand{\ttdefault}{pcr}
 \renewcommand{\familydefault}{\ttdefault}
 \pagestyle{fancy}
@@ -47,6 +49,8 @@ const PREAMBLE: Record<ExportTemplate, string> = {
 \IfFileExists{tgpagella.sty}{\usepackage{tgpagella}}{\IfFileExists{mathpazo.sty}{\usepackage{mathpazo}}{}}
 \IfFileExists{microtype.sty}{\usepackage{microtype}}{}
 \usepackage{fancyhdr}
+% Unterstreichen/Durchstreichen mit Zeilenumbruch; ohne ulem bleibt nur \underline bzw. nichts
+\IfFileExists{ulem.sty}{\usepackage[normalem]{ulem}\newcommand{\wmuline}[1]{\uline{##1}}\newcommand{\wmstrike}[1]{\sout{##1}}}{\newcommand{\wmuline}[1]{\underline{##1}}\newcommand{\wmstrike}[1]{##1}}
 \pagestyle{fancy}
 \fancyhf{}
 \fancyfoot[C]{\small\thepage}
@@ -226,7 +230,8 @@ function inline(nodes: JsonNode[], ctx: Context): string {
     let text = escape(node.text, ctx);
     const marks = printMarks(node);
     if (marks.has('code')) text = `\\texttt{${text}}`;
-    if (marks.has('underline')) text = `\\underline{${text}}`;
+    if (marks.has('strike')) text = `\\wmstrike{${text}}`;
+    if (marks.has('underline')) text = `\\wmuline{${text}}`;
     if (marks.has('italic')) text = `\\emph{${text}}`;
     if (marks.has('bold')) text = `\\textbf{${text}}`;
     out += text;

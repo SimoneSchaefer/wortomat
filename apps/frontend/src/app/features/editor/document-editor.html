@@ -1,97 +1,103 @@
-<div class="toolbar" role="toolbar" aria-label="Formatierung">
-  <button
-    type="button"
-    title="Fett (Strg+B)"
-    [class.on]="isActive('bold')"
-    (click)="command('bold')"
-  >
-    <b>F</b>
-  </button>
-  <button
-    type="button"
-    title="Kursiv (Strg+I)"
-    [class.on]="isActive('italic')"
-    (click)="command('italic')"
-  >
-    <i>K</i>
-  </button>
-  <span class="sep"></span>
-  <button
-    type="button"
-    title="Überschrift"
-    [class.on]="isActive('heading', { level: 2 })"
-    (click)="command('heading2')"
-  >
-    Ü1
-  </button>
-  <button
-    type="button"
-    title="Unterüberschrift"
-    [class.on]="isActive('heading', { level: 3 })"
-    (click)="command('heading3')"
-  >
-    Ü2
-  </button>
-  <button
-    type="button"
-    title="Zitat"
-    [class.on]="isActive('blockquote')"
-    (click)="command('quote')"
-  >
-    „“
-  </button>
-  <span class="sep"></span>
-  @for (info of annotationKinds; track info.kind) {
-    <button
-      type="button"
-      class="annotation"
-      [style.--annotation-color]="info.color"
-      [title]="
-        'Als ' +
-        info.label +
-        ' markieren – nochmal klicken entfernt (' +
-        modifierKey +
-        '+Alt+' +
-        info.key +
-        ')'
-      "
-      [class.on]="isActive('annotation', { kind: info.kind })"
-      (click)="annotate(info.kind)"
-    >
-      <span class="swatch" aria-hidden="true"></span>{{ info.label }}
-    </button>
-  }
-  <span class="sep"></span>
-  <button type="button" title="Bild einfügen" (click)="imagePicker.click()">Bild</button>
-  <input
-    #imagePicker
-    type="file"
-    accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-    multiple
-    hidden
-    (change)="onImagesPicked(imagePicker)"
-  />
-  <span class="sep"></span>
-  <button
-    type="button"
-    title="Rückgängig (Strg+Z)"
-    [disabled]="!can('undo')"
-    (click)="command('undo')"
-  >
-    ↶
-  </button>
-  <button
-    type="button"
-    title="Wiederholen (Strg+Umschalt+Z)"
-    [disabled]="!can('redo')"
-    (click)="command('redo')"
-  >
-    ↷
-  </button>
-</div>
-
 <article class="page">
   <ng-content />
+  <!-- Unter dem Kopfbereich: die Formatierung gilt nur für den Text darunter -->
+  <div class="toolbar" role="toolbar" aria-label="Formatierung">
+    <button
+      type="button"
+      title="Fett (Strg+B)"
+      [class.on]="isActive('bold')"
+      (click)="command('bold')"
+    >
+      <b>F</b>
+    </button>
+    <button
+      type="button"
+      title="Kursiv (Strg+I)"
+      [class.on]="isActive('italic')"
+      (click)="command('italic')"
+    >
+      <i>K</i>
+    </button>
+    <button
+      type="button"
+      title="Unterstrichen (Strg+U)"
+      [class.on]="isActive('underline')"
+      (click)="command('underline')"
+    >
+      <u>U</u>
+    </button>
+    <button
+      type="button"
+      title="Durchgestrichen (Strg+Umschalt+S)"
+      [class.on]="isActive('strike')"
+      (click)="command('strike')"
+    >
+      <s>S</s>
+    </button>
+    <span class="sep"></span>
+    <button
+      type="button"
+      title="Überschrift"
+      [class.on]="isActive('heading', { level: 2 })"
+      (click)="command('heading2')"
+    >
+      Ü1
+    </button>
+    <button
+      type="button"
+      title="Unterüberschrift"
+      [class.on]="isActive('heading', { level: 3 })"
+      (click)="command('heading3')"
+    >
+      Ü2
+    </button>
+    <button
+      type="button"
+      title="Zitat"
+      [class.on]="isActive('blockquote')"
+      (click)="command('quote')"
+    >
+      „“
+    </button>
+    <span class="sep"></span>
+    @for (info of annotationKinds; track info.kind) {
+      <button
+        type="button"
+        class="annotation"
+        [style.--annotation-color]="info.color"
+        [title]="
+          'Als ' +
+          info.label +
+          ' markieren – nochmal klicken entfernt (' +
+          modifierKey +
+          '+Alt+' +
+          info.key +
+          ')'
+        "
+        [class.on]="isActive('annotation', { kind: info.kind })"
+        (click)="annotate(info.kind)"
+      >
+        <span class="swatch" aria-hidden="true"></span>{{ info.label }}
+      </button>
+    }
+    <span class="sep"></span>
+    <button
+      type="button"
+      title="Rückgängig (Strg+Z)"
+      [disabled]="!can('undo')"
+      (click)="command('undo')"
+    >
+      ↶
+    </button>
+    <button
+      type="button"
+      title="Wiederholen (Strg+Umschalt+Z)"
+      [disabled]="!can('redo')"
+      (click)="command('redo')"
+    >
+      ↷
+    </button>
+  </div>
   <div #editorHost class="editor-host"></div>
 </article>
 
