@@ -92,7 +92,9 @@ export class ManuscriptTree {
     return ANNOTATION_KINDS.filter((info) => total[info.kind] > 0);
   });
 
-  /** Beim Filtern sind alle Teile offen – sonst lägen Treffer verborgen. */
+  protected readonly noAnnotations = NO_ANNOTATIONS;
+
+  /** Beim Filtern sind alle Teile und Kapitel offen – sonst lägen Treffer verborgen. */
   protected isCollapsed(id: string): boolean {
     return !this.filter.active() && this.store.collapsed().has(id);
   }

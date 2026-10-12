@@ -29,7 +29,7 @@ export class ProjectStore {
   readonly nodes = signal<ManuscriptNode[]>([]);
   readonly tree = computed(() => buildTree(this.nodes()));
   readonly totalWords = computed(() => this.nodes().reduce((sum, node) => sum + node.wordCount, 0));
-  /** Eingeklappte Teile im Baum – nur Anzeige, gilt bis zum Schließen des Projekts. */
+  /** Eingeklappte Teile und Kapitel im Baum – nur Anzeige, gilt bis zum Schließen des Projekts. */
   readonly collapsed = signal<ReadonlySet<string>>(new Set());
 
   /**

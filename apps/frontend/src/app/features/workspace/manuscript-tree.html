@@ -1,5 +1,5 @@
-<!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter.
-     Nur vorhandene Arten, rechtsbündig aufgerückt (keine Lücken). Der Bereich ist überall
+<!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter –
+     aber nur zugeklappt, aufgeklappt stehen sie ja an den Szenen. Nur vorhandene Arten, rechtsbündig aufgerückt (keine Lücken). Der Bereich ist überall
      gleich breit, damit die Wortzahl dahinter (ebenfalls summiert) bündig untereinander steht. -->
 <ng-template #rowStats let-counts let-words="words">
   <span class="badges" [style.--slots]="annotationKinds().length">
@@ -35,7 +35,7 @@
         (dragend)="onDragEnd()"
       >
         <div class="row" (dragover)="onDragOverItem($event, item.node)">
-          @if (item.node.kind === 'part' && !filter.active()) {
+          @if (item.node.kind !== 'scene' && !filter.active()) {
             <button
               type="button"
               class="collapse"
@@ -92,7 +92,10 @@
             <ng-container
               *ngTemplateOutlet="
                 rowStats;
-                context: { $implicit: item.annotations, words: item.wordCount }
+                context: {
+                  $implicit: isCollapsed(item.node.id) ? item.annotations : noAnnotations,
+                  words: item.wordCount,
+                }
               "
             />
           }

@@ -107,7 +107,7 @@ input {
   padding: 0.2rem 0.4rem;
 }
 
-// Auf-/Zuklappen der Teile; der Pfeil zeigt nach unten, solange der Teil offen ist
+// Auf-/Zuklappen von Teilen und Kapiteln; der Pfeil zeigt nach unten, solange sie offen sind
 .collapse {
   flex-shrink: 0;
   display: grid;
