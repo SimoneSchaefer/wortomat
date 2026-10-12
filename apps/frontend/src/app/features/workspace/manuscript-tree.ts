@@ -6,7 +6,7 @@ import { Autofocus } from '../../core/autofocus';
 import { ANNOTATION_KINDS } from '../../core/annotations';
 import { errorMessage } from '../../core/errors';
 import { statusInfo } from '../../core/scene-status';
-import { ProjectStore } from '../../core/project-store';
+import { NEW_SCENE_TITLE, ProjectStore } from '../../core/project-store';
 import {
   changesPosition,
   type DropPlan,
@@ -21,7 +21,7 @@ const DRAG_TYPE = 'application/x-wortomat-node';
 const DEFAULT_TITLES: Record<NodeKind, string> = {
   part: 'Neuer Teil',
   chapter: 'Neues Kapitel',
-  scene: 'Neue Szene',
+  scene: NEW_SCENE_TITLE,
 };
 
 @Component({
@@ -45,9 +45,11 @@ export class ManuscriptTree {
   protected async add(kind: NodeKind, parentId: string | null): Promise<void> {
     await this.run(async () => {
       const node = await this.store.addNode({ kind, parentId, title: DEFAULT_TITLES[kind] });
-      this.editingId.set(node.id);
       if (node.kind === 'scene') {
+        // Umbenannt wird auf der Szenenseite, die den neuen Titel gleich markiert.
         await this.router.navigate(['/write/scene', node.id]);
+      } else {
+        this.editingId.set(node.id);
       }
     });
   }

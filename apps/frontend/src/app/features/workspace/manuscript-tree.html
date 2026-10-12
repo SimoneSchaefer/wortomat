@@ -47,7 +47,6 @@
               routerLinkActive="active"
               draggable="false"
               [title]="item.node.title"
-              (dblclick)="editingId.set(item.node.id)"
             >
               {{ item.node.title }}
             </a>
@@ -58,7 +57,7 @@
           } @else {
             <span
               class="label"
-              [title]="item.node.title"
+              [title]="item.node.title + ' (Doppelklick zum Umbenennen)'"
               (dblclick)="editingId.set(item.node.id)"
               >{{ item.node.title }}</span
             >
@@ -82,9 +81,6 @@
                 +
               </button>
             }
-            <button type="button" title="Umbenennen" (click)="editingId.set(item.node.id)">
-              ✎
-            </button>
             <button type="button" title="Löschen" (click)="remove(item.node)">×</button>
           </span>
         </div>
