@@ -1,7 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, inject, linkedSignal, resource, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import type { ProjectListEntry } from '@wortomat/shared';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
@@ -11,7 +11,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 
 @Component({
   selector: 'wm-start-page',
-  imports: [FormsModule, DecimalPipe],
+  imports: [FormsModule, DecimalPipe, RouterLink],
   templateUrl: './start-page.html',
   styleUrl: './start-page.scss',
 })

@@ -1,7 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import type { NoteKind } from '@wortomat/shared';
 import { filter, map } from 'rxjs';
 import { AppSettingsStore } from '../../core/app-settings';
@@ -42,6 +42,7 @@ const MENU: readonly MenuItem[] = [
   selector: 'wm-workspace-page',
   imports: [
     RouterOutlet,
+    RouterLink,
     DecimalPipe,
     ManuscriptTree,
     NoteList,

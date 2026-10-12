@@ -1,0 +1,35 @@
+<main class="settings">
+  <header>
+    <button type="button" class="link back" (click)="back()">← Zurück</button>
+    <h1>Einstellungen</h1>
+  </header>
+
+  <section class="card">
+    <fieldset>
+      <legend><h2>Anführungszeichen</h2></legend>
+      <p class="muted hint">
+        Beim Schreiben werden " und ' automatisch durch diese Zeichen ersetzt. Die Rücktaste direkt
+        danach macht die Ersetzung rückgängig. Bereits geschriebener Text bleibt unverändert.
+      </p>
+      <div class="choices">
+        @for (info of quoteStyles; track info.style) {
+          <label class="choice" [class.selected]="settings.settings().quoteStyle === info.style">
+            <input
+              type="radio"
+              name="quoteStyle"
+              [value]="info.style"
+              [checked]="settings.settings().quoteStyle === info.style"
+              (change)="chooseQuoteStyle(info.style)"
+            />
+            <span class="choice-label">{{ info.label }}</span>
+            <span class="example">{{ example(info) }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </section>
+</main>

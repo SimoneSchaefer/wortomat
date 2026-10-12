@@ -259,6 +259,7 @@ const REPLACEMENTS: Record<string, string> = {
   '"': '\\textquotedbl{}', // mit ngerman ist " ein Steuerzeichen
   '`': '\\textasciigrave{}', // verhindert die Ligaturen !` und ?`
   '\t': ' ',
+  '\u202f': '\\,', // schmales geschütztes Leerzeichen (französische Anführungszeichen)
 };
 
 /** Escapt LaTeX-Sonderzeichen; nicht darstellbare Zeichen werden zu „?“. */

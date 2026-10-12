@@ -454,6 +454,11 @@ describe('LaTeX-Hilfen', () => {
       String.raw`100 \% \& \$ \# \_ \textasciitilde{} \textbackslash{} \{x\} \textasciicircum{} \textless{}\textless{}a\textgreater{}\textgreater{} \textquotedbl{}b\textquotedbl{} \textasciigrave{}c ,{},d`,
     );
     assert.equal(escape('Größe – „gut“ … €', ctx), 'Größe – „gut“ … €');
+    // Anführungszeichen aller Stile, die der Editor setzt
+    assert.equal(
+      escape('»a« ›b‹ ‚c‘ “d” ‘e’ «\u202ff\u202f» ‹g›', ctx),
+      '»a« ›b‹ ‚c‘ “d” ‘e’ «\\,f\\,» ‹g›',
+    );
     assert.equal(escape('Hi 😀 Ω', ctx), 'Hi ? ?');
     assert.equal(ctx.unsupported, 2);
   });

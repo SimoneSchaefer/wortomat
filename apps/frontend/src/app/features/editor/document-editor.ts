@@ -17,19 +17,21 @@ import { CharacterCount, Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 import type { AnnotationKind, EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { ANNOTATION_KINDS } from '../../core/annotations';
+import { AppSettingsStore } from '../../core/app-settings';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { Annotation } from './annotation-mark';
+import { SmartQuotes } from './smart-quotes';
 
 /** Nach dieser Tipp-Pause wird gespeichert. */
 const AUTOSAVE_DELAY_MS = 800;
 
 type SaveStatus = 'loading' | 'saved' | 'unsaved' | 'saving' | 'error';
 type ToolbarCommand =
-  'bold' | 'italic' | 'underline' | 'strike' | 'heading2' | 'heading3' | 'quote' | 'undo' | 'redo';
+  'bold' | 'italic' | 'underline' | 'strike' | 'heading2' | 'heading3' | 'undo' | 'redo';
 
 /** Woher der Editor ein Dokument lädt und wohin er speichert (Szene, Charakter, Ort …). */
 export interface DocumentSource {
@@ -57,6 +59,7 @@ export class DocumentEditor {
 
   private readonly api = inject(WortomatApi);
   private readonly desktop = inject(DESKTOP_BRIDGE);
+  private readonly settings = inject(AppSettingsStore);
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
 
   protected readonly status = signal<SaveStatus>('loading');
@@ -181,6 +184,7 @@ export class DocumentEditor {
         Image.configure({ allowBase64: false }),
         CharacterCount,
         Annotation,
+        SmartQuotes.configure({ style: () => this.settings.settings().quoteStyle }),
         Placeholder.configure({ placeholder: this.placeholder() }),
       ],
       editorProps: {
@@ -276,9 +280,6 @@ export class DocumentEditor {
         break;
       case 'heading3':
         chain.toggleHeading({ level: 3 });
-        break;
-      case 'quote':
-        chain.toggleBlockquote();
         break;
       case 'undo':
         chain.undo();

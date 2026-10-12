@@ -18,10 +18,23 @@ export interface AppInfo {
   defaultProjectDir: string;
 }
 
+/**
+ * Welche Anführungszeichen der Editor beim Tippen von " und ' setzt:
+ * - `de`: „Deutsch“ und ‚einfach‘
+ * - `de-guillemets`: »Deutsch« und ›einfach‹ (Buchsatz)
+ * - `ch`: «Schweiz» und ‹einfach›
+ * - `en`: “English” and ‘single’
+ * - `fr`: « français » et ‹ simple › (mit schmalem geschütztem Leerzeichen)
+ * - `off`: nichts ersetzen
+ */
+export type QuoteStyle = 'de' | 'de-guillemets' | 'ch' | 'en' | 'fr' | 'off';
+
 /** Einstellungen der App (nicht des Buchs) – z. B. Breite der Seitenleiste. */
 export interface AppSettings {
   /** Breite der Seitenleiste in Pixeln; `null` = Standardbreite. */
   sidebarWidth: number | null;
+  /** Typografische Anführungszeichen beim Schreiben. */
+  quoteStyle: QuoteStyle;
 }
 
 export type UpdateAppSettingsRequest = Partial<AppSettings>;

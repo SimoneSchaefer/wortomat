@@ -662,10 +662,16 @@ describe('REST-API', () => {
   it('speichert App-Einstellungen dauerhaft – auch ohne geöffnetes Projekt', async () => {
     const openProject = await api<ProjectInfo>('GET', '/api/project');
     await api('POST', '/api/project/close');
-    assert.deepEqual(await api('GET', '/api/settings'), { sidebarWidth: null });
+    assert.deepEqual(await api('GET', '/api/settings'), { sidebarWidth: null, quoteStyle: 'de' });
 
     assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: 340.6 }), {
       sidebarWidth: 341,
+      quoteStyle: 'de',
+    });
+    // Einzelne Werte ändern lässt die anderen stehen
+    assert.deepEqual(await api('PATCH', '/api/settings', { quoteStyle: 'de-guillemets' }), {
+      sidebarWidth: 341,
+      quoteStyle: 'de-guillemets',
     });
 
     // Zweiter Server mit demselben Datenordner (= App-Neustart) liest den Wert
@@ -681,26 +687,28 @@ describe('REST-API', () => {
       const response = await fetch(`${restarted.url}/api/settings`, {
         headers: { [AUTH_HEADER]: TOKEN },
       });
-      assert.deepEqual(await response.json(), { sidebarWidth: 341 });
+      assert.deepEqual(await response.json(), { sidebarWidth: 341, quoteStyle: 'de-guillemets' });
     } finally {
       await restarted.close();
     }
 
-    const invalid = async (sidebarWidth: unknown) =>
+    const invalid = async (request: object) =>
       (
         await fetch(`${server.url}/api/settings`, {
           method: 'PATCH',
           headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sidebarWidth }),
+          body: JSON.stringify(request),
         })
       ).status;
-    assert.equal(await invalid(20), 400);
-    assert.equal(await invalid('breit'), 400);
+    assert.equal(await invalid({ sidebarWidth: 20 }), 400);
+    assert.equal(await invalid({ sidebarWidth: 'breit' }), 400);
+    assert.equal(await invalid({ quoteStyle: 'klingonisch' }), 400);
 
     // Zurück auf Standard
-    assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: null }), {
-      sidebarWidth: null,
-    });
+    assert.deepEqual(
+      await api('PATCH', '/api/settings', { sidebarWidth: null, quoteStyle: 'de' }),
+      { sidebarWidth: null, quoteStyle: 'de' },
+    );
 
     // Für die folgenden Tests wieder öffnen
     await api('POST', '/api/project/open', { filePath: openProject.filePath });

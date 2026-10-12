@@ -1,13 +1,15 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import type { AppSettings, UpdateAppSettingsRequest } from '@wortomat/shared';
+import type { AppSettings, QuoteStyle, UpdateAppSettingsRequest } from '@wortomat/shared';
 import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 
 const SETTINGS_FILE = 'settings.json';
 export const SIDEBAR_WIDTH_LIMITS = { min: 150, max: 1000 } as const;
 
-const DEFAULTS: AppSettings = { sidebarWidth: null };
+const QUOTE_STYLES: readonly QuoteStyle[] = ['de', 'de-guillemets', 'ch', 'en', 'fr', 'off'];
+
+const DEFAULTS: AppSettings = { sidebarWidth: null, quoteStyle: 'de' };
 
 /**
  * Einstellungen der App, unabhängig vom geöffneten Buch, als JSON im App-Datenordner.
@@ -41,6 +43,14 @@ export class AppSettingsService {
     if (request?.sidebarWidth !== undefined) {
       next.sidebarWidth = requireSidebarWidth(request.sidebarWidth);
     }
+    if (request?.quoteStyle !== undefined) {
+      if (!isQuoteStyle(request.quoteStyle)) {
+        throw new BadRequestException(
+          `Unbekannte Anführungszeichen: ${String(request.quoteStyle)}`,
+        );
+      }
+      next.quoteStyle = request.quoteStyle;
+    }
     mkdirSync(path.dirname(this.file), { recursive: true });
     // Erst in eine Temp-Datei schreiben, dann umbenennen: nie eine halb geschriebene Datei.
     const tmpFile = `${this.file}.tmp`;
@@ -52,8 +62,15 @@ export class AppSettingsService {
 
 /** Unbekannte oder ungültige Werte aus der Datei ignorieren. */
 function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
+  const result: Partial<AppSettings> = {};
   const width = stored?.sidebarWidth;
-  return isValidWidth(width) ? { sidebarWidth: Math.round(width) } : {};
+  if (isValidWidth(width)) result.sidebarWidth = Math.round(width);
+  if (isQuoteStyle(stored?.quoteStyle)) result.quoteStyle = stored.quoteStyle;
+  return result;
+}
+
+function isQuoteStyle(value: unknown): value is QuoteStyle {
+  return QUOTE_STYLES.includes(value as QuoteStyle);
 }
 
 function requireSidebarWidth(value: unknown): number | null {

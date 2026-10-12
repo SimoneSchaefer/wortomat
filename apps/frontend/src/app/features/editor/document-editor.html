@@ -51,14 +51,6 @@
     >
       Ü2
     </button>
-    <button
-      type="button"
-      title="Zitat"
-      [class.on]="isActive('blockquote')"
-      (click)="command('quote')"
-    >
-      „“
-    </button>
     <span class="sep"></span>
     @for (info of annotationKinds; track info.kind) {
       <button

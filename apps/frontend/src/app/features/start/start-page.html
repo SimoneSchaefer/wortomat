@@ -94,8 +94,9 @@
   }
 
   <footer class="muted">
+    <button type="button" class="link" routerLink="/settings">Einstellungen</button>
     @if (appInfo.value(); as info) {
-      Version {{ info.version }}
+      · Version {{ info.version }}
       @if (info.mode === 'browser') {
         · Browser-Modus (Entwicklung)
       }

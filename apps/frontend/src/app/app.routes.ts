@@ -53,5 +53,9 @@ export const routes: Routes = [
       ...noteRoutes('research'),
     ],
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./features/settings/settings-page').then((m) => m.SettingsPage),
+  },
   { path: '**', redirectTo: '' },
 ];
