@@ -294,6 +294,9 @@ describe('REST-API', () => {
     // Kurzbeschreibung und Text sind durchsuchbar
     hits = await api<SearchHit[]>('GET', '/api/search?q=arztin');
     assert.equal(hits[0]?.id, anna.id);
+    assert.match(hits[0]!.snippetHtml, /<mark>Ärztin<\/mark>/); // aus der Kurzbeschreibung
+    hits = await api<SearchHit[]>('GET', '/api/search?q=berger');
+    assert.equal(hits[0]?.snippetHtml, ''); // nur der Titel passt → kein doppelter Ausschnitt
     hits = await api<SearchHit[]>('GET', '/api/search?q=fischkutter');
     assert.deepEqual(
       hits.map((h) => [h.kind, h.id]),

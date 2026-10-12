@@ -1,0 +1,59 @@
+<div class="field" [class.open]="showResults()">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="11" cy="11" r="6.5" />
+    <path d="M16 16l4.5 4.5" />
+  </svg>
+  <input
+    #input
+    type="search"
+    role="combobox"
+    aria-label="Im ganzen Buch suchen"
+    aria-controls="search-results"
+    aria-autocomplete="list"
+    [attr.aria-expanded]="showResults()"
+    [attr.aria-activedescendant]="showResults() ? 'hit-' + activeIndex() : null"
+    placeholder="Im ganzen Buch suchen …"
+    [value]="query()"
+    (input)="onInput($any($event.target).value)"
+    (keydown)="onKeydown($event)"
+    (focus)="open.set(true)"
+  />
+  @if (query()) {
+    <button type="button" class="clear" aria-label="Suche leeren" (click)="clear()">×</button>
+  } @else {
+    <kbd>{{ shortcut }}</kbd>
+  }
+</div>
+
+@if (showResults()) {
+  <div id="search-results" class="results" role="listbox" aria-label="Suchergebnisse">
+    @for (group of groups(); track group.kind) {
+      <div class="group-label" role="presentation">
+        {{ group.label }}<span>{{ group.hits.length }}</span>
+      </div>
+      @for (hit of group.hits; track hit.kind + hit.id) {
+        <div
+          class="hit"
+          role="option"
+          [id]="'hit-' + indexOf(hit)"
+          [class.active]="indexOf(hit) === activeIndex()"
+          [attr.aria-selected]="indexOf(hit) === activeIndex()"
+          (pointerenter)="activeIndex.set(indexOf(hit))"
+          (click)="go(hit)"
+        >
+          <strong>{{ hit.title }}</strong>
+          @if (hit.snippetHtml) {
+            <span class="snippet" [innerHTML]="hit.snippetHtml"></span>
+          }
+        </div>
+      }
+    } @empty {
+      <p class="empty">
+        {{ loading() ? 'Suche …' : 'Keine Treffer für „' + query().trim() + '“.' }}
+      </p>
+    }
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </div>
+}

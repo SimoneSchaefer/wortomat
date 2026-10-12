@@ -1,4 +1,14 @@
 <div class="layout">
+  <!-- Obere Leiste: alles, was das ganze Buch betrifft -->
+  <header class="topbar">
+    <div class="book" [title]="store.project()?.filePath ?? ''">
+      <span class="book-title">{{ store.project()?.title }}</span>
+      <span class="muted">{{ store.totalWords() | number }} Wörter</span>
+    </div>
+    <wm-global-search />
+    <button type="button" class="link close" (click)="closeProject()">Projekt schließen</button>
+  </header>
+
   <nav class="rail" aria-label="Bereiche">
     @for (item of menu; track item.section) {
       <button
@@ -35,52 +45,18 @@
     }
   </nav>
 
-  <aside class="sidebar">
-    <header>
-      <h1 [title]="store.project()?.filePath ?? ''">{{ store.project()?.title }}</h1>
-      <p class="muted">{{ store.totalWords() | number }} Wörter</p>
-    </header>
+  <aside class="sidebar" [attr.aria-label]="sectionLabel()">
+    <h2>{{ sectionLabel() }}</h2>
 
-    <input
-      class="search"
-      type="search"
-      placeholder="Im Buch suchen …"
-      [value]="query()"
-      (input)="onSearchInput($any($event.target).value)"
-      (keydown.escape)="clearSearch()"
-    />
-
-    @if (query().trim()) {
-      <ul class="hits">
-        @for (hit of hits(); track hit.kind + hit.id) {
-          <li>
-            <a [routerLink]="hitLink(hit)">
-              <span class="hit-head">
-                <strong>{{ hit.title }}</strong>
-                <span class="kind">{{ hitLabel(hit) }}</span>
-              </span>
-              <span [innerHTML]="hit.snippetHtml"></span>
-            </a>
-          </li>
-        } @empty {
-          <li class="muted">Keine Treffer.</li>
-        }
-      </ul>
+    @if (noteKind(); as kind) {
+      <wm-note-list [kind]="kind" />
     } @else {
-      @if (noteKind(); as kind) {
-        <wm-note-list [kind]="kind" />
-      } @else {
-        <wm-manuscript-tree />
-      }
+      <wm-manuscript-tree />
     }
 
     @if (error(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     }
-
-    <footer>
-      <button type="button" class="link" (click)="closeProject()">Projekt schließen</button>
-    </footer>
   </aside>
 
   <main class="content">

@@ -1,7 +1,43 @@
 .layout {
   display: grid;
-  grid-template-columns: 4.75rem 17rem 1fr;
+  grid-template-columns: 4.75rem 17rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   height: 100vh;
+}
+
+// Obere Leiste über die ganze Breite: Buch, Suche, Projekt schließen
+.topbar {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 34rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+
+  .book {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    min-width: 0;
+    white-space: nowrap;
+
+    .muted {
+      font-size: 0.8rem;
+    }
+  }
+
+  .book-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--font-prose);
+    font-size: 1.15rem;
+  }
+
+  .close {
+    justify-self: end;
+  }
 }
 
 // Schmale Menüleiste ganz links: Manuskript, Charaktere, Orte, Forschung
@@ -56,78 +92,23 @@
   background: var(--surface);
   border-right: 1px solid var(--border);
 
-  header {
-    padding: 0 0.5rem;
-  }
-
-  h1 {
-    font-family: var(--font-prose);
-    font-size: 1.25rem;
+  h2 {
     margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  p {
-    font-size: 0.8rem;
-    margin: 0.2rem 0 0;
-  }
-
-  wm-manuscript-tree,
-  wm-note-list,
-  .hits {
-    flex: 1;
-    overflow-y: auto;
-  }
-
-  footer {
     padding: 0 0.5rem;
-  }
-}
-
-.hits {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  a {
-    display: grid;
-    gap: 0.2rem;
-    padding: 0.5rem;
-    border-radius: 0.4rem;
-    color: inherit;
-    text-decoration: none;
-    font-size: 0.85rem;
-
-    &:hover {
-      background: var(--hover);
-    }
-  }
-
-  span {
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--text-muted);
   }
 
-  li.muted {
-    padding: 0.5rem;
+  wm-manuscript-tree,
+  wm-note-list {
+    flex: 1;
+    overflow-y: auto;
   }
 }
 
 .content {
   min-width: 0;
   overflow-y: auto;
-}
-
-.hit-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-
-  .kind {
-    flex-shrink: 0;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-  }
 }

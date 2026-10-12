@@ -56,6 +56,9 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Verknüpfungen. Tags gehören zum Projekt und werden über den Namen wiederverwendet – Groß-/
   Kleinschreibung (auch Umlaute) und ein führendes `#` spielen keine Rolle. Ungenutzte Tags
   verschwinden aus den Vorschlägen und werden beim nächsten Entfernen aufgeräumt.
+- **Aufbau des Arbeitsbereichs:** Oben eine Leiste für das ganze Buch (Titel, Wortzahl, Suche,
+  „Projekt schließen“), darunter Menüleiste, Liste des aktuellen Bereichs und Inhalt. Die Suche
+  (Strg+K / ⌘K) durchsucht Szenen und Notizen und zeigt die Treffer nach Bereich gruppiert.
 - **Texte** werden pro Szene als ProseMirror-JSON gespeichert (nicht HTML) – Grundlage für späteren
   Export nach DOCX/EPUB/PDF. Gespeichert wird automatisch 0,8 s nach der letzten Eingabe und
   zusätzlich vor dem Schließen des Fensters bzw. Beenden der App.

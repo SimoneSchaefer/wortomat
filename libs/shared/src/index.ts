@@ -230,7 +230,10 @@ export interface SearchHit {
   kind: 'scene' | NoteKind;
   id: string;
   title: string;
-  /** Textausschnitt; Treffer sind mit <mark>…</mark> markiert, sonst HTML-escaped. */
+  /**
+   * Textausschnitt aus Text oder Kurzbeschreibung; Treffer sind mit <mark>…</mark> markiert,
+   * sonst HTML-escaped. Leer, wenn nur der Titel passt.
+   */
   snippetHtml: string;
 }
 

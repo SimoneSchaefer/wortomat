@@ -15,16 +15,19 @@ export class SearchService {
     if (!match) {
       return [];
     }
-    // Spalte -1 = snippet() nimmt die Spalte mit dem besten Treffer (Titel, Kurzbeschreibung oder Text).
+    // Ausschnitte nur aus Kurzbeschreibung und Text – der Titel wird ohnehin angezeigt.
+    // snippet() liefert auch ohne Treffer in der Spalte Text; dann bleibt der Ausschnitt leer.
     const rows = this.projects.db
       .prepare(
         `SELECT 'scene' AS kind, node_id AS id, title,
-                snippet(scene_fts, -1, :start, :end, '…', 16) AS snippet, rank
+                NULL AS summary_snippet,
+                snippet(scene_fts, 2, :start, :end, '…', 16) AS body_snippet, rank
            FROM scene_fts
           WHERE scene_fts MATCH :match
          UNION ALL
          SELECT n.kind, f.note_id, f.title,
-                snippet(note_fts, -1, :start, :end, '…', 16), f.rank
+                snippet(note_fts, 2, :start, :end, '…', 16),
+                snippet(note_fts, 3, :start, :end, '…', 16), f.rank
            FROM note_fts f
            JOIN notes n ON n.id = f.note_id
           WHERE note_fts MATCH :match
@@ -35,17 +38,23 @@ export class SearchService {
       kind: SearchHit['kind'];
       id: string;
       title: string;
-      snippet: string;
+      summary_snippet: string | null;
+      body_snippet: string;
     }>;
 
-    return rows.map((row) => ({
-      kind: row.kind,
-      id: row.id,
-      title: row.title,
-      snippetHtml: escapeHtml(row.snippet)
-        .replaceAll(MARK_START, '<mark>')
-        .replaceAll(MARK_END, '</mark>'),
-    }));
+    return rows.map((row) => {
+      const snippet = [row.body_snippet, row.summary_snippet].find((text) =>
+        text?.includes(MARK_START),
+      );
+      return {
+        kind: row.kind,
+        id: row.id,
+        title: row.title,
+        snippetHtml: snippet
+          ? escapeHtml(snippet).replaceAll(MARK_START, '<mark>').replaceAll(MARK_END, '</mark>')
+          : '',
+      };
+    });
   }
 }
 

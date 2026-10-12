@@ -1,19 +1,17 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import type { NoteKind, SearchHit } from '@wortomat/shared';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import type { NoteKind } from '@wortomat/shared';
 import { filter, map } from 'rxjs';
 import { errorMessage } from '../../core/errors';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
-import { WortomatApi } from '../../core/wortomat-api';
-import { NOTE_KIND_LIST, NOTE_KINDS } from '../notes/note-kinds';
+import { NOTE_KIND_LIST } from '../notes/note-kinds';
 import { NoteList } from '../notes/note-list';
 import { NotesStore } from '../notes/notes-store';
+import { GlobalSearch } from './global-search';
 import { ManuscriptTree } from './manuscript-tree';
-
-const SEARCH_DELAY_MS = 250;
 
 type Section = 'manuscript' | NoteKind;
 
@@ -35,24 +33,20 @@ const MENU: readonly MenuItem[] = [
 
 @Component({
   selector: 'wm-workspace-page',
-  imports: [RouterOutlet, RouterLink, DecimalPipe, ManuscriptTree, NoteList],
+  imports: [RouterOutlet, DecimalPipe, ManuscriptTree, NoteList, GlobalSearch],
   templateUrl: './workspace-page.html',
   styleUrl: './workspace-page.scss',
   // Pro geöffnetem Projekt frisch – die Notizen gehören zum Projekt.
   providers: [NotesStore],
 })
 export class WorkspacePage {
-  private readonly api = inject(WortomatApi);
   private readonly router = inject(Router);
   private readonly pendingSaves = inject(PendingSaves);
   protected readonly store = inject(ProjectStore);
   protected readonly notes = inject(NotesStore);
 
   protected readonly menu = MENU;
-  protected readonly query = signal('');
-  protected readonly hits = signal<SearchHit[]>([]);
   protected readonly error = signal<string | null>(null);
-  private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
   private readonly url = toSignal(
     this.router.events.pipe(
@@ -62,6 +56,9 @@ export class WorkspacePage {
     { initialValue: this.router.url },
   );
   protected readonly section = computed(() => sectionOf(this.url()));
+  protected readonly sectionLabel = computed(
+    () => MENU.find((item) => item.section === this.section())?.label ?? '',
+  );
   protected readonly noteKind = computed(() => {
     const section = this.section();
     return section === 'manuscript' ? null : section;
@@ -75,42 +72,9 @@ export class WorkspacePage {
   }
 
   protected openSection(item: MenuItem): void {
-    this.clearSearch();
     if (item.section !== this.section()) {
       void this.router.navigateByUrl(this.lastUrls.get(item.section) ?? item.url);
     }
-  }
-
-  protected hitLink(hit: SearchHit): string[] {
-    return hit.kind === 'scene'
-      ? ['/write/scene', hit.id]
-      : ['/write', NOTE_KINDS[hit.kind].path, hit.id];
-  }
-
-  protected hitLabel(hit: SearchHit): string {
-    return hit.kind === 'scene' ? 'Szene' : NOTE_KINDS[hit.kind].singular;
-  }
-
-  protected onSearchInput(value: string): void {
-    this.query.set(value);
-    clearTimeout(this.searchTimer);
-    if (!value.trim()) {
-      this.hits.set([]);
-      return;
-    }
-    this.searchTimer = setTimeout(async () => {
-      try {
-        const hits = await this.api.search(value);
-        // Nur übernehmen, wenn die Eingabe sich inzwischen nicht geändert hat.
-        if (this.query() === value) this.hits.set(hits);
-      } catch (error) {
-        this.error.set(errorMessage(error));
-      }
-    }, SEARCH_DELAY_MS);
-  }
-
-  protected clearSearch(): void {
-    this.onSearchInput('');
   }
 
   protected async closeProject(): Promise<void> {
