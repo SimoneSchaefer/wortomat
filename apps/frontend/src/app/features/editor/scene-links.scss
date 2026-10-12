@@ -92,7 +92,7 @@
   border-radius: 999px;
   height: var(--pill-height);
   background: var(--surface);
-  font-size: 0.82rem;
+  font-size: var(--pill-font-size);
 
   // Avatar füllt die Pille bis auf einen schmalen Rand (2 × Rahmen + 2 × 2px)
   --avatar-size: calc(var(--pill-height) - 6px);

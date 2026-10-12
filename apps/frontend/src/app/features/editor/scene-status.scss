@@ -31,7 +31,7 @@ button {
   border-radius: 0;
   background: var(--bg);
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: var(--pill-font-size);
   white-space: nowrap;
 
   &:first-child {

@@ -19,7 +19,9 @@ import { ResizeHandle } from './resize-handle';
 type Section = 'manuscript' | NoteKind;
 
 const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem
-const MIN_SIDEBAR_WIDTH = 192; // 12rem
+// Platz für Überschrift und „+“-Buttons daneben – auch die längste Variante
+// („MANUSCRIPT  + Chapter  + Part“, gemessen ca. 246px) passt in eine Zeile.
+const MIN_SIDEBAR_WIDTH = 256; // 16rem
 const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
 
 interface MenuItem {
@@ -64,7 +66,7 @@ export class WorkspacePage {
   protected readonly noteList = viewChild(NoteList);
 
   // Breite der Seitenleiste: gespeichert in den App-Einstellungen, begrenzt auf
-  // mindestens 12rem und höchstens die halbe Fensterbreite (der Text braucht Platz).
+  // mindestens 16rem und höchstens die halbe Fensterbreite (der Text braucht Platz).
   protected readonly minSidebarWidth = MIN_SIDEBAR_WIDTH;
   protected readonly windowWidth = signal(window.innerWidth);
   protected readonly maxSidebarWidth = computed(() =>

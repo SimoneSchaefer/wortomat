@@ -26,8 +26,9 @@
   --annotation-idea: #2f9e8f;
   --annotation-fixme: #d64545;
 
-  // Einheitliche Höhe der „Pillen“ im Szenenkopf (Status, Charaktere, Orte, Tags, +)
+  // Einheitliche Höhe und Schriftgröße der „Pillen“ im Szenenkopf (Status, Charaktere, Orte, Tags, +)
   --pill-height: 1.5rem;
+  --pill-font-size: 0.78rem;
 }
 
 @media (prefers-color-scheme: dark) {
