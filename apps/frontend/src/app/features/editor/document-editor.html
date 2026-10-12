@@ -34,18 +34,6 @@
     >
       <s>{{ t().editor.strikeLetter }}</s>
     </button>
-    <button
-      type="button"
-      class="clear"
-      [title]="t().editor.clearFormat"
-      [attr.aria-label]="t().editor.clearFormat"
-      (click)="command('clearFormat')"
-    >
-      <!-- „T“ mit Schrägstrich: Formatierung entfernen -->
-      <svg viewBox="0 0 16 16" aria-hidden="true">
-        <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
-      </svg>
-    </button>
     <span class="sep"></span>
     @for (info of annotationKinds; track info.kind) {
       <button
@@ -61,6 +49,20 @@
         <span class="swatch" aria-hidden="true"></span>{{ t().annotations[info.kind].label }}
       </button>
     }
+    <span class="sep"></span>
+    <!-- Ganz rechts: entfernt alle Formatierungen samt Markierungen -->
+    <button
+      type="button"
+      class="clear"
+      [title]="t().editor.clearFormat"
+      [attr.aria-label]="t().editor.clearFormat"
+      (click)="command('clearFormat')"
+    >
+      <!-- „T“ mit Schrägstrich: Formatierung entfernen -->
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
+      </svg>
+    </button>
     <span class="sep"></span>
     <button
       type="button"

@@ -104,8 +104,9 @@ textarea {
   color: inherit;
 }
 
-input:not([type='file']),
-textarea {
+// .doc-input bringt eigene Regeln mit (sieht aus wie Text, siehe unten)
+input:not([type='file'], .doc-input),
+textarea:not(.doc-input) {
   padding: 0.45rem 0.6rem;
   border: 1px solid var(--border);
   border-radius: 0.4rem;
@@ -271,17 +272,21 @@ mark {
   color: var(--accent);
 }
 
-// Titel und Kurzbeschreibung sehen aus wie Text, sind aber Eingabefelder.
+// Titel und Kurzbeschreibung sehen aus wie Text; erst im Fokus als Eingabefeld erkennbar.
 .doc-input {
   display: block;
   width: 100%;
   padding: 0.1rem 0.25rem;
   margin-left: -0.25rem;
   border: 1px solid transparent;
+  border-radius: 0.4rem;
   background: none;
 
-  &:hover {
+  &:focus {
     border-color: var(--border);
+    background: var(--bg);
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
   }
 }
 

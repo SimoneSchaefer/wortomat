@@ -131,9 +131,25 @@
 
   .head-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.4rem;
     font-size: 0.8rem;
     white-space: nowrap;
+
+    // Als kleine Buttons erkennbar statt bloßer Text-Links
+    button {
+      padding: 0.15rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 0.4rem;
+      background: var(--bg);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+
+      &:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: var(--hover);
+        color: var(--text);
+      }
+    }
   }
 
   h2 {
