@@ -1,7 +1,9 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import type { NoteGroup, NoteKind, NoteSummary } from '@wortomat/shared';
+import type { AnnotationCounts, NoteGroup, NoteKind, NoteSummary } from '@wortomat/shared';
+import { AnnotationBadges } from '../../core/annotation-badges';
+import { addCounts, ANNOTATION_KINDS, NO_ANNOTATIONS } from '../../core/annotations';
 import { Autofocus } from '../../core/autofocus';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
@@ -23,7 +25,14 @@ interface GroupDrop {
 /** Seitenleiste für Charaktere, Orte oder Recherchen. */
 @Component({
   selector: 'wm-note-list',
-  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, Autofocus, NoteAvatar],
+  imports: [
+    NgTemplateOutlet,
+    RouterLink,
+    RouterLinkActive,
+    AnnotationBadges,
+    Autofocus,
+    NoteAvatar,
+  ],
   templateUrl: './note-list.html',
   styleUrl: './note-list.scss',
 })
@@ -39,6 +48,16 @@ export class NoteList {
   protected readonly groups = computed(() => this.store.groupedByKind(this.kind()));
   /** Überschriften erst, sobald es mindestens eine Gruppe gibt. */
   protected readonly showGroups = computed(() => this.groups().some((entry) => entry.group));
+  /**
+   * Markierungsarten, die in dieser Liste vorkommen – mit festem Platz in jeder Zeile,
+   * damit die Zähler untereinander stehen (wie im Manuskript-Baum).
+   */
+  protected readonly annotationKinds = computed(() => {
+    const total = this.groups()
+      .flatMap((entry) => entry.notes)
+      .reduce((sum, note) => addCounts(sum, note.annotations), NO_ANNOTATIONS);
+    return ANNOTATION_KINDS.filter((info) => total[info.kind] > 0);
+  });
   /** Gruppe, deren Name gerade bearbeitet wird. */
   protected readonly editingGroupId = signal<string | null>(null);
   private readonly error = inject(StatusMessages).channel();
@@ -92,6 +111,13 @@ export class NoteList {
 
   protected isCollapsed(groupId: string | null): boolean {
     return this.store.isGroupCollapsed(groupId ?? '');
+  }
+
+  /** Summe der Gruppe – nur zugeklappt, aufgeklappt stehen die Zähler an den Notizen. */
+  protected groupAnnotations(groupId: string | null, notes: NoteSummary[]): AnnotationCounts {
+    return this.isCollapsed(groupId)
+      ? notes.reduce((sum, note) => addCounts(sum, note.annotations), NO_ANNOTATIONS)
+      : NO_ANNOTATIONS;
   }
 
   protected toggle(groupId: string | null): void {

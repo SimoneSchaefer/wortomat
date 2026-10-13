@@ -382,15 +382,31 @@ describe('REST-API', () => {
       null,
     );
 
-    const doc = { type: 'doc', content: [{ type: 'paragraph' }] };
-    await api('PUT', `/api/notes/${hafen.id}/content`, {
+    const todo = { type: 'annotation', attrs: { kind: 'todo' } };
+    const doc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Fischkutter liegen am Kai.', marks: [todo] }],
+        },
+      ],
+    };
+    const saved = await api<NoteContent>('PUT', `/api/notes/${hafen.id}/content`, {
       doc,
       text: 'Fischkutter liegen am Kai.',
       wordCount: 4,
     });
+    assert.deepEqual(saved.annotations, { todo: 1, idea: 0, fixme: 0 });
     const content = await api<NoteContent>('GET', `/api/notes/${hafen.id}/content`);
     assert.deepEqual(content.doc, doc);
     assert.equal(content.wordCount, 4);
+    assert.deepEqual(content.annotations, { todo: 1, idea: 0, fixme: 0 });
+    // auch in der Liste, damit die Seitenleiste die Zähler zeigen kann
+    assert.deepEqual(
+      (await api<NoteSummary[]>('GET', '/api/notes')).find((n) => n.id === hafen.id)!.annotations,
+      { todo: 1, idea: 0, fixme: 0 },
+    );
 
     // Kurzbeschreibung und Text sind durchsuchbar
     hits = await api<SearchHit[]>('GET', '/api/search?q=arztin');

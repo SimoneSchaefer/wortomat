@@ -171,35 +171,7 @@ input {
   height: 0.75rem;
 }
 
-// Badges zentriert in gleich breiten Plätzen, Wortzahl rechtsbündig
-// Platz für so viele Badges, wie Arten im Buch vorkommen; vorhandene rücken nach rechts.
-.badges {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: flex-end;
-  width: calc(var(--slots) * 1.4rem);
-}
-
-.slot {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  width: 1.4rem;
-}
-
-.badge {
-  min-width: 1.1rem;
-  padding: 0 0.3rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--annotation-color) 35%, transparent);
-  box-shadow: inset 0 0 0 1px var(--annotation-color);
-  font-size: 0.68rem;
-  font-weight: 600;
-  line-height: 1.1rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
+// Badges (wm-annotation-badges) in festen Plätzen, Wortzahl rechtsbündig
 .count {
   flex-shrink: 0;
   width: 3.2rem;

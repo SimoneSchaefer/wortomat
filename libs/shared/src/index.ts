@@ -248,12 +248,16 @@ export interface NoteSummary {
   updatedAt: string;
   /** Erstes Bild der Galerie (Profilbild), z. B. `/api/images/<id>`; `null` ohne Bilder. */
   coverImageUrl: string | null;
+  /** Todo/Idee/Fixme-Markierungen im Text. */
+  annotations: AnnotationCounts;
 }
 
 export interface NoteContent {
   id: string;
   doc: EditorDoc | null;
   wordCount: number;
+  /** Vom Backend aus dem Dokument gezählt. */
+  annotations: AnnotationCounts;
   updatedAt: string | null;
 }
 

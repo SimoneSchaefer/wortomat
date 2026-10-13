@@ -2,24 +2,7 @@
      aber nur zugeklappt, aufgeklappt stehen sie ja an den Szenen. Nur vorhandene Arten, rechtsbündig aufgerückt (keine Lücken). Der Bereich ist überall
      gleich breit, damit die Wortzahl dahinter (ebenfalls summiert) bündig untereinander steht. -->
 <ng-template #rowStats let-counts let-words="words">
-  <span class="badges" [style.--slots]="annotationKinds().length">
-    @for (info of annotationKinds(); track info.kind) {
-      @if (counts[info.kind]; as count) {
-        <span class="slot">
-          <span
-            class="badge"
-            [style.--annotation-color]="info.color"
-            [title]="
-              count +
-              ' ' +
-              (count === 1 ? t().annotations[info.kind].label : t().annotations[info.kind].plural)
-            "
-            >{{ count }}</span
-          >
-        </span>
-      }
-    }
-  </span>
+  <wm-annotation-badges [counts]="counts" [kinds]="annotationKinds()" />
   <span class="count">{{ t().number(words) }}</span>
 </ng-template>
 

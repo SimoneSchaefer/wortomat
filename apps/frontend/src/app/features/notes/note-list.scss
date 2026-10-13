@@ -33,11 +33,22 @@ a {
   }
 }
 
+// Todo/Idee/Fixme-Zähler rechts neben dem Text
+a:has(wm-annotation-badges) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 0.4rem;
+  align-items: center;
+}
+
 // Mit Avatar: Bild links, Titel und Kurzbeschreibung rechts daneben.
 a.with-avatar {
   grid-template-columns: 2.25rem minmax(0, 1fr);
   column-gap: 0.6rem;
   align-items: center;
+
+  &:has(wm-annotation-badges) {
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  }
 }
 
 .text {

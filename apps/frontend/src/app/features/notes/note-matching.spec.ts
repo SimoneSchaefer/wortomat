@@ -10,6 +10,7 @@ function note(id: string, title: string, summary = ''): NoteSummary {
     groupId: null,
     updatedAt: '',
     coverImageUrl: null,
+    annotations: { todo: 0, idea: 0, fixme: 0 },
   };
 }
 

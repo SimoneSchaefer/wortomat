@@ -1,6 +1,10 @@
 import { DatabaseSync } from 'node:sqlite';
 import { LocalizedError, localized } from '../i18n.js';
 import { transaction } from './sqlite.js';
+import { countAnnotations } from '../manuscript/annotations.js';
+
+/** SQL – oder eine Funktion, wenn vorhandene Daten in TypeScript umgerechnet werden müssen. */
+type Migration = string | ((db: DatabaseSync) => void);
 
 /**
  * Kennung im SQLite-Header ("WORT"), damit wir eigene Projektdateien
@@ -12,7 +16,7 @@ export const APPLICATION_ID = 0x574f5254;
  * Jede Migration wird genau einmal ausgeführt; der Stand steht in `PRAGMA user_version`.
  * Bestehende Einträge nie ändern, nur neue anhängen – sonst passen alte Projektdateien nicht mehr.
  */
-const MIGRATIONS: readonly string[] = [
+const MIGRATIONS: readonly Migration[] = [
   /* 1: Grundschema */ `
     CREATE TABLE project (
       id          INTEGER PRIMARY KEY CHECK (id = 1),
@@ -195,6 +199,26 @@ const MIGRATIONS: readonly string[] = [
     );
     CREATE INDEX map_pins_by_note ON map_pins(note_id);
   `,
+  /* 15: Todo/Idee/Fixme-Markierungen auch je Notiz; vorhandene Notizen werden gleich gezählt */ (
+    db,
+  ) => {
+    db.exec(`
+      ALTER TABLE notes ADD COLUMN todo_count INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE notes ADD COLUMN idea_count INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE notes ADD COLUMN fixme_count INTEGER NOT NULL DEFAULT 0;
+    `);
+    const rows = db.prepare('SELECT id, doc FROM notes WHERE doc IS NOT NULL').all() as Array<{
+      id: string;
+      doc: string;
+    }>;
+    const update = db.prepare(
+      'UPDATE notes SET todo_count = ?, idea_count = ?, fixme_count = ? WHERE id = ?',
+    );
+    for (const row of rows) {
+      const counts = countAnnotations(JSON.parse(row.doc));
+      update.run(counts.todo, counts.idea, counts.fixme, row.id);
+    }
+  },
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
@@ -229,7 +253,9 @@ export function migrate(db: DatabaseSync): void {
   }
   for (let version = current; version < SCHEMA_VERSION; version++) {
     transaction(db, () => {
-      db.exec(MIGRATIONS[version]);
+      const migration = MIGRATIONS[version];
+      if (typeof migration === 'string') db.exec(migration);
+      else migration(db);
       db.exec(`PRAGMA user_version = ${version + 1}`);
     });
   }

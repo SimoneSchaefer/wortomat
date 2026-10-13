@@ -72,7 +72,8 @@ export class NotePage {
   protected readonly source: DocumentSource = {
     load: (id) => this.api.noteContent(id),
     save: async (id, request) => {
-      await this.api.saveNoteContent(id, request);
+      const saved = await this.api.saveNoteContent(id, request);
+      this.store.setAnnotations(id, saved.annotations);
     },
   };
 

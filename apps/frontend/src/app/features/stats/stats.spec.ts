@@ -22,6 +22,7 @@ function note(id: string): NoteSummary {
     groupId: null,
     updatedAt: '',
     coverImageUrl: null,
+    annotations: { todo: 0, idea: 0, fixme: 0 },
   };
 }
 

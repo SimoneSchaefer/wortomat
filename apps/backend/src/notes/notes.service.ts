@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
+  AnnotationCounts,
   CreateNoteGroupRequest,
   CreateNoteRequest,
   MoveNoteGroupRequest,
@@ -18,6 +19,7 @@ import { nowIso, transaction } from '../database/sqlite.js';
 import { ImagesService, type UploadedImage } from '../images/images.service.js';
 import { ProjectService } from '../project/project.service.js';
 import { localized } from '../i18n.js';
+import { countAnnotations } from '../manuscript/annotations.js';
 
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
 /** Wie im Frontend (`NotePage`), das die Eingabe gleich begrenzt. */
@@ -25,6 +27,7 @@ const MAX_SUMMARY_LENGTH = 2000;
 
 /** Spalten für NoteSummary; das Profilbild ist das erste Bild der Galerie. */
 const SUMMARY_COLUMNS = `id, kind, title, summary, group_id, updated_at,
+  todo_count, idea_count, fixme_count,
   (SELECT image_id FROM note_images WHERE note_id = notes.id ORDER BY sort_order LIMIT 1)
     AS cover_image_id`;
 
@@ -36,6 +39,9 @@ interface NoteRow {
   group_id: string | null;
   updated_at: string;
   cover_image_id: string | null;
+  todo_count: number;
+  idea_count: number;
+  fixme_count: number;
 }
 
 /** Charaktere, Orte und Forschungsnotizen – alles, was neben dem Manuskript zum Buch gehört. */
@@ -299,8 +305,17 @@ export class NotesService {
 
   getContent(id: string): NoteContent {
     const row = this.db
-      .prepare('SELECT doc, word_count, updated_at FROM notes WHERE id = ?')
-      .get(id) as { doc: string | null; word_count: number; updated_at: string } | undefined;
+      .prepare(
+        `SELECT doc, word_count, updated_at, todo_count, idea_count, fixme_count
+           FROM notes WHERE id = ?`,
+      )
+      .get(id) as
+      | (Pick<NoteRow, 'todo_count' | 'idea_count' | 'fixme_count'> & {
+          doc: string | null;
+          word_count: number;
+          updated_at: string;
+        })
+      | undefined;
     if (!row) {
       throw new NotFoundException(localized('Notiz nicht gefunden.', 'Note not found.'));
     }
@@ -308,6 +323,7 @@ export class NotesService {
       id,
       doc: row.doc ? (JSON.parse(row.doc) as EditorDoc) : null,
       wordCount: row.word_count,
+      annotations: annotationCounts(row),
       updatedAt: row.updated_at,
     };
   }
@@ -320,15 +336,27 @@ export class NotesService {
     const wordCount =
       Number.isInteger(request.wordCount) && request.wordCount >= 0 ? request.wordCount : 0;
     const text = typeof request.text === 'string' ? request.text : '';
+    const annotations = countAnnotations(request.doc);
     const now = nowIso();
     transaction(this.db, () => {
       this.db
-        .prepare('UPDATE notes SET doc = ?, word_count = ?, updated_at = ? WHERE id = ?')
-        .run(JSON.stringify(request.doc), wordCount, now, id);
+        .prepare(
+          `UPDATE notes SET doc = ?, word_count = ?, todo_count = ?, idea_count = ?,
+             fixme_count = ?, updated_at = ? WHERE id = ?`,
+        )
+        .run(
+          JSON.stringify(request.doc),
+          wordCount,
+          annotations.todo,
+          annotations.idea,
+          annotations.fixme,
+          now,
+          id,
+        );
       this.db.prepare('UPDATE note_fts SET body = ? WHERE note_id = ?').run(text, id);
       this.projects.touch();
     });
-    return { id, doc: request.doc, wordCount, updatedAt: now };
+    return { id, doc: request.doc, wordCount, annotations, updatedAt: now };
   }
 
   /** Alle Notizen, die mit der Szene verknüpft sind. */
@@ -361,7 +389,14 @@ function toSummary(row: NoteRow): NoteSummary {
     groupId: row.group_id,
     updatedAt: row.updated_at,
     coverImageUrl: row.cover_image_id ? `/api/images/${row.cover_image_id}` : null,
+    annotations: annotationCounts(row),
   };
+}
+
+function annotationCounts(
+  row: Pick<NoteRow, 'todo_count' | 'idea_count' | 'fixme_count'>,
+): AnnotationCounts {
+  return { todo: row.todo_count, idea: row.idea_count, fixme: row.fixme_count };
 }
 
 function requireKind(kind: unknown): NoteKind {

@@ -1,5 +1,11 @@
 import { inject, Injectable, signal } from '@angular/core';
-import type { NoteGroup, NoteKind, NoteSummary, UpdateNoteRequest } from '@wortomat/shared';
+import type {
+  AnnotationCounts,
+  NoteGroup,
+  NoteKind,
+  NoteSummary,
+  UpdateNoteRequest,
+} from '@wortomat/shared';
 import { WortomatApi } from '../../core/wortomat-api';
 
 const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
@@ -89,6 +95,13 @@ export class NotesStore {
   setCover(id: string, coverImageUrl: string | null): void {
     this.notes.update((notes) =>
       notes.map((note) => (note.id === id ? { ...note, coverImageUrl } : note)),
+    );
+  }
+
+  /** Nach dem Speichern des Textes: Todo/Idee/Fixme-Zähler in der Liste aktualisieren. */
+  setAnnotations(id: string, annotations: AnnotationCounts): void {
+    this.notes.update((notes) =>
+      notes.map((note) => (note.id === id ? { ...note, annotations } : note)),
     );
   }
 

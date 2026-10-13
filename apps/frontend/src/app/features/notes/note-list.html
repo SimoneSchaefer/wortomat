@@ -23,6 +23,9 @@
                 <span class="summary">{{ note.summary }}</span>
               }
             </span>
+            @if (annotationKinds().length) {
+              <wm-annotation-badges [counts]="note.annotations" [kinds]="annotationKinds()" />
+            }
           </a>
           <button type="button" class="remove" [title]="t().common.delete" (click)="remove(note)">
             ×
@@ -84,6 +87,10 @@
                 (dblclick)="editingGroupId.set(group.id)"
                 >{{ group.name }}</span
               >
+              <wm-annotation-badges
+                [counts]="groupAnnotations(id, entry.notes)"
+                [kinds]="annotationKinds()"
+              />
               <span class="group-count">{{ entry.notes.length }}</span>
               <span class="actions">
                 <button type="button" [title]="texts().addToGroup" (click)="add(group.id)">
@@ -96,6 +103,10 @@
             }
           } @else {
             <span class="group-name">{{ t().notes.ungrouped }}</span>
+            <wm-annotation-badges
+              [counts]="groupAnnotations(id, entry.notes)"
+              [kinds]="annotationKinds()"
+            />
             <span class="group-count">{{ entry.notes.length }}</span>
           }
         </div>

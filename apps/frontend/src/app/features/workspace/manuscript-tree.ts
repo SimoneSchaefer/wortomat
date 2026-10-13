@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
+import { AnnotationBadges } from '../../core/annotation-badges';
 import { Autofocus } from '../../core/autofocus';
 import { addCounts, ANNOTATION_KINDS, NO_ANNOTATIONS } from '../../core/annotations';
 import { errorMessage } from '../../core/errors';
@@ -25,7 +26,14 @@ const DRAG_TYPE = 'application/x-wortomat-node';
 
 @Component({
   selector: 'wm-manuscript-tree',
-  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, Autofocus, StatusIcon],
+  imports: [
+    NgTemplateOutlet,
+    RouterLink,
+    RouterLinkActive,
+    AnnotationBadges,
+    Autofocus,
+    StatusIcon,
+  ],
   templateUrl: './manuscript-tree.html',
   styleUrl: './manuscript-tree.scss',
 })
