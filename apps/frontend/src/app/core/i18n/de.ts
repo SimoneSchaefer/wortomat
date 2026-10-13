@@ -361,6 +361,17 @@ export const de = {
     title: 'Korrektur unterwegs',
     intro:
       'Lies dein Manuskript auf dem Android-Handy Korrektur – offline, mit Notizen und Ersetzungsvorschlägen. Zurück am Rechner holst du die Notizen hier ins Buch.',
+    exportTitle: 'Korrekturfassung fürs Handy erstellen',
+    exportHint:
+      'Eine einzige HTML-Datei mit deinem Manuskript. Schick sie dir aufs Android-Handy (Mail, Messenger, USB), speichere sie und öffne sie in Chrome – sie läuft offline. Öffne sie danach immer auf demselben Weg, dann merkt sie sich deine Notizen.',
+    create: 'Korrekturfassung erstellen …',
+    creating: 'Erstelle …',
+    defaultName: 'Korrekturfassung',
+    savedTo: (path: string) => `Gespeichert: ${path}`,
+    downloadedAs: (name: string) => `Heruntergeladen: ${name}`,
+    showInFolder: 'Im Ordner zeigen',
+    phoneSteps:
+      'Auf dem Handy: Text markieren → „Notiz“ oder „Vorschlag“. Zum Schluss „Notizen senden“ und die Datei hier unten übernehmen.',
     importTitle: 'Notizen vom Handy übernehmen',
     importHint:
       'Wähle die Notizdatei („… notizen.txt“), die du dir vom Handy geschickt hast. Jede Notiz wird zu einer Fixme-Markierung an ihrer Textstelle; Vorschläge übernimmst oder verwirfst du dort mit einem Klick.',
@@ -369,6 +380,10 @@ export const de = {
     applied: (count: number) =>
       count === 1 ? '1 Notiz übernommen.' : `${count} Notizen übernommen.`,
     appliedHint: 'Du findest sie als Fixme-Markierungen – im Baum, im Szenenfilter und im Text.',
+    skipped: (count: number) =>
+      count === 1
+        ? '1 Notiz war schon von einem früheren Import da.'
+        : `${count} Notizen waren schon von einem früheren Import da.`,
     unmatchedTitle: (count: number) =>
       count === 1
         ? '1 Notiz ließ sich nicht zuordnen'

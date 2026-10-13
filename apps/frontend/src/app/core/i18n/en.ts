@@ -331,6 +331,17 @@ export const en: Texts = {
     title: 'Proofread on the go',
     intro:
       'Proofread your manuscript on your Android phone – offline, with notes and suggested changes. Back at your computer, bring the notes into the book here.',
+    exportTitle: 'Create a proofreading copy for your phone',
+    exportHint:
+      'A single HTML file with your manuscript. Send it to your Android phone (mail, messenger, USB), save it and open it in Chrome – it works offline. Always open it the same way afterwards, then it remembers your notes.',
+    create: 'Create proofreading copy …',
+    creating: 'Creating …',
+    defaultName: 'Proofreading copy',
+    savedTo: (path: string) => `Saved: ${path}`,
+    downloadedAs: (name: string) => `Downloaded: ${name}`,
+    showInFolder: 'Show in folder',
+    phoneSteps:
+      'On the phone: select text → “Note” or “Suggestion”. When done, “Send notes” and bring the file in below.',
     importTitle: 'Bring in notes from your phone',
     importHint:
       'Choose the notes file (“… notizen.txt”) you sent yourself from your phone. Each note becomes a Fixme mark at its place in the text; accept or reject suggestions there with one click.',
@@ -338,6 +349,10 @@ export const en: Texts = {
     importing: 'Bringing in notes …',
     applied: (count: number) => (count === 1 ? '1 note added.' : `${count} notes added.`),
     appliedHint: 'You will find them as Fixme marks – in the tree, the scene filter and the text.',
+    skipped: (count: number) =>
+      count === 1
+        ? '1 note was already there from an earlier import.'
+        : `${count} notes were already there from an earlier import.`,
     unmatchedTitle: (count: number) =>
       count === 1 ? '1 note could not be placed' : `${count} notes could not be placed`,
     unmatchedHint:

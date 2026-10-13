@@ -558,10 +558,17 @@ export interface ProofNote {
   createdAt: string;
 }
 
+/** `POST /api/proofreading/export`: mit Pfad (Desktop) dort speichern, sonst als Download. */
+export interface ProofExportRequest {
+  filePath?: string;
+}
+
 /** Ergebnis von `POST /api/proofreading/import`. */
 export interface ProofImportResult {
   /** So viele Notizen stehen jetzt als Fixme-Markierung im Text. */
   applied: number;
+  /** Schon bei einem früheren Import übernommen – das Handy sendet immer alle Notizen. */
+  skipped: number;
   /** Notizen, deren Stelle sich nicht mehr finden ließ. */
   unmatched: Array<{
     note: ProofNote;

@@ -170,10 +170,13 @@ export function proofNoteAt(state: EditorState): ProofNoteAt | null {
   if (!mark) return null;
   const range = getMarkRange($from, type, mark.attrs);
   if (!range) return null;
+  const text = state.doc.textBetween(range.from, range.to, ' ');
+  const suggestion = mark.attrs['suggestion'] as string | null;
   return {
     note: (mark.attrs['note'] as string | null) || null,
-    suggestion: mark.attrs['suggestion'] as string | null,
-    text: state.doc.textBetween(range.from, range.to, ' '),
+    // Ein Vorschlag, der nichts ändert, ist nur eine Notiz (nichts zu übernehmen)
+    suggestion: suggestion === text ? null : suggestion,
+    text,
     from: range.from,
     to: range.to,
   };

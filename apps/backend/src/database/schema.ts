@@ -251,6 +251,12 @@ const MIGRATIONS: readonly Migration[] = [
       created_at  TEXT NOT NULL
     );
   `,
+  /* 18: Schon übernommene Notizen aus der Korrekturfassung – das Handy sendet immer alle */ `
+    CREATE TABLE proof_imported (
+      note_id      TEXT PRIMARY KEY,
+      imported_at  TEXT NOT NULL
+    );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -6,6 +6,29 @@
   </header>
 
   <section class="card">
+    <h2>{{ t().proofreading.exportTitle }}</h2>
+    <p class="muted">{{ t().proofreading.exportHint }}</p>
+    <button type="button" class="primary" [disabled]="creating()" (click)="createCopy()">
+      {{ creating() ? t().proofreading.creating : t().proofreading.create }}
+    </button>
+    @if (created(); as created) {
+      <p class="created" role="status">
+        @if (created.filePath; as filePath) {
+          {{ t().proofreading.savedTo(filePath) }}
+          @if (desktop) {
+            <button type="button" class="link" (click)="showInFolder()">
+              {{ t().proofreading.showInFolder }}
+            </button>
+          }
+        } @else {
+          {{ t().proofreading.downloadedAs(created.fileName) }}
+        }
+      </p>
+      <p class="muted">{{ t().proofreading.phoneSteps }}</p>
+    }
+  </section>
+
+  <section class="card">
     <h2>{{ t().proofreading.importTitle }}</h2>
     <p class="muted">{{ t().proofreading.importHint }}</p>
     <button type="button" [disabled]="importing()" (click)="picker.click()">
@@ -25,6 +48,9 @@
           {{ t().proofreading.applied(result.applied) }}
           @if (result.applied) {
             <span class="muted">{{ t().proofreading.appliedHint }}</span>
+          }
+          @if (result.skipped) {
+            <span class="muted">{{ t().proofreading.skipped(result.skipped) }}</span>
           }
         </p>
 

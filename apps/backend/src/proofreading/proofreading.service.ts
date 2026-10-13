@@ -14,6 +14,7 @@ import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { ProjectService } from '../project/project.service.js';
 import { localized } from '../i18n.js';
 import { addMark, findAnchor, textBlocks } from './proof-text.js';
+import { readerHtml } from './reader/reader-html.js';
 
 /** Höchstlängen, damit eine kaputte oder fremde Datei nichts Unsinniges ins Buch schreibt. */
 const MAX_NOTE_LENGTH = 5000;
@@ -93,9 +94,19 @@ export class ProofreadingService {
         .map((node) => [node.id, node.title]),
     );
 
-    const result: ProofImportResult = { applied: 0, unmatched: [] };
+    const imported = new Set(
+      (
+        this.db.prepare('SELECT note_id FROM proof_imported').all() as Array<{ note_id: string }>
+      ).map((row) => row.note_id),
+    );
+    const result: ProofImportResult = { applied: 0, skipped: 0, unmatched: [] };
     const changed = new Map<string, EditorDoc>();
+    const done: string[] = [];
     for (const note of notes) {
+      if (imported.has(note.id)) {
+        result.skipped++;
+        continue;
+      }
       const doc = docs.get(note.sceneId); // dasselbe Objekt, auch nach früheren Notizen
       const anchor = doc ? findAnchor(textBlocks(doc), note) : null;
       if (!doc || !anchor) {
@@ -104,17 +115,36 @@ export class ProofreadingService {
       }
       addMark(anchor, {
         type: 'annotation',
-        attrs: { kind: 'fixme', note: note.note || null, suggestion: note.suggestion },
+        // Ein „Vorschlag“, der den Text nicht ändert, ist eine Notiz
+        attrs: {
+          kind: 'fixme',
+          note: note.note || null,
+          suggestion: note.suggestion === note.quote ? null : note.suggestion,
+        },
       });
       changed.set(note.sceneId, doc);
+      done.push(note.id);
       result.applied++;
     }
 
     transaction(this.db, () => {
       for (const [sceneId, doc] of changed) this.manuscript.replaceMarkedDoc(sceneId, doc);
+      // Nicht zuordenbare Notizen bleiben offen: vielleicht passt die Stelle nach einer Korrektur
+      const remember = this.db.prepare(
+        'INSERT OR IGNORE INTO proof_imported (note_id, imported_at) VALUES (?, ?)',
+      );
+      const now = nowIso();
+      for (const id of done) remember.run(id, now);
       if (changed.size) this.projects.touch();
     });
     return result;
+  }
+
+  /** Die Korrekturfassung als eine HTML-Datei fürs Handy (Lese-App und Text darin). */
+  readerFile(): { fileName: string; html: string } {
+    const proof = this.package();
+    const name = proof.title.replace(/[\\/:*?"<>|]+/g, '').trim() || 'Wortomat';
+    return { fileName: `${name} – Korrekturfassung.html`, html: readerHtml(proof) };
   }
 
   /** Die Dokumente aller Szenen mit Text. */

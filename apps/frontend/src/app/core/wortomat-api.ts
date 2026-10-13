@@ -288,6 +288,24 @@ export class WortomatApi {
     return this.call(this.http.get<ProofPackage>('/api/proofreading/package'));
   }
 
+  /** Desktop: Korrekturfassung (HTML fürs Handy) an den gewählten Ort schreiben. */
+  proofCopyToFile(filePath: string): Promise<ExportResult> {
+    return this.call(this.http.post<ExportResult>('/api/proofreading/export', { filePath }));
+  }
+
+  /** Browser-Modus: Korrekturfassung kommt als Download zurück. */
+  async proofCopyDownload(): Promise<{ blob: Blob; fileName: string }> {
+    const response = await this.call(
+      this.http.post('/api/proofreading/export', {}, { observe: 'response', responseType: 'blob' }),
+    );
+    const disposition = response.headers.get('Content-Disposition') ?? '';
+    const encodedName = /filename\*=UTF-8''([^;]+)/.exec(disposition)?.[1];
+    return {
+      blob: response.body!,
+      fileName: encodedName ? decodeURIComponent(encodedName) : 'Korrekturfassung.html',
+    };
+  }
+
   /** Notizen vom Handy als Fixme-Markierungen ins Buch übernehmen. */
   importProofNotes(file: ProofNotesFile): Promise<ProofImportResult> {
     return this.call(this.http.post<ProofImportResult>('/api/proofreading/import', file));

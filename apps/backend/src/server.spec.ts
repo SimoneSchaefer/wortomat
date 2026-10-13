@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -1232,9 +1232,12 @@ describe('REST-API', () => {
         note({ id: 'c', quote: 'Flughafen' }),
         note({ id: 'd', sceneId: leer.id, quote: 'irgendwas' }),
         note({ id: 'e', sceneId: 'gibt-es-nicht', quote: 'x' }),
+        // Vorschlag ohne Änderung: wird zur Notiz
+        note({ id: 'f', paragraph: 0, quote: 'Bahnhof', suggestion: 'Bahnhof', note: 'Grün' }),
       ],
     });
-    assert.equal(result.applied, 2);
+    assert.equal(result.applied, 3);
+    assert.equal(result.skipped, 0);
     assert.deepEqual(
       result.unmatched.map((u) => [u.note.id, u.sceneTitle]),
       [
@@ -1252,7 +1255,9 @@ describe('REST-API', () => {
         content: [
           { type: 'text', text: 'Lena ' },
           { type: 'text', text: 'wartete', marks: [fixme({ note: null, suggestion: 'harrte' })] },
-          { type: 'text', text: ' am Bahnhof.' },
+          { type: 'text', text: ' am ' },
+          { type: 'text', text: 'Bahnhof', marks: [fixme({ note: 'Grün', suggestion: null })] },
+          { type: 'text', text: '.' },
         ],
       },
       {
@@ -1270,9 +1275,43 @@ describe('REST-API', () => {
     ]);
     // Text und Wortzahl bleiben; die Markierungen zählen im Baum mit
     assert.equal(content.wordCount, 9);
-    assert.deepEqual(content.annotations, { todo: 0, idea: 0, fixme: 2 });
+    assert.deepEqual(content.annotations, { todo: 0, idea: 0, fixme: 3 });
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
-    assert.equal(nodes.find((n) => n.id === szene.id)?.annotations?.fixme, 2);
+    assert.equal(nodes.find((n) => n.id === szene.id)?.annotations?.fixme, 3);
+
+    // Das Handy sendet immer alle Notizen: schon übernommene werden übersprungen
+    const again = await api<ProofImportResult>('POST', '/api/proofreading/import', {
+      format: 'wortomat-proof-notes',
+      version: 1,
+      packageId: proof.id,
+      title: proof.title,
+      exportedAt: '',
+      notes: [
+        note({ id: 'a', quote: 'zu spät', prefix: 'Zug kam ', note: 'Wie spät genau?' }),
+        note({ id: 'c', quote: 'Flughafen' }),
+      ],
+    });
+    assert.deepEqual([again.applied, again.skipped, again.unmatched.length], [0, 1, 1]);
+
+    // Korrekturfassung als HTML-Datei: als Download (Browser) oder in eine Datei (Desktop)
+    const download = await fetch(`${server.url}/api/proofreading/export`, {
+      method: 'POST',
+      headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    assert.equal(download.status, 200);
+    assert.match(download.headers.get('content-type') ?? '', /text\/html/);
+    assert.match(
+      decodeURIComponent(download.headers.get('content-disposition') ?? ''),
+      /Korrekturbuch – Korrekturfassung\.html/,
+    );
+    const html = await download.text();
+    assert.match(html, /Lena wartete am Bahnhof/);
+    const saved = await api<{ filePath: string }>('POST', '/api/proofreading/export', {
+      filePath: path.join(tmpDir, 'korrektur', 'Zum Handy'),
+    });
+    assert.equal(saved.filePath, path.join(tmpDir, 'korrektur', 'Zum Handy.html'));
+    assert.match(await readFile(saved.filePath, 'utf8'), /id="proof-data"/);
 
     const status = async (body: unknown) =>
       (
@@ -1310,7 +1349,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

@@ -165,6 +165,15 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
+  it('behandelt einen Vorschlag, der nichts ändert, als Notiz – nichts zu übernehmen', () => {
+    const editor = editorWithNote({ note: 'Grün', suggestion: 'fehlt' });
+    editor.commands.setTextSelection(8);
+    expect(proofNoteAt(editor.state)).toMatchObject({ note: 'Grün', suggestion: null });
+    editor.chain().resolveProofNote(true).run();
+    expect(editor.getHTML()).toBe('<p>Hier <em>fehlt</em> noch was.</p>');
+    editor.destroy();
+  });
+
   it('löscht den Text bei einem leeren Vorschlag', () => {
     const editor = editorWithNote({ note: null, suggestion: '' });
     editor.chain().setTextSelection(8).resolveProofNote(true).run();
