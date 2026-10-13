@@ -6,6 +6,17 @@
 
   <form class="export-form" (submit)="$event.preventDefault(); run()">
     <div class="options">
+      <!-- Gilt für alle Formate, daher vor der Formatauswahl -->
+      <label class="check">
+        <input
+          type="checkbox"
+          [checked]="includeSceneTitles()"
+          (change)="includeSceneTitles.set($any($event.target).checked)"
+        />
+        {{ t().export.sceneTitles }}
+        <span class="muted">{{ t().export.sceneTitlesHint }}</span>
+      </label>
+
       <fieldset>
         <legend>{{ t().export.format }}</legend>
         <div class="choices formats">
@@ -189,16 +200,6 @@
           />
         </fieldset>
       }
-
-      <label class="check">
-        <input
-          type="checkbox"
-          [checked]="includeSceneTitles()"
-          (change)="includeSceneTitles.set($any($event.target).checked)"
-        />
-        {{ t().export.sceneTitles }}
-        <span class="muted">{{ t().export.sceneTitlesHint }}</span>
-      </label>
 
       @if (result(); as done) {
         <div class="result" role="status">
