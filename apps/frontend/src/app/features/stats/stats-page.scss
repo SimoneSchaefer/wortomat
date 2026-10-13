@@ -322,6 +322,19 @@ h1 {
     border-left: 1px solid var(--hairline);
   }
 
+  // Ganze Zeile hervorheben – auch die stehen bleibende Namensspalte (deckend, damit beim
+  // Scrollen nichts durchscheint); der Ring der Punkte nimmt die Zeilenfarbe an
+  tbody tr:hover {
+    th,
+    td {
+      background-color: var(--hover);
+    }
+
+    .dot::before {
+      box-shadow: 0 0 0 2px var(--hover);
+    }
+  }
+
   tbody tr:hover th .name {
     color: var(--accent-strong);
   }
