@@ -80,15 +80,17 @@ export const en: Texts = {
   workspace: {
     export: 'Export',
     closeProject: 'Close project',
+    moreActions: 'Menu',
+    showList: 'Open the list to choose from',
     changeCover: 'Title, author and cover image',
     coverHint: 'Shown on the start page and as the cover of the e-book.',
     sections: 'Sections',
     manuscript: 'Manuscript',
     sidebarWidth: 'Sidebar width',
     resizeHint: 'Drag to change the width – double-click to reset it',
-    chooseScene: 'Choose a scene on the left – or add a new one with “+” on a chapter.',
+    chooseScene: 'Choose a scene from the list – or add a new one with “+” on a chapter.',
     chooseNote: (addLabel: string) =>
-      `Choose an entry on the left – or add a new one with “${addLabel}”.`,
+      `Choose an entry from the list – or add a new one with “${addLabel}”.`,
   },
 
   tree: {
@@ -126,7 +128,8 @@ export const en: Texts = {
 
   search: {
     label: 'Search the whole book',
-    placeholder: 'Search the whole book …',
+    placeholder: 'Search the whole book',
+    shortPlaceholder: 'Search',
     clear: 'Clear search',
     results: 'Search results',
     searching: 'Searching …',

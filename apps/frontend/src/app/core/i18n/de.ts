@@ -110,15 +110,18 @@ export const de = {
   workspace: {
     export: 'Exportieren',
     closeProject: 'Projekt schließen',
+    moreActions: 'Menü',
+    showList: 'Liste zum Auswählen öffnen',
     changeCover: 'Titel, Autor und Titelbild',
     coverHint: 'Erscheint auf der Startseite und als Cover im E-Book.',
     sections: 'Bereiche',
     manuscript: 'Manuskript',
     sidebarWidth: 'Breite der Seitenleiste',
     resizeHint: 'Ziehen, um die Breite zu ändern – Doppelklick setzt sie zurück',
-    chooseScene: 'Wähle links eine Szene aus – oder lege mit „+“ an einem Kapitel eine neue an.',
+    chooseScene:
+      'Wähle in der Liste eine Szene aus – oder lege mit „+“ an einem Kapitel eine neue an.',
     chooseNote: (addLabel: string) =>
-      `Wähle links einen Eintrag aus – oder lege mit „${addLabel}“ einen neuen an.`,
+      `Wähle in der Liste einen Eintrag aus – oder lege mit „${addLabel}“ einen neuen an.`,
   },
 
   tree: {
@@ -155,7 +158,8 @@ export const de = {
 
   search: {
     label: 'Im ganzen Buch suchen',
-    placeholder: 'Im ganzen Buch suchen …',
+    placeholder: 'Im ganzen Buch suchen',
+    shortPlaceholder: 'Suchen',
     clear: 'Suche leeren',
     results: 'Suchergebnisse',
     searching: 'Suche …',

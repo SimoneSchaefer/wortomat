@@ -12,7 +12,7 @@
     aria-autocomplete="list"
     [attr.aria-expanded]="showResults()"
     [attr.aria-activedescendant]="showResults() ? 'hit-' + activeIndex() : null"
-    [placeholder]="t().search.placeholder"
+    [placeholder]="compact() ? t().search.shortPlaceholder : t().search.placeholder"
     [value]="query()"
     (input)="onInput($any($event.target).value)"
     (keydown)="onKeydown($event)"

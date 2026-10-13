@@ -6,6 +6,7 @@ import {
   ElementRef,
   inject,
   Injector,
+  input,
   signal,
   viewChild,
 } from '@angular/core';
@@ -43,6 +44,8 @@ export class GlobalSearch {
   private readonly i18n = inject(I18n);
   protected readonly t = this.i18n.t;
   protected readonly shortcut = computed(() => this.i18n.shortcut()('K'));
+  /** Schmales Fenster: nur „Suchen“ als Platzhalter. */
+  readonly compact = input(false);
   protected readonly query = signal('');
   protected readonly hits = signal<SearchHit[]>([]);
   protected readonly loading = signal(false);

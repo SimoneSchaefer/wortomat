@@ -1,4 +1,9 @@
-<div class="layout" [class.no-sidebar]="!hasSidebar()" [style.--sidebar-width.px]="sidebarWidth()">
+<div
+  class="layout"
+  [class.no-sidebar]="!hasSidebar()"
+  [class.compact-sidebar]="compactSidebar()"
+  [style.--sidebar-width.px]="sidebarWidth()"
+>
   <!-- Obere Leiste: alles, was das ganze Buch betrifft -->
   <header class="topbar">
     <div class="book" [title]="store.project()?.filePath ?? ''">
@@ -20,17 +25,38 @@
       }
       <span class="book-title">{{ store.project()?.title }}</span>
     </div>
-    <wm-global-search />
-    <div class="top-actions">
-      <button type="button" class="link" routerLink="/export">
-        {{ t().workspace.export }}
-      </button>
-      <button type="button" class="link" routerLink="/settings">
-        {{ t().common.settings }}
-      </button>
-      <button type="button" class="link" (click)="closeProject()">
-        {{ t().workspace.closeProject }}
-      </button>
+    <wm-global-search [compact]="compactTopbar()" />
+    <!-- Auf schmalen Fenstern verschwinden die Knöpfe hinter einem Burger-Menü -->
+    <div #topActions class="top-actions" [class.compact]="compactTopbar()">
+      @if (compactTopbar()) {
+        <button
+          #menuToggle
+          type="button"
+          class="menu-toggle"
+          [attr.aria-expanded]="actionsOpen()"
+          aria-controls="top-actions-menu"
+          [title]="t().workspace.moreActions"
+          [attr.aria-label]="t().workspace.moreActions"
+          (click)="actionsOpen.set(!actionsOpen())"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      }
+      @if (!compactTopbar() || actionsOpen()) {
+        <div class="actions" id="top-actions-menu" (click)="closeActions()">
+          <button type="button" class="link" routerLink="/export">
+            {{ t().workspace.export }}
+          </button>
+          <button type="button" class="link" routerLink="/settings">
+            {{ t().common.settings }}
+          </button>
+          <button type="button" class="link" (click)="closeProject()">
+            {{ t().workspace.closeProject }}
+          </button>
+        </div>
+      }
     </div>
   </header>
 
@@ -75,7 +101,14 @@
   </nav>
 
   @if (hasSidebar()) {
-    <aside class="sidebar" [attr.aria-label]="sectionLabel()">
+    <!-- Auf schmalen Fenstern ein Popover, das sich über die Leiste im Inhalt öffnet -->
+    <aside
+      #sidebar
+      id="sidebar"
+      class="sidebar"
+      [class.open]="sidebarOpen()"
+      [attr.aria-label]="sectionLabel()"
+    >
       <div class="sidebar-head">
         <h2>
           {{ sectionLabel() }}
@@ -109,21 +142,51 @@
         <wm-manuscript-tree />
       }
 
-      <wm-resize-handle
-        [label]="t().workspace.sidebarWidth"
-        [value]="sidebarWidth()"
-        [min]="minSidebarWidth()"
-        [max]="maxSidebarWidth()"
-        (resized)="settings.setSidebarWidth($event)"
-        (reset)="settings.setSidebarWidth(null)"
-      />
+      @if (!compactSidebar()) {
+        <wm-resize-handle
+          [label]="t().workspace.sidebarWidth"
+          [value]="sidebarWidth()"
+          [min]="minSidebarWidth()"
+          [max]="maxSidebarWidth()"
+          (resized)="settings.setSidebarWidth($event)"
+          (reset)="settings.setSidebarWidth(null)"
+        />
+      }
     </aside>
   }
 
   <main class="content">
-    @if (notes.loaded()) {
-      <router-outlet />
+    <!-- Schmales Fenster: statt der Seitenleiste eine Leiste mit dem geöffneten Eintrag -->
+    @if (compactSidebar()) {
+      <div class="picker-bar">
+        <button
+          #sidebarToggle
+          type="button"
+          class="picker-toggle"
+          [attr.aria-expanded]="sidebarOpen()"
+          aria-controls="sidebar"
+          [title]="t().workspace.showList"
+          (click)="sidebarOpen.set(!sidebarOpen())"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
+          </svg>
+          <span class="picker-section">{{ sectionLabel() }}</span>
+          @if (currentTitle(); as title) {
+            <span class="picker-sep" aria-hidden="true">›</span>
+            <span class="picker-title">{{ title }}</span>
+          }
+          <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+      </div>
     }
+    <div class="scroll">
+      @if (notes.loaded()) {
+        <router-outlet />
+      }
+    </div>
   </main>
 </div>
 
