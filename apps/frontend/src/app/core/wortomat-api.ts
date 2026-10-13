@@ -30,6 +30,7 @@ import type {
   SearchHit,
   Tag,
   TagSummary,
+  TextStatsResponse,
   UpdateAppSettingsRequest,
   UpdateNodeRequest,
   UpdateNoteGroupRequest,
@@ -131,6 +132,11 @@ export class WortomatApi {
   /** Heute geschriebene Wörter (Schreib-Log; der Tag beginnt um 4 Uhr). */
   writingToday(): Promise<WritingDay> {
     return this.call(this.http.get<WritingDay>('/api/writing-log/today'));
+  }
+
+  /** Dialog und Sätze je Szene, Füll- und Lieblingswörter des Buchs. */
+  textStats(): Promise<TextStatsResponse> {
+    return this.call(this.http.get<TextStatsResponse>('/api/text-stats'));
   }
 
   /** Schreib-Log je Tag von `from` bis `to` (YYYY-MM-DD, inklusive). */

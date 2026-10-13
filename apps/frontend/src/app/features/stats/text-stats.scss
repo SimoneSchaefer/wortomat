@@ -1,0 +1,127 @@
+:host {
+  display: block;
+  --hairline: color-mix(in srgb, var(--border) 70%, var(--bg));
+}
+
+.empty,
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  margin: 0 0 1.25rem;
+
+  dt {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  dd {
+    margin: 0.1rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Je Kapitel: zwei Spalten mit eigenem Maßstab, Zeile beim Darüberfahren hervorgehoben
+// ---------------------------------------------------------------------------
+
+.table {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 15rem) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  margin: 0 -0.5rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.4rem;
+
+  &:not(.head):hover {
+    background: var(--hover);
+  }
+
+  &.head {
+    padding-bottom: 0.35rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Balken mit Zahl dahinter; der längste lässt Platz für seine Zahl
+.cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.bar {
+  flex: none;
+  width: calc((100% - 3.5rem) * var(--ratio));
+  min-width: 2px;
+  height: 0.875rem;
+  border-radius: 0 4px 4px 0;
+  background: var(--accent);
+}
+
+.value {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+// ---------------------------------------------------------------------------
+// Füll- und Lieblingswörter: Pillen wie die Charaktere in den Szenendetails
+// ---------------------------------------------------------------------------
+
+h3 {
+  margin: 1.5rem 0 0.2rem;
+  font-size: 0.9rem;
+}
+
+.hint {
+  margin-bottom: 0.6rem;
+}
+
+.words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.word {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: var(--pill-height);
+  padding: 0 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: var(--pill-font-size);
+  white-space: nowrap;
+
+  .count {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+}

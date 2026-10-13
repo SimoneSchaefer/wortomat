@@ -1,0 +1,102 @@
+@if (data(); as data) {
+  @if (!data.words) {
+    <p class="muted empty">{{ t().stats.textEmpty }}</p>
+  } @else {
+    <dl class="figures">
+      <div>
+        <dt>{{ t().stats.dialogueShare }}</dt>
+        <dd>{{ t().stats.percent(data.dialogue) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t().stats.sentenceLength }}</dt>
+        <dd>{{ t().stats.wordsPerSentence(data.sentenceLength) }}</dd>
+      </div>
+      <div>
+        <dt>{{ t().stats.fillersPer1000 }}</dt>
+        <dd>{{ t().stats.decimal(data.fillersPer1000) }}</dd>
+      </div>
+    </dl>
+
+    <!-- Je Kapitel: Dialoganteil (0–100 %) und Satzlänge (am längsten Kapitel gemessen) -->
+    <div class="table" role="table">
+      <div class="row head" role="row">
+        <span role="columnheader">{{ t().stats.chapterColumn }}</span>
+        <span role="columnheader">{{ t().stats.dialogueColumn }}</span>
+        <span role="columnheader">{{ t().stats.sentenceColumn }}</span>
+      </div>
+      @for (chapter of data.chapters; track chapter.chapter.id) {
+        @let name = chapterName(chapter.number, chapter.chapter.title);
+        <div class="row" role="row">
+          <span class="name" role="rowheader" [title]="chapter.chapter.title">
+            {{ t().stats.chapterLabel(chapter.number, chapter.chapter.title) }}
+          </span>
+          <span class="cell" role="cell">
+            @if (chapter.dialogue !== null) {
+              <span
+                class="bar"
+                [style.--ratio]="chapter.dialogue / 100"
+                [attr.data-tip]="t().stats.dialogueTip(name, chapter.dialogueWords, chapter.words)"
+              ></span>
+              <span class="value">{{ t().stats.percent(chapter.dialogue) }}</span>
+            } @else {
+              <span class="value">–</span>
+            }
+          </span>
+          <span class="cell" role="cell">
+            @if (chapter.sentenceLength !== null) {
+              <span
+                class="bar"
+                [style.--ratio]="chapter.sentenceLength / data.maxSentenceLength"
+                [attr.data-tip]="t().stats.sentenceTip(name, chapter.sentences)"
+              ></span>
+              <span class="value">{{ t().stats.decimal(chapter.sentenceLength) }}</span>
+            } @else {
+              <span class="value">–</span>
+            }
+          </span>
+        </div>
+      }
+    </div>
+
+    <h3>{{ t().stats.fillers }}</h3>
+    <p class="muted hint">{{ t().stats.fillersHint }}</p>
+    @if (data.fillers.length) {
+      <ul class="words">
+        @for (entry of data.fillers; track entry.word) {
+          <li>
+            <button
+              type="button"
+              class="word"
+              [title]="t().stats.searchFor(entry.word, entry.count)"
+              (click)="searchFor(entry.word)"
+            >
+              {{ entry.word }} <span class="count">{{ t().number(entry.count) }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted empty">{{ t().stats.noFillers }}</p>
+    }
+
+    <h3>{{ t().stats.topWords }}</h3>
+    <p class="muted hint">{{ t().stats.topWordsHint }}</p>
+    @if (!data.topWords.length) {
+      <p class="muted empty">{{ t().stats.noTopWords }}</p>
+    }
+    <ul class="words">
+      @for (entry of data.topWords; track entry.word) {
+        <li>
+          <button
+            type="button"
+            class="word"
+            [title]="t().stats.searchFor(entry.word, entry.count)"
+            (click)="searchFor(entry.word)"
+          >
+            {{ entry.word }} <span class="count">{{ t().number(entry.count) }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+}

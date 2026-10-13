@@ -1,6 +1,6 @@
 import type { ManuscriptNode, NodeKind, NoteSummary, SceneStatus } from '@wortomat/shared';
 import { buildTree } from '../../core/project-store';
-import { chapterStats, presence, scenesInOrder, statusTotals } from './stats';
+import { chapterStats, chapterText, presence, scenesInOrder, statusTotals } from './stats';
 
 function node(
   id: string,
@@ -88,5 +88,27 @@ describe('presence', () => {
       ['Zora', [2], 30],
     ]);
     expect(result.absent.map((n) => n.id)).toEqual(['Carl']);
+  });
+});
+
+describe('chapterText', () => {
+  it('summiert Wörter, Dialog und Sätze je Kapitel, auch leere Kapitel', () => {
+    const result = chapterText(tree, [
+      { sceneId: 's1', words: 100, dialogueWords: 40, sentences: 8 },
+      { sceneId: 's2', words: 50, dialogueWords: 0, sentences: 4 },
+      { sceneId: 's3', words: 30, dialogueWords: 30, sentences: 2 },
+    ]);
+    expect(
+      result.map(({ number, words, dialogueWords, sentences }) => [
+        number,
+        words,
+        dialogueWords,
+        sentences,
+      ]),
+    ).toEqual([
+      [1, 150, 40, 12],
+      [2, 30, 30, 2],
+      [3, 0, 0, 0],
+    ]);
   });
 });

@@ -1,4 +1,10 @@
-import type { ManuscriptNode, NoteSummary, SceneRelations, SceneStatus } from '@wortomat/shared';
+import type {
+  ManuscriptNode,
+  NoteSummary,
+  SceneRelations,
+  SceneStatus,
+  SceneTextStats,
+} from '@wortomat/shared';
 import type { TreeItem } from '../../core/project-store';
 import { SCENE_STATUSES } from '../../core/scene-status';
 
@@ -139,4 +145,33 @@ export function presence(
   );
   absent.sort((a, b) => a.title.localeCompare(b.title));
   return { rows, absent };
+}
+
+export interface ChapterText {
+  chapter: ManuscriptNode;
+  number: number;
+  words: number;
+  dialogueWords: number;
+  sentences: number;
+}
+
+/** Textstatistik der Szenen je Kapitel summiert, in Lesereihenfolge (auch leere Kapitel). */
+export function chapterText(
+  tree: readonly TreeItem[],
+  scenes: readonly SceneTextStats[],
+): ChapterText[] {
+  const bySceneId = new Map(scenes.map((entry) => [entry.sceneId, entry]));
+  const entries = scenesInOrder(tree);
+  return chapterStats(tree).map(({ chapter, number }) => {
+    const result: ChapterText = { chapter, number, words: 0, dialogueWords: 0, sentences: 0 };
+    for (const entry of entries) {
+      if (entry.chapter.id !== chapter.id) continue;
+      const stats = bySceneId.get(entry.scene.id);
+      if (!stats) continue;
+      result.words += stats.words;
+      result.dialogueWords += stats.dialogueWords;
+      result.sentences += stats.sentences;
+    }
+    return result;
+  });
 }

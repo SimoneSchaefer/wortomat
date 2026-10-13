@@ -2,6 +2,7 @@ import {
   afterNextRender,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -12,6 +13,7 @@ import { Router } from '@angular/router';
 import type { SearchHit } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
+import { SearchRequest } from '../../core/search-request';
 import { WortomatApi } from '../../core/wortomat-api';
 import { groupHits, hitLink } from './search-hits';
 import { StatusMessages } from '../../core/status-messages';
@@ -54,6 +56,19 @@ export class GlobalSearch {
   protected readonly showResults = computed(() => this.open() && !!this.query().trim());
 
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
+
+  constructor() {
+    // Suche von anderswo angestoßen: Begriff eintragen, Ergebnisse zeigen, Fokus ins Feld
+    const requests = inject(SearchRequest);
+    effect(() => {
+      const request = requests.request();
+      if (!request) return;
+      this.onInput(request.query);
+      const input = this.input().nativeElement;
+      input.value = request.query;
+      input.focus();
+    });
+  }
 
   protected indexOf(hit: SearchHit): number {
     return this.flat().indexOf(hit);

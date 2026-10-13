@@ -1,6 +1,7 @@
 import type { Texts } from './de';
 
 const numberFormat = new Intl.NumberFormat('en');
+const decimalFormat = new Intl.NumberFormat('en', { maximumFractionDigits: 1 });
 
 /** Texte der Oberfläche auf Englisch. */
 export const en: Texts = {
@@ -309,6 +310,32 @@ export const en: Texts = {
       to === null
         ? `${numberFormat.format(from)}+ words`
         : `${numberFormat.format(from)}–${numberFormat.format(to)} words`,
+    text: 'Text',
+    textHint:
+      'From the plain text of all scenes; dialogue by the configured quotation marks. The numbers show tendencies, not exact values.',
+    textEmpty: 'No text yet – once the scenes have text, more shows up here.',
+    dialogueShare: 'Dialogue',
+    sentenceLength: 'Avg. sentence length',
+    fillersPer1000: 'Filler words per 1,000 words',
+    percent: (value: number) => `${numberFormat.format(Math.round(value))}%`,
+    decimal: (value: number) => decimalFormat.format(value),
+    wordsPerSentence: (value: number) => `${decimalFormat.format(value)} words`,
+    chapterColumn: 'Chapter',
+    dialogueColumn: 'Dialogue',
+    sentenceColumn: 'Avg. sentence length',
+    dialogueTip: (chapter: string, dialogue: number, words: number) =>
+      `${chapter} · ${numberFormat.format(dialogue)} of ${numberFormat.format(words)} words in dialogue`,
+    sentenceTip: (chapter: string, sentences: number) =>
+      `${chapter} · ${numberFormat.format(sentences)} ${sentences === 1 ? 'sentence' : 'sentences'}`,
+    fillers: 'Filler words',
+    fillersHint: 'From a fixed (German) list. Click one to find it in the book.',
+    noFillers: 'No filler words from the list found.',
+    noTopWords: 'No word appears more than once yet.',
+    topWords: 'Favorite words',
+    topWordsHint:
+      'The most frequent words – without articles, pronouns etc. and without names of characters and places.',
+    searchFor: (word: string, count: number) =>
+      `${numberFormat.format(count)}× – search the book for “${word}”`,
     calendarLabel: (last30: number) =>
       `Calendar of writing days over the past year; ${numberFormat.format(last30)} words written in the last 30 days`,
   },

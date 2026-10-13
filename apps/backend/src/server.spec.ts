@@ -19,6 +19,7 @@ import type {
   SearchHit,
   Tag,
   TagSummary,
+  TextStatsResponse,
   WritingDay,
 } from '@wortomat/shared';
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
@@ -656,6 +657,40 @@ describe('REST-API', () => {
     // Der Verlauf bleibt, auch wenn die Szene gelöscht wird
     await api('DELETE', `/api/nodes/${chapter.id}`);
     assert.equal((await api<WritingDay[]>('GET', '/api/writing-log')).length, 1);
+    await api('POST', '/api/project/close');
+  });
+
+  it('wertet den Text aus: Dialog, Sätze, Füll- und Lieblingswörter ohne Namen', async () => {
+    await api<ProjectInfo>('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'Textstatistik'),
+      title: 'Textstatistik',
+    });
+    await api('POST', '/api/notes', { kind: 'character', title: 'Anna Berger' });
+    const chapter = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const scene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: chapter.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    // Standard-Anführungszeichen sind die deutschen („…“)
+    const text = '„Komm eigentlich her“, sagte Anna. Der Fluss rauschte.\nAnna sah den Fluss.';
+    await api('PUT', `/api/scenes/${scene.id}/content`, {
+      doc: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] },
+      text,
+      wordCount: 12,
+    });
+
+    const stats = await api<TextStatsResponse>('GET', '/api/text-stats');
+    assert.deepEqual(stats.scenes, [
+      { sceneId: scene.id, words: 12, dialogueWords: 3, sentences: 3 },
+    ]);
+    assert.deepEqual(stats.fillers, [{ word: 'eigentlich', count: 1 }]);
+    assert.deepEqual(stats.topWords[0], { word: 'Fluss', count: 2 });
+    assert.ok(!stats.topWords.some((entry) => entry.word.toLowerCase() === 'anna'));
     await api('POST', '/api/project/close');
   });
 

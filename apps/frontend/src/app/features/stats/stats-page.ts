@@ -9,6 +9,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { NoteAvatar } from '../notes/note-avatar';
 import { NOTE_KINDS } from '../notes/note-kinds';
 import { NotesStore } from '../notes/notes-store';
+import { TextStats } from './text-stats';
 import { WritingCalendar } from './writing-calendar';
 import {
   chapterStats,
@@ -36,7 +37,7 @@ const TOOLTIP_EDGE_PX = 180;
 /** Statistik über das Buch: Fortschritt nach Status, Wörter je Kapitel, Auftritte. */
 @Component({
   selector: 'wm-stats-page',
-  imports: [RouterLink, StatusIcon, NoteAvatar, WritingCalendar],
+  imports: [RouterLink, StatusIcon, NoteAvatar, TextStats, WritingCalendar],
   templateUrl: './stats-page.html',
   styleUrl: './stats-page.scss',
   host: {

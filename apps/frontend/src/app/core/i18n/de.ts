@@ -8,6 +8,7 @@ import type {
 } from '@wortomat/shared';
 
 const numberFormat = new Intl.NumberFormat('de');
+const decimalFormat = new Intl.NumberFormat('de', { maximumFractionDigits: 1 });
 
 interface NoteKindTexts {
   /** Mehrzahl, z. B. Menüpunkt und Überschrift der Seitenleiste. */
@@ -338,6 +339,32 @@ export const de = {
       to === null
         ? `ab ${numberFormat.format(from)} Wörter`
         : `${numberFormat.format(from)}–${numberFormat.format(to)} Wörter`,
+    text: 'Text',
+    textHint:
+      'Aus dem reinen Text aller Szenen; wörtliche Rede nach den eingestellten Anführungszeichen. Die Zahlen zeigen Tendenzen, keine exakten Werte.',
+    textEmpty: 'Noch kein Text – sobald die Szenen Text haben, steht hier mehr.',
+    dialogueShare: 'Dialoganteil',
+    sentenceLength: 'Ø Satzlänge',
+    fillersPer1000: 'Füllwörter je 1.000 Wörter',
+    percent: (value: number) => `${numberFormat.format(Math.round(value))} %`,
+    decimal: (value: number) => decimalFormat.format(value),
+    wordsPerSentence: (value: number) => `${decimalFormat.format(value)} Wörter`,
+    chapterColumn: 'Kapitel',
+    dialogueColumn: 'Dialog',
+    sentenceColumn: 'Ø Satzlänge',
+    dialogueTip: (chapter: string, dialogue: number, words: number) =>
+      `${chapter} · ${numberFormat.format(dialogue)} von ${numberFormat.format(words)} Wörtern in wörtlicher Rede`,
+    sentenceTip: (chapter: string, sentences: number) =>
+      `${chapter} · ${numberFormat.format(sentences)} ${sentences === 1 ? 'Satz' : 'Sätze'}`,
+    fillers: 'Füllwörter',
+    fillersHint: 'Aus einer festen Liste. Ein Klick sucht die Stellen im Buch.',
+    noFillers: 'Keine Füllwörter aus der Liste gefunden.',
+    noTopWords: 'Noch kein Wort kommt öfter als einmal vor.',
+    topWords: 'Lieblingswörter',
+    topWordsHint:
+      'Die häufigsten Wörter – ohne Artikel, Pronomen & Co. und ohne Namen von Charakteren und Orten.',
+    searchFor: (word: string, count: number) =>
+      `${numberFormat.format(count)}× – „${word}“ im Buch suchen`,
     calendarLabel: (last30: number) =>
       `Kalender der Schreibtage im letzten Jahr; in den letzten 30 Tagen ${numberFormat.format(last30)} Wörter geschrieben`,
   },

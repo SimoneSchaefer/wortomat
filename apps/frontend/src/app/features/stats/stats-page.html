@@ -243,6 +243,16 @@
       }
     }
   </section>
+
+  <!-- Text: Dialog, Satzlänge, Füll- und Lieblingswörter -->
+  <section class="card">
+    <div class="card-head">
+      <h2>{{ t().stats.text }}</h2>
+    </div>
+    <p class="muted hint">{{ t().stats.textHint }}</p>
+
+    <wm-text-stats />
+  </section>
 </div>
 
 @if (tip(); as tip) {
