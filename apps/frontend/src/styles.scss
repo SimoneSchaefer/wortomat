@@ -41,8 +41,10 @@
   --button-hover: color-mix(in srgb, var(--accent) 20%, var(--bg));
   --button-border: color-mix(in srgb, var(--accent) 30%, var(--border));
 
-  // Obere Leiste: eigene Farbe und Schatten
-  --topbar-bg: var(--surface);
+  // Obere Leiste: eigene Farbe und Schatten – ein kräftiger warmer Orange-Ton
+  --topbar-bg: color-mix(in srgb, var(--accent) 26%, var(--bg));
+  // Menüleiste links: ein dezenter Hauch derselben Farbe
+  --rail-bg: color-mix(in srgb, var(--accent) 9%, var(--surface));
   --topbar-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
 }
 

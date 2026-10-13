@@ -25,7 +25,8 @@ type Section = 'manuscript' | NoteKind;
 
 const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem bei mittlerer Schriftgröße
 // Platz für Überschrift und „+“-Buttons daneben – auch die längste Variante
-// („MANUSCRIPT  + Chapter  + Part“, gemessen ca. 246px) passt in eine Zeile.
+// („MANUSCRIPT  + Chapter  + Part“, gemessen ca. 246px) passt in eine Zeile. Mit der Wortzahl
+// hinter „Manuskript“ rutschen die Buttons dort in eine zweite Zeile.
 const MIN_SIDEBAR_WIDTH = 256; // 16rem bei mittlerer Schriftgröße
 const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
 

@@ -19,7 +19,6 @@
         </button>
       }
       <span class="book-title">{{ store.project()?.title }}</span>
-      <span class="muted">{{ t().words(store.totalWords()) }}</span>
     </div>
     <wm-global-search />
     <div class="top-actions">
@@ -73,7 +72,12 @@
 
   <aside class="sidebar" [attr.aria-label]="sectionLabel()">
     <div class="sidebar-head">
-      <h2>{{ sectionLabel() }}</h2>
+      <h2>
+        {{ sectionLabel() }}
+        @if (!noteKind()) {
+          <span class="word-count">{{ t().words(store.totalWords()) }}</span>
+        }
+      </h2>
       <span class="head-actions">
         @if (noteKind(); as kind) {
           <button type="button" class="link" (click)="noteList()?.add()">
