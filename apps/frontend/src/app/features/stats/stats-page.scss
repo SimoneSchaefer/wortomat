@@ -187,15 +187,13 @@ h1 {
 
 .chapters {
   display: grid;
-  grid-template-columns: minmax(6rem, 15rem) minmax(0, 1fr);
-  gap: 0.45rem 1rem;
+  gap: 0.1rem;
   margin: 0;
   padding: 0;
   list-style: none;
   font-size: 0.85rem;
 
   .part {
-    grid-column: 1 / -1;
     margin-top: 0.5rem;
     font-size: 0.72rem;
     letter-spacing: 0.05em;
@@ -214,8 +212,20 @@ h1 {
     }
   }
 
+  // Eigenes Raster je Zeile (gleiche Spalten), damit die ganze Zeile hervorgehoben werden
+  // kann; ragt seitlich etwas über, damit Name und Zahl nicht am Rand der Fläche kleben
   .chapter {
-    display: contents;
+    display: grid;
+    grid-template-columns: minmax(6rem, 15rem) minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+    margin: 0 -0.5rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.4rem;
+
+    &:hover {
+      background: var(--hover);
+    }
   }
 
   .chapter-name {
