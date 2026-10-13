@@ -15,6 +15,7 @@ import type {
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
 import { ProjectService } from '../project/project.service.js';
+import { WritingLogService } from '../writing-log/writing-log.service.js';
 import { countAnnotations } from './annotations.js';
 import { localized } from '../i18n.js';
 
@@ -40,7 +41,10 @@ interface NodeRow {
 
 @Injectable()
 export class ManuscriptService {
-  constructor(private readonly projects: ProjectService) {}
+  constructor(
+    private readonly projects: ProjectService,
+    private readonly writingLog: WritingLogService,
+  ) {}
 
   private get db() {
     return this.projects.db;
@@ -226,6 +230,10 @@ export class ManuscriptService {
     const now = nowIso();
 
     transaction(this.db, () => {
+      // Der bisherige Text steht im Suchindex – daraus ergibt sich, was neu geschrieben wurde.
+      const before = this.db.prepare('SELECT body FROM scene_fts WHERE node_id = ?').get(nodeId) as
+        { body: string } | undefined;
+      this.writingLog.record(nodeId, before?.body ?? '', text, request.pastedWords ?? 0);
       this.db
         .prepare(
           `INSERT INTO scene_content

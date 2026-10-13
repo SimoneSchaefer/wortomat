@@ -13,6 +13,7 @@ import {
 import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
+import type { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import type { AnnotationKind, EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { ANNOTATION_KINDS } from '../../core/annotations';
@@ -73,6 +74,8 @@ export class DocumentEditor {
   private editor: Editor | null = null;
   private currentId: string | null = null;
   private dirty = false;
+  /** Seit dem letzten Speichern eingefügte/verschobene Wörter – zählen im Schreib-Log nicht. */
+  private pastedWords = 0;
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
   /** Speichervorgänge laufen strikt nacheinander. */
   private saveQueue: Promise<void> = Promise.resolve();
@@ -113,6 +116,7 @@ export class DocumentEditor {
       this.editor?.destroy();
       this.currentId = id;
       this.dirty = false;
+      this.pastedWords = 0;
       this.editor = this.createEditor(content.doc ?? this.template());
       this.wordCount.set(content.wordCount);
       this.status.set('saved');
@@ -143,8 +147,10 @@ export class DocumentEditor {
       doc: this.editor.getJSON() as EditorDoc,
       text: this.editor.getText({ blockSeparator: '\n' }),
       wordCount: this.editor.storage.characterCount.words(),
+      pastedWords: this.pastedWords,
     };
     this.dirty = false;
+    this.pastedWords = 0;
     this.status.set('saving');
 
     this.saveQueue = this.saveQueue.then(async () => {
@@ -155,6 +161,7 @@ export class DocumentEditor {
         if (error instanceof HttpErrorResponse && error.status === 404) return; // wurde gelöscht
         if (this.currentId === documentId) {
           this.dirty = true; // beim nächsten Tastendruck erneut versuchen
+          this.pastedWords += request.pastedWords ?? 0;
           this.status.set('error');
           this.error.set(errorMessage(error, this.t()));
         }
@@ -193,15 +200,21 @@ export class DocumentEditor {
       ],
       editorProps: {
         attributes: { class: 'wm-prose', spellcheck: 'true', lang: 'de' },
-        handlePaste: (_view, event) => {
+        handlePaste: (_view, event, slice) => {
           const files = imageFiles(event.clipboardData);
-          if (!files.length) return false;
+          if (!files.length) {
+            this.pastedWords += wordsIn(slice);
+            return false;
+          }
           void this.insertImages(files);
           return true;
         },
-        handleDrop: (view, event, _slice, moved) => {
+        handleDrop: (view, event, slice, moved) => {
           const files = imageFiles(event.dataTransfer);
-          if (moved || !files.length) return false;
+          if (moved || !files.length) {
+            this.pastedWords += wordsIn(slice);
+            return false;
+          }
           event.preventDefault();
           const position = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
           void this.insertImages(files, position);
@@ -300,4 +313,10 @@ export class DocumentEditor {
 
 function imageFiles(data: DataTransfer | null): File[] {
   return Array.from(data?.files ?? []).filter(isSupportedImage);
+}
+
+/** Wörter in eingefügtem oder gezogenem Inhalt – gezählt wie vom Editor. */
+function wordsIn(slice: Slice): number {
+  return slice.content.textBetween(0, slice.content.size, ' ', ' ').split(/\s+/).filter(Boolean)
+    .length;
 }

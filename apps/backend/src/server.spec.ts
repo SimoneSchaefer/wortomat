@@ -19,6 +19,7 @@ import type {
   SearchHit,
   Tag,
   TagSummary,
+  WritingDay,
 } from '@wortomat/shared';
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
 
@@ -616,6 +617,47 @@ describe('REST-API', () => {
     });
   });
 
+  it('führt ein Schreib-Log: brutto geschrieben, Eingefügtes extra', async () => {
+    await api<ProjectInfo>('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'Schreiblog'),
+      title: 'Schreiblog',
+    });
+    const chapter = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const scene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: chapter.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    const save = (text: string, pastedWords = 0) =>
+      api('PUT', `/api/scenes/${scene.id}/content`, {
+        doc: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] },
+        text,
+        wordCount: text.split(/\s+/).filter(Boolean).length,
+        pastedWords,
+      });
+
+    await save('Es war einmal ein alter König.'); // 6 geschrieben
+    await save('Es war einmal ein junger König.'); // 1 ersetzt
+    await save('Es war einmal ein junger König. Aus dem alten Entwurf kopiert.', 5);
+
+    const days = await api<WritingDay[]>('GET', '/api/writing-log');
+    assert.equal(days.length, 1);
+    assert.deepEqual(
+      { added: days[0]!.added, removed: days[0]!.removed, pasted: days[0]!.pasted },
+      { added: 7, removed: 1, pasted: 5 },
+    );
+    assert.deepEqual(await api('GET', '/api/writing-log?from=2000-01-01&to=2000-12-31'), []);
+
+    // Der Verlauf bleibt, auch wenn die Szene gelöscht wird
+    await api('DELETE', `/api/nodes/${chapter.id}`);
+    assert.equal((await api<WritingDay[]>('GET', '/api/writing-log')).length, 1);
+    await api('POST', '/api/project/close');
+  });
+
   it('führt einen Status je Szene', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'status', 'Buch'),
@@ -754,7 +796,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

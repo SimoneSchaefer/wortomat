@@ -159,6 +159,20 @@ const MIGRATIONS: readonly string[] = [
   /* 12: Einstellungen des Export-Dialogs als JSON (Format, Vorlage, Satzspiegel); leer = Vorgaben */ `
     ALTER TABLE project ADD COLUMN export_settings TEXT;
   `,
+  /* 13: Schreib-Log – geschriebene und gestrichene Wörter je Tag und Szene */ `
+    CREATE TABLE writing_log (
+      -- Kalendertag (YYYY-MM-DD, Ortszeit); er beginnt um 4 Uhr, Nachtschichten zählen zum Vortag
+      day       TEXT NOT NULL,
+      -- ohne Fremdschlüssel: der Verlauf bleibt, auch wenn die Szene gelöscht wird
+      scene_id  TEXT NOT NULL,
+      -- selbst getippt (brutto)
+      added     INTEGER NOT NULL DEFAULT 0,
+      removed   INTEGER NOT NULL DEFAULT 0,
+      -- eingefügt oder per Ziehen verschoben – zählt nicht als geschrieben
+      pasted    INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (day, scene_id)
+    );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

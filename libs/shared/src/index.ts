@@ -205,6 +205,21 @@ export interface SaveDocumentRequest {
   /** Reiner Text für die Volltextsuche, kommt aus `editor.getText()`. */
   text: string;
   wordCount: number;
+  /**
+   * Seit dem letzten Speichern eingefügte oder per Ziehen verschobene Wörter. Sie zählen im
+   * Schreib-Log nicht als geschrieben.
+   */
+  pastedWords?: number;
+}
+
+/** Ein Tag im Schreib-Log (Summe über alle Szenen). */
+export interface WritingDay {
+  /** YYYY-MM-DD; der Tag beginnt um 4 Uhr. */
+  day: string;
+  /** Selbst geschriebene Wörter (brutto, Überarbeiten zählt mit). */
+  added: number;
+  removed: number;
+  pasted: number;
 }
 
 // ---------------------------------------------------------------------------

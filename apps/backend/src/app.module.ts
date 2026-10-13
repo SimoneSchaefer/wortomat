@@ -22,6 +22,8 @@ import { AppSettingsController } from './settings/app-settings.controller.js';
 import { AppSettingsService } from './settings/app-settings.service.js';
 import { TagsController } from './tags/tags.controller.js';
 import { TagsService } from './tags/tags.service.js';
+import { WritingLogController } from './writing-log/writing-log.controller.js';
+import { WritingLogService } from './writing-log/writing-log.service.js';
 
 @Module({})
 export class AppModule {
@@ -42,6 +44,7 @@ export class AppModule {
         FilesController,
         ImagesController,
         SearchController,
+        WritingLogController,
       ],
       providers: [
         { provide: SERVER_OPTIONS, useValue: options },
@@ -55,6 +58,7 @@ export class AppModule {
         ExportService,
         ImagesService,
         SearchService,
+        WritingLogService,
       ],
     };
   }
