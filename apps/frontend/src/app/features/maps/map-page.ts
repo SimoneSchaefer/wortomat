@@ -21,7 +21,7 @@ import { PendingSaves } from '../../core/pending-saves';
 import { StatusMessages } from '../../core/status-messages';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
-import { hitsStroke, simplify, strokePath } from './map-drawing';
+import { hitsStroke, simplify, smooth, strokePath } from './map-drawing';
 import { MapsStore } from './maps-store';
 
 const SAVE_DELAY_MS = 800;
@@ -47,6 +47,13 @@ export const MAP_COLORS = [
 
 /** Strichstärken in Bildschirmpixeln bei 100 % – gespeichert wird in Karteneinheiten. */
 const WIDTHS = [2, 4, 9] as const;
+
+/**
+ * Glättung beim Zeichnen: Abstand der Stützpunkte und wie viele Nachbarn je Seite gemittelt
+ * werden – zusammen etwa 15 Bildschirmpixel, genug gegen Mauszittern, ohne Ecken zu verwischen.
+ */
+const SMOOTH_SPACING = 2.5;
+const SMOOTH_RADIUS = 6;
 
 /** Stand für Rückgängig/Wiederholen. */
 interface Snapshot {
@@ -164,7 +171,8 @@ export class MapPage {
   );
   protected readonly draftPath = computed(() => {
     const points = this.draft();
-    return points ? strokePath(points, this.tool() === 'area') : null;
+    const closed = this.tool() === 'area';
+    return points ? strokePath(this.smoothed(points, closed), closed) : null;
   });
 
   private readonly places = computed(() => this.notes.byKind('place'));
@@ -536,7 +544,7 @@ export class MapPage {
     this.draft.set(null);
     const tool = this.tool();
     if (tool !== 'pen' && tool !== 'area') return;
-    const points = simplify(draft, 0.6 * this.unit());
+    const points = simplify(this.smoothed(draft, tool === 'area'), 0.4 * this.unit());
     if (tool === 'area' && points.length < 6) return; // Fläche braucht mindestens drei Punkte
     const before = this.snapshot();
     const width = WIDTHS[this.widthIndex()]! * this.unit();
@@ -545,6 +553,11 @@ export class MapPage {
       { tool, color: this.color(), width: Math.round(width * 10) / 10, points },
     ]);
     this.commit(before);
+  }
+
+  /** Geglättet in Bildschirmpixeln gemessen – beim Zoomen also entsprechend feiner. */
+  private smoothed(points: readonly number[], closed: boolean): number[] {
+    return smooth(points, SMOOTH_SPACING * this.unit(), SMOOTH_RADIUS, closed);
   }
 
   protected onPointerLeave(): void {

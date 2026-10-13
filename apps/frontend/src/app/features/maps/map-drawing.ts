@@ -27,6 +27,66 @@ export function strokePath(points: Points, closed = false): string {
 }
 
 /**
+ * Glättet einen von Hand gezogenen Strich, damit das Zittern der Maus verschwindet: Die Punkte
+ * werden in gleichen Abständen (`spacing`) neu verteilt und dann mit ihren Nachbarn gemittelt
+ * (Dreiecksgewichte über `radius` Punkte je Seite). Offene Striche behalten Anfang und Ende,
+ * geschlossene (Flächen) werden auch über die Naht hinweg geglättet.
+ */
+export function smooth(points: Points, spacing: number, radius: number, closed = false): number[] {
+  const even = resample(points, spacing);
+  const count = even.length / 2;
+  if (count < 3 || radius < 1) return even;
+  const result: number[] = [];
+  for (let i = 0; i < count; i++) {
+    if (!closed && (i === 0 || i === count - 1)) {
+      result.push(even[2 * i]!, even[2 * i + 1]!);
+      continue;
+    }
+    // Am Rand offener Striche schrumpft das Fenster, damit die Enden nicht wegrutschen
+    const reach = closed
+      ? Math.min(radius, Math.floor((count - 1) / 2))
+      : Math.min(radius, i, count - 1 - i);
+    let x = 0;
+    let y = 0;
+    let total = 0;
+    for (let j = -reach; j <= reach; j++) {
+      const index = (i + j + count) % count;
+      const weight = reach + 1 - Math.abs(j);
+      x += even[2 * index]! * weight;
+      y += even[2 * index + 1]! * weight;
+      total += weight;
+    }
+    result.push(x / total, y / total);
+  }
+  return result;
+}
+
+/** Verteilt die Punkte im Abstand `spacing` entlang des Strichs; der letzte bleibt erhalten. */
+function resample(points: Points, spacing: number): number[] {
+  const count = points.length / 2;
+  if (count < 2 || spacing <= 0) return [...points];
+  const result = [points[0]!, points[1]!];
+  let carry = 0; // Wegstück seit dem letzten gesetzten Punkt
+  for (let i = 1; i < count; i++) {
+    const ax = points[2 * i - 2]!;
+    const ay = points[2 * i - 1]!;
+    const bx = points[2 * i]!;
+    const by = points[2 * i + 1]!;
+    const length = Math.hypot(bx - ax, by - ay);
+    let at = spacing - carry;
+    while (at <= length) {
+      result.push(ax + ((bx - ax) * at) / length, ay + ((by - ay) * at) / length);
+      at += spacing;
+    }
+    carry = length - (at - spacing);
+  }
+  const lastX = points[2 * count - 2]!;
+  const lastY = points[2 * count - 1]!;
+  if (result.at(-2) !== lastX || result.at(-1) !== lastY) result.push(lastX, lastY);
+  return result;
+}
+
+/**
  * Lässt Punkte weg, die kaum von der Linie abweichen (Douglas-Peucker), damit die
  * Projektdatei nicht mit jedem Mauszucken wächst. `tolerance` in Karteneinheiten.
  */
