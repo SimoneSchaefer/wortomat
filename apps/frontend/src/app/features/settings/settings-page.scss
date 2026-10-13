@@ -61,13 +61,15 @@ legend {
   display: grid;
   gap: 0.25rem;
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border);
+  // wie alle Buttons, damit die Kacheln als anklickbar erkennbar sind
+  border: 1px solid var(--button-border);
   border-radius: 0.5rem;
-  background: var(--bg);
+  background: var(--button-bg);
   cursor: pointer;
+  transition: background-color 0.15s;
 
   &:hover {
-    background: var(--hover);
+    background: var(--button-hover);
   }
 
   &.selected {
