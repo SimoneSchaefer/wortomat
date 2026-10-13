@@ -55,6 +55,10 @@ export const routes: Routes = [
       },
       ...noteRoutes('research'),
       {
+        path: 'plot',
+        loadComponent: () => import('./features/plot/plot-page').then((m) => m.PlotPage),
+      },
+      {
         path: 'stats',
         loadComponent: () => import('./features/stats/stats-page').then((m) => m.StatsPage),
       },

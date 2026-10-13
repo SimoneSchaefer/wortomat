@@ -320,6 +320,26 @@ export const en: Texts = {
       'Words typed in all scenes since 4 a.m. – revising counts, pasted text doesn’t',
   },
 
+  plot: {
+    title: 'Plot',
+    intro:
+      'Your plot threads from left to right in book order. Where they meet, they share a scene.',
+    show: 'Show',
+    turningPoints: 'Turning points',
+    allScenes: 'All scenes',
+    noStrand: 'No thread',
+    chapter: (number: number) => `Chapter ${number}`,
+    hoverHint: 'Point at a scene to see it here – click to open it.',
+    noScenes: 'No scenes in the book yet.',
+    noStrands:
+      'No plot threads yet. Assign scenes to a thread in the scene details (row “Threads”) – they will run through the book here as lines.',
+    noTurningPoints:
+      'No turning points yet. Mark important scenes as “Turning point” in the scene details – or show all scenes.',
+    showAll: 'Show all scenes',
+    sceneCount: (count: number) => (count === 1 ? '1 scene' : `${count} scenes`),
+    openScene: (title: string) => `Open scene “${title}”`,
+  },
+
   stats: {
     title: 'Statistics',
     scenes: (count: number) => (count === 1 ? '1 scene' : `${numberFormat.format(count)} scenes`),

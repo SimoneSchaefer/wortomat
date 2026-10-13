@@ -350,6 +350,26 @@ export const de = {
       'Selbst getippte Wörter in allen Szenen seit 4 Uhr – Überarbeiten zählt mit, Eingefügtes nicht',
   },
 
+  plot: {
+    title: 'Handlung',
+    intro:
+      'Die Stränge von links nach rechts in der Reihenfolge des Buchs. Wo sie zusammenlaufen, teilen sie sich eine Szene.',
+    show: 'Anzeigen',
+    turningPoints: 'Wendepunkte',
+    allScenes: 'Alle Szenen',
+    noStrand: 'Ohne Strang',
+    chapter: (number: number) => `Kapitel ${number}`,
+    hoverHint: 'Zeige auf eine Szene, um sie hier zu sehen – ein Klick öffnet sie.',
+    noScenes: 'Noch keine Szenen im Buch.',
+    noStrands:
+      'Noch keine Stränge. Ordne Szenen in den Szenendetails einem Strang zu (Zeile „Stränge“) – dann laufen sie hier als Linien durchs Buch.',
+    noTurningPoints:
+      'Noch keine Wendepunkte. Markiere wichtige Szenen in den Szenendetails als „Wendepunkt“ – oder zeige alle Szenen.',
+    showAll: 'Alle Szenen zeigen',
+    sceneCount: (count: number) => (count === 1 ? '1 Szene' : `${count} Szenen`),
+    openScene: (title: string) => `Szene „${title}“ öffnen`,
+  },
+
   stats: {
     title: 'Statistik',
     scenes: (count: number) => (count === 1 ? '1 Szene' : `${numberFormat.format(count)} Szenen`),

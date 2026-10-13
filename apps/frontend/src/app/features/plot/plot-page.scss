@@ -1,0 +1,311 @@
+// Leicht getönte Seite mit hellen Kästen darauf – wie Statistik und Szenen
+:host {
+  display: block;
+  min-height: 100%;
+  background: color-mix(in srgb, var(--bg) 40%, var(--surface));
+  --hairline: color-mix(in srgb, var(--border) 70%, var(--bg));
+}
+
+.plot {
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-prose);
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.intro {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 0.9rem;
+}
+
+.card {
+  min-width: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.empty {
+  margin: 0;
+  padding: 1.25rem;
+  font-size: 0.9rem;
+}
+
+// Umschalter „Wendepunkte | Alle Szenen“ – wie die Stufen des Szenenstatus
+.mode {
+  display: flex;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 1.9rem;
+    padding: 0 0.8rem;
+    border-radius: 0;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+
+    &:first-child {
+      border-radius: 999px 0 0 999px;
+    }
+
+    &:last-child {
+      margin-left: -1px;
+      border-radius: 0 999px 999px 0;
+    }
+
+    &[aria-checked='true'] {
+      position: relative; // Rahmen liegt über dem des Nachbarn
+      border-color: var(--accent);
+      background: var(--button-hover);
+      color: var(--text);
+    }
+  }
+
+  .count {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+}
+
+.diamond-icon {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  fill: var(--accent);
+  stroke: var(--accent-strong);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+
+// Infozeile über der Zeichnung
+.info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  min-height: 1.6rem;
+  font-size: 0.85rem;
+}
+
+.info-chapter {
+  color: var(--text-muted);
+}
+
+.info-title {
+  font-weight: 600;
+}
+
+.info-strand,
+.info-turning {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.info-status {
+  padding: 0 0.5rem;
+  border: 1px solid var(--status-color);
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+// ---------------------------------------------------------------------------
+// Zeichnung: links die Namen der Stränge, rechts die seitlich scrollende Fläche
+// ---------------------------------------------------------------------------
+
+.chart {
+  display: flex;
+  overflow: hidden;
+}
+
+.lanes {
+  flex-shrink: 0;
+  width: 11rem;
+  margin: 0;
+  padding: 0 0 0 0.75rem;
+  list-style: none;
+  border-right: 1px solid var(--hairline);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+    padding-right: 0.75rem;
+    font-size: 0.85rem;
+
+    &.unassigned {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    &.idle {
+      opacity: 0.55;
+    }
+  }
+
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.scroller {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  padding-left: 0.5rem;
+
+  svg {
+    display: block;
+    overflow: visible;
+  }
+}
+
+.chapters {
+  position: relative;
+
+  .chapter {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0 0.3rem;
+    box-sizing: border-box;
+    border-bottom: 2px solid var(--hairline);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    b {
+      color: var(--text);
+      font-weight: 600;
+    }
+  }
+}
+
+.chapter-band {
+  fill: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.guide {
+  stroke: var(--hairline);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// Szenen: Rand in der Farbe des Status, Wendepunkte gefüllt
+.node {
+  cursor: pointer;
+  outline: none;
+
+  rect,
+  polygon {
+    fill: var(--bg);
+    stroke: var(--status-color);
+    stroke-width: 2.5;
+    transition: stroke-width 0.1s;
+  }
+
+  &.turning rect,
+  &.turning polygon {
+    fill: color-mix(in srgb, var(--accent) 45%, var(--bg));
+    stroke-linejoin: round;
+  }
+
+  &:hover,
+  &.active,
+  &:focus-visible {
+    rect,
+    polygon {
+      stroke: var(--text);
+      stroke-width: 3;
+    }
+  }
+}
+
+// SVG und Titel liegen übereinander; die Titel werden in Pixeln wie das SVG positioniert
+.drawing {
+  position: relative;
+  width: max-content;
+}
+
+.label {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  padding: 0 0.25rem;
+  box-sizing: border-box;
+  cursor: pointer;
+  pointer-events: none; // nur der Text selbst reagiert, nicht die leere Breite daneben
+
+  span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    padding: 0 0.3rem;
+    border-radius: 0.3rem;
+    // leicht deckend: Linien, die darunter durchlaufen, stören den Text nicht
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    font-size: 0.72rem;
+    line-height: 1.3;
+    text-align: center;
+    overflow-wrap: anywhere;
+    pointer-events: auto;
+  }
+
+  &.active span {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+.no-nodes {
+  margin: 0;
+  padding: 1.25rem 1rem;
+  font-size: 0.9rem;
+
+  button {
+    margin-left: 0.5rem;
+  }
+}

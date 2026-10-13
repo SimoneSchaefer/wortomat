@@ -1,0 +1,196 @@
+<div class="plot">
+  <div class="head">
+    <div>
+      <h1>{{ t().plot.title }}</h1>
+      <p class="muted intro">{{ t().plot.intro }}</p>
+    </div>
+    <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.show">
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="onlyTurningPoints()"
+        (click)="onlyTurningPoints.set(true)"
+      >
+        <svg class="diamond-icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
+        </svg>
+        {{ t().plot.turningPoints }}
+        <span class="count">{{ turningPointCount() }}</span>
+      </button>
+      <button
+        type="button"
+        role="radio"
+        [attr.aria-checked]="!onlyTurningPoints()"
+        (click)="onlyTurningPoints.set(false)"
+      >
+        {{ t().plot.allScenes }}
+        <span class="count">{{ sceneCount() }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (loaded()) {
+    @if (!sceneCount()) {
+      <p class="card empty muted">{{ t().plot.noScenes }}</p>
+    } @else if (!strands().length) {
+      <p class="card empty muted">{{ t().plot.noStrands }}</p>
+    } @else {
+      <!-- Infozeile: welche Szene gerade unter dem Mauszeiger liegt -->
+      <div class="info" aria-live="polite">
+        @if (active(); as node) {
+          <span class="info-chapter">{{ t().plot.chapter(node.chapterNumber) }}</span>
+          <span class="info-title">{{ node.scene.title }}</span>
+          @for (strand of node.strands; track strand.id) {
+            <span class="info-strand">
+              <span class="dot" [style.background]="strandColor(strand.color)"></span>
+              {{ strand.name }}
+            </span>
+          }
+          @if (node.scene.status; as status) {
+            <span class="info-status" [style.--status-color]="statusInfo(status).color">
+              {{ t().sceneStatus.names[status] }}
+            </span>
+          }
+          @if (node.scene.turningPoint) {
+            <span class="info-turning">
+              <svg class="diamond-icon" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
+              </svg>
+              {{ t().sceneLinks.turningPoint }}
+            </span>
+          }
+        } @else {
+          <span class="muted">{{ t().plot.hoverHint }}</span>
+        }
+      </div>
+
+      <div class="card chart">
+        <!-- Links fest: die Namen der Stränge; rechts scrollt die Zeichnung seitlich -->
+        <ul class="lanes" [style.padding-top.px]="headerHeight">
+          @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
+            <li
+              [style.height.px]="laneHeight"
+              [class.unassigned]="!lane.strand"
+              [class.idle]="!lane.nodeCount"
+              [title]="t().plot.sceneCount(lane.nodeCount)"
+            >
+              @if (lane.strand; as strand) {
+                <span class="dot" [style.background]="strandColor(strand.color)"></span>
+                <span class="name">{{ strand.name }}</span>
+              } @else {
+                <span class="name">{{ t().plot.noStrand }}</span>
+              }
+            </li>
+          }
+        </ul>
+
+        <div class="scroller">
+          @if (layout().nodes.length) {
+            <div class="chapters" [style.height.px]="headerHeight">
+              @for (chapter of layout().chapters; track chapter.chapter.id) {
+                <span
+                  class="chapter"
+                  [style.left.px]="chapter.x"
+                  [style.width.px]="chapter.width"
+                  [title]="t().plot.chapter(chapter.number) + ' · ' + chapter.chapter.title"
+                >
+                  <b>{{ chapter.number }}</b> {{ chapter.chapter.title }}
+                </span>
+              }
+            </div>
+            <div class="drawing">
+              <svg
+                [attr.width]="layout().width + padding"
+                [attr.height]="layout().height"
+                [attr.viewBox]="'0 0 ' + (layout().width + padding) + ' ' + layout().height"
+              >
+                <!-- Kapitelbereiche, abwechselnd leicht getönt -->
+                @for (chapter of layout().chapters; track chapter.chapter.id; let odd = $odd) {
+                  @if (odd) {
+                    <rect
+                      class="chapter-band"
+                      [attr.x]="chapter.x"
+                      y="0"
+                      [attr.width]="chapter.width"
+                      [attr.height]="layout().height"
+                    />
+                  }
+                }
+                <!-- Spuren der Stränge als feine Hilfslinien -->
+                @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
+                  <line
+                    class="guide"
+                    x1="0"
+                    [attr.x2]="layout().width + padding"
+                    [attr.y1]="lane.y"
+                    [attr.y2]="lane.y"
+                  />
+                }
+                @for (line of layout().lines; track line.strand.id) {
+                  <path
+                    class="line"
+                    [attr.d]="line.path"
+                    [style.stroke]="strandColor(line.strand.color)"
+                  />
+                }
+                @for (node of layout().nodes; track node.scene.id) {
+                  <g
+                    class="node"
+                    role="link"
+                    tabindex="0"
+                    [class.turning]="node.scene.turningPoint"
+                    [class.active]="active() === node"
+                    [style.--status-color]="statusInfo(node.scene.status ?? 'idea').color"
+                    [attr.aria-label]="t().plot.openScene(node.scene.title)"
+                    (pointerenter)="active.set(node)"
+                    (pointerleave)="leave(node)"
+                    (focus)="active.set(node)"
+                    (blur)="leave(node)"
+                    (click)="open(node)"
+                    (keydown)="onKeydown($event, node)"
+                  >
+                    @if (node.scene.turningPoint && node.strands.length < 2) {
+                      <polygon [attr.points]="diamond(node)" />
+                    } @else {
+                      <rect
+                        [attr.x]="node.x - nodeSize / 2"
+                        [attr.y]="node.y - node.height / 2"
+                        [attr.width]="nodeSize"
+                        [attr.height]="node.height"
+                        [attr.rx]="nodeSize / 2"
+                      />
+                    }
+                  </g>
+                }
+              </svg>
+              <!-- Titel unter den Knoten: als HTML, damit lange Titel umbrechen und gekürzt werden -->
+              @for (node of layout().nodes; track node.scene.id) {
+                <span
+                  class="label"
+                  aria-hidden="true"
+                  [class.active]="active() === node"
+                  [style.left.px]="node.x - columnWidth / 2"
+                  [style.width.px]="columnWidth"
+                  [style.top.px]="labelTop(node)"
+                  [title]="node.scene.title"
+                  (pointerenter)="active.set(node)"
+                  (pointerleave)="leave(node)"
+                  (click)="open(node)"
+                >
+                  <span>{{ node.scene.title }}</span>
+                </span>
+              }
+            </div>
+          } @else {
+            <p class="no-nodes muted">
+              {{ t().plot.noTurningPoints }}
+              <button type="button" class="link" (click)="onlyTurningPoints.set(false)">
+                {{ t().plot.showAll }}
+              </button>
+            </p>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

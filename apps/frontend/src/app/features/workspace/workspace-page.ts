@@ -32,7 +32,7 @@ import { SceneFilter } from './scene-filter';
 import { SceneFilterPanel } from './scene-filter-panel';
 import { StatusMessages } from '../../core/status-messages';
 
-type Section = 'manuscript' | NoteKind | 'stats';
+type Section = 'manuscript' | 'plot' | NoteKind | 'stats';
 
 const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem bei mittlerer Schriftgröße
 // Platz für Überschrift und „+“-Buttons daneben – auch die längste Variante
@@ -55,6 +55,7 @@ interface MenuItem {
 
 const MENU: readonly MenuItem[] = [
   { section: 'manuscript', url: '/write' },
+  { section: 'plot', url: '/write/plot' },
   ...NOTE_KIND_LIST.map((config) => ({ section: config.kind, url: `/write/${config.path}` })),
   { section: 'stats', url: '/write/stats' },
 ];
@@ -145,10 +146,12 @@ export class WorkspacePage {
   protected readonly sectionLabel = computed(() => this.labelOf(this.section()));
   protected readonly noteKind = computed(() => {
     const section = this.section();
-    return section === 'manuscript' || section === 'stats' ? null : section;
+    return section === 'manuscript' || section === 'plot' || section === 'stats' ? null : section;
   });
-  /** Die Statistik braucht keine Liste links und nimmt die ganze Breite. */
-  protected readonly hasSidebar = computed(() => this.section() !== 'stats');
+  /** Handlung und Statistik brauchen keine Liste links und nehmen die ganze Breite. */
+  protected readonly hasSidebar = computed(
+    () => this.section() !== 'plot' && this.section() !== 'stats',
+  );
   /** Titel der geöffneten Szene bzw. des geöffneten Eintrags – für die Leiste im Inhalt. */
   protected readonly currentTitle = computed(() => {
     const [, , segment, id, mapId] = this.url().split(/[?#]/)[0]!.split('/');
@@ -174,6 +177,7 @@ export class WorkspacePage {
   protected labelOf(section: Section): string {
     const t = this.t();
     if (section === 'manuscript') return t.workspace.manuscript;
+    if (section === 'plot') return t.plot.title;
     if (section === 'stats') return t.stats.title;
     return t.noteKinds[section].label;
   }
@@ -231,5 +235,6 @@ export class WorkspacePage {
 function sectionOf(url: string): Section {
   const segment = url.split(/[?#]/)[0]!.split('/')[2];
   if (segment === 'stats') return 'stats';
+  if (segment === 'plot') return 'plot';
   return NOTE_KIND_LIST.find((config) => config.path === segment)?.kind ?? 'manuscript';
 }
