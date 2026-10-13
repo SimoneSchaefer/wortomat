@@ -1,0 +1,107 @@
+:host {
+  display: block;
+}
+
+// ---------------------------------------------------------------------------
+// Schreibtage: Kalender, eine Spalte je Woche (Mo–So)
+// ---------------------------------------------------------------------------
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  margin: 0 0 1rem;
+
+  dt {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  dd {
+    margin: 0.1rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .figure-note {
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+}
+
+// Eine Stufe je Farbe: von zart bis kräftig (hell: dunkler, dunkel: heller)
+.calendar-scroll,
+.scale {
+  --level-0: color-mix(in srgb, var(--border) 55%, var(--bg));
+  --level-1: color-mix(in srgb, var(--accent) 25%, var(--bg));
+  --level-2: color-mix(in srgb, var(--accent) 50%, var(--bg));
+  --level-3: color-mix(in srgb, var(--accent) 80%, var(--bg));
+  --level-4: var(--accent);
+  --level-5: var(--accent-strong);
+}
+
+.calendar-scroll {
+  overflow-x: auto;
+  direction: rtl;
+}
+
+.calendar {
+  --cell: 0.72rem;
+  direction: ltr;
+  display: inline-grid;
+  grid-template-columns: auto repeat(53, var(--cell));
+  grid-template-rows: auto repeat(7, var(--cell));
+  gap: 3px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.month {
+  grid-row: 1;
+  white-space: nowrap;
+  padding-bottom: 0.15rem;
+}
+
+// Bleibt beim seitlichen Scrollen links stehen
+.weekday {
+  grid-column: 1;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding-right: 0.4rem;
+  line-height: var(--cell);
+  background: var(--bg);
+}
+
+.cell {
+  width: var(--cell, 0.72rem);
+  height: var(--cell, 0.72rem);
+  border-radius: 2px;
+  background: var(--level-0);
+
+  @for $level from 1 through 5 {
+    &[data-level='#{$level}'] {
+      background: var(--level-#{$level});
+    }
+  }
+}
+
+.calendar-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+
+  .scale {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    color: var(--text-muted);
+  }
+}

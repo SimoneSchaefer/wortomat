@@ -1,12 +1,15 @@
 import { Component, computed, inject, resource, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import type { SceneStatus } from '@wortomat/shared';
+import type { NoteSummary, SceneStatus } from '@wortomat/shared';
 import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { SCENE_STATUSES, statusInfo } from '../../core/scene-status';
 import { StatusIcon } from '../../core/status-icon';
 import { WortomatApi } from '../../core/wortomat-api';
+import { NoteAvatar } from '../notes/note-avatar';
+import { NOTE_KINDS } from '../notes/note-kinds';
 import { NotesStore } from '../notes/notes-store';
+import { WritingCalendar } from './writing-calendar';
 import {
   chapterStats,
   presence,
@@ -23,12 +26,17 @@ interface Tooltip {
   text: string;
   x: number;
   y: number;
+  /** Am Fensterrand liegt der Tooltip neben statt mittig über dem Element. */
+  align: 'center' | 'start' | 'end';
 }
+
+/** So nah am Fensterrand wird der Tooltip zur Seite ausgerichtet (etwa halbe Breite). */
+const TOOLTIP_EDGE_PX = 180;
 
 /** Statistik über das Buch: Fortschritt nach Status, Wörter je Kapitel, Auftritte. */
 @Component({
   selector: 'wm-stats-page',
-  imports: [RouterLink, StatusIcon],
+  imports: [RouterLink, StatusIcon, NoteAvatar, WritingCalendar],
   templateUrl: './stats-page.html',
   styleUrl: './stats-page.scss',
   host: {
@@ -98,6 +106,11 @@ export class StatsPage {
 
   protected readonly tip = signal<Tooltip | null>(null);
 
+  /** Seite der Notiz, z. B. `/write/characters/<id>`. */
+  protected notePath(note: NoteSummary): string[] {
+    return ['/write', NOTE_KINDS[note.kind].path, note.id];
+  }
+
   protected setUnit(unit: Unit): void {
     this.chosenUnit.set(unit);
   }
@@ -123,7 +136,11 @@ export class StatsPage {
     const target = (event.target as Element | null)?.closest<HTMLElement>('[data-tip]');
     if (!target) return;
     const rect = target.getBoundingClientRect();
-    this.tip.set({ text: target.dataset['tip']!, x: rect.left + rect.width / 2, y: rect.top });
+    const x = rect.left + rect.width / 2;
+    const align =
+      x > window.innerWidth - TOOLTIP_EDGE_PX ? 'end' : x < TOOLTIP_EDGE_PX ? 'start' : 'center';
+    const left = align === 'end' ? rect.right : align === 'start' ? rect.left : x;
+    this.tip.set({ text: target.dataset['tip']!, x: left, y: rect.top, align });
   }
 
   protected hideTip(event: Event): void {

@@ -1,0 +1,76 @@
+@if (calendar(); as cal) {
+  <dl class="figures">
+    <div>
+      <dt>{{ t().stats.writingToday }}</dt>
+      <dd>{{ t().number(cal.summary.today) }}</dd>
+    </div>
+    <div>
+      <dt>{{ t().stats.writingLast7 }}</dt>
+      <dd>{{ t().number(cal.summary.last7) }}</dd>
+    </div>
+    <div>
+      <dt>{{ t().stats.writingLast30 }}</dt>
+      <dd>{{ t().number(cal.summary.last30) }}</dd>
+    </div>
+    <div>
+      <dt>{{ t().stats.writingBest }}</dt>
+      <dd>
+        @if (cal.summary.best; as best) {
+          {{ t().number(best.added) }}
+          <span class="figure-note">{{ bestDayLabel(best.day) }}</span>
+        } @else {
+          –
+        }
+      </dd>
+    </div>
+  </dl>
+
+  <!-- rtl: startet rechts (heute), wenn das Jahr nicht in die Breite passt -->
+  <div class="calendar-scroll">
+    <div
+      class="calendar"
+      role="img"
+      [attr.aria-label]="t().stats.calendarLabel(cal.summary.last30)"
+    >
+      @for (month of cal.months; track $index) {
+        @if (month) {
+          <span class="month" [style.grid-column]="$index + 2">{{ month }}</span>
+        }
+      }
+      @for (weekday of weekdayLabels(); track weekday.row) {
+        <span class="weekday" [style.grid-row]="weekday.row">{{ weekday.label }}</span>
+      }
+      @for (week of cal.weeks; track week[0]!.day; let column = $index) {
+        @for (day of week; track day.day; let row = $index) {
+          @if (!day.future) {
+            <span
+              class="cell"
+              [attr.data-level]="day.level"
+              [style.grid-column]="column + 2"
+              [style.grid-row]="row + 2"
+              [attr.data-tip]="dayTip(day)"
+            ></span>
+          }
+        }
+      }
+    </div>
+  </div>
+
+  <div class="calendar-foot">
+    @if (cal.empty) {
+      <span class="muted">{{ t().stats.writingEmpty }}</span>
+    }
+    <span class="scale" aria-hidden="true">
+      {{ t().stats.less }}
+      <span class="cell" data-level="0"></span>
+      @for (step of levels; track step.level) {
+        <span
+          class="cell"
+          [attr.data-level]="step.level"
+          [attr.data-tip]="t().stats.levelTip(step.from, step.to)"
+        ></span>
+      }
+      {{ t().stats.more }}
+    </span>
+  </div>
+}

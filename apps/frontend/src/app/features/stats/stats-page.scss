@@ -279,9 +279,12 @@ h1 {
     text-align: left;
     white-space: nowrap;
 
+    // Link zur Notiz, in Textfarbe – die Zeile hebt ihn beim Darüberfahren hervor
     .name {
       display: inline-block;
       max-width: 11rem;
+      color: inherit;
+      text-decoration: none;
       overflow: hidden;
       text-overflow: ellipsis;
       vertical-align: bottom;
@@ -312,6 +315,11 @@ h1 {
   tbody tr:hover th .name {
     color: var(--accent-strong);
   }
+
+  tbody th .name:hover,
+  tbody th .name:focus-visible {
+    text-decoration: underline;
+  }
 }
 
 // Ganze Zelle als Klickfläche, der Punkt (10px, mit Ring in Flächenfarbe) in der Mitte
@@ -340,10 +348,37 @@ h1 {
 
 .absent {
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 0.25rem 0.6rem;
-  margin: 1rem 0 0;
+  gap: 0.4rem 0.6rem;
+  margin-top: 1rem;
   font-size: 0.82rem;
+
+  ul {
+    display: contents;
+    list-style: none;
+  }
+}
+
+// Pille wie die Charaktere und Orte in den Szenendetails
+.chip-link {
+  --avatar-size: calc(var(--pill-height) - 6px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: var(--pill-height);
+  padding: 0 0.6rem 0 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--pill-font-size);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--button-hover);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -354,6 +389,14 @@ h1 {
   position: fixed;
   z-index: 20;
   transform: translate(-50%, calc(-100% - 0.4rem));
+
+  &[data-align='start'] {
+    transform: translate(0, calc(-100% - 0.4rem));
+  }
+
+  &[data-align='end'] {
+    transform: translate(-100%, calc(-100% - 0.4rem));
+  }
   max-width: 20rem;
   padding: 0.3rem 0.55rem;
   border-radius: 0.35rem;

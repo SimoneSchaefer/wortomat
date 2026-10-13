@@ -316,6 +316,30 @@ export const de = {
     noChapters: 'Noch keine Kapitel.',
     noNotes: (label: string) => `Noch keine ${label}.`,
     noLinks: 'Noch keine Verknüpfungen – trage in den Szenendetails ein, wer vorkommt.',
+    writing: 'Schreibtage',
+    writingHint:
+      'Selbst getippte Wörter je Tag – Überarbeiten zählt mit, Eingefügtes nicht. Ein Tag beginnt um 4 Uhr.',
+    writingToday: 'Heute',
+    writingLast7: 'Letzte 7 Tage',
+    writingLast30: 'Letzte 30 Tage',
+    writingBest: 'Bester Tag',
+    writingEmpty: 'Noch nichts aufgezeichnet – ab jetzt zählt jeder Tag.',
+    dayTip: (date: string, written: number, removed: number, pasted: number) =>
+      [
+        `${date}: ${written ? `${numberFormat.format(written)} geschrieben` : 'nichts geschrieben'}`,
+        removed ? `${numberFormat.format(removed)} gestrichen` : '',
+        pasted ? `${numberFormat.format(pasted)} eingefügt` : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    less: 'Weniger',
+    more: 'Mehr',
+    levelTip: (from: number, to: number | null) =>
+      to === null
+        ? `ab ${numberFormat.format(from)} Wörter`
+        : `${numberFormat.format(from)}–${numberFormat.format(to)} Wörter`,
+    calendarLabel: (last30: number) =>
+      `Kalender der Schreibtage im letzten Jahr; in den letzten 30 Tagen ${numberFormat.format(last30)} Wörter geschrieben`,
   },
 
   sceneStatus: {

@@ -287,6 +287,30 @@ export const en: Texts = {
     noChapters: 'No chapters yet.',
     noNotes: (label: string) => `No ${label.toLowerCase()} yet.`,
     noLinks: 'No links yet – add who appears in the scene details.',
+    writing: 'Writing days',
+    writingHint:
+      'Words typed per day – revising counts, pasted text doesn’t. A day starts at 4 a.m.',
+    writingToday: 'Today',
+    writingLast7: 'Last 7 days',
+    writingLast30: 'Last 30 days',
+    writingBest: 'Best day',
+    writingEmpty: 'Nothing recorded yet – from now on, every day counts.',
+    dayTip: (date: string, written: number, removed: number, pasted: number) =>
+      [
+        `${date}: ${written ? `${numberFormat.format(written)} written` : 'nothing written'}`,
+        removed ? `${numberFormat.format(removed)} removed` : '',
+        pasted ? `${numberFormat.format(pasted)} pasted` : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    less: 'Less',
+    more: 'More',
+    levelTip: (from: number, to: number | null) =>
+      to === null
+        ? `${numberFormat.format(from)}+ words`
+        : `${numberFormat.format(from)}–${numberFormat.format(to)} words`,
+    calendarLabel: (last30: number) =>
+      `Calendar of writing days over the past year; ${numberFormat.format(last30)} words written in the last 30 days`,
   },
 
   sceneStatus: {

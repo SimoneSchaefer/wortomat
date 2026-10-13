@@ -21,6 +21,16 @@
     </div>
   </dl>
 
+  <!-- Schreibtage: Kalender des letzten Jahres -->
+  <section class="card">
+    <div class="card-head">
+      <h2>{{ t().stats.writing }}</h2>
+    </div>
+    <p class="muted hint">{{ t().stats.writingHint }}</p>
+
+    <wm-writing-calendar />
+  </section>
+
   <!-- Fortschritt nach Status -->
   <section class="card">
     <div class="card-head">
@@ -176,7 +186,7 @@
                 @for (row of data.rows; track row.note.id) {
                   <tr>
                     <th scope="row">
-                      <span class="name">{{ row.note.title }}</span>
+                      <a class="name" [routerLink]="notePath(row.note)">{{ row.note.title }}</a>
                       <span class="count">{{ row.appearances.size }}</span>
                     </th>
                     @for (entry of scenes(); track entry.scene.id; let index = $index) {
@@ -212,12 +222,23 @@
           <p class="muted empty">{{ t().stats.noLinks }}</p>
         }
         @if (data.absent.length) {
-          <p class="absent">
+          <div class="absent">
             <span class="muted">{{ t().stats.absent }}</span>
-            @for (note of data.absent; track note.id) {
-              <span class="absent-name">{{ note.title }}</span>
-            }
-          </p>
+            <ul>
+              @for (note of data.absent; track note.id) {
+                <li>
+                  <a
+                    class="chip-link"
+                    [routerLink]="notePath(note)"
+                    [title]="note.summary || note.title"
+                  >
+                    <wm-note-avatar [note]="note" />
+                    {{ note.title }}
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
         }
       }
     }
@@ -225,7 +246,13 @@
 </div>
 
 @if (tip(); as tip) {
-  <div class="tooltip" aria-hidden="true" [style.left.px]="tip.x" [style.top.px]="tip.y">
+  <div
+    class="tooltip"
+    aria-hidden="true"
+    [attr.data-align]="tip.align"
+    [style.left.px]="tip.x"
+    [style.top.px]="tip.y"
+  >
     {{ tip.text }}
   </div>
 }

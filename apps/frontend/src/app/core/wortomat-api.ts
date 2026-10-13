@@ -133,6 +133,11 @@ export class WortomatApi {
     return this.call(this.http.get<WritingDay>('/api/writing-log/today'));
   }
 
+  /** Schreib-Log je Tag von `from` bis `to` (YYYY-MM-DD, inklusive). */
+  writingLog(from: string, to: string): Promise<WritingDay[]> {
+    return this.call(this.http.get<WritingDay[]>('/api/writing-log', { params: { from, to } }));
+  }
+
   // Notizen (Charaktere, Orte, Forschung) -----------------------------------
 
   listNotes(): Promise<NoteSummary[]> {
