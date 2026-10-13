@@ -1,18 +1,24 @@
 :host {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  flex: 1;
 }
 
 // Toolbar und Text als ein Kasten – Rahmen wie der Kasten der Szenendetails darüber.
 // Kein overflow: hidden, sonst bleibt die Toolbar beim Scrollen nicht oben stehen.
 .writing {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   border: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
   border-radius: 0.75rem;
   background: var(--bg);
 }
 
 .editor-host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 1.25rem 1.25rem 2rem;
 }
 
@@ -109,8 +115,12 @@
   }
 }
 
+// Spalte bis zum unteren Rand: der Textkasten wächst in den freien Platz, ohne dass die
+// Seite schon leer einen Scrollbalken bekommt
 .page {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 40rem;
   margin: 0 auto;

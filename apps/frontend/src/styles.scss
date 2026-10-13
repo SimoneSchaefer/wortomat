@@ -203,7 +203,9 @@ mark {
   font-size: 1.15rem;
   line-height: 1.7;
   outline: none;
-  min-height: 50vh;
+  // Füllt den Kasten bis unten (siehe document-editor.scss), aber nie höher als nötig
+  flex: 1;
+  min-height: 8rem;
   hyphens: auto;
 
   p {

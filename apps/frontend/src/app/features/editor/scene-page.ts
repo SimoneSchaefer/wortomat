@@ -50,7 +50,8 @@ const TITLE_SAVE_DELAY_MS = 600;
   styles: `
     // Leicht getönte Seite: Szenendetails und Text liegen als helle Kästen darauf
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
       min-height: 100%;
       --editor-page-bg: color-mix(in srgb, var(--bg) 40%, var(--surface));
       background: var(--editor-page-bg);

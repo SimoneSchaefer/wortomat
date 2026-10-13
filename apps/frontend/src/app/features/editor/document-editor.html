@@ -1,5 +1,8 @@
 <article class="page">
-  <ng-content />
+  <!-- Eigener Block, damit Titel & Co. ihr Layout (Abstände) außerhalb der Flex-Spalte behalten -->
+  <div>
+    <ng-content />
+  </div>
   <!-- Toolbar und Text als ein Kasten: die Formatierung gilt nur für den Text darunter -->
   <div class="writing">
     <!-- Klebt beim Scrollen oben; die Leiste darin wird dann eckig (siehe SCSS) -->
