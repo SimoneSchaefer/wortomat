@@ -1,0 +1,62 @@
+<main class="proofreading-page">
+  <header>
+    <button type="button" class="link back" (click)="back()">{{ t().common.back }}</button>
+    <h1>{{ t().proofreading.title }}</h1>
+    <p class="muted intro">{{ t().proofreading.intro }}</p>
+  </header>
+
+  <section class="card">
+    <h2>{{ t().proofreading.importTitle }}</h2>
+    <p class="muted">{{ t().proofreading.importHint }}</p>
+    <button type="button" [disabled]="importing()" (click)="picker.click()">
+      {{ importing() ? t().proofreading.importing : t().proofreading.choose }}
+    </button>
+    <input
+      #picker
+      type="file"
+      accept=".txt,.json,text/plain,application/json"
+      hidden
+      (change)="onPicked(picker)"
+    />
+
+    @if (result(); as result) {
+      <div class="result" role="status">
+        <p class="applied">
+          {{ t().proofreading.applied(result.applied) }}
+          @if (result.applied) {
+            <span class="muted">{{ t().proofreading.appliedHint }}</span>
+          }
+        </p>
+
+        @if (result.unmatched.length) {
+          <h3>{{ t().proofreading.unmatchedTitle(result.unmatched.length) }}</h3>
+          <p class="muted">{{ t().proofreading.unmatchedHint }}</p>
+          <ul class="unmatched">
+            @for (entry of result.unmatched; track entry.note.id) {
+              <li>
+                <div class="where">
+                  @if (entry.sceneTitle !== null) {
+                    <a [routerLink]="['/write/scene', entry.note.sceneId]">{{
+                      entry.sceneTitle
+                    }}</a>
+                  } @else {
+                    <span class="muted">{{ t().proofreading.sceneGone }}</span>
+                  }
+                </div>
+                <blockquote>{{ t().proofreading.quote(entry.note.quote) }}</blockquote>
+                @if (entry.note.suggestion !== null) {
+                  <div class="suggestion">
+                    {{ t().proofreading.suggestion(entry.note.suggestion) }}
+                  </div>
+                }
+                @if (entry.note.note) {
+                  <div class="note">{{ entry.note.note }}</div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </section>
+</main>

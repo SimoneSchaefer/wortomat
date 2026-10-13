@@ -213,3 +213,46 @@
     }
   }
 }
+
+// Korrekturnotiz unter der Toolbar – in der Farbe von Fixme, klebt mit der Toolbar oben
+.proof-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.75rem;
+  padding: 0.45rem 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--annotation-fixme) 35%, var(--border));
+  background: color-mix(in srgb, var(--annotation-fixme) 10%, var(--bg));
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+
+.proof-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--annotation-fixme);
+}
+
+.proof-body {
+  display: grid;
+  flex: 1;
+  min-width: 12rem;
+}
+
+.proof-suggestion {
+  font-weight: 600;
+}
+
+.proof-text {
+  white-space: pre-wrap;
+}
+
+.proof-actions {
+  display: flex;
+  gap: 0.35rem;
+
+  .accept {
+    border-color: var(--accent-strong);
+  }
+}

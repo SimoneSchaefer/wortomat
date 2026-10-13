@@ -26,7 +26,7 @@ import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
-import { Annotation } from './annotation-mark';
+import { Annotation, proofNoteAt } from './annotation-mark';
 import { Revision, revisionResult } from './revision';
 import type { Finding, FindingKind, RevisionResult } from './revision-check';
 import { SmartQuotes } from './smart-quotes';
@@ -329,6 +329,17 @@ export class DocumentEditor {
 
   protected annotate(kind: AnnotationKind): void {
     this.editor?.chain().focus().toggleAnnotation(kind).run();
+  }
+
+  /** Korrekturnotiz am Cursor (vom Korrekturlesen unterwegs) – erscheint unter der Toolbar. */
+  protected readonly proofNote = computed(() => {
+    this.editorTick();
+    return this.editor ? proofNoteAt(this.editor.state) : null;
+  });
+
+  /** Vorschlag übernehmen (`accept`) oder Notiz bzw. Vorschlag ohne Änderung abhaken. */
+  protected resolveProofNote(accept: boolean): void {
+    this.editor?.chain().focus().resolveProofNote(accept).run();
   }
 
   // Überarbeitungsmodus ---------------------------------------------------------

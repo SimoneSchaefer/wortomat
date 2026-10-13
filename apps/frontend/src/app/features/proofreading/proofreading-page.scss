@@ -1,0 +1,101 @@
+// Seite wie Export und Einstellungen: schmale Spalte mit Karten
+.proofreading-page {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem 1rem 4rem;
+}
+
+header {
+  display: grid;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+    font-family: var(--font-prose);
+    font-weight: 400;
+    font-size: 2rem;
+  }
+}
+
+.back {
+  justify-self: start;
+}
+
+.intro {
+  margin: 0;
+}
+
+.card {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.result {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.5rem;
+
+  h3 {
+    margin: 0.5rem 0 0;
+    font-size: 0.95rem;
+    color: var(--annotation-fixme);
+  }
+}
+
+.applied {
+  display: grid;
+  gap: 0.2rem;
+  font-weight: 600;
+
+  .muted {
+    font-weight: 400;
+    font-size: 0.85rem;
+  }
+}
+
+.unmatched {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.6rem 0.8rem;
+    border-left: 3px solid var(--annotation-fixme);
+    background: var(--bg);
+    font-size: 0.9rem;
+  }
+
+  blockquote {
+    margin: 0;
+    font-family: var(--font-prose);
+  }
+
+  .suggestion {
+    font-weight: 600;
+  }
+
+  .note {
+    white-space: pre-wrap;
+  }
+}

@@ -109,6 +109,11 @@ export class ProjectStore {
     return state.marks;
   }
 
+  /** Den Baum neu laden – z. B. nachdem Markierungen von außen dazugekommen sind. */
+  async reloadNodes(): Promise<void> {
+    this.nodes.set(await this.api.listNodes());
+  }
+
   async moveNode(id: string, request: MoveNodeRequest): Promise<void> {
     this.nodes.set(await this.api.moveNode(id, request));
   }

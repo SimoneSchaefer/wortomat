@@ -46,6 +46,9 @@
       }
       @if (!compactTopbar() || actionsOpen()) {
         <div class="actions" id="top-actions-menu" (click)="closeActions()">
+          <button type="button" class="link" routerLink="/proofreading">
+            {{ t().workspace.proofreading }}
+          </button>
           <button type="button" class="link" routerLink="/export">
             {{ t().workspace.export }}
           </button>

@@ -291,6 +291,29 @@ export class ManuscriptService {
     return { nodeId, doc: request.doc, wordCount, annotations, updatedAt: now };
   }
 
+  /**
+   * Ersetzt das Dokument einer Szene, deren Text gleich bleibt – z. B. wenn nur Markierungen
+   * dazukommen. Suchindex, Wortzahl und Schreib-Log bleiben daher, wie sie sind.
+   */
+  replaceMarkedDoc(nodeId: string, doc: EditorDoc): void {
+    this.requireScene(nodeId);
+    const annotations = countAnnotations(doc);
+    this.db
+      .prepare(
+        `UPDATE scene_content
+            SET doc = ?, todo_count = ?, idea_count = ?, fixme_count = ?, updated_at = ?
+          WHERE node_id = ?`,
+      )
+      .run(
+        JSON.stringify(doc),
+        annotations.todo,
+        annotations.idea,
+        annotations.fixme,
+        nowIso(),
+        nodeId,
+      );
+  }
+
   // -------------------------------------------------------------------------
 
   private get(id: string): ManuscriptNode {

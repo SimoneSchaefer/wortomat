@@ -14,6 +14,8 @@ import type {
   NoteGroup,
   NoteSummary,
   PlaceMap,
+  ProofImportResult,
+  ProofPackage,
   ProjectInfo,
   ProjectListEntry,
   SceneContent,
@@ -1148,6 +1150,142 @@ describe('REST-API', () => {
     );
     assert.equal(
       await status({ columns: [[a.id]], marks: [{ label: ' ', beforeColumn: 0 }] }),
+      400,
+    );
+  });
+
+  it('exportiert eine Korrekturfassung und übernimmt Notizen als Fixme-Markierungen', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'korrektur', 'Buch'),
+      title: 'Korrekturbuch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const teil = await node(null, 'part', 'Teil Eins');
+    const kapitel = await node(teil.id, 'chapter', 'Ankunft');
+    const szene = await node(kapitel.id, 'scene', 'Am Bahnhof');
+    const leer = await node(kapitel.id, 'scene', 'Noch leer');
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Lena wartete am Bahnhof.' }] },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Der Zug kam ' },
+            { type: 'text', text: 'zu spät', marks: [{ type: 'italic' }] },
+            { type: 'text', text: '.' },
+          ],
+        },
+      ],
+    };
+    await api('PUT', `/api/scenes/${szene.id}/content`, {
+      doc,
+      text: 'Lena wartete am Bahnhof.\nDer Zug kam zu spät.',
+      wordCount: 9,
+    });
+
+    const proof = await api<ProofPackage>('GET', '/api/proofreading/package');
+    assert.equal(proof.format, 'wortomat-proof');
+    assert.equal(proof.title, 'Korrekturbuch');
+    assert.deepEqual(
+      proof.chapters.map((c) => [
+        c.number,
+        c.part,
+        c.title,
+        c.scenes.map((s) => [s.title, s.paragraphs]),
+      ]),
+      [
+        [
+          1,
+          'Teil Eins',
+          'Ankunft',
+          [
+            ['Am Bahnhof', ['Lena wartete am Bahnhof.', 'Der Zug kam zu spät.']],
+            ['Noch leer', []],
+          ],
+        ],
+      ],
+    );
+
+    const note = (patch: object) => ({
+      id: 'n',
+      sceneId: szene.id,
+      paragraph: 1,
+      quote: '',
+      prefix: '',
+      suffix: '',
+      note: '',
+      suggestion: null,
+      createdAt: '',
+      ...patch,
+    });
+    const result = await api<ProofImportResult>('POST', '/api/proofreading/import', {
+      format: 'wortomat-proof-notes',
+      version: 1,
+      packageId: proof.id,
+      title: proof.title,
+      exportedAt: '',
+      notes: [
+        note({ id: 'a', quote: 'zu spät', prefix: 'Zug kam ', note: 'Wie spät genau?' }),
+        note({ id: 'b', paragraph: 0, quote: 'wartete', suggestion: 'harrte', note: '' }),
+        note({ id: 'c', quote: 'Flughafen' }),
+        note({ id: 'd', sceneId: leer.id, quote: 'irgendwas' }),
+        note({ id: 'e', sceneId: 'gibt-es-nicht', quote: 'x' }),
+      ],
+    });
+    assert.equal(result.applied, 2);
+    assert.deepEqual(
+      result.unmatched.map((u) => [u.note.id, u.sceneTitle]),
+      [
+        ['c', 'Am Bahnhof'],
+        ['d', 'Noch leer'],
+        ['e', null],
+      ],
+    );
+
+    const content = await api<SceneContent>('GET', `/api/scenes/${szene.id}/content`);
+    const fixme = (attrs: object) => ({ type: 'annotation', attrs: { kind: 'fixme', ...attrs } });
+    assert.deepEqual(content.doc?.content, [
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'Lena ' },
+          { type: 'text', text: 'wartete', marks: [fixme({ note: null, suggestion: 'harrte' })] },
+          { type: 'text', text: ' am Bahnhof.' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'Der Zug kam ' },
+          {
+            type: 'text',
+            text: 'zu spät',
+            marks: [{ type: 'italic' }, fixme({ note: 'Wie spät genau?', suggestion: null })],
+          },
+          { type: 'text', text: '.' },
+        ],
+      },
+    ]);
+    // Text und Wortzahl bleiben; die Markierungen zählen im Baum mit
+    assert.equal(content.wordCount, 9);
+    assert.deepEqual(content.annotations, { todo: 0, idea: 0, fixme: 2 });
+    const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    assert.equal(nodes.find((n) => n.id === szene.id)?.annotations?.fixme, 2);
+
+    const status = async (body: unknown) =>
+      (
+        await fetch(`${server.url}/api/proofreading/import`, {
+          method: 'POST',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+    assert.equal(await status({ format: 'etwas anderes', notes: [] }), 400);
+    assert.equal(await status({ format: 'wortomat-proof-notes', version: 2, notes: [] }), 400);
+    assert.equal(
+      await status({ format: 'wortomat-proof-notes', version: 1, notes: [note({ quote: '' })] }),
       400,
     );
   });

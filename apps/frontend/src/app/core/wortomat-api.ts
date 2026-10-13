@@ -24,6 +24,9 @@ import type {
   NoteGroup,
   NoteSummary,
   PlaceMap,
+  ProofImportResult,
+  ProofNotesFile,
+  ProofPackage,
   ProjectInfo,
   ProjectListEntry,
   SaveDocumentRequest,
@@ -277,6 +280,17 @@ export class WortomatApi {
   /** Charaktere, Orte und Tags aller Szenen – für den Szenenfilter. */
   sceneRelations(): Promise<SceneRelations[]> {
     return this.call(this.http.get<SceneRelations[]>('/api/scene-relations'));
+  }
+
+  // Korrekturlesen unterwegs --------------------------------------------------
+
+  proofPackage(): Promise<ProofPackage> {
+    return this.call(this.http.get<ProofPackage>('/api/proofreading/package'));
+  }
+
+  /** Notizen vom Handy als Fixme-Markierungen ins Buch übernehmen. */
+  importProofNotes(file: ProofNotesFile): Promise<ProofImportResult> {
+    return this.call(this.http.post<ProofImportResult>('/api/proofreading/import', file));
   }
 
   // Reihenfolge der Handlung -------------------------------------------------

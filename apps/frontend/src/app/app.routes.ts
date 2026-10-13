@@ -65,6 +65,12 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'proofreading',
+    canActivate: [projectOpenGuard],
+    loadComponent: () =>
+      import('./features/proofreading/proofreading-page').then((m) => m.ProofreadingPage),
+  },
+  {
     path: 'export',
     canActivate: [projectOpenGuard],
     loadComponent: () => import('./features/export/export-page').then((m) => m.ExportPage),

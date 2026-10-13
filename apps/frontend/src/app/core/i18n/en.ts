@@ -79,6 +79,7 @@ export const en: Texts = {
 
   workspace: {
     export: 'Export',
+    proofreading: 'Proofread on the go',
     closeProject: 'Close project',
     moreActions: 'Menu',
     showList: 'Open the list to choose from',
@@ -318,6 +319,34 @@ export const en: Texts = {
       `Today: ${count === 1 ? '1 word' : `${numberFormat.format(count)} words`} written`,
     writtenTodayHint:
       'Words typed in all scenes since 4 a.m. – revising counts, pasted text doesn’t',
+    proofNote: 'Proofreading',
+    proofReplace: (from: string, to: string) => `“${to}” instead of “${from}”`,
+    proofDelete: (from: string) => `Delete “${from}”`,
+    proofAccept: 'Accept',
+    proofReject: 'Reject',
+    proofDone: 'Done',
+  },
+
+  proofreading: {
+    title: 'Proofread on the go',
+    intro:
+      'Proofread your manuscript on your Android phone – offline, with notes and suggested changes. Back at your computer, bring the notes into the book here.',
+    importTitle: 'Bring in notes from your phone',
+    importHint:
+      'Choose the notes file (“… notizen.txt”) you sent yourself from your phone. Each note becomes a Fixme mark at its place in the text; accept or reject suggestions there with one click.',
+    choose: 'Choose notes file …',
+    importing: 'Bringing in notes …',
+    applied: (count: number) => (count === 1 ? '1 note added.' : `${count} notes added.`),
+    appliedHint: 'You will find them as Fixme marks – in the tree, the scene filter and the text.',
+    unmatchedTitle: (count: number) =>
+      count === 1 ? '1 note could not be placed' : `${count} notes could not be placed`,
+    unmatchedHint:
+      'These passages are no longer in the text as they were – maybe you changed them since. Please check by hand.',
+    sceneGone: 'Scene no longer exists',
+    quote: (text: string) => `“${text}”`,
+    openScene: 'Open scene',
+    suggestion: (text: string) => (text ? `Suggestion: “${text}”` : 'Suggestion: delete'),
+    unreadable: 'This file is not a readable notes file.',
   },
 
   plot: {

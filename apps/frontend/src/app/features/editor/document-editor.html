@@ -106,6 +106,40 @@
           </button>
         }
       </div>
+      <!-- Korrekturnotiz am Cursor: Notiz und/oder Vorschlag aus dem Korrekturlesen unterwegs -->
+      @if (proofNote(); as proof) {
+        <div class="proof-note" role="note">
+          <span class="proof-label">{{ t().editor.proofNote }}</span>
+          <span class="proof-body">
+            @if (proof.suggestion !== null) {
+              <span class="proof-suggestion">
+                {{
+                  proof.suggestion
+                    ? t().editor.proofReplace(proof.text, proof.suggestion)
+                    : t().editor.proofDelete(proof.text)
+                }}
+              </span>
+            }
+            @if (proof.note) {
+              <span class="proof-text">{{ proof.note }}</span>
+            }
+          </span>
+          <span class="proof-actions">
+            @if (proof.suggestion !== null) {
+              <button type="button" class="link accept" (click)="resolveProofNote(true)">
+                {{ t().editor.proofAccept }}
+              </button>
+              <button type="button" class="link" (click)="resolveProofNote(false)">
+                {{ t().editor.proofReject }}
+              </button>
+            } @else {
+              <button type="button" class="link" (click)="resolveProofNote(false)">
+                {{ t().editor.proofDone }}
+              </button>
+            }
+          </span>
+        </div>
+      }
     </div>
     <div #editorHost class="editor-host"></div>
   </div>

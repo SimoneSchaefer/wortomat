@@ -495,6 +495,82 @@ export interface ReorderImagesRequest {
 }
 
 // ---------------------------------------------------------------------------
+// Korrekturlesen unterwegs: Korrekturfassung hin, Notizen zurück
+// ---------------------------------------------------------------------------
+
+/** Das Manuskript zum Korrekturlesen – nur Text, Absatz für Absatz. */
+export interface ProofPackage {
+  format: 'wortomat-proof';
+  version: 1;
+  /** Kennung dieser Fassung; die Notizen beziehen sich darauf. */
+  id: string;
+  title: string;
+  author: string;
+  exportedAt: string;
+  chapters: ProofChapter[];
+}
+
+export interface ProofChapter {
+  id: string;
+  title: string;
+  /** Laufende Nummer im Buch (ab 1). */
+  number: number;
+  /** Titel des Teils, zu dem das Kapitel gehört; `null` ohne Teil. */
+  part: string | null;
+  scenes: ProofScene[];
+}
+
+export interface ProofScene {
+  id: string;
+  title: string;
+  /** Reiner Text je Absatz (auch leere, damit die Nummern zum Buch passen). */
+  paragraphs: string[];
+}
+
+/** Notizen vom Handy zurück an den Rechner. */
+export interface ProofNotesFile {
+  format: 'wortomat-proof-notes';
+  version: 1;
+  packageId: string;
+  title: string;
+  exportedAt: string;
+  notes: ProofNote[];
+}
+
+/**
+ * Eine Notiz an einer Textstelle. Die Stelle wird über den markierten Text samt ein paar
+ * Zeichen davor und danach wiedergefunden – auch wenn sich der Absatz verschoben hat.
+ */
+export interface ProofNote {
+  id: string;
+  sceneId: string;
+  /** Absatz in der Korrekturfassung (ab 0). */
+  paragraph: number;
+  /** Der markierte Text. */
+  quote: string;
+  /** Text direkt davor bzw. danach (im selben Absatz, höchstens ein paar Dutzend Zeichen). */
+  prefix: string;
+  suffix: string;
+  /** Freitext; bei Vorschlägen die optionale Begründung. */
+  note: string;
+  /** Ersetzungsvorschlag für den markierten Text; `null` bei reinen Notizen. */
+  suggestion: string | null;
+  createdAt: string;
+}
+
+/** Ergebnis von `POST /api/proofreading/import`. */
+export interface ProofImportResult {
+  /** So viele Notizen stehen jetzt als Fixme-Markierung im Text. */
+  applied: number;
+  /** Notizen, deren Stelle sich nicht mehr finden ließ. */
+  unmatched: Array<{
+    note: ProofNote;
+    /** Titel der Szene; `null`, wenn es die Szene nicht mehr gibt. */
+    sceneTitle: string | null;
+  }>;
+}
+
+// ---------------------------------------------------------------------------
 // Bilder
 // ---------------------------------------------------------------------------
 

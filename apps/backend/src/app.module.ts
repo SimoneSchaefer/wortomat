@@ -18,6 +18,8 @@ import { ProjectController } from './project/project.controller.js';
 import { ProjectService } from './project/project.service.js';
 import { ProjectsController } from './project/projects.controller.js';
 import { RecentProjectsService } from './project/recent-projects.service.js';
+import { ProofreadingController } from './proofreading/proofreading.controller.js';
+import { ProofreadingService } from './proofreading/proofreading.service.js';
 import { SearchController } from './search/search.controller.js';
 import { SearchService } from './search/search.service.js';
 import { AppSettingsController } from './settings/app-settings.controller.js';
@@ -48,6 +50,7 @@ export class AppModule {
         TagsController,
         StrandsController,
         StoryController,
+        ProofreadingController,
         AppSettingsController,
         ExportController,
         FilesController,
@@ -66,6 +69,7 @@ export class AppModule {
         TagsService,
         StrandsService,
         StoryService,
+        ProofreadingService,
         AppSettingsService,
         ExportService,
         ImagesService,

@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { de } from '../../core/i18n/de';
-import { Annotation } from './annotation-mark';
+import { Annotation, proofNoteAt } from './annotation-mark';
 
 /** Echter Tiptap-Editor (jsdom) mit dem Satz „Hier fehlt noch was.“ */
 function createEditor(): Editor {
@@ -95,6 +95,80 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     const editor = createEditor();
     editor.commands.setContent('<p><mark data-annotation="idea">Möwe?</mark></p>');
     expect(marksOf(editor)).toEqual([['Möwe?', 'idea']]);
+    editor.destroy();
+  });
+});
+
+describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
+  /** „Hier fehlt noch was.“ mit „fehlt“ kursiv und als Fixme mit Vorschlag markiert. */
+  function editorWithNote(attrs: { note: string | null; suggestion: string | null }): Editor {
+    return new Editor({
+      element: document.createElement('div'),
+      extensions: [
+        StarterKit,
+        Annotation.configure({ label: (kind) => de.annotations[kind].label }),
+      ],
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              { type: 'text', text: 'Hier ' },
+              {
+                type: 'text',
+                text: 'fehlt',
+                marks: [
+                  { type: 'italic' },
+                  { type: 'annotation', attrs: { kind: 'fixme', ...attrs } },
+                ],
+              },
+              { type: 'text', text: ' noch was.' },
+            ],
+          },
+        ],
+      },
+    });
+  }
+
+  it('findet die Notiz am Cursor – auch direkt an ihrem Anfang – und zeigt sie im Tooltip', () => {
+    const editor = editorWithNote({ note: 'Was fehlt?', suggestion: 'mangelt' });
+    for (const position of [6, 8]) {
+      editor.commands.setTextSelection(position);
+      expect(proofNoteAt(editor.state)).toEqual({
+        note: 'Was fehlt?',
+        suggestion: 'mangelt',
+        text: 'fehlt',
+        from: 6,
+        to: 11,
+      });
+    }
+    editor.commands.setTextSelection(2);
+    expect(proofNoteAt(editor.state)).toBeNull();
+    expect(editor.getHTML()).toContain('title="Fixme: Was fehlt?"');
+    expect(editor.getHTML()).toContain('data-suggestion="mangelt"');
+    editor.destroy();
+  });
+
+  it('übernimmt einen Vorschlag: Text ersetzt, Kursiv bleibt, Markierung weg', () => {
+    const editor = editorWithNote({ note: null, suggestion: 'mangelt' });
+    editor.chain().setTextSelection(8).resolveProofNote(true).run();
+    expect(editor.getText()).toBe('Hier mangelt noch was.');
+    expect(editor.getHTML()).toBe('<p>Hier <em>mangelt</em> noch was.</p>');
+    editor.destroy();
+  });
+
+  it('verwirft einen Vorschlag bzw. erledigt eine Notiz: nur die Markierung geht', () => {
+    const editor = editorWithNote({ note: 'Was fehlt?', suggestion: null });
+    editor.chain().setTextSelection(8).resolveProofNote(true).run();
+    expect(editor.getHTML()).toBe('<p>Hier <em>fehlt</em> noch was.</p>');
+    editor.destroy();
+  });
+
+  it('löscht den Text bei einem leeren Vorschlag', () => {
+    const editor = editorWithNote({ note: null, suggestion: '' });
+    editor.chain().setTextSelection(8).resolveProofNote(true).run();
+    expect(editor.getText()).toBe('Hier  noch was.');
     editor.destroy();
   });
 });

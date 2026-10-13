@@ -109,6 +109,7 @@ export const de = {
 
   workspace: {
     export: 'Exportieren',
+    proofreading: 'Korrektur unterwegs',
     closeProject: 'Projekt schließen',
     moreActions: 'Menü',
     showList: 'Liste zum Auswählen öffnen',
@@ -348,6 +349,37 @@ export const de = {
       `Heute: ${count === 1 ? '1 Wort' : `${numberFormat.format(count)} Wörter`} geschrieben`,
     writtenTodayHint:
       'Selbst getippte Wörter in allen Szenen seit 4 Uhr – Überarbeiten zählt mit, Eingefügtes nicht',
+    proofNote: 'Korrektur',
+    proofReplace: (from: string, to: string) => `„${to}“ statt „${from}“`,
+    proofDelete: (from: string) => `„${from}“ streichen`,
+    proofAccept: 'Übernehmen',
+    proofReject: 'Verwerfen',
+    proofDone: 'Erledigt',
+  },
+
+  proofreading: {
+    title: 'Korrektur unterwegs',
+    intro:
+      'Lies dein Manuskript auf dem Android-Handy Korrektur – offline, mit Notizen und Ersetzungsvorschlägen. Zurück am Rechner holst du die Notizen hier ins Buch.',
+    importTitle: 'Notizen vom Handy übernehmen',
+    importHint:
+      'Wähle die Notizdatei („… notizen.txt“), die du dir vom Handy geschickt hast. Jede Notiz wird zu einer Fixme-Markierung an ihrer Textstelle; Vorschläge übernimmst oder verwirfst du dort mit einem Klick.',
+    choose: 'Notizdatei auswählen …',
+    importing: 'Übernehme Notizen …',
+    applied: (count: number) =>
+      count === 1 ? '1 Notiz übernommen.' : `${count} Notizen übernommen.`,
+    appliedHint: 'Du findest sie als Fixme-Markierungen – im Baum, im Szenenfilter und im Text.',
+    unmatchedTitle: (count: number) =>
+      count === 1
+        ? '1 Notiz ließ sich nicht zuordnen'
+        : `${count} Notizen ließen sich nicht zuordnen`,
+    unmatchedHint:
+      'Diese Stellen stehen so nicht mehr im Text – vielleicht hast du sie inzwischen geändert. Bitte von Hand nachsehen.',
+    sceneGone: 'Szene gibt es nicht mehr',
+    quote: (text: string) => `„${text}“`,
+    openScene: 'Szene öffnen',
+    suggestion: (text: string) => (text ? `Vorschlag: „${text}“` : 'Vorschlag: streichen'),
+    unreadable: 'Die Datei ist keine lesbare Notizdatei.',
   },
 
   plot: {
