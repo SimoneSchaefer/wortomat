@@ -1,87 +1,92 @@
 <article class="page">
   <ng-content />
-  <!-- Unter dem Kopfbereich: die Formatierung gilt nur für den Text darunter -->
-  <div class="toolbar" role="toolbar" [attr.aria-label]="t().editor.toolbar">
-    <button
-      type="button"
-      [title]="hint(t().editor.bold, 'B')"
-      [class.on]="isActive('bold')"
-      (click)="command('bold')"
-    >
-      <b>{{ t().editor.boldLetter }}</b>
-    </button>
-    <button
-      type="button"
-      [title]="hint(t().editor.italic, 'I')"
-      [class.on]="isActive('italic')"
-      (click)="command('italic')"
-    >
-      <i>{{ t().editor.italicLetter }}</i>
-    </button>
-    <button
-      type="button"
-      [title]="hint(t().editor.underline, 'U')"
-      [class.on]="isActive('underline')"
-      (click)="command('underline')"
-    >
-      <u>{{ t().editor.underlineLetter }}</u>
-    </button>
-    <button
-      type="button"
-      [title]="hint(t().editor.strike, 'S', { shift: true })"
-      [class.on]="isActive('strike')"
-      (click)="command('strike')"
-    >
-      <s>{{ t().editor.strikeLetter }}</s>
-    </button>
-    <span class="sep"></span>
-    @for (info of annotationKinds; track info.kind) {
-      <button
-        type="button"
-        class="annotation"
-        [style.--annotation-color]="info.color"
-        [title]="
-          hint(t().editor.annotate(t().annotations[info.kind].label), info.key, { alt: true })
-        "
-        [class.on]="isActive('annotation', { kind: info.kind })"
-        (click)="annotate(info.kind)"
-      >
-        <span class="swatch" aria-hidden="true"></span>{{ t().annotations[info.kind].label }}
-      </button>
-    }
-    <span class="sep"></span>
-    <!-- Ganz rechts: entfernt alle Formatierungen samt Markierungen -->
-    <button
-      type="button"
-      class="clear"
-      [title]="t().editor.clearFormat"
-      [attr.aria-label]="t().editor.clearFormat"
-      (click)="command('clearFormat')"
-    >
-      <!-- „T“ mit Schrägstrich: Formatierung entfernen -->
-      <svg viewBox="0 0 16 16" aria-hidden="true">
-        <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
-      </svg>
-    </button>
-    <span class="sep"></span>
-    <button
-      type="button"
-      [title]="hint(t().editor.undo, 'Z')"
-      [disabled]="!can('undo')"
-      (click)="command('undo')"
-    >
-      ↶
-    </button>
-    <button
-      type="button"
-      [title]="hint(t().editor.redo, 'Z', { shift: true })"
-      [disabled]="!can('redo')"
-      (click)="command('redo')"
-    >
-      ↷
-    </button>
+  <!-- Toolbar und Text als ein Kasten: die Formatierung gilt nur für den Text darunter -->
+  <div class="writing">
+    <!-- Klebt beim Scrollen oben; die Leiste darin wird dann eckig (siehe SCSS) -->
+    <div class="toolbar-sticky">
+      <div class="toolbar" role="toolbar" [attr.aria-label]="t().editor.toolbar">
+        <button
+          type="button"
+          [title]="hint(t().editor.bold, 'B')"
+          [class.on]="isActive('bold')"
+          (click)="command('bold')"
+        >
+          <b>{{ t().editor.boldLetter }}</b>
+        </button>
+        <button
+          type="button"
+          [title]="hint(t().editor.italic, 'I')"
+          [class.on]="isActive('italic')"
+          (click)="command('italic')"
+        >
+          <i>{{ t().editor.italicLetter }}</i>
+        </button>
+        <button
+          type="button"
+          [title]="hint(t().editor.underline, 'U')"
+          [class.on]="isActive('underline')"
+          (click)="command('underline')"
+        >
+          <u>{{ t().editor.underlineLetter }}</u>
+        </button>
+        <button
+          type="button"
+          [title]="hint(t().editor.strike, 'S', { shift: true })"
+          [class.on]="isActive('strike')"
+          (click)="command('strike')"
+        >
+          <s>{{ t().editor.strikeLetter }}</s>
+        </button>
+        <span class="sep"></span>
+        @for (info of annotationKinds; track info.kind) {
+          <button
+            type="button"
+            class="annotation"
+            [style.--annotation-color]="info.color"
+            [title]="
+              hint(t().editor.annotate(t().annotations[info.kind].label), info.key, { alt: true })
+            "
+            [class.on]="isActive('annotation', { kind: info.kind })"
+            (click)="annotate(info.kind)"
+          >
+            <span class="swatch" aria-hidden="true"></span>{{ t().annotations[info.kind].label }}
+          </button>
+        }
+        <span class="sep"></span>
+        <!-- Ganz rechts: entfernt alle Formatierungen samt Markierungen -->
+        <button
+          type="button"
+          class="clear"
+          [title]="t().editor.clearFormat"
+          [attr.aria-label]="t().editor.clearFormat"
+          (click)="command('clearFormat')"
+        >
+          <!-- „T“ mit Schrägstrich: Formatierung entfernen -->
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
+          </svg>
+        </button>
+        <span class="sep"></span>
+        <button
+          type="button"
+          [title]="hint(t().editor.undo, 'Z')"
+          [disabled]="!can('undo')"
+          (click)="command('undo')"
+        >
+          ↶
+        </button>
+        <button
+          type="button"
+          [title]="hint(t().editor.redo, 'Z', { shift: true })"
+          [disabled]="!can('redo')"
+          (click)="command('redo')"
+        >
+          ↷
+        </button>
+      </div>
+    </div>
+    <div #editorHost class="editor-host"></div>
   </div>
-  <div #editorHost class="editor-host"></div>
 </article>
 
 <footer class="statusbar">

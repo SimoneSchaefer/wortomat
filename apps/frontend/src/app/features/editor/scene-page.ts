@@ -48,15 +48,24 @@ const TITLE_SAVE_DELAY_MS = 600;
     </wm-document-editor>
   `,
   styles: `
+    // Leicht getönte Seite: Szenendetails und Text liegen als helle Kästen darauf
     :host {
       display: block;
       min-height: 100%;
+      --editor-page-bg: color-mix(in srgb, var(--bg) 40%, var(--surface));
+      background: var(--editor-page-bg);
     }
 
+    // Szenendetails als zusammengehöriger Kasten zwischen Titel und Text – Rahmen wie der
+    // Kasten von Toolbar und Text darunter
     .scene-meta {
       display: grid;
       gap: 0.4rem;
       margin: 0.75rem 0 2rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
+      border-radius: 0.75rem;
+      background: var(--bg);
     }
   `,
 })

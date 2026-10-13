@@ -4,18 +4,57 @@
   min-height: 100%;
 }
 
-.toolbar {
+// Toolbar und Text als ein Kasten – Rahmen wie der Kasten der Szenendetails darüber.
+// Kein overflow: hidden, sonst bleibt die Toolbar beim Scrollen nicht oben stehen.
+.writing {
+  border: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.editor-host {
+  padding: 1.25rem 1.25rem 2rem;
+}
+
+.toolbar-sticky {
   position: sticky;
   top: 0;
   z-index: 1;
+  container-type: scroll-state;
+  // Eigene Ebene: Firefox führt die Leiste dann beim asynchronen Scrollen direkt mit,
+  // statt sie einen Moment später nachzusetzen
+  will-change: transform;
+
+  // Streifen in Seitenfarbe über der Leiste (oberhalb des Kastenrahmens). Im Ruhezustand
+  // unsichtbar auf gleichfarbigem Grund; hängt die Leiste beim Scrollen doch kurz nach,
+  // deckt er die Lücke zur Menüleiste ab, damit kein Text durchblitzt.
+  &::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    bottom: calc(100% + 1px);
+    height: 0.75rem;
+    background: var(--editor-page-bg, var(--bg));
+  }
+}
+
+// Kopfzeile des Kastens, getönt
+.toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.15rem;
-  margin: 0 -0.5rem 1.5rem;
   padding: 0.4rem 0.5rem;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
+  border-radius: calc(0.75rem - 1px) calc(0.75rem - 1px) 0 0;
+  background: color-mix(in srgb, var(--bg) 50%, var(--surface));
+
+  // Klebt sie oben, würde der Text durch die runden Ecken scheinen – dann eckig
+  // (Firefox kennt scroll-state noch nicht und behält die runden Ecken)
+  @container scroll-state(stuck: top) {
+    border-radius: 0;
+  }
 
   button {
     min-width: 2rem;
