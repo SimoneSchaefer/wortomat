@@ -11,7 +11,7 @@ import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
 import { BookCover } from '../cover/book-cover';
-import { CoverDialog } from '../cover/cover-dialog';
+import { BookDialog } from '../cover/book-dialog';
 import { NoteList } from '../notes/note-list';
 import { NotesStore } from '../notes/notes-store';
 import { GlobalSearch } from './global-search';
@@ -49,7 +49,7 @@ const MENU: readonly MenuItem[] = [
     NoteList,
     GlobalSearch,
     ResizeHandle,
-    CoverDialog,
+    BookDialog,
     BookCover,
     SceneFilterPanel,
   ],

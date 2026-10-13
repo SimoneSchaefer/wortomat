@@ -79,7 +79,7 @@ export const en: Texts = {
   workspace: {
     export: 'Export',
     closeProject: 'Close project',
-    changeCover: 'Change cover image',
+    changeCover: 'Title, author and cover image',
     coverHint: 'Shown on the start page and as the cover of the e-book.',
     sections: 'Sections',
     manuscript: 'Manuscript',
@@ -286,6 +286,15 @@ export const en: Texts = {
     noTags: 'No tags yet – type one to create it.',
     allLinked: 'All are already linked – type a name to create a new one.',
     createTag: (name: string) => `Create “${name}” as a new tag`,
+  },
+
+  book: {
+    title: 'Book',
+    titleLabel: 'Title',
+    author: 'Author',
+    authorPlaceholder: 'Your name or pen name',
+    authorHint:
+      'Appears on the title page, in the header of the standard manuscript and in the e-book and Word metadata.',
   },
 
   export: {

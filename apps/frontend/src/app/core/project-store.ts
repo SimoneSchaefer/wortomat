@@ -63,6 +63,11 @@ export class ProjectStore {
   }
 
   /** Titelbild setzen (hochgeladenes Bild) oder mit `null` entfernen. */
+  /** Titel und/oder Autor des Buchs ändern. */
+  async updateDetails(changes: { title?: string; author?: string }): Promise<void> {
+    this.project.set(await this.api.updateProject(changes));
+  }
+
   async setCover(imageId: string | null): Promise<void> {
     this.project.set(await this.api.updateProject({ coverImageId: imageId }));
   }

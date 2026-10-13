@@ -8,7 +8,7 @@
           class="cover-button"
           [title]="t().workspace.changeCover"
           [attr.aria-label]="t().workspace.changeCover"
-          (click)="coverDialog.open()"
+          (click)="bookDialog.open()"
         >
           <wm-book-cover
             [url]="project.coverImageId ? '/api/images/' + project.coverImageId : null"
@@ -117,4 +117,4 @@
   </main>
 </div>
 
-<wm-cover-dialog #coverDialog />
+<wm-book-dialog #bookDialog />

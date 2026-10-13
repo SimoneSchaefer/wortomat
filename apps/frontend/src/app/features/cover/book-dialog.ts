@@ -1,22 +1,56 @@
-import { Component, type ElementRef, inject, viewChild } from '@angular/core';
+import { Component, type ElementRef, inject, signal, viewChild } from '@angular/core';
+import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
+import { ProjectStore } from '../../core/project-store';
 import { CoverPicker } from './cover-picker';
 
-/** Kleiner Dialog aus der oberen Leiste: Titelbild des Buchs wählen. */
+const SAVE_DELAY_MS = 600;
+
+type Field = 'title' | 'author';
+
+/** Dialog „Buch“ aus der oberen Leiste: Titel, Autor und Titelbild des geöffneten Buchs. */
 @Component({
-  selector: 'wm-cover-dialog',
+  selector: 'wm-book-dialog',
   imports: [CoverPicker],
   template: `
-    <!-- Anfangsfokus auf dem Dialog selbst: kein Button wirkt beim Öffnen hervorgehoben -->
+    <!-- Anfangsfokus auf dem Dialog selbst: kein Feld wirkt beim Öffnen hervorgehoben -->
     <dialog
       #dialog
       tabindex="-1"
-      aria-labelledby="cover-dialog-title"
+      aria-labelledby="book-dialog-title"
       (click)="closeOnBackdrop($event)"
+      (close)="flush()"
     >
       <div class="body">
-        <h2 id="cover-dialog-title">{{ t().export.cover }}</h2>
-        <wm-cover-picker [hint]="t().workspace.coverHint" />
+        <h2 id="book-dialog-title">{{ t().book.title }}</h2>
+
+        <label class="field">
+          <span>{{ t().book.titleLabel }}</span>
+          <input
+            [value]="title()"
+            (input)="edit('title', $any($event.target).value)"
+            (blur)="leaveTitle($any($event.target))"
+          />
+        </label>
+        <label class="field">
+          <span>{{ t().book.author }}</span>
+          <input
+            [value]="author()"
+            [placeholder]="t().book.authorPlaceholder"
+            (input)="edit('author', $any($event.target).value)"
+            (blur)="flush()"
+          />
+          <small class="muted">{{ t().book.authorHint }}</small>
+        </label>
+        @if (error(); as message) {
+          <p class="error" role="alert">{{ message }}</p>
+        }
+
+        <section>
+          <h3>{{ t().export.cover }}</h3>
+          <wm-cover-picker [hint]="t().workspace.coverHint" />
+        </section>
+
         <footer>
           <button type="button" (click)="close()">{{ t().export.close }}</button>
         </footer>
@@ -25,7 +59,7 @@ import { CoverPicker } from './cover-picker';
   `,
   styles: `
     dialog {
-      width: min(30rem, calc(100vw - 2rem));
+      width: min(32rem, calc(100vw - 2rem));
       padding: 0;
       border: 1px solid var(--border);
       border-radius: 0.75rem;
@@ -52,28 +86,112 @@ import { CoverPicker } from './cover-picker';
       font-size: 1.4rem;
     }
 
+    .field {
+      display: grid;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+
+      input {
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+
+      small {
+        font-size: 0.75rem;
+      }
+    }
+
+    section {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .error {
+      margin: 0;
+      font-size: 0.85rem;
+    }
+
     footer {
       display: flex;
       justify-content: flex-end;
     }
   `,
 })
-export class CoverDialog {
+export class BookDialog {
   protected readonly t = inject(I18n).t;
+  private readonly store = inject(ProjectStore);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
+  protected readonly title = signal('');
+  protected readonly author = signal('');
+  protected readonly error = signal<string | null>(null);
+  /** Noch nicht gespeicherte Eingaben. */
+  private pending: Partial<Record<Field, string>> = {};
+  private timer: ReturnType<typeof setTimeout> | undefined;
+
   open(): void {
+    const project = this.store.project();
+    this.title.set(project?.title ?? '');
+    this.author.set(project?.author ?? '');
+    this.error.set(null);
+    this.pending = {};
     const dialog = this.dialog().nativeElement;
     dialog.showModal();
     dialog.focus();
   }
 
   protected close(): void {
-    this.dialog().nativeElement.close();
+    this.dialog().nativeElement.close(); // speichert über das close-Ereignis
   }
 
   /** Klick auf den abgedunkelten Hintergrund schließt (nur der trifft das Dialog-Element selbst). */
   protected closeOnBackdrop(event: MouseEvent): void {
     if (event.target === this.dialog().nativeElement) this.close();
+  }
+
+  /** Kurz nach dem Tippen speichern; ein leerer Titel wird nicht gespeichert. */
+  protected edit(field: Field, value: string): void {
+    (field === 'title' ? this.title : this.author).set(value);
+    if (field === 'title' && !value.trim()) {
+      delete this.pending.title;
+      return;
+    }
+    this.pending[field] = value;
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => void this.flush(), SAVE_DELAY_MS);
+  }
+
+  /**
+   * Leeren Titel nicht stehen lassen. Das Feld direkt zurücksetzen: Für die Bindung hat sich der
+   * Wert oft gar nicht geändert (zuletzt angezeigt war schon der gespeicherte Titel).
+   */
+  protected leaveTitle(input: HTMLInputElement): void {
+    if (!this.title().trim()) {
+      const saved = this.store.project()?.title ?? '';
+      this.title.set(saved);
+      input.value = saved;
+    }
+    void this.flush();
+  }
+
+  protected async flush(): Promise<void> {
+    clearTimeout(this.timer);
+    const changes = this.pending;
+    this.pending = {};
+    if (!Object.keys(changes).length) return;
+    try {
+      await this.store.updateDetails(changes);
+      this.error.set(null);
+    } catch (error) {
+      this.error.set(errorMessage(error, this.t()));
+    }
   }
 }

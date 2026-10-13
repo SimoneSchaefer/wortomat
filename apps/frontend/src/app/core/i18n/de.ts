@@ -109,7 +109,7 @@ export const de = {
   workspace: {
     export: 'Exportieren',
     closeProject: 'Projekt schließen',
-    changeCover: 'Titelbild ändern',
+    changeCover: 'Titel, Autor und Titelbild',
     coverHint: 'Erscheint auf der Startseite und als Cover im E-Book.',
     sections: 'Bereiche',
     manuscript: 'Manuskript',
@@ -315,6 +315,15 @@ export const de = {
     noTags: 'Noch keine Tags – tippe einen, um ihn anzulegen.',
     allLinked: 'Alle sind schon verknüpft – tippe einen Namen, um neu anzulegen.',
     createTag: (name: string) => `„${name}“ als neuen Tag anlegen`,
+  },
+
+  book: {
+    title: 'Buch',
+    titleLabel: 'Titel',
+    author: 'Autor',
+    authorPlaceholder: 'Dein Name oder Pseudonym',
+    authorHint:
+      'Erscheint auf der Titelseite, in der Kopfzeile der Normseite und in den Angaben von E-Book und Word-Datei.',
   },
 
   export: {
