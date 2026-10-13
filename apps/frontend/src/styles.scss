@@ -12,11 +12,11 @@
   --border: #e3ddd4;
   --text: #1f1b17;
   --text-muted: #6b645c;
-  // Orange als Primärfarbe: --accent leuchtet (Rahmen, Ringe, Markierungen, Flächen ohne
+  // Limettengrün als Primärfarbe: --accent leuchtet (Rahmen, Ringe, Markierungen, Flächen ohne
   // Schrift), --accent-strong ist dunkler und erreicht 4,5 : 1 – für Schrift und für
   // Flächen, auf denen Schrift steht
-  --accent: #ea580c;
-  --accent-strong: #c2410c;
+  --accent: #84cc16;
+  --accent-strong: #4d7c0f;
   --danger: #c92a2a;
 
   // Szenenstatus: von grau (Idee) bis grün (Fertig)
@@ -36,12 +36,12 @@
   --pill-font-size: 0.78rem;
 
   // Einheitlicher Hintergrund aller beschrifteten Buttons (auch „+ Kapitel“, „Exportieren“ …):
-  // ein Hauch Orange, hebt sich von Papier (--bg) und Seitenleiste (--surface) gleichermaßen ab
+  // ein Hauch Grün, hebt sich von Papier (--bg) und Seitenleiste (--surface) gleichermaßen ab
   --button-bg: color-mix(in srgb, var(--accent) 10%, var(--bg));
   --button-hover: color-mix(in srgb, var(--accent) 20%, var(--bg));
   --button-border: color-mix(in srgb, var(--accent) 30%, var(--border));
 
-  // Obere Leiste: eigene Farbe und Schatten – ein kräftiger warmer Orange-Ton
+  // Obere Leiste: eigene Farbe und Schatten – ein kräftiger Grünton
   --topbar-bg: color-mix(in srgb, var(--accent) 26%, var(--bg));
   // Menüleiste links: ein dezenter Hauch derselben Farbe
   --rail-bg: color-mix(in srgb, var(--accent) 9%, var(--surface));
@@ -58,9 +58,9 @@
   --border: #3b3835;
   --text: #eeeae4;
   --text-muted: #a19a91;
-  // auf dunklem Grund ist das hellere Orange das kontrastreichere
-  --accent: #ff8a3d;
-  --accent-strong: #ff9f5a;
+  // auf dunklem Grund ist das hellere Grün das kontrastreichere
+  --accent: #a3e635;
+  --accent-strong: #bef264;
   --danger: #ff8787;
   // auf dunklem Grund braucht ein Schatten mehr Deckkraft, um sichtbar zu sein
   --topbar-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
