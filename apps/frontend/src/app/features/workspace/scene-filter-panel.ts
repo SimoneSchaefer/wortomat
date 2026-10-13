@@ -4,6 +4,7 @@ import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { SCENE_STATUSES } from '../../core/scene-status';
 import { StatusIcon } from '../../core/status-icon';
+import { strandColor } from '../../core/strands';
 import { NoteAvatar } from '../notes/note-avatar';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
 import { NotesStore } from '../notes/notes-store';
@@ -12,7 +13,7 @@ import { StatusMessages } from '../../core/status-messages';
 
 /**
  * Filter über dem Manuskript-Baum: ein Knopf, der ein Popover öffnet – darin je Zeile
- * Status, offene Markierungen, Charaktere, Orte und Tags zum An- und Abwählen.
+ * Status, offene Markierungen, Wendepunkte, Stränge, Charaktere, Orte und Tags zum An- und Abwählen.
  * Daneben, solange gefiltert wird: „3 von 12 Szenen“ und „Zurücksetzen“.
  */
 @Component({
@@ -36,6 +37,7 @@ export class SceneFilterPanel {
 
   protected readonly statuses = SCENE_STATUSES;
   protected readonly annotationKinds = ANNOTATION_KINDS;
+  protected readonly strandColor = strandColor;
   private readonly error = inject(StatusMessages).channel();
 
   /** Je verknüpfbarer Art (Charaktere, Orte) die Einträge, die in Szenen vorkommen. */

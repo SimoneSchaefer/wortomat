@@ -23,12 +23,18 @@ const node = (
   wordCount: 0,
   status: kind === 'scene' ? 'idea' : null,
   annotations: kind === 'scene' ? { todo: 0, idea: 0, fixme: 0 } : null,
+  turningPoint: kind === 'scene' ? false : null,
   ...extra,
 });
 
-const links = (noteIds: string[], tagIds: string[] = []): SceneLinksInfo => ({
+const links = (
+  noteIds: string[],
+  tagIds: string[] = [],
+  strandIds: string[] = [],
+): SceneLinksInfo => ({
   noteIds: new Set(noteIds),
   tags: tagIds.map((id) => ({ id, name: id })),
+  strandIds,
 });
 
 const KINDS: Record<string, string> = { anna: 'character', ben: 'character', hafen: 'place' };
@@ -40,7 +46,7 @@ describe('matchesScene', () => {
     status: 'draft',
     annotations: { todo: 2, idea: 0, fixme: 0 },
   });
-  const sceneLinks = links(['anna', 'hafen'], ['rückblende']);
+  const sceneLinks = links(['anna', 'hafen'], ['rückblende'], ['lena', 'tom']);
   const matches = (criteria: SceneFilterCriteria) =>
     matchesScene(scene, criteria, sceneLinks, kindOf);
 
@@ -49,6 +55,20 @@ describe('matchesScene', () => {
     expect(matches(filter({ statuses: ['idea', 'final'] }))).toBe(false);
     expect(matches(filter({ annotations: ['fixme', 'todo'] }))).toBe(true);
     expect(matches(filter({ annotations: ['idea'] }))).toBe(false);
+  });
+
+  it('filtert nach Strängen – einer der gewählten genügt', () => {
+    expect(matches(filter({ strandIds: ['tom', 'ermittlung'] }))).toBe(true);
+    expect(matches(filter({ strandIds: ['ermittlung'] }))).toBe(false);
+    expect(matchesScene(scene, filter({ strandIds: ['tom'] }), undefined, kindOf)).toBe(false);
+  });
+
+  it('zeigt mit „Nur Wendepunkte“ nur Szenen, die als Wendepunkt markiert sind', () => {
+    expect(matches(filter({ flags: ['turningPoint'] }))).toBe(false);
+    const wendepunkt = { ...scene, turningPoint: true };
+    expect(matchesScene(wendepunkt, filter({ flags: ['turningPoint'] }), sceneLinks, kindOf)).toBe(
+      true,
+    );
   });
 
   it('verlangt je Art (Charakter, Ort) eine der gewählten Notizen', () => {

@@ -32,6 +32,8 @@ import type {
   SceneRelations,
   SceneText,
   SearchHit,
+  Strand,
+  StrandColor,
   Tag,
   TagSummary,
   UpdateAppSettingsRequest,
@@ -272,6 +274,39 @@ export class WortomatApi {
   /** Charaktere, Orte und Tags aller Szenen – für den Szenenfilter. */
   sceneRelations(): Promise<SceneRelations[]> {
     return this.call(this.http.get<SceneRelations[]>('/api/scene-relations'));
+  }
+
+  // Handlungsstränge --------------------------------------------------------
+
+  /** Alle Stränge in ihrer Reihenfolge (mit Anzahl der Szenen). */
+  listStrands(): Promise<Strand[]> {
+    return this.call(this.http.get<Strand[]>('/api/strands'));
+  }
+
+  /** Ohne Farbe bekommt der Strang die bisher seltenste. */
+  createStrand(name: string, color?: StrandColor): Promise<Strand> {
+    return this.call(this.http.post<Strand>('/api/strands', { name, color }));
+  }
+
+  updateStrand(id: string, changes: { name?: string; color?: StrandColor }): Promise<Strand> {
+    return this.call(this.http.patch<Strand>(`/api/strands/${id}`, changes));
+  }
+
+  /** Die Szenen bleiben, sie verlieren nur die Zuordnung. */
+  deleteStrand(id: string): Promise<void> {
+    return this.call(this.http.delete<void>(`/api/strands/${id}`));
+  }
+
+  sceneStrands(sceneId: string): Promise<Strand[]> {
+    return this.call(this.http.get<Strand[]>(`/api/scenes/${sceneId}/strands`));
+  }
+
+  addSceneStrand(sceneId: string, strandId: string): Promise<Strand[]> {
+    return this.call(this.http.post<Strand[]>(`/api/scenes/${sceneId}/strands`, { strandId }));
+  }
+
+  removeSceneStrand(sceneId: string, strandId: string): Promise<Strand[]> {
+    return this.call(this.http.delete<Strand[]>(`/api/scenes/${sceneId}/strands/${strandId}`));
   }
 
   /** Alle verwendeten Tags des Projekts (mit Anzahl der Szenen). */

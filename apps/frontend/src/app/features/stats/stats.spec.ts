@@ -10,7 +10,18 @@ function node(
   wordCount = 0,
   status: SceneStatus | null = kind === 'scene' ? 'idea' : null,
 ): ManuscriptNode {
-  return { id, kind, parentId, sortOrder, title: id, wordCount, status, annotations: null };
+  const turningPoint = kind === 'scene' ? false : null;
+  return {
+    id,
+    kind,
+    parentId,
+    sortOrder,
+    title: id,
+    wordCount,
+    status,
+    annotations: null,
+    turningPoint,
+  };
 }
 
 function note(id: string): NoteSummary {
@@ -77,9 +88,9 @@ describe('presence', () => {
       scenesInOrder(tree),
       [note('Zora'), note('Anna'), note('Ben'), note('Carl')],
       [
-        { sceneId: 's1', noteIds: ['Ben'], tags: [] },
-        { sceneId: 's3', noteIds: ['Anna', 'Zora', 'Ben'], tags: [] },
-        { sceneId: 's4', noteIds: ['Anna'], tags: [] },
+        { sceneId: 's1', noteIds: ['Ben'], tags: [], strandIds: [] },
+        { sceneId: 's3', noteIds: ['Anna', 'Zora', 'Ben'], tags: [], strandIds: [] },
+        { sceneId: 's4', noteIds: ['Anna'], tags: [], strandIds: [] },
       ],
     );
     expect(result.rows.map((row) => [row.note.id, [...row.appearances], row.words])).toEqual([

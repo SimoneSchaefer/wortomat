@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import type { AnnotationKind, ManuscriptNode, SceneStatus, Tag } from '@wortomat/shared';
+import type { AnnotationKind, ManuscriptNode, SceneStatus, Strand, Tag } from '@wortomat/shared';
 import { addCounts, NO_ANNOTATIONS } from '../../core/annotations';
 import { ProjectStore, type TreeItem } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
@@ -13,16 +13,23 @@ export interface SceneFilterCriteria {
   statuses: readonly SceneStatus[];
   /** Szenen mit offenen Todos/Ideen/Fixmes dieser Arten. */
   annotations: readonly AnnotationKind[];
+  /** Merkmale, die eine Szene haben muss (bisher nur „Wendepunkt“). */
+  flags: readonly SceneFlag[];
+  strandIds: readonly string[];
   /** Charaktere und Orte (eine Gruppe je Art, s. `noteKinds`). */
   noteIds: readonly string[];
   tagIds: readonly string[];
 }
+
+export type SceneFlag = 'turningPoint';
 
 export type FilterGroup = keyof SceneFilterCriteria;
 
 export const NO_FILTER: SceneFilterCriteria = {
   statuses: [],
   annotations: [],
+  flags: [],
+  strandIds: [],
   noteIds: [],
   tagIds: [],
 };
@@ -31,6 +38,7 @@ export const NO_FILTER: SceneFilterCriteria = {
 export interface SceneLinksInfo {
   noteIds: ReadonlySet<string>;
   tags: readonly Tag[];
+  strandIds: readonly string[];
 }
 
 /**
@@ -46,6 +54,8 @@ export class SceneFilter {
   readonly criteria = signal<SceneFilterCriteria>(NO_FILTER);
   /** Charaktere, Orte und Tags je Szene; wird beim Öffnen des Filters frisch geladen. */
   readonly links = signal<ReadonlyMap<string, SceneLinksInfo>>(new Map());
+  /** Stränge, zu denen mindestens eine Szene gehört – in ihrer Reihenfolge. */
+  readonly strands = signal<readonly Strand[]>([]);
 
   readonly active = computed(() => activeCount(this.criteria()) > 0);
   readonly activeCount = computed(() => activeCount(this.criteria()));
@@ -81,16 +91,38 @@ export class SceneFilter {
   });
 
   async load(): Promise<void> {
-    const relations = await this.api.sceneRelations();
+    const [relations, strands] = await Promise.all([
+      this.api.sceneRelations(),
+      this.api.listStrands(),
+    ]);
     this.links.set(
-      new Map(relations.map((r) => [r.sceneId, { noteIds: new Set(r.noteIds), tags: r.tags }])),
+      new Map(
+        relations.map((r) => [
+          r.sceneId,
+          { noteIds: new Set(r.noteIds), tags: r.tags, strandIds: r.strandIds },
+        ]),
+      ),
     );
+    this.strands.set(strands.filter((strand) => strand.sceneCount > 0));
+    // Gelöschte Stränge nicht weiter filtern (sonst passt keine Szene mehr)
+    const known = new Set(strands.map((strand) => strand.id));
+    this.criteria.update((criteria) => ({
+      ...criteria,
+      strandIds: criteria.strandIds.filter((id) => known.has(id)),
+    }));
   }
 
-  /** Nach Änderungen in einer Szene (Charakter verknüpft, Tag vergeben …). */
-  updateScene(sceneId: string, noteIds: readonly string[], tags: readonly Tag[]): void {
+  /** Nach Änderungen in einer Szene (Strang zugeordnet, Charakter verknüpft, Tag vergeben …). */
+  updateScene(
+    sceneId: string,
+    info: { noteIds: readonly string[]; tags: readonly Tag[]; strandIds: readonly string[] },
+  ): void {
     this.links.update((links) =>
-      new Map(links).set(sceneId, { noteIds: new Set(noteIds), tags: [...tags] }),
+      new Map(links).set(sceneId, {
+        noteIds: new Set(info.noteIds),
+        tags: [...info.tags],
+        strandIds: [...info.strandIds],
+      }),
     );
   }
 
@@ -133,6 +165,15 @@ export function matchesScene(
   }
   const annotations = node.annotations ?? NO_ANNOTATIONS;
   if (criteria.annotations.length && !criteria.annotations.some((kind) => annotations[kind] > 0)) {
+    return false;
+  }
+  if (criteria.flags.includes('turningPoint') && !node.turningPoint) {
+    return false;
+  }
+  if (
+    criteria.strandIds.length &&
+    !links?.strandIds.some((id) => criteria.strandIds.includes(id))
+  ) {
     return false;
   }
   if (criteria.tagIds.length && !links?.tags.some((tag) => criteria.tagIds.includes(tag.id))) {

@@ -70,6 +70,42 @@
       </div>
     </div>
 
+    <div class="group" role="group" [attr.aria-label]="t().sceneLinks.turningPoint">
+      <span class="label">{{ t().sceneLinks.turningPoint }}</span>
+      <div class="pills">
+        <button
+          type="button"
+          class="pill"
+          [attr.aria-pressed]="filter.isSelected('flags', 'turningPoint')"
+          (click)="filter.toggle('flags', 'turningPoint')"
+        >
+          <svg class="diamond" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
+          </svg>
+          {{ t().filter.turningPoints }}
+        </button>
+      </div>
+    </div>
+
+    @if (filter.strands().length) {
+      <div class="group" role="group" [attr.aria-label]="t().sceneLinks.strands">
+        <span class="label">{{ t().sceneLinks.strands }}</span>
+        <div class="pills">
+          @for (strand of filter.strands(); track strand.id) {
+            <button
+              type="button"
+              class="pill"
+              [attr.aria-pressed]="filter.isSelected('strandIds', strand.id)"
+              (click)="filter.toggle('strandIds', strand.id)"
+            >
+              <span class="dot" [style.background]="strandColor(strand.color)"></span>
+              {{ strand.name }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
     @for (group of noteGroups(); track group.kind) {
       <div class="group" role="group" [attr.aria-label]="t().noteKinds[group.kind].label">
         <span class="label">{{ t().noteKinds[group.kind].label }}</span>

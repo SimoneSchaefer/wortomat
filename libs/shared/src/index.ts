@@ -153,6 +153,8 @@ export interface ManuscriptNode {
   status: SceneStatus | null;
   /** Todo/Idee/Fixme-Markierungen im Text; nur bei Szenen, sonst `null`. */
   annotations: AnnotationCounts | null;
+  /** Wichtiges Ereignis der Handlung; nur bei Szenen, sonst `null`. */
+  turningPoint: boolean | null;
 }
 
 export interface CreateNodeRequest {
@@ -165,6 +167,8 @@ export interface UpdateNodeRequest {
   title?: string;
   /** Nur für Szenen. */
   status?: SceneStatus;
+  /** Nur für Szenen. */
+  turningPoint?: boolean;
 }
 
 /**
@@ -388,11 +392,48 @@ export interface SceneRelations {
   /** Verknüpfte Notizen (Charaktere, Orte …). */
   noteIds: string[];
   tags: Tag[];
+  strandIds: string[];
 }
 
 /** Vergibt einen Tag per Name; gibt es ihn (ohne Groß-/Kleinschreibung) schon, wird er wiederverwendet. */
 export interface AddTagRequest {
   name: string;
+}
+
+// ---------------------------------------------------------------------------
+// Handlungsstränge (projektweit, an Szenen vergeben)
+// ---------------------------------------------------------------------------
+
+/** Feste Farben für Stränge; die Töne stehen in styles.scss (`--strand-<farbe>`), hell und dunkel. */
+export type StrandColor =
+  'violet' | 'teal' | 'rose' | 'amber' | 'blue' | 'green' | 'coral' | 'slate';
+
+/**
+ * Ein Handlungsstrang, z. B. „Lena“ oder „Die Ermittlung“. Eine Szene kann zu mehreren
+ * Strängen gehören – dort laufen sie zusammen.
+ */
+export interface Strand {
+  id: string;
+  name: string;
+  color: StrandColor;
+  /** Anzahl der Szenen in diesem Strang. */
+  sceneCount: number;
+}
+
+export interface CreateStrandRequest {
+  name: string;
+  /** Ohne Angabe die am wenigsten benutzte Farbe. */
+  color?: StrandColor;
+}
+
+export interface UpdateStrandRequest {
+  name?: string;
+  color?: StrandColor;
+}
+
+/** Ordnet eine Szene einem Strang zu. */
+export interface AddSceneStrandRequest {
+  strandId: string;
 }
 
 /** Neue Reihenfolge der Galerie; das erste Bild ist das Profilbild. */

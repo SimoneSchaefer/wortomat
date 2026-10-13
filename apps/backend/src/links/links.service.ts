@@ -40,14 +40,14 @@ export class LinksService {
     return this.notes.linkedToScene(sceneId);
   }
 
-  /** Notizen und Tags aller Szenen, die überhaupt etwas zugeordnet haben. */
+  /** Notizen, Tags und Stränge aller Szenen, die überhaupt etwas zugeordnet haben. */
   relations(): SceneRelations[] {
     const db = this.projects.db;
     const result = new Map<string, SceneRelations>();
     const entry = (sceneId: string) => {
       let relations = result.get(sceneId);
       if (!relations) {
-        relations = { sceneId, noteIds: [], tags: [] };
+        relations = { sceneId, noteIds: [], tags: [], strandIds: [] };
         result.set(sceneId, relations);
       }
       return relations;
@@ -65,6 +65,14 @@ export class LinksService {
       )
       .all() as Array<{ scene_id: string; id: string; name: string }>;
     for (const row of tags) entry(row.scene_id).tags.push({ id: row.id, name: row.name });
+    const strands = db
+      .prepare(
+        `SELECT ss.scene_id, ss.strand_id FROM scene_strands ss
+         JOIN strands s ON s.id = ss.strand_id
+         ORDER BY s.sort_order`,
+      )
+      .all() as Array<{ scene_id: string; strand_id: string }>;
+    for (const row of strands) entry(row.scene_id).strandIds.push(row.strand_id);
     return [...result.values()];
   }
 

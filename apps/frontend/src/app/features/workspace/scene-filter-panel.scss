@@ -144,6 +144,25 @@
   color: var(--accent-strong);
 }
 
+// Farbe des Strangs
+.dot {
+  flex-shrink: 0;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+
+// Wendepunkt (Raute wie in den Szenendetails)
+.diamond {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  fill: var(--accent);
+  stroke: var(--accent-strong);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
 .rule {
   margin: 0;
   font-size: 0.72rem;

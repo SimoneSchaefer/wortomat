@@ -147,10 +147,11 @@ export const de = {
 
   filter: {
     toggle: 'Filter',
-    hint: 'Szenen nach Status, offenen Markierungen, Charakteren, Orten oder Tags filtern',
+    hint: 'Szenen nach Status, offenen Markierungen, Strängen, Charakteren, Orten oder Tags filtern',
     reset: 'Zurücksetzen',
     status: 'Status',
     annotations: 'Offen',
+    turningPoints: 'Nur Wendepunkte',
     rule: 'Innerhalb einer Zeile reicht eins davon, zwischen den Zeilen muss alles passen.',
     count: (shown: number, total: number) => `${shown} von ${total} Szenen`,
     noMatch: 'Keine Szene passt zum Filter.',
@@ -488,6 +489,33 @@ export const de = {
     noTags: 'Noch keine Tags – tippe einen, um ihn anzulegen.',
     allLinked: 'Alle sind schon verknüpft – tippe einen Namen, um neu anzulegen.',
     createTag: (name: string) => `„${name}“ als neuen Tag anlegen`,
+    strands: 'Stränge',
+    strand: 'Strang',
+    allStrandsUsed: 'Die Szene gehört schon zu allen Strängen – tippe einen neuen Namen.',
+    noStrands: 'Noch keine Stränge – tippe einen Namen, um ihn anzulegen.',
+    createStrand: (name: string) => `„${name}“ als neuen Strang anlegen`,
+    editStrand: 'Strang bearbeiten',
+    editStrandLabel: (name: string) => `Strang „${name}“ bearbeiten`,
+    strandName: 'Name',
+    strandColor: 'Farbe',
+    strandColors: {
+      violet: 'Violett',
+      teal: 'Türkis',
+      rose: 'Rosa',
+      amber: 'Ocker',
+      blue: 'Blau',
+      green: 'Grün',
+      coral: 'Koralle',
+      slate: 'Schiefer',
+    },
+    deleteStrand: 'Strang löschen …',
+    deleteStrandTitle: 'Strang löschen?',
+    deleteStrandMessage: (name: string, sceneCount: number) =>
+      sceneCount === 0
+        ? `Der Strang „${name}“ wird gelöscht.`
+        : `Der Strang „${name}“ wird gelöscht. ${sceneCount === 1 ? 'Die eine Szene darin bleibt' : `Die ${sceneCount} Szenen darin bleiben`} erhalten, gehören aber nicht mehr zu diesem Strang.`,
+    turningPoint: 'Wendepunkt',
+    turningPointHint: 'Ein wichtiges Ereignis der Handlung',
   },
 
   book: {

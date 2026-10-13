@@ -12,8 +12,21 @@
           [attr.data-target]="row.target"
         >
           @for (chip of row.chips; track chip.id) {
-            <li class="chip" [class.tag]="!chip.note">
-              @if (chip.note; as note) {
+            <li class="chip" [class.tag]="!chip.note && !chip.strand">
+              @if (chip.strand; as strand) {
+                <button
+                  type="button"
+                  class="open strand"
+                  aria-haspopup="dialog"
+                  [attr.aria-expanded]="editingStrand()?.id === strand.id"
+                  [attr.aria-label]="t().sceneLinks.editStrandLabel(strand.name)"
+                  [title]="t().sceneLinks.editStrand"
+                  (click)="toggleStrandEditor(strand)"
+                >
+                  <span class="dot" [style.background]="strandColor(strand.color)"></span>
+                  {{ chip.title }}
+                </button>
+              } @else if (chip.note; as note) {
                 <button
                   type="button"
                   class="open"
@@ -104,6 +117,18 @@
                       <small>{{ option.note.summary }}</small>
                     }
                   </span>
+                } @else if (option.type === 'strand') {
+                  <span
+                    class="dot"
+                    aria-hidden="true"
+                    [style.background]="strandColor(option.strand.color)"
+                  ></span>
+                  <span class="option-text">
+                    <span>{{ option.strand.name }}</span>
+                  </span>
+                  <small class="count">{{
+                    t().sceneLinks.sceneCount(option.strand.sceneCount)
+                  }}</small>
                 } @else if (option.type === 'tag') {
                   <span class="option-text">
                     <span><span class="hash">#</span>{{ option.tag.name }}</span>
@@ -122,5 +147,57 @@
         </div>
       }
     </div>
+
+    @if (row.target === 'strand') {
+      <button
+        type="button"
+        class="turning-point"
+        [attr.aria-pressed]="turningPoint()"
+        [title]="t().sceneLinks.turningPointHint"
+        (click)="toggleTurningPoint()"
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
+        </svg>
+        {{ t().sceneLinks.turningPoint }}
+      </button>
+
+      @if (editingStrand(); as strand) {
+        <div
+          class="strand-editor"
+          role="dialog"
+          [attr.aria-label]="t().sceneLinks.editStrandLabel(strand.name)"
+          (keydown)="onEditorKeydown($event)"
+        >
+          <label>
+            <span class="field-label">{{ t().sceneLinks.strandName }}</span>
+            <input
+              wmAutofocus
+              [value]="strand.name"
+              (change)="renameStrand(strand, $any($event.target).value)"
+              (keydown.enter)="$any($event.target).blur()"
+            />
+          </label>
+          <div class="field-label" id="strand-color-label">{{ t().sceneLinks.strandColor }}</div>
+          <div class="swatches" role="radiogroup" aria-labelledby="strand-color-label">
+            @for (color of strandColors; track color) {
+              <button
+                type="button"
+                role="radio"
+                class="swatch"
+                [style.background]="strandColor(color)"
+                [attr.aria-checked]="color === strand.color"
+                [attr.aria-label]="t().sceneLinks.strandColors[color]"
+                [title]="t().sceneLinks.strandColors[color]"
+                (click)="recolorStrand(strand, color)"
+              ></button>
+            }
+          </div>
+          <button type="button" class="link delete" (click)="deleteStrand(strand)">
+            {{ t().sceneLinks.deleteStrand }}
+          </button>
+        </div>
+      }
+    }
   </div>
 }

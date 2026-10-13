@@ -9,7 +9,18 @@ function node(
   annotations: AnnotationCounts | null = null,
   wordCount = 0,
 ): ManuscriptNode {
-  return { id, kind, parentId, sortOrder, title: id, wordCount, status: null, annotations };
+  const turningPoint = kind === 'scene' ? false : null;
+  return {
+    id,
+    kind,
+    parentId,
+    sortOrder,
+    title: id,
+    wordCount,
+    status: null,
+    annotations,
+    turningPoint,
+  };
 }
 
 describe('buildTree', () => {

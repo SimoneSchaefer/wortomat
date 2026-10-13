@@ -219,6 +219,25 @@ const MIGRATIONS: readonly Migration[] = [
       update.run(counts.todo, counts.idea, counts.fixme, row.id);
     }
   },
+  /* 16: Handlungsstränge (eine Szene kann zu mehreren gehören) und Wendepunkte */ `
+    CREATE TABLE strands (
+      id          TEXT PRIMARY KEY,
+      name        TEXT NOT NULL,
+      -- Name einer festen Farbe (s. StrandColor), damit sie hell und dunkel passt
+      color       TEXT NOT NULL,
+      sort_order  REAL NOT NULL,
+      created_at  TEXT NOT NULL
+    );
+
+    CREATE TABLE scene_strands (
+      scene_id   TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+      strand_id  TEXT NOT NULL REFERENCES strands(id) ON DELETE CASCADE,
+      PRIMARY KEY (scene_id, strand_id)
+    );
+    CREATE INDEX scene_strands_by_strand ON scene_strands(strand_id);
+
+    ALTER TABLE nodes ADD COLUMN turning_point INTEGER NOT NULL DEFAULT 0;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

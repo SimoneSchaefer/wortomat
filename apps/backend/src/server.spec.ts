@@ -21,6 +21,7 @@ import type {
   SceneRelations,
   SceneText,
   SearchHit,
+  Strand,
   Tag,
   TagSummary,
   WritingDay,
@@ -928,6 +929,129 @@ describe('REST-API', () => {
     assert.equal(await invalid('x'.repeat(41)), 400);
   });
 
+  it('ordnet Szenen Handlungssträngen zu – neue Szenen erben den Strang davor', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'straenge', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const strandsOf = async (sceneId: string) =>
+      (await api<Strand[]>('GET', `/api/scenes/${sceneId}/strands`)).map((s) => s.name);
+    const status = async (method: string, urlPath: string, body: unknown) =>
+      (
+        await fetch(server.url + urlPath, {
+          method,
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+
+    // Farben werden der Reihe nach vergeben, solange man keine wählt
+    const lena = await api<Strand>('POST', '/api/strands', { name: '  Lena ' });
+    const tom = await api<Strand>('POST', '/api/strands', { name: 'Tom' });
+    assert.deepEqual([lena.name, lena.color, tom.color], ['Lena', 'violet', 'teal']);
+
+    const k1 = await node(null, 'chapter', 'K1');
+    const s1 = await node(k1.id, 'scene', 'S1');
+    assert.deepEqual(await strandsOf(s1.id), []); // erste Szene: nichts zu erben
+    await api('POST', `/api/scenes/${s1.id}/strands`, { strandId: lena.id });
+    // Zusammenlaufen: eine Szene in zwei Strängen, sortiert nach Strang-Reihenfolge
+    const s2 = await node(k1.id, 'scene', 'S2');
+    await api('POST', `/api/scenes/${s2.id}/strands`, { strandId: tom.id });
+    assert.deepEqual(await strandsOf(s2.id), ['Lena', 'Tom']);
+
+    // Auch über die Kapitelgrenze: die neue Szene erbt von der letzten Szene davor
+    const k2 = await node(null, 'chapter', 'K2');
+    const s3 = await node(k2.id, 'scene', 'S3');
+    assert.deepEqual(await strandsOf(s3.id), ['Lena', 'Tom']);
+    await api('DELETE', `/api/scenes/${s3.id}/strands/${lena.id}`);
+    assert.deepEqual(await strandsOf(s3.id), ['Tom']);
+
+    assert.deepEqual(
+      (await api<Strand[]>('GET', '/api/strands')).map((s) => [s.name, s.sceneCount]),
+      [
+        ['Lena', 2],
+        ['Tom', 2],
+      ],
+    );
+    const relations = await api<SceneRelations[]>('GET', '/api/scene-relations');
+    assert.deepEqual(relations.find((r) => r.sceneId === s2.id)?.strandIds, [lena.id, tom.id]);
+
+    // Umbenennen und umfärben
+    const renamed = await api<Strand>('PATCH', `/api/strands/${tom.id}`, {
+      name: 'Toms Flucht',
+      color: 'amber',
+    });
+    assert.deepEqual(
+      [renamed.name, renamed.color, renamed.sceneCount],
+      ['Toms Flucht', 'amber', 2],
+    );
+    assert.equal(await status('PATCH', `/api/strands/${tom.id}`, { color: 'pink' }), 400);
+    assert.equal(await status('POST', '/api/strands', { name: ' ' }), 400);
+    assert.equal(
+      await status('POST', `/api/scenes/${s1.id}/strands`, { strandId: 'gibts-nicht' }),
+      404,
+    );
+    assert.equal(await status('POST', `/api/scenes/${k1.id}/strands`, { strandId: lena.id }), 400);
+
+    // Ein Strang ohne Szenen bleibt bestehen; gelöscht wird nur ausdrücklich
+    await api('DELETE', `/api/scenes/${s1.id}/strands/${lena.id}`);
+    await api('DELETE', `/api/scenes/${s2.id}/strands/${lena.id}`);
+    assert.deepEqual(
+      (await api<Strand[]>('GET', '/api/strands')).map((s) => [s.name, s.sceneCount]),
+      [
+        ['Lena', 0],
+        ['Toms Flucht', 2],
+      ],
+    );
+    await api('DELETE', `/api/strands/${tom.id}`);
+    assert.deepEqual(await strandsOf(s2.id), []);
+    assert.deepEqual(
+      (await api<Strand[]>('GET', '/api/strands')).map((s) => s.name),
+      ['Lena'],
+    );
+  });
+
+  it('markiert Szenen als Wendepunkt', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'wendepunkte', 'Buch'),
+      title: 'Buch',
+    });
+    const kapitel = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const szene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: kapitel.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    assert.equal(szene.turningPoint, false);
+    assert.equal(kapitel.turningPoint, null);
+
+    const marked = await api<ManuscriptNode>('PATCH', `/api/nodes/${szene.id}`, {
+      turningPoint: true,
+    });
+    assert.deepEqual([marked.turningPoint, marked.status, marked.title], [true, 'idea', 'S']);
+    // Status ändern lässt den Wendepunkt in Ruhe
+    await api('PATCH', `/api/nodes/${szene.id}`, { status: 'draft' });
+    const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    assert.equal(nodes.find((n) => n.id === szene.id)?.turningPoint, true);
+
+    const status = async (id: string, body: unknown) =>
+      (
+        await fetch(`${server.url}/api/nodes/${id}`, {
+          method: 'PATCH',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+    assert.equal(await status(kapitel.id, { turningPoint: true }), 400);
+    assert.equal(await status(szene.id, { turningPoint: 'ja' }), 400);
+  });
+
   it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -948,7 +1072,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 
@@ -961,6 +1085,7 @@ describe('REST-API', () => {
     // Bestehende Szenen bekommen beim Upgrade den Status „Idee“
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.equal(nodes.find((n) => n.id === szene.id)?.status, 'idea');
+    assert.equal(nodes.find((n) => n.id === szene.id)?.turningPoint, false);
   });
 
   it('speichert App-Einstellungen dauerhaft – auch ohne geöffnetes Projekt', async () => {

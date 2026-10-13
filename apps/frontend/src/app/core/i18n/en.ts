@@ -117,10 +117,11 @@ export const en: Texts = {
 
   filter: {
     toggle: 'Filter',
-    hint: 'Filter scenes by status, open marks, characters, places or tags',
+    hint: 'Filter scenes by status, open marks, plot threads, characters, places or tags',
     reset: 'Reset',
     status: 'Status',
     annotations: 'Open',
+    turningPoints: 'Turning points only',
     rule: 'Within a row one match is enough; across rows everything must match.',
     count: (shown: number, total: number) => `${shown} of ${total} scenes`,
     noMatch: 'No scene matches the filter.',
@@ -457,6 +458,33 @@ export const en: Texts = {
     noTags: 'No tags yet – type one to create it.',
     allLinked: 'All are already linked – type a name to create a new one.',
     createTag: (name: string) => `Create “${name}” as a new tag`,
+    strands: 'Threads',
+    strand: 'Plot thread',
+    allStrandsUsed: 'The scene already belongs to every thread – type a new name.',
+    noStrands: 'No plot threads yet – type a name to create one.',
+    createStrand: (name: string) => `Create “${name}” as a new plot thread`,
+    editStrand: 'Edit plot thread',
+    editStrandLabel: (name: string) => `Edit plot thread “${name}”`,
+    strandName: 'Name',
+    strandColor: 'Color',
+    strandColors: {
+      violet: 'Violet',
+      teal: 'Teal',
+      rose: 'Rose',
+      amber: 'Ochre',
+      blue: 'Blue',
+      green: 'Green',
+      coral: 'Coral',
+      slate: 'Slate',
+    },
+    deleteStrand: 'Delete plot thread …',
+    deleteStrandTitle: 'Delete plot thread?',
+    deleteStrandMessage: (name: string, sceneCount: number) =>
+      sceneCount === 0
+        ? `The plot thread “${name}” will be deleted.`
+        : `The plot thread “${name}” will be deleted. ${sceneCount === 1 ? 'Its scene stays' : `Its ${sceneCount} scenes stay`} in the book but no longer belong to this thread.`,
+    turningPoint: 'Turning point',
+    turningPointHint: 'An important event in the plot',
   },
 
   book: {

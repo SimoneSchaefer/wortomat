@@ -95,6 +95,11 @@ export class ProjectStore {
     this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
   }
 
+  async setTurningPoint(id: string, turningPoint: boolean): Promise<void> {
+    const updated = await this.api.updateNode(id, { turningPoint });
+    this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
+  }
+
   async moveNode(id: string, request: MoveNodeRequest): Promise<void> {
     this.nodes.set(await this.api.moveNode(id, request));
   }

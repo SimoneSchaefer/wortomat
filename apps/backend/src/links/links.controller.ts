@@ -12,7 +12,7 @@ import { localized } from '../i18n.js';
 export class LinksController {
   constructor(private readonly links: LinksService) {}
 
-  /** Charaktere, Orte und Tags aller Szenen auf einmal (für den Szenenfilter). */
+  /** Charaktere, Orte, Tags und Stränge aller Szenen auf einmal (für den Szenenfilter). */
   @Get('scene-relations')
   relations(): SceneRelations[] {
     return this.links.relations();

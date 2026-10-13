@@ -38,6 +38,7 @@ interface NodeRow {
   todo_count: number;
   idea_count: number;
   fixme_count: number;
+  turning_point: number;
 }
 
 @Injectable()
@@ -58,7 +59,7 @@ export class ManuscriptService {
   list(): ManuscriptNode[] {
     const rows = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count,
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, n.turning_point, COALESCE(c.word_count, 0) AS word_count,
                 COALESCE(c.todo_count, 0) AS todo_count, COALESCE(c.idea_count, 0) AS idea_count,
                 COALESCE(c.fixme_count, 0) AS fixme_count
            FROM nodes n
@@ -87,6 +88,7 @@ export class ManuscriptService {
            VALUES (?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(id, parentId, kind, title, next, now, now);
+      if (kind === 'scene') this.inheritStrands(id);
       this.projects.touch();
     });
     return this.get(id);
@@ -104,15 +106,28 @@ export class ManuscriptService {
       }
       status = requireStatus(request.status);
     }
-    if (title === node.title && status === node.status) {
+    let turningPoint = node.turningPoint;
+    if (request?.turningPoint !== undefined) {
+      if (node.kind !== 'scene') {
+        throw new BadRequestException(
+          localized('Nur Szenen können Wendepunkte sein.', 'Only scenes can be turning points.'),
+        );
+      }
+      if (typeof request.turningPoint !== 'boolean') {
+        throw new BadRequestException(localized('Ungültiger Wert.', 'Invalid value.'));
+      }
+      turningPoint = request.turningPoint;
+    }
+    if (title === node.title && status === node.status && turningPoint === node.turningPoint) {
       return node;
     }
     transaction(this.db, () => {
       this.db
         .prepare(
-          'UPDATE nodes SET title = ?, status = COALESCE(?, status), updated_at = ? WHERE id = ?',
+          `UPDATE nodes SET title = ?, status = COALESCE(?, status),
+                  turning_point = COALESCE(?, turning_point), updated_at = ? WHERE id = ?`,
         )
-        .run(title, status, nowIso(), id);
+        .run(title, status, turningPoint === null ? null : Number(turningPoint), nowIso(), id);
       if (title !== node.title) {
         this.db.prepare('UPDATE scene_fts SET title = ? WHERE node_id = ?').run(title, id);
       }
@@ -280,7 +295,7 @@ export class ManuscriptService {
   private get(id: string): ManuscriptNode {
     const row = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, COALESCE(c.word_count, 0) AS word_count,
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, n.turning_point, COALESCE(c.word_count, 0) AS word_count,
                 COALESCE(c.todo_count, 0) AS todo_count, COALESCE(c.idea_count, 0) AS idea_count,
                 COALESCE(c.fixme_count, 0) AS fixme_count
            FROM nodes n
@@ -322,6 +337,23 @@ export class ManuscriptService {
     return result;
   }
 
+  /**
+   * Eine neue Szene gehört zu denselben Strängen wie die Szene davor (in Buchreihenfolge) –
+   * meist erzählt man einen Strang über mehrere Szenen weiter.
+   */
+  private inheritStrands(sceneId: string): void {
+    const scenes = scenesInOrder(this.list());
+    const index = scenes.findIndex((scene) => scene.id === sceneId);
+    const previous = index > 0 ? scenes[index - 1] : undefined;
+    if (!previous) return;
+    this.db
+      .prepare(
+        `INSERT INTO scene_strands (scene_id, strand_id)
+         SELECT ?, strand_id FROM scene_strands WHERE scene_id = ?`,
+      )
+      .run(sceneId, previous.id);
+  }
+
   requireScene(id: string): ManuscriptNode {
     const node = this.get(id);
     if (node.kind !== 'scene') {
@@ -355,7 +387,26 @@ function toNode(row: NodeRow): ManuscriptNode {
     wordCount: row.word_count,
     status: row.kind === 'scene' ? row.status : null,
     annotations: row.kind === 'scene' ? annotationCounts(row) : null,
+    turningPoint: row.kind === 'scene' ? row.turning_point === 1 : null,
   };
+}
+
+/** Alle Szenen in der Reihenfolge, in der sie im Buch stehen. */
+function scenesInOrder(nodes: readonly ManuscriptNode[]): ManuscriptNode[] {
+  const children = new Map<string | null, ManuscriptNode[]>();
+  for (const node of nodes) {
+    children.set(node.parentId, [...(children.get(node.parentId) ?? []), node]);
+  }
+  const result: ManuscriptNode[] = [];
+  const visit = (parentId: string | null) => {
+    const siblings = (children.get(parentId) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
+    for (const node of siblings) {
+      if (node.kind === 'scene') result.push(node);
+      else visit(node.id);
+    }
+  };
+  visit(null);
+  return result;
 }
 
 function annotationCounts(row: {
