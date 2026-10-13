@@ -256,3 +256,59 @@ footer {
     }
   }
 }
+
+// „Neues Buch beginnen“ – klappt das Formular erst auf Klick auf
+.new-book {
+  padding-bottom: 1.25rem;
+
+  h2 {
+    margin: 0;
+  }
+
+  &.open h2 {
+    margin-bottom: 1rem;
+  }
+
+  .toggle {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+
+    &:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 0.25rem;
+    }
+  }
+
+  .plus {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--button-border);
+    border-radius: 50%;
+    background: var(--button-bg);
+    font-size: 1.2rem;
+    line-height: 1;
+    font-weight: 400;
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .toggle:hover .plus {
+    background: var(--button-hover);
+  }
+
+  &.open .plus {
+    transform: rotate(45deg);
+  }
+}

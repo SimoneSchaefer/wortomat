@@ -135,29 +135,52 @@
     }
   </section>
 
-  <section class="card">
-    <h2>{{ t().start.newBook }}</h2>
-    <form (ngSubmit)="createProject()">
-      <label>
-        {{ t().common.title }}
-        <input name="title" [(ngModel)]="title" [placeholder]="t().start.titlePlaceholder" />
-      </label>
-      @if (!desktop) {
-        <label>
-          {{ t().start.location }}
-          <span class="path-row">
-            <input name="newPath" [(ngModel)]="newPath" />
-            <button type="button" [disabled]="busy()" (click)="browseLocation(locationPicker)">
-              {{ t().start.browse }}
-            </button>
-          </span>
-        </label>
-        <wm-file-picker-dialog #locationPicker mode="folder" (chosen)="chooseLocation($event)" />
-      }
-      <button class="primary" type="submit" [disabled]="busy()">
-        {{ desktop ? t().start.createWithDialog : t().start.create }}
+  <section class="card new-book" [class.open]="creating()">
+    <h2>
+      <button
+        type="button"
+        #newBookToggle
+        class="toggle"
+        aria-controls="new-book-form"
+        [attr.aria-expanded]="creating()"
+        (click)="creating.set(!creating())"
+      >
+        {{ t().start.newBook }}
+        <span class="plus" aria-hidden="true">+</span>
       </button>
-    </form>
+    </h2>
+    @if (creating()) {
+      <form
+        id="new-book-form"
+        (ngSubmit)="createProject()"
+        (keydown.escape)="creating.set(false); newBookToggle.focus()"
+      >
+        <label>
+          {{ t().common.title }}
+          <input
+            name="title"
+            wmAutofocus
+            [(ngModel)]="title"
+            [placeholder]="t().start.titlePlaceholder"
+          />
+        </label>
+        @if (!desktop) {
+          <label>
+            {{ t().start.location }}
+            <span class="path-row">
+              <input name="newPath" [(ngModel)]="newPath" />
+              <button type="button" [disabled]="busy()" (click)="browseLocation(locationPicker)">
+                {{ t().start.browse }}
+              </button>
+            </span>
+          </label>
+          <wm-file-picker-dialog #locationPicker mode="folder" (chosen)="chooseLocation($event)" />
+        }
+        <button class="primary" type="submit" [disabled]="busy()">
+          {{ desktop ? t().start.createWithDialog : t().start.create }}
+        </button>
+      </form>
+    }
   </section>
 
   @if (!desktop) {

@@ -2,6 +2,7 @@ import { Component, computed, inject, linkedSignal, resource, signal } from '@an
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import type { ProjectListEntry } from '@wortomat/shared';
+import { Autofocus } from '../../core/autofocus';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
@@ -14,7 +15,7 @@ import { StatusMessages } from '../../core/status-messages';
 
 @Component({
   selector: 'wm-start-page',
-  imports: [FormsModule, RouterLink, BookCover, FilePickerDialog],
+  imports: [FormsModule, RouterLink, Autofocus, BookCover, FilePickerDialog],
   templateUrl: './start-page.html',
   styleUrl: './start-page.scss',
 })
@@ -38,6 +39,8 @@ export class StartPage {
       Math.min(previous?.value ?? 0, Math.max(0, (list?.length ?? 0) - 1)),
   });
   protected readonly current = computed(() => this.projects.value()?.[this.selected()] ?? null);
+  /** Formular für ein neues Buch; ohne Bücher in der Liste gleich aufgeklappt. */
+  protected readonly creating = linkedSignal(() => this.projects.value()?.length === 0);
   protected readonly title = signal('');
   protected readonly busy = signal(false);
   private readonly error = inject(StatusMessages).channel();
