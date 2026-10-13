@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
+  computed,
   DestroyRef,
   effect,
   type ElementRef,
@@ -24,7 +25,10 @@ import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
+import { NotesStore } from '../notes/notes-store';
 import { Annotation } from './annotation-mark';
+import { Revision, revisionResult } from './revision';
+import type { Finding, FindingKind, RevisionResult } from './revision-check';
 import { SmartQuotes } from './smart-quotes';
 import { StatusMessages } from '../../core/status-messages';
 
@@ -59,18 +63,33 @@ export class DocumentEditor {
   readonly placeholder = input<string>();
   /** Startinhalt für Dokumente, die noch nie gespeichert wurden (z. B. Gliederung eines Charakters). */
   readonly template = input<EditorDoc | null>(null);
+  /** Überarbeitungsmodus anbieten (Szenen); Notizen brauchen ihn nicht. */
+  readonly revisable = input(false);
 
   private readonly i18n = inject(I18n);
   protected readonly t = this.i18n.t;
   private readonly api = inject(WortomatApi);
   private readonly desktop = inject(DESKTOP_BRIDGE);
   private readonly settings = inject(AppSettingsStore);
+  private readonly notes = inject(NotesStore, { optional: true });
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
   /** `null`, solange unbekannt oder die Quelle kein Schreib-Log hat. */
   protected readonly writtenToday = signal<number | null>(null);
+  /** Überarbeitungsmodus: Einstellung gilt für alle Szenen. */
+  protected readonly revising = computed(
+    () => this.revisable() && this.settings.settings().revisionMode,
+  );
+  /** Fundstellen der letzten Prüfung; `null` bei ausgeschaltetem Modus. */
+  protected readonly revision = signal<RevisionResult | null>(null);
+  protected readonly findingKinds: readonly FindingKind[] = [
+    'repetition',
+    'filler',
+    'long',
+    'double',
+  ];
   private readonly error = inject(StatusMessages).channel();
   /** Wird bei jeder Editor-Transaktion erhöht, damit die Toolbar ihren Zustand neu berechnet. */
   private readonly editorTick = signal(0);
@@ -100,6 +119,11 @@ export class DocumentEditor {
       const id = this.documentId();
       untracked(() => void this.load(id));
     });
+
+    effect(() => {
+      const revising = this.revising();
+      untracked(() => this.editor?.commands.setRevisionMode(revising));
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -122,6 +146,7 @@ export class DocumentEditor {
       this.dirty = false;
       this.pastedWords = 0;
       this.editor = this.createEditor(content.doc ?? this.template());
+      this.editor.commands.setRevisionMode(this.revising());
       this.wordCount.set(content.wordCount);
       this.status.set('saved');
       void this.refreshWrittenToday();
@@ -216,6 +241,11 @@ export class DocumentEditor {
         Placeholder.configure({
           placeholder: this.placeholder() ?? this.t().editor.placeholder,
         }),
+        Revision.configure({
+          names: () => this.names(),
+          describe: (finding) => this.describeFinding(finding),
+          toggle: () => this.toggleRevision(),
+        }),
       ],
       editorProps: {
         attributes: { class: 'wm-prose', spellcheck: 'true', lang: 'de' },
@@ -244,7 +274,10 @@ export class DocumentEditor {
         this.wordCount.set(editor.storage.characterCount.words());
         this.scheduleSave();
       },
-      onTransaction: () => this.editorTick.update((tick) => tick + 1),
+      onTransaction: ({ editor }) => {
+        this.editorTick.update((tick) => tick + 1);
+        this.revision.set(revisionResult(editor.state));
+      },
     });
   }
 
@@ -296,6 +329,47 @@ export class DocumentEditor {
 
   protected annotate(kind: AnnotationKind): void {
     this.editor?.chain().focus().toggleAnnotation(kind).run();
+  }
+
+  // Überarbeitungsmodus ---------------------------------------------------------
+
+  protected toggleRevision(): void {
+    if (!this.revisable()) return;
+    this.settings
+      .setRevisionMode(!this.settings.settings().revisionMode)
+      .catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
+  }
+
+  protected nextFinding(kind: FindingKind): void {
+    this.editor?.commands.selectNextFinding(kind);
+  }
+
+  /** Namen von Figuren und Orten, klein und in Einzelwörter zerlegt („Anna Berger“). */
+  private names(): ReadonlySet<string> {
+    const names = new Set<string>();
+    for (const note of this.notes?.notes() ?? []) {
+      if (note.kind !== 'character' && note.kind !== 'place') continue;
+      for (const part of note.title.toLowerCase().split(/[^\p{L}\p{N}]+/u)) {
+        if (part) names.add(part);
+      }
+    }
+    return names;
+  }
+
+  private describeFinding(finding: Finding): string {
+    const texts = this.t().revision;
+    switch (finding.kind) {
+      case 'repetition':
+        return finding.other === 'before'
+          ? texts.repeatedBefore(finding.word, finding.distance)
+          : texts.repeatedAfter(finding.word, finding.distance);
+      case 'filler':
+        return texts.fillerTip(finding.word);
+      case 'long':
+        return texts.longTip(finding.words);
+      case 'double':
+        return texts.doubleTip(finding.word);
+    }
   }
 
   protected command(command: ToolbarCommand): void {

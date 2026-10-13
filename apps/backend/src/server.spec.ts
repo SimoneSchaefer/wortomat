@@ -5,6 +5,7 @@ import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { after, before, describe, it } from 'node:test';
 import type {
+  AppSettings,
   DirectoryListing,
   ImageInfo,
   ManuscriptNode,
@@ -16,10 +17,10 @@ import type {
   SceneContent,
   SceneReference,
   SceneRelations,
+  SceneText,
   SearchHit,
   Tag,
   TagSummary,
-  TextStatsResponse,
   WritingDay,
 } from '@wortomat/shared';
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
@@ -660,12 +661,11 @@ describe('REST-API', () => {
     await api('POST', '/api/project/close');
   });
 
-  it('wertet den Text aus: Dialog, Sätze, Füll- und Lieblingswörter ohne Namen', async () => {
+  it('liefert den reinen Text aller Szenen', async () => {
     await api<ProjectInfo>('POST', '/api/project/create', {
-      filePath: path.join(tmpDir, 'Textstatistik'),
-      title: 'Textstatistik',
+      filePath: path.join(tmpDir, 'Szenentexte'),
+      title: 'Szenentexte',
     });
-    await api('POST', '/api/notes', { kind: 'character', title: 'Anna Berger' });
     const chapter = await api<ManuscriptNode>('POST', '/api/nodes', {
       parentId: null,
       kind: 'chapter',
@@ -676,21 +676,15 @@ describe('REST-API', () => {
       kind: 'scene',
       title: 'S',
     });
-    // Standard-Anführungszeichen sind die deutschen („…“)
-    const text = '„Komm eigentlich her“, sagte Anna. Der Fluss rauschte.\nAnna sah den Fluss.';
+    const text = '„Komm her“, sagte Anna.\nDer Fluss rauschte.';
     await api('PUT', `/api/scenes/${scene.id}/content`, {
       doc: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] },
       text,
-      wordCount: 12,
+      wordCount: 7,
     });
-
-    const stats = await api<TextStatsResponse>('GET', '/api/text-stats');
-    assert.deepEqual(stats.scenes, [
-      { sceneId: scene.id, words: 12, dialogueWords: 3, sentences: 3 },
+    assert.deepEqual(await api<SceneText[]>('GET', '/api/scene-texts'), [
+      { sceneId: scene.id, text },
     ]);
-    assert.deepEqual(stats.fillers, [{ word: 'eigentlich', count: 1 }]);
-    assert.deepEqual(stats.topWords[0], { word: 'Fluss', count: 2 });
-    assert.ok(!stats.topWords.some((entry) => entry.word.toLowerCase() === 'anna'));
     await api('POST', '/api/project/close');
   });
 
@@ -856,6 +850,7 @@ describe('REST-API', () => {
       quoteStyle: 'de',
       theme: 'system',
       fontSize: 'medium',
+      revisionMode: false,
     });
 
     assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: 340.6 }), {
@@ -864,6 +859,7 @@ describe('REST-API', () => {
       quoteStyle: 'de',
       theme: 'system',
       fontSize: 'medium',
+      revisionMode: false,
     });
     // Einzelne Werte ändern lässt die anderen stehen
     assert.deepEqual(await api('PATCH', '/api/settings', { quoteStyle: 'de-guillemets' }), {
@@ -872,6 +868,7 @@ describe('REST-API', () => {
       quoteStyle: 'de-guillemets',
       theme: 'system',
       fontSize: 'medium',
+      revisionMode: false,
     });
     assert.deepEqual(await api('PATCH', '/api/settings', { language: 'en' }), {
       language: 'en',
@@ -879,6 +876,7 @@ describe('REST-API', () => {
       quoteStyle: 'de-guillemets',
       theme: 'system',
       fontSize: 'medium',
+      revisionMode: false,
     });
 
     // Zweiter Server mit demselben Datenordner (= App-Neustart) liest den Wert
@@ -900,6 +898,7 @@ describe('REST-API', () => {
         quoteStyle: 'de-guillemets',
         theme: 'system',
         fontSize: 'medium',
+        revisionMode: false,
       });
     } finally {
       await restarted.close();
@@ -919,12 +918,19 @@ describe('REST-API', () => {
     assert.equal(await invalid({ language: 'tlh' }), 400);
     assert.equal(await invalid({ theme: 'sepia' }), 400);
     assert.equal(await invalid({ fontSize: 'riesig' }), 400);
+    assert.equal(await invalid({ revisionMode: 'ja' }), 400);
+    assert.equal(
+      (await api<AppSettings>('PATCH', '/api/settings', { revisionMode: true })).revisionMode,
+      true,
+    );
+    await api('PATCH', '/api/settings', { revisionMode: false });
     assert.deepEqual(await api('PATCH', '/api/settings', { theme: 'dark', fontSize: 'large' }), {
       language: 'en',
       sidebarWidth: 341,
       quoteStyle: 'de-guillemets',
       theme: 'dark',
       fontSize: 'large',
+      revisionMode: false,
     });
 
     // Zurück auf Standard
@@ -935,8 +941,16 @@ describe('REST-API', () => {
         quoteStyle: 'de',
         theme: 'system',
         fontSize: 'medium',
+        revisionMode: false,
       }),
-      { language: null, sidebarWidth: null, quoteStyle: 'de', theme: 'system', fontSize: 'medium' },
+      {
+        language: null,
+        sidebarWidth: null,
+        quoteStyle: 'de',
+        theme: 'system',
+        fontSize: 'medium',
+        revisionMode: false,
+      },
     );
 
     // Für die folgenden Tests wieder öffnen

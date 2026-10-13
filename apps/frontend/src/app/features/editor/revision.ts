@@ -1,0 +1,142 @@
+import { Extension } from '@tiptap/core';
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
+import { type EditorState, Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
+import {
+  checkRevision,
+  type Finding,
+  type FindingKind,
+  type RevisionResult,
+  type TextBlock,
+} from './revision-check';
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    revision: {
+      /** Überarbeitungsmodus an/aus – die Hinweise werden nie im Dokument gespeichert. */
+      setRevisionMode: (enabled: boolean) => ReturnType;
+      /** Wählt die nächste Stelle dieser Art hinter der Auswahl (am Ende wieder von vorn). */
+      selectNextFinding: (kind: FindingKind) => ReturnType;
+    };
+  }
+}
+
+export interface RevisionOptions {
+  /** Namen von Figuren und Orten (klein) – werden bei jeder Prüfung neu gelesen. */
+  names: () => ReadonlySet<string>;
+  /** Text für den Tooltip einer Stelle. */
+  describe: (finding: Finding) => string;
+  /** Tastenkürzel: Modus umschalten (gespeichert wird draußen, in den Einstellungen). */
+  toggle: () => void;
+}
+
+interface RevisionState {
+  enabled: boolean;
+  result: RevisionResult | null;
+  decorations: DecorationSet;
+}
+
+export const revisionKey = new PluginKey<RevisionState>('revision');
+
+/** Ergebnis der letzten Prüfung; `null`, solange der Modus aus ist. */
+export function revisionResult(state: EditorState): RevisionResult | null {
+  return revisionKey.getState(state)?.result ?? null;
+}
+
+/**
+ * Überarbeitungsmodus: markiert Nahwiederholungen, Füllwörter, lange Sätze und doppelte
+ * Wörter als Dekorationen – nur Anzeige, das Dokument bleibt unverändert.
+ * Geprüft wird bei jeder Änderung neu; bei Szenenlänge dauert das wenige Millisekunden.
+ */
+export const Revision = Extension.create<RevisionOptions>({
+  name: 'revision',
+
+  addOptions() {
+    return { names: () => new Set(), describe: () => '', toggle: () => undefined };
+  },
+
+  addCommands() {
+    return {
+      setRevisionMode:
+        (enabled) =>
+        ({ tr, dispatch }) => {
+          dispatch?.(tr.setMeta(revisionKey, { enabled }));
+          return true;
+        },
+      selectNextFinding:
+        (kind) =>
+        ({ state, chain }) => {
+          const findings = revisionResult(state)?.findings.filter((f) => f.kind === kind) ?? [];
+          const after = state.selection.from;
+          const next = findings.find((f) => f.from > after) ?? findings[0];
+          if (!next) return false;
+          return chain()
+            .focus()
+            .setTextSelection({ from: next.from, to: next.to })
+            .scrollIntoView()
+            .run();
+        },
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Alt-r': () => {
+        this.options.toggle();
+        return true;
+      },
+    };
+  },
+
+  addProseMirrorPlugins() {
+    const options = this.options;
+    const compute = (doc: ProseMirrorNode): Omit<RevisionState, 'enabled'> => {
+      const result = checkRevision(textBlocks(doc), options.names());
+      const decorations = result.findings.map((finding) =>
+        Decoration.inline(finding.from, finding.to, {
+          class: `wm-rev wm-rev-${finding.kind}`,
+          title: options.describe(finding),
+        }),
+      );
+      return { result, decorations: DecorationSet.create(doc, decorations) };
+    };
+
+    return [
+      new Plugin<RevisionState>({
+        key: revisionKey,
+        state: {
+          init: () => ({ enabled: false, result: null, decorations: DecorationSet.empty }),
+          apply: (tr, value, _old, state) => {
+            const meta = tr.getMeta(revisionKey) as { enabled: boolean } | undefined;
+            const enabled = meta?.enabled ?? value.enabled;
+            if (!enabled) {
+              return value.enabled
+                ? { enabled: false, result: null, decorations: DecorationSet.empty }
+                : value;
+            }
+            if (!meta && !tr.docChanged) return value;
+            return { enabled, ...compute(state.doc) };
+          },
+        },
+        props: {
+          decorations: (state) => revisionKey.getState(state)?.decorations,
+        },
+      }),
+    ];
+  },
+});
+
+/**
+ * Textblöcke (Absätze, Überschriften) mit Position ihres ersten Zeichens. Bilder und
+ * Zeilenumbrüche werden zu einem Leerzeichen – sie belegen wie ein Zeichen genau eine
+ * Position, so bleibt Textindex = Position − Start.
+ */
+function textBlocks(doc: ProseMirrorNode): TextBlock[] {
+  const blocks: TextBlock[] = [];
+  doc.descendants((node, pos) => {
+    if (!node.isTextblock) return true;
+    blocks.push({ text: node.textBetween(0, node.content.size, undefined, ' '), start: pos + 1 });
+    return false;
+  });
+  return blocks;
+}

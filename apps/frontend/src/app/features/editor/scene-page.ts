@@ -29,7 +29,7 @@ const TITLE_SAVE_DELAY_MS = 600;
   selector: 'wm-scene-page',
   imports: [DocumentEditor, SceneLinks, SceneStatusPicker],
   template: `
-    <wm-document-editor [documentId]="id()" [source]="source">
+    <wm-document-editor [documentId]="id()" [source]="source" [revisable]="true">
       <input
         #titleInput
         class="doc-title doc-input"

@@ -86,6 +86,25 @@
         >
           ↷
         </button>
+        @if (revisable()) {
+          <span class="sep"></span>
+          <!-- Überarbeitungsmodus: markiert Wiederholungen, Füllwörter … (nur Anzeige); nur Symbol, damit die Leiste nicht umbricht -->
+          <button
+            type="button"
+            class="revision"
+            [class.on]="revising()"
+            [attr.aria-pressed]="revising()"
+            [title]="hint(t().revision.toggle, 'R', { alt: true })"
+            [attr.aria-label]="t().revision.label"
+            (click)="toggleRevision()"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2.5 4h7M2.5 8h5M2.5 12h4" />
+              <circle cx="11.5" cy="10" r="2.5" />
+              <path d="M13.3 11.8l1.7 1.7" />
+            </svg>
+          </button>
+        }
       </div>
     </div>
     <div #editorHost class="editor-host"></div>
@@ -95,6 +114,23 @@
 <footer class="statusbar">
   <span>{{ t().words(wordCount()) }}</span>
   <span class="status" [class]="status()">{{ t().editor.saveStatus[status()] }}</span>
+  @if (revising() && revision(); as result) {
+    <!-- je Art: Anzahl, ein Klick springt zur nächsten Stelle -->
+    <span class="findings" role="group" [attr.aria-label]="t().revision.label">
+      @for (kind of findingKinds; track kind) {
+        <button
+          type="button"
+          class="finding"
+          [disabled]="!result.counts[kind]"
+          [title]="t().revision.next"
+          (click)="nextFinding(kind)"
+        >
+          <span class="key" [class]="kind" aria-hidden="true"></span>
+          {{ t().revision.counts[kind](result.counts[kind]) }}
+        </button>
+      }
+    </span>
+  }
   @if (writtenToday() !== null) {
     <span class="today" [title]="t().editor.writtenTodayHint">
       {{ t().editor.writtenToday(writtenToday()!) }}

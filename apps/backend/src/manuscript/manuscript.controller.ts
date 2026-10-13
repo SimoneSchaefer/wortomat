@@ -5,6 +5,7 @@ import type {
   MoveNodeRequest,
   SaveDocumentRequest,
   SceneContent,
+  SceneText,
   UpdateNodeRequest,
 } from '@wortomat/shared';
 import { ManuscriptService } from './manuscript.service.js';
@@ -38,6 +39,12 @@ export class ManuscriptController {
   @HttpCode(204)
   remove(@Param('id') id: string): void {
     this.manuscript.remove(id);
+  }
+
+  /** Reiner Text aller Szenen, z. B. für die Textstatistik. */
+  @Get('scene-texts')
+  texts(): SceneText[] {
+    return this.manuscript.texts();
   }
 
   @Get('scenes/:id/content')

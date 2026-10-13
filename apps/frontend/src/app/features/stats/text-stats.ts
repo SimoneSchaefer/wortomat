@@ -1,8 +1,11 @@
 import { Component, computed, inject, resource } from '@angular/core';
+import { AppSettingsStore } from '../../core/app-settings';
 import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { SearchRequest } from '../../core/search-request';
+import { analyzeBook, quotePair } from '../../core/text-analysis';
 import { WortomatApi } from '../../core/wortomat-api';
+import { NotesStore } from '../notes/notes-store';
 import { chapterText } from './stats';
 
 /**
@@ -19,11 +22,25 @@ export class TextStats {
   private readonly store = inject(ProjectStore);
   private readonly api = inject(WortomatApi);
   private readonly search = inject(SearchRequest);
+  private readonly settings = inject(AppSettingsStore);
+  private readonly notes = inject(NotesStore);
 
-  private readonly stats = resource({ loader: () => this.api.textStats() });
+  private readonly texts = resource({ loader: () => this.api.sceneTexts() });
+  /** Namen von Charakteren und Orten – keine „Lieblingswörter“. */
+  private readonly names = computed(() =>
+    this.notes
+      .notes()
+      .filter((note) => note.kind === 'character' || note.kind === 'place')
+      .map((note) => note.title),
+  );
+  private readonly stats = computed(() => {
+    const texts = this.texts.value();
+    if (!texts) return null;
+    return analyzeBook(texts, quotePair(this.settings.settings().quoteStyle), this.names());
+  });
 
   protected readonly data = computed(() => {
-    const stats = this.stats.value();
+    const stats = this.stats();
     if (!stats) return null;
     const chapters = chapterText(this.store.tree(), stats.scenes).map((chapter) => ({
       ...chapter,

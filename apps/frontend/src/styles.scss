@@ -32,6 +32,13 @@
   --annotation-idea: #2f9e8f;
   --annotation-fixme: #d64545;
 
+  // Überarbeitungsmodus: Linien unter dem Text, zusätzlich an der Linienart unterscheidbar.
+  // Andere Farbtöne als Todo/Idee/Fixme; geprüft auf Farbfehlsichtigkeit (hell und dunkel)
+  --revision-repetition: #c2457a;
+  --revision-filler: #2a78d6;
+  --revision-double: #eb6834;
+  --revision-long: color-mix(in srgb, var(--text) 7%, transparent);
+
   // Einheitliche Höhe und Schriftgröße der „Pillen“ im Szenenkopf (Status, Charaktere, Orte, Tags, +)
   --pill-height: 1.5rem;
   --pill-font-size: 0.78rem;
@@ -73,6 +80,11 @@
   --annotation-todo: #f2c94c;
   --annotation-idea: #4fc1b0;
   --annotation-fixme: #f07070;
+
+  --revision-repetition: #d35fa8;
+  --revision-filler: #3987e5;
+  --revision-double: #d95926;
+  --revision-long: color-mix(in srgb, var(--text) 9%, transparent);
 }
 
 :root[data-theme='dark'] {
@@ -278,6 +290,39 @@ mark {
     color: var(--text-muted);
     pointer-events: none;
   }
+}
+
+// Überarbeitungsmodus: Hinweise als Dekorationen (nur Anzeige, nie gespeichert).
+// Wiederholung gepunktet, Füllwort gestrichelt, doppeltes Wort doppelt unterstrichen,
+// langer Satz zart hinterlegt – auch ohne Farbe unterscheidbar.
+.wm-rev {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.22em;
+  text-decoration-skip-ink: none;
+}
+
+.wm-rev-repetition {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--revision-repetition);
+}
+
+.wm-rev-filler {
+  text-decoration-line: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--revision-filler);
+}
+
+.wm-rev-double {
+  text-decoration-line: underline;
+  text-decoration-style: double;
+  text-decoration-color: var(--revision-double);
+}
+
+.wm-rev-long {
+  background: var(--revision-long);
+  border-radius: 2px;
+  box-decoration-break: clone;
 }
 
 // ---------------------------------------------------------------------------

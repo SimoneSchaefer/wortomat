@@ -27,10 +27,10 @@ import type {
   SceneContent,
   SceneReference,
   SceneRelations,
+  SceneText,
   SearchHit,
   Tag,
   TagSummary,
-  TextStatsResponse,
   UpdateAppSettingsRequest,
   UpdateNodeRequest,
   UpdateNoteGroupRequest,
@@ -134,9 +134,9 @@ export class WortomatApi {
     return this.call(this.http.get<WritingDay>('/api/writing-log/today'));
   }
 
-  /** Dialog und Sätze je Szene, Füll- und Lieblingswörter des Buchs. */
-  textStats(): Promise<TextStatsResponse> {
-    return this.call(this.http.get<TextStatsResponse>('/api/text-stats'));
+  /** Reiner Text aller Szenen (Absätze durch Zeilenumbrüche getrennt). */
+  sceneTexts(): Promise<SceneText[]> {
+    return this.call(this.http.get<SceneText[]>('/api/scene-texts'));
   }
 
   /** Schreib-Log je Tag von `from` bis `to` (YYYY-MM-DD, inklusive). */

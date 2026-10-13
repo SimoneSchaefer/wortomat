@@ -369,6 +369,30 @@ export const de = {
       `Kalender der Schreibtage im letzten Jahr; in den letzten 30 Tagen ${numberFormat.format(last30)} Wörter geschrieben`,
   },
 
+  revision: {
+    label: 'Überarbeiten',
+    toggle:
+      'Überarbeitungsmodus: Wiederholungen, Füllwörter, lange Sätze und doppelte Wörter markieren',
+    next: 'Zur nächsten Stelle springen',
+    counts: {
+      repetition: (count: number) =>
+        count === 1 ? '1 Wiederholung' : `${numberFormat.format(count)} Wiederholungen`,
+      filler: (count: number) =>
+        count === 1 ? '1 Füllwort' : `${numberFormat.format(count)} Füllwörter`,
+      long: (count: number) =>
+        count === 1 ? '1 langer Satz' : `${numberFormat.format(count)} lange Sätze`,
+      double: (count: number) =>
+        count === 1 ? '1 doppeltes Wort' : `${numberFormat.format(count)} doppelte Wörter`,
+    },
+    repeatedBefore: (word: string, distance: number) =>
+      `Wiederholung: „${word}“ steht ${distance} Wörter vorher schon einmal`,
+    repeatedAfter: (word: string, distance: number) =>
+      `Wiederholung: „${word}“ kommt ${distance} Wörter später noch einmal`,
+    fillerTip: (word: string) => `Füllwort: „${word}“`,
+    longTip: (words: number) => `Langer Satz: ${numberFormat.format(words)} Wörter`,
+    doubleTip: (word: string) => `Doppeltes Wort: „${word} ${word}“`,
+  },
+
   sceneStatus: {
     label: 'Status',
     names: {

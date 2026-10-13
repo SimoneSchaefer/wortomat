@@ -1,6 +1,9 @@
+import type { QuoteStyle } from '@wortomat/shared';
+
 /**
- * Textstatistik für deutsche Prosa: Dialoganteil, Sätze, Füllwörter, häufige Wörter.
+ * Textanalyse für deutsche Prosa: Dialoganteil, Sätze, Füllwörter, häufige Wörter.
  * Bewusst einfache Regeln – die Zahlen sollen Tendenzen zeigen, keine Linguistik ersetzen.
+ * Statistik und Überarbeitungsmodus nutzen dieselben Regeln, damit sie gleich zählen.
  */
 
 /** Feste Liste typischer Füllwörter; Mehrwortausdrücke mit Leerzeichen. */
@@ -78,6 +81,23 @@ export interface QuotePair {
   close: string;
 }
 
+/**
+ * Wörtliche Rede je Stil – nur das jeweils erste bzw. letzte Zeichen (beim französischen Stil
+ * gehören schmale Leerzeichen dazu). Ohne Ersetzen tippt man meist gerade Anführungszeichen.
+ */
+const QUOTES: Record<QuoteStyle, QuotePair> = {
+  de: { open: '„', close: '“' },
+  'de-guillemets': { open: '»', close: '«' },
+  ch: { open: '«', close: '»' },
+  en: { open: '“', close: '”' },
+  fr: { open: '«', close: '»' },
+  off: { open: '"', close: '"' },
+};
+
+export function quotePair(style: QuoteStyle): QuotePair {
+  return QUOTES[style];
+}
+
 export interface TextStats {
   /** Wörter (Folgen mit mindestens einem Buchstaben oder einer Ziffer). */
   words: number;
@@ -94,6 +114,38 @@ export interface TextStats {
 
 const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u;
 const TRIM_PUNCTUATION = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu;
+
+/** Wort ohne Satzzeichen davor und dahinter („»Blick!«“ → „Blick“); leer bei reinen Zeichen. */
+export function wordCore(token: string): string {
+  return token.replace(TRIM_PUNCTUATION, '');
+}
+
+/** Bedeutungstragendes Wort (klein geschrieben übergeben): kein Funktions-/Füllwort, keine Zahl. */
+export function isContentWord(word: string): boolean {
+  return (
+    word.length > 2 &&
+    !STOP_WORDS.has(word) &&
+    !FILLER_WORDS.includes(word) &&
+    !/^\p{N}+$/u.test(word)
+  );
+}
+
+/**
+ * Füllwort an Stelle `index` der (klein geschriebenen) Wortfolge – auch aus zwei Wörtern
+ * („ein wenig“). Liefert den Ausdruck und wie viele Wörter er umfasst.
+ */
+export function fillerAt(
+  words: readonly string[],
+  index: number,
+): { filler: string; length: 1 | 2 } | null {
+  const word = words[index];
+  if (!word) return null;
+  const next = words[index + 1];
+  const pair = next ? `${word} ${next}` : null;
+  if (pair && FILLER_WORDS.includes(pair)) return { filler: pair, length: 2 };
+  if (FILLER_WORDS.includes(word)) return { filler: word, length: 1 };
+  return null;
+}
 
 export function analyzeText(text: string, quotes: QuotePair | null): TextStats {
   const stats: TextStats = {
@@ -127,7 +179,7 @@ function analyzeParagraph(paragraph: string, quotes: QuotePair | null, stats: Te
   }
 
   const tokens = paragraph.split(/\s+/).filter(Boolean);
-  const forms = tokens.map((token) => token.replace(TRIM_PUNCTUATION, ''));
+  const forms = tokens.map(wordCore);
   const words = forms.map((form) => form.toLowerCase());
   let wordsInSentence = 0;
   // zweites Wort eines Füllausdrucks („ein wenig“) – nicht noch einmal einzeln zählen
@@ -138,14 +190,12 @@ function analyzeParagraph(paragraph: string, quotes: QuotePair | null, stats: Te
     stats.words++;
     wordsInSentence++;
 
-    const next = words[index + 1];
-    const pair = next ? `${word} ${next}` : null;
+    const filler = partOfFiller ? null : fillerAt(words, index);
     if (partOfFiller) partOfFiller = false;
-    else if (pair && FILLER_WORDS.includes(pair)) {
-      increment(stats.fillers, pair);
-      partOfFiller = true;
-    } else if (FILLER_WORDS.includes(word)) increment(stats.fillers, word);
-    else if (word.length > 2 && !STOP_WORDS.has(word) && !/^\p{N}+$/u.test(word)) {
+    else if (filler) {
+      increment(stats.fillers, filler.filler);
+      partOfFiller = filler.length === 2;
+    } else if (isContentWord(word)) {
       increment(stats.wordCounts, word);
       let wordForms = stats.wordForms.get(word);
       if (!wordForms) stats.wordForms.set(word, (wordForms = new Map()));
@@ -166,7 +216,7 @@ function analyzeParagraph(paragraph: string, quotes: QuotePair | null, stats: Te
  * Abkürzungen, Einzelbuchstaben („z. B.“, „J. R.“), Ordnungszahlen („3. Mai“) und wenn das
  * nächste Wort klein beginnt („»Komm!«, rief sie“).
  */
-function endsSentence(token: string, word: string, nextToken: string | undefined): boolean {
+export function endsSentence(token: string, word: string, nextToken: string | undefined): boolean {
   const trailing = token.replace(/[»«„“”"'’‹›)\]]+$/u, '');
   if (!/[.!?…]$/u.test(trailing)) return false;
   if (nextToken) {
@@ -186,4 +236,99 @@ function countWords(text: string): number {
 
 function increment(map: Map<string, number>, key: string): void {
   map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+// ---------------------------------------------------------------------------
+// Auswertung über das ganze Buch (Statistikseite)
+// ---------------------------------------------------------------------------
+
+const TOP_WORDS = 15;
+
+export interface SceneTextStats {
+  sceneId: string;
+  words: number;
+  dialogueWords: number;
+  sentences: number;
+}
+
+export interface WordCount {
+  word: string;
+  count: number;
+}
+
+export interface BookTextStats {
+  scenes: SceneTextStats[];
+  /** Gefundene Füllwörter, häufigste zuerst. */
+  fillers: WordCount[];
+  /**
+   * Häufigste Wörter (ab zwei Vorkommen) ohne Funktions-, Füllwörter und `names`, in ihrer
+   * häufigsten Schreibweise.
+   */
+  topWords: WordCount[];
+  words: number;
+}
+
+/** Wertet alle Szenen aus; `names` (z. B. Charaktere, Orte) zählen nicht als Lieblingswörter. */
+export function analyzeBook(
+  texts: readonly { sceneId: string; text: string }[],
+  quotes: QuotePair | null,
+  names: readonly string[],
+): BookTextStats {
+  const fillers = new Map<string, number>();
+  const wordCounts = new Map<string, number>();
+  const wordForms = new Map<string, Map<string, number>>();
+  let words = 0;
+  const scenes = texts.map(({ sceneId, text }) => {
+    const stats = analyzeText(text, quotes);
+    words += stats.words;
+    merge(fillers, stats.fillers);
+    merge(wordCounts, stats.wordCounts);
+    for (const [word, forms] of stats.wordForms) {
+      let merged = wordForms.get(word);
+      if (!merged) wordForms.set(word, (merged = new Map()));
+      merge(merged, forms);
+    }
+    return {
+      sceneId,
+      words: stats.words,
+      dialogueWords: stats.dialogueWords,
+      sentences: stats.sentences,
+    };
+  });
+
+  for (const name of names) {
+    for (const part of name.toLowerCase().split(/[^\p{L}\p{N}]+/u)) wordCounts.delete(part);
+  }
+
+  return {
+    scenes,
+    fillers: ranked(fillers),
+    // erst ab zwei Vorkommen – einmalige Wörter sind kein Muster; in der häufigsten
+    // Schreibweise: „Blick“, aber „ging“
+    topWords: ranked(wordCounts)
+      .filter(({ count }) => count > 1)
+      .slice(0, TOP_WORDS)
+      .map(({ word, count }) => ({ word: commonForm(wordForms.get(word)) ?? word, count })),
+    words,
+  };
+}
+
+function merge(into: Map<string, number>, from: ReadonlyMap<string, number>): void {
+  for (const [key, count] of from) into.set(key, (into.get(key) ?? 0) + count);
+}
+
+/** Häufigste zuerst, bei Gleichstand alphabetisch. */
+function ranked(counts: ReadonlyMap<string, number>): WordCount[] {
+  return [...counts]
+    .map(([word, count]) => ({ word, count }))
+    .sort((a, b) => b.count - a.count || a.word.localeCompare(b.word, 'de'));
+}
+
+function commonForm(forms: ReadonlyMap<string, number> | undefined): string | undefined {
+  let best: string | undefined;
+  let bestCount = 0;
+  for (const [form, count] of forms ?? []) {
+    if (count > bestCount) [best, bestCount] = [form, count];
+  }
+  return best;
 }

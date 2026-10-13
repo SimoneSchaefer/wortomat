@@ -27,6 +27,7 @@ const DEFAULTS: AppSettings = {
   quoteStyle: 'de',
   theme: 'system',
   fontSize: 'medium',
+  revisionMode: false,
 };
 
 /**
@@ -105,6 +106,17 @@ export class AppSettingsService {
       }
       next.fontSize = request.fontSize;
     }
+    if (request?.revisionMode !== undefined) {
+      if (typeof request.revisionMode !== 'boolean') {
+        throw new BadRequestException(
+          localized(
+            'Der Überarbeitungsmodus ist entweder an oder aus.',
+            'The revision mode is either on or off.',
+          ),
+        );
+      }
+      next.revisionMode = request.revisionMode;
+    }
     mkdirSync(path.dirname(this.file), { recursive: true });
     // Erst in eine Temp-Datei schreiben, dann umbenennen: nie eine halb geschriebene Datei.
     const tmpFile = `${this.file}.tmp`;
@@ -123,6 +135,7 @@ function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
   if (isQuoteStyle(stored?.quoteStyle)) result.quoteStyle = stored.quoteStyle;
   if (THEMES.includes(stored?.theme as Theme)) result.theme = stored.theme;
   if (FONT_SIZES.includes(stored?.fontSize as FontSize)) result.fontSize = stored.fontSize;
+  if (typeof stored?.revisionMode === 'boolean') result.revisionMode = stored.revisionMode;
   return result;
 }
 

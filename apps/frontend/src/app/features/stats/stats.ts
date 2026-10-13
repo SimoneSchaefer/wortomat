@@ -1,12 +1,7 @@
-import type {
-  ManuscriptNode,
-  NoteSummary,
-  SceneRelations,
-  SceneStatus,
-  SceneTextStats,
-} from '@wortomat/shared';
+import type { ManuscriptNode, NoteSummary, SceneRelations, SceneStatus } from '@wortomat/shared';
 import type { TreeItem } from '../../core/project-store';
 import { SCENE_STATUSES } from '../../core/scene-status';
+import type { SceneTextStats } from '../../core/text-analysis';
 
 /** Faustregel für eine Normseite (1.800 Zeichen). */
 export const WORDS_PER_PAGE = 250;

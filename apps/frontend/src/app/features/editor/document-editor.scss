@@ -91,6 +91,20 @@
     stroke-linecap: round;
   }
 
+  // Überarbeitungsmodus: nur Symbol (der Name steht im Tooltip)
+  .revision {
+    svg {
+      display: block;
+      width: 0.95rem;
+      height: 0.95rem;
+      margin: 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+  }
+
   // Todo/Idee/Fixme mit Farbmuster wie im Text
   .annotation {
     display: inline-flex;
@@ -150,5 +164,52 @@
   // Schreib-Log des Tages, rechts abgesetzt vom Stand des Dokuments
   .today {
     margin-left: auto;
+  }
+
+  // Überarbeitungsmodus: Anzahl je Art; ein Klick springt zur nächsten Stelle
+  .findings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.9rem;
+  }
+
+  .finding {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+
+    &:hover:not(:disabled) {
+      background: none;
+      color: var(--text);
+    }
+  }
+
+  // Muster wie im Text: Linienart und Farbe bzw. Hinterlegung
+  .key {
+    width: 0.9rem;
+    height: 0.55rem;
+    border-bottom: 2px solid transparent;
+
+    &.repetition {
+      border-bottom: 2px dotted var(--revision-repetition);
+    }
+
+    &.filler {
+      border-bottom: 2px dashed var(--revision-filler);
+    }
+
+    &.double {
+      border-bottom: 3px double var(--revision-double);
+    }
+
+    &.long {
+      border-radius: 2px;
+      background: var(--revision-long);
+    }
   }
 }

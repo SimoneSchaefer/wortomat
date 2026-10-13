@@ -11,6 +11,7 @@ import type {
   SceneContent,
   SceneReference,
   SceneStatus,
+  SceneText,
   UpdateNodeRequest,
 } from '@wortomat/shared';
 import { nowIso, transaction } from '../database/sqlite.js';
@@ -215,6 +216,17 @@ export class ManuscriptService {
       annotations: row ? annotationCounts(row) : { todo: 0, idea: 0, fixme: 0 },
       updatedAt: row?.updated_at ?? null,
     };
+  }
+
+  /** Reiner Text aller Szenen – steht als solcher im Suchindex. */
+  texts(): SceneText[] {
+    return this.db
+      .prepare(
+        `SELECT f.node_id AS sceneId, f.body AS text
+           FROM scene_fts f JOIN nodes n ON n.id = f.node_id
+          WHERE n.kind = 'scene'`,
+      )
+      .all() as unknown as SceneText[];
   }
 
   saveContent(nodeId: string, request: SaveDocumentRequest): SceneContent {

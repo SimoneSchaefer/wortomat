@@ -48,6 +48,8 @@ export interface AppSettings {
   quoteStyle: QuoteStyle;
   theme: Theme;
   fontSize: FontSize;
+  /** Überarbeitungsmodus im Editor: Wiederholungen, Füllwörter usw. markieren. */
+  revisionMode: boolean;
 }
 
 export type UpdateAppSettingsRequest = Partial<AppSettings>;
@@ -212,33 +214,11 @@ export interface SaveDocumentRequest {
   pastedWords?: number;
 }
 
-/** Textstatistik einer Szene (aus dem reinen Text). */
-export interface SceneTextStats {
+/** `GET /api/scene-texts`: reiner Text einer Szene (z. B. für die Textstatistik). */
+export interface SceneText {
   sceneId: string;
-  /** Wörter mit mindestens einem Buchstaben oder einer Ziffer. */
-  words: number;
-  /** Davon in wörtlicher Rede (nach den eingestellten Anführungszeichen). */
-  dialogueWords: number;
-  sentences: number;
-}
-
-export interface WordCount {
-  word: string;
-  count: number;
-}
-
-/** `GET /api/text-stats`: Dialog und Sätze je Szene, Füll- und Lieblingswörter des Buchs. */
-export interface TextStatsResponse {
-  scenes: SceneTextStats[];
-  /** Gefundene Füllwörter, häufigste zuerst. */
-  fillers: WordCount[];
-  /**
-   * Häufigste Wörter (ab zwei Vorkommen) ohne Funktions-, Füllwörter und Namen von Charakteren
-   * und Orten, in ihrer häufigsten Schreibweise.
-   */
-  topWords: WordCount[];
-  /** Wörter im ganzen Buch (gezählt wie `SceneTextStats.words`). */
-  words: number;
+  /** Absätze durch Zeilenumbrüche getrennt. */
+  text: string;
 }
 
 /** Ein Tag im Schreib-Log (Summe über alle Szenen). */

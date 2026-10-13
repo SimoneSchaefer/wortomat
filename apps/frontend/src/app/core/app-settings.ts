@@ -16,6 +16,7 @@ export class AppSettingsStore {
     quoteStyle: 'de',
     theme: 'system',
     fontSize: 'medium',
+    revisionMode: false,
   });
 
   /** Fehler sind hier kein Grund, die App nicht zu starten – dann gelten die Standardwerte. */
@@ -52,6 +53,10 @@ export class AppSettingsStore {
 
   setFontSize(fontSize: FontSize): Promise<void> {
     return this.saveNow('fontSize', fontSize);
+  }
+
+  setRevisionMode(revisionMode: boolean): Promise<void> {
+    return this.saveNow('revisionMode', revisionMode);
   }
 
   /** Sofort übernehmen und speichern; schlägt das Speichern fehl, gilt wieder der alte Wert. */

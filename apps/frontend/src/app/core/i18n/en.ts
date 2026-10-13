@@ -340,6 +340,29 @@ export const en: Texts = {
       `Calendar of writing days over the past year; ${numberFormat.format(last30)} words written in the last 30 days`,
   },
 
+  revision: {
+    label: 'Revise',
+    toggle: 'Revision mode: mark repetitions, filler words, long sentences and doubled words',
+    next: 'Jump to the next one',
+    counts: {
+      repetition: (count: number) =>
+        count === 1 ? '1 repetition' : `${numberFormat.format(count)} repetitions`,
+      filler: (count: number) =>
+        count === 1 ? '1 filler word' : `${numberFormat.format(count)} filler words`,
+      long: (count: number) =>
+        count === 1 ? '1 long sentence' : `${numberFormat.format(count)} long sentences`,
+      double: (count: number) =>
+        count === 1 ? '1 doubled word' : `${numberFormat.format(count)} doubled words`,
+    },
+    repeatedBefore: (word: string, distance: number) =>
+      `Repetition: “${word}” already appears ${distance} words earlier`,
+    repeatedAfter: (word: string, distance: number) =>
+      `Repetition: “${word}” appears again ${distance} words later`,
+    fillerTip: (word: string) => `Filler word: “${word}”`,
+    longTip: (words: number) => `Long sentence: ${numberFormat.format(words)} words`,
+    doubleTip: (word: string) => `Doubled word: “${word} ${word}”`,
+  },
+
   sceneStatus: {
     label: 'Status',
     names: {
