@@ -58,7 +58,7 @@ import { StatusMessages } from '../../core/status-messages';
     }
 
     a {
-      color: var(--accent);
+      color: var(--accent-strong);
       text-decoration: none;
 
       &:hover {

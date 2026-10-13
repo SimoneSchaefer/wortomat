@@ -106,18 +106,18 @@ legend {
   font-size: 1.2rem;
 
   &[data-preview='light'] {
-    background: #fbfaf7;
-    color: #22201c;
+    background: #fffdfa;
+    color: #1f1b17;
   }
 
   &[data-preview='dark'] {
-    background: #1c1b19;
-    color: #e8e4dc;
+    background: #1b1a19;
+    color: #eeeae4;
   }
 
   &[data-preview='system'] {
-    background: linear-gradient(135deg, #fbfaf7 50%, #1c1b19 50%);
-    color: #9a5b1e;
+    background: linear-gradient(135deg, #fffdfa 50%, #1b1a19 50%);
+    color: #ea580c;
   }
 }
 

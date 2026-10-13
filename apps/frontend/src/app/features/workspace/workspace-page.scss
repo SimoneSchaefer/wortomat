@@ -16,8 +16,6 @@
   border-bottom: 1px solid color-mix(in srgb, var(--topbar-bg) 80%, black);
   background: var(--topbar-bg);
   box-shadow: var(--topbar-shadow);
-  // Das übliche Grau für Nebensächliches ist auf dem Grün zu blass
-  --topbar-muted: color-mix(in srgb, var(--text) 85%, var(--topbar-bg));
   // Über Seitenleiste und Editor, damit der Schatten nicht verdeckt wird – und über dem
   // Ziehgriff der Seitenleiste (z-index 5), damit die Suchergebnisse darüber liegen.
   position: relative;
@@ -32,7 +30,6 @@
 
     .muted {
       font-size: 0.8rem;
-      color: var(--topbar-muted);
     }
   }
 
@@ -68,20 +65,8 @@
   .top-actions {
     justify-self: end;
     display: flex;
+    align-items: center;
     gap: 0.4rem;
-
-    .link {
-      padding: 0.3rem 0.6rem;
-      border-radius: 0.4rem;
-      color: var(--topbar-muted);
-      transition: background-color 0.15s;
-
-      // Hover: Fläche in Textfarbe – auf hellem Grün abdunkelnd, auf dunklem aufhellend
-      &:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--text) 12%, transparent);
-        color: var(--text);
-      }
-    }
   }
 }
 
@@ -112,7 +97,7 @@
 
     &.active {
       background: var(--surface);
-      color: var(--accent);
+      color: var(--accent-strong);
       font-weight: 600;
     }
   }
@@ -156,20 +141,8 @@
     font-size: 0.8rem;
     white-space: nowrap;
 
-    // Als kleine Buttons erkennbar statt bloßer Text-Links
     button {
-      padding: 0.15rem 0.55rem;
-      border: 1px solid var(--border);
-      border-radius: 0.4rem;
-      background: var(--bg);
-      color: var(--text-muted);
       font-size: 0.8rem;
-
-      &:hover:not(:disabled) {
-        border-color: var(--accent);
-        background: var(--hover);
-        color: var(--text);
-      }
     }
   }
 

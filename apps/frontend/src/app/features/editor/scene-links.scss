@@ -81,7 +81,7 @@
   &:hover:not(:disabled) {
     background: var(--bg);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-strong);
   }
 }
 
@@ -93,5 +93,5 @@
 
 .hash {
   margin-right: 0.1rem;
-  color: var(--accent);
+  color: var(--accent-strong);
 }

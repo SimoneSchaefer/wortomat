@@ -20,8 +20,6 @@
   height: var(--pill-height);
   padding: 0 0.6rem;
   border-radius: 999px;
-  background: var(--bg);
-  color: var(--text-muted);
   font-size: var(--pill-font-size);
 
   svg {
@@ -35,11 +33,11 @@
 
   &.active {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-strong);
   }
 
   &[aria-expanded='true'] {
-    background: var(--hover);
+    background: var(--button-hover);
   }
 
   &:focus-visible {
@@ -52,7 +50,7 @@
   min-width: 1.1rem;
   padding: 0 0.3rem;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--accent-strong);
   color: var(--bg);
   font-size: 0.7rem;
   line-height: 1.1rem;
@@ -143,7 +141,7 @@
 }
 
 .hash {
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .rule {

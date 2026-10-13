@@ -50,16 +50,11 @@
   width: var(--pill-height);
   height: var(--pill-height);
   padding: 0;
-  border: 1px dashed var(--border);
   border-radius: 50%;
-  background: none;
-  color: var(--text-muted);
 
-  &.open,
-  &:hover:not(:disabled) {
+  &.open {
     border-color: var(--accent);
-    color: var(--accent);
-    background: none;
+    background: var(--button-hover);
   }
 }
 
@@ -128,7 +123,7 @@
 }
 
 .create {
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 
 .picker .count {

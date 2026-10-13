@@ -77,7 +77,7 @@ export const en: Texts = {
   },
 
   workspace: {
-    export: 'Export …',
+    export: 'Export',
     closeProject: 'Close project',
     changeCover: 'Change cover image',
     coverHint: 'Shown on the start page and as the cover of the e-book.',

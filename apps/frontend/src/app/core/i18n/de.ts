@@ -107,7 +107,7 @@ export const de = {
   },
 
   workspace: {
-    export: 'Exportieren …',
+    export: 'Exportieren',
     closeProject: 'Projekt schließen',
     changeCover: 'Titelbild ändern',
     coverHint: 'Erscheint auf der Startseite und als Cover im E-Book.',
