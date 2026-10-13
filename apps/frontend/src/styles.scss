@@ -109,6 +109,12 @@ body {
   height: 100%;
 }
 
+// Export-Seite: Platz für die Scrollleiste immer freihalten – sonst springt das Layout, wenn die
+// Seite beim Wechsel des Formats länger oder kürzer als das Fenster wird.
+html:has(.export-page) {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: var(--font-ui);
   color: var(--text);

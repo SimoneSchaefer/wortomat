@@ -31,12 +31,21 @@ import {
 import { renderDocx } from './docx-renderer.js';
 import { renderEpub } from './epub-renderer.js';
 import { contentHtml, escapeHtml, renderHtml } from './html-renderer.js';
-import { BOOK_FONTS, DEFAULT_SETTINGS, sanitizeLayout, sanitizeSettings } from './layout.js';
+import {
+  BOOK_FONTS,
+  COURIER_FILES,
+  DEFAULT_SETTINGS,
+  type FontFiles,
+  type FontStyle,
+  sanitizeLayout,
+  sanitizeSettings,
+} from './layout.js';
 import { renderLatex } from './latex-renderer.js';
 import {
   compilePdf,
   findLatexPackages,
   findPdflatex,
+  findTexFile,
   type PdflatexInstallation,
 } from './pdflatex.js';
 import { type Localized, LocalizedError, localized } from '../i18n.js';
@@ -84,6 +93,25 @@ export class ExportService {
       })),
     };
   }
+
+  /**
+   * Pfad einer Schriftdatei für die Vorschau – nur Dateien aus dem Schriftkatalog, gesucht in
+   * der TeX-Installation. `null`, wenn es sie (oder TeX) nicht gibt.
+   */
+  async fontFile(font: string, style: string): Promise<string | null> {
+    const files: FontFiles | undefined =
+      font === 'courier' ? COURIER_FILES : BOOK_FONTS[font as BookFont]?.files;
+    const name = files && Object.hasOwn(files, style) ? files[style as FontStyle] : undefined;
+    if (!name) return null;
+    if (!this.fontPaths.has(name)) {
+      const pdflatex = await findPdflatex();
+      this.fontPaths.set(name, pdflatex ? await findTexFile(pdflatex, name) : null);
+    }
+    return this.fontPaths.get(name) ?? null;
+  }
+
+  /** Gefundene Schriftdateien (Name → Pfad); auch Fehlanzeigen, damit nicht ständig gesucht wird. */
+  private readonly fontPaths = new Map<string, string | null>();
 
   /** Gespeicherte Einstellungen des Export-Dialogs; fehlt etwas, gelten die Vorgaben. */
   settings(): ExportSettingsResponse {

@@ -35,7 +35,22 @@ export interface FontSpec {
   css: string;
   /** Nur anbieten, wenn eins der TeX-Pakete installiert ist. */
   optional?: boolean;
+  /** OpenType-Dateien aus der TeX-Installation – die Vorschau lädt genau diese Schrift. */
+  files: FontFiles;
 }
+
+export type FontStyle = 'regular' | 'italic' | 'bold' | 'boldItalic';
+export type FontFiles = Record<FontStyle, string>;
+
+const texGyre = (name: string): FontFiles => ({
+  regular: `texgyre${name}-regular.otf`,
+  italic: `texgyre${name}-italic.otf`,
+  bold: `texgyre${name}-bold.otf`,
+  boldItalic: `texgyre${name}-bolditalic.otf`,
+});
+
+/** Courier der Normseite (für deren Vorschau). */
+export const COURIER_FILES: FontFiles = texGyre('cursor');
 
 /** Gute Buchschriften, die es als TeX-Paket und als verbreitete Systemschrift gibt. */
 export const BOOK_FONTS: Record<BookFont, FontSpec> = {
@@ -44,60 +59,110 @@ export const BOOK_FONTS: Record<BookFont, FontSpec> = {
     latex: ['tgpagella', 'mathpazo'],
     docx: 'Palatino Linotype',
     css: "'TeX Gyre Pagella', 'Palatino Linotype', Palatino, 'Book Antiqua', serif",
+
+    files: texGyre('pagella'),
   },
   garamond: {
     label: 'Garamond',
     latex: ['ebgaramond'],
     docx: 'Garamond',
     css: "'EB Garamond', 'EB Garamond 12', Garamond, serif",
+
+    files: {
+      regular: 'EBGaramond-Regular.otf',
+      italic: 'EBGaramond-Italic.otf',
+      bold: 'EBGaramond-Bold.otf',
+      boldItalic: 'EBGaramond-BoldItalic.otf',
+    },
   },
   libertinus: {
     label: 'Libertinus',
     latex: ['libertinus', 'libertine'],
     docx: 'Libertinus Serif',
     css: "'Libertinus Serif', 'Linux Libertine O', 'Linux Libertine', serif",
+
+    files: {
+      regular: 'LibertinusSerif-Regular.otf',
+      italic: 'LibertinusSerif-Italic.otf',
+      bold: 'LibertinusSerif-Bold.otf',
+      boldItalic: 'LibertinusSerif-BoldItalic.otf',
+    },
   },
   charter: {
     label: 'Charter',
     latex: ['XCharter', 'charter'],
     docx: 'Charter',
     css: "XCharter, Charter, 'Bitstream Charter', serif",
+
+    files: {
+      regular: 'XCharter-Roman.otf',
+      italic: 'XCharter-Italic.otf',
+      bold: 'XCharter-Bold.otf',
+      boldItalic: 'XCharter-BoldItalic.otf',
+    },
   },
   times: {
     label: 'Times',
     latex: ['tgtermes', 'mathptmx'],
     docx: 'Times New Roman',
     css: "'TeX Gyre Termes', 'Times New Roman', Times, serif",
+
+    files: texGyre('termes'),
   },
   schoolbook: {
     label: 'Century Schoolbook',
     latex: ['tgschola'],
     docx: 'Century Schoolbook',
     css: "'TeX Gyre Schola', 'Century Schoolbook', 'New Century Schoolbook', serif",
+
+    files: texGyre('schola'),
   },
   bookman: {
     label: 'Bookman',
     latex: ['tgbonum'],
     docx: 'Bookman Old Style',
     css: "'TeX Gyre Bonum', 'Bookman Old Style', Bookman, serif",
+
+    files: texGyre('bonum'),
   },
   sourceserif: {
     label: 'Source Serif',
     latex: ['sourceserifpro'],
     docx: 'Source Serif Pro',
     css: "'Source Serif Pro', 'Source Serif 4', serif",
+
+    files: {
+      regular: 'SourceSerifPro-Regular.otf',
+      italic: 'SourceSerifPro-RegularIt.otf',
+      bold: 'SourceSerifPro-Bold.otf',
+      boldItalic: 'SourceSerifPro-BoldIt.otf',
+    },
   },
   crimson: {
     label: 'Crimson',
     latex: ['crimson'],
     docx: 'Crimson Text',
     css: "'Crimson Text', Crimson, serif",
+
+    files: {
+      regular: 'Crimson-Roman.otf',
+      italic: 'Crimson-Italic.otf',
+      bold: 'Crimson-Bold.otf',
+      boldItalic: 'Crimson-BoldItalic.otf',
+    },
   },
   latinmodern: {
     label: 'Latin Modern',
     latex: ['lmodern'],
     docx: 'Latin Modern Roman',
     css: "'Latin Modern Roman', 'LM Roman 10', 'CMU Serif', serif",
+
+    files: {
+      regular: 'lmroman10-regular.otf',
+      italic: 'lmroman10-italic.otf',
+      bold: 'lmroman10-bold.otf',
+      boldItalic: 'lmroman10-bolditalic.otf',
+    },
   },
   // Die LaTeX-Standardschrift. Mit T1 (Umlaute, Silbentrennung) braucht sie cm-super als
   // Type-1-Schrift – ohne das würde pdfLaTeX unscharfe Bitmaps einsetzen, daher dann Latin Modern.
@@ -107,6 +172,13 @@ export const BOOK_FONTS: Record<BookFont, FontSpec> = {
     docx: 'CMU Serif',
     css: "'CMU Serif', 'Latin Modern Roman', 'LM Roman 10', serif",
     optional: true,
+
+    files: {
+      regular: 'cmunrm.otf',
+      italic: 'cmunti.otf',
+      bold: 'cmunbx.otf',
+      boldItalic: 'cmunbi.otf',
+    },
   },
 };
 

@@ -1,10 +1,10 @@
-<main class="export-page" [class.with-preview]="paged()">
+<main class="export-page">
   <header>
     <button type="button" class="link back" (click)="back()">{{ t().common.back }}</button>
     <h1>{{ t().export.title }}</h1>
   </header>
 
-  <form class="columns" (submit)="$event.preventDefault(); run()">
+  <form class="export-form" (submit)="$event.preventDefault(); run()">
     <div class="options">
       <fieldset>
         <legend>{{ t().export.format }}</legend>
@@ -245,17 +245,22 @@
       </footer>
     </div>
 
-    @if (paged() && layout(); as layout) {
-      <aside class="preview-pane" [attr.aria-label]="t().export.preview">
-        <div class="preview-head">
-          <span class="legend">{{ t().export.preview }}</span>
+    <!-- Immer da, damit die Seite beim Wechsel des Formats nicht springt -->
+    <aside class="preview-pane" [attr.aria-label]="t().export.preview">
+      <div class="preview-head">
+        <span class="legend">{{ t().export.preview }}</span>
+        @if (paged()) {
           <span class="muted">{{ t().export.previewPages }}</span>
-        </div>
+        }
+      </div>
+      @if (!paged()) {
+        <p class="preview-none">{{ t().export.previewNone }}</p>
+      } @else if (layout(); as layout) {
         <div class="preview-scroll">
           <wm-export-preview
             [template]="template()"
             [layout]="layout"
-            [fontFamily]="font()?.cssFamily ?? 'serif'"
+            [fontFamily]="previewFamily()"
             [content]="preview()"
           />
         </div>
@@ -265,7 +270,7 @@
             {{ t().export.fontMissingPreview }}
           }
         </p>
-      </aside>
-    }
+      }
+    </aside>
   </form>
 </main>

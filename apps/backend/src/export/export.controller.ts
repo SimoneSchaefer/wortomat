@@ -6,6 +6,8 @@ import {
   Controller,
   Get,
   HttpCode,
+  NotFoundException,
+  Param,
   Post,
   Put,
   Query,
@@ -44,6 +46,24 @@ export class ExportController {
   @Put('settings')
   saveSettings(@Body() body: unknown): ExportSettings {
     return this.exporter.saveSettings(body);
+  }
+
+  /** Schriftdatei (OpenType) für die Vorschau, z. B. `fonts/garamond/italic`. */
+  @Get('fonts/:font/:style')
+  async font(
+    @Param('font') font: string,
+    @Param('style') style: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const file = await this.exporter.fontFile(font, style);
+    if (!file) {
+      throw new NotFoundException(
+        localized('Diese Schrift ist nicht installiert.', 'This font is not installed.'),
+      );
+    }
+    res.setHeader('Cache-Control', 'private, max-age=86400');
+    res.type('font/otf');
+    res.sendFile(file);
   }
 
   /** Titel und erstes Kapitel für die Seitenvorschau im Dialog. */

@@ -19,7 +19,7 @@ import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 import { CoverPicker } from '../cover/cover-picker';
-import { ExportPreviewPages, isFontInstalled } from './export-preview';
+import { ExportPreviewPages, isPreviewFontAvailable, previewFontFamily } from './export-preview';
 
 /** Bezeichnung und Beschreibung: `t().export.formats[…]` bzw. `t().export.templates[…]`. */
 const FORMATS: readonly ExportFormat[] = ['html', 'docx', 'pdf', 'epub'];
@@ -88,11 +88,13 @@ export class ExportPage {
   protected readonly font = computed(() =>
     this.fonts().find((font) => font.id === this.layout()?.font),
   );
-  /** Ist die gewählte Schrift auf diesem Rechner installiert (für die Vorschau)? */
-  protected readonly fontInstalled = computed(() => {
+  /** Schriftfamilie der Vorschau: die Datei aus TeX, sonst die Systemschrift. */
+  protected readonly previewFamily = computed(() => {
     const font = this.font();
-    return !font || isFontInstalled(font.cssFamily);
+    return font ? previewFontFamily(font.id, font.cssFamily) : 'serif';
   });
+  /** Kann die Vorschau die gewählte Schrift zeigen? Sonst zeigt sie eine Ersatzschrift. */
+  protected readonly fontInstalled = signal(true);
   /** Vorschau und Satzspiegel gibt es nur für Formate mit fester Seite. */
   protected readonly paged = computed(() => this.hasTemplates(this.format()));
   protected readonly customizable = computed(() => this.paged() && this.template() === 'roman');
@@ -126,6 +128,14 @@ export class ExportPage {
       const withTitles = this.includeSceneTitles();
       untracked(() => {
         if (this.loaded) void this.loadPreview(withTitles);
+      });
+    });
+    // Prüfen, ob die Vorschau die gewählte Schrift laden kann (Datei aus TeX oder Systemschrift)
+    effect(() => {
+      const font = this.font();
+      if (!font) return;
+      void isPreviewFontAvailable(font.id, font.cssFamily).then((available) => {
+        if (this.font()?.id === font.id) this.fontInstalled.set(available);
       });
     });
     inject(DestroyRef).onDestroy(() => this.flushSave());

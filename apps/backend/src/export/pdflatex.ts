@@ -43,14 +43,34 @@ export async function findPdflatex(): Promise<PdflatexInstallation | null> {
  * Welche der Pakete (ohne `.sty`) findet die TeX-Installation? Fragt `kpsewhich` neben
  * pdflatex; ohne kpsewhich gilt keins als vorhanden.
  */
+/** Vollständiger Pfad einer Datei der TeX-Installation (z. B. einer Schrift) oder `null`. */
+export async function findTexFile(
+  installation: PdflatexInstallation,
+  name: string,
+): Promise<string | null> {
+  try {
+    const { stdout } = await run(kpsewhichFor(installation), [name], {
+      timeout: 15_000,
+      windowsHide: true,
+    });
+    return stdout.split(/\r?\n/)[0]?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+function kpsewhichFor(installation: PdflatexInstallation): string {
+  const exe = process.platform === 'win32' ? 'kpsewhich.exe' : 'kpsewhich';
+  return path.isAbsolute(installation.executable)
+    ? path.join(path.dirname(installation.executable), exe)
+    : exe;
+}
+
 export async function findLatexPackages(
   installation: PdflatexInstallation,
   packages: readonly string[],
 ): Promise<Set<string>> {
-  const exe = process.platform === 'win32' ? 'kpsewhich.exe' : 'kpsewhich';
-  const kpsewhich = path.isAbsolute(installation.executable)
-    ? path.join(path.dirname(installation.executable), exe)
-    : exe;
+  const kpsewhich = kpsewhichFor(installation);
   let stdout = '';
   try {
     ({ stdout } = await run(

@@ -344,6 +344,8 @@ export const en: Texts = {
     preview: 'Preview',
     previewHint: 'Approximation – line and page breaks may differ slightly in the final document.',
     previewEmpty: 'No text yet – as soon as a chapter has text, it appears here.',
+    previewNone:
+      'HTML and e-books have no fixed pages – the text adapts to the screen or reader. That is why there is no page preview here.',
     previewPages: 'Title page and the first pages',
     cover: 'Cover image',
     coverDropHint: 'or drag an image here',

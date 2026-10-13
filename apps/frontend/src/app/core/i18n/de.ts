@@ -373,6 +373,8 @@ export const de = {
     previewHint:
       'Annäherung – Zeilen- und Seitenumbrüche können im fertigen Dokument etwas abweichen.',
     previewEmpty: 'Noch kein Text – sobald ein Kapitel Text hat, erscheint er hier.',
+    previewNone:
+      'HTML und E-Books haben keine festen Seiten – der Text passt sich Bildschirm bzw. Reader an. Deshalb gibt es hier keine Seitenvorschau.',
     previewPages: 'Titelseite und die ersten Seiten',
     cover: 'Titelbild',
     coverDropHint: 'oder ein Bild hierher ziehen',

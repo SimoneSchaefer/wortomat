@@ -40,6 +40,19 @@
   .content {
     p {
       margin: 0;
+      // wie im PDF (\clubpenalty/\widowpenalty): keine einzelne Zeile am Seitenanfang oder -ende
+      orphans: 2;
+      widows: 2;
+    }
+
+    h3,
+    h4,
+    h5 {
+      break-after: avoid;
+    }
+
+    figure {
+      break-inside: avoid;
     }
 
     // Einzug ab dem zweiten Absatz – nicht nach Überschrift oder Szenentrenner

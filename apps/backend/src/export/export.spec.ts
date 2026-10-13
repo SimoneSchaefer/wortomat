@@ -179,6 +179,30 @@ describe('Export', () => {
     if (!caps.pdf.available) assert.ok(caps.fonts.every((font) => !font.pdfAvailable));
   });
 
+  it('liefert die Schriftdateien der TeX-Installation für die Vorschau', async () => {
+    const get = (urlPath: string) =>
+      fetch(server.url + urlPath, { headers: { [AUTH_HEADER]: TOKEN } });
+    if (pdfAvailable) {
+      const response = await get('/api/export/fonts/palatino/italic');
+      // nur, wenn TeX Gyre installiert ist (bei TeX Live „recommended“ dabei)
+      if (response.status === 200) {
+        assert.equal(response.headers.get('content-type'), 'font/otf');
+        const head = Buffer.from(await response.arrayBuffer())
+          .subarray(0, 4)
+          .toString('latin1');
+        assert.equal(head, 'OTTO'); // OpenType mit CFF-Umrissen
+      }
+    }
+    // Nur Dateien aus dem Katalog – nichts anderes aus der TeX-Installation
+    for (const urlPath of [
+      '/api/export/fonts/comic/regular',
+      '/api/export/fonts/palatino/constructor',
+      '/api/export/fonts/palatino/..%2F..%2Fetc%2Fpasswd',
+    ]) {
+      assert.equal((await get(urlPath)).status, 404, urlPath);
+    }
+  });
+
   it('merkt sich die Einstellungen des Export-Dialogs im Buch', async () => {
     const initial = await api<ExportSettingsResponse>('GET', '/api/export/settings');
     assert.deepEqual(initial.settings, initial.defaults);

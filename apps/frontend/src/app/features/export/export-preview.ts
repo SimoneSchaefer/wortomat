@@ -18,6 +18,8 @@ const PX_PER_MM = 96 / 25.4;
 /** Gezeigte Textseiten nach der Titelseite. */
 const TEXT_PAGES = 3;
 const PAGE_GAP_PX = 12;
+/** Abstand zwischen den Spalten, in die der Text umbrochen wird (unsichtbar, s. u.). */
+const COLUMN_GAP_MM = 10;
 
 /** Seitenmaße und Schrift, wie sie die Vorlage im PDF bzw. in Word verwendet. */
 interface Geometry {
@@ -58,10 +60,50 @@ const NORMSEITE: Omit<Geometry, 'fontFamily'> = {
 };
 const COURIER = "'TeX Gyre Cursor', 'Courier New', Courier, 'Nimbus Mono PS', monospace";
 
+const FONT_STYLES = [
+  { style: 'regular', descriptors: { style: 'normal', weight: '400' } },
+  { style: 'italic', descriptors: { style: 'italic', weight: '400' } },
+  { style: 'bold', descriptors: { style: 'normal', weight: '700' } },
+  { style: 'boldItalic', descriptors: { style: 'italic', weight: '700' } },
+] as const;
+const registered = new Set<string>();
+
+/**
+ * Schriftfamilie für die Vorschau: zuerst die Schriftdateien aus der TeX-Installation (dieselben,
+ * die das PDF verwendet – unabhängig davon, welche Schriften der Browser kennt oder freigibt),
+ * dahinter die Systemschriften. Der Browser lädt eine Datei erst, wenn sie gebraucht wird.
+ */
+export function previewFontFamily(id: string, systemFamily: string): string {
+  const family = `Wortomat Vorschau ${id}`;
+  if (!registered.has(id)) {
+    registered.add(id);
+    for (const { style, descriptors } of FONT_STYLES) {
+      const face = new FontFace(family, `url(/api/export/fonts/${id}/${style})`, descriptors);
+      document.fonts.add(face);
+    }
+  }
+  return `'${family}', ${systemFamily}`;
+}
+
+/** Steht die Schrift der Vorschau zur Verfügung – als Datei aus TeX oder als Systemschrift? */
+export async function isPreviewFontAvailable(id: string, systemFamily: string): Promise<boolean> {
+  const family = previewFontFamily(id, systemFamily);
+  try {
+    const faces = await document.fonts.load(`16px 'Wortomat Vorschau ${id}'`);
+    if (faces.some((face) => face.status === 'loaded')) return true;
+  } catch {
+    // Datei nicht ladbar – dann zählt nur die Systemschrift
+  }
+  return isFontInstalled(family.slice(family.indexOf(',') + 1));
+}
+
 /**
  * Seitenvorschau im Export-Dialog: Titelseite und die ersten Textseiten des ersten Kapitels in
- * echten Maßen (mm/pt), verkleinert auf die verfügbare Breite. Der Text fließt einmal durch;
- * jede Seite zeigt einen auf ganze Zeilen gerundeten Ausschnitt davon.
+ * echten Maßen (mm/pt), verkleinert auf die verfügbare Breite.
+ *
+ * Seitenumbruch: Der Text fließt in CSS-Spalten von der Höhe des Satzspiegels; jede Seite zeigt
+ * genau eine dieser Spalten (die übrigen sind weggeschoben und abgeschnitten). So bricht der
+ * Browser zwischen Zeilen um – nie mitten durch eine Zeile, auch nicht nach Zitaten oder Bildern.
  */
 @Component({
   selector: 'wm-export-preview',
@@ -103,11 +145,7 @@ const COURIER = "'TeX Gyre Cursor', 'Courier New', Courier, 'Nimbus Mono PS', mo
               </div>
             }
             <div class="text" [style]="textStyle(page)">
-              <div
-                class="flow"
-                lang="de"
-                [style.transform]="'translateY(-' + (page - 1) * viewportPt() + 'pt)'"
-              >
+              <div class="flow" lang="de" [style]="flowStyle(page)">
                 @if (content()?.chapterTitle; as chapter) {
                   <div class="chapter-head" [style.height.pt]="chapterHeadPt()">
                     <div
@@ -151,7 +189,9 @@ export class ExportPreviewPages {
   private readonly availableWidth = signal(0);
 
   protected readonly geometry = computed<Geometry>(() => {
-    if (this.template() === 'normseite') return { ...NORMSEITE, fontFamily: COURIER };
+    if (this.template() === 'normseite') {
+      return { ...NORMSEITE, fontFamily: previewFontFamily('courier', COURIER) };
+    }
     const layout = this.layout();
     return {
       style: 'roman',
@@ -175,18 +215,11 @@ export class ExportPreviewPages {
     return (g.height - g.top - g.bottom) * PT_PER_MM;
   });
 
-  /** Sichtbare Höhe je Seite: ganze Zeilen, damit keine Zeile auf zwei Seiten halb erscheint. */
-  protected readonly viewportPt = computed(() => {
-    const g = this.geometry();
-    return Math.max(1, Math.floor(this.textHeightPt() / g.lineHeight)) * g.lineHeight;
-  });
-
   /** Kapitelanfang: Roman 15 % tiefer, großer Titel, zwei Leerzeilen; Normseite: Titel + Leerzeile. */
   protected readonly chapterHeadPt = computed(() => {
     const g = this.geometry();
     if (g.style === 'normseite') return 2 * g.lineHeight;
-    const raw = this.textHeightPt() * 0.15 + g.fontSize * 1.31 * 1.25 + 2 * g.lineHeight;
-    return Math.ceil(raw / g.lineHeight) * g.lineHeight;
+    return this.textHeightPt() * 0.15 + g.fontSize * 1.31 * 1.25 + 2 * g.lineHeight;
   });
 
   protected readonly runningHead = computed(() =>
@@ -232,7 +265,21 @@ export class ExportPreviewPages {
       left: `${this.left(page)}mm`,
       top: `${g.top}mm`,
       width: `${g.width - g.inner - g.outer}mm`,
-      height: `${this.viewportPt()}pt`,
+      height: `${this.textHeightPt()}pt`,
+    };
+  }
+
+  /** Spalten so breit und hoch wie der Satzspiegel; Seite n zeigt die n-te Spalte. */
+  protected flowStyle(page: number): Record<string, string> {
+    const g = this.geometry();
+    const width = g.width - g.inner - g.outer;
+    return {
+      width: `${width}mm`,
+      height: `${this.textHeightPt()}pt`,
+      'column-width': `${width}mm`,
+      'column-gap': `${COLUMN_GAP_MM}mm`,
+      'column-fill': 'auto',
+      transform: `translateX(-${(page - 1) * (width + COLUMN_GAP_MM)}mm)`,
     };
   }
 
