@@ -231,6 +231,13 @@ export const en: Texts = {
     pen: 'Pen',
     area: 'Area',
     eraser: 'Eraser',
+    hand: 'Move',
+    zoomLabel: 'Zoom',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    zoomFit: 'Show the whole map',
+    zoomHint:
+      'You can also zoom with Ctrl + mouse wheel or two fingers on the trackpad; move the view by holding Space or the middle mouse button',
     colorLabel: 'Colour',
     colors: {
       ink: 'Ink',

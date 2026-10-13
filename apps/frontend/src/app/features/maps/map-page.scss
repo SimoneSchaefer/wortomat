@@ -22,6 +22,7 @@ header input.doc-title {
 .tools,
 .swatches,
 .widths,
+.zoom,
 .history,
 .background {
   display: flex;
@@ -107,6 +108,19 @@ svg {
   }
 }
 
+.zoom-level {
+  min-width: 4rem;
+  height: 2rem;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+
+  &:disabled {
+    opacity: 1;
+    color: var(--text-muted);
+  }
+}
+
 .opacity input {
   width: 6rem;
   accent-color: var(--accent-strong);
@@ -152,6 +166,14 @@ svg {
 
   &.placing {
     cursor: copy;
+  }
+
+  &.pannable {
+    cursor: grab;
+  }
+
+  &.panning {
+    cursor: grabbing;
   }
 
   .paper {
@@ -216,7 +238,7 @@ svg {
   }
 }
 
-.canvas.erasing .pin {
+.canvas:is(.erasing, .pannable, .panning) .pin {
   pointer-events: none;
 }
 

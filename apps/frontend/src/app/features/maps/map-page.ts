@@ -29,8 +29,11 @@ const MAX_HISTORY = 100;
 const PLACE_DRAG_TYPE = 'application/x-wortomat-place';
 /** Breite der Zeichenfläche in Karteneinheiten (wie im Backend); die Höhe folgt dem Bild. */
 const MAP_WIDTH = 1600;
+/** Stärkste Vergrößerung; 1 = ganze Karte. */
+const MAX_ZOOM = 8;
+const ZOOM_STEP = 1.5;
 
-type Tool = 'pen' | 'area' | 'eraser';
+type Tool = 'pen' | 'area' | 'eraser' | 'hand';
 
 /** Farben für grobe Karten – auf hellem Papier gut zu unterscheiden. */
 export const MAP_COLORS = [
@@ -51,6 +54,14 @@ interface Snapshot {
   pins: MapPin[];
 }
 
+/** Sichtbarer Ausschnitt der Karte in Karteneinheiten. */
+interface View {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 interface PinDrag {
   noteId: string;
   pointerId: number;
@@ -68,6 +79,8 @@ interface PinDrag {
   styleUrl: './map-page.scss',
   host: {
     '(document:keydown)': 'onKeydown($event)',
+    '(document:keyup)': 'onKeyup($event)',
+    '(window:blur)': 'spaceHeld.set(false)',
   },
 })
 export class MapPage {
@@ -85,7 +98,7 @@ export class MapPage {
   private readonly canvas = viewChild<ElementRef<SVGSVGElement>>('canvas');
   private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
 
-  protected readonly tools: readonly Tool[] = ['pen', 'area', 'eraser'];
+  protected readonly tools: readonly Tool[] = ['pen', 'area', 'eraser', 'hand'];
   protected readonly colors = MAP_COLORS;
   protected readonly widths = WIDTHS;
 
@@ -100,14 +113,36 @@ export class MapPage {
   protected readonly tool = signal<Tool>('pen');
   protected readonly color = signal<string>(MAP_COLORS[0].value);
   protected readonly widthIndex = signal(1);
+  /** Zeichnet das Werkzeug (Stift, Fläche)? Dann gelten Farbe und Strichstärke. */
+  protected readonly drawing = computed(() => this.tool() === 'pen' || this.tool() === 'area');
 
   private readonly undoStack = signal<Snapshot[]>([]);
   private readonly redoStack = signal<Snapshot[]>([]);
   protected readonly canUndo = computed(() => this.undoStack().length > 0);
   protected readonly canRedo = computed(() => this.redoStack().length > 0);
 
-  /** Karteneinheiten je Bildschirmpixel – Striche, Orte und Schrift wachsen nicht mit der Karte. */
-  protected readonly unit = signal(1);
+  protected readonly view = signal<View>({ x: 0, y: 0, w: MAP_WIDTH, h: 1000 });
+  protected readonly viewBox = computed(() => {
+    const { x, y, w, h } = this.view();
+    return `${x} ${y} ${w} ${h}`;
+  });
+  protected readonly zoom = computed(() => (this.map()?.width ?? this.view().w) / this.view().w);
+  protected readonly zoomPercent = computed(() => this.t().number(Math.round(this.zoom() * 100)));
+  protected readonly maxZoom = MAX_ZOOM;
+  /** Breite der Zeichenfläche auf dem Bildschirm (px). */
+  private readonly canvasWidth = signal(0);
+  /**
+   * Karteneinheiten je Bildschirmpixel – Orte und Schrift bleiben beim Zoomen gleich groß,
+   * neue Striche gleich dick auf dem Bildschirm (vergrößert also feiner).
+   */
+  protected readonly unit = computed(() => {
+    const width = this.canvasWidth();
+    return width > 0 ? this.view().w / width : 1;
+  });
+  /** Leertaste gedrückt: Ziehen verschiebt den Ausschnitt (wie das Hand-Werkzeug). */
+  protected readonly spaceHeld = signal(false);
+  protected readonly panning = signal(false);
+  private pan: { pointerId: number; lastX: number; lastY: number } | null = null;
   /** Der Strich, der gerade gezogen wird. */
   protected readonly draft = signal<number[] | null>(null);
   /** Position des Radierers (für den Kreis unter dem Mauszeiger). */
@@ -150,6 +185,15 @@ export class MapPage {
   protected readonly selected = computed(() =>
     this.placedPins().find((entry) => entry.pin.noteId === this.selectedPin()),
   );
+  /** Feld über dem ausgewählten Ort: Lage in Prozent des Ausschnitts; außerhalb `null`. */
+  protected readonly popover = computed(() => {
+    const entry = this.selected();
+    const view = this.view();
+    if (!entry) return null;
+    const left = ((entry.pin.x - view.x) / view.w) * 100;
+    const top = ((entry.pin.y - view.y) / view.h) * 100;
+    return left < 0 || left > 100 || top < 0 || top > 100 ? null : { entry, left, top };
+  });
   protected readonly placingNote = computed(() => {
     const id = this.placing();
     return id ? this.notes.find(id) : undefined;
@@ -198,6 +242,7 @@ export class MapPage {
       const map = await this.api.map(id);
       if (loadId !== this.loadCounter) return;
       this.map.set(map);
+      this.fitView();
       this.notFound.set(false);
       this.nameDraft.set(map.name);
       this.strokes.set(map.strokes);
@@ -227,11 +272,65 @@ export class MapPage {
   }
 
   private measure(): void {
-    const canvas = this.canvas()?.nativeElement;
+    const width = this.canvas()?.nativeElement.getBoundingClientRect().width ?? 0;
+    if (width > 0) this.canvasWidth.set(width);
+  }
+
+  // Zoomen und Verschieben ----------------------------------------------------------
+
+  protected fitView(): void {
     const map = this.map();
-    if (!canvas || !map) return;
-    const width = canvas.getBoundingClientRect().width;
-    if (width > 0) this.unit.set(map.width / width);
+    if (map) this.view.set({ x: 0, y: 0, w: map.width, h: map.height });
+  }
+
+  /** Vergrößert um `factor` (< 1 verkleinert); der Punkt `center` bleibt an seiner Stelle. */
+  protected zoomBy(factor: number, center?: { x: number; y: number }): void {
+    const map = this.map();
+    if (!map) return;
+    const view = this.view();
+    const zoom = Math.min(MAX_ZOOM, Math.max(1, (map.width / view.w) * factor));
+    const w = map.width / zoom;
+    const h = map.height / zoom;
+    const cx = center?.x ?? view.x + view.w / 2;
+    const cy = center?.y ?? view.y + view.h / 2;
+    this.setView({
+      x: cx - (cx - view.x) * (w / view.w),
+      y: cy - (cy - view.y) * (h / view.h),
+      w,
+      h,
+    });
+  }
+
+  /** Verschiebt den Ausschnitt um Bildschirmpixel (positiv = nach rechts/unten). */
+  private scrollView(dx: number, dy: number): void {
+    const view = this.view();
+    const unit = this.unit();
+    this.setView({ ...view, x: view.x + dx * unit, y: view.y + dy * unit });
+  }
+
+  /** Der Ausschnitt bleibt innerhalb der Karte. */
+  private setView(view: View): void {
+    const map = this.map();
+    if (!map) return;
+    this.view.set({
+      ...view,
+      x: Math.min(map.width - view.w, Math.max(0, view.x)),
+      y: Math.min(map.height - view.h, Math.max(0, view.y)),
+    });
+  }
+
+  /** Strg + Mausrad bzw. Zwei-Finger-Zoom am Trackpad zoomt; sonst verschiebt das Rad. */
+  protected onWheel(event: WheelEvent): void {
+    const lines = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      this.zoomBy(Math.exp(-event.deltaY * lines * 0.002), this.toMap(event) ?? undefined);
+    } else if (this.zoom() > 1) {
+      event.preventDefault();
+      const [dx, dy] =
+        event.shiftKey && !event.deltaX ? [event.deltaY, 0] : [event.deltaX, event.deltaY];
+      this.scrollView(dx * lines, dy * lines);
+    }
   }
 
   // Name ----------------------------------------------------------------------
@@ -254,12 +353,12 @@ export class MapPage {
 
   protected selectColor(color: string): void {
     this.color.set(color);
-    if (this.tool() === 'eraser') this.tool.set('pen');
+    if (!this.drawing()) this.tool.set('pen');
   }
 
   protected selectWidth(index: number): void {
     this.widthIndex.set(index);
-    if (this.tool() === 'eraser') this.tool.set('pen');
+    if (!this.drawing()) this.tool.set('pen');
   }
 
   protected undo(): void {
@@ -301,6 +400,16 @@ export class MapPage {
   protected onKeydown(event: KeyboardEvent): void {
     const target = event.target as Element | null;
     if (target?.closest('input, textarea, [contenteditable], dialog')) return;
+    if (event.key === ' ' && !target?.closest('button, a, select')) {
+      event.preventDefault(); // nicht scrollen
+      this.spaceHeld.set(true);
+      return;
+    }
+    if (!event.ctrlKey && !event.metaKey && !event.altKey && this.map()) {
+      if (event.key === '+' || event.key === '=') return this.zoomBy(ZOOM_STEP);
+      if (event.key === '-') return this.zoomBy(1 / ZOOM_STEP);
+      if (event.key === '0') return this.fitView();
+    }
     if (event.key === 'Escape') {
       if (this.placing() || this.selectedPin()) {
         this.placing.set(null);
@@ -320,6 +429,10 @@ export class MapPage {
     }
   }
 
+  protected onKeyup(event: KeyboardEvent): void {
+    if (event.key === ' ') this.spaceHeld.set(false);
+  }
+
   // Zeichnen und Radieren ----------------------------------------------------------
 
   /** Bildschirmposition → Karteneinheiten. */
@@ -328,18 +441,31 @@ export class MapPage {
     const map = this.map();
     if (!canvas || !map) return null;
     const rect = canvas.getBoundingClientRect();
+    const view = this.view();
     return {
-      x: ((event.clientX - rect.left) / rect.width) * map.width,
-      y: ((event.clientY - rect.top) / rect.height) * map.height,
+      x: view.x + ((event.clientX - rect.left) / rect.width) * view.w,
+      y: view.y + ((event.clientY - rect.top) / rect.height) * view.h,
     };
   }
 
+  /** Verschieben: Hand-Werkzeug, gedrückte Leertaste oder mittlere Maustaste. */
+  private pansWith(event: PointerEvent): boolean {
+    return event.button === 1 || this.tool() === 'hand' || this.spaceHeld();
+  }
+
   protected onPointerDown(event: PointerEvent): void {
+    const placing = this.placing();
+    if (this.pansWith(event) && !(placing && event.button === 0 && !this.spaceHeld())) {
+      event.preventDefault();
+      (event.currentTarget as Element).setPointerCapture(event.pointerId);
+      this.pan = { pointerId: event.pointerId, lastX: event.clientX, lastY: event.clientY };
+      this.panning.set(true);
+      return;
+    }
     if (event.button !== 0) return;
     const point = this.toMap(event);
     if (!point) return;
     event.preventDefault();
-    const placing = this.placing();
     if (placing) {
       this.setPin(placing, point.x, point.y);
       this.placing.set(null);
@@ -356,6 +482,12 @@ export class MapPage {
   }
 
   protected onPointerMove(event: PointerEvent): void {
+    if (this.pan?.pointerId === event.pointerId) {
+      this.scrollView(this.pan.lastX - event.clientX, this.pan.lastY - event.clientY);
+      this.pan.lastX = event.clientX;
+      this.pan.lastY = event.clientY;
+      return;
+    }
     const point = this.toMap(event);
     if (!point) return;
     if (this.pinDrag?.pointerId === event.pointerId) {
@@ -384,6 +516,11 @@ export class MapPage {
   }
 
   protected onPointerUp(event: PointerEvent): void {
+    if (this.pan?.pointerId === event.pointerId) {
+      this.pan = null;
+      this.panning.set(false);
+      return;
+    }
     if (this.pinDrag?.pointerId === event.pointerId) {
       this.endPinDrag();
       return;
@@ -398,7 +535,7 @@ export class MapPage {
     if (!draft) return;
     this.draft.set(null);
     const tool = this.tool();
-    if (tool === 'eraser') return;
+    if (tool !== 'pen' && tool !== 'area') return;
     const points = simplify(draft, 0.6 * this.unit());
     if (tool === 'area' && points.length < 6) return; // Fläche braucht mindestens drei Punkte
     const before = this.snapshot();
@@ -424,7 +561,9 @@ export class MapPage {
   // Orte auf der Karte ---------------------------------------------------------------
 
   protected onPinPointerDown(event: PointerEvent, noteId: string): void {
-    if (event.button !== 0 || this.placing()) return;
+    if (event.button !== 0 || this.placing() || this.tool() === 'hand' || this.spaceHeld()) {
+      return; // dann verschiebt das Ziehen den Ausschnitt
+    }
     event.stopPropagation();
     event.preventDefault();
     this.canvas()?.nativeElement.setPointerCapture(event.pointerId);
@@ -512,11 +651,6 @@ export class MapPage {
     this.setPin(noteId, point.x, point.y);
   }
 
-  /** Lage des ausgewählten Orts in Prozent – für das Feld mit „Öffnen“ darüber. */
-  protected percent(value: number, total: number): number {
-    return (value / total) * 100;
-  }
-
   // Hintergrundbild ------------------------------------------------------------------
 
   protected async onBackgroundSelected(input: HTMLInputElement): Promise<void> {
@@ -589,6 +723,7 @@ export class MapPage {
     if (this.map()?.id === id) {
       // Zeichnung und Orte bleiben wie auf dem Bildschirm – sie können sich inzwischen geändert haben
       this.map.set(saved);
+      this.fitView(); // die Größe kann sich mit dem Bild geändert haben
       afterNextRender(() => this.measure(), { injector: this.injector });
     }
   }

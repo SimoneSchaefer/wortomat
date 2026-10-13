@@ -261,6 +261,13 @@ export const de = {
     pen: 'Stift',
     area: 'Fläche',
     eraser: 'Radierer',
+    hand: 'Verschieben',
+    zoomLabel: 'Zoom',
+    zoomIn: 'Vergrößern',
+    zoomOut: 'Verkleinern',
+    zoomFit: 'Ganze Karte zeigen',
+    zoomHint:
+      'Zoomen auch mit Strg + Mausrad oder zwei Fingern am Trackpad; verschieben mit gedrückter Leertaste oder mittlerer Maustaste',
     colorLabel: 'Farbe',
     colors: {
       ink: 'Tinte',
