@@ -14,7 +14,7 @@
       [attr.tabindex]="i === currentIndex() ? 0 : -1"
       [class.done]="i < currentIndex()"
       [class.current]="i === currentIndex()"
-      (click)="select(info.status)"
+      (click)="select(info.status, $any($event.currentTarget))"
     >
       <wm-status-icon [status]="info.status" />
       {{ t().sceneStatus.names[info.status] }}

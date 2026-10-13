@@ -1,6 +1,7 @@
 import { Component, computed, ElementRef, inject, input } from '@angular/core';
 import type { ManuscriptNode, SceneStatus } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
+import { celebrate } from '../../core/fireworks';
 import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { SCENE_STATUSES, statusInfo } from '../../core/scene-status';
@@ -29,11 +30,13 @@ export class SceneStatusPicker {
   protected readonly currentIndex = computed(() => SCENE_STATUSES.indexOf(this.current()));
   private readonly error = inject(StatusMessages).channel();
 
-  protected async select(status: SceneStatus): Promise<void> {
+  /** `origin`: der Knopf der Stufe – bei „Fertig“ steigt dort ein kleines Feuerwerk auf. */
+  protected async select(status: SceneStatus, origin?: Element): Promise<void> {
     if (status === this.current().status) return;
     this.error.set(null);
     try {
       await this.store.setStatus(this.node().id, status);
+      if (status === 'final' && origin) celebrate(origin);
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
     }
@@ -54,7 +57,9 @@ export class SceneStatusPicker {
               : null;
     if (target === null) return;
     event.preventDefault();
-    void this.select(SCENE_STATUSES[target]!.status);
-    this.host.nativeElement.querySelectorAll<HTMLButtonElement>('[role=radio]')[target]?.focus();
+    const button =
+      this.host.nativeElement.querySelectorAll<HTMLButtonElement>('[role=radio]')[target];
+    void this.select(SCENE_STATUSES[target]!.status, button);
+    button?.focus();
   }
 }
