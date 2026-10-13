@@ -280,6 +280,10 @@ export const de = {
       error: 'Fehler',
     },
     imageFailed: (name: string, message: string) => `Bild „${name}“: ${message}`,
+    writtenToday: (count: number) =>
+      `Heute: ${count === 1 ? '1 Wort' : `${numberFormat.format(count)} Wörter`} geschrieben`,
+    writtenTodayHint:
+      'Selbst getippte Wörter in allen Szenen seit 4 Uhr – Überarbeiten zählt mit, Eingefügtes nicht',
   },
 
   sceneStatus: {

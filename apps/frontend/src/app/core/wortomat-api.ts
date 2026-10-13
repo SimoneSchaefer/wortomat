@@ -35,6 +35,7 @@ import type {
   UpdateNoteGroupRequest,
   UpdateNoteRequest,
   UpdateProjectRequest,
+  WritingDay,
 } from '@wortomat/shared';
 import { firstValueFrom, type Observable } from 'rxjs';
 
@@ -125,6 +126,11 @@ export class WortomatApi {
 
   saveSceneContent(id: string, request: SaveDocumentRequest): Promise<SceneContent> {
     return this.call(this.http.put<SceneContent>(`/api/scenes/${id}/content`, request));
+  }
+
+  /** Heute geschriebene Wörter (Schreib-Log; der Tag beginnt um 4 Uhr). */
+  writingToday(): Promise<WritingDay> {
+    return this.call(this.http.get<WritingDay>('/api/writing-log/today'));
   }
 
   // Notizen (Charaktere, Orte, Forschung) -----------------------------------

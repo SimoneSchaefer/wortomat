@@ -251,6 +251,10 @@ export const en: Texts = {
       error: 'Error',
     },
     imageFailed: (name: string, message: string) => `Image “${name}”: ${message}`,
+    writtenToday: (count: number) =>
+      `Today: ${count === 1 ? '1 word' : `${numberFormat.format(count)} words`} written`,
+    writtenTodayHint:
+      'Words typed in all scenes since 4 a.m. – revising counts, pasted text doesn’t',
   },
 
   sceneStatus: {

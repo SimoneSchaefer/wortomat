@@ -38,6 +38,12 @@ export class WritingLogService {
       .run(writingDay(now), sceneId, added - pasted, removed, pasted);
   }
 
+  /** Der heutige Tag (ab 4 Uhr) – auch ohne Einträge, dann mit Nullen. */
+  today(now = new Date()): WritingDay {
+    const day = writingDay(now);
+    return this.days(day, day)[0] ?? { day, added: 0, removed: 0, pasted: 0 };
+  }
+
   /** Summen je Tag, älteste zuerst; Tage ohne Schreiben fehlen. */
   days(from?: string, to?: string): WritingDay[] {
     return this.db

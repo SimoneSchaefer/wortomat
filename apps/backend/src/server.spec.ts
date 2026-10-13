@@ -651,6 +651,7 @@ describe('REST-API', () => {
       { added: 7, removed: 1, pasted: 5 },
     );
     assert.deepEqual(await api('GET', '/api/writing-log?from=2000-01-01&to=2000-12-31'), []);
+    assert.deepEqual(await api('GET', '/api/writing-log/today'), days[0]);
 
     // Der Verlauf bleibt, auch wenn die Szene gelöscht wird
     await api('DELETE', `/api/nodes/${chapter.id}`);

@@ -98,6 +98,7 @@ export class ScenePage {
       const saved = await this.api.saveSceneContent(id, request);
       this.store.updateSceneStats(id, saved.wordCount, saved.annotations);
     },
+    writtenToday: async () => (await this.api.writingToday()).added,
   };
 
   constructor() {

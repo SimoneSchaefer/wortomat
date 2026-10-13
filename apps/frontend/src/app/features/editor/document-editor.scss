@@ -146,4 +146,9 @@
   .status.error {
     color: var(--danger);
   }
+
+  // Schreib-Log des Tages, rechts abgesetzt vom Stand des Dokuments
+  .today {
+    margin-left: auto;
+  }
 }

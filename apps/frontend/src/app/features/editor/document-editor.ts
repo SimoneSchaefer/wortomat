@@ -38,6 +38,8 @@ type ToolbarCommand = 'bold' | 'italic' | 'underline' | 'strike' | 'clearFormat'
 export interface DocumentSource {
   load(id: string): Promise<{ doc: EditorDoc | null; wordCount: number }>;
   save(id: string, request: SaveDocumentRequest): Promise<void>;
+  /** Heute geschriebene Wörter fürs Schreib-Log – nur Szenen haben eins. */
+  writtenToday?(): Promise<number>;
 }
 
 /**
@@ -67,6 +69,8 @@ export class DocumentEditor {
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
+  /** `null`, solange unbekannt oder die Quelle kein Schreib-Log hat. */
+  protected readonly writtenToday = signal<number | null>(null);
   private readonly error = inject(StatusMessages).channel();
   /** Wird bei jeder Editor-Transaktion erhöht, damit die Toolbar ihren Zustand neu berechnet. */
   private readonly editorTick = signal(0);
@@ -120,6 +124,7 @@ export class DocumentEditor {
       this.editor = this.createEditor(content.doc ?? this.template());
       this.wordCount.set(content.wordCount);
       this.status.set('saved');
+      void this.refreshWrittenToday();
     } catch (error) {
       if (loadId !== this.loadCounter) return;
       this.status.set('error');
@@ -157,6 +162,7 @@ export class DocumentEditor {
       try {
         await source.save(documentId, request);
         if (this.currentId === documentId && !this.dirty) this.status.set('saved');
+        void this.refreshWrittenToday();
       } catch (error) {
         if (error instanceof HttpErrorResponse && error.status === 404) return; // wurde gelöscht
         if (this.currentId === documentId) {
@@ -168,6 +174,19 @@ export class DocumentEditor {
       }
     });
     return this.saveQueue;
+  }
+
+  private async refreshWrittenToday(): Promise<void> {
+    const source = this.source();
+    if (!source.writtenToday) {
+      this.writtenToday.set(null);
+      return;
+    }
+    try {
+      this.writtenToday.set(await source.writtenToday());
+    } catch {
+      // nur eine Anzeige – beim nächsten Speichern klappt es wieder
+    }
   }
 
   protected onBeforeUnload(event: BeforeUnloadEvent): void {
