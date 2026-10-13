@@ -20,11 +20,12 @@
   --danger: #c92a2a;
 
   // Szenenstatus: von grau (Idee) bis grün (Fertig)
-  --status-idea: #9a958c;
-  --status-outline: #4f86b3;
-  --status-draft: #c98f22;
-  --status-revised: #8462bb;
-  --status-final: #3f8f50;
+  // Gleicher Farbton und gleiche Helligkeit, nur die Sättigung (Chroma) nimmt zu
+  --status-idea: oklch(0.58 0 148);
+  --status-outline: oklch(0.58 0.045 148);
+  --status-draft: oklch(0.58 0.09 148);
+  --status-revised: oklch(0.58 0.135 148);
+  --status-final: oklch(0.58 0.18 148);
 
   // Markierungen im Text (Todo/Idee/Fixme)
   --annotation-todo: #e0a800;
@@ -63,11 +64,11 @@
   // auf dunklem Grund braucht ein Schatten mehr Deckkraft, um sichtbar zu sein
   --topbar-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
 
-  --status-idea: #8f897f;
-  --status-outline: #7fb0d8;
-  --status-draft: #e6b44f;
-  --status-revised: #a98fd9;
-  --status-final: #6dbf7d;
+  --status-idea: oklch(0.74 0 148);
+  --status-outline: oklch(0.74 0.045 148);
+  --status-draft: oklch(0.74 0.09 148);
+  --status-revised: oklch(0.74 0.135 148);
+  --status-final: oklch(0.74 0.18 148);
 
   --annotation-todo: #f2c94c;
   --annotation-idea: #4fc1b0;
