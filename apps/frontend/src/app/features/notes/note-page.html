@@ -34,12 +34,17 @@
         }
       </div>
       @if (config().gallery) {
-        <wm-image-gallery
-          [noteId]="id()"
-          [label]="t().notes.profileImage"
-          [placeholderIcon]="config().galleryIcon"
-          (changed)="onGalleryChanged($event)"
-        />
+        <div class="side">
+          <wm-image-gallery
+            [noteId]="id()"
+            [label]="t().notes.profileImage"
+            [placeholderIcon]="config().galleryIcon"
+            (changed)="onGalleryChanged($event)"
+          />
+          @if (config().mappable) {
+            <wm-note-location [noteId]="id()" />
+          }
+        </div>
       }
     </div>
   </wm-document-editor>

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
   AppSettings,
+  CreateMapRequest,
   CreateNodeRequest,
   CreateNoteGroupRequest,
   CreateNoteRequest,
@@ -16,11 +17,13 @@ import type {
   ExportSettingsResponse,
   ImageInfo,
   ManuscriptNode,
+  MapSummary,
   MoveNodeRequest,
   MoveNoteGroupRequest,
   NoteContent,
   NoteGroup,
   NoteSummary,
+  PlaceMap,
   ProjectInfo,
   ProjectListEntry,
   SaveDocumentRequest,
@@ -32,6 +35,7 @@ import type {
   Tag,
   TagSummary,
   UpdateAppSettingsRequest,
+  UpdateMapRequest,
   UpdateNodeRequest,
   UpdateNoteGroupRequest,
   UpdateNoteRequest,
@@ -234,6 +238,33 @@ export class WortomatApi {
   /** Szenen, in denen eine Notiz vorkommt – in Manuskript-Reihenfolge. */
   noteScenes(noteId: string): Promise<SceneReference[]> {
     return this.call(this.http.get<SceneReference[]>(`/api/notes/${noteId}/scenes`));
+  }
+
+  // Karten ------------------------------------------------------------------------
+
+  listMaps(): Promise<MapSummary[]> {
+    return this.call(this.http.get<MapSummary[]>('/api/maps'));
+  }
+
+  createMap(request: CreateMapRequest): Promise<PlaceMap> {
+    return this.call(this.http.post<PlaceMap>('/api/maps', request));
+  }
+
+  map(id: string): Promise<PlaceMap> {
+    return this.call(this.http.get<PlaceMap>(`/api/maps/${id}`));
+  }
+
+  updateMap(id: string, request: UpdateMapRequest): Promise<PlaceMap> {
+    return this.call(this.http.patch<PlaceMap>(`/api/maps/${id}`, request));
+  }
+
+  /** Karten, auf denen ein Ort eingezeichnet ist. */
+  mapsWithPlace(noteId: string): Promise<PlaceMap[]> {
+    return this.call(this.http.get<PlaceMap[]>(`/api/notes/${noteId}/maps`));
+  }
+
+  deleteMap(id: string): Promise<void> {
+    return this.call(this.http.delete<void>(`/api/maps/${id}`));
   }
 
   // Tags --------------------------------------------------------------------------

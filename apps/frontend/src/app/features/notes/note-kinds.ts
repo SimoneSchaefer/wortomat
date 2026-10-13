@@ -11,6 +11,8 @@ export interface NoteKindConfig {
   galleryIcon: 'person' | 'picture';
   /** Mit Szenen verknüpfbar („kommt vor in …“). */
   linkable: boolean;
+  /** Lässt sich auf Karten einzeichnen (Vorschau der Lage auf der Seite). */
+  mappable: boolean;
 }
 
 export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
@@ -20,6 +22,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     gallery: true,
     galleryIcon: 'person',
     linkable: true,
+    mappable: false,
   },
   place: {
     kind: 'place',
@@ -27,6 +30,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     gallery: true,
     galleryIcon: 'picture',
     linkable: true,
+    mappable: true,
   },
   research: {
     kind: 'research',
@@ -34,6 +38,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     gallery: true,
     galleryIcon: 'picture',
     linkable: false,
+    mappable: false,
   },
 };
 

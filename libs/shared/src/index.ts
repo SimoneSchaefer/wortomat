@@ -305,6 +305,66 @@ export interface SceneReference {
 }
 
 // ---------------------------------------------------------------------------
+// Karten: grob gezeichnete Landkarten, auf denen Orte eingezeichnet sind
+// ---------------------------------------------------------------------------
+
+/** Eintrag der Kartenliste in der Seitenleiste „Orte“. */
+export interface MapSummary {
+  id: string;
+  name: string;
+  updatedAt: string;
+}
+
+/**
+ * Ein Strich auf der Karte, freihand gezeichnet:
+ * - `pen`: Linie (Küste, Fluss, Straße …)
+ * - `area`: geschlossene, halb durchsichtig gefüllte Fläche (See, Wald …)
+ */
+export interface MapStroke {
+  tool: 'pen' | 'area';
+  /** `#rrggbb` */
+  color: string;
+  /** Strichstärke in Karteneinheiten. */
+  width: number;
+  /** Abwechselnd x und y in Karteneinheiten: `[x0, y0, x1, y1, …]`. */
+  points: number[];
+}
+
+/** Ein Ort (Notiz der Art `place`) auf der Karte, in Karteneinheiten. */
+export interface MapPin {
+  noteId: string;
+  x: number;
+  y: number;
+}
+
+export interface PlaceMap extends MapSummary {
+  /** Größe der Zeichenfläche in Karteneinheiten (Seitenverhältnis wie das Hintergrundbild). */
+  width: number;
+  height: number;
+  /** Hintergrundbild, z. B. eine abfotografierte Skizze; `null` = leeres Papier. */
+  backgroundImageId: string | null;
+  /** Deckkraft des Hintergrundbilds, 0.1 … 1 (blasser zum Nachzeichnen). */
+  backgroundOpacity: number;
+  strokes: MapStroke[];
+  pins: MapPin[];
+}
+
+export interface CreateMapRequest {
+  name: string;
+}
+
+/** Nur die angegebenen Felder ändern sich; `strokes` und `pins` ersetzen den alten Stand. */
+export interface UpdateMapRequest {
+  name?: string;
+  width?: number;
+  height?: number;
+  backgroundImageId?: string | null;
+  backgroundOpacity?: number;
+  strokes?: MapStroke[];
+  pins?: MapPin[];
+}
+
+// ---------------------------------------------------------------------------
 // Tags (projektweit, an Szenen vergeben)
 // ---------------------------------------------------------------------------
 

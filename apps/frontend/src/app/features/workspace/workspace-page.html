@@ -136,6 +136,9 @@
       </div>
 
       @if (noteKind(); as kind) {
+        @if (kind === 'place') {
+          <wm-map-list />
+        }
         <wm-note-list [kind]="kind" />
       } @else {
         <wm-scene-filter-panel />

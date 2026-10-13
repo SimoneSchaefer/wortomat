@@ -8,6 +8,8 @@ import { ImagesController } from './images/images.controller.js';
 import { ImagesService } from './images/images.service.js';
 import { LinksController } from './links/links.controller.js';
 import { LinksService } from './links/links.service.js';
+import { MapsController } from './maps/maps.controller.js';
+import { MapsService } from './maps/maps.service.js';
 import { ManuscriptController } from './manuscript/manuscript.controller.js';
 import { ManuscriptService } from './manuscript/manuscript.service.js';
 import { NoteGroupsController, NotesController } from './notes/notes.controller.js';
@@ -38,6 +40,7 @@ export class AppModule {
         NotesController,
         NoteGroupsController,
         LinksController,
+        MapsController,
         TagsController,
         AppSettingsController,
         ExportController,
@@ -53,6 +56,7 @@ export class AppModule {
         ManuscriptService,
         NotesService,
         LinksService,
+        MapsService,
         TagsService,
         AppSettingsService,
         ExportService,

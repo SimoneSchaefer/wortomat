@@ -173,6 +173,28 @@ const MIGRATIONS: readonly string[] = [
       PRIMARY KEY (day, scene_id)
     );
   `,
+  /* 14: Karten mit Zeichnung (Striche als JSON) und eingezeichneten Orten */ `
+    CREATE TABLE maps (
+      id                   TEXT PRIMARY KEY,
+      name                 TEXT NOT NULL,
+      width                REAL NOT NULL,
+      height               REAL NOT NULL,
+      background_image_id  TEXT REFERENCES images(id),
+      background_opacity   REAL NOT NULL DEFAULT 1,
+      strokes              TEXT NOT NULL DEFAULT '[]',
+      created_at           TEXT NOT NULL,
+      updated_at           TEXT NOT NULL
+    );
+
+    CREATE TABLE map_pins (
+      map_id   TEXT NOT NULL REFERENCES maps(id) ON DELETE CASCADE,
+      note_id  TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+      x        REAL NOT NULL,
+      y        REAL NOT NULL,
+      PRIMARY KEY (map_id, note_id)
+    );
+    CREATE INDEX map_pins_by_note ON map_pins(note_id);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

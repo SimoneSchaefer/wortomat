@@ -21,6 +21,8 @@ import { ProjectStore } from '../../core/project-store';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
 import { BookCover } from '../cover/book-cover';
 import { BookDialog } from '../cover/book-dialog';
+import { MapList } from '../maps/map-list';
+import { MapsStore } from '../maps/maps-store';
 import { NoteList } from '../notes/note-list';
 import { NotesStore } from '../notes/notes-store';
 import { GlobalSearch } from './global-search';
@@ -64,6 +66,7 @@ const MENU: readonly MenuItem[] = [
     RouterLink,
     ManuscriptTree,
     NoteList,
+    MapList,
     GlobalSearch,
     ResizeHandle,
     BookDialog,
@@ -72,8 +75,8 @@ const MENU: readonly MenuItem[] = [
   ],
   templateUrl: './workspace-page.html',
   styleUrl: './workspace-page.scss',
-  // Pro geöffnetem Projekt frisch – Notizen und Szenenfilter gehören zum Projekt.
-  providers: [NotesStore, SceneFilter],
+  // Pro geöffnetem Projekt frisch – Notizen, Karten und Szenenfilter gehören zum Projekt.
+  providers: [NotesStore, MapsStore, SceneFilter],
   host: {
     '(window:resize)': 'onWindowResize()',
     '(document:pointerdown)': 'onDocumentPointerDown($event)',
@@ -86,6 +89,7 @@ export class WorkspacePage {
   private readonly pendingSaves = inject(PendingSaves);
   protected readonly store = inject(ProjectStore);
   protected readonly notes = inject(NotesStore);
+  private readonly maps = inject(MapsStore);
 
   protected readonly settings = inject(AppSettingsStore);
 
@@ -147,9 +151,10 @@ export class WorkspacePage {
   protected readonly hasSidebar = computed(() => this.section() !== 'stats');
   /** Titel der geöffneten Szene bzw. des geöffneten Eintrags – für die Leiste im Inhalt. */
   protected readonly currentTitle = computed(() => {
-    const [, , segment, id] = this.url().split(/[?#]/)[0]!.split('/');
+    const [, , segment, id, mapId] = this.url().split(/[?#]/)[0]!.split('/');
     if (!id) return null;
-    return segment === 'scene' ? this.store.findNode(id)?.title : this.notes.find(id)?.title;
+    if (segment === 'scene') return this.store.findNode(id)?.title;
+    return id === 'maps' && mapId ? this.maps.find(mapId)?.name : this.notes.find(id)?.title;
   });
   /** Zuletzt geöffnete Seite je Bereich, damit man beim Zurückwechseln dort weitermacht. */
   private readonly lastUrls = new Map<Section, string>();
@@ -163,6 +168,7 @@ export class WorkspacePage {
       untracked(() => this.sidebarOpen.set(false));
     });
     this.notes.load().catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
+    this.maps.load().catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
   }
 
   protected labelOf(section: Section): string {

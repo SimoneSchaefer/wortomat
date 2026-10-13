@@ -1,0 +1,342 @@
+:host {
+  display: block;
+}
+
+.map-page {
+  padding: 2rem 2rem 2.5rem;
+}
+
+header input.doc-title {
+  margin-bottom: 1rem;
+}
+
+// Werkzeugleiste: Gruppen nebeneinander, auf schmalen Fenstern umbrechend
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.tools,
+.swatches,
+.widths,
+.history,
+.background {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tool {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+
+  &[aria-pressed='true'] {
+    border-color: var(--accent-strong);
+    background: color-mix(in srgb, var(--accent) 30%, var(--bg));
+  }
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+.tool svg,
+.icon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  .filled {
+    fill: color-mix(in srgb, currentColor 30%, transparent);
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.4rem;
+}
+
+// Farben: runde Tupfer; der gewählte bekommt einen Ring
+.swatch {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px var(--border);
+
+  &:hover:not(:disabled) {
+    background: var(--swatch);
+    filter: brightness(1.1);
+  }
+
+  &[aria-pressed='true'] {
+    box-shadow: 0 0 0 2px var(--accent-strong);
+  }
+}
+
+.width {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+
+  span {
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--accent-strong);
+    background: color-mix(in srgb, var(--accent) 30%, var(--bg));
+  }
+}
+
+.opacity input {
+  width: 6rem;
+  accent-color: var(--accent-strong);
+}
+
+// Zeichenfläche links, Liste der Orte rechts daneben. Die Fläche ist ganz sichtbar, auch bei
+// Hochformat: höchstens so hoch wie das Fenster unter der Werkzeugleiste.
+.body {
+  --fit-width: calc((100vh - 15rem) * var(--aspect));
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.surface {
+  position: relative;
+  flex: 0 1 var(--fit-width);
+  min-width: 0;
+  border-radius: 0.5rem;
+
+  &.drop-active .canvas {
+    outline: 2px dashed var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+// Papier bleibt auch im dunklen Modus hell: die Farben sind auf hellen Grund abgestimmt
+.canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--aspect);
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.08);
+  cursor: crosshair;
+  touch-action: none; // Zeichnen mit Stift/Finger statt Scrollen
+  user-select: none;
+
+  &.erasing {
+    cursor: none;
+  }
+
+  &.placing {
+    cursor: copy;
+  }
+
+  .paper {
+    fill: #fbf7ee;
+  }
+
+  path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  path.area {
+    fill-opacity: 0.3;
+  }
+
+  .eraser-ring {
+    fill: rgb(255 255 255 / 0.4);
+    stroke: #3d3530;
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+  }
+}
+
+// Orte: Stecknadel mit Namen darunter; Maße in Bildschirmpixeln (scale = unit)
+.pin {
+  cursor: grab;
+
+  .hit {
+    fill: transparent;
+  }
+
+  .marker {
+    fill: #c0392b;
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+
+  .dot {
+    fill: #fff;
+  }
+
+  text {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+    fill: #1f1b17;
+    // heller Rand um die Schrift, damit sie auf Strichen lesbar bleibt
+    stroke: #fbf7ee;
+    stroke-width: 3.5px;
+    stroke-linejoin: round;
+    paint-order: stroke;
+  }
+
+  &.selected .marker {
+    fill: #4d7c0f;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.canvas.erasing .pin {
+  pointer-events: none;
+}
+
+.empty-hint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  color: #8a8178;
+  font-style: italic;
+  pointer-events: none;
+}
+
+// Feld über dem ausgewählten Ort: Name, „Öffnen“, „Von der Karte nehmen“
+.pin-popover {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  gap: 0.35rem;
+  min-width: 10rem;
+  padding: 0.6rem 0.7rem;
+  transform: translate(-50%, calc(-100% - 2.5rem));
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  font-size: 0.85rem;
+
+  strong {
+    font-weight: 600;
+  }
+
+  .open {
+    color: var(--accent-strong);
+    font-weight: 600;
+  }
+}
+
+.places {
+  flex: 0 0 13rem;
+  font-size: 0.85rem;
+
+  h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+
+    &:not(:first-child) {
+      margin-top: 1rem;
+    }
+  }
+
+  .hint {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  li button {
+    width: 100%;
+    padding: 0.3rem 0.6rem;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: grab;
+
+    &.placed {
+      border-color: transparent;
+      background: none;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--hover);
+      }
+    }
+
+    &[aria-pressed='true'] {
+      border-color: var(--accent-strong);
+      background: color-mix(in srgb, var(--accent) 30%, var(--bg));
+    }
+  }
+}
+
+// Schmales Fenster: die Orte unter der Karte
+@media (max-width: 62rem) {
+  .body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .surface {
+    flex: none;
+    width: min(100%, var(--fit-width));
+  }
+
+  .places {
+    flex: none;
+  }
+}
+
+.placing-hint {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg));
+}
+
+.not-found {
+  padding: 2rem;
+}

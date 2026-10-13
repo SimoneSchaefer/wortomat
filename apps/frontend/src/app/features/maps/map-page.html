@@ -1,0 +1,295 @@
+@if (map(); as map) {
+  <div class="map-page">
+    <header>
+      <p class="doc-kind">{{ t().maps.kind }}</p>
+      <input
+        #nameInput
+        class="doc-title doc-input"
+        [attr.aria-label]="t().maps.name"
+        [value]="nameDraft()"
+        (input)="onNameInput($any($event.target).value)"
+        (blur)="onNameBlur()"
+        (keydown.enter)="nameInput.blur()"
+      />
+    </header>
+
+    <div class="toolbar" role="toolbar" [attr.aria-label]="t().maps.toolbar">
+      <div class="tools" role="group" [attr.aria-label]="t().maps.toolLabel">
+        @for (entry of tools; track entry) {
+          <button
+            type="button"
+            class="tool"
+            [attr.aria-pressed]="tool() === entry"
+            [title]="t().maps[entry]"
+            (click)="selectTool(entry)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              @switch (entry) {
+                @case ('pen') {
+                  <path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" />
+                  <path d="M14 7l3 3" />
+                }
+                @case ('area') {
+                  <path class="filled" d="M5 9c1-4 6-5 9-4s6 3 5 7-3 7-7 7-8-5-7-10z" />
+                }
+                @case ('eraser') {
+                  <path d="M8 20h12" />
+                  <path
+                    d="M4.5 15.5 13 7a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L12 20H8.5l-4-4z"
+                  />
+                  <path d="M9 11l5 5" />
+                }
+              }
+            </svg>
+            <span>{{ t().maps[entry] }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="swatches" role="group" [attr.aria-label]="t().maps.colorLabel">
+        @for (entry of colors; track entry.key) {
+          <button
+            type="button"
+            class="swatch"
+            [style.--swatch]="entry.value"
+            [attr.aria-pressed]="tool() !== 'eraser' && color() === entry.value"
+            [title]="t().maps.colors[entry.key]"
+            [attr.aria-label]="t().maps.colors[entry.key]"
+            (click)="selectColor(entry.value)"
+          ></button>
+        }
+      </div>
+
+      <div class="widths" role="group" [attr.aria-label]="t().maps.widthLabel">
+        @for (width of widths; track $index) {
+          <button
+            type="button"
+            class="width"
+            [attr.aria-pressed]="tool() !== 'eraser' && widthIndex() === $index"
+            [title]="t().maps.widths[$index]"
+            [attr.aria-label]="t().maps.widths[$index]"
+            (click)="selectWidth($index)"
+          >
+            <span [style.width.px]="width * 1.6 + 2" [style.height.px]="width * 1.6 + 2"></span>
+          </button>
+        }
+      </div>
+
+      <div class="history">
+        <button
+          type="button"
+          class="icon"
+          [disabled]="!canUndo()"
+          [title]="t().maps.undo + ' (' + shortcut()('Z') + ')'"
+          [attr.aria-label]="t().maps.undo"
+          (click)="undo()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 14 4 9l5-5" />
+            <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          class="icon"
+          [disabled]="!canRedo()"
+          [title]="t().maps.redo + ' (' + shortcut()('Z', { shift: true }) + ')'"
+          [attr.aria-label]="t().maps.redo"
+          (click)="redo()"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 14 5-5-5-5" />
+            <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="background">
+        <input
+          #fileInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          hidden
+          (change)="onBackgroundSelected(fileInput)"
+        />
+        <button
+          type="button"
+          class="link"
+          [disabled]="uploading()"
+          [title]="t().maps.backgroundHint"
+          (click)="fileInput.click()"
+        >
+          {{
+            uploading()
+              ? t().gallery.uploading
+              : map.backgroundImageId
+                ? t().maps.replaceBackground
+                : t().maps.addBackground
+          }}
+        </button>
+        @if (map.backgroundImageId) {
+          <label class="opacity" [title]="t().maps.backgroundOpacity">
+            <input
+              type="range"
+              [attr.aria-label]="t().maps.backgroundOpacity"
+              min="0.1"
+              max="1"
+              step="0.05"
+              [value]="backgroundOpacity()"
+              (input)="onOpacityInput($any($event.target).value)"
+            />
+          </label>
+          <button
+            type="button"
+            class="icon"
+            [title]="t().maps.removeBackground"
+            [attr.aria-label]="t().maps.removeBackground"
+            (click)="removeBackground()"
+          >
+            ×
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="body" [style.--aspect]="map.width / map.height">
+      <div
+        class="surface"
+        [class.drop-active]="dropActive()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="dropActive.set(false)"
+        (drop)="onDrop($event)"
+      >
+        <svg
+          #canvas
+          class="canvas"
+          [class.placing]="placing()"
+          [class.erasing]="tool() === 'eraser'"
+          [attr.viewBox]="'0 0 ' + map.width + ' ' + map.height"
+          role="img"
+          [attr.aria-label]="t().maps.canvasLabel(map.name)"
+          (pointerdown)="onPointerDown($event)"
+          (pointermove)="onPointerMove($event)"
+          (pointerup)="onPointerUp($event)"
+          (pointercancel)="onPointerUp($event)"
+          (pointerleave)="onPointerLeave()"
+        >
+          <rect class="paper" [attr.width]="map.width" [attr.height]="map.height" />
+          @if (map.backgroundImageId) {
+            <image
+              [attr.href]="'/api/images/' + map.backgroundImageId"
+              [attr.width]="map.width"
+              [attr.height]="map.height"
+              preserveAspectRatio="none"
+              [attr.opacity]="backgroundOpacity()"
+            />
+          }
+          @for (entry of renderedStrokes(); track entry.stroke) {
+            <path
+              [class]="entry.stroke.tool"
+              [attr.d]="entry.d"
+              [attr.stroke]="entry.stroke.color"
+              [attr.fill]="entry.stroke.tool === 'area' ? entry.stroke.color : 'none'"
+              [attr.stroke-width]="entry.stroke.width"
+            />
+          }
+          @if (draftPath(); as d) {
+            <path
+              [class]="tool()"
+              [attr.d]="d"
+              [attr.stroke]="color()"
+              [attr.fill]="tool() === 'area' ? color() : 'none'"
+              [attr.stroke-width]="widths[widthIndex()]! * unit()"
+            />
+          }
+          @for (entry of placedPins(); track entry.pin.noteId) {
+            <g
+              class="pin"
+              [class.selected]="selectedPin() === entry.pin.noteId"
+              [attr.transform]="
+                'translate(' + entry.pin.x + ' ' + entry.pin.y + ') scale(' + unit() + ')'
+              "
+              (pointerdown)="onPinPointerDown($event, entry.pin.noteId)"
+            >
+              <circle class="hit" cy="-8" r="15" />
+              <path class="marker" d="M0 0c-4-6-7-9-7-13a7 7 0 0 1 14 0c0 4-3 7-7 13z" />
+              <circle class="dot" cy="-13" r="2.6" />
+              <text y="15">{{ entry.note.title }}</text>
+            </g>
+          }
+          @if (eraserAt(); as at) {
+            <circle class="eraser-ring" [attr.cx]="at.x" [attr.cy]="at.y" [attr.r]="8 * unit()" />
+          }
+        </svg>
+
+        @if (isEmpty()) {
+          <p class="empty-hint">{{ t().maps.emptyHint }}</p>
+        }
+
+        @if (selected(); as entry) {
+          <div
+            class="pin-popover"
+            [style.left.%]="percent(entry.pin.x, map.width)"
+            [style.top.%]="percent(entry.pin.y, map.height)"
+          >
+            <strong>{{ entry.note.title }}</strong>
+            <a class="open" [routerLink]="['/write/places', entry.note.id]">
+              {{ t().maps.openPlace }}
+            </a>
+            <button type="button" class="link" (click)="removePin(entry.note.id)">
+              {{ t().maps.removePin }}
+            </button>
+          </div>
+        }
+      </div>
+
+      <aside class="places" [attr.aria-label]="t().noteKinds.place.label">
+        @if (placingNote(); as note) {
+          <p class="placing-hint" role="status">{{ t().maps.placing(note.title) }}</p>
+        }
+        <h3>{{ t().maps.offMap }}</h3>
+        @if (unplaced().length) {
+          <p class="muted hint">{{ t().maps.placeHint }}</p>
+          <ul>
+            @for (note of unplaced(); track note.id) {
+              <li>
+                <button
+                  type="button"
+                  draggable="true"
+                  [attr.aria-pressed]="placing() === note.id"
+                  (click)="pickPlace(note)"
+                  (dragstart)="onPlaceDragStart($event, note)"
+                >
+                  {{ note.title }}
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="muted hint">
+            {{ placedNotes().length ? t().maps.allPlaced : t().maps.noPlaces }}
+          </p>
+        }
+        @if (placedNotes().length) {
+          <h3>{{ t().maps.onMap }}</h3>
+          <ul>
+            @for (note of placedNotes(); track note.id) {
+              <li>
+                <button
+                  type="button"
+                  class="placed"
+                  [attr.aria-pressed]="selectedPin() === note.id"
+                  (click)="pickPlace(note)"
+                >
+                  {{ note.title }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </aside>
+    </div>
+  </div>
+} @else if (notFound()) {
+  <p class="muted not-found">{{ t().maps.notFound }}</p>
+}

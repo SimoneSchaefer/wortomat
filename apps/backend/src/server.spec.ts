@@ -9,9 +9,11 @@ import type {
   DirectoryListing,
   ImageInfo,
   ManuscriptNode,
+  MapSummary,
   NoteContent,
   NoteGroup,
   NoteSummary,
+  PlaceMap,
   ProjectInfo,
   ProjectListEntry,
   SceneContent,
@@ -559,6 +561,110 @@ describe('REST-API', () => {
     assert.deepEqual(await linked(ankunft.id), []);
   });
 
+  it('zeichnet Karten und trägt Orte darauf ein', async () => {
+    const status = async (method: string, urlPath: string, body: unknown) =>
+      (
+        await fetch(server.url + urlPath, {
+          method,
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+
+    const map = await api<PlaceMap>('POST', '/api/maps', { name: ' Nordküste ' });
+    assert.equal(map.name, 'Nordküste');
+    assert.deepEqual([map.width, map.height, map.strokes, map.pins], [1600, 1000, [], []]);
+    assert.ok((await api<MapSummary[]>('GET', '/api/maps')).some((m) => m.id === map.id));
+
+    const hafen = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Hafen' });
+    const leuchtturm = await api<NoteSummary>('POST', '/api/notes', {
+      kind: 'place',
+      title: 'Leuchtturm',
+    });
+    const anna = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'A' });
+
+    const updated = await api<PlaceMap>('PATCH', `/api/maps/${map.id}`, {
+      strokes: [{ tool: 'pen', color: '#3A7BD5', width: 4, points: [10.123, 20, 30, 40.06] }],
+      pins: [
+        { noteId: hafen.id, x: 100, y: 200 },
+        { noteId: leuchtturm.id, x: 300, y: 50 },
+        // keine Orte: werden übergangen
+        { noteId: anna.id, x: 1, y: 1 },
+        { noteId: 'gibt-es-nicht', x: 1, y: 1 },
+      ],
+    });
+    assert.deepEqual(updated.strokes, [
+      { tool: 'pen', color: '#3a7bd5', width: 4, points: [10.1, 20, 30, 40.1] },
+    ]);
+    assert.deepEqual(
+      updated.pins.map((pin) => pin.noteId),
+      [hafen.id, leuchtturm.id],
+    );
+
+    // Nur der Name ändert sich – Zeichnung und Orte bleiben
+    const renamed = await api<PlaceMap>('PATCH', `/api/maps/${map.id}`, { name: 'Küste' });
+    assert.equal(renamed.name, 'Küste');
+    assert.equal(renamed.strokes.length, 1);
+    assert.equal(renamed.pins.length, 2);
+
+    assert.equal(await status('PATCH', `/api/maps/${map.id}`, { strokes: [{ tool: 'x' }] }), 400);
+    assert.equal(
+      await status('PATCH', `/api/maps/${map.id}`, {
+        strokes: [{ tool: 'pen', color: 'red', width: 1, points: [0, 0] }],
+      }),
+      400,
+    );
+    assert.equal(await status('PATCH', `/api/maps/${map.id}`, { name: ' ' }), 400);
+
+    // Die Seite des Orts zeigt, auf welchen Karten er liegt
+    const stadt = await api<PlaceMap>('POST', '/api/maps', { name: 'Stadt' });
+    await api('PATCH', `/api/maps/${stadt.id}`, { pins: [{ noteId: hafen.id, x: 5, y: 6 }] });
+    assert.deepEqual(
+      (await api<PlaceMap[]>('GET', `/api/notes/${hafen.id}/maps`)).map((m) => m.name),
+      ['Küste', 'Stadt'],
+    );
+    await api('DELETE', `/api/maps/${stadt.id}`);
+    assert.deepEqual(await api('GET', `/api/notes/${anna.id}/maps`), []);
+
+    // Ort gelöscht → verschwindet von der Karte
+    await api('DELETE', `/api/notes/${leuchtturm.id}`);
+    const after = await api<PlaceMap>('GET', `/api/maps/${map.id}`);
+    assert.deepEqual(after.pins, [{ noteId: hafen.id, x: 100, y: 200 }]);
+
+    // Hintergrundbild: beim Ersetzen bzw. Löschen der Karte wird das alte aufgeräumt
+    const uploadImage = async () => {
+      const form = new FormData();
+      form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), 'k.png');
+      const response = await fetch(`${server.url}/api/images`, {
+        method: 'POST',
+        headers: { [AUTH_HEADER]: TOKEN },
+        body: form,
+      });
+      return (await response.json()) as ImageInfo;
+    };
+    const imageExists = async (url: string) =>
+      (await fetch(server.url + url, { headers: { [AUTH_HEADER]: TOKEN } })).status === 200;
+    const first = await uploadImage();
+    const second = await uploadImage();
+    await api('PATCH', `/api/maps/${map.id}`, { backgroundImageId: first.id, height: 800 });
+    assert.equal(
+      await status('PATCH', `/api/maps/${map.id}`, { backgroundImageId: 'unbekannt' }),
+      400,
+    );
+    const replaced = await api<PlaceMap>('PATCH', `/api/maps/${map.id}`, {
+      backgroundImageId: second.id,
+      backgroundOpacity: 0.01,
+    });
+    assert.equal(replaced.backgroundImageId, second.id);
+    assert.equal(replaced.backgroundOpacity, 0.1);
+    assert.equal(replaced.height, 800);
+    assert.equal(await imageExists(first.url), false);
+
+    await api('DELETE', `/api/maps/${map.id}`);
+    assert.equal(await imageExists(second.url), false);
+    assert.ok(!(await api<MapSummary[]>('GET', '/api/maps')).some((m) => m.id === map.id));
+  });
+
   it('zählt Todo/Idee/Fixme-Markierungen beim Speichern und zeigt sie im Baum', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'markierungen', 'Buch'),
@@ -826,7 +932,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

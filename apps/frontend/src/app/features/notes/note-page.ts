@@ -18,6 +18,7 @@ import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from '../editor/document-editor';
+import { NoteLocation } from '../maps/note-location';
 import { ImageGallery } from './image-gallery';
 import { NoteAppearances } from './note-appearances';
 import { NoteGroupPicker } from './note-group-picker';
@@ -32,7 +33,7 @@ const MAX_SUMMARY_LENGTH = 2000;
 /** Ein Charakter, Ort oder eine Recherche: Route `write/<art>/:id`. */
 @Component({
   selector: 'wm-note-page',
-  imports: [DocumentEditor, ImageGallery, NoteAppearances, NoteGroupPicker],
+  imports: [DocumentEditor, ImageGallery, NoteAppearances, NoteGroupPicker, NoteLocation],
   templateUrl: './note-page.html',
   styleUrl: './note-page.scss',
 })

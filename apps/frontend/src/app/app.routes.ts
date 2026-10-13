@@ -49,6 +49,10 @@ export const routes: Routes = [
       },
       ...noteRoutes('character'),
       ...noteRoutes('place'),
+      {
+        path: 'places/maps/:id',
+        loadComponent: () => import('./features/maps/map-page').then((m) => m.MapPage),
+      },
       ...noteRoutes('research'),
       {
         path: 'stats',

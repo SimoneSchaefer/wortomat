@@ -1,0 +1,28 @@
+<section class="maps" [attr.aria-label]="t().maps.label">
+  <div class="head">
+    <span class="label">{{ t().maps.label }}</span>
+    @if (store.maps().length) {
+      <button type="button" class="add" [title]="t().maps.add" (click)="add()">+</button>
+    }
+  </div>
+  <ul>
+    @for (map of store.maps(); track map.id) {
+      <li>
+        <a [routerLink]="['/write/places/maps', map.id]" routerLinkActive="active">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4z" />
+            <path d="M9 4v14M15 6v14" />
+          </svg>
+          <span class="name" [title]="map.name">{{ map.name }}</span>
+        </a>
+        <button type="button" class="remove" [title]="t().common.delete" (click)="remove(map)">
+          ×
+        </button>
+      </li>
+    } @empty {
+      <li class="empty">
+        <button type="button" class="link" (click)="add()">{{ t().maps.addFirst }}</button>
+      </li>
+    }
+  </ul>
+</section>
