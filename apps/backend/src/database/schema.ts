@@ -238,6 +238,19 @@ const MIGRATIONS: readonly Migration[] = [
 
     ALTER TABLE nodes ADD COLUMN turning_point INTEGER NOT NULL DEFAULT 0;
   `,
+  /* 17: Reihenfolge der Handlung (unabhängig vom Buch) und Abschnittsmarken darin */ `
+    -- Position in der Handlung; gleiche Werte = gleichzeitig. NULL = noch nie festgelegt:
+    -- die Szene folgt dann ihrer Vorgängerin im Buch.
+    ALTER TABLE nodes ADD COLUMN story_order REAL;
+
+    -- Beginn eines Abschnitts („Tag 1“, „Winter“) vor der ersten Szene mit story_order >= position
+    CREATE TABLE story_marks (
+      id          TEXT PRIMARY KEY,
+      label       TEXT NOT NULL,
+      position    REAL NOT NULL,
+      created_at  TEXT NOT NULL
+    );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -20,6 +20,7 @@ function node(
     status: null,
     annotations,
     turningPoint,
+    storyOrder: null,
   };
 }
 

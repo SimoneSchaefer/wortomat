@@ -4,28 +4,49 @@
       <h1>{{ t().plot.title }}</h1>
       <p class="muted intro">{{ t().plot.intro }}</p>
     </div>
-    <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.show">
-      <button
-        type="button"
-        role="radio"
-        [attr.aria-checked]="onlyTurningPoints()"
-        (click)="onlyTurningPoints.set(true)"
-      >
-        <svg class="diamond-icon" viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
-        </svg>
-        {{ t().plot.turningPoints }}
-        <span class="count">{{ turningPointCount() }}</span>
-      </button>
-      <button
-        type="button"
-        role="radio"
-        [attr.aria-checked]="!onlyTurningPoints()"
-        (click)="onlyTurningPoints.set(false)"
-      >
-        {{ t().plot.allScenes }}
-        <span class="count">{{ sceneCount() }}</span>
-      </button>
+    <div class="switches">
+      <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.orderBy">
+        <span class="mode-label">{{ t().plot.orderBy }}</span>
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="order() === 'story'"
+          (click)="order.set('story')"
+        >
+          {{ t().plot.storyOrder }}
+        </button>
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="order() === 'book'"
+          (click)="order.set('book')"
+        >
+          {{ t().plot.bookOrder }}
+        </button>
+      </div>
+      <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.show">
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="onlyTurningPoints()"
+          (click)="onlyTurningPoints.set(true)"
+        >
+          <svg class="diamond-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
+          </svg>
+          {{ t().plot.turningPoints }}
+          <span class="count">{{ turningPointCount() }}</span>
+        </button>
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="!onlyTurningPoints()"
+          (click)="onlyTurningPoints.set(false)"
+        >
+          {{ t().plot.allScenes }}
+          <span class="count">{{ sceneCount() }}</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -35,6 +56,15 @@
     } @else if (!strands().length) {
       <p class="card empty muted">{{ t().plot.noStrands }}</p>
     } @else {
+      <div class="hint-row">
+        <p class="muted mode-hint">
+          {{ order() === 'story' ? t().plot.storyHint : t().plot.bookHint }}
+        </p>
+        @if (order() === 'story' && arranged()) {
+          <button type="button" class="link" (click)="reset()">{{ t().plot.reset }}</button>
+        }
+      </div>
+
       <!-- Infozeile: welche Szene gerade unter dem Mauszeiger liegt -->
       <div class="info" aria-live="polite">
         @if (active(); as node) {
@@ -57,6 +87,16 @@
                 <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
               </svg>
               {{ t().sceneLinks.turningPoint }}
+            </span>
+          }
+          <span class="info-muted">{{ t().plot.bookPosition(node.bookNumber) }}</span>
+          @if (simultaneous(node); as count) {
+            <span class="info-muted">{{ t().plot.simultaneous(count) }}</span>
+          }
+          @if (isDisplaced(node)) {
+            <span class="info-displaced" [title]="t().plot.displacedHint">
+              <span class="displaced-dot"></span>
+              {{ t().plot.displaced }}
             </span>
           }
         } @else {
@@ -86,33 +126,105 @@
 
         <div class="scroller">
           @if (layout().nodes.length) {
-            <div class="chapters" [style.height.px]="headerHeight">
-              @for (chapter of layout().chapters; track chapter.chapter.id) {
-                <span
-                  class="chapter"
-                  [style.left.px]="chapter.x"
-                  [style.width.px]="chapter.width"
-                  [title]="t().plot.chapter(chapter.number) + ' · ' + chapter.chapter.title"
+            <!-- Kopf: Kapitel (Buch) bzw. Abschnitte (Handlung); „+“ beginnt einen Abschnitt -->
+            <div
+              class="groups"
+              [class.story]="order() === 'story'"
+              [style.height.px]="headerHeight"
+              [style.width.px]="layout().width + padding"
+            >
+              @for (group of layout().groups; track group.id) {
+                @if (group.number !== null) {
+                  <span
+                    class="group"
+                    [style.left.px]="group.x"
+                    [style.width.px]="group.width"
+                    [title]="t().plot.chapter(group.number) + ' · ' + group.label"
+                  >
+                    <b>{{ group.number }}</b> {{ group.label }}
+                  </span>
+                } @else if (group.label) {
+                  <button
+                    type="button"
+                    class="group mark"
+                    [style.left.px]="group.x"
+                    [style.width.px]="group.width"
+                    [title]="t().plot.editMark(group.label)"
+                    (click)="editMark(group.id, group.x)"
+                  >
+                    {{ group.label }}
+                  </button>
+                }
+              }
+              @for (slot of markSlots(); track slot.beforeColumn) {
+                <button
+                  type="button"
+                  class="add-mark"
+                  [style.left.px]="slot.x"
+                  [title]="t().plot.addMark"
+                  [attr.aria-label]="t().plot.addMark"
+                  (click)="startMark(slot.beforeColumn, slot.x)"
                 >
-                  <b>{{ chapter.number }}</b> {{ chapter.chapter.title }}
-                </span>
+                  +
+                </button>
+              }
+              @if (markDraft(); as draft) {
+                <div class="mark-editor" [style.left.px]="draft.x">
+                  <input
+                    #markInput
+                    wmAutofocus
+                    [attr.aria-label]="t().plot.markLabel"
+                    [placeholder]="t().plot.markPlaceholder"
+                    [value]="draft.label"
+                    maxlength="40"
+                    (keydown.enter)="saveMark(markInput.value)"
+                    (keydown.escape)="markDraft.set(null)"
+                    (blur)="saveMark(markInput.value)"
+                  />
+                  @if (draft.id) {
+                    <button
+                      type="button"
+                      class="delete-mark"
+                      [title]="t().plot.deleteMark"
+                      [attr.aria-label]="t().plot.deleteMark"
+                      (pointerdown)="$event.preventDefault(); deleteMark()"
+                    >
+                      ×
+                    </button>
+                  }
+                </div>
               }
             </div>
-            <div class="drawing">
+
+            <div #drawing class="drawing" [class.dragging]="drag()?.moved">
               <svg
                 [attr.width]="layout().width + padding"
                 [attr.height]="layout().height"
                 [attr.viewBox]="'0 0 ' + (layout().width + padding) + ' ' + layout().height"
               >
-                <!-- Kapitelbereiche, abwechselnd leicht getönt -->
-                @for (chapter of layout().chapters; track chapter.chapter.id; let odd = $odd) {
+                <!-- Gruppen (Kapitel bzw. Abschnitte), abwechselnd leicht getönt -->
+                @for (group of layout().groups; track group.id; let odd = $odd) {
                   @if (odd) {
                     <rect
-                      class="chapter-band"
-                      [attr.x]="chapter.x"
+                      class="group-band"
+                      [attr.x]="group.x"
                       y="0"
-                      [attr.width]="chapter.width"
+                      [attr.width]="group.width"
                       [attr.height]="layout().height"
+                    />
+                  }
+                }
+                <!-- Gleichzeitige Szenen: eine gemeinsame Spalte, leicht hinterlegt -->
+                @for (column of layout().columns; track $index; let index = $index) {
+                  @if (column.sceneIds.length > 1 || dropColumn() === index) {
+                    <rect
+                      class="together"
+                      [class.drop]="dropColumn() === index"
+                      [attr.x]="column.left + 6"
+                      y="4"
+                      [attr.width]="column.width - 12"
+                      [attr.height]="layout().height - 8"
+                      rx="10"
                     />
                   }
                 }
@@ -133,23 +245,44 @@
                     [style.stroke]="strandColor(line.strand.color)"
                   />
                 }
+                @if (dropGapX(); as x) {
+                  <line
+                    class="drop-gap"
+                    [attr.x1]="x"
+                    [attr.x2]="x"
+                    y1="0"
+                    [attr.y2]="layout().height"
+                  />
+                }
                 @for (node of layout().nodes; track node.scene.id) {
                   <g
                     class="node"
                     role="link"
                     tabindex="0"
+                    [attr.data-scene]="node.scene.id"
                     [class.turning]="node.scene.turningPoint"
                     [class.active]="active() === node"
+                    [class.movable]="order() === 'story'"
+                    [class.lifted]="drag()?.moved && drag()?.node === node"
+                    [style.transform]="
+                      drag()?.moved && drag()?.node === node
+                        ? 'translateX(' + drag()!.dx + 'px)'
+                        : null
+                    "
                     [style.--status-color]="statusInfo(node.scene.status ?? 'idea').color"
                     [attr.aria-label]="t().plot.openScene(node.scene.title)"
+                    [attr.aria-description]="order() === 'story' ? t().plot.moveHint : null"
                     (pointerenter)="active.set(node)"
                     (pointerleave)="leave(node)"
                     (focus)="active.set(node)"
                     (blur)="leave(node)"
-                    (click)="open(node)"
+                    (pointerdown)="onPointerDown($event, node)"
+                    (pointermove)="onPointerMove($event)"
+                    (pointerup)="onPointerUp()"
+                    (pointercancel)="onPointerCancel()"
                     (keydown)="onKeydown($event, node)"
                   >
-                    @if (node.scene.turningPoint && node.strands.length < 2) {
+                    @if (isDiamond(node)) {
                       <polygon [attr.points]="diamond(node)" />
                     } @else {
                       <rect
@@ -158,6 +291,18 @@
                         [attr.width]="nodeSize"
                         [attr.height]="node.height"
                         [attr.rx]="nodeSize / 2"
+                      />
+                    }
+                    <!-- Position im Buch -->
+                    <text class="number" [attr.x]="node.x" [attr.y]="node.y">
+                      {{ node.bookNumber }}
+                    </text>
+                    @if (isDisplaced(node)) {
+                      <circle
+                        class="displaced"
+                        [attr.cx]="node.x + nodeSize / 2"
+                        [attr.cy]="node.y - reach(node)"
+                        r="4"
                       />
                     }
                   </g>
@@ -169,6 +314,7 @@
                   class="label"
                   aria-hidden="true"
                   [class.active]="active() === node"
+                  [class.lifted]="drag()?.moved && drag()?.node === node"
                   [style.left.px]="node.x - columnWidth / 2"
                   [style.width.px]="columnWidth"
                   [style.top.px]="labelTop(node)"

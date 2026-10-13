@@ -14,6 +14,52 @@
   gap: 1rem;
 }
 
+.switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.mode-label {
+  align-self: center;
+  margin-right: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hint-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.mode-hint {
+  margin: 0;
+  max-width: 50rem;
+  font-size: 0.85rem;
+}
+
+.info-muted {
+  color: var(--text-muted);
+}
+
+.info-displaced {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.displaced-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--annotation-todo);
+}
+
 .head {
   display: flex;
   align-items: flex-end;
@@ -63,11 +109,11 @@ h1 {
     color: var(--text-muted);
     font-size: 0.85rem;
 
-    &:first-child {
+    &:first-of-type {
       border-radius: 999px 0 0 999px;
     }
 
-    &:last-child {
+    &:last-of-type {
       margin-left: -1px;
       border-radius: 0 999px 999px 0;
     }
@@ -189,10 +235,11 @@ h1 {
   }
 }
 
-.chapters {
+// Kopf über der Zeichnung: Kapitel (Buch) bzw. Abschnitte (Handlung)
+.groups {
   position: relative;
 
-  .chapter {
+  .group {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -201,7 +248,10 @@ h1 {
     gap: 0.3rem;
     padding: 0 0.3rem;
     box-sizing: border-box;
+    border: none;
     border-bottom: 2px solid var(--hairline);
+    border-radius: 0;
+    background: none;
     font-size: 0.72rem;
     color: var(--text-muted);
     overflow: hidden;
@@ -213,10 +263,86 @@ h1 {
       font-weight: 600;
     }
   }
+
+  // Abschnitt der Handlung: anklicken zum Umbenennen
+  .mark {
+    border-bottom-color: var(--accent);
+    color: var(--text);
+    font-weight: 600;
+    text-align: left;
+
+    &:hover:not(:disabled) {
+      background: var(--button-hover);
+    }
+  }
 }
 
-.chapter-band {
+// „+“ vor jeder Spalte – erst sichtbar, wenn die Maus über dem Kopf ist
+.add-mark {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0 1px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .groups:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+
+.mark-editor {
+  position: absolute;
+  top: 2px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+
+  input {
+    width: 10rem;
+    height: calc(100% - 4px);
+    padding: 0.15rem 0.4rem;
+    font-size: 0.8rem;
+  }
+}
+
+.delete-mark {
+  padding: 0 0.4rem;
+  color: var(--danger);
+}
+
+.group-band {
   fill: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+// Gleichzeitige Szenen teilen sich eine hinterlegte Spalte; beim Ziehen die Zielspalte
+.together {
+  fill: color-mix(in srgb, var(--accent) 7%, transparent);
+  stroke: color-mix(in srgb, var(--accent) 30%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+
+  &.drop {
+    fill: color-mix(in srgb, var(--accent) 18%, transparent);
+    stroke: var(--accent-strong);
+    stroke-dasharray: none;
+  }
+}
+
+.drop-gap {
+  stroke: var(--accent-strong);
+  stroke-width: 3;
+  stroke-linecap: round;
 }
 
 .guide {
@@ -260,6 +386,44 @@ h1 {
       stroke-width: 3;
     }
   }
+
+  // In der Reihenfolge der Handlung lassen sich Szenen ziehen
+  &.movable {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  &.lifted {
+    cursor: grabbing;
+    opacity: 0.85;
+  }
+
+  // Position im Buch
+  .number {
+    fill: var(--text);
+    font-size: 9px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  // steht im Buch an anderer Stelle als in der Handlung
+  .displaced {
+    fill: var(--annotation-todo);
+    stroke: var(--bg);
+    stroke-width: 1.5;
+  }
+}
+
+.drawing.dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.label.lifted {
+  visibility: hidden;
 }
 
 // SVG und Titel liegen übereinander; die Titel werden in Pixeln wie das SVG positioniert

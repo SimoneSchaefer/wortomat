@@ -323,7 +323,29 @@ export const en: Texts = {
   plot: {
     title: 'Plot',
     intro:
-      'Your plot threads from left to right in book order. Where they meet, they share a scene.',
+      'Each plot thread is a line running from left to right. Where threads meet, they share a scene.',
+    orderBy: 'Order by',
+    storyOrder: 'Story',
+    bookOrder: 'Book',
+    storyHint:
+      'Drag scenes to where they happen – dropped onto another scene, they happen at the same time. Use “+” above the columns to start a section like “Day 2”.',
+    bookHint: 'The scenes in book order, by chapter.',
+    bookPosition: (number: number) => `scene ${number} in the book`,
+    displaced: 'out of order',
+    displacedHint:
+      'Sits elsewhere in the book than in the story – a flashback, for example. Intended? Otherwise a hint at a timeline error.',
+    simultaneous: (count: number) =>
+      `at the same time as ${count === 1 ? '1 scene' : `${count} scenes`}`,
+    addMark: 'Start a section here (e.g. “Day 2”)',
+    markPlaceholder: 'e.g. Day 2',
+    markLabel: 'Section name',
+    editMark: (label: string) => `Rename section “${label}”`,
+    deleteMark: 'Remove section',
+    moveHint: 'Alt + arrow keys move the scene in the story',
+    reset: 'Reset to book order …',
+    resetTitle: 'Reset the order?',
+    resetMessage: 'All scenes go back to book order, and the sections are removed.',
+    resetConfirm: 'Reset',
     show: 'Show',
     turningPoints: 'Turning points',
     allScenes: 'All scenes',

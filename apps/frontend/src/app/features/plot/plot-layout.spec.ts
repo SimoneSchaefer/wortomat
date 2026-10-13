@@ -1,16 +1,17 @@
 import type { ManuscriptNode, Strand } from '@wortomat/shared';
 import {
   BUNDLE_GAP,
-  CHAPTER_GAP,
   COLUMN_WIDTH,
+  GROUP_GAP,
   LANE_HEIGHT,
   layoutPlot,
   linePath,
   NODE_SIZE,
+  type PlotColumnInput,
   type PlotScene,
 } from './plot-layout';
 
-const node = (id: string, kind: ManuscriptNode['kind'], turningPoint = false): ManuscriptNode => ({
+const node = (id: string, kind: ManuscriptNode['kind']): ManuscriptNode => ({
   id,
   parentId: null,
   kind,
@@ -19,24 +20,28 @@ const node = (id: string, kind: ManuscriptNode['kind'], turningPoint = false): M
   wordCount: 0,
   status: kind === 'scene' ? 'idea' : null,
   annotations: null,
-  turningPoint: kind === 'scene' ? turningPoint : null,
+  turningPoint: kind === 'scene' ? false : null,
+  storyOrder: null,
 });
 
 const strand = (id: string): Strand => ({ id, name: id, color: 'violet', sceneCount: 0 });
 
 const K1 = node('K1', 'chapter');
 const K2 = node('K2', 'chapter');
-const scene = (
-  id: string,
-  chapter: ManuscriptNode,
-  strandIds: string[],
-  turningPoint = false,
-): PlotScene => ({
-  scene: node(id, 'scene', turningPoint),
+let bookNumber = 0;
+const scene = (id: string, chapter: ManuscriptNode, strandIds: string[]): PlotScene => ({
+  scene: node(id, 'scene'),
   chapter,
   chapterNumber: chapter === K1 ? 1 : 2,
+  bookNumber: ++bookNumber,
   strandIds,
 });
+/** Buchreihenfolge: eine Szene je Spalte, gruppiert nach Kapitel. */
+const inBookOrder = (scenes: PlotScene[]): PlotColumnInput[] =>
+  scenes.map((entry) => ({
+    scenes: [entry],
+    group: { id: entry.chapter.id, label: entry.chapter.title, number: entry.chapterNumber },
+  }));
 
 const lena = strand('lena');
 const tom = strand('tom');
@@ -45,29 +50,29 @@ const lane = (index: number) => index * LANE_HEIGHT + LANE_HEIGHT / 2;
 describe('layoutPlot', () => {
   const scenes = [
     scene('a', K1, ['lena']),
-    scene('b', K1, ['tom', 'lena'], true),
+    scene('b', K1, ['tom', 'lena']),
     scene('c', K2, ['tom']),
-    scene('d', K2, [], true),
+    scene('d', K2, []),
   ];
 
-  it('legt Szenen in Buchreihenfolge als Spalten an, mit einer Lücke je Kapitel', () => {
-    const layout = layoutPlot(scenes, [lena, tom], false);
+  it('legt die Spalten von links nach rechts an, mit einer Lücke je Gruppe', () => {
+    const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     const half = COLUMN_WIDTH / 2;
-    expect(layout.nodes.map((n) => [n.scene.id, n.x])).toEqual([
-      ['a', half],
-      ['b', COLUMN_WIDTH + half],
-      ['c', 2 * COLUMN_WIDTH + CHAPTER_GAP + half],
-      ['d', 3 * COLUMN_WIDTH + CHAPTER_GAP + half],
+    expect(layout.nodes.map((n) => [n.scene.id, n.x, n.column])).toEqual([
+      ['a', half, 0],
+      ['b', COLUMN_WIDTH + half, 1],
+      ['c', 2 * COLUMN_WIDTH + GROUP_GAP + half, 2],
+      ['d', 3 * COLUMN_WIDTH + GROUP_GAP + half, 3],
     ]);
-    expect(layout.chapters.map((c) => [c.chapter.id, c.x, c.width])).toEqual([
-      ['K1', 0, 2 * COLUMN_WIDTH],
-      ['K2', 2 * COLUMN_WIDTH + CHAPTER_GAP, 2 * COLUMN_WIDTH],
+    expect(layout.groups.map((g) => [g.id, g.number, g.x, g.width, g.firstColumn])).toEqual([
+      ['K1', 1, 0, 2 * COLUMN_WIDTH, 0],
+      ['K2', 2, 2 * COLUMN_WIDTH + GROUP_GAP, 2 * COLUMN_WIDTH, 2],
     ]);
-    expect(layout.width).toBe(4 * COLUMN_WIDTH + CHAPTER_GAP);
+    expect(layout.width).toBe(4 * COLUMN_WIDTH + GROUP_GAP);
   });
 
   it('legt gemeinsame Szenen mittig zwischen die Stränge und bündelt die Linien', () => {
-    const layout = layoutPlot(scenes, [lena, tom], false);
+    const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     const b = layout.nodes[1]!;
     expect(b.strands.map((s) => s.id)).toEqual(['lena', 'tom']); // Reihenfolge der Zeilen
     expect(b.y).toBe((lane(0) + lane(1)) / 2);
@@ -82,7 +87,7 @@ describe('layoutPlot', () => {
   });
 
   it('sammelt Szenen ohne Strang in einer eigenen Zeile', () => {
-    const layout = layoutPlot(scenes, [lena, tom], false);
+    const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     expect(layout.lanes.map((l) => [l.strand?.id ?? null, l.y, l.nodeCount])).toEqual([
       ['lena', lane(0), 2],
       ['tom', lane(1), 2],
@@ -92,17 +97,29 @@ describe('layoutPlot', () => {
     expect(layout.height).toBe(3 * LANE_HEIGHT);
   });
 
-  it('zeigt auf Wunsch nur Wendepunkte; ein Strang mit einem Knoten hat keine Linie', () => {
-    const layout = layoutPlot(scenes, [lena, tom], true);
-    expect(layout.nodes.map((n) => n.scene.id)).toEqual(['b', 'd']);
-    expect(layout.lines).toEqual([]);
-    expect(layout.lanes.map((l) => l.nodeCount)).toEqual([1, 1, 1]);
-  });
-
   it('ignoriert unbekannte (gelöschte) Stränge', () => {
-    const layout = layoutPlot([scene('a', K1, ['weg'])], [lena], false);
+    const layout = layoutPlot(inBookOrder([scene('a', K1, ['weg'])]), [lena]);
     expect(layout.nodes[0]!.strands).toEqual([]);
     expect(layout.lanes.map((l) => l.strand?.id ?? null)).toEqual(['lena', null]);
+  });
+
+  it('stellt gleichzeitige Szenen übereinander – oder nebeneinander, wenn sie sich stören', () => {
+    const group = { id: 'start', label: '', number: null };
+    const x = scene('x', K1, ['lena']);
+    const y = scene('y', K1, ['tom']);
+    const z = scene('z', K1, ['lena']);
+    // x und y in verschiedenen Zeilen: eine Spalte, übereinander
+    const stacked = layoutPlot([{ scenes: [x, y], group }], [lena, tom]);
+    expect(stacked.nodes.map((n) => [n.scene.id, n.x, n.y])).toEqual([
+      ['x', COLUMN_WIDTH / 2, lane(0)],
+      ['y', COLUMN_WIDTH / 2, lane(1)],
+    ]);
+    expect(stacked.columns).toEqual([{ left: 0, width: COLUMN_WIDTH, sceneIds: ['x', 'y'] }]);
+    // x und z im selben Strang: die Spalte wird doppelt so breit
+    const spread = layoutPlot([{ scenes: [x, z], group }], [lena, tom]);
+    expect(spread.nodes.map((n) => n.x)).toEqual([COLUMN_WIDTH / 2, COLUMN_WIDTH * 1.5]);
+    expect(spread.columns[0]!.width).toBe(2 * COLUMN_WIDTH);
+    expect(spread.lines[0]!.path).toBe(`M${COLUMN_WIDTH / 2} ${lane(0)} H${COLUMN_WIDTH * 1.5}`);
   });
 });
 

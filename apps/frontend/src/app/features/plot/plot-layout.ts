@@ -1,9 +1,9 @@
 import type { ManuscriptNode, Strand } from '@wortomat/shared';
 
-/** Abstand der Szenen (Spalten) nebeneinander, in Pixeln – breit genug für den Titel darunter. */
+/** Breite einer Spalte, in Pixeln – breit genug für den Titel unter dem Knoten. */
 export const COLUMN_WIDTH = 120;
-/** Zusätzliche Lücke zwischen zwei Kapiteln. */
-export const CHAPTER_GAP = 18;
+/** Zusätzliche Lücke zwischen zwei Gruppen (Kapitel bzw. Abschnitte der Handlung). */
+export const GROUP_GAP = 18;
 /** Abstand der Stränge (Spuren) untereinander – Platz für zwei Zeilen Titel unter dem Knoten. */
 export const LANE_HEIGHT = 88;
 /** Durchmesser eines Szenenknotens. */
@@ -12,14 +12,33 @@ export const NODE_SIZE = 20;
 export const BUNDLE_GAP = 7;
 /** Strecke, auf der eine Linie zwischen Spur und gemeinsamer Szene umbiegt. */
 const BEND = 40;
+/** So weit reicht der Titel unter einen Knoten. */
+const LABEL_REACH = 40;
 
-/** Eine Szene mit ihrem Kapitel und ihren Strängen – in Buchreihenfolge. */
+/** Eine Szene mit ihrem Kapitel und ihren Strängen. */
 export interface PlotScene {
   scene: ManuscriptNode;
   chapter: ManuscriptNode;
   /** Laufende Nummer des Kapitels im Buch (ab 1). */
   chapterNumber: number;
+  /** Position im Buch (ab 1). */
+  bookNumber: number;
   strandIds: readonly string[];
+}
+
+/** Kapitel (Buchreihenfolge) bzw. Abschnitt der Handlung, z. B. „Tag 1“. */
+export interface PlotGroupInfo {
+  id: string;
+  /** Leer beim Abschnitt vor der ersten Marke. */
+  label: string;
+  /** Kapitelnummer; `null` bei Abschnitten. */
+  number: number | null;
+}
+
+/** Eingabe: Szenen, die gleichzeitig passieren (in Buchreihenfolge: immer nur eine). */
+export interface PlotColumnInput {
+  scenes: readonly PlotScene[];
+  group: PlotGroupInfo;
 }
 
 /** Eine Zeile der Übersicht: ein Strang oder die Sammelzeile für Szenen ohne Strang. */
@@ -31,17 +50,23 @@ export interface PlotLane {
   nodeCount: number;
 }
 
-export interface PlotNode {
-  scene: ManuscriptNode;
-  chapter: ManuscriptNode;
-  chapterNumber: number;
+export interface PlotNode extends PlotScene {
   /** Stränge der Szene in der Reihenfolge der Zeilen. */
   strands: Strand[];
+  /** Index der Spalte. */
+  column: number;
   x: number;
   /** Mitte des Knotens. */
   y: number;
   /** Höhe: bei mehreren Strängen ein längliches Oval, sonst ein Kreis. */
   height: number;
+}
+
+/** Platz einer Spalte – z. B. um beim Ziehen die Stelle unter dem Mauszeiger zu finden. */
+export interface PlotColumn {
+  left: number;
+  width: number;
+  sceneIds: string[];
 }
 
 export interface PlotLine {
@@ -50,13 +75,13 @@ export interface PlotLine {
   path: string;
 }
 
-/** Kopf über den Spalten eines Kapitels. */
-export interface PlotChapter {
-  chapter: ManuscriptNode;
-  number: number;
+/** Kopf über den Spalten einer Gruppe. */
+export interface PlotGroup extends PlotGroupInfo {
   /** Linke Kante und Breite des Bereichs. */
   x: number;
   width: number;
+  /** Index der ersten Spalte. */
+  firstColumn: number;
 }
 
 export interface PlotLayout {
@@ -64,24 +89,21 @@ export interface PlotLayout {
   height: number;
   lanes: PlotLane[];
   nodes: PlotNode[];
+  columns: PlotColumn[];
   lines: PlotLine[];
-  chapters: PlotChapter[];
+  groups: PlotGroup[];
 }
 
 /**
- * Ordnet die Szenen als Spalten (von links nach rechts in Buchreihenfolge) und die Stränge als
- * Zeilen an. Eine Szene in mehreren Strängen liegt mittig zwischen deren Zeilen; die Linien
- * biegen dorthin ab, laufen gebündelt ein und kehren danach in ihre Zeile zurück.
- *
- * @param onlyTurningPoints nur Wendepunkte als Knoten zeigen – die Linien verbinden dann die
- *   Wendepunkte ihres Strangs.
+ * Ordnet die Spalten von links nach rechts und die Stränge als Zeilen an. Eine Szene in mehreren
+ * Strängen liegt mittig zwischen deren Zeilen; die Linien biegen dorthin ab, laufen gebündelt
+ * ein und kehren danach in ihre Zeile zurück. Gleichzeitige Szenen stehen übereinander; kämen
+ * sie sich (samt Titel) in die Quere, bekommt die Spalte nebeneinanderliegende Plätze.
  */
 export function layoutPlot(
-  scenes: readonly PlotScene[],
+  input: readonly PlotColumnInput[],
   strands: readonly Strand[],
-  onlyTurningPoints: boolean,
 ): PlotLayout {
-  const visible = scenes.filter((entry) => !onlyTurningPoints || entry.scene.turningPoint);
   const laneIndex = new Map(strands.map((strand, index) => [strand.id, index]));
   const strandsOf = (entry: PlotScene) =>
     entry.strandIds
@@ -95,48 +117,73 @@ export function layoutPlot(
     y: laneY(index),
     nodeCount: 0,
   }));
-  const unassigned = visible.some((entry) => strandsOf(entry).length === 0);
+  const unassigned = input.some((column) =>
+    column.scenes.some((entry) => strandsOf(entry).length === 0),
+  );
   if (unassigned) lanes.push({ strand: null, y: laneY(strands.length), nodeCount: 0 });
 
   const nodes: PlotNode[] = [];
-  const chapters: PlotChapter[] = [];
-  /** Wo jede Linie in ihre Knoten einläuft, je Strang in Buchreihenfolge. */
+  const columns: PlotColumn[] = [];
+  const groups: PlotGroup[] = [];
+  /** Wo jede Linie in ihre Knoten einläuft, je Strang von links nach rechts. */
   const anchors = new Map<string, Array<{ x: number; y: number }>>();
   let left = 0;
-  for (const entry of visible) {
-    let chapter = chapters.at(-1);
-    if (chapter?.chapter.id !== entry.chapter.id) {
-      if (chapter) left += CHAPTER_GAP;
-      chapter = { chapter: entry.chapter, number: entry.chapterNumber, x: left, width: 0 };
-      chapters.push(chapter);
+  input.forEach((column, columnIndex) => {
+    let group = groups.at(-1);
+    if (group?.id !== column.group.id) {
+      if (group) left += GROUP_GAP;
+      group = { ...column.group, x: left, width: 0, firstColumn: columnIndex };
+      groups.push(group);
     }
-    const x = left + COLUMN_WIDTH / 2;
-    left += COLUMN_WIDTH;
-    chapter.width = left - chapter.x;
 
-    const nodeStrands = strandsOf(entry);
-    const rows = nodeStrands.length
-      ? nodeStrands.map((strand) => laneIndex.get(strand.id)!)
-      : [strands.length];
-    const y = rows.reduce((sum, row) => sum + laneY(row), 0) / rows.length;
-    for (const row of rows) lanes[row]!.nodeCount++;
-    nodeStrands.forEach((strand, index) => {
-      const offset = (index - (nodeStrands.length - 1) / 2) * BUNDLE_GAP;
-      anchors.set(strand.id, [...(anchors.get(strand.id) ?? []), { x, y: y + offset }]);
+    // Erst die Höhe jedes Knotens, dann Plätze nebeneinander verteilen, wo nötig
+    const placed = column.scenes.map((entry) => {
+      const nodeStrands = strandsOf(entry);
+      const rows = nodeStrands.length
+        ? nodeStrands.map((strand) => laneIndex.get(strand.id)!)
+        : [strands.length];
+      const y = rows.reduce((sum, row) => sum + laneY(row), 0) / rows.length;
+      const height = NODE_SIZE + Math.max(0, nodeStrands.length - 1) * BUNDLE_GAP;
+      for (const row of rows) lanes[row]!.nodeCount++;
+      return { entry, nodeStrands, y, height, slot: 0 };
     });
-    nodes.push({
-      scene: entry.scene,
-      chapter: entry.chapter,
-      chapterNumber: entry.chapterNumber,
-      strands: nodeStrands,
-      x,
-      y,
-      height: NODE_SIZE + Math.max(0, nodeStrands.length - 1) * BUNDLE_GAP,
-    });
-  }
+    const slots: Array<Array<{ top: number; bottom: number }>> = [];
+    for (const node of [...placed].sort((a, b) => a.y - b.y)) {
+      const top = node.y - node.height / 2;
+      const bottom = node.y + node.height / 2 + LABEL_REACH;
+      let slot = slots.findIndex((taken) =>
+        taken.every((other) => bottom <= other.top || top >= other.bottom),
+      );
+      if (slot < 0) slot = slots.push([]) - 1;
+      slots[slot]!.push({ top, bottom });
+      node.slot = slot;
+    }
+    const width = Math.max(1, slots.length) * COLUMN_WIDTH;
+    columns.push({ left, width, sceneIds: column.scenes.map((entry) => entry.scene.id) });
+
+    for (const node of placed) {
+      const x = left + node.slot * COLUMN_WIDTH + COLUMN_WIDTH / 2;
+      node.nodeStrands.forEach((strand, index) => {
+        const offset = (index - (node.nodeStrands.length - 1) / 2) * BUNDLE_GAP;
+        const points = anchors.get(strand.id) ?? [];
+        points.push({ x, y: node.y + offset });
+        anchors.set(strand.id, points);
+      });
+      nodes.push({
+        ...node.entry,
+        strands: node.nodeStrands,
+        column: columnIndex,
+        x,
+        y: node.y,
+        height: node.height,
+      });
+    }
+    left += width;
+    group.width = left - group.x;
+  });
 
   const lines = strands.flatMap((strand): PlotLine[] => {
-    const points = anchors.get(strand.id) ?? [];
+    const points = (anchors.get(strand.id) ?? []).sort((a, b) => a.x - b.x);
     if (points.length < 2) return [];
     return [{ strand, path: linePath(points, laneY(laneIndex.get(strand.id)!)) }];
   });
@@ -146,8 +193,9 @@ export function layoutPlot(
     height: laneY(lanes.length) - LANE_HEIGHT / 2,
     lanes,
     nodes,
+    columns,
     lines,
-    chapters,
+    groups,
   };
 }
 

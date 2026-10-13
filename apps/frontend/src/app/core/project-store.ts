@@ -5,7 +5,9 @@ import type {
   ManuscriptNode,
   MoveNodeRequest,
   ProjectInfo,
+  SaveStoryRequest,
   SceneStatus,
+  StoryMark,
 } from '@wortomat/shared';
 import { addCounts, NO_ANNOTATIONS } from './annotations';
 import { WortomatApi } from './wortomat-api';
@@ -98,6 +100,13 @@ export class ProjectStore {
   async setTurningPoint(id: string, turningPoint: boolean): Promise<void> {
     const updated = await this.api.updateNode(id, { turningPoint });
     this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
+  }
+
+  /** Reihenfolge der Handlung speichern; liefert die Abschnittsmarken. */
+  async saveStory(request: SaveStoryRequest): Promise<StoryMark[]> {
+    const state = await this.api.saveStory(request);
+    this.nodes.set(state.nodes);
+    return state.marks;
   }
 
   async moveNode(id: string, request: MoveNodeRequest): Promise<void> {

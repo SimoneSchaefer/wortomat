@@ -39,6 +39,7 @@ interface NodeRow {
   idea_count: number;
   fixme_count: number;
   turning_point: number;
+  story_order: number | null;
 }
 
 @Injectable()
@@ -59,7 +60,7 @@ export class ManuscriptService {
   list(): ManuscriptNode[] {
     const rows = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, n.turning_point, COALESCE(c.word_count, 0) AS word_count,
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, n.turning_point, n.story_order, COALESCE(c.word_count, 0) AS word_count,
                 COALESCE(c.todo_count, 0) AS todo_count, COALESCE(c.idea_count, 0) AS idea_count,
                 COALESCE(c.fixme_count, 0) AS fixme_count
            FROM nodes n
@@ -295,7 +296,7 @@ export class ManuscriptService {
   private get(id: string): ManuscriptNode {
     const row = this.db
       .prepare(
-        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, n.turning_point, COALESCE(c.word_count, 0) AS word_count,
+        `SELECT n.id, n.parent_id, n.kind, n.title, n.sort_order, n.status, n.turning_point, n.story_order, COALESCE(c.word_count, 0) AS word_count,
                 COALESCE(c.todo_count, 0) AS todo_count, COALESCE(c.idea_count, 0) AS idea_count,
                 COALESCE(c.fixme_count, 0) AS fixme_count
            FROM nodes n
@@ -388,6 +389,7 @@ function toNode(row: NodeRow): ManuscriptNode {
     status: row.kind === 'scene' ? row.status : null,
     annotations: row.kind === 'scene' ? annotationCounts(row) : null,
     turningPoint: row.kind === 'scene' ? row.turning_point === 1 : null,
+    storyOrder: row.kind === 'scene' ? row.story_order : null,
   };
 }
 

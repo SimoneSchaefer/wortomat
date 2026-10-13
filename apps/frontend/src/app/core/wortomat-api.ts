@@ -31,7 +31,10 @@ import type {
   SceneReference,
   SceneRelations,
   SceneText,
+  SaveStoryRequest,
   SearchHit,
+  StoryMark,
+  StoryState,
   Strand,
   StrandColor,
   Tag,
@@ -274,6 +277,17 @@ export class WortomatApi {
   /** Charaktere, Orte und Tags aller Szenen – für den Szenenfilter. */
   sceneRelations(): Promise<SceneRelations[]> {
     return this.call(this.http.get<SceneRelations[]>('/api/scene-relations'));
+  }
+
+  // Reihenfolge der Handlung -------------------------------------------------
+
+  storyMarks(): Promise<StoryMark[]> {
+    return this.call(this.http.get<StoryMark[]>('/api/story/marks'));
+  }
+
+  /** Ersetzt die ganze Reihenfolge samt Abschnittsmarken; liefert Baum und Marken neu. */
+  saveStory(request: SaveStoryRequest): Promise<StoryState> {
+    return this.call(this.http.put<StoryState>('/api/story', request));
   }
 
   // Handlungsstränge --------------------------------------------------------

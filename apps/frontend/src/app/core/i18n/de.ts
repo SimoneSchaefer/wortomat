@@ -353,7 +353,30 @@ export const de = {
   plot: {
     title: 'Handlung',
     intro:
-      'Die Stränge von links nach rechts in der Reihenfolge des Buchs. Wo sie zusammenlaufen, teilen sie sich eine Szene.',
+      'Jeder Strang eine Linie, von links nach rechts. Wo Stränge zusammenlaufen, teilen sie sich eine Szene.',
+    orderBy: 'Ordnen nach',
+    storyOrder: 'Handlung',
+    bookOrder: 'Buch',
+    storyHint:
+      'Ziehe Szenen an die Stelle, an der sie passieren – auf eine andere Szene gezogen passieren sie gleichzeitig. Über den Spalten beginnst du mit „+“ einen Abschnitt wie „Tag 2“.',
+    bookHint: 'Die Szenen in der Reihenfolge des Buchs, nach Kapiteln.',
+    bookPosition: (number: number) => `im Buch Szene ${number}`,
+    displaced: 'versetzt',
+    displacedHint:
+      'Steht im Buch an anderer Stelle als in der Handlung – z. B. eine Rückblende. Gewollt? Sonst ein Hinweis auf einen Zeitfehler.',
+    simultaneous: (count: number) =>
+      `gleichzeitig mit ${count === 1 ? '1 Szene' : `${count} Szenen`}`,
+    addMark: 'Hier einen Abschnitt beginnen (z. B. „Tag 2“)',
+    markPlaceholder: 'z. B. Tag 2',
+    markLabel: 'Name des Abschnitts',
+    editMark: (label: string) => `Abschnitt „${label}“ umbenennen`,
+    deleteMark: 'Abschnitt entfernen',
+    moveHint: 'Alt + Pfeiltasten verschieben die Szene in der Handlung',
+    reset: 'Auf Buchreihenfolge zurücksetzen …',
+    resetTitle: 'Reihenfolge zurücksetzen?',
+    resetMessage:
+      'Alle Szenen stehen danach wieder in der Reihenfolge des Buchs, und die Abschnitte werden entfernt.',
+    resetConfirm: 'Zurücksetzen',
     show: 'Anzeigen',
     turningPoints: 'Wendepunkte',
     allScenes: 'Alle Szenen',

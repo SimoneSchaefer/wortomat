@@ -21,6 +21,8 @@ import type {
   SceneRelations,
   SceneText,
   SearchHit,
+  StoryMark,
+  StoryState,
   Strand,
   Tag,
   TagSummary,
@@ -1052,6 +1054,86 @@ describe('REST-API', () => {
     assert.equal(await status(szene.id, { turningPoint: 'ja' }), 400);
   });
 
+  it('legt die Reihenfolge der Handlung samt Abschnitten fest und setzt sie zurück', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'handlung', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const k = await node(null, 'chapter', 'K');
+    const [a, b, c] = [
+      await node(k.id, 'scene', 'A'),
+      await node(k.id, 'scene', 'B'),
+      await node(k.id, 'scene', 'C'),
+    ];
+    assert.equal(a.storyOrder, null); // ohne Festlegung: wie im Buch
+    assert.equal(k.storyOrder, null);
+    const order = (nodes: ManuscriptNode[]) =>
+      nodes.filter((n) => n.kind === 'scene').map((n) => [n.title, n.storyOrder]);
+
+    // C passiert zuerst, A und B gleichzeitig danach; „Tag 2“ beginnt vor A/B
+    const saved = await api<StoryState>('PUT', '/api/story', {
+      columns: [[c.id], [a.id, b.id]],
+      marks: [
+        { label: ' Tag  1 ', beforeColumn: 0 },
+        { label: 'Tag 2', beforeColumn: 1 },
+      ],
+    });
+    assert.deepEqual(order(saved.nodes), [
+      ['A', 2],
+      ['B', 2],
+      ['C', 1],
+    ]);
+    assert.deepEqual(
+      saved.marks.map((m) => [m.label, m.position]),
+      [
+        ['Tag 1', 1],
+        ['Tag 2', 2],
+      ],
+    );
+
+    // Neue Szenen haben noch keine Position; Marken behalten beim Umbenennen ihre ID
+    const d = await node(k.id, 'scene', 'D');
+    assert.equal(d.storyOrder, null);
+    const tag2 = saved.marks[1]!;
+    const renamed = await api<StoryState>('PUT', '/api/story', {
+      columns: [[a.id], [b.id], [c.id]],
+      marks: [{ id: tag2.id, label: 'Am nächsten Morgen', beforeColumn: 2 }],
+    });
+    assert.deepEqual(
+      renamed.marks.map((m) => [m.id, m.label, m.position]),
+      [[tag2.id, 'Am nächsten Morgen', 3]],
+    );
+    assert.deepEqual(await api<StoryMark[]>('GET', '/api/story/marks'), renamed.marks);
+    assert.equal(renamed.nodes.find((n) => n.id === d.id)?.storyOrder, null);
+
+    // Zurücksetzen: alles wieder wie im Buch, Marken weg
+    const reset = await api<StoryState>('PUT', '/api/story', { columns: [], marks: [] });
+    assert.ok(reset.nodes.every((n) => n.storyOrder === null));
+    assert.deepEqual(reset.marks, []);
+
+    const status = async (body: unknown) =>
+      (
+        await fetch(`${server.url}/api/story`, {
+          method: 'PUT',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+    assert.equal(await status({ columns: [[a.id], [a.id]], marks: [] }), 400); // doppelt
+    assert.equal(await status({ columns: [[k.id]], marks: [] }), 400); // keine Szene
+    assert.equal(await status({ columns: [[]], marks: [] }), 400);
+    assert.equal(
+      await status({ columns: [[a.id]], marks: [{ label: 'X', beforeColumn: 1 }] }),
+      400,
+    );
+    assert.equal(
+      await status({ columns: [[a.id]], marks: [{ label: ' ', beforeColumn: 0 }] }),
+      400,
+    );
+  });
+
   it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -1072,7 +1154,7 @@ describe('REST-API', () => {
     // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

@@ -21,6 +21,7 @@ function node(
     status,
     annotations: null,
     turningPoint,
+    storyOrder: null,
   };
 }
 

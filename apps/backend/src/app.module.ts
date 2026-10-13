@@ -22,6 +22,8 @@ import { SearchController } from './search/search.controller.js';
 import { SearchService } from './search/search.service.js';
 import { AppSettingsController } from './settings/app-settings.controller.js';
 import { AppSettingsService } from './settings/app-settings.service.js';
+import { StoryController } from './story/story.controller.js';
+import { StoryService } from './story/story.service.js';
 import { StrandsController } from './strands/strands.controller.js';
 import { StrandsService } from './strands/strands.service.js';
 import { TagsController } from './tags/tags.controller.js';
@@ -45,6 +47,7 @@ export class AppModule {
         MapsController,
         TagsController,
         StrandsController,
+        StoryController,
         AppSettingsController,
         ExportController,
         FilesController,
@@ -62,6 +65,7 @@ export class AppModule {
         MapsService,
         TagsService,
         StrandsService,
+        StoryService,
         AppSettingsService,
         ExportService,
         ImagesService,

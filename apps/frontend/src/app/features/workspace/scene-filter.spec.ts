@@ -24,6 +24,7 @@ const node = (
   status: kind === 'scene' ? 'idea' : null,
   annotations: kind === 'scene' ? { todo: 0, idea: 0, fixme: 0 } : null,
   turningPoint: kind === 'scene' ? false : null,
+  storyOrder: null,
   ...extra,
 });
 

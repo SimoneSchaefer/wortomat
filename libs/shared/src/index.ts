@@ -155,6 +155,11 @@ export interface ManuscriptNode {
   annotations: AnnotationCounts | null;
   /** Wichtiges Ereignis der Handlung; nur bei Szenen, sonst `null`. */
   turningPoint: boolean | null;
+  /**
+   * Position in der Reihenfolge der Handlung (unabhängig vom Buch); gleiche Werte bedeuten
+   * „gleichzeitig“. `null`: noch nie festgelegt – die Szene folgt ihrer Vorgängerin im Buch.
+   */
+  storyOrder: number | null;
 }
 
 export interface CreateNodeRequest {
@@ -434,6 +439,34 @@ export interface UpdateStrandRequest {
 /** Ordnet eine Szene einem Strang zu. */
 export interface AddSceneStrandRequest {
   strandId: string;
+}
+
+// ---------------------------------------------------------------------------
+// Reihenfolge der Handlung
+// ---------------------------------------------------------------------------
+
+/** Beginn eines Abschnitts in der Handlung, z. B. „Tag 1“ oder „Winter“. */
+export interface StoryMark {
+  id: string;
+  label: string;
+  /** Die Marke steht vor der ersten Szene, deren `storyOrder` mindestens so groß ist. */
+  position: number;
+}
+
+/**
+ * Legt die ganze Reihenfolge der Handlung fest. Szenen, die fehlen, folgen wieder ihrer
+ * Vorgängerin im Buch; leer = alles zurück auf die Buchreihenfolge.
+ */
+export interface SaveStoryRequest {
+  /** Spalten von früh nach spät; Szenen in derselben Spalte passieren gleichzeitig. */
+  columns: string[][];
+  /** Alle Marken (ersetzen die bisherigen); ohne `id` wird eine neu angelegt. */
+  marks: Array<{ id?: string; label: string; beforeColumn: number }>;
+}
+
+export interface StoryState {
+  nodes: ManuscriptNode[];
+  marks: StoryMark[];
 }
 
 /** Neue Reihenfolge der Galerie; das erste Bild ist das Profilbild. */
