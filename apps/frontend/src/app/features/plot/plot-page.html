@@ -11,7 +11,7 @@
           type="button"
           role="radio"
           [attr.aria-checked]="order() === 'story'"
-          (click)="order.set('story')"
+          (click)="setView({ order: 'story' })"
         >
           {{ t().plot.storyOrder }}
         </button>
@@ -19,17 +19,26 @@
           type="button"
           role="radio"
           [attr.aria-checked]="order() === 'book'"
-          (click)="order.set('book')"
+          (click)="setView({ order: 'book' })"
         >
           {{ t().plot.bookOrder }}
         </button>
       </div>
+      <button
+        type="button"
+        class="titles"
+        [attr.aria-pressed]="!compact()"
+        [title]="t().plot.titlesHint"
+        (click)="setView({ compact: !compact() })"
+      >
+        {{ t().plot.titles }}
+      </button>
       <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.show">
         <button
           type="button"
           role="radio"
           [attr.aria-checked]="onlyTurningPoints()"
-          (click)="onlyTurningPoints.set(true)"
+          (click)="setView({ onlyTurningPoints: true })"
         >
           <svg class="diamond-icon" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M8 1.5 14.5 8 8 14.5 1.5 8z" />
@@ -41,7 +50,7 @@
           type="button"
           role="radio"
           [attr.aria-checked]="!onlyTurningPoints()"
-          (click)="onlyTurningPoints.set(false)"
+          (click)="setView({ onlyTurningPoints: false })"
         >
           {{ t().plot.allScenes }}
           <span class="count">{{ sceneCount() }}</span>
@@ -108,19 +117,33 @@
         <!-- Links fest: die Namen der Stränge; rechts scrollt die Zeichnung seitlich -->
         <ul class="lanes" [style.padding-top.px]="headerHeight">
           @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
-            <li
-              [style.height.px]="laneHeight"
-              [class.unassigned]="!lane.strand"
-              [class.idle]="!lane.nodeCount"
-              [title]="t().plot.sceneCount(lane.nodeCount)"
-            >
-              @if (lane.strand; as strand) {
+            @if (lane.strand; as strand) {
+              <!-- Zeile ziehen (oder Alt + Pfeil hoch/runter) ändert die Reihenfolge der Stränge -->
+              <li
+                tabindex="0"
+                class="movable"
+                [attr.data-strand]="strand.id"
+                [class.dragged]="laneDrag()?.strand?.id === strand.id"
+                [class.idle]="!lane.nodeCount"
+                [style.height.px]="laneHeight()"
+                [title]="t().plot.sceneCount(lane.nodeCount) + ' · ' + t().plot.moveLaneHint"
+                [attr.aria-description]="t().plot.moveLaneHint"
+                (pointerdown)="onLanePointerDown($event, strand)"
+                (keydown)="onLaneKeydown($event, strand)"
+              >
+                <span class="grip" aria-hidden="true">⠿</span>
                 <span class="dot" [style.background]="strandColor(strand.color)"></span>
                 <span class="name">{{ strand.name }}</span>
-              } @else {
+              </li>
+            } @else {
+              <li
+                class="unassigned"
+                [style.height.px]="laneHeight()"
+                [title]="t().plot.sceneCount(lane.nodeCount)"
+              >
                 <span class="name">{{ t().plot.noStrand }}</span>
-              }
-            </li>
+              </li>
+            }
           }
         </ul>
 
@@ -309,14 +332,14 @@
                 }
               </svg>
               <!-- Titel unter den Knoten: als HTML, damit lange Titel umbrechen und gekürzt werden -->
-              @for (node of layout().nodes; track node.scene.id) {
+              @for (node of compact() ? [] : layout().nodes; track node.scene.id) {
                 <span
                   class="label"
                   aria-hidden="true"
                   [class.active]="active() === node"
                   [class.lifted]="drag()?.moved && drag()?.node === node"
-                  [style.left.px]="node.x - columnWidth / 2"
-                  [style.width.px]="columnWidth"
+                  [style.left.px]="node.x - columnWidth() / 2"
+                  [style.width.px]="columnWidth()"
                   [style.top.px]="labelTop(node)"
                   [title]="node.scene.title"
                   (pointerenter)="active.set(node)"
@@ -330,7 +353,7 @@
           } @else {
             <p class="no-nodes muted">
               {{ t().plot.noTurningPoints }}
-              <button type="button" class="link" (click)="onlyTurningPoints.set(false)">
+              <button type="button" class="link" (click)="setView({ onlyTurningPoints: false })">
                 {{ t().plot.showAll }}
               </button>
             </p>

@@ -1,15 +1,16 @@
 import type { ManuscriptNode, Strand } from '@wortomat/shared';
 import {
   BUNDLE_GAP,
-  COLUMN_WIDTH,
   GROUP_GAP,
-  LANE_HEIGHT,
   layoutPlot,
   linePath,
   NODE_SIZE,
+  PLOT_GEOMETRY,
   type PlotColumnInput,
   type PlotScene,
 } from './plot-layout';
+
+const { columnWidth: COLUMN_WIDTH, laneHeight: LANE_HEIGHT } = PLOT_GEOMETRY.regular;
 
 const node = (id: string, kind: ManuscriptNode['kind']): ManuscriptNode => ({
   id,
@@ -120,6 +121,28 @@ describe('layoutPlot', () => {
     expect(spread.nodes.map((n) => n.x)).toEqual([COLUMN_WIDTH / 2, COLUMN_WIDTH * 1.5]);
     expect(spread.columns[0]!.width).toBe(2 * COLUMN_WIDTH);
     expect(spread.lines[0]!.path).toBe(`M${COLUMN_WIDTH / 2} ${lane(0)} H${COLUMN_WIDTH * 1.5}`);
+  });
+});
+
+describe('layoutPlot kompakt', () => {
+  it('rückt Spalten und Zeilen ohne Titel enger zusammen', () => {
+    const { columnWidth, laneHeight } = PLOT_GEOMETRY.compact;
+    const group = { id: 'start', label: '', number: null };
+    const x = scene('x', K1, ['lena']);
+    const y = scene('y', K1, ['tom']);
+    const layout = layoutPlot(
+      [
+        { scenes: [x], group },
+        { scenes: [y], group },
+      ],
+      [lena, tom],
+      PLOT_GEOMETRY.compact,
+    );
+    expect(layout.nodes.map((n) => [n.x, n.y])).toEqual([
+      [columnWidth / 2, laneHeight / 2],
+      [columnWidth * 1.5, laneHeight * 1.5],
+    ]);
+    expect([layout.width, layout.height]).toEqual([2 * columnWidth, 2 * laneHeight]);
   });
 });
 

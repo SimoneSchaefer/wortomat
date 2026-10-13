@@ -31,6 +31,7 @@ import type {
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
 
 const TOKEN = 'test-token';
+const DEFAULT_PLOT_VIEW = { order: 'story', onlyTurningPoints: true, compact: false };
 // Kleinstes gültiges PNG (1×1 Pixel).
 const PNG_1PX = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
@@ -997,6 +998,23 @@ describe('REST-API', () => {
     );
     assert.equal(await status('POST', `/api/scenes/${k1.id}/strands`, { strandId: lena.id }), 400);
 
+    // Reihenfolge der Zeilen ändern
+    const ermittlung = await api<Strand>('POST', '/api/strands', { name: 'Ermittlung' });
+    const names = (strands: Strand[]) => strands.map((s) => s.name);
+    assert.deepEqual(
+      names(
+        await api<Strand[]>('POST', `/api/strands/${ermittlung.id}/move`, { beforeId: lena.id }),
+      ),
+      ['Ermittlung', 'Lena', 'Toms Flucht'],
+    );
+    assert.deepEqual(
+      names(await api<Strand[]>('POST', `/api/strands/${ermittlung.id}/move`, { beforeId: null })),
+      ['Lena', 'Toms Flucht', 'Ermittlung'],
+    );
+    assert.equal(await status('POST', `/api/strands/${lena.id}/move`, { beforeId: lena.id }), 400);
+    assert.equal(await status('POST', `/api/strands/${lena.id}/move`, { beforeId: 'weg' }), 404);
+    await api('DELETE', `/api/strands/${ermittlung.id}`);
+
     // Ein Strang ohne Szenen bleibt bestehen; gelöscht wird nur ausdrücklich
     await api('DELETE', `/api/scenes/${s1.id}/strands/${lena.id}`);
     await api('DELETE', `/api/scenes/${s2.id}/strands/${lena.id}`);
@@ -1180,6 +1198,7 @@ describe('REST-API', () => {
       theme: 'system',
       fontSize: 'medium',
       revisionMode: false,
+      plotView: DEFAULT_PLOT_VIEW,
     });
 
     assert.deepEqual(await api('PATCH', '/api/settings', { sidebarWidth: 340.6 }), {
@@ -1189,6 +1208,7 @@ describe('REST-API', () => {
       theme: 'system',
       fontSize: 'medium',
       revisionMode: false,
+      plotView: DEFAULT_PLOT_VIEW,
     });
     // Einzelne Werte ändern lässt die anderen stehen
     assert.deepEqual(await api('PATCH', '/api/settings', { quoteStyle: 'de-guillemets' }), {
@@ -1198,6 +1218,7 @@ describe('REST-API', () => {
       theme: 'system',
       fontSize: 'medium',
       revisionMode: false,
+      plotView: DEFAULT_PLOT_VIEW,
     });
     assert.deepEqual(await api('PATCH', '/api/settings', { language: 'en' }), {
       language: 'en',
@@ -1206,6 +1227,7 @@ describe('REST-API', () => {
       theme: 'system',
       fontSize: 'medium',
       revisionMode: false,
+      plotView: DEFAULT_PLOT_VIEW,
     });
 
     // Zweiter Server mit demselben Datenordner (= App-Neustart) liest den Wert
@@ -1228,6 +1250,7 @@ describe('REST-API', () => {
         theme: 'system',
         fontSize: 'medium',
         revisionMode: false,
+        plotView: DEFAULT_PLOT_VIEW,
       });
     } finally {
       await restarted.close();
@@ -1248,6 +1271,18 @@ describe('REST-API', () => {
     assert.equal(await invalid({ theme: 'sepia' }), 400);
     assert.equal(await invalid({ fontSize: 'riesig' }), 400);
     assert.equal(await invalid({ revisionMode: 'ja' }), 400);
+    assert.equal(await invalid({ plotView: { order: 'zufällig' } }), 400);
+    assert.equal(await invalid({ plotView: { compact: 'ja' } }), 400);
+    // Die Ansicht der Handlung lässt sich teilweise ändern
+    assert.deepEqual(
+      (await api<AppSettings>('PATCH', '/api/settings', { plotView: { order: 'book' } })).plotView,
+      { order: 'book', onlyTurningPoints: true, compact: false },
+    );
+    assert.deepEqual(
+      (await api<AppSettings>('PATCH', '/api/settings', { plotView: { compact: true } })).plotView,
+      { order: 'book', onlyTurningPoints: true, compact: true },
+    );
+    await api('PATCH', '/api/settings', { plotView: DEFAULT_PLOT_VIEW });
     assert.equal(
       (await api<AppSettings>('PATCH', '/api/settings', { revisionMode: true })).revisionMode,
       true,
@@ -1260,6 +1295,7 @@ describe('REST-API', () => {
       theme: 'dark',
       fontSize: 'large',
       revisionMode: false,
+      plotView: DEFAULT_PLOT_VIEW,
     });
 
     // Zurück auf Standard
@@ -1271,6 +1307,7 @@ describe('REST-API', () => {
         theme: 'system',
         fontSize: 'medium',
         revisionMode: false,
+        plotView: DEFAULT_PLOT_VIEW,
       }),
       {
         language: null,
@@ -1279,6 +1316,7 @@ describe('REST-API', () => {
         theme: 'system',
         fontSize: 'medium',
         revisionMode: false,
+        plotView: DEFAULT_PLOT_VIEW,
       },
     );
 

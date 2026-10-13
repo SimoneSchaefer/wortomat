@@ -50,9 +50,23 @@ export interface AppSettings {
   fontSize: FontSize;
   /** Überarbeitungsmodus im Editor: Wiederholungen, Füllwörter usw. markieren. */
   revisionMode: boolean;
+  /** Wie die Übersicht „Handlung“ zuletzt eingestellt war. */
+  plotView: PlotViewSettings;
 }
 
-export type UpdateAppSettingsRequest = Partial<AppSettings>;
+export interface PlotViewSettings {
+  /** Von links nach rechts in der Reihenfolge der Handlung oder des Buchs. */
+  order: 'story' | 'book';
+  /** Nur Wendepunkte statt aller Szenen. */
+  onlyTurningPoints: boolean;
+  /** Schmale Spalten ohne Szenentitel – für lange Bücher. */
+  compact: boolean;
+}
+
+/** `plotView` lässt sich auch teilweise ändern. */
+export type UpdateAppSettingsRequest = Partial<Omit<AppSettings, 'plotView'>> & {
+  plotView?: Partial<PlotViewSettings>;
+};
 
 // ---------------------------------------------------------------------------
 // Projekt (= eine .wortomat-Datei, intern eine SQLite-Datenbank)
@@ -434,6 +448,12 @@ export interface CreateStrandRequest {
 export interface UpdateStrandRequest {
   name?: string;
   color?: StrandColor;
+}
+
+/** Verschiebt einen Strang (seine Zeile in der Übersicht „Handlung“). */
+export interface MoveStrandRequest {
+  /** Strang, vor dem eingefügt wird; `null` = ans Ende. */
+  beforeId: string | null;
 }
 
 /** Ordnet eine Szene einem Strang zu. */

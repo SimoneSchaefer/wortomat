@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@ne
 import type {
   AddSceneStrandRequest,
   CreateStrandRequest,
+  MoveStrandRequest,
   Strand,
   UpdateStrandRequest,
 } from '@wortomat/shared';
@@ -24,6 +25,13 @@ export class StrandsController {
   @Patch('strands/:id')
   update(@Param('id') id: string, @Body() body: UpdateStrandRequest): Strand {
     return this.strands.update(id, body);
+  }
+
+  /** Liefert alle Stränge in der neuen Reihenfolge. */
+  @Post('strands/:id/move')
+  @HttpCode(200)
+  move(@Param('id') id: string, @Body() body: MoveStrandRequest): Strand[] {
+    return this.strands.move(id, body?.beforeId ?? null);
   }
 
   @Delete('strands/:id')

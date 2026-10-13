@@ -82,6 +82,37 @@ export class StrandsService {
     return this.get(id);
   }
 
+  /**
+   * Verschiebt einen Strang vor einen anderen (oder ans Ende) und nummeriert alle neu.
+   * @returns alle Stränge in der neuen Reihenfolge
+   */
+  move(id: string, beforeId: unknown): Strand[] {
+    this.get(id);
+    if (beforeId !== null && (typeof beforeId !== 'string' || beforeId === id)) {
+      throw new BadRequestException(
+        localized('Ungültige Zielposition.', 'Invalid target position.'),
+      );
+    }
+    transaction(this.db, () => {
+      const others = (
+        this.db
+          .prepare('SELECT id FROM strands WHERE id != ? ORDER BY sort_order')
+          .all(id) as Array<{
+          id: string;
+        }>
+      ).map((row) => row.id);
+      const index = beforeId === null ? others.length : others.indexOf(beforeId);
+      if (index < 0) {
+        throw new NotFoundException(localized('Strang nicht gefunden.', 'Plot thread not found.'));
+      }
+      others.splice(index, 0, id);
+      const setOrder = this.db.prepare('UPDATE strands SET sort_order = ? WHERE id = ?');
+      others.forEach((strandId, position) => setOrder.run(position + 1, strandId));
+      this.projects.touch();
+    });
+    return this.list();
+  }
+
   /** Löscht den Strang; die Szenen bleiben, verlieren nur die Zuordnung. */
   remove(id: string): void {
     this.get(id);

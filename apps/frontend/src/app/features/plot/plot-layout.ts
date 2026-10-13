@@ -1,19 +1,30 @@
 import type { ManuscriptNode, Strand } from '@wortomat/shared';
 
-/** Breite einer Spalte, in Pixeln – breit genug für den Titel unter dem Knoten. */
-export const COLUMN_WIDTH = 120;
+/** Maße der Zeichnung in Pixeln. */
+export interface PlotGeometry {
+  /** Breite einer Spalte. */
+  columnWidth: number;
+  /** Abstand der Stränge (Spuren) untereinander. */
+  laneHeight: number;
+  /** So weit reicht der Titel unter einen Knoten; 0 = ohne Titel. */
+  labelReach: number;
+}
+
+export const PLOT_GEOMETRY = {
+  /** Breit genug für zwei Zeilen Szenentitel unter jedem Knoten. */
+  regular: { columnWidth: 120, laneHeight: 88, labelReach: 40 },
+  /** Ohne Titel – für lange Bücher. */
+  compact: { columnWidth: 44, laneHeight: 56, labelReach: 0 },
+} satisfies Record<string, PlotGeometry>;
+
 /** Zusätzliche Lücke zwischen zwei Gruppen (Kapitel bzw. Abschnitte der Handlung). */
 export const GROUP_GAP = 18;
-/** Abstand der Stränge (Spuren) untereinander – Platz für zwei Zeilen Titel unter dem Knoten. */
-export const LANE_HEIGHT = 88;
 /** Durchmesser eines Szenenknotens. */
 export const NODE_SIZE = 20;
 /** Abstand der Linien, die gebündelt in eine gemeinsame Szene einlaufen. */
 export const BUNDLE_GAP = 7;
 /** Strecke, auf der eine Linie zwischen Spur und gemeinsamer Szene umbiegt. */
 const BEND = 40;
-/** So weit reicht der Titel unter einen Knoten. */
-const LABEL_REACH = 40;
 
 /** Eine Szene mit ihrem Kapitel und ihren Strängen. */
 export interface PlotScene {
@@ -103,7 +114,9 @@ export interface PlotLayout {
 export function layoutPlot(
   input: readonly PlotColumnInput[],
   strands: readonly Strand[],
+  geometry: PlotGeometry = PLOT_GEOMETRY.regular,
 ): PlotLayout {
+  const { columnWidth, laneHeight, labelReach } = geometry;
   const laneIndex = new Map(strands.map((strand, index) => [strand.id, index]));
   const strandsOf = (entry: PlotScene) =>
     entry.strandIds
@@ -111,7 +124,7 @@ export function layoutPlot(
       .sort((a, b) => laneIndex.get(a)! - laneIndex.get(b)!)
       .map((id) => strands[laneIndex.get(id)!]!);
 
-  const laneY = (index: number) => index * LANE_HEIGHT + LANE_HEIGHT / 2;
+  const laneY = (index: number) => index * laneHeight + laneHeight / 2;
   const lanes: PlotLane[] = strands.map((strand, index) => ({
     strand,
     y: laneY(index),
@@ -150,7 +163,8 @@ export function layoutPlot(
     const slots: Array<Array<{ top: number; bottom: number }>> = [];
     for (const node of [...placed].sort((a, b) => a.y - b.y)) {
       const top = node.y - node.height / 2;
-      const bottom = node.y + node.height / 2 + LABEL_REACH;
+      // Knoten brauchen auch ohne Titel etwas Luft zueinander
+      const bottom = node.y + node.height / 2 + Math.max(labelReach, BUNDLE_GAP);
       let slot = slots.findIndex((taken) =>
         taken.every((other) => bottom <= other.top || top >= other.bottom),
       );
@@ -158,11 +172,11 @@ export function layoutPlot(
       slots[slot]!.push({ top, bottom });
       node.slot = slot;
     }
-    const width = Math.max(1, slots.length) * COLUMN_WIDTH;
+    const width = Math.max(1, slots.length) * columnWidth;
     columns.push({ left, width, sceneIds: column.scenes.map((entry) => entry.scene.id) });
 
     for (const node of placed) {
-      const x = left + node.slot * COLUMN_WIDTH + COLUMN_WIDTH / 2;
+      const x = left + node.slot * columnWidth + columnWidth / 2;
       node.nodeStrands.forEach((strand, index) => {
         const offset = (index - (node.nodeStrands.length - 1) / 2) * BUNDLE_GAP;
         const points = anchors.get(strand.id) ?? [];
@@ -190,7 +204,7 @@ export function layoutPlot(
 
   return {
     width: left,
-    height: laneY(lanes.length) - LANE_HEIGHT / 2,
+    height: laneY(lanes.length) - laneHeight / 2,
     lanes,
     nodes,
     columns,

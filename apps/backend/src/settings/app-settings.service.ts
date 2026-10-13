@@ -5,6 +5,7 @@ import type {
   AppSettings,
   FontSize,
   Language,
+  PlotViewSettings,
   QuoteStyle,
   Theme,
   UpdateAppSettingsRequest,
@@ -28,6 +29,7 @@ const DEFAULTS: AppSettings = {
   theme: 'system',
   fontSize: 'medium',
   revisionMode: false,
+  plotView: { order: 'story', onlyTurningPoints: true, compact: false },
 };
 
 /**
@@ -117,6 +119,19 @@ export class AppSettingsService {
       }
       next.revisionMode = request.revisionMode;
     }
+    if (request?.plotView !== undefined) {
+      const plotView = { ...next.plotView, ...request.plotView };
+      if (!isPlotView(plotView)) {
+        throw new BadRequestException(
+          localized('Ungültige Einstellung der Handlung.', 'Invalid plot view setting.'),
+        );
+      }
+      next.plotView = {
+        order: plotView.order,
+        onlyTurningPoints: plotView.onlyTurningPoints,
+        compact: plotView.compact,
+      };
+    }
     mkdirSync(path.dirname(this.file), { recursive: true });
     // Erst in eine Temp-Datei schreiben, dann umbenennen: nie eine halb geschriebene Datei.
     const tmpFile = `${this.file}.tmp`;
@@ -136,7 +151,27 @@ function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
   if (THEMES.includes(stored?.theme as Theme)) result.theme = stored.theme;
   if (FONT_SIZES.includes(stored?.fontSize as FontSize)) result.fontSize = stored.fontSize;
   if (typeof stored?.revisionMode === 'boolean') result.revisionMode = stored.revisionMode;
+  // Einzelne kaputte Werte durch die Vorgabe ersetzen, statt die ganze Ansicht zu verwerfen
+  const plotView: Partial<PlotViewSettings> = stored?.plotView ?? {};
+  const fallback = DEFAULTS.plotView;
+  result.plotView = {
+    order:
+      plotView.order === 'story' || plotView.order === 'book' ? plotView.order : fallback.order,
+    onlyTurningPoints:
+      typeof plotView.onlyTurningPoints === 'boolean'
+        ? plotView.onlyTurningPoints
+        : fallback.onlyTurningPoints,
+    compact: typeof plotView.compact === 'boolean' ? plotView.compact : fallback.compact,
+  };
   return result;
+}
+
+function isPlotView(value: Partial<PlotViewSettings>): value is PlotViewSettings {
+  return (
+    (value.order === 'story' || value.order === 'book') &&
+    typeof value.onlyTurningPoints === 'boolean' &&
+    typeof value.compact === 'boolean'
+  );
 }
 
 function isLanguage(value: unknown): value is Language {

@@ -306,6 +306,11 @@ export class WortomatApi {
     return this.call(this.http.patch<Strand>(`/api/strands/${id}`, changes));
   }
 
+  /** Liefert alle Stränge in der neuen Reihenfolge. */
+  moveStrand(id: string, beforeId: string | null): Promise<Strand[]> {
+    return this.call(this.http.post<Strand[]>(`/api/strands/${id}/move`, { beforeId }));
+  }
+
   /** Die Szenen bleiben, sie verlieren nur die Zuordnung. */
   deleteStrand(id: string): Promise<void> {
     return this.call(this.http.delete<void>(`/api/strands/${id}`));

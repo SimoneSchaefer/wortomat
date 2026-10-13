@@ -1,5 +1,12 @@
 import { inject, Injectable, signal } from '@angular/core';
-import type { AppSettings, FontSize, Language, QuoteStyle, Theme } from '@wortomat/shared';
+import type {
+  AppSettings,
+  FontSize,
+  Language,
+  PlotViewSettings,
+  QuoteStyle,
+  Theme,
+} from '@wortomat/shared';
 import { WortomatApi } from './wortomat-api';
 
 const SAVE_DELAY_MS = 400;
@@ -17,6 +24,7 @@ export class AppSettingsStore {
     theme: 'system',
     fontSize: 'medium',
     revisionMode: false,
+    plotView: { order: 'story', onlyTurningPoints: true, compact: false },
   });
 
   /** Fehler sind hier kein Grund, die App nicht zu starten – dann gelten die Standardwerte. */
@@ -59,8 +67,19 @@ export class AppSettingsStore {
     return this.saveNow('revisionMode', revisionMode);
   }
 
+  /** Ansicht der Handlung: sofort übernehmen, im Hintergrund speichern. */
+  setPlotView(changes: Partial<PlotViewSettings>): void {
+    this.settings.update((settings) => ({
+      ...settings,
+      plotView: { ...settings.plotView, ...changes },
+    }));
+    this.api
+      .updateSettings({ plotView: changes })
+      .catch((error: unknown) => console.warn('Einstellungen nicht gespeichert', error));
+  }
+
   /** Sofort übernehmen und speichern; schlägt das Speichern fehl, gilt wieder der alte Wert. */
-  private async saveNow<K extends Exclude<keyof AppSettings, 'sidebarWidth'>>(
+  private async saveNow<K extends Exclude<keyof AppSettings, 'sidebarWidth' | 'plotView'>>(
     key: K,
     value: AppSettings[K],
   ): Promise<void> {

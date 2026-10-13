@@ -377,6 +377,9 @@ export const de = {
     resetMessage:
       'Alle Szenen stehen danach wieder in der Reihenfolge des Buchs, und die Abschnitte werden entfernt.',
     resetConfirm: 'Zurücksetzen',
+    titles: 'Szenentitel',
+    titlesHint: 'Titel unter den Szenen zeigen – ohne Titel wird die Übersicht viel schmaler',
+    moveLaneHint: 'Ziehen oder Alt + Pfeil hoch/runter ändert die Reihenfolge der Stränge',
     show: 'Anzeigen',
     turningPoints: 'Wendepunkte',
     allScenes: 'Alle Szenen',

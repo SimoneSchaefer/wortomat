@@ -10,7 +10,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import type { StoryMark } from '@wortomat/shared';
+import type { PlotViewSettings, StoryMark, Strand } from '@wortomat/shared';
+import { AppSettingsStore } from '../../core/app-settings';
 import { Autofocus } from '../../core/autofocus';
 import { ConfirmDialog } from '../../core/confirm-dialog';
 import { errorMessage } from '../../core/errors';
@@ -22,10 +23,9 @@ import { strandColor } from '../../core/strands';
 import { WortomatApi } from '../../core/wortomat-api';
 import { scenesInOrder } from '../stats/stats';
 import {
-  COLUMN_WIDTH,
-  LANE_HEIGHT,
   layoutPlot,
   NODE_SIZE,
+  PLOT_GEOMETRY,
   type PlotColumnInput,
   type PlotGroupInfo,
   type PlotNode,
@@ -52,10 +52,16 @@ const DRAG_THRESHOLD_PX = 4;
 /** So weit vom Spaltenrand (Anteil einer Spalte) gilt Ablegen als „davor/dahinter“. */
 const EDGE_SHARE = 0.25;
 
-type Order = 'story' | 'book';
-
 /** Wo eine gezogene Szene landen würde – bezogen auf die angezeigten Spalten. */
 type Hit = { join: number } | { gap: number };
+
+/** Ein Strang, dessen Zeile gerade nach oben oder unten gezogen wird. */
+interface LaneDrag {
+  strand: Strand;
+  startY: number;
+  /** Index der Zeile, an der er beim Loslassen landen würde. */
+  target: number;
+}
 
 interface Drag {
   node: PlotNode;
@@ -87,7 +93,14 @@ const START_SECTION: PlotGroupInfo = { id: 'start', label: '', number: null };
   selector: 'wm-plot-page',
   imports: [Autofocus],
   templateUrl: './plot-page.html',
-  styleUrl: './plot-page.scss',
+  styleUrls: ['./plot-page.scss', './plot-drawing.scss'],
+  // Zeilen ziehen: am Dokument lauschen – die gezogene Zeile wandert beim Ziehen im DOM mit
+  // und verlöre dabei einen Pointer-Capture.
+  host: {
+    '(document:pointermove)': 'onLanePointerMove($event)',
+    '(document:pointerup)': 'onLanePointerUp()',
+    '(document:pointercancel)': 'onLanePointerCancel()',
+  },
 })
 export class PlotPage {
   protected readonly t = inject(I18n).t;
@@ -97,14 +110,13 @@ export class PlotPage {
   private readonly confirm = inject(ConfirmDialog);
   private readonly injector = inject(Injector);
   private readonly error = inject(StatusMessages).channel();
+  private readonly settings = inject(AppSettingsStore);
   private readonly drawing = viewChild<ElementRef<HTMLElement>>('drawing');
 
   protected readonly strandColor = strandColor;
   protected readonly statusInfo = statusInfo;
   protected readonly headerHeight = HEADER_HEIGHT;
-  protected readonly laneHeight = LANE_HEIGHT;
   protected readonly nodeSize = NODE_SIZE;
-  protected readonly columnWidth = COLUMN_WIDTH;
   /** Platz rechts neben der letzten Spalte. */
   protected readonly padding = 22;
 
@@ -126,10 +138,32 @@ export class PlotPage {
     },
   });
 
-  protected readonly order = signal<Order>('story');
-  protected readonly onlyTurningPoints = signal(true);
+  // Ansicht: in den App-Einstellungen gemerkt, damit sie beim Zurückkommen gleich bleibt
+  private readonly plotView = computed(() => this.settings.settings().plotView);
+  protected readonly order = computed(() => this.plotView().order);
+  protected readonly onlyTurningPoints = computed(() => this.plotView().onlyTurningPoints);
+  protected readonly compact = computed(() => this.plotView().compact);
+  private readonly geometry = computed(() =>
+    this.compact() ? PLOT_GEOMETRY.compact : PLOT_GEOMETRY.regular,
+  );
+  protected readonly laneHeight = computed(() => this.geometry().laneHeight);
+  protected readonly columnWidth = computed(() => this.geometry().columnWidth);
+
+  protected setView(changes: Partial<PlotViewSettings>): void {
+    this.settings.setPlotView(changes);
+  }
+
   protected readonly loaded = computed(() => this.data.hasValue());
-  protected readonly strands = computed(() => this.data.value()?.strands ?? []);
+  protected readonly laneDrag = signal<LaneDrag | null>(null);
+  /** Stränge in ihrer Reihenfolge – beim Ziehen einer Zeile schon so, wie sie landen würde. */
+  protected readonly strands = computed(() => {
+    const strands = this.data.value()?.strands ?? [];
+    const drag = this.laneDrag();
+    if (!drag) return strands;
+    const others = strands.filter((strand) => strand.id !== drag.strand.id);
+    others.splice(drag.target, 0, drag.strand);
+    return others;
+  });
   private readonly marks = signal<StoryMark[]>([]);
 
   /** Alle Szenen in Buchreihenfolge. */
@@ -195,7 +229,9 @@ export class PlotPage {
     return { columns, storyIndex };
   });
 
-  protected readonly layout = computed(() => layoutPlot(this.view().columns, this.strands()));
+  protected readonly layout = computed(() =>
+    layoutPlot(this.view().columns, this.strands(), this.geometry()),
+  );
 
   /** Szene unter dem Mauszeiger bzw. mit dem Fokus – erscheint in der Infozeile. */
   protected readonly active = signal<PlotNode | null>(null);
@@ -256,7 +292,7 @@ export class PlotPage {
   /** Welche Spalte bzw. Lücke liegt an dieser Stelle der Zeichnung? */
   private hitAt(x: number, node: PlotNode): Hit | null {
     const columns = this.layout().columns;
-    const edge = COLUMN_WIDTH * EDGE_SHARE;
+    const edge = this.columnWidth() * EDGE_SHARE;
     for (const [index, column] of columns.entries()) {
       if (x < column.left + edge) return { gap: index }; // auch: Lücke zwischen zwei Gruppen
       if (x <= column.left + column.width - edge) {
@@ -340,6 +376,65 @@ export class PlotPage {
         () => document.querySelector<SVGElement>(`.node[data-scene="${sceneId}"]`)?.focus(),
         { injector: this.injector },
       );
+    }
+  }
+
+  // Zeilen der Stränge umsortieren ------------------------------------------
+
+  protected onLanePointerDown(event: PointerEvent, strand: Strand): void {
+    if (event.button !== 0) return;
+    event.preventDefault(); // kein Markieren von Text beim Ziehen
+    const index = this.strands().findIndex((s) => s.id === strand.id);
+    this.laneDrag.set({ strand, startY: event.clientY - index * this.laneHeight(), target: index });
+  }
+
+  protected onLanePointerMove(event: PointerEvent): void {
+    const drag = this.laneDrag();
+    if (!drag) return;
+    const last = (this.data.value()?.strands.length ?? 1) - 1;
+    const target = Math.round((event.clientY - drag.startY) / this.laneHeight());
+    const clamped = Math.max(0, Math.min(last, target));
+    if (clamped !== drag.target) this.laneDrag.set({ ...drag, target: clamped });
+  }
+
+  protected async onLanePointerUp(): Promise<void> {
+    const drag = this.laneDrag();
+    if (!drag) return;
+    await this.moveStrand(drag.strand, drag.target);
+    this.laneDrag.set(null);
+  }
+
+  protected onLanePointerCancel(): void {
+    this.laneDrag.set(null);
+  }
+
+  /** Alt + Pfeil hoch/runter verschiebt die Zeile des Strangs. */
+  protected onLaneKeydown(event: KeyboardEvent, strand: Strand): void {
+    if (!event.altKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
+    event.preventDefault();
+    const strands = this.data.value()?.strands ?? [];
+    const index = strands.findIndex((s) => s.id === strand.id);
+    const target = index + (event.key === 'ArrowUp' ? -1 : 1);
+    if (target < 0 || target >= strands.length) return;
+    void this.moveStrand(strand, target).then(() =>
+      afterNextRender(
+        () => document.querySelector<HTMLElement>(`.lanes [data-strand="${strand.id}"]`)?.focus(),
+        { injector: this.injector },
+      ),
+    );
+  }
+
+  /** Speichert die neue Reihenfolge, wenn sich etwas geändert hat. */
+  private async moveStrand(strand: Strand, target: number): Promise<void> {
+    const strands = this.data.value()?.strands ?? [];
+    const others = strands.filter((s) => s.id !== strand.id);
+    if (strands[target]?.id === strand.id) return;
+    this.error.set(null);
+    try {
+      const moved = await this.api.moveStrand(strand.id, others[target]?.id ?? null);
+      this.data.update((data) => data && { ...data, strands: moved });
+    } catch (error) {
+      this.error.set(errorMessage(error, this.t()));
     }
   }
 
