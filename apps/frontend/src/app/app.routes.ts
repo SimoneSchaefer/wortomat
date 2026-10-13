@@ -50,6 +50,10 @@ export const routes: Routes = [
       ...noteRoutes('character'),
       ...noteRoutes('place'),
       ...noteRoutes('research'),
+      {
+        path: 'stats',
+        loadComponent: () => import('./features/stats/stats-page').then((m) => m.StatsPage),
+      },
     ],
   },
   {

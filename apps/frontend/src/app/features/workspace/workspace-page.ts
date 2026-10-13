@@ -21,7 +21,7 @@ import { SceneFilter } from './scene-filter';
 import { SceneFilterPanel } from './scene-filter-panel';
 import { StatusMessages } from '../../core/status-messages';
 
-type Section = 'manuscript' | NoteKind;
+type Section = 'manuscript' | NoteKind | 'stats';
 
 const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem bei mittlerer Schriftgröße
 // Platz für Überschrift und „+“-Buttons daneben – auch die längste Variante
@@ -39,6 +39,7 @@ interface MenuItem {
 const MENU: readonly MenuItem[] = [
   { section: 'manuscript', url: '/write' },
   ...NOTE_KIND_LIST.map((config) => ({ section: config.kind, url: `/write/${config.path}` })),
+  { section: 'stats', url: '/write/stats' },
 ];
 
 @Component({
@@ -105,8 +106,10 @@ export class WorkspacePage {
   protected readonly sectionLabel = computed(() => this.labelOf(this.section()));
   protected readonly noteKind = computed(() => {
     const section = this.section();
-    return section === 'manuscript' ? null : section;
+    return section === 'manuscript' || section === 'stats' ? null : section;
   });
+  /** Die Statistik braucht keine Liste links und nimmt die ganze Breite. */
+  protected readonly hasSidebar = computed(() => this.section() !== 'stats');
   /** Zuletzt geöffnete Seite je Bereich, damit man beim Zurückwechseln dort weitermacht. */
   private readonly lastUrls = new Map<Section, string>();
 
@@ -117,7 +120,9 @@ export class WorkspacePage {
 
   protected labelOf(section: Section): string {
     const t = this.t();
-    return section === 'manuscript' ? t.workspace.manuscript : t.noteKinds[section].label;
+    if (section === 'manuscript') return t.workspace.manuscript;
+    if (section === 'stats') return t.stats.title;
+    return t.noteKinds[section].label;
   }
 
   protected onWindowResize(): void {
@@ -143,5 +148,6 @@ export class WorkspacePage {
 
 function sectionOf(url: string): Section {
   const segment = url.split(/[?#]/)[0]!.split('/')[2];
+  if (segment === 'stats') return 'stats';
   return NOTE_KIND_LIST.find((config) => config.path === segment)?.kind ?? 'manuscript';
 }

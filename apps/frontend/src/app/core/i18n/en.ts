@@ -257,6 +257,38 @@ export const en: Texts = {
       'Words typed in all scenes since 4 a.m. – revising counts, pasted text doesn’t',
   },
 
+  stats: {
+    title: 'Statistics',
+    scenes: (count: number) => (count === 1 ? '1 scene' : `${numberFormat.format(count)} scenes`),
+    totalWords: 'Words',
+    totalScenes: 'Scenes',
+    pages: 'Pages',
+    pagesValue: (count: number) => `≈ ${numberFormat.format(count)}`,
+    pagesHint: 'Estimated at 250 words per page',
+    finalShare: 'Final',
+    finalShareHint: 'Share of words in scenes with status “Final”',
+    progress: 'Progress',
+    progressBy: 'Measure progress in',
+    unitWords: 'Words',
+    unitScenes: 'Scenes',
+    chapters: 'Words per chapter',
+    chapterLabel: (number: number, title: string) => `${number}. ${title}`,
+    chapterTip: (number: number, title: string) => `Chapter ${number}: ${title}`,
+    presence: 'Appearances',
+    presenceHint:
+      'Who appears in which scene – from the links in the scene details. A dot opens the scene.',
+    presenceOf: 'Show appearances for',
+    inScenes: (count: number) =>
+      count === 1 ? 'in 1 scene' : `in ${numberFormat.format(count)} scenes`,
+    appearsTip: (name: string, chapter: number, scene: string) =>
+      `${name} · Chapter ${chapter} › ${scene}`,
+    absent: 'In no scene:',
+    noScenes: 'No scenes yet – once there are some, progress shows up here.',
+    noChapters: 'No chapters yet.',
+    noNotes: (label: string) => `No ${label.toLowerCase()} yet.`,
+    noLinks: 'No links yet – add who appears in the scene details.',
+  },
+
   sceneStatus: {
     label: 'Status',
     names: {

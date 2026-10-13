@@ -1,0 +1,366 @@
+// Leicht getönte Seite mit hellen Kästen darauf – wie bei den Szenen
+:host {
+  display: block;
+  min-height: 100%;
+  background: color-mix(in srgb, var(--bg) 40%, var(--surface));
+  // Linien und Gitter: eine Stufe neben der Fläche, zurückhaltend
+  --hairline: color-mix(in srgb, var(--border) 70%, var(--bg));
+  --bar-height: 0.875rem;
+}
+
+.stats {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-prose);
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+.card {
+  min-width: 0;
+  padding: 1rem 1.25rem 1.25rem;
+  border: 1px solid var(--hairline);
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.empty,
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.hint {
+  margin: -0.5rem 0 1rem;
+}
+
+// ---------------------------------------------------------------------------
+// Kennzahlen
+// ---------------------------------------------------------------------------
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.tile {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--hairline);
+  border-radius: 0.75rem;
+  background: var(--bg);
+
+  dt {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Umschalter (Wörter/Szenen, Charaktere/Orte)
+// ---------------------------------------------------------------------------
+
+.toggle {
+  display: inline-flex;
+
+  button {
+    padding: 0.2rem 0.65rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    border-radius: 0;
+
+    & + button {
+      margin-left: -1px;
+    }
+
+    &:first-child {
+      border-radius: 999px 0 0 999px;
+    }
+
+    &:last-child {
+      border-radius: 0 999px 999px 0;
+    }
+
+    &[aria-pressed='true'] {
+      position: relative;
+      color: var(--text);
+      font-weight: 600;
+      background: var(--button-hover);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Gestapelte Balken: 2px Fläche zwischen den Stücken, rundes Ende nur rechts
+// ---------------------------------------------------------------------------
+
+.stack {
+  display: flex;
+  gap: 2px;
+  height: var(--bar-height);
+
+  .segment {
+    min-width: 2px;
+    outline-offset: 2px;
+
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+  }
+}
+
+.progress-bar {
+  --bar-height: 1.25rem;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    &.zero {
+      opacity: 0.55;
+    }
+  }
+
+  // Symbol in Statusfarbe, Schrift in Textfarbe
+  wm-status-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .legend-name {
+    color: var(--text);
+  }
+
+  .legend-value {
+    color: var(--text-muted);
+  }
+
+  &.compact {
+    gap: 0.3rem 1rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Wörter je Kapitel
+// ---------------------------------------------------------------------------
+
+.chapters {
+  display: grid;
+  grid-template-columns: minmax(6rem, 15rem) minmax(0, 1fr);
+  gap: 0.45rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+
+  .part {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    // Kapitel nach einem Teil, die selbst in keinem liegen: nur eine Trennlinie
+    &.no-part {
+      height: 1px;
+      margin: 0.35rem 0;
+      background: var(--hairline);
+    }
+  }
+
+  .chapter {
+    display: contents;
+  }
+
+  .chapter-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Balken plus Zahl dahinter; der längste Balken lässt Platz für seine Zahl
+  .track {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .stack {
+    flex: none;
+    width: calc((100% - 5rem) * var(--ratio));
+  }
+
+  .value {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.78rem;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Auftritte: Tabelle mit einem Punkt je Szene
+// ---------------------------------------------------------------------------
+
+.presence-scroll {
+  overflow-x: auto;
+  // Platz für den Fokusrahmen der Punkte am Rand
+  padding: 2px;
+  margin: -2px;
+}
+
+.presence {
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  thead th {
+    padding: 0 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: left;
+    padding-left: 0.3rem;
+  }
+
+  // Namen bleiben beim seitlichen Scrollen stehen
+  tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    padding: 0 0.75rem 0 0;
+    background: var(--bg);
+    font-weight: 400;
+    text-align: left;
+    white-space: nowrap;
+
+    .name {
+      display: inline-block;
+      max-width: 11rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }
+
+    .count {
+      margin-left: 0.4rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  // Jede Zeile eine dünne Spur, auf der die Punkte sitzen
+  tbody td {
+    width: 1.25rem;
+    min-width: 1.25rem;
+    height: 1.6rem;
+    padding: 0;
+    background: linear-gradient(var(--hairline), var(--hairline)) center / 100% 1px no-repeat;
+  }
+
+  // Kapitelgrenze
+  .chapter-start {
+    border-left: 1px solid var(--hairline);
+  }
+
+  tbody tr:hover th .name {
+    color: var(--accent-strong);
+  }
+}
+
+// Ganze Zelle als Klickfläche, der Punkt (10px, mit Ring in Flächenfarbe) in der Mitte
+.dot {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.3rem;
+
+  &::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 2px var(--bg);
+    transition: transform 0.1s;
+  }
+
+  &:hover::before,
+  &:focus-visible::before {
+    transform: scale(1.35);
+  }
+}
+
+.absent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.6rem;
+  margin: 1rem 0 0;
+  font-size: 0.82rem;
+}
+
+// ---------------------------------------------------------------------------
+// Tooltip über dem Element
+// ---------------------------------------------------------------------------
+
+.tooltip {
+  position: fixed;
+  z-index: 20;
+  transform: translate(-50%, calc(-100% - 0.4rem));
+  max-width: 20rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.35rem;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  pointer-events: none;
+  white-space: nowrap;
+}

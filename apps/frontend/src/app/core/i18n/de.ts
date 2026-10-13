@@ -286,6 +286,38 @@ export const de = {
       'Selbst getippte Wörter in allen Szenen seit 4 Uhr – Überarbeiten zählt mit, Eingefügtes nicht',
   },
 
+  stats: {
+    title: 'Statistik',
+    scenes: (count: number) => (count === 1 ? '1 Szene' : `${numberFormat.format(count)} Szenen`),
+    totalWords: 'Wörter',
+    totalScenes: 'Szenen',
+    pages: 'Normseiten',
+    pagesValue: (count: number) => `≈ ${numberFormat.format(count)}`,
+    pagesHint: 'Geschätzt mit 250 Wörtern pro Seite',
+    finalShare: 'Fertig',
+    finalShareHint: 'Anteil der Wörter in Szenen mit Status „Fertig“',
+    progress: 'Fortschritt',
+    progressBy: 'Fortschritt messen in',
+    unitWords: 'Wörter',
+    unitScenes: 'Szenen',
+    chapters: 'Wörter je Kapitel',
+    chapterLabel: (number: number, title: string) => `${number}. ${title}`,
+    chapterTip: (number: number, title: string) => `Kapitel ${number}: ${title}`,
+    presence: 'Auftritte',
+    presenceHint:
+      'Wer in welcher Szene vorkommt – aus den Verknüpfungen in den Szenendetails. Ein Punkt öffnet die Szene.',
+    presenceOf: 'Auftritte zeigen für',
+    inScenes: (count: number) =>
+      count === 1 ? 'in 1 Szene' : `in ${numberFormat.format(count)} Szenen`,
+    appearsTip: (name: string, chapter: number, scene: string) =>
+      `${name} · Kapitel ${chapter} › ${scene}`,
+    absent: 'In keiner Szene:',
+    noScenes: 'Noch keine Szenen – sobald es welche gibt, steht hier der Fortschritt.',
+    noChapters: 'Noch keine Kapitel.',
+    noNotes: (label: string) => `Noch keine ${label}.`,
+    noLinks: 'Noch keine Verknüpfungen – trage in den Szenendetails ein, wer vorkommt.',
+  },
+
   sceneStatus: {
     label: 'Status',
     names: {

@@ -1,4 +1,4 @@
-<div class="layout" [style.--sidebar-width.px]="sidebarWidth()">
+<div class="layout" [class.no-sidebar]="!hasSidebar()" [style.--sidebar-width.px]="sidebarWidth()">
   <!-- Obere Leiste: alles, was das ganze Buch betrifft -->
   <header class="topbar">
     <div class="book" [title]="store.project()?.filePath ?? ''">
@@ -63,6 +63,10 @@
               />
               <path d="M7.5 15h9" />
             }
+            @case ('stats') {
+              <path d="M4 20h16" />
+              <path d="M7 16.5V11M12 16.5V5.5M17 16.5V8.5" />
+            }
           }
         </svg>
         <span>{{ labelOf(item.section) }}</span>
@@ -70,49 +74,51 @@
     }
   </nav>
 
-  <aside class="sidebar" [attr.aria-label]="sectionLabel()">
-    <div class="sidebar-head">
-      <h2>
-        {{ sectionLabel() }}
-        @if (!noteKind()) {
-          <span class="word-count">{{ t().words(store.totalWords()) }}</span>
-        }
-      </h2>
-      <span class="head-actions">
-        @if (noteKind(); as kind) {
-          <button type="button" class="link" (click)="noteList()?.add()">
-            {{ t().noteKinds[kind].addLabel }}
-          </button>
-          <button type="button" class="link" (click)="noteList()?.addGroup()">
-            {{ t().notes.addGroupButton }}
-          </button>
-        } @else {
-          <button type="button" class="link" (click)="tree()?.add('chapter', null)">
-            {{ t().tree.addChapterButton }}
-          </button>
-          <button type="button" class="link" (click)="tree()?.add('part', null)">
-            {{ t().tree.addPartButton }}
-          </button>
-        }
-      </span>
-    </div>
+  @if (hasSidebar()) {
+    <aside class="sidebar" [attr.aria-label]="sectionLabel()">
+      <div class="sidebar-head">
+        <h2>
+          {{ sectionLabel() }}
+          @if (!noteKind()) {
+            <span class="word-count">{{ t().words(store.totalWords()) }}</span>
+          }
+        </h2>
+        <span class="head-actions">
+          @if (noteKind(); as kind) {
+            <button type="button" class="link" (click)="noteList()?.add()">
+              {{ t().noteKinds[kind].addLabel }}
+            </button>
+            <button type="button" class="link" (click)="noteList()?.addGroup()">
+              {{ t().notes.addGroupButton }}
+            </button>
+          } @else {
+            <button type="button" class="link" (click)="tree()?.add('chapter', null)">
+              {{ t().tree.addChapterButton }}
+            </button>
+            <button type="button" class="link" (click)="tree()?.add('part', null)">
+              {{ t().tree.addPartButton }}
+            </button>
+          }
+        </span>
+      </div>
 
-    @if (noteKind(); as kind) {
-      <wm-note-list [kind]="kind" />
-    } @else {
-      <wm-scene-filter-panel />
-      <wm-manuscript-tree />
-    }
+      @if (noteKind(); as kind) {
+        <wm-note-list [kind]="kind" />
+      } @else {
+        <wm-scene-filter-panel />
+        <wm-manuscript-tree />
+      }
 
-    <wm-resize-handle
-      [label]="t().workspace.sidebarWidth"
-      [value]="sidebarWidth()"
-      [min]="minSidebarWidth()"
-      [max]="maxSidebarWidth()"
-      (resized)="settings.setSidebarWidth($event)"
-      (reset)="settings.setSidebarWidth(null)"
-    />
-  </aside>
+      <wm-resize-handle
+        [label]="t().workspace.sidebarWidth"
+        [value]="sidebarWidth()"
+        [min]="minSidebarWidth()"
+        [max]="maxSidebarWidth()"
+        (resized)="settings.setSidebarWidth($event)"
+        (reset)="settings.setSidebarWidth(null)"
+      />
+    </aside>
+  }
 
   <main class="content">
     @if (notes.loaded()) {

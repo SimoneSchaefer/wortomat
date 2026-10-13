@@ -1,0 +1,231 @@
+<div class="stats">
+  <h1>{{ t().stats.title }}</h1>
+
+  <!-- Kennzahlen -->
+  <dl class="tiles">
+    <div class="tile">
+      <dt>{{ t().stats.totalWords }}</dt>
+      <dd>{{ t().number(totalWords()) }}</dd>
+    </div>
+    <div class="tile">
+      <dt>{{ t().stats.totalScenes }}</dt>
+      <dd>{{ t().number(scenes().length) }}</dd>
+    </div>
+    <div class="tile" [title]="t().stats.pagesHint">
+      <dt>{{ t().stats.pages }}</dt>
+      <dd>{{ t().stats.pagesValue(pages()) }}</dd>
+    </div>
+    <div class="tile" [title]="t().stats.finalShareHint">
+      <dt>{{ t().stats.finalShare }}</dt>
+      <dd>{{ finalShare() === null ? '–' : finalShare() + ' %' }}</dd>
+    </div>
+  </dl>
+
+  <!-- Fortschritt nach Status -->
+  <section class="card">
+    <div class="card-head">
+      <h2>{{ t().stats.progress }}</h2>
+      @if (totalWords()) {
+        <div class="toggle" role="group" [attr.aria-label]="t().stats.progressBy">
+          <button type="button" [attr.aria-pressed]="unit() === 'words'" (click)="setUnit('words')">
+            {{ t().stats.unitWords }}
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="unit() === 'scenes'"
+            (click)="setUnit('scenes')"
+          >
+            {{ t().stats.unitScenes }}
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (progress().total) {
+      <div class="stack progress-bar">
+        @for (segment of progress().segments; track segment.status) {
+          <span
+            class="segment"
+            tabindex="0"
+            [style.flex-grow]="segment.value"
+            [style.background]="statusInfo(segment.status).color"
+            [attr.data-tip]="statusTip(segment.status, segment.words, segment.scenes)"
+            [attr.aria-label]="statusTip(segment.status, segment.words, segment.scenes)"
+          ></span>
+        }
+      </div>
+      <ul class="legend">
+        @for (total of totals(); track total.status) {
+          <li [class.zero]="!total.scenes" [style.color]="statusInfo(total.status).color">
+            <wm-status-icon [status]="total.status" />
+            <span class="legend-name">{{ statusName(total.status) }}</span>
+            <span class="legend-value">
+              {{ t().words(total.words) }} · {{ t().stats.scenes(total.scenes) }}
+            </span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted empty">{{ t().stats.noScenes }}</p>
+    }
+  </section>
+
+  <!-- Wörter je Kapitel, gestapelt nach Status -->
+  <section class="card">
+    <div class="card-head">
+      <h2>{{ t().stats.chapters }}</h2>
+    </div>
+    @if (chapters().length) {
+      <ol class="chapters">
+        @for (chapter of chapters(); track chapter.chapter.id) {
+          @if (chapter.part !== ($index ? chapters()[$index - 1]!.part : null)) {
+            @if (chapter.part) {
+              <li class="part">{{ chapter.part }}</li>
+            } @else {
+              <li class="part no-part" aria-hidden="true"></li>
+            }
+          }
+          <li class="chapter">
+            <span class="chapter-name" [title]="chapter.chapter.title">{{
+              t().stats.chapterLabel(chapter.number, chapter.chapter.title)
+            }}</span>
+            <span class="track">
+              <span class="stack" [style.--ratio]="chapter.words / maxChapterWords()">
+                @for (info of statuses; track info.status) {
+                  @if (chapter.wordsByStatus[info.status]; as words) {
+                    <span
+                      class="segment"
+                      [style.flex-grow]="words"
+                      [style.background]="info.color"
+                      [attr.data-tip]="
+                        t().stats.chapterTip(chapter.number, chapter.chapter.title) +
+                        ' · ' +
+                        statusName(info.status) +
+                        ': ' +
+                        t().words(words)
+                      "
+                    ></span>
+                  }
+                }
+              </span>
+              <span class="value">{{ t().number(chapter.words) }}</span>
+            </span>
+          </li>
+        }
+      </ol>
+      @if (totalWords()) {
+        <ul class="legend compact" aria-hidden="true">
+          @for (info of statuses; track info.status) {
+            <li [style.color]="info.color">
+              <wm-status-icon [status]="info.status" />
+              <span class="legend-name">{{ statusName(info.status) }}</span>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <p class="muted empty">{{ t().stats.noChapters }}</p>
+    }
+  </section>
+
+  <!-- Auftritte: wer kommt in welcher Szene vor -->
+  <section class="card">
+    <div class="card-head">
+      <h2>{{ t().stats.presence }}</h2>
+      <div class="toggle" role="group" [attr.aria-label]="t().stats.presenceOf">
+        @for (kind of presenceKinds; track kind) {
+          <button
+            type="button"
+            [attr.aria-pressed]="presenceKind() === kind"
+            (click)="presenceKind.set(kind)"
+          >
+            {{ t().noteKinds[kind].label }}
+          </button>
+        }
+      </div>
+    </div>
+    <p class="muted hint">{{ t().stats.presenceHint }}</p>
+
+    @if (presence(); as data) {
+      @if (!data.total) {
+        <p class="muted empty">{{ t().stats.noNotes(t().noteKinds[presenceKind()].label) }}</p>
+      } @else if (!scenes().length) {
+        <p class="muted empty">{{ t().stats.noScenes }}</p>
+      } @else {
+        @if (data.rows.length) {
+          <div class="presence-scroll">
+            <table class="presence">
+              <thead>
+                <tr>
+                  <td></td>
+                  @for (column of chapterColumns(); track column.entry.chapter.id) {
+                    <th
+                      scope="colgroup"
+                      [attr.colspan]="column.span"
+                      [class.chapter-start]="$index > 0"
+                      [attr.data-tip]="
+                        t().stats.chapterTip(column.entry.chapterNumber, column.entry.chapter.title)
+                      "
+                    >
+                      {{ column.entry.chapterNumber }}
+                    </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of data.rows; track row.note.id) {
+                  <tr>
+                    <th scope="row">
+                      <span class="name">{{ row.note.title }}</span>
+                      <span class="count">{{ row.appearances.size }}</span>
+                    </th>
+                    @for (entry of scenes(); track entry.scene.id; let index = $index) {
+                      <td [class.chapter-start]="isChapterStart(index)">
+                        @if (row.appearances.has(index)) {
+                          <a
+                            class="dot"
+                            [routerLink]="['/write/scene', entry.scene.id]"
+                            [attr.data-tip]="
+                              t().stats.appearsTip(
+                                row.note.title,
+                                entry.chapterNumber,
+                                entry.scene.title
+                              )
+                            "
+                            [attr.aria-label]="
+                              t().stats.appearsTip(
+                                row.note.title,
+                                entry.chapterNumber,
+                                entry.scene.title
+                              )
+                            "
+                          ></a>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted empty">{{ t().stats.noLinks }}</p>
+        }
+        @if (data.absent.length) {
+          <p class="absent">
+            <span class="muted">{{ t().stats.absent }}</span>
+            @for (note of data.absent; track note.id) {
+              <span class="absent-name">{{ note.title }}</span>
+            }
+          </p>
+        }
+      }
+    }
+  </section>
+</div>
+
+@if (tip(); as tip) {
+  <div class="tooltip" aria-hidden="true" [style.left.px]="tip.x" [style.top.px]="tip.y">
+    {{ tip.text }}
+  </div>
+}

@@ -3,6 +3,10 @@
   grid-template-columns: 4.75rem var(--sidebar-width, 17rem) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   height: 100vh;
+
+  &.no-sidebar {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+  }
 }
 
 // Obere Leiste über die ganze Breite: Buch, Suche, Projekt schließen
