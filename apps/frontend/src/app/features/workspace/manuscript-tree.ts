@@ -36,6 +36,7 @@ const DRAG_TYPE = 'application/x-wortomat-node';
   ],
   templateUrl: './manuscript-tree.html',
   styleUrl: './manuscript-tree.scss',
+  host: { '[style.--count-chars]': 'countChars()' },
 })
 export class ManuscriptTree {
   private readonly router = inject(Router);
@@ -108,6 +109,15 @@ export class ManuscriptTree {
   });
 
   protected readonly noAnnotations = NO_ANNOTATIONS;
+
+  /**
+   * Zeichen der längsten Wortzahl – so breit wird die Spalte, damit sie bündig steht, ohne
+   * Platz zu verschenken. Die größte Zahl steht immer oben: Teile und Kapitel zeigen die Summe.
+   */
+  protected readonly countChars = computed(() => {
+    const max = Math.max(0, ...this.filter.tree().map((item) => item.wordCount));
+    return this.t().number(max).length;
+  });
 
   /** Beim Filtern sind alle Teile und Kapitel offen – sonst lägen Treffer verborgen. */
   protected isCollapsed(id: string): boolean {

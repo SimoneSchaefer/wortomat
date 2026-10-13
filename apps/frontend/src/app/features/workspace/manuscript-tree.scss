@@ -171,10 +171,11 @@ input {
   height: 0.75rem;
 }
 
-// Badges (wm-annotation-badges) in festen Plätzen, Wortzahl rechtsbündig
+// Badges (wm-annotation-badges) in festen Plätzen, Wortzahl rechtsbündig – so breit wie
+// die längste Zahl im Baum (`--count-chars`, Ziffern sind dank tabular-nums gleich breit)
 .count {
   flex-shrink: 0;
-  width: 3.2rem;
+  width: calc(var(--count-chars, 4) * 1ch);
   text-align: right;
   font-size: 0.75rem;
   color: var(--text-muted);
