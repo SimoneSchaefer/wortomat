@@ -7,11 +7,20 @@ import {
   Get,
   HttpCode,
   Post,
+  Put,
+  Query,
   Req,
   Res,
   StreamableFile,
 } from '@nestjs/common';
-import type { ExportCapabilities, ExportRequest, ExportResult } from '@wortomat/shared';
+import type {
+  ExportCapabilities,
+  ExportPreview,
+  ExportRequest,
+  ExportResult,
+  ExportSettings,
+  ExportSettingsResponse,
+} from '@wortomat/shared';
 import type { Request, Response } from 'express';
 import { ExportService } from './export.service.js';
 import { localized, requestLanguage } from '../i18n.js';
@@ -24,6 +33,23 @@ export class ExportController {
   @Get('capabilities')
   capabilities(): Promise<ExportCapabilities> {
     return this.exporter.capabilities();
+  }
+
+  /** Was der Export-Dialog sich für dieses Buch gemerkt hat. */
+  @Get('settings')
+  settings(): ExportSettingsResponse {
+    return this.exporter.settings();
+  }
+
+  @Put('settings')
+  saveSettings(@Body() body: unknown): ExportSettings {
+    return this.exporter.saveSettings(body);
+  }
+
+  /** Titel und erstes Kapitel für die Seitenvorschau im Dialog. */
+  @Get('preview')
+  preview(@Query('sceneTitles') sceneTitles?: string): ExportPreview {
+    return this.exporter.preview(sceneTitles === 'true');
   }
 
   /**

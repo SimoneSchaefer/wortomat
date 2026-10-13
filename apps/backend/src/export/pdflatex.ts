@@ -39,6 +39,38 @@ export async function findPdflatex(): Promise<PdflatexInstallation | null> {
   return null;
 }
 
+/**
+ * Welche der Pakete (ohne `.sty`) findet die TeX-Installation? Fragt `kpsewhich` neben
+ * pdflatex; ohne kpsewhich gilt keins als vorhanden.
+ */
+export async function findLatexPackages(
+  installation: PdflatexInstallation,
+  packages: readonly string[],
+): Promise<Set<string>> {
+  const exe = process.platform === 'win32' ? 'kpsewhich.exe' : 'kpsewhich';
+  const kpsewhich = path.isAbsolute(installation.executable)
+    ? path.join(path.dirname(installation.executable), exe)
+    : exe;
+  let stdout = '';
+  try {
+    ({ stdout } = await run(
+      kpsewhich,
+      packages.map((name) => `${name}.sty`),
+      { timeout: 15_000, windowsHide: true },
+    ));
+  } catch (error) {
+    // Fehlt eins der Pakete, endet kpsewhich mit Code 1 – die Funde stehen trotzdem in stdout.
+    stdout = String((error as { stdout?: unknown }).stdout ?? '');
+  }
+  const found = new Set(
+    stdout
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((file) => path.basename(file, '.sty')),
+  );
+  return new Set(packages.filter((name) => found.has(name)));
+}
+
 function candidates(): string[] {
   const exe = process.platform === 'win32' ? 'pdflatex.exe' : 'pdflatex';
   const list = [exe];

@@ -13,9 +13,11 @@ import {
   TabStopType,
   TextRun,
 } from 'docx';
-import type { ExportTemplate } from '@wortomat/shared';
+import JSZip from 'jszip';
+import type { BookLayout, ExportTemplate } from '@wortomat/shared';
 import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
 import { fitImage, normseitenLabel, printMarks } from './book.js';
+import { BOOK_FONTS, DEFAULT_LAYOUT } from './layout.js';
 import { type Localized, localized } from '../i18n.js';
 
 /** Maße in Twips (1/20 Punkt; 1 cm = 567 Twips). */
@@ -41,6 +43,8 @@ interface Layout {
   sceneBreak: string;
   /** Normseite: Autor und Titel oben, Seitenzahl rechts; Roman: Seitenzahl unten mittig. */
   pageNumbers: 'header' | 'footer';
+  /** Doppelseitig: links = innen (Bund), rechts = außen; Word spiegelt auf geraden Seiten. */
+  mirrorMargins: boolean;
 }
 
 /**
@@ -68,22 +72,40 @@ const NORMSEITE: Layout = {
   hyphenate: false,
   sceneBreak: '*',
   pageNumbers: 'header',
+  mirrorMargins: false,
 };
 
-/** Roman: Buchformat 12,5 × 19 cm, Serifenschrift, Blocksatz mit Silbentrennung. */
-const ROMAN: Layout = {
-  page: { width: 7087, height: 10772 },
-  margin: { top: 1020, right: 1020, bottom: 1247, left: 1020, header: 567, footer: 680 },
-  font: 'Palatino Linotype',
-  size: 22,
-  line: 276,
-  lineRule: LineRuleType.AUTO,
-  align: AlignmentType.BOTH,
-  indent: 340,
-  hyphenate: true,
-  sceneBreak: '*   *   *',
-  pageNumbers: 'footer',
-};
+const TWIPS_PER_MM = 1440 / 25.4;
+
+/** Roman: Buchformat nach dem Satzspiegel des Buchs, Blocksatz mit Silbentrennung. */
+function romanLayout(book: BookLayout): Layout {
+  const twips = (mm: number) => Math.round(mm * TWIPS_PER_MM);
+  const top = twips(book.marginTop);
+  const bottom = twips(book.marginBottom);
+  return {
+    page: { width: twips(book.pageWidth), height: twips(book.pageHeight) },
+    margin: {
+      top,
+      right: twips(book.marginOuter),
+      bottom,
+      left: twips(book.marginInner),
+      header: Math.min(567, Math.max(0, top - 170)),
+      // Seitenzahl gut 1 cm über der Unterkante – bei kleinem Rand entsprechend tiefer
+      footer: Math.max(170, Math.min(680, bottom - 340)),
+    },
+    font: BOOK_FONTS[book.font].docx,
+    size: Math.round(book.fontSize * 2),
+    line: 276,
+    lineRule: LineRuleType.AUTO,
+    align: AlignmentType.BOTH,
+    // gut 1,2 Geviert wie im PDF
+    indent: Math.round((340 * book.fontSize) / 11),
+    hyphenate: true,
+    sceneBreak: '*   *   *',
+    pageNumbers: 'footer',
+    mirrorMargins: true,
+  };
+}
 
 const TWIPS_PER_PIXEL = 15; // docx rechnet Bildgrößen in Pixeln à 1/96 Zoll
 
@@ -92,8 +114,9 @@ export async function renderDocx(
   template: ExportTemplate,
   options: ExportOptions,
   images: ImageResolver,
+  bookLayout: BookLayout = DEFAULT_LAYOUT,
 ): Promise<{ data: Buffer; warnings: Localized[] }> {
-  const layout = template === 'normseite' ? NORMSEITE : ROMAN;
+  const layout = template === 'normseite' ? NORMSEITE : romanLayout(bookLayout);
   const warnings: Localized[] = [];
   const textWidth = layout.page.width - layout.margin.left - layout.margin.right;
   const textHeight = layout.page.height - layout.margin.top - layout.margin.bottom;
@@ -103,6 +126,7 @@ export async function renderDocx(
     warnings,
     maxImage: { width: textWidth / TWIPS_PER_PIXEL, height: (textHeight / TWIPS_PER_PIXEL) * 0.7 },
     indentNext: false,
+    textHeight,
   };
 
   const body: Paragraph[] = [];
@@ -202,7 +226,30 @@ export async function renderDocx(
     ],
   });
 
-  return { data: await Packer.toBuffer(document), warnings };
+  const data = await Packer.toBuffer(document);
+  return { data: layout.mirrorMargins ? await withMirrorMargins(data) : data, warnings };
+}
+
+/**
+ * Die docx-Bibliothek kennt die Einstellung „Gegenüberliegende Seiten“ nicht – also nachträglich
+ * `<w:mirrorMargins/>` in word/settings.xml eintragen. Laut Schema steht es vor allen anderen
+ * Einstellungen, die docx schreibt (bis auf `w:displayBackgroundShape`).
+ */
+async function withMirrorMargins(data: Buffer): Promise<Buffer> {
+  const zip = await JSZip.loadAsync(data);
+  const file = zip.file('word/settings.xml');
+  if (!file) return data;
+  const xml = await file.async('string');
+  if (xml.includes('<w:mirrorMargins')) return data;
+  const background = /<w:displayBackgroundShape\b[^>]*\/>/.exec(xml);
+  const insertAt = background
+    ? background.index + background[0].length
+    : xml.indexOf('>', xml.indexOf('<w:settings')) + 1;
+  zip.file(
+    'word/settings.xml',
+    xml.slice(0, insertAt) + '<w:mirrorMargins/>' + xml.slice(insertAt),
+  );
+  return zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 }
 
 interface Context {
@@ -212,6 +259,7 @@ interface Context {
   maxImage: { width: number; height: number };
   /** Einzug erst ab dem zweiten Absatz nach Überschrift oder Szenentrenner. */
   indentNext: boolean;
+  textHeight: number;
 }
 
 function titlePage(
@@ -272,7 +320,8 @@ function chapterHeading(title: string, ctx: Context): Paragraph[] {
         }),
       ]
     : [
-        newPageSpacer(1700),
+        // wie im PDF: Kapitelanfang 15 % der Satzspiegelhöhe tiefer
+        newPageSpacer(Math.round(ctx.textHeight * 0.15)),
         new Paragraph({
           keepNext: true,
           alignment: AlignmentType.CENTER,

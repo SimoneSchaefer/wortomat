@@ -355,11 +355,79 @@ export type ExportFormat = 'html' | 'docx' | 'pdf' | 'epub';
 /** Vorlage für Word und PDF (HTML und EPUB haben ein festes Layout). */
 export type ExportTemplate = 'normseite' | 'roman';
 
+/** Schriften zur Auswahl für die Vorlage „Roman“ (jeweils für PDF und Word verfügbar). */
+export type BookFont =
+  | 'palatino'
+  | 'garamond'
+  | 'libertinus'
+  | 'charter'
+  | 'times'
+  | 'schoolbook'
+  | 'bookman'
+  | 'sourceserif'
+  | 'crimson'
+  | 'latinmodern'
+  | 'computermodern';
+
+/**
+ * Satzspiegel der Vorlage „Roman“ (die Normseite ist genormt und bleibt fest).
+ * Maße in Millimetern, Schriftgröße in Punkt. Gedruckt wird doppelseitig: „innen“ ist der
+ * Rand am Bund, „außen“ der am Seitenrand.
+ */
+export interface BookLayout {
+  pageWidth: number;
+  pageHeight: number;
+  marginInner: number;
+  marginOuter: number;
+  marginTop: number;
+  marginBottom: number;
+  font: BookFont;
+  fontSize: number;
+}
+
+/** Was der Export-Dialog sich pro Buch merkt (in der Projektdatei gespeichert). */
+export interface ExportSettings {
+  format: ExportFormat;
+  template: ExportTemplate;
+  includeSceneTitles: boolean;
+  layout: BookLayout;
+}
+
+/** `GET /api/export/settings` */
+export interface ExportSettingsResponse {
+  settings: ExportSettings;
+  /** Vorgaben, z. B. für „Zurücksetzen“. */
+  defaults: ExportSettings;
+}
+
+/** Eine wählbare Schrift samt CSS-Schriftfamilie für die Vorschau. */
+export interface BookFontInfo {
+  id: BookFont;
+  label: string;
+  cssFamily: string;
+  /** Ist ein passendes TeX-Paket installiert? Sonst setzt das PDF in Latin Modern. */
+  pdfAvailable: boolean;
+  /** Nur anbieten, wenn `pdfAvailable` (oder die Schrift schon gewählt ist). */
+  optional: boolean;
+}
+
+/** `GET /api/export/preview`: Anfang des Buchs für die Seitenvorschau. */
+export interface ExportPreview {
+  title: string;
+  author: string;
+  /** Erstes Kapitel mit Text; `null`, wenn das Buch noch leer ist. */
+  chapterTitle: string | null;
+  /** Szenen dieses Kapitels als HTML (Absätze, Szenentrenner bzw. -titel, Bilder). */
+  html: string;
+}
+
 export interface ExportRequest {
   format: ExportFormat;
   template: ExportTemplate;
   /** Szenentitel als Zwischenüberschriften drucken (sonst nur Szenentrenner). */
   includeSceneTitles: boolean;
+  /** Satzspiegel für „Roman“; fehlt er, gelten die Vorgaben. */
+  layout?: BookLayout;
   /**
    * Zielpfad (Desktop: aus dem Speichern-Dialog). Ohne Pfad liefert der Server die Datei
    * direkt als Download aus (Browser-Modus).
@@ -379,6 +447,8 @@ export interface ExportCapabilities {
     /** z. B. „pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023)“ */
     version: string | null;
   };
+  /** Schriften für die Vorlage „Roman“. */
+  fonts: BookFontInfo[];
 }
 
 // ---------------------------------------------------------------------------

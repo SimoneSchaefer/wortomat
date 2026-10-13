@@ -156,6 +156,9 @@ const MIGRATIONS: readonly string[] = [
               OR (lower(g.name) = lower(note_groups.name) AND g.id < note_groups.id))
     );
   `,
+  /* 12: Einstellungen des Export-Dialogs als JSON (Format, Vorlage, Satzspiegel); leer = Vorgaben */ `
+    ALTER TABLE project ADD COLUMN export_settings TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

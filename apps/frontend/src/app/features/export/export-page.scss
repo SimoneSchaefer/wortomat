@@ -1,0 +1,328 @@
+// Seite wie die Einstellungen – mit Vorschau breiter und zweispaltig
+.export-page {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem 4rem;
+
+  &.with-preview {
+    max-width: 76rem;
+  }
+}
+
+header {
+  display: grid;
+  gap: 0.75rem;
+
+  h1 {
+    margin: 0;
+    font-family: var(--font-prose);
+    font-weight: 400;
+    font-size: 2rem;
+  }
+}
+
+.back {
+  justify-self: start;
+}
+
+.columns {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+
+  .with-preview & {
+    grid-template-columns: minmax(24rem, 1fr) minmax(0, 1.15fr);
+  }
+
+  // schmales Fenster: Vorschau unter die Optionen
+  @media (width < 60rem) {
+    .with-preview & {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+.options {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+// Jede Gruppe als Karte wie auf der Einstellungsseite
+.options > fieldset,
+.options > .check {
+  padding: 1rem 1.25rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+// Browser setzen die Legende eines fieldset mittig auf dessen Rahmen. Als float steht sie
+// stattdessen ganz normal oben in der Karte; der Inhalt danach beginnt darunter.
+.options > fieldset > legend {
+  float: left;
+  width: 100%;
+
+  + * {
+    clear: both;
+  }
+}
+
+.options > .check {
+  padding-block: 0.9rem;
+}
+
+// Satzspiegel der Vorlage „Roman“
+.layout legend {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  width: 100%;
+
+  .reset {
+    margin-left: auto;
+    font-size: 0.75rem;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem 0.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+
+  &.wide-field {
+    grid-column: 1 / -1;
+  }
+
+  select,
+  input {
+    width: 100%;
+    min-width: 0;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  select {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    background: var(--bg);
+
+    &:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: -1px;
+    }
+  }
+}
+
+.unit-input {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  input {
+    flex: 1;
+  }
+}
+
+.field-group {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.group-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.margins {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+
+  &.warn {
+    color: var(--accent-strong);
+  }
+}
+
+// Vorschau
+.preview-pane {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.preview-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+
+  .legend {
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .muted {
+    font-size: 0.75rem;
+  }
+}
+
+.preview-scroll {
+  max-height: calc(100vh - 8rem);
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--text) 8%, var(--surface));
+}
+
+fieldset {
+  margin: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+
+  &.two,
+  &.formats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.choice {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &:hover:not(.disabled) {
+    background: var(--hover);
+  }
+
+  &.selected {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Tastaturfokus sichtbar, aber anders als „ausgewählt“ (gestrichelt, mit Abstand)
+  &:has(input:focus-visible) {
+    outline: 2px dashed var(--accent);
+    outline-offset: 3px;
+  }
+
+  // Radio-Button unsichtbar, aber per Tastatur bedienbar
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.choice-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.choice-description {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+
+  .muted {
+    font-size: 0.8rem;
+  }
+}
+
+.result {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--status-final) 14%, var(--bg));
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .path {
+    word-break: break-all;
+  }
+}
+
+.result-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  button {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+.warnings {
+  margin: 0;
+  padding: 0.6rem 0.8rem 0.6rem 1.8rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--annotation-todo) 16%, var(--bg));
+  font-size: 0.82rem;
+}
+
+.error {
+  margin: 0;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

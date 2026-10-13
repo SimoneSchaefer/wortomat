@@ -1,6 +1,7 @@
-import type { ExportTemplate } from '@wortomat/shared';
+import type { BookLayout, ExportTemplate } from '@wortomat/shared';
 import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
 import { normseitenLabel, printMarks } from './book.js';
+import { BOOK_FONTS, DEFAULT_LAYOUT } from './layout.js';
 import { type Localized, localized } from '../i18n.js';
 
 export interface LatexDocument {
@@ -10,14 +11,17 @@ export interface LatexDocument {
   warnings: Localized[];
 }
 
-/**
+/*
  * Präambeln. Bewusst nur Pakete aus den üblichen Grundausstattungen (TeX Live „recommended“,
- * MiKTeX Basic); Schöneres (TeX Gyre Pagella, microtype) nur, wenn vorhanden.
+ * MiKTeX Basic); Schöneres (Buchschriften, microtype) nur, wenn vorhanden.
  */
-const PREAMBLE: Record<ExportTemplate, string> = {
-  // Normseite: Courier 12 pt, 30 Zeilen à 60 Anschläge. Courier ist 0,6 em breit → 60 × 7,2 pt
-  // = 432 pt; 30 Zeilen à 18 pt → Satzspiegelhöhe 29 × 18 pt + \topskip (12 pt) = 534 pt.
-  normseite: String.raw`\documentclass[12pt,a4paper]{article}
+
+/**
+ * Normseite: Courier 12 pt, 30 Zeilen à 60 Anschläge. Courier ist 0,6 em breit → 60 × 7,2 pt
+ * = 432 pt; 30 Zeilen à 18 pt → Satzspiegelhöhe 29 × 18 pt + \topskip (12 pt) = 534 pt.
+ * Genormt, daher nicht einstellbar.
+ */
+const NORMSEITE_PREAMBLE = String.raw`\documentclass[12pt,a4paper]{article}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
@@ -39,15 +43,42 @@ const PREAMBLE: Record<ExportTemplate, string> = {
 \newcommand{\wmchapter}[1]{\clearpage\begin{center}\textbf{#1}\end{center}\vspace{\baselineskip}}
 \newcommand{\wmscenetitle}[1]{\par\vspace{\baselineskip}\noindent\textbf{#1}\par\nopagebreak}
 \newcommand{\wmscenebreak}{\par\noindent\hfill*\hfill\null\par}
-`,
-  // Roman: Buchformat 12,5 × 19 cm, doppelseitig, Blocksatz mit deutscher Silbentrennung.
-  roman: String.raw`\documentclass[11pt,twoside,openany]{book}
+`;
+
+/**
+ * Roman: doppelseitiger Buchsatz, Blocksatz mit deutscher Silbentrennung. Seitengröße, Ränder,
+ * Schrift und Schriftgröße kommen aus dem Satzspiegel des Buchs.
+ */
+function romanPreamble(layout: BookLayout): string {
+  const mm = (value: number) => `${value}mm`;
+  // Grundgröße der Klasse (10/11/12 pt) möglichst nah an der gewählten: Davon hängen die
+  // Größen der Überschriften (\Large usw.) ab.
+  const classSize = layout.fontSize < 10.5 ? 10 : layout.fontSize < 11.5 ? 11 : 12;
+  // Zeilenabstand wie in der Klasse „book“ (11 pt auf 13,6 pt), \linespread kommt noch dazu
+  const baseline = Math.round(layout.fontSize * (13.6 / 11) * 100) / 100;
+  // Abstand Textende → Seitenzahl; muss in den unteren Rand passen
+  const footskip = Math.round(Math.min(10, Math.max(4, layout.marginBottom * 0.45)) * 10) / 10;
+  // Gewünschte Schrift, sonst Latin Modern (oder notfalls die Standardschrift)
+  const font = BOOK_FONTS[layout.font].latex.reduceRight(
+    (fallback, name) => `\\IfFileExists{${name}.sty}{\\usepackage{${name}}}{${fallback}}`,
+    '\\IfFileExists{lmodern.sty}{\\usepackage{lmodern}}{}',
+  );
+  const geometry = [
+    `paperwidth=${mm(layout.pageWidth)}`,
+    `paperheight=${mm(layout.pageHeight)}`,
+    `inner=${mm(layout.marginInner)}`,
+    `outer=${mm(layout.marginOuter)}`,
+    `top=${mm(layout.marginTop)}`,
+    `bottom=${mm(layout.marginBottom)}`,
+    `footskip=${mm(footskip)}`,
+  ].join(',');
+  return String.raw`\documentclass[${classSize}pt,twoside,openany]{book}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
 \usepackage{graphicx}
-\usepackage[paperwidth=125mm,paperheight=190mm,inner=20mm,outer=15mm,top=18mm,bottom=22mm,footskip=10mm]{geometry}
-\IfFileExists{tgpagella.sty}{\usepackage{tgpagella}}{\IfFileExists{mathpazo.sty}{\usepackage{mathpazo}}{}}
+\usepackage[${geometry}]{geometry}
+${font}
 \IfFileExists{microtype.sty}{\usepackage{microtype}}{}
 \usepackage{fancyhdr}
 % Unterstreichen/Durchstreichen mit Zeilenumbruch; ohne ulem bleibt nur \underline bzw. nichts
@@ -57,28 +88,31 @@ const PREAMBLE: Record<ExportTemplate, string> = {
 \fancyfoot[C]{\small\thepage}
 \renewcommand{\headrulewidth}{0pt}
 \fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
-% Leere Seiten vor einem neuen Teil (rechte Seite) ohne Seitenzahl
 \makeatletter
+% Leere Seiten vor einem neuen Teil (rechte Seite) ohne Seitenzahl
 \renewcommand{\cleardoublepage}{\clearpage\if@twoside\ifodd\c@page\else\hbox{}\thispagestyle{empty}\newpage\fi\fi}
+% Grundschrift in der gewählten Größe (auch dort, wo LaTeX \normalsize neu setzt)
+\renewcommand{\normalsize}{\@setfontsize\normalsize{${layout.fontSize}pt}{${baseline}pt}}
 \makeatother
 \linespread{1.08}
 \setlength{\parindent}{1.2em}
 \setlength{\parskip}{0pt}
 \clubpenalty=10000
 \widowpenalty=10000
-\AtBeginDocument{\shorthandoff{"}}
+\AtBeginDocument{\shorthandoff{"}\normalsize}
 \newcommand{\wmpart}[1]{\cleardoublepage\thispagestyle{empty}\vspace*{0.3\textheight}\begin{center}\LARGE #1\end{center}\clearpage}
 \newcommand{\wmchapter}[1]{\clearpage\thispagestyle{plain}\vspace*{0.15\textheight}\begin{center}\Large #1\end{center}\vspace{2\baselineskip}}
 \newcommand{\wmscenetitle}[1]{\par\bigskip\noindent\textit{#1}\par\nopagebreak\smallskip}
 \newcommand{\wmscenebreak}{\par\bigskip\noindent\hfill*\quad*\quad*\hfill\null\par\bigskip}
-`,
-};
+`;
+}
 
 export function renderLatex(
   book: Book,
   template: ExportTemplate,
   options: ExportOptions,
   images: ImageResolver,
+  layout: BookLayout = DEFAULT_LAYOUT,
 ): LatexDocument {
   const ctx: Context = {
     images,
@@ -87,7 +121,7 @@ export function renderLatex(
     unsupported: 0,
     indentNext: false,
   };
-  const out: string[] = [PREAMBLE[template]];
+  const out: string[] = [template === 'normseite' ? NORMSEITE_PREAMBLE : romanPreamble(layout)];
   if (template === 'normseite') {
     // Kopfzeile der Normseite: „Autor: Titel“ links, Seitenzahl rechts
     const header = [book.author, book.title]

@@ -5,15 +5,20 @@ import os from 'node:os';
 import path from 'node:path';
 import { after, before, describe, it } from 'node:test';
 import type {
+  BookLayout,
   ExportCapabilities,
+  ExportPreview,
   ExportResult,
+  ExportSettings,
+  ExportSettingsResponse,
   ImageInfo,
   ManuscriptNode,
   ProjectInfo,
 } from '@wortomat/shared';
 import JSZip from 'jszip';
 import { AUTH_HEADER, type RunningServer, startServer } from '../server.js';
-import { escape } from './latex-renderer.js';
+import { DEFAULT_LAYOUT, sanitizeLayout } from './layout.js';
+import { escape, renderLatex } from './latex-renderer.js';
 import { describeLatexError } from './pdflatex.js';
 
 const TOKEN = 'export-test';
@@ -49,12 +54,21 @@ describe('Export', () => {
     return (text ? JSON.parse(text) : null) as T;
   };
   /** Export im Desktop-Modus (Datei wird geschrieben). */
-  const exportTo = async (format: string, template: string, includeSceneTitles = false) => {
-    const filePath = path.join(tmpDir, `out-${format}-${template}-${includeSceneTitles}`);
+  const exportTo = async (
+    format: string,
+    template: string,
+    includeSceneTitles = false,
+    layout?: BookLayout,
+  ) => {
+    const filePath = path.join(
+      tmpDir,
+      `out-${format}-${template}-${includeSceneTitles}${layout ? '-layout' : ''}`,
+    );
     const result = await api<ExportResult>('POST', '/api/export', {
       format,
       template,
       includeSceneTitles,
+      layout,
       filePath,
     });
     return { ...result, data: await readFile(result.filePath) };
@@ -157,6 +171,56 @@ describe('Export', () => {
     const caps = await api<ExportCapabilities>('GET', '/api/export/capabilities');
     assert.equal(typeof caps.pdf.available, 'boolean');
     if (caps.pdf.available) assert.match(caps.pdf.version ?? '', /pdfTeX/);
+    assert.equal(caps.fonts.length, 11);
+    assert.equal(caps.fonts.find((font) => font.id === 'computermodern')?.optional, true);
+    const palatino = caps.fonts.find((font) => font.id === 'palatino');
+    assert.equal(palatino?.label, 'Palatino');
+    assert.match(palatino?.cssFamily ?? '', /Palatino/);
+    if (!caps.pdf.available) assert.ok(caps.fonts.every((font) => !font.pdfAvailable));
+  });
+
+  it('merkt sich die Einstellungen des Export-Dialogs im Buch', async () => {
+    const initial = await api<ExportSettingsResponse>('GET', '/api/export/settings');
+    assert.deepEqual(initial.settings, initial.defaults);
+    assert.deepEqual(initial.defaults.layout, DEFAULT_LAYOUT);
+
+    const saved = await api<ExportSettings>('PUT', '/api/export/settings', {
+      format: 'pdf',
+      template: 'roman',
+      includeSceneTitles: true,
+      layout: {
+        ...DEFAULT_LAYOUT,
+        pageWidth: 148,
+        pageHeight: 210,
+        font: 'garamond',
+        fontSize: 12.3,
+      },
+    });
+    assert.equal(saved.layout.fontSize, 12.5); // auf halbe Punkte gerundet
+
+    const again = await api<ExportSettingsResponse>('GET', '/api/export/settings');
+    assert.deepEqual(again.settings, saved);
+    assert.equal(again.settings.format, 'pdf');
+    assert.equal(again.settings.layout.font, 'garamond');
+
+    // Unsinn wird durch Vorgaben ersetzt
+    const repaired = await api<ExportSettings>('PUT', '/api/export/settings', {
+      format: 'odt',
+      layout: { font: 'comic-sans', pageWidth: 'breit' },
+    });
+    assert.equal(repaired.format, 'docx');
+    assert.equal(repaired.layout.font, 'palatino');
+    assert.equal(repaired.layout.pageWidth, DEFAULT_LAYOUT.pageWidth);
+  });
+
+  it('liefert den Anfang des Buchs für die Seitenvorschau', async () => {
+    const preview = await api<ExportPreview>('GET', '/api/export/preview');
+    assert.equal(preview.title, 'Die Häuser am Fluss');
+    assert.ok(preview.chapterTitle);
+    assert.match(preview.html, /<p>/);
+    assert.doesNotMatch(preview.html, /scene-title/);
+    const withTitles = await api<ExportPreview>('GET', '/api/export/preview?sceneTitles=true');
+    assert.match(withTitles.html, /class="scene-title"/);
   });
 
   it('exportiert eigenständiges HTML in Lesereihenfolge – ohne Todo-Markierungen', async () => {
@@ -224,7 +288,39 @@ describe('Export', () => {
     assert.match(roman.styles, /Palatino Linotype/);
     assert.match(roman.document, /<w:pgSz w:w="7087" w:h="10772"/); // 12,5 × 19 cm
     assert.match(roman.settings, /autoHyphenation/);
+    assert.match(roman.settings, /<w:mirrorMargins\/>/); // innen/außen gespiegelt
+    assert.doesNotMatch(normseite.settings, /mirrorMargins/);
     assert.match(roman.document, /w:jc w:val="both"/); // Blocksatz
+  });
+
+  it('übernimmt Seitengröße, Ränder, Schrift und Schriftgröße in die Vorlage Roman', async () => {
+    const layout: BookLayout = {
+      pageWidth: 148,
+      pageHeight: 210,
+      marginInner: 22,
+      marginOuter: 16,
+      marginTop: 20,
+      marginBottom: 25,
+      font: 'garamond',
+      fontSize: 12,
+    };
+    const { data } = await exportTo('docx', 'roman', false, layout);
+    const zip = await JSZip.loadAsync(data);
+    const document = await zip.file('word/document.xml')!.async('string');
+    const styles = await zip.file('word/styles.xml')!.async('string');
+    assert.match(document, /<w:pgSz w:w="8391" w:h="11906"/); // A5
+    assert.match(document, /w:top="1134" w:right="907" w:bottom="1417" w:left="1247"/);
+    assert.match(styles, /w:ascii="Garamond"/);
+    assert.match(styles, /<w:sz w:val="24"\/>/); // 12 pt
+
+    // Die Normseite bleibt genormt, egal was mitgeschickt wird
+    const normseite = await exportTo('docx', 'normseite', false, layout);
+    const normDoc = await (
+      await JSZip.loadAsync(normseite.data)
+    )
+      .file('word/document.xml')!
+      .async('string');
+    assert.match(normDoc, /<w:pgSz w:w="11906" w:h="16838"/);
   });
 
   it('exportiert ein EPUB 3 mit Inhaltsverzeichnis, Kapiteldateien und Bildern', async () => {
@@ -373,11 +469,19 @@ describe('Export', () => {
       t.skip('pdfLaTeX ist nicht installiert');
       return;
     }
-    for (const [template, size] of [
-      ['normseite', /595\.\d* x 841\.\d* pts|595\.276 x 841\.89 pts/], // A4
-      ['roman', /354\.\d* x 538\.\d* pts/], // 125 × 190 mm
+    const a5: BookLayout = {
+      ...DEFAULT_LAYOUT,
+      pageWidth: 148,
+      pageHeight: 210,
+      font: 'times',
+      fontSize: 12,
+    };
+    for (const [template, size, layout] of [
+      ['normseite', /595\.\d* x 841\.\d* pts|595\.276 x 841\.89 pts/, undefined], // A4
+      ['roman', /354\.\d* x 538\.\d* pts/, undefined], // 125 × 190 mm
+      ['roman', /419\.\d* x 595\.\d* pts/, a5], // 148 × 210 mm
     ] as const) {
-      const { data, filePath, warnings } = await exportTo('pdf', template);
+      const { data, filePath, warnings } = await exportTo('pdf', template, false, layout);
       assert.equal(data.subarray(0, 5).toString(), '%PDF-');
       assert.ok(
         warnings.some((w) => w.includes('WEBP')),
@@ -451,7 +555,33 @@ describe('Export', () => {
   });
 });
 
+describe('Satzspiegel', () => {
+  it('legt Zahlen in ihre Grenzen und lässt immer Platz für Text', () => {
+    assert.deepEqual(sanitizeLayout(undefined), DEFAULT_LAYOUT);
+    const tiny = sanitizeLayout({ ...DEFAULT_LAYOUT, pageWidth: 10, fontSize: 99 });
+    assert.equal(tiny.pageWidth, 80);
+    assert.equal(tiny.fontSize, 18);
+    // 80 mm breit mit 20 + 15 mm Rand ließe 45 mm – genug; bei 60 + 60 mm wird geschrumpft
+    const squeezed = sanitizeLayout({ ...DEFAULT_LAYOUT, marginInner: 60, marginOuter: 60 });
+    assert.ok(squeezed.pageWidth - squeezed.marginInner - squeezed.marginOuter >= 40);
+    assert.equal(squeezed.marginInner, squeezed.marginOuter);
+  });
+});
+
 describe('LaTeX-Hilfen', () => {
+  it('setzt Computer Modern mit cm-super und weicht sonst auf Latin Modern aus', () => {
+    const book = { title: 'T', author: '', wordCount: 0, characterCount: 0, items: [] };
+    const { tex } = renderLatex(book, 'roman', { includeSceneTitles: false }, () => null, {
+      ...DEFAULT_LAYOUT,
+      font: 'computermodern',
+    });
+    assert.ok(
+      tex.includes(
+        String.raw`\IfFileExists{type1ec.sty}{\usepackage{type1ec}}{\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}}`,
+      ),
+    );
+  });
+
   it('escapt Sonderzeichen und ersetzt nicht darstellbare Zeichen', () => {
     const ctx = { unsupported: 0 };
     assert.equal(

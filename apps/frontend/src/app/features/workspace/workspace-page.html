@@ -23,7 +23,7 @@
     </div>
     <wm-global-search />
     <div class="top-actions">
-      <button type="button" class="link" (click)="exportDialog.open()">
+      <button type="button" class="link" routerLink="/export">
         {{ t().workspace.export }}
       </button>
       <button type="button" class="link" routerLink="/settings">
@@ -117,5 +117,4 @@
   </main>
 </div>
 
-<wm-export-dialog #exportDialog />
 <wm-cover-dialog #coverDialog />

@@ -1,0 +1,271 @@
+<main class="export-page" [class.with-preview]="paged()">
+  <header>
+    <button type="button" class="link back" (click)="back()">{{ t().common.back }}</button>
+    <h1>{{ t().export.title }}</h1>
+  </header>
+
+  <form class="columns" (submit)="$event.preventDefault(); run()">
+    <div class="options">
+      <fieldset>
+        <legend>{{ t().export.format }}</legend>
+        <div class="choices formats">
+          @for (value of formats; track value) {
+            <label
+              class="choice"
+              [class.selected]="format() === value"
+              [class.disabled]="isDisabled(value)"
+            >
+              <input
+                type="radio"
+                name="format"
+                [attr.autofocus]="format() === value ? '' : null"
+                [value]="value"
+                [checked]="format() === value"
+                [disabled]="isDisabled(value)"
+                (change)="choose(value)"
+              />
+              <span class="choice-label">{{ t().export.formats[value].label }}</span>
+              <span class="choice-description">
+                @if (value === 'pdf' && capabilities() && !capabilities()!.pdf.available) {
+                  {{ t().export.pdfMissing }}
+                } @else if (value === 'pdf' && !capabilities()) {
+                  {{ t().export.pdfSearching }}
+                } @else {
+                  {{ t().export.formats[value].description }}
+                }
+              </span>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      @if (hasTemplates(format())) {
+        <fieldset>
+          <legend>{{ t().export.template }}</legend>
+          <div class="choices two">
+            @for (value of templates; track value) {
+              <label class="choice" [class.selected]="template() === value">
+                <input
+                  type="radio"
+                  name="template"
+                  [value]="value"
+                  [checked]="template() === value"
+                  (change)="template.set(value)"
+                />
+                <span class="choice-label">{{ t().export.templates[value].label }}</span>
+                <span class="choice-description">{{
+                  t().export.templates[value].description
+                }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+      }
+
+      @if (customizable() && layout(); as layout) {
+        <fieldset class="layout">
+          <legend>
+            {{ t().export.layout }}
+            <button type="button" class="link reset" (click)="resetLayout()">
+              {{ t().export.resetLayout }}
+            </button>
+          </legend>
+
+          <div class="layout-grid">
+            <label class="field wide-field">
+              <span>{{ t().export.pageSize }}</span>
+              <select (change)="choosePageSize($any($event.target).value)">
+                @for (size of pageSizes; track $index) {
+                  <option [value]="$index" [selected]="!customSize() && pageSizeIndex() === $index">
+                    {{ pageSizeLabel(size) }}
+                  </option>
+                }
+                <option value="custom" [selected]="customSize() || pageSizeIndex() < 0">
+                  {{ t().export.customSize }}
+                </option>
+              </select>
+            </label>
+
+            @if (customSize() || pageSizeIndex() < 0) {
+              <label class="field">
+                <span>{{ t().export.width }}</span>
+                <span class="unit-input">
+                  <input
+                    type="number"
+                    min="80"
+                    max="300"
+                    step="1"
+                    [value]="layout.pageWidth"
+                    (change)="setNumber('pageWidth', $any($event.target).value)"
+                  />
+                  {{ t().export.unitMm }}
+                </span>
+              </label>
+              <label class="field">
+                <span>{{ t().export.height }}</span>
+                <span class="unit-input">
+                  <input
+                    type="number"
+                    min="100"
+                    max="400"
+                    step="1"
+                    [value]="layout.pageHeight"
+                    (change)="setNumber('pageHeight', $any($event.target).value)"
+                  />
+                  {{ t().export.unitMm }}
+                </span>
+              </label>
+            }
+
+            <label class="field">
+              <span>{{ t().export.font }}</span>
+              <select (change)="updateLayout({ font: $any($event.target).value })">
+                @for (option of fonts(); track option.id) {
+                  <option [value]="option.id" [selected]="option.id === layout.font">
+                    {{ option.label
+                    }}{{
+                      format() === 'pdf' && !option.pdfAvailable
+                        ? ' (' + t().export.fontNotInTex + ')'
+                        : ''
+                    }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label class="field">
+              <span>{{ t().export.fontSize }}</span>
+              <span class="unit-input">
+                <input
+                  type="number"
+                  min="8"
+                  max="18"
+                  step="0.5"
+                  [value]="layout.fontSize"
+                  (change)="setNumber('fontSize', $any($event.target).value)"
+                />
+                {{ t().export.unitPt }}
+              </span>
+            </label>
+          </div>
+
+          @if (format() === 'pdf' && font() && !font()!.pdfAvailable) {
+            <p class="hint warn">{{ t().export.fontMissingPdf(font()!.label) }}</p>
+          } @else if (format() === 'docx') {
+            <p class="hint">{{ t().export.fontWordHint }}</p>
+          }
+
+          <div class="field-group">
+            <span class="group-label">{{ t().export.margins }}</span>
+            <div class="margins">
+              @for (margin of margins; track margin.key) {
+                <label class="field">
+                  <span>{{ margin.label() }}</span>
+                  <span class="unit-input">
+                    <input
+                      type="number"
+                      min="5"
+                      max="60"
+                      step="1"
+                      [value]="layout[margin.key]"
+                      (change)="setNumber(margin.key, $any($event.target).value)"
+                    />
+                    {{ t().export.unitMm }}
+                  </span>
+                </label>
+              }
+            </div>
+            <p class="hint">{{ t().export.marginsHint }}</p>
+          </div>
+        </fieldset>
+      }
+
+      @if (format() === 'epub') {
+        <fieldset>
+          <legend>{{ t().export.cover }}</legend>
+          <wm-cover-picker
+            [hint]="
+              project.project()?.coverImageId ? t().export.coverShown : t().export.coverMissing
+            "
+          />
+        </fieldset>
+      }
+
+      <label class="check">
+        <input
+          type="checkbox"
+          [checked]="includeSceneTitles()"
+          (change)="includeSceneTitles.set($any($event.target).checked)"
+        />
+        {{ t().export.sceneTitles }}
+        <span class="muted">{{ t().export.sceneTitlesHint }}</span>
+      </label>
+
+      @if (result(); as done) {
+        <div class="result" role="status">
+          <p>
+            <strong>{{ t().export.exported }}</strong>
+            <span class="path">{{ done.filePath }}</span>
+          </p>
+          <div class="result-actions">
+            <button type="button" (click)="openFile()">{{ t().export.open }}</button>
+            <button type="button" (click)="showInFolder()">{{ t().export.showInFolder }}</button>
+          </div>
+        </div>
+      }
+      @if (downloaded(); as done) {
+        <div class="result" role="status">
+          <p>
+            <strong>{{ t().export.downloaded }}</strong> {{ done.fileName }}
+          </p>
+        </div>
+      }
+      @if (result()?.warnings ?? downloaded()?.warnings; as warnings) {
+        @if (warnings.length) {
+          <ul class="warnings" [attr.aria-label]="t().export.warnings">
+            @for (warning of warnings; track warning) {
+              <li>{{ warning }}</li>
+            }
+          </ul>
+        }
+      }
+      @if (error(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      }
+
+      <footer>
+        <button class="primary" type="submit" [disabled]="busy() || isDisabled(format())">
+          {{
+            busy()
+              ? t().export.exporting
+              : desktop
+                ? t().export.exportWithDialog
+                : t().export.download
+          }}
+        </button>
+      </footer>
+    </div>
+
+    @if (paged() && layout(); as layout) {
+      <aside class="preview-pane" [attr.aria-label]="t().export.preview">
+        <div class="preview-head">
+          <span class="legend">{{ t().export.preview }}</span>
+          <span class="muted">{{ t().export.previewPages }}</span>
+        </div>
+        <div class="preview-scroll">
+          <wm-export-preview
+            [template]="template()"
+            [layout]="layout"
+            [fontFamily]="font()?.cssFamily ?? 'serif'"
+            [content]="preview()"
+          />
+        </div>
+        <p class="hint">
+          {{ t().export.previewHint }}
+          @if (template() === 'roman' && !fontInstalled()) {
+            {{ t().export.fontMissingPreview }}
+          }
+        </p>
+      </aside>
+    }
+  </form>
+</main>

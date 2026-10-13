@@ -53,6 +53,11 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'export',
+    canActivate: [projectOpenGuard],
+    loadComponent: () => import('./features/export/export-page').then((m) => m.ExportPage),
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./features/settings/settings-page').then((m) => m.SettingsPage),
   },

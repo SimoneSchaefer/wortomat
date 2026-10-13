@@ -2,15 +2,18 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
-  DirectoryListing,
   AppSettings,
   CreateNodeRequest,
   CreateNoteGroupRequest,
   CreateNoteRequest,
   CreateProjectRequest,
+  DirectoryListing,
   ExportCapabilities,
+  ExportPreview,
   ExportRequest,
   ExportResult,
+  ExportSettings,
+  ExportSettingsResponse,
   ImageInfo,
   ManuscriptNode,
   MoveNodeRequest,
@@ -20,9 +23,9 @@ import type {
   NoteSummary,
   ProjectInfo,
   ProjectListEntry,
-  SceneReference,
   SaveDocumentRequest,
   SceneContent,
+  SceneReference,
   SceneRelations,
   SearchHit,
   Tag,
@@ -245,6 +248,23 @@ export class WortomatApi {
 
   exportCapabilities(): Promise<ExportCapabilities> {
     return this.call(this.http.get<ExportCapabilities>('/api/export/capabilities'));
+  }
+
+  /** Was sich der Export-Dialog für das geöffnete Buch gemerkt hat. */
+  exportSettings(): Promise<ExportSettingsResponse> {
+    return this.call(this.http.get<ExportSettingsResponse>('/api/export/settings'));
+  }
+
+  saveExportSettings(settings: ExportSettings): Promise<ExportSettings> {
+    return this.call(this.http.put<ExportSettings>('/api/export/settings', settings));
+  }
+
+  exportPreview(includeSceneTitles: boolean): Promise<ExportPreview> {
+    return this.call(
+      this.http.get<ExportPreview>('/api/export/preview', {
+        params: { sceneTitles: String(includeSceneTitles) },
+      }),
+    );
   }
 
   /** Desktop: Backend schreibt die Datei an `filePath`. */

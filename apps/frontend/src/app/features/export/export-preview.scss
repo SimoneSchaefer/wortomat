@@ -1,0 +1,171 @@
+// Ohne View-Kapselung (wegen des Kapitel-HTML): alles unter .wm-export-preview.
+// Seiten sind immer weißes Papier mit schwarzer Schrift – auch im dunklen Farbschema.
+.wm-export-preview {
+  .pages {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+  }
+
+  .page {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    color: #111;
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.08),
+      0 4px 14px rgb(0 0 0 / 0.18);
+  }
+
+  .text {
+    position: absolute;
+    overflow: hidden;
+  }
+
+  .flow {
+    hyphens: auto;
+    text-align: justify;
+  }
+
+  // Kapitelanfang
+  .chapter-head {
+    text-align: center;
+  }
+
+  .chapter-title {
+    font-size: 1.31em;
+    line-height: 1.25;
+  }
+
+  .content {
+    p {
+      margin: 0;
+    }
+
+    // Einzug ab dem zweiten Absatz – nicht nach Überschrift oder Szenentrenner
+    p + p {
+      text-indent: 1.2em;
+    }
+
+    p.scene-break {
+      margin: 1lh 0;
+      text-align: center;
+      text-indent: 0;
+    }
+
+    p.scene-break + p,
+    h3 + p,
+    h4 + p,
+    h5 + p,
+    blockquote + p {
+      text-indent: 0;
+    }
+
+    h3.scene-title {
+      margin: 1lh 0 0;
+      font-size: 1em;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    // erste Szene direkt unter dem Kapiteltitel: kein Abstand davor
+    > h3.scene-title:first-child {
+      margin-top: 0;
+    }
+
+    h4,
+    h5 {
+      margin: 1lh 0 0;
+      font-size: 1em;
+    }
+
+    blockquote {
+      margin: 0.5lh 2em;
+      font-style: italic;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 1.5em;
+    }
+
+    figure {
+      margin: 0.5lh 0;
+      text-align: center;
+    }
+
+    img {
+      max-width: 100%;
+      max-height: 12lh;
+    }
+
+    a {
+      color: inherit;
+    }
+  }
+
+  .empty {
+    margin: 0;
+    color: #777;
+    font-style: italic;
+    text-align: center;
+  }
+
+  // Titelseite „Roman“
+  .title {
+    text-align: center;
+  }
+
+  .book-title {
+    font-size: 2.26em;
+    line-height: 1.2;
+  }
+
+  .book-author {
+    margin-top: 2lh;
+    font-size: 1.09em;
+    font-style: italic;
+  }
+
+  .page-number {
+    position: absolute;
+    left: 0;
+    right: 0;
+    line-height: 1;
+    text-align: center;
+  }
+
+  // Normseite: Flattersatz ohne Trennung, Einzug 3 Anschläge, Kopfzeile „Autor: Titel“
+  &[data-style='normseite'] {
+    .flow {
+      hyphens: manual;
+      text-align: left;
+    }
+
+    .content p + p {
+      text-indent: 21.6pt;
+    }
+
+    .chapter-title {
+      font-size: 1em;
+      font-weight: 700;
+      line-height: inherit;
+    }
+
+    .content h3.scene-title {
+      font-style: normal;
+      font-weight: 700;
+    }
+  }
+
+  .ns-header {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ns-title {
+    text-align: center;
+  }
+}
