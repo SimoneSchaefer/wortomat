@@ -72,16 +72,26 @@
         </button>
       }
       <span class="spacer"></span>
-      <button type="button" [title]="t().gallery.add" [disabled]="busy()" (click)="picker.click()">
-        +
+      <!-- Symbole als SVG: Textzeichen wie + und × sitzen je nach Schrift nicht mittig -->
+      <button
+        type="button"
+        class="icon"
+        [title]="t().gallery.add"
+        [attr.aria-label]="t().gallery.add"
+        [disabled]="busy()"
+        (click)="picker.click()"
+      >
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" /></svg>
       </button>
       <button
         type="button"
+        class="icon"
         [title]="t().gallery.remove"
+        [attr.aria-label]="t().gallery.remove"
         [disabled]="busy()"
         (click)="removeCurrent()"
       >
-        ×
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" /></svg>
       </button>
     </div>
   } @else if (!loading()) {
