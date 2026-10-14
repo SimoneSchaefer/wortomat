@@ -105,9 +105,16 @@ h1 {
 }
 
 .empty {
-  margin: 0;
-  padding: 1.25rem;
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2rem 1.25rem;
   font-size: 0.9rem;
+  text-align: center;
+
+  p {
+    margin: 0;
+  }
 }
 
 // Umschalter „Wendepunkte | Alle Szenen“ – wie die Stufen des Szenenstatus

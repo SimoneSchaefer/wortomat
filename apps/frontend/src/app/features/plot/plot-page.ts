@@ -16,6 +16,7 @@ import { Autofocus } from '../../core/autofocus';
 import { ConfirmDialog } from '../../core/confirm-dialog';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
+import { Mascot } from '../../core/mascot';
 import { ProjectStore } from '../../core/project-store';
 import { statusInfo } from '../../core/scene-status';
 import { StatusMessages } from '../../core/status-messages';
@@ -91,7 +92,7 @@ const START_SECTION: PlotGroupInfo = { id: 'start', label: '', number: null };
  */
 @Component({
   selector: 'wm-plot-page',
-  imports: [Autofocus],
+  imports: [Autofocus, Mascot],
   templateUrl: './plot-page.html',
   styleUrls: ['./plot-page.scss', './plot-drawing.scss'],
   // Zeilen ziehen: am Dokument lauschen – die gezogene Zeile wandert beim Ziehen im DOM mit

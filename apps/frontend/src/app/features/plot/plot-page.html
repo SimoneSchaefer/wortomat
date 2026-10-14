@@ -60,10 +60,11 @@
   </div>
 
   @if (loaded()) {
-    @if (!sceneCount()) {
-      <p class="card empty muted">{{ t().plot.noScenes }}</p>
-    } @else if (!strands().length) {
-      <p class="card empty muted">{{ t().plot.noStrands }}</p>
+    @if (!sceneCount() || !strands().length) {
+      <div class="card empty">
+        <wm-mascot />
+        <p class="muted">{{ sceneCount() ? t().plot.noStrands : t().plot.noScenes }}</p>
+      </div>
     } @else {
       <div class="hint-row">
         <p class="muted mode-hint">
