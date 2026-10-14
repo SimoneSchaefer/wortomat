@@ -33,7 +33,7 @@ const MAP_WIDTH = 1600;
 const MAX_ZOOM = 8;
 const ZOOM_STEP = 1.5;
 
-type Tool = 'pen' | 'area' | 'eraser' | 'hand';
+type Tool = 'pen' | 'area' | 'eraser' | 'hand' | 'zoom';
 
 /** Farben für grobe Karten – auf hellem Papier gut zu unterscheiden. */
 export const MAP_COLORS = [
@@ -67,6 +67,15 @@ interface View {
   y: number;
   w: number;
   h: number;
+}
+
+/** Mit der Lupe aufgezogener Bereich: Start- und aktueller Punkt in Karteneinheiten. */
+interface ZoomDrag {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
 }
 
 interface PinDrag {
@@ -105,7 +114,7 @@ export class MapPage {
   private readonly canvas = viewChild<ElementRef<SVGSVGElement>>('canvas');
   private readonly nameInput = viewChild<ElementRef<HTMLInputElement>>('nameInput');
 
-  protected readonly tools: readonly Tool[] = ['pen', 'area', 'eraser', 'hand'];
+  protected readonly tools: readonly Tool[] = ['pen', 'area', 'eraser', 'hand', 'zoom'];
   protected readonly colors = MAP_COLORS;
   protected readonly widths = WIDTHS;
 
@@ -117,7 +126,8 @@ export class MapPage {
   protected readonly backgroundOpacity = signal(1);
   protected readonly uploading = signal(false);
 
-  protected readonly tool = signal<Tool>('pen');
+  /** Startet mit „Verschieben“ – sonst malt man beim Umsehen leicht aus Versehen. */
+  protected readonly tool = signal<Tool>('hand');
   protected readonly color = signal<string>(MAP_COLORS[0].value);
   protected readonly widthIndex = signal(1);
   /** Zeichnet das Werkzeug (Stift, Fläche)? Dann gelten Farbe und Strichstärke. */
@@ -155,6 +165,19 @@ export class MapPage {
   /** Position des Radierers (für den Kreis unter dem Mauszeiger). */
   protected readonly eraserAt = signal<{ x: number; y: number } | null>(null);
   private erasing: { pointerId: number; before: Snapshot } | null = null;
+  /** Lupe: der Bereich, der gerade aufgezogen wird. */
+  private readonly zoomDrag = signal<ZoomDrag | null>(null);
+  protected readonly zoomArea = computed(() => {
+    const drag = this.zoomDrag();
+    if (!drag) return null;
+    const { start, end } = drag;
+    return {
+      x: Math.min(start.x, end.x),
+      y: Math.min(start.y, end.y),
+      w: Math.abs(end.x - start.x),
+      h: Math.abs(end.y - start.y),
+    };
+  });
   private pinDrag: PinDrag | null = null;
 
   /** Ausgewählter Ort auf der Karte (zeigt „Öffnen“ und „Von der Karte nehmen“). */
@@ -244,6 +267,7 @@ export class MapPage {
     this.error.set(null);
     this.selectedPin.set(null);
     this.placing.set(null);
+    this.tool.set('hand');
     this.undoStack.set([]);
     this.redoStack.set([]);
     try {
@@ -307,6 +331,18 @@ export class MapPage {
       w,
       h,
     });
+  }
+
+  /** Zeigt den Bereich so groß wie möglich (Seitenverhältnis der Karte bleibt). */
+  private zoomTo(area: View): void {
+    const map = this.map();
+    if (!map || area.w <= 0 || area.h <= 0) return;
+    // Der ganze Bereich muss hineinpassen – die knappere Richtung bestimmt den Zoom
+    const fit = Math.min(map.width / area.w, map.height / area.h);
+    const zoom = Math.min(MAX_ZOOM, Math.max(1, fit));
+    const w = map.width / zoom;
+    const h = map.height / zoom;
+    this.setView({ x: area.x + area.w / 2 - w / 2, y: area.y + area.h / 2 - h / 2, w, h });
   }
 
   /** Verschiebt den Ausschnitt um Bildschirmpixel (positiv = nach rechts/unten). */
@@ -481,7 +517,15 @@ export class MapPage {
     }
     this.selectedPin.set(null);
     (event.currentTarget as Element).setPointerCapture(event.pointerId);
-    if (this.tool() === 'eraser') {
+    if (this.tool() === 'zoom') {
+      this.zoomDrag.set({
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        start: point,
+        end: point,
+      });
+    } else if (this.tool() === 'eraser') {
       this.erasing = { pointerId: event.pointerId, before: this.snapshot() };
       this.eraseAt(point.x, point.y);
     } else {
@@ -500,6 +544,16 @@ export class MapPage {
     if (!point) return;
     if (this.pinDrag?.pointerId === event.pointerId) {
       this.movePin(event, point);
+      return;
+    }
+    const zoomDrag = this.zoomDrag();
+    if (zoomDrag?.pointerId === event.pointerId) {
+      const map = this.map()!;
+      const end = {
+        x: Math.min(map.width, Math.max(0, point.x)),
+        y: Math.min(map.height, Math.max(0, point.y)),
+      };
+      this.zoomDrag.set({ ...zoomDrag, end });
       return;
     }
     this.eraserAt.set(this.tool() === 'eraser' && !this.placing() ? point : null);
@@ -531,6 +585,19 @@ export class MapPage {
     }
     if (this.pinDrag?.pointerId === event.pointerId) {
       this.endPinDrag();
+      return;
+    }
+    const zoomDrag = this.zoomDrag();
+    if (zoomDrag?.pointerId === event.pointerId) {
+      const area = this.zoomArea()!;
+      this.zoomDrag.set(null);
+      if (event.type === 'pointercancel') return;
+      // Nur geklickt: eine Stufe näher heran (mit Alt weiter weg), der Punkt bleibt stehen
+      if (Math.hypot(event.clientX - zoomDrag.startX, event.clientY - zoomDrag.startY) < 4) {
+        this.zoomBy(event.altKey ? 1 / ZOOM_STEP : ZOOM_STEP, zoomDrag.start);
+      } else {
+        this.zoomTo(area);
+      }
       return;
     }
     if (this.erasing?.pointerId === event.pointerId) {
@@ -574,8 +641,15 @@ export class MapPage {
   // Orte auf der Karte ---------------------------------------------------------------
 
   protected onPinPointerDown(event: PointerEvent, noteId: string): void {
-    if (event.button !== 0 || this.placing() || this.tool() === 'hand' || this.spaceHeld()) {
-      return; // dann verschiebt das Ziehen den Ausschnitt
+    const tool = this.tool();
+    if (
+      event.button !== 0 ||
+      this.placing() ||
+      tool === 'hand' ||
+      tool === 'zoom' ||
+      this.spaceHeld()
+    ) {
+      return; // dann verschiebt bzw. vergrößert das Ziehen den Ausschnitt
     }
     event.stopPropagation();
     event.preventDefault();

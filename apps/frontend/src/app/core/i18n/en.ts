@@ -236,6 +236,7 @@ export const en: Texts = {
     area: 'Area',
     eraser: 'Eraser',
     hand: 'Move',
+    zoom: 'Magnifier',
     zoomLabel: 'Zoom',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
