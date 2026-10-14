@@ -130,9 +130,29 @@
   opacity: 0;
   transition: opacity 0.15s;
 
+  // Alle gleich hoch, Inhalt mittig
   button {
-    padding: 0.15rem 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    padding: 0 0.45rem;
     font-size: 0.75rem;
+    line-height: 1;
+
+    &.icon {
+      width: 1.5rem;
+      padding: 0;
+    }
+
+    svg {
+      width: 0.65rem;
+      height: 0.65rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+    }
   }
 
   .spacer {
