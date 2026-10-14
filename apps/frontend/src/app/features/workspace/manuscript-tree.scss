@@ -8,6 +8,11 @@ nav {
   flex: 1;
 }
 
+// Per Tastatur angesteuerte Einträge nicht unter dem stehenbleibenden Teil verstecken
+:host {
+  scroll-padding-top: 2rem;
+}
+
 ul {
   list-style: none;
   margin: 0;
@@ -41,6 +46,25 @@ nav > ul > li.part + li.chapter {
 
 li.part > ul {
   padding-left: 0.4rem;
+}
+
+// Der Teil bleibt oben stehen, solange man durch seine Kapitel scrollt – samt „+“ für ein
+// neues Kapitel; der nächste Teil schiebt ihn hinaus. Eckig und deckend, damit die
+// Kapitel-Karten nicht durchscheinen.
+li.part > .row {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-radius: 0;
+  background: var(--surface);
+
+  &:hover {
+    background: var(--hover);
+  }
+
+  .actions {
+    border-radius: 0;
+  }
 }
 
 li.chapter {
