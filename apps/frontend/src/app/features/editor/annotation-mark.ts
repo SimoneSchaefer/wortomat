@@ -1,5 +1,9 @@
 import { getMarkRange, Mark, mergeAttributes } from '@tiptap/core';
-import type { Mark as ProseMirrorMark, ResolvedPos } from '@tiptap/pm/model';
+import type {
+  Mark as ProseMirrorMark,
+  Node as ProseMirrorNode,
+  ResolvedPos,
+} from '@tiptap/pm/model';
 import { type EditorState, TextSelection } from '@tiptap/pm/state';
 import type { AnnotationKind } from '@wortomat/shared';
 
@@ -15,10 +19,12 @@ declare module '@tiptap/core' {
        */
       toggleAnnotation: (kind: AnnotationKind) => ReturnType;
       /**
-       * Korrekturnotiz am Cursor erledigen: mit `accept` den Vorschlag übernehmen (der markierte
+       * Markierung am Cursor erledigen: mit `accept` den Vorschlag übernehmen (der markierte
        * Text wird ersetzt), sonst nur die Markierung entfernen. Der Text bleibt dabei formatiert.
        */
-      resolveProofNote: (accept: boolean) => ReturnType;
+      resolveAnnotation: (accept: boolean) => ReturnType;
+      /** Notiz der Markierung am Cursor setzen; leer oder `null` entfernt sie. */
+      setAnnotationNote: (note: string | null) => ReturnType;
     };
   }
 }
@@ -27,8 +33,8 @@ declare module '@tiptap/core' {
  * Tiptap-Mark für Stellen, an denen noch etwas zu tun ist. Im Dokument:
  * `{ type: 'annotation', attrs: { kind: 'todo' | 'idea' | 'fixme', note, suggestion } }`,
  * im HTML: `<mark class="wm-annotation" data-annotation="todo">`.
- * `note` und `suggestion` kommen aus dem Korrekturlesen unterwegs (Notiz bzw. Ersetzungsvorschlag
- * für den markierten Text); selbst gesetzte Markierungen haben beides nicht.
+ * `note` ist eine Notiz zur Stelle – im Editor eingetragen oder vom Korrekturlesen unterwegs;
+ * `suggestion` (Ersetzungsvorschlag für den markierten Text) kommt nur vom Korrekturlesen.
  * Gezählt wird im Backend (apps/backend/src/manuscript/annotations.ts).
  */
 export interface AnnotationOptions {
@@ -117,10 +123,10 @@ export const Annotation = Mark.create<AnnotationOptions>({
             : chain().setMark(this.name, { kind }).run();
         },
 
-      resolveProofNote:
+      resolveAnnotation:
         (accept) =>
         ({ state, tr, dispatch }) => {
-          const found = proofNoteAt(state);
+          const found = annotationAt(state);
           if (!found) return false;
           if (dispatch) {
             const { from, to, suggestion } = found;
@@ -130,6 +136,20 @@ export const Annotation = Mark.create<AnnotationOptions>({
             if (replace) tr.insertText(suggestion, from, to);
             const end = replace ? from + suggestion.length : to;
             tr.setSelection(TextSelection.create(tr.doc, end));
+          }
+          return true;
+        },
+
+      setAnnotationNote:
+        (note) =>
+        ({ state, tr, dispatch }) => {
+          const found = annotationAt(state);
+          if (!found) return false;
+          if (dispatch) {
+            const { kind, suggestion, from, to } = found;
+            const type = state.schema.marks[this.name]!;
+            tr.removeMark(from, to, type);
+            tr.addMark(from, to, type.create({ kind, note: note?.trim() || null, suggestion }));
           }
           return true;
         },
@@ -145,8 +165,9 @@ export const Annotation = Mark.create<AnnotationOptions>({
   },
 });
 
-/** Korrekturnotiz (Notiz und/oder Vorschlag) am Cursor – für die Leiste über dem Text. */
-export interface ProofNoteAt {
+/** Eine Markierung samt Notiz und Vorschlag – für die Leiste über dem Text und die Liste. */
+export interface AnnotationAt {
+  kind: AnnotationKind;
   note: string | null;
   suggestion: string | null;
   /** Der markierte Text. */
@@ -156,28 +177,64 @@ export interface ProofNoteAt {
 }
 
 /**
- * Sucht eine Markierung mit Notiz oder Vorschlag am Anfang der Auswahl – auch, wenn der Cursor
- * genau an ihrem Anfang steht.
+ * Sucht eine Markierung am Anfang der Auswahl – auch, wenn der Cursor genau an ihrem Anfang
+ * steht.
  */
-export function proofNoteAt(state: EditorState): ProofNoteAt | null {
+export function annotationAt(state: EditorState): AnnotationAt | null {
   const type = state.schema.marks['annotation'];
   if (!type) return null;
   const $from: ResolvedPos = state.selection.$from;
   const candidates = [...$from.marks(), ...($from.nodeAfter?.marks ?? [])];
-  const mark = candidates.find(
-    (m) => m.type === type && (!!m.attrs['note'] || m.attrs['suggestion'] !== null),
-  );
+  const mark = candidates.find((m) => m.type === type);
   if (!mark) return null;
   const range = getMarkRange($from, type, mark.attrs);
   if (!range) return null;
-  const text = state.doc.textBetween(range.from, range.to, ' ');
+  return describe(state.doc, mark, range.from, range.to);
+}
+
+/**
+ * Alle Markierungen im Dokument, in Textreihenfolge. Wie beim Zählen bleibt eine Markierung eine,
+ * auch wenn darin z. B. ein Wort fett ist; sie endet am Absatzende.
+ */
+export function annotationsIn(doc: ProseMirrorNode): AnnotationAt[] {
+  const type = doc.type.schema.marks['annotation'];
+  if (!type) return [];
+  const found: AnnotationAt[] = [];
+  doc.descendants((block, blockPos) => {
+    if (!block.isTextblock) return true;
+    // `as`: sonst hält TypeScript `open` nach dem forEach für immer `null`
+    let open = null as { mark: ProseMirrorMark; from: number; to: number } | null;
+    block.forEach((child, offset) => {
+      const from = blockPos + 1 + offset;
+      const mark = type.isInSet(child.marks);
+      if (open && mark?.eq(open.mark)) {
+        open.to = from + child.nodeSize;
+        return;
+      }
+      if (open) found.push(describe(doc, open.mark, open.from, open.to));
+      open = mark ? { mark, from, to: from + child.nodeSize } : null;
+    });
+    if (open) found.push(describe(doc, open.mark, open.from, open.to));
+    return false;
+  });
+  return found;
+}
+
+function describe(
+  doc: ProseMirrorNode,
+  mark: ProseMirrorMark,
+  from: number,
+  to: number,
+): AnnotationAt {
+  const text = doc.textBetween(from, to, ' ');
   const suggestion = mark.attrs['suggestion'] as string | null;
   return {
+    kind: mark.attrs['kind'] as AnnotationKind,
     note: (mark.attrs['note'] as string | null) || null,
     // Ein Vorschlag, der nichts ändert, ist nur eine Notiz (nichts zu übernehmen)
     suggestion: suggestion === text ? null : suggestion,
     text,
-    from: range.from,
-    to: range.to,
+    from,
+    to,
   };
 }

@@ -106,41 +106,111 @@
           </button>
         }
       </div>
-      <!-- Korrekturnotiz am Cursor: Notiz und/oder Vorschlag aus dem Korrekturlesen unterwegs -->
-      @if (proofNote(); as proof) {
-        <div class="proof-note" role="note">
-          <span class="proof-label">{{ t().editor.proofNote }}</span>
-          <span class="proof-body">
-            @if (proof.suggestion !== null) {
-              <span class="proof-suggestion">
-                {{
-                  proof.suggestion
-                    ? t().editor.proofReplace(proof.text, proof.suggestion)
-                    : t().editor.proofDelete(proof.text)
-                }}
-              </span>
-            }
-            @if (proof.note) {
-              <span class="proof-text">{{ proof.note }}</span>
-            }
-          </span>
-          <span class="proof-actions">
-            @if (proof.suggestion !== null) {
-              <button type="button" class="link accept" (click)="resolveProofNote(true)">
-                {{ t().editor.proofAccept }}
+      <!-- Markierung am Cursor: Notiz (selbst eingetragen oder vom Korrekturlesen) und Vorschlag -->
+      @if (annotation(); as mark) {
+        <div class="mark-note" role="note" [style.--annotation-color]="colorOf(mark.kind)">
+          <span class="mark-label">{{ t().annotations[mark.kind].label }}</span>
+          @if (editingNoteAt() === mark.from) {
+            <input
+              #noteInput
+              class="note-input"
+              [value]="mark.note ?? ''"
+              [placeholder]="t().editor.notePlaceholder"
+              [attr.aria-label]="t().editor.notePlaceholder"
+              (keydown.enter)="saveNote(noteInput.value)"
+              (keydown.escape)="cancelNote()"
+              (blur)="saveNote(noteInput.value)"
+            />
+            <span class="mark-actions">
+              <button type="button" class="link" (click)="saveNote(noteInput.value)">
+                {{ t().editor.noteSave }}
               </button>
-              <button type="button" class="link" (click)="resolveProofNote(false)">
-                {{ t().editor.proofReject }}
+            </span>
+          } @else {
+            <span class="mark-body">
+              @if (mark.suggestion !== null) {
+                <span class="mark-suggestion">
+                  {{
+                    mark.suggestion
+                      ? t().editor.proofReplace(mark.text, mark.suggestion)
+                      : t().editor.proofDelete(mark.text)
+                  }}
+                </span>
+              }
+              @if (mark.note) {
+                <span class="mark-text">{{ mark.note }}</span>
+              } @else if (mark.suggestion === null) {
+                <span class="mark-empty">{{ t().editor.noNote }}</span>
+              }
+            </span>
+            <span class="mark-actions">
+              <button type="button" class="link" (click)="editNote(mark)">
+                {{ mark.note ? t().editor.editNote : t().editor.addNote }}
               </button>
-            } @else {
-              <button type="button" class="link" (click)="resolveProofNote(false)">
-                {{ t().editor.proofDone }}
-              </button>
-            }
-          </span>
+              @if (mark.suggestion !== null) {
+                <button type="button" class="link accept" (click)="resolveAnnotation(true)">
+                  {{ t().editor.proofAccept }}
+                </button>
+                <button type="button" class="link" (click)="resolveAnnotation(false)">
+                  {{ t().editor.proofReject }}
+                </button>
+              } @else {
+                <button type="button" class="link" (click)="resolveAnnotation(false)">
+                  {{ t().editor.proofDone }}
+                </button>
+              }
+            </span>
+          }
         </div>
       }
     </div>
+    <!-- Alle Markierungen im Text; ein Klick springt an die Stelle -->
+    @let listed = allAnnotations();
+    @if (listed.length) {
+      <section class="mark-list">
+        <button
+          type="button"
+          class="mark-list-toggle"
+          [attr.aria-expanded]="listOpen()"
+          (click)="listOpen.set(!listOpen())"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4" /></svg>
+          {{ t().editor.markCount(listed.length) }}
+        </button>
+        @if (listOpen()) {
+          <ul>
+            @for (item of listed; track item.from) {
+              <li>
+                <button
+                  type="button"
+                  class="mark-item"
+                  [class.current]="annotation()?.from === item.from"
+                  [style.--annotation-color]="colorOf(item.kind)"
+                  [title]="t().editor.jumpToNote"
+                  (click)="jumpTo(item)"
+                >
+                  <span class="mark-item-head">
+                    <span class="swatch" aria-hidden="true"></span>
+                    <span class="mark-item-kind">{{ t().annotations[item.kind].label }}</span>
+                    <span class="mark-item-quote">{{ t().editor.quote(item.text) }}</span>
+                  </span>
+                  @if (item.suggestion !== null) {
+                    <span class="mark-item-suggestion">{{
+                      item.suggestion
+                        ? t().editor.proofReplace(item.text, item.suggestion)
+                        : t().editor.proofDelete(item.text)
+                    }}</span>
+                  }
+                  @if (item.note) {
+                    <span class="mark-item-note">{{ item.note }}</span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
     <div #editorHost class="editor-host"></div>
   </div>
 </article>

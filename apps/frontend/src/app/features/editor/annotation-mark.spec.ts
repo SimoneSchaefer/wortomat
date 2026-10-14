@@ -1,7 +1,7 @@
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { de } from '../../core/i18n/de';
-import { Annotation, proofNoteAt } from './annotation-mark';
+import { Annotation, annotationAt, annotationsIn } from './annotation-mark';
 
 /** Echter Tiptap-Editor (jsdom) mit dem Satz „Hier fehlt noch was.“ */
 function createEditor(): Editor {
@@ -135,7 +135,8 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     const editor = editorWithNote({ note: 'Was fehlt?', suggestion: 'mangelt' });
     for (const position of [6, 8]) {
       editor.commands.setTextSelection(position);
-      expect(proofNoteAt(editor.state)).toEqual({
+      expect(annotationAt(editor.state)).toEqual({
+        kind: 'fixme',
         note: 'Was fehlt?',
         suggestion: 'mangelt',
         text: 'fehlt',
@@ -144,7 +145,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
       });
     }
     editor.commands.setTextSelection(2);
-    expect(proofNoteAt(editor.state)).toBeNull();
+    expect(annotationAt(editor.state)).toBeNull();
     expect(editor.getHTML()).toContain('title="Fixme: Was fehlt?"');
     expect(editor.getHTML()).toContain('data-suggestion="mangelt"');
     editor.destroy();
@@ -152,7 +153,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
 
   it('übernimmt einen Vorschlag: Text ersetzt, Kursiv bleibt, Markierung weg', () => {
     const editor = editorWithNote({ note: null, suggestion: 'mangelt' });
-    editor.chain().setTextSelection(8).resolveProofNote(true).run();
+    editor.chain().setTextSelection(8).resolveAnnotation(true).run();
     expect(editor.getText()).toBe('Hier mangelt noch was.');
     expect(editor.getHTML()).toBe('<p>Hier <em>mangelt</em> noch was.</p>');
     editor.destroy();
@@ -160,7 +161,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
 
   it('verwirft einen Vorschlag bzw. erledigt eine Notiz: nur die Markierung geht', () => {
     const editor = editorWithNote({ note: 'Was fehlt?', suggestion: null });
-    editor.chain().setTextSelection(8).resolveProofNote(true).run();
+    editor.chain().setTextSelection(8).resolveAnnotation(true).run();
     expect(editor.getHTML()).toBe('<p>Hier <em>fehlt</em> noch was.</p>');
     editor.destroy();
   });
@@ -168,15 +169,58 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
   it('behandelt einen Vorschlag, der nichts ändert, als Notiz – nichts zu übernehmen', () => {
     const editor = editorWithNote({ note: 'Grün', suggestion: 'fehlt' });
     editor.commands.setTextSelection(8);
-    expect(proofNoteAt(editor.state)).toMatchObject({ note: 'Grün', suggestion: null });
-    editor.chain().resolveProofNote(true).run();
+    expect(annotationAt(editor.state)).toMatchObject({ note: 'Grün', suggestion: null });
+    editor.chain().resolveAnnotation(true).run();
     expect(editor.getHTML()).toBe('<p>Hier <em>fehlt</em> noch was.</p>');
+    editor.destroy();
+  });
+
+  it('trägt eine Notiz ein, ändert und entfernt sie – Art, Vorschlag und Kursiv bleiben', () => {
+    const editor = editorWithNote({ note: null, suggestion: 'mangelt' });
+    editor.chain().setTextSelection(8).setAnnotationNote('  Lieber kürzer? ').run();
+    expect(annotationAt(editor.state)).toMatchObject({
+      kind: 'fixme',
+      note: 'Lieber kürzer?',
+      suggestion: 'mangelt',
+      from: 6,
+      to: 11,
+    });
+    expect(editor.getHTML()).toContain('<em>');
+    editor.chain().setAnnotationNote('').run();
+    expect(annotationAt(editor.state)).toMatchObject({ note: null, suggestion: 'mangelt' });
+    editor.destroy();
+  });
+
+  it('findet auch Markierungen ohne Notiz am Cursor', () => {
+    const editor = createEditor();
+    editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('idea').run();
+    editor.commands.setTextSelection(8);
+    expect(annotationAt(editor.state)).toMatchObject({ kind: 'idea', note: null, text: 'fehlt' });
+    expect(editor.commands.setAnnotationNote('Ausbauen')).toBe(true);
+    expect(editor.getHTML()).toContain('data-note="Ausbauen"');
+    editor.destroy();
+  });
+
+  it('listet alle Markierungen in Textreihenfolge – eine bleibt eine, auch mit Fett darin', () => {
+    const editor = new Editor({
+      element: document.createElement('div'),
+      extensions: [StarterKit, Annotation],
+      content:
+        '<p><mark data-annotation="todo" data-note="A">eins <strong>zwei</strong></mark> drei</p>' +
+        '<p>vier <mark data-annotation="fixme">fünf</mark></p>',
+    });
+    expect(
+      annotationsIn(editor.state.doc).map(({ kind, note, text }) => ({ kind, note, text })),
+    ).toEqual([
+      { kind: 'todo', note: 'A', text: 'eins zwei' },
+      { kind: 'fixme', note: null, text: 'fünf' },
+    ]);
     editor.destroy();
   });
 
   it('löscht den Text bei einem leeren Vorschlag', () => {
     const editor = editorWithNote({ note: null, suggestion: '' });
-    editor.chain().setTextSelection(8).resolveProofNote(true).run();
+    editor.chain().setTextSelection(8).resolveAnnotation(true).run();
     expect(editor.getText()).toBe('Hier  noch was.');
     editor.destroy();
   });
