@@ -143,6 +143,8 @@ function createMainWindow(): BrowserWindow {
     minHeight: 500,
     show: false,
     title: 'Wortomat',
+    // macOS nimmt das Icon aus dem App-Bundle, Windows und Linux brauchen es am Fenster.
+    icon: process.platform === 'darwin' ? undefined : path.join(appDir, 'icon.png'),
     webPreferences: {
       preload: path.join(appDir, 'preload.cjs'),
       contextIsolation: true,

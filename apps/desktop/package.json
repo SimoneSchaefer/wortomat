@@ -9,6 +9,7 @@
     "build": "node scripts/bundle.mjs",
     "dev": "npm run build -w @wortomat/backend && node scripts/bundle.mjs --dev && wait-on -t 120000 http-get://localhost:4200 && electron app --dev",
     "start": "electron app",
+    "desktop-entry": "node scripts/desktop-entry.mjs",
     "dist": "electron-builder --config electron-builder.yml",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

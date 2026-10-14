@@ -134,6 +134,13 @@ npm run dev:desktop
 npm run start:desktop
 ```
 
+Unter Linux mit GNOME/Wayland zeigt die Shell das App-Icon nur, wenn es einen passenden
+Starter-Eintrag gibt. Für die beiden Starts oben legt ihn einmalig an:
+
+```bash
+npm run desktop-entry -w @wortomat/desktop
+```
+
 **Tests & Typprüfung:**
 
 ```bash
@@ -183,7 +190,6 @@ Installer für alle drei Plattformen baut der GitHub-Workflow
 
 ## Offene Punkte / nächste Schritte
 
-- App-Icon: `apps/desktop/build/icon.png` (1024×1024) ablegen
 - Code-Signing für Windows und macOS (sonst warnen SmartScreen bzw. Gatekeeper)
 - Umsortieren per Tastatur (Drag & Drop ist nur mit der Maus bedienbar)
 - Versionen/Snapshots von Szenen, nicht mehr verwendete Bilder aufräumen

@@ -5,6 +5,7 @@
  *   ├─ package.json   (ohne Abhängigkeiten)
  *   ├─ main.mjs       (Electron-Hauptprozess + komplettes NestJS-Backend in einer Datei)
  *   ├─ preload.cjs
+ *   ├─ icon.png       (Fenster-Icon unter Windows und Linux)
  *   └─ frontend/      (Angular-Build; entfällt mit --dev, dann kommt es vom Dev-Server)
  *
  * Weil alles gebündelt ist, braucht die fertige App keinen node_modules-Ordner.
@@ -82,6 +83,8 @@ await build({
   format: 'cjs',
   external: ['electron'],
 });
+
+await cp(path.join(desktopDir, 'build/icon.png'), path.join(outDir, 'icon.png'));
 
 if (!dev) {
   await cp(frontendDist, path.join(outDir, 'frontend'), { recursive: true });

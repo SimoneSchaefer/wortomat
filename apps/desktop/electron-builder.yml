@@ -7,7 +7,7 @@ copyright: Copyright © 2026 Wortomat
 directories:
   app: app
   output: release
-  buildResources: build   # hier icon.png (1024×1024) ablegen
+  buildResources: build   # icon.png (1024×1024), gerendert aus icon.svg
 
 files:
   - "**/*"
