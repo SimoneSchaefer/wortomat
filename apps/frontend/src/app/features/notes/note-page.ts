@@ -46,7 +46,7 @@ export class NotePage {
   private readonly api = inject(WortomatApi);
   private readonly store = inject(NotesStore);
   private readonly injector = inject(Injector);
-  private readonly titleInput = viewChild<ElementRef<HTMLInputElement>>('titleInput');
+  private readonly titleInput = viewChild<ElementRef<HTMLTextAreaElement>>('titleInput');
 
   protected readonly config = computed(() => NOTE_KINDS[this.kind()]);
   protected readonly texts = computed(() => this.t().noteKinds[this.kind()]);
@@ -103,7 +103,10 @@ export class NotePage {
     });
   }
 
-  protected onTitleInput(value: string): void {
+  /** Der Titel bricht nur um – eingefügte Zeilenumbrüche werden zu Leerzeichen. */
+  protected onTitleInput(field: HTMLTextAreaElement): void {
+    if (/[\r\n]/.test(field.value)) field.value = field.value.replace(/\s*[\r\n]+\s*/g, ' ');
+    const value = field.value;
     this.titleDraft.set(value);
     if (value.trim()) {
       this.queueMeta({ title: value });

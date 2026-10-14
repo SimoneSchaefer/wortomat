@@ -390,8 +390,17 @@ mark {
   }
 }
 
-input.doc-title {
+// Mehrzeilige Felder: so hoch wie ihr Text, ohne Ziehgriff und Scrollleiste
+textarea.doc-input {
+  field-sizing: content;
+  min-height: 0;
+  resize: none;
+  overflow: hidden;
+}
+
+.doc-input.doc-title {
   margin-bottom: 0.25rem;
+  line-height: 1.25;
 }
 
 .doc-summary {
@@ -399,12 +408,7 @@ input.doc-title {
   color: var(--text-muted);
   font-style: italic;
 
-  // Mehrzeilige Kurzbeschreibung: so hoch wie ihr Text, ohne Ziehgriff und Scrollleiste
   &:is(textarea) {
-    field-sizing: content;
-    min-height: 0;
-    resize: none;
-    overflow: hidden;
     line-height: 1.4;
   }
 }
