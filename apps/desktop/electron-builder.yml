@@ -34,6 +34,9 @@ mac:
   category: public.app-category.productivity
 
 linux:
+  # Fertige Größen bis 512 px: das hicolor-Theme kennt keinen 1024er-Ordner, und nur mit
+  # icon.png landet das Icon allein dort – GNOME findet es dann nicht.
+  icon: build/icons
   target: [AppImage, deb]
   category: Office
   syncDesktopName: true
