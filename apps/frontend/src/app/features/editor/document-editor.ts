@@ -14,7 +14,7 @@ import {
 import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
-import type { Slice } from '@tiptap/pm/model';
+import type { Node as ProseMirrorNode, Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import type { AnnotationKind, EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { ANNOTATION_KINDS } from '../../core/annotations';
@@ -26,7 +26,7 @@ import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
-import { Annotation, proofNoteAt } from './annotation-mark';
+import { Annotation, type AnnotationAt, annotationAt, annotationsIn } from './annotation-mark';
 import { Revision, revisionResult } from './revision';
 import type { Finding, FindingKind, RevisionResult } from './revision-check';
 import { SmartQuotes } from './smart-quotes';
@@ -73,6 +73,7 @@ export class DocumentEditor {
   private readonly settings = inject(AppSettingsStore);
   private readonly notes = inject(NotesStore, { optional: true });
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
+  private readonly noteInput = viewChild<ElementRef<HTMLInputElement>>('noteInput');
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
@@ -120,6 +121,9 @@ export class DocumentEditor {
       untracked(() => void this.load(id));
     });
 
+    // Notizfeld erscheint → gleich hineinschreiben können
+    effect(() => this.noteInput()?.nativeElement.focus());
+
     effect(() => {
       const revising = this.revising();
       untracked(() => this.editor?.commands.setRevisionMode(revising));
@@ -145,6 +149,7 @@ export class DocumentEditor {
       this.currentId = id;
       this.dirty = false;
       this.pastedWords = 0;
+      this.editingNoteAt.set(null);
       this.editor = this.createEditor(content.doc ?? this.template());
       this.editor.commands.setRevisionMode(this.revising());
       this.wordCount.set(content.wordCount);
@@ -331,15 +336,72 @@ export class DocumentEditor {
     this.editor?.chain().focus().toggleAnnotation(kind).run();
   }
 
-  /** Korrekturnotiz am Cursor (vom Korrekturlesen unterwegs) – erscheint unter der Toolbar. */
-  protected readonly proofNote = computed(() => {
+  protected colorOf(kind: AnnotationKind): string {
+    return ANNOTATION_KINDS.find((info) => info.kind === kind)?.color ?? 'var(--annotation-todo)';
+  }
+
+  // Markierungen mit Notiz ------------------------------------------------------
+
+  /** Markierung am Cursor – erscheint mit Notiz bzw. Vorschlag unter der Toolbar. */
+  protected readonly annotation = computed(() => {
     this.editorTick();
-    return this.editor ? proofNoteAt(this.editor.state) : null;
+    return this.editor ? annotationAt(this.editor.state) : null;
   });
 
-  /** Vorschlag übernehmen (`accept`) oder Notiz bzw. Vorschlag ohne Änderung abhaken. */
-  protected resolveProofNote(accept: boolean): void {
-    this.editor?.chain().focus().resolveProofNote(accept).run();
+  /** Alle Markierungen (mit und ohne Notiz) – als Liste über dem Text. */
+  protected readonly allAnnotations = computed(() => {
+    this.editorTick();
+    const doc = this.editor?.state.doc;
+    if (!doc) return [];
+    // Bei Cursorbewegungen bleibt das Dokument dasselbe – dann nicht neu suchen
+    if (doc !== this.listedFor) {
+      this.listedFor = doc;
+      this.listed = annotationsIn(doc);
+    }
+    return this.listed;
+  });
+  private listedFor: ProseMirrorNode | null = null;
+  private listed: AnnotationAt[] = [];
+
+  protected readonly listOpen = signal(true);
+  /** Anfang der Markierung, deren Notiz gerade bearbeitet wird. */
+  protected readonly editingNoteAt = signal<number | null>(null);
+
+  /** Vorschlag übernehmen (`accept`) oder die Markierung ohne Änderung abhaken. */
+  protected resolveAnnotation(accept: boolean): void {
+    this.editor?.chain().focus().resolveAnnotation(accept).run();
+  }
+
+  protected editNote(annotation: AnnotationAt): void {
+    // Sofort aus dem Text: das Feld bekommt den Fokus erst nach dem Rendern, bis dahin
+    // Getipptes landete sonst in der Szene
+    this.editor?.commands.blur();
+    this.editingNoteAt.set(annotation.from);
+  }
+
+  /** Enter, „Fertig“ oder Klick daneben. Danach geht es im Text weiter. */
+  protected saveNote(note: string): void {
+    if (this.editingNoteAt() === null) return; // schon gespeichert (Enter, dann blur)
+    this.editingNoteAt.set(null);
+    this.editor?.chain().focus().setAnnotationNote(note).run();
+  }
+
+  protected cancelNote(): void {
+    this.editingNoteAt.set(null);
+    this.editor?.commands.focus();
+  }
+
+  /**
+   * Aus der Liste: Cursor an den Anfang der Stelle – dann zeigt die Leiste die Markierung. Die Stelle
+   * kommt in die Mitte; ProseMirror schöbe sie nur knapp ins Bild, unter Toolbar oder Statusleiste.
+   */
+  protected jumpTo(annotation: AnnotationAt): void {
+    const editor = this.editor;
+    if (!editor) return;
+    editor.chain().focus(annotation.from, { scrollIntoView: false }).run();
+    const { node } = editor.view.domAtPos(annotation.from + 1);
+    const element = node instanceof Element ? node : node.parentElement;
+    element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   // Überarbeitungsmodus ---------------------------------------------------------
