@@ -76,9 +76,15 @@
   }
 
   // Hintergrund, Rahmen und Überfahren wie alle Buttons (styles.scss), nur kompakter
+  // Alle gleich hoch – Text, Symbole und Pfeilzeichen haben sonst unterschiedliche Zeilenhöhen
   button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.75rem;
     min-width: 2rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0 0.5rem;
+    line-height: 1;
     transition: background-color 0.1s;
 
     // Eingeschaltet (fett, Todo-Markierung …): kräftiger grün, mit Rahmen in der Akzentfarbe
