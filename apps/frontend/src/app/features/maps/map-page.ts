@@ -117,7 +117,8 @@ export class MapPage {
   protected readonly backgroundOpacity = signal(1);
   protected readonly uploading = signal(false);
 
-  protected readonly tool = signal<Tool>('pen');
+  /** Startet mit „Verschieben“ – sonst malt man beim Umsehen leicht aus Versehen. */
+  protected readonly tool = signal<Tool>('hand');
   protected readonly color = signal<string>(MAP_COLORS[0].value);
   protected readonly widthIndex = signal(1);
   /** Zeichnet das Werkzeug (Stift, Fläche)? Dann gelten Farbe und Strichstärke. */
@@ -244,6 +245,7 @@ export class MapPage {
     this.error.set(null);
     this.selectedPin.set(null);
     this.placing.set(null);
+    this.tool.set('hand');
     this.undoStack.set([]);
     this.redoStack.set([]);
     try {
