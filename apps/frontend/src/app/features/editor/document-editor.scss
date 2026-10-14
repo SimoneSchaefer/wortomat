@@ -11,8 +11,21 @@
   display: flex;
   flex-direction: column;
   border: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
+  position: relative;
   border-radius: 0.75rem;
   background: var(--bg);
+
+  // Beim Schreiben derselbe Fokusrahmen wie bei den anderen Eingabefeldern (2px Akzent über
+  // dem Rahmen). Als eigene Ebene, sonst verdeckt die klebende Toolbar ihn oben.
+  &:has(.wm-prose:focus)::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    z-index: 2;
+    border: 2px solid var(--accent);
+    border-radius: calc(0.75rem + 1px);
+    pointer-events: none;
+  }
 }
 
 .editor-host {
@@ -62,21 +75,22 @@
     border-radius: 0;
   }
 
+  // Hintergrund, Rahmen und Überfahren wie alle Buttons (styles.scss), nur kompakter
+  // Alle gleich hoch – Text, Symbole und Pfeilzeichen haben sonst unterschiedliche Zeilenhöhen
   button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.75rem;
     min-width: 2rem;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid transparent;
-    background: none;
+    padding: 0 0.5rem;
+    line-height: 1;
     transition: background-color 0.1s;
 
-    // Wie die Zeilen im Seitenbaum: beim Überfahren hinterlegt
-    &:hover:not(:disabled) {
-      background: var(--hover);
-    }
-
+    // Eingeschaltet (fett, Todo-Markierung …): kräftiger grün, mit Rahmen in der Akzentfarbe
     &.on {
-      background: var(--hover);
-      border-color: var(--border);
+      background: color-mix(in srgb, var(--accent) 35%, var(--bg));
+      border-color: var(--accent);
     }
   }
 
