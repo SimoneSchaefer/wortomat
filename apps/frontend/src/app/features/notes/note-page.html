@@ -8,16 +8,18 @@
     <div class="note-head" [class.with-gallery]="config().gallery">
       <div class="note-meta">
         <p class="doc-kind">{{ texts().singular }}</p>
-        <input
+        <!-- Titel und Kurzbeschreibung sind mehrzeilig: sie wachsen mit dem Text
+             (field-sizing), damit lange Namen nicht abgeschnitten werden -->
+        <textarea
           #titleInput
           class="doc-title doc-input"
+          rows="1"
           [attr.aria-label]="t().common.title"
           [value]="titleDraft()"
-          (input)="onTitleInput($any($event.target).value)"
+          (input)="onTitleInput($any($event.target))"
           (blur)="onTitleBlur()"
           (keydown.enter)="$event.preventDefault(); summaryInput.focus()"
-        />
-        <!-- Mehrzeilig: wächst mit dem Text (field-sizing), damit nichts abgeschnitten wird -->
+        ></textarea>
         <textarea
           #summaryInput
           class="doc-summary doc-input"
