@@ -70,6 +70,7 @@ export class ExportPage {
   protected readonly format = signal<ExportFormat>('docx');
   protected readonly template = signal<ExportTemplate>('normseite');
   protected readonly includeSceneTitles = signal(false);
+  protected readonly includeParts = signal(true);
   protected readonly layout = signal<BookLayout | null>(null);
   private defaults: ExportSettings | null = null;
   /** Erst nach dem Laden speichern – sonst überschrieben die Vorgaben das Gemerkte. */
@@ -149,6 +150,7 @@ export class ExportPage {
           format: this.format(),
           template: this.template(),
           includeSceneTitles: this.includeSceneTitles(),
+          includeParts: this.includeParts(),
           layout,
         }
       : null;
@@ -180,6 +182,7 @@ export class ExportPage {
       );
       this.template.set(settings.template);
       this.includeSceneTitles.set(settings.includeSceneTitles);
+      this.includeParts.set(settings.includeParts);
       this.layout.set(settings.layout);
       this.customSize.set(this.pageSizeIndex() < 0);
       // Gespeichert ist, was im Buch steht – eine Umstellung PDF → Word erst bei Änderungen merken
@@ -278,6 +281,7 @@ export class ExportPage {
       format: this.format(),
       template: this.template(),
       includeSceneTitles: this.includeSceneTitles(),
+      includeParts: this.includeParts(),
       layout: this.layout() ?? undefined,
     };
     this.flushSave();

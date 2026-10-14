@@ -667,6 +667,8 @@ export const en: Texts = {
     removeCover: 'Remove cover image',
     sceneTitles: 'Print scene titles as subheadings',
     sceneTitlesHint: '(otherwise scenes are only separated by a break)',
+    parts: 'Print parts',
+    partsHint: '(otherwise chapters follow each other directly)',
     exported: 'Exported:',
     open: 'Open',
     showInFolder: 'Show in folder',

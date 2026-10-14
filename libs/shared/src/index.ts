@@ -676,6 +676,7 @@ export interface ExportSettings {
   format: ExportFormat;
   template: ExportTemplate;
   includeSceneTitles: boolean;
+  includeParts: boolean;
   layout: BookLayout;
 }
 
@@ -712,6 +713,11 @@ export interface ExportRequest {
   template: ExportTemplate;
   /** Szenentitel als Zwischenüberschriften drucken (sonst nur Szenentrenner). */
   includeSceneTitles: boolean;
+  /**
+   * Teile als eigene Seiten bzw. Überschriften drucken. Fehlt der Wert, werden sie gedruckt;
+   * ohne sie folgen die Kapitel direkt aufeinander.
+   */
+  includeParts?: boolean;
   /** Satzspiegel für „Roman“; fehlt er, gelten die Vorgaben. */
   layout?: BookLayout;
   /**

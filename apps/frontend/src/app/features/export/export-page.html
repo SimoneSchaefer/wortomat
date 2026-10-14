@@ -16,6 +16,15 @@
         {{ t().export.sceneTitles }}
         <span class="muted">{{ t().export.sceneTitlesHint }}</span>
       </label>
+      <label class="check">
+        <input
+          type="checkbox"
+          [checked]="includeParts()"
+          (change)="includeParts.set($any($event.target).checked)"
+        />
+        {{ t().export.parts }}
+        <span class="muted">{{ t().export.partsHint }}</span>
+      </label>
 
       <fieldset>
         <legend>{{ t().export.format }}</legend>

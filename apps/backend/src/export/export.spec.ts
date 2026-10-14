@@ -276,6 +276,30 @@ describe('Export', () => {
     assert.match(withTitles, /<h3 class="scene-title">Bahnhof \(Arbeitstitel\)<\/h3>/);
   });
 
+  it('lässt Teile auf Wunsch weg – die Kapitel bleiben', async () => {
+    const exportWithoutParts = async (format: string) => {
+      const result = await api<ExportResult>('POST', '/api/export', {
+        format,
+        template: 'normseite',
+        includeSceneTitles: false,
+        includeParts: false,
+        filePath: path.join(tmpDir, `out-${format}-ohne-teile`),
+      });
+      return readFile(result.filePath);
+    };
+
+    const html = (await exportWithoutParts('html')).toString('utf8');
+    assert.doesNotMatch(html, /Erster Teil/);
+    assert.match(html, /Ankunft/);
+    assert.match(html, /Abschied/);
+
+    const epub = await JSZip.loadAsync(await exportWithoutParts('epub'));
+    const nav = await epub.file('OEBPS/nav.xhtml')!.async('string');
+    assert.doesNotMatch(nav, /Erster Teil/);
+    assert.match(nav, /Ankunft/);
+    assert.ok(!Object.keys(epub.files).some((name) => name.includes('teil-')));
+  });
+
   it('exportiert Word-Dateien mit den Vorlagen Normseite und Roman', async () => {
     const read = async (template: string) => {
       const { data, warnings } = await exportTo('docx', template);

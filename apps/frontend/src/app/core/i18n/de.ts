@@ -702,6 +702,8 @@ export const de = {
     removeCover: 'Titelbild entfernen',
     sceneTitles: 'Szenentitel als Zwischenüberschriften drucken',
     sceneTitlesHint: '(sonst stehen zwischen Szenen nur Trenner)',
+    parts: 'Teile drucken',
+    partsHint: '(sonst folgen die Kapitel direkt aufeinander)',
     exported: 'Exportiert:',
     open: 'Öffnen',
     showInFolder: 'Im Ordner zeigen',

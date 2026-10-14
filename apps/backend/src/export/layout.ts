@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS: ExportSettings = {
   format: 'docx',
   template: 'normseite',
   includeSceneTitles: false,
+  includeParts: true,
   layout: DEFAULT_LAYOUT,
 };
 
@@ -248,6 +249,8 @@ export function sanitizeSettings(input: unknown): ExportSettings {
       ? (value.template as ExportTemplate)
       : DEFAULT_SETTINGS.template,
     includeSceneTitles: value.includeSceneTitles === true,
+    // Ältere Einstellungen kennen den Schalter nicht – dort wurden Teile immer gedruckt
+    includeParts: value.includeParts !== false,
     layout: sanitizeLayout(value.layout),
   };
 }
