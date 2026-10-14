@@ -164,6 +164,10 @@ svg {
     cursor: none;
   }
 
+  &.zooming {
+    cursor: zoom-in;
+  }
+
   &.placing {
     cursor: copy;
   }
@@ -187,6 +191,16 @@ svg {
 
   path.area {
     fill-opacity: 0.3;
+  }
+
+  // Lupe: der aufgezogene Bereich
+  .zoom-area {
+    fill: color-mix(in srgb, var(--accent) 15%, transparent);
+    stroke: var(--accent-strong);
+    stroke-width: 1.5px;
+    stroke-dasharray: 5 4;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
   }
 
   .eraser-ring {
@@ -238,7 +252,7 @@ svg {
   }
 }
 
-.canvas:is(.erasing, .pannable, .panning) .pin {
+.canvas:is(.erasing, .pannable, .panning, .zooming) .pin {
   pointer-events: none;
 }
 

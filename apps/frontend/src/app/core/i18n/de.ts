@@ -266,6 +266,7 @@ export const de = {
     area: 'Fläche',
     eraser: 'Radierer',
     hand: 'Verschieben',
+    zoom: 'Lupe',
     zoomLabel: 'Zoom',
     zoomIn: 'Vergrößern',
     zoomOut: 'Verkleinern',
