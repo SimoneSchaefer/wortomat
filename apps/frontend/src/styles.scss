@@ -62,6 +62,10 @@
   // Obere Leiste: eigene Farbe und Schatten – ein kräftiger Grünton
   --topbar-bg: color-mix(in srgb, var(--accent) 40%, var(--bg));
   --topbar-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+
+  // Scrollleisten im Grün der Oberfläche; die Leiste selbst bleibt durchsichtig
+  --scrollbar-thumb: color-mix(in srgb, var(--accent) 55%, var(--surface));
+  --scrollbar-track: transparent;
 }
 
 // Dunkle Farben – je nach Einstellung immer, nie oder wie das System (data-theme an <html>)
@@ -139,6 +143,11 @@ html,
 body {
   margin: 0;
   height: 100%;
+}
+
+// scrollbar-color wird vererbt und gilt damit für alle scrollbaren Bereiche
+:root {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 // Export-Seite: Platz für die Scrollleiste immer freihalten – sonst springt das Layout, wenn die
