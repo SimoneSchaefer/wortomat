@@ -48,10 +48,10 @@ import { StatusMessages } from '../../core/status-messages';
       color: var(--text-muted);
     }
 
+    // Eine Szene je Zeile – nebeneinander passten selten zwei, das wirkte zufällig
     ol {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem 0.9rem;
+      display: grid;
+      gap: 0.25rem;
       margin: 0;
       padding: 0;
       list-style: none;
