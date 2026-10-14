@@ -936,7 +936,7 @@ describe('REST-API', () => {
     assert.equal(await invalid('x'.repeat(41)), 400);
   });
 
-  it('ordnet Szenen Handlungssträngen zu – neue Szenen erben den Strang davor', async () => {
+  it('ordnet Szenen Handlungssträngen zu – neue Szenen starten ohne Strang', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'straenge', 'Buch'),
       title: 'Buch',
@@ -961,17 +961,21 @@ describe('REST-API', () => {
 
     const k1 = await node(null, 'chapter', 'K1');
     const s1 = await node(k1.id, 'scene', 'S1');
-    assert.deepEqual(await strandsOf(s1.id), []); // erste Szene: nichts zu erben
+    assert.deepEqual(await strandsOf(s1.id), []);
     await api('POST', `/api/scenes/${s1.id}/strands`, { strandId: lena.id });
-    // Zusammenlaufen: eine Szene in zwei Strängen, sortiert nach Strang-Reihenfolge
+    // Neue Szenen übernehmen nichts von der Szene davor
     const s2 = await node(k1.id, 'scene', 'S2');
+    assert.deepEqual(await strandsOf(s2.id), []);
+    // Zusammenlaufen: eine Szene in zwei Strängen, sortiert nach Strang-Reihenfolge
     await api('POST', `/api/scenes/${s2.id}/strands`, { strandId: tom.id });
+    await api('POST', `/api/scenes/${s2.id}/strands`, { strandId: lena.id });
     assert.deepEqual(await strandsOf(s2.id), ['Lena', 'Tom']);
 
-    // Auch über die Kapitelgrenze: die neue Szene erbt von der letzten Szene davor
     const k2 = await node(null, 'chapter', 'K2');
     const s3 = await node(k2.id, 'scene', 'S3');
-    assert.deepEqual(await strandsOf(s3.id), ['Lena', 'Tom']);
+    assert.deepEqual(await strandsOf(s3.id), []);
+    await api('POST', `/api/scenes/${s3.id}/strands`, { strandId: lena.id });
+    await api('POST', `/api/scenes/${s3.id}/strands`, { strandId: tom.id });
     await api('DELETE', `/api/scenes/${s3.id}/strands/${lena.id}`);
     assert.deepEqual(await strandsOf(s3.id), ['Tom']);
 

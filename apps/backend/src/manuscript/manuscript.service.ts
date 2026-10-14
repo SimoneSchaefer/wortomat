@@ -89,7 +89,6 @@ export class ManuscriptService {
            VALUES (?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(id, parentId, kind, title, next, now, now);
-      if (kind === 'scene') this.inheritStrands(id);
       this.projects.touch();
     });
     return this.get(id);
@@ -361,23 +360,6 @@ export class ManuscriptService {
     return result;
   }
 
-  /**
-   * Eine neue Szene gehört zu denselben Strängen wie die Szene davor (in Buchreihenfolge) –
-   * meist erzählt man einen Strang über mehrere Szenen weiter.
-   */
-  private inheritStrands(sceneId: string): void {
-    const scenes = scenesInOrder(this.list());
-    const index = scenes.findIndex((scene) => scene.id === sceneId);
-    const previous = index > 0 ? scenes[index - 1] : undefined;
-    if (!previous) return;
-    this.db
-      .prepare(
-        `INSERT INTO scene_strands (scene_id, strand_id)
-         SELECT ?, strand_id FROM scene_strands WHERE scene_id = ?`,
-      )
-      .run(sceneId, previous.id);
-  }
-
   requireScene(id: string): ManuscriptNode {
     const node = this.get(id);
     if (node.kind !== 'scene') {
@@ -414,24 +396,6 @@ function toNode(row: NodeRow): ManuscriptNode {
     turningPoint: row.kind === 'scene' ? row.turning_point === 1 : null,
     storyOrder: row.kind === 'scene' ? row.story_order : null,
   };
-}
-
-/** Alle Szenen in der Reihenfolge, in der sie im Buch stehen. */
-function scenesInOrder(nodes: readonly ManuscriptNode[]): ManuscriptNode[] {
-  const children = new Map<string | null, ManuscriptNode[]>();
-  for (const node of nodes) {
-    children.set(node.parentId, [...(children.get(node.parentId) ?? []), node]);
-  }
-  const result: ManuscriptNode[] = [];
-  const visit = (parentId: string | null) => {
-    const siblings = (children.get(parentId) ?? []).sort((a, b) => a.sortOrder - b.sortOrder);
-    for (const node of siblings) {
-      if (node.kind === 'scene') result.push(node);
-      else visit(node.id);
-    }
-  };
-  visit(null);
-  return result;
 }
 
 function annotationCounts(row: {
