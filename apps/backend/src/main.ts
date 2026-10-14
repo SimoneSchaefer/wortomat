@@ -20,6 +20,7 @@ const server = await startServer({
   defaultProjectDir: existsSync(documentsDir) ? documentsDir : os.homedir(),
   // Eigener Ordner für die Entwicklung, damit die Projektliste der installierten App unberührt bleibt.
   dataDir: process.env['WORTOMAT_DATA_DIR'] ?? path.join(os.homedir(), '.wortomat-dev'),
+  downloadsDir: process.env['WORTOMAT_DOWNLOADS_DIR'],
   port: Number(process.env['PORT'] ?? 3000),
   staticDir: process.env['WORTOMAT_STATIC_DIR'],
 });

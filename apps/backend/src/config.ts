@@ -7,6 +7,10 @@ export interface ServerOptions {
   defaultProjectDir: string;
   /** Verzeichnis für App-Daten, die zu keinem Buch gehören (z. B. die Projektliste). */
   dataDir: string;
+  /**
+   * Wo Notizdateien vom Handy ankommen (Mail-Anhänge, GSConnect …). Ohne Angabe ~/Downloads.
+   */
+  downloadsDir?: string;
   /** Standard: 127.0.0.1. Niemals 0.0.0.0, sonst ist die API im Netzwerk erreichbar. */
   host?: string;
   /** 0 = zufälliger freier Port (Produktion in Electron). */

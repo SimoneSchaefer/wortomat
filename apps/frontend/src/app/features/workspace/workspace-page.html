@@ -42,12 +42,28 @@
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
+          <!-- Neue Notizen vom Handy stecken im Menü – hier schon ein Hinweis -->
+          @if (proofInbox.inbox()?.newNotes) {
+            <span class="inbox-dot" aria-hidden="true"></span>
+          }
         </button>
       }
       @if (!compactTopbar() || actionsOpen()) {
         <div class="actions" id="top-actions-menu" (click)="closeActions()">
-          <button type="button" class="link" routerLink="/proofreading">
+          <button
+            type="button"
+            class="link"
+            routerLink="/proofreading"
+            [title]="
+              proofInbox.inbox()?.newNotes
+                ? t().workspace.newProofNotes(proofInbox.inbox()!.newNotes)
+                : ''
+            "
+          >
             {{ t().workspace.proofreading }}
+            @if (proofInbox.inbox()?.newNotes; as count) {
+              <span class="inbox-badge">{{ count }}</span>
+            }
           </button>
           <button type="button" class="link" routerLink="/export">
             {{ t().workspace.export }}

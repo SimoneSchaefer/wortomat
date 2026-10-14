@@ -563,6 +563,27 @@ export interface ProofExportRequest {
   filePath?: string;
 }
 
+/** Notizdateien zum geöffneten Buch im Download-Ordner (`GET /api/proofreading/inbox`). */
+export interface ProofInbox {
+  /** Der Ordner, in dem gesucht wird. */
+  dir: string;
+  /** Neueste zuerst. */
+  files: ProofInboxFile[];
+  /** Notizen aus allen Dateien, die noch nicht im Buch sind (jede nur einmal gezählt). */
+  newNotes: number;
+}
+
+export interface ProofInboxFile {
+  name: string;
+  modifiedAt: string;
+  /** Notizen zu diesem Buch in der Datei. */
+  notes: number;
+  /** Davon noch nicht übernommen. */
+  newNotes: number;
+  /** Alles übernommen und nichts zu anderen Büchern darin – darf gelöscht werden. */
+  done: boolean;
+}
+
 /** Ergebnis von `POST /api/proofreading/import`. */
 export interface ProofImportResult {
   /** So viele Notizen stehen jetzt als Fixme-Markierung im Text. */

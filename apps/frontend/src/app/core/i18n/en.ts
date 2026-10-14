@@ -80,6 +80,8 @@ export const en: Texts = {
   workspace: {
     export: 'Export',
     proofreading: 'Proofread on the go',
+    newProofNotes: (count: number) =>
+      count === 1 ? '1 new note from your phone' : `${count} new notes from your phone`,
     closeProject: 'Close project',
     moreActions: 'Menu',
     showList: 'Open the list to choose from',
@@ -333,7 +335,7 @@ export const en: Texts = {
       'Proofread your manuscript on your Android phone – offline, with notes and suggested changes. Back at your computer, bring the notes into the book here.',
     exportTitle: 'Create a proofreading copy for your phone',
     exportHint:
-      'A single HTML file with your manuscript. Send it to your Android phone (mail, messenger, USB), save it and open it in Chrome – it works offline. Always open it the same way afterwards, then it remembers your notes.',
+      'A single HTML file with your manuscript. Send it to your Android phone (GSConnect, mail, messenger, USB), save it and open it in Chrome – it works offline. Always open it the same way afterwards, then it remembers your notes.',
     create: 'Create proofreading copy …',
     creating: 'Creating …',
     defaultName: 'Proofreading copy',
@@ -344,8 +346,18 @@ export const en: Texts = {
       'On the phone: select text → “Note” or “Suggestion”. When done, “Send notes” and bring the file in below.',
     importTitle: 'Bring in notes from your phone',
     importHint:
-      'Choose the notes file (“… notizen.txt”) you sent yourself from your phone. Each note becomes a Fixme mark at its place in the text; accept or reject suggestions there with one click.',
-    choose: 'Choose notes file …',
+      'Each note becomes a Fixme mark at its place in the text; accept or reject suggestions there with one click. If the notes file is not in your downloads folder, choose it yourself.',
+    choose: 'Choose another notes file …',
+    importInbox: 'Bring in',
+    inboxFrom: (name: string, when: string) => `from “${name}”, ${when}`,
+    inboxEmpty: (dir: string) => `No new notes in ${dir}.`,
+    clean: (count: number) =>
+      count === 1 ? 'Delete finished notes file …' : `Delete ${count} finished notes files …`,
+    cleanTitle: 'Delete notes files?',
+    cleanMessage: (count: number, dir: string) =>
+      `${count === 1 ? 'The notes file' : `${count} notes files`} in ${dir} will be deleted. All their notes are already in the book.`,
+    cleaned: (count: number) =>
+      count === 1 ? '1 notes file deleted.' : `${count} notes files deleted.`,
     importing: 'Bringing in notes …',
     applied: (count: number) => (count === 1 ? '1 note added.' : `${count} notes added.`),
     appliedHint: 'You will find them as Fixme marks – in the tree, the scene filter and the text.',

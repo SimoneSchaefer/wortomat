@@ -1,14 +1,19 @@
 import { randomUUID } from 'node:crypto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { existsSync, readdirSync, readFileSync, statSync, unlinkSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import type {
   EditorDoc,
   ManuscriptNode,
   ProofChapter,
   ProofImportResult,
+  ProofInbox,
   ProofNote,
   ProofNotesFile,
   ProofPackage,
 } from '@wortomat/shared';
+import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 import { nowIso, transaction } from '../database/sqlite.js';
 import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { ProjectService } from '../project/project.service.js';
@@ -21,6 +26,21 @@ const MAX_NOTE_LENGTH = 5000;
 const MAX_QUOTE_LENGTH = 2000;
 const MAX_CONTEXT_LENGTH = 200;
 
+/** So heißen Notizdateien vom Handy – auch mit „(1)“ o. Ä., wenn es sie schon gab. */
+const NOTES_FILE_NAME = /notizen.*\.txt$/i;
+/** Größere Dateien sind keine Notizdateien; nicht erst einlesen. */
+const MAX_NOTES_FILE_BYTES = 5 * 1024 * 1024;
+
+/** Eine Notizdatei im Download-Ordner mit den Notizen, die zu diesem Buch gehören. */
+interface InboxFile {
+  name: string;
+  path: string;
+  modifiedAt: Date;
+  notes: ProofNote[];
+  /** Enthält die Datei auch Notizen zu anderen Büchern? Dann nie löschen. */
+  foreign: boolean;
+}
+
 /**
  * Korrekturlesen unterwegs: das Manuskript als reiner Text zum Mitnehmen, und die Notizen von
  * dort zurück ins Buch – als Fixme-Markierungen mit Notiz bzw. Ersetzungsvorschlag.
@@ -30,6 +50,7 @@ export class ProofreadingService {
   constructor(
     private readonly projects: ProjectService,
     private readonly manuscript: ManuscriptService,
+    @Inject(SERVER_OPTIONS) private readonly options: ServerOptions,
   ) {}
 
   private get db() {
@@ -94,11 +115,7 @@ export class ProofreadingService {
         .map((node) => [node.id, node.title]),
     );
 
-    const imported = new Set(
-      (
-        this.db.prepare('SELECT note_id FROM proof_imported').all() as Array<{ note_id: string }>
-      ).map((row) => row.note_id),
-    );
+    const imported = this.importedIds();
     const result: ProofImportResult = { applied: 0, skipped: 0, unmatched: [] };
     const changed = new Map<string, EditorDoc>();
     const done: string[] = [];
@@ -138,6 +155,110 @@ export class ProofreadingService {
       if (changed.size) this.projects.touch();
     });
     return result;
+  }
+
+  // -------------------------------------------------------------------------
+  // Postkasten: Notizdateien im Download-Ordner (Mail-Anhang, GSConnect …)
+  // -------------------------------------------------------------------------
+
+  /** Notizdateien zu diesem Buch im Download-Ordner, und wie viele Notizen daraus neu sind. */
+  inbox(): ProofInbox {
+    const files = this.inboxFiles();
+    const imported = this.importedIds();
+    const fresh = new Set<string>();
+    const result = files.map((file) => {
+      const newIds = file.notes.filter((note) => !imported.has(note.id)).map((note) => note.id);
+      newIds.forEach((id) => fresh.add(id));
+      return {
+        name: file.name,
+        modifiedAt: file.modifiedAt.toISOString(),
+        notes: file.notes.length,
+        newNotes: newIds.length,
+        done: !file.foreign && newIds.length === 0,
+      };
+    });
+    return { dir: this.downloadsDir, files: result, newNotes: fresh.size };
+  }
+
+  /**
+   * Übernimmt die neuen Notizen aus allen Notizdateien. Kommt eine Notiz in mehreren Dateien vor
+   * (das Handy sendet immer alle), gilt die Fassung aus der neuesten Datei.
+   */
+  importInbox(): ProofImportResult {
+    const byId = new Map<string, ProofNote>();
+    for (const file of [...this.inboxFiles()].reverse()) {
+      for (const note of file.notes) byId.set(note.id, note);
+    }
+    return this.import({
+      format: 'wortomat-proof-notes',
+      version: 1,
+      packageId: '',
+      title: '',
+      exportedAt: nowIso(),
+      notes: [...byId.values()],
+    });
+  }
+
+  /**
+   * Löscht Notizdateien, deren Notizen alle schon im Buch sind. Dateien mit offenen oder
+   * fremden Notizen (anderes Buch) bleiben liegen.
+   * @returns die Namen der gelöschten Dateien
+   */
+  cleanInbox(): string[] {
+    const imported = this.importedIds();
+    const deleted: string[] = [];
+    for (const file of this.inboxFiles()) {
+      if (file.foreign || !file.notes.every((note) => imported.has(note.id))) continue;
+      unlinkSync(file.path);
+      deleted.push(file.name);
+    }
+    return deleted;
+  }
+
+  private get downloadsDir(): string {
+    return this.options.downloadsDir ?? path.join(os.homedir(), 'Downloads');
+  }
+
+  /** Neueste zuerst; unlesbare oder fremde Dateien werden still übergangen. */
+  private inboxFiles(): InboxFile[] {
+    const dir = this.downloadsDir;
+    if (!existsSync(dir)) return [];
+    const scenes = new Set(
+      this.manuscript
+        .list()
+        .filter((node) => node.kind === 'scene')
+        .map((node) => node.id),
+    );
+    const files: InboxFile[] = [];
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (!entry.isFile() || !NOTES_FILE_NAME.test(entry.name)) continue;
+      const filePath = path.join(dir, entry.name);
+      try {
+        const stat = statSync(filePath);
+        if (stat.size > MAX_NOTES_FILE_BYTES) continue;
+        const all = requireNotes(JSON.parse(readFileSync(filePath, 'utf8')));
+        const notes = all.filter((note) => scenes.has(note.sceneId));
+        if (!notes.length) continue;
+        files.push({
+          name: entry.name,
+          path: filePath,
+          modifiedAt: stat.mtime,
+          notes,
+          foreign: notes.length < all.length,
+        });
+      } catch {
+        // keine (gültige) Notizdatei
+      }
+    }
+    return files.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
+  }
+
+  private importedIds(): Set<string> {
+    return new Set(
+      (
+        this.db.prepare('SELECT note_id FROM proof_imported').all() as Array<{ note_id: string }>
+      ).map((row) => row.note_id),
+    );
   }
 
   /** Die Korrekturfassung als eine HTML-Datei fürs Handy (Lese-App und Text darin). */

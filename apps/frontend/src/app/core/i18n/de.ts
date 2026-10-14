@@ -110,6 +110,8 @@ export const de = {
   workspace: {
     export: 'Exportieren',
     proofreading: 'Korrektur unterwegs',
+    newProofNotes: (count: number) =>
+      count === 1 ? '1 neue Notiz vom Handy' : `${count} neue Notizen vom Handy`,
     closeProject: 'Projekt schließen',
     moreActions: 'Menü',
     showList: 'Liste zum Auswählen öffnen',
@@ -363,7 +365,7 @@ export const de = {
       'Lies dein Manuskript auf dem Android-Handy Korrektur – offline, mit Notizen und Ersetzungsvorschlägen. Zurück am Rechner holst du die Notizen hier ins Buch.',
     exportTitle: 'Korrekturfassung fürs Handy erstellen',
     exportHint:
-      'Eine einzige HTML-Datei mit deinem Manuskript. Schick sie dir aufs Android-Handy (Mail, Messenger, USB), speichere sie und öffne sie in Chrome – sie läuft offline. Öffne sie danach immer auf demselben Weg, dann merkt sie sich deine Notizen.',
+      'Eine einzige HTML-Datei mit deinem Manuskript. Schick sie dir aufs Android-Handy (GSConnect, Mail, Messenger, USB), speichere sie und öffne sie in Chrome – sie läuft offline. Öffne sie danach immer auf demselben Weg, dann merkt sie sich deine Notizen.',
     create: 'Korrekturfassung erstellen …',
     creating: 'Erstelle …',
     defaultName: 'Korrekturfassung',
@@ -374,8 +376,18 @@ export const de = {
       'Auf dem Handy: Text markieren → „Notiz“ oder „Vorschlag“. Zum Schluss „Notizen senden“ und die Datei hier unten übernehmen.',
     importTitle: 'Notizen vom Handy übernehmen',
     importHint:
-      'Wähle die Notizdatei („… notizen.txt“), die du dir vom Handy geschickt hast. Jede Notiz wird zu einer Fixme-Markierung an ihrer Textstelle; Vorschläge übernimmst oder verwirfst du dort mit einem Klick.',
-    choose: 'Notizdatei auswählen …',
+      'Jede Notiz wird zu einer Fixme-Markierung an ihrer Textstelle; Vorschläge übernimmst oder verwirfst du dort mit einem Klick. Liegt die Notizdatei nicht im Download-Ordner, wähle sie selbst aus.',
+    choose: 'Andere Notizdatei auswählen …',
+    importInbox: 'Übernehmen',
+    inboxFrom: (name: string, when: string) => `aus „${name}“, ${when}`,
+    inboxEmpty: (dir: string) => `Keine neuen Notizen in ${dir}.`,
+    clean: (count: number) =>
+      count === 1 ? 'Erledigte Notizdatei löschen …' : `${count} erledigte Notizdateien löschen …`,
+    cleanTitle: 'Notizdateien löschen?',
+    cleanMessage: (count: number, dir: string) =>
+      `${count === 1 ? 'Die Notizdatei' : `${count} Notizdateien`} in ${dir} ${count === 1 ? 'wird' : 'werden'} gelöscht. Alle Notizen daraus stehen schon im Buch.`,
+    cleaned: (count: number) =>
+      count === 1 ? '1 Notizdatei gelöscht.' : `${count} Notizdateien gelöscht.`,
     importing: 'Übernehme Notizen …',
     applied: (count: number) =>
       count === 1 ? '1 Notiz übernommen.' : `${count} Notizen übernommen.`,

@@ -30,9 +30,27 @@
 
   <section class="card">
     <h2>{{ t().proofreading.importTitle }}</h2>
+    <!-- Postkasten: Notizdateien, die im Download-Ordner liegen (Mail-Anhang, GSConnect …) -->
+    @if (inbox.inbox(); as box) {
+      @if (box.newNotes && box.files[0]; as newest) {
+        <div class="inbox" role="status">
+          <p>
+            <strong>{{ t().workspace.newProofNotes(box.newNotes) }}</strong>
+            <span class="muted">
+              {{ t().proofreading.inboxFrom(newest.name, relativeTime(newest.modifiedAt)) }}
+            </span>
+          </p>
+          <button type="button" class="primary" [disabled]="importing()" (click)="importInbox()">
+            {{ importing() ? t().proofreading.importing : t().proofreading.importInbox }}
+          </button>
+        </div>
+      } @else {
+        <p class="muted">{{ t().proofreading.inboxEmpty(box.dir) }}</p>
+      }
+    }
     <p class="muted">{{ t().proofreading.importHint }}</p>
     <button type="button" [disabled]="importing()" (click)="picker.click()">
-      {{ importing() ? t().proofreading.importing : t().proofreading.choose }}
+      {{ t().proofreading.choose }}
     </button>
     <input
       #picker
@@ -83,6 +101,15 @@
           </ul>
         }
       </div>
+    }
+
+    @if (doneFiles(); as count) {
+      <button type="button" class="link" (click)="clean()">
+        {{ t().proofreading.clean(count) }}
+      </button>
+    }
+    @if (cleaned(); as cleaned) {
+      <p class="muted" role="status">{{ t().proofreading.cleaned(cleaned.length) }}</p>
     }
   </section>
 </main>

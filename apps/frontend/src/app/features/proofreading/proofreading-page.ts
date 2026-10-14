@@ -1,11 +1,14 @@
 import { Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import type { ProofImportResult, ProofNotesFile } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
+import { ConfirmDialog } from '../../core/confirm-dialog';
 import { PendingSaves } from '../../core/pending-saves';
+import { ProofInboxStore } from '../../core/proof-inbox';
+import { relativeTime } from '../../core/relative-time';
 import { ProjectStore } from '../../core/project-store';
 import { StatusMessages } from '../../core/status-messages';
 import { WortomatApi } from '../../core/wortomat-api';
@@ -22,7 +25,10 @@ import { WortomatApi } from '../../core/wortomat-api';
   styleUrl: './proofreading-page.scss',
 })
 export class ProofreadingPage {
-  protected readonly t = inject(I18n).t;
+  private readonly i18n = inject(I18n);
+  protected readonly t = this.i18n.t;
+  protected readonly inbox = inject(ProofInboxStore);
+  private readonly confirm = inject(ConfirmDialog);
   private readonly api = inject(WortomatApi);
   private readonly store = inject(ProjectStore);
   private readonly router = inject(Router);
@@ -37,6 +43,43 @@ export class ProofreadingPage {
   protected readonly created = signal<{ filePath: string | null; fileName: string } | null>(null);
   protected readonly importing = signal(false);
   protected readonly result = signal<ProofImportResult | null>(null);
+  /** Namen der zuletzt gelöschten Notizdateien. */
+  protected readonly cleaned = signal<string[] | null>(null);
+  /** Notizdateien, deren Notizen alle im Buch sind – können weg. */
+  protected readonly doneFiles = computed(
+    () => this.inbox.inbox()?.files.filter((file) => file.done).length ?? 0,
+  );
+
+  constructor() {
+    void this.inbox.refresh();
+  }
+
+  protected relativeTime(iso: string): string {
+    return relativeTime(iso, this.i18n.language());
+  }
+
+  /** Alle neuen Notizen aus dem Download-Ordner übernehmen. */
+  protected async importInbox(): Promise<void> {
+    await this.runImport(() => this.api.importProofInbox());
+  }
+
+  /** Erledigte Notizdateien löschen – nach Rückfrage, sie liegen im Download-Ordner. */
+  protected async clean(): Promise<void> {
+    const t = this.t().proofreading;
+    const confirmed = await this.confirm.ask({
+      title: t.cleanTitle,
+      message: t.cleanMessage(this.doneFiles(), this.inbox.inbox()?.dir ?? ''),
+      confirmLabel: this.t().confirm.delete,
+    });
+    if (!confirmed) return;
+    this.error.set(null);
+    try {
+      this.cleaned.set((await this.api.cleanProofInbox()).deleted);
+      await this.inbox.refresh();
+    } catch (error) {
+      this.error.set(errorMessage(error, this.t()));
+    }
+  }
 
   protected back(): void {
     if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
@@ -93,10 +136,18 @@ export class ProofreadingPage {
       this.error.set(this.t().proofreading.unreadable);
       return;
     }
+    await this.runImport(() => this.api.importProofNotes(notes));
+  }
+
+  private async runImport(run: () => Promise<ProofImportResult>): Promise<void> {
+    this.error.set(null);
+    this.result.set(null);
+    this.cleaned.set(null);
     this.importing.set(true);
     try {
-      this.result.set(await this.api.importProofNotes(notes));
+      this.result.set(await run());
       await this.store.reloadNodes(); // neue Fixme-Zahlen im Baum
+      await this.inbox.refresh();
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
     } finally {

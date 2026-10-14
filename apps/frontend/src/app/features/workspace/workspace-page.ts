@@ -17,6 +17,7 @@ import { Appearance } from '../../core/appearance';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
+import { ProofInboxStore } from '../../core/proof-inbox';
 import { ProjectStore } from '../../core/project-store';
 import { NOTE_KIND_LIST } from '../notes/note-kinds';
 import { BookCover } from '../cover/book-cover';
@@ -82,6 +83,8 @@ const MENU: readonly MenuItem[] = [
     '(window:resize)': 'onWindowResize()',
     '(document:pointerdown)': 'onDocumentPointerDown($event)',
     '(keydown.escape)': 'onEscape($event)',
+    // Zurück vom Handy? Dann nachsehen, ob neue Notizen in „Downloads“ liegen.
+    '(window:focus)': 'proofInbox.refresh()',
   },
 })
 export class WorkspacePage {
@@ -93,6 +96,7 @@ export class WorkspacePage {
   private readonly maps = inject(MapsStore);
 
   protected readonly settings = inject(AppSettingsStore);
+  protected readonly proofInbox = inject(ProofInboxStore);
 
   protected readonly menu = MENU;
   protected readonly tree = viewChild(ManuscriptTree);
@@ -172,6 +176,7 @@ export class WorkspacePage {
     });
     this.notes.load().catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
     this.maps.load().catch((error: unknown) => this.error.set(errorMessage(error, this.t())));
+    void this.proofInbox.refresh();
   }
 
   protected labelOf(section: Section): string {

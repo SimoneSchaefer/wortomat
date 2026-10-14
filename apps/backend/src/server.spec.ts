@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, utimes, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -15,6 +15,7 @@ import type {
   NoteSummary,
   PlaceMap,
   ProofImportResult,
+  ProofInbox,
   ProofPackage,
   ProjectInfo,
   ProjectListEntry,
@@ -62,6 +63,7 @@ describe('REST-API', () => {
       version: 'test',
       defaultProjectDir: tmpDir,
       dataDir: path.join(tmpDir, 'appdata'),
+      downloadsDir: path.join(tmpDir, 'downloads'),
       token: TOKEN,
       logger: false,
     });
@@ -1329,6 +1331,114 @@ describe('REST-API', () => {
     );
   });
 
+  it('findet Notizdateien vom Handy im Download-Ordner und räumt erledigte auf', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'postkasten', 'Buch'),
+      title: 'Postkasten',
+    });
+    const kapitel = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const szene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: kapitel.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    await api('PUT', `/api/scenes/${szene.id}/content`, {
+      doc: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Eins zwei drei vier.' }] }],
+      },
+      text: 'Eins zwei drei vier.',
+      wordCount: 4,
+    });
+
+    const downloads = path.join(tmpDir, 'downloads');
+    await mkdir(downloads, { recursive: true });
+    const note = (id: string, quote: string, sceneId = szene.id) => ({
+      id,
+      sceneId,
+      paragraph: 0,
+      quote,
+      prefix: '',
+      suffix: '',
+      note: `Notiz ${id}`,
+      suggestion: null,
+      createdAt: '',
+    });
+    const notesFile = async (name: string, notes: object[], minutesAgo: number) => {
+      const file = path.join(downloads, name);
+      await writeFile(
+        file,
+        JSON.stringify({
+          format: 'wortomat-proof-notes',
+          version: 1,
+          packageId: 'p',
+          title: 't',
+          exportedAt: '',
+          notes,
+        }),
+      );
+      const time = new Date(Date.now() - minutesAgo * 60_000);
+      await utimes(file, time, time);
+    };
+    // Das Handy sendet immer alle Notizen: die zweite Datei enthält die erste noch einmal
+    await notesFile('Postkasten.notizen.txt', [note('a', 'zwei')], 10);
+    await notesFile('Postkasten.notizen(1).txt', [note('a', 'zwei'), note('b', 'vier')], 1);
+    // Andere Bücher, kaputte und fremde Dateien bleiben außen vor
+    await notesFile('Anderes Buch.notizen.txt', [note('x', 'y', 'fremde-szene')], 5);
+    await notesFile(
+      'Gemischt.notizen.txt',
+      [note('c', 'drei'), note('z', 'y', 'fremde-szene')],
+      20,
+    );
+    await writeFile(path.join(downloads, 'kaputt.notizen.txt'), '{ kein json');
+    await writeFile(path.join(downloads, 'Einkauf.txt'), 'Milch');
+
+    const inbox = await api<ProofInbox>('GET', '/api/proofreading/inbox');
+    assert.equal(inbox.dir, downloads);
+    assert.deepEqual(
+      inbox.files.map((f) => [f.name, f.notes, f.newNotes, f.done]),
+      [
+        ['Postkasten.notizen(1).txt', 2, 2, false],
+        ['Postkasten.notizen.txt', 1, 1, false],
+        ['Gemischt.notizen.txt', 1, 1, false],
+      ],
+    );
+    assert.equal(inbox.newNotes, 3); // a, b, c – jede nur einmal
+
+    const result = await api<ProofImportResult>('POST', '/api/proofreading/inbox/import');
+    assert.deepEqual([result.applied, result.skipped, result.unmatched.length], [3, 0, 0]);
+    const content = await api<SceneContent>('GET', `/api/scenes/${szene.id}/content`);
+    assert.equal(content.annotations.fixme, 3);
+    const after = await api<ProofInbox>('GET', '/api/proofreading/inbox');
+    assert.equal(after.newNotes, 0);
+    // die gemischte Datei enthält Notizen zu einem anderen Buch – nie löschen
+    assert.deepEqual(
+      after.files.map((f) => [f.name, f.done]),
+      [
+        ['Postkasten.notizen(1).txt', true],
+        ['Postkasten.notizen.txt', true],
+        ['Gemischt.notizen.txt', false],
+      ],
+    );
+
+    // Aufräumen: nur Dateien, deren Notizen alle zu diesem Buch gehören und übernommen sind
+    const cleaned = await api<{ deleted: string[] }>('POST', '/api/proofreading/inbox/clean');
+    assert.deepEqual(cleaned.deleted.sort(), [
+      'Postkasten.notizen(1).txt',
+      'Postkasten.notizen.txt',
+    ]);
+    assert.deepEqual((await readdir(downloads)).sort(), [
+      'Anderes Buch.notizen.txt',
+      'Einkauf.txt',
+      'Gemischt.notizen.txt',
+      'kaputt.notizen.txt',
+    ]);
+  });
+
   it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -1413,6 +1523,7 @@ describe('REST-API', () => {
       version: 'test',
       defaultProjectDir: tmpDir,
       dataDir: path.join(tmpDir, 'appdata'),
+      downloadsDir: path.join(tmpDir, 'downloads'),
       token: TOKEN,
       logger: false,
     });

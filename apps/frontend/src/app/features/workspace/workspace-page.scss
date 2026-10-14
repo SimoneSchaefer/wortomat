@@ -85,6 +85,7 @@
   }
 
   .menu-toggle {
+    position: relative; // Bezug für den Punkt bei neuen Notizen vom Handy
     display: grid;
     place-items: center;
     padding: 0.3rem;
@@ -326,4 +327,29 @@
     white-space: nowrap;
     font-weight: 600;
   }
+}
+
+// Neue Notizen vom Handy im Download-Ordner – an „Korrektur unterwegs“
+.inbox-badge {
+  display: inline-block;
+  min-width: 1.2rem;
+  margin-left: 0.3rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--annotation-fixme);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2rem;
+  text-align: center;
+}
+
+.inbox-dot {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--annotation-fixme);
 }

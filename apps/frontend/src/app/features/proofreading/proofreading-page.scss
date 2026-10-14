@@ -108,3 +108,27 @@ header {
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+// Neue Notizen im Download-Ordner – hervorgehoben, mit „Übernehmen“ daneben
+.inbox {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid var(--annotation-fixme);
+  border-radius: 0;
+  background: var(--bg);
+
+  p {
+    display: grid;
+    flex: 1;
+    min-width: 14rem;
+  }
+
+  .muted {
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+}

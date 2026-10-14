@@ -25,6 +25,7 @@ import type {
   NoteSummary,
   PlaceMap,
   ProofImportResult,
+  ProofInbox,
   ProofNotesFile,
   ProofPackage,
   ProjectInfo,
@@ -304,6 +305,21 @@ export class WortomatApi {
       blob: response.body!,
       fileName: encodedName ? decodeURIComponent(encodedName) : 'Korrekturfassung.html',
     };
+  }
+
+  /** Notizdateien zu diesem Buch im Download-Ordner. */
+  proofInbox(): Promise<ProofInbox> {
+    return this.call(this.http.get<ProofInbox>('/api/proofreading/inbox'));
+  }
+
+  /** Alle neuen Notizen aus dem Download-Ordner übernehmen. */
+  importProofInbox(): Promise<ProofImportResult> {
+    return this.call(this.http.post<ProofImportResult>('/api/proofreading/inbox/import', null));
+  }
+
+  /** Erledigte Notizdateien aus dem Download-Ordner löschen. */
+  cleanProofInbox(): Promise<{ deleted: string[] }> {
+    return this.call(this.http.post<{ deleted: string[] }>('/api/proofreading/inbox/clean', null));
   }
 
   /** Notizen vom Handy als Fixme-Markierungen ins Buch übernehmen. */

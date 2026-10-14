@@ -14,6 +14,7 @@ import type {
   ExportResult,
   ProofExportRequest,
   ProofImportResult,
+  ProofInbox,
   ProofNotesFile,
   ProofPackage,
 } from '@wortomat/shared';
@@ -64,6 +65,26 @@ export class ProofreadingController {
       `attachment; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
     );
     return new StreamableFile(data, { type: 'text/html; charset=utf-8', length: data.length });
+  }
+
+  /** Notizdateien zu diesem Buch im Download-Ordner – vom Handy geschickt. */
+  @Get('proofreading/inbox')
+  inbox(): ProofInbox {
+    return this.proofreading.inbox();
+  }
+
+  /** Alle neuen Notizen aus dem Download-Ordner übernehmen. */
+  @Post('proofreading/inbox/import')
+  @HttpCode(200)
+  importInbox(): ProofImportResult {
+    return this.proofreading.importInbox();
+  }
+
+  /** Erledigte Notizdateien aus dem Download-Ordner löschen; liefert ihre Namen. */
+  @Post('proofreading/inbox/clean')
+  @HttpCode(200)
+  cleanInbox(): { deleted: string[] } {
+    return { deleted: this.proofreading.cleanInbox() };
   }
 
   /** Notizen aus der Korrekturfassung als Fixme-Markierungen ins Buch übernehmen. */
