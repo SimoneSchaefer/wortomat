@@ -4,7 +4,8 @@
 
 .gallery {
   position: relative;
-  aspect-ratio: 3 / 4;
+  // Querformat: Fotos von Personen und Orten sind meist breiter als hoch
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 0.75rem;
   border: 1px solid var(--border);
