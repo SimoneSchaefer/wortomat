@@ -1,6 +1,13 @@
 import type { ProofPackage } from '@wortomat/shared';
 import { readerApp } from './reader-app.js';
 
+/**
+ * Der Desktop-Bundle (esbuild mit `keepNames`) fügt in `readerApp` Aufrufe von `__name(fn, "…")`
+ * ein. Der Helfer selbst bleibt im Bundle zurück, wenn die Funktion per `toString()` ins HTML
+ * wandert – ohne diesen Ersatz bricht das Script mit „__name is not defined“ ab.
+ */
+const READER_PRELUDE = 'var __name = function (fn) { return fn; };';
+
 /** Für ruhiges Lesen auf dem Handy: Serifenschrift, viel Zeilenabstand, hell und dunkel. */
 const READER_CSS = `
 :root {
@@ -127,7 +134,7 @@ export function readerHtml(proof: ProofPackage): string {
 <body>
 <noscript>Diese Korrekturfassung braucht JavaScript – bitte in Chrome öffnen.</noscript>
 <script type="application/json" id="proof-data">${data}</script>
-<script>(${readerApp.toString()})();</script>
+<script>${READER_PRELUDE}(${readerApp.toString()})();</script>
 </body>
 </html>
 `;

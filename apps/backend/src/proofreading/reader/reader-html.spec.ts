@@ -35,9 +35,16 @@ describe('readerHtml', () => {
   it('enthält die Lese-App als eigenständiges Skript und einen lesbaren Titel', () => {
     assert.match(html, /<title>Liebe &amp; &lt;Tod&gt; – Korrekturfassung<\/title>/);
     const app = /<script>(.*)<\/script>/s.exec(html.slice(html.lastIndexOf('<script>')))?.[1];
-    assert.ok(app?.startsWith('(function readerApp()'), 'App fehlt');
+    assert.ok(app?.includes(';(function readerApp()'), 'App fehlt');
     // ohne Bezug auf Module – sonst liefe die Datei auf dem Handy nicht
     assert.doesNotMatch(app!, /\brequire\(|\bimport\b|\bexports\b/);
     assert.doesNotThrow(() => new Function(app!));
+  });
+
+  it('stellt __name bereit, das esbuild (keepNames) im Desktop-Bundle in die App einfügt', () => {
+    const app = html.slice(html.lastIndexOf('<script>') + '<script>'.length);
+    const prelude = app.slice(0, app.indexOf('(function readerApp()'));
+    const named = new Function(`${prelude} return __name(function f() {}, 'f');`)();
+    assert.equal(typeof named, 'function');
   });
 });
