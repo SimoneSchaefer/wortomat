@@ -27,6 +27,7 @@ import {
   type JsonNode,
   plainText,
   safeFileName,
+  withoutParts,
 } from './book.js';
 import { renderDocx } from './docx-renderer.js';
 import { renderEpub } from './epub-renderer.js';
@@ -185,7 +186,8 @@ export class ExportService {
     const options = { includeSceneTitles: request.includeSceneTitles === true };
     const layout = sanitizeLayout(request.layout);
     const project = this.requireProject();
-    const book = this.book(project);
+    const fullBook = this.book(project);
+    const book = request.includeParts === false ? withoutParts(fullBook) : fullBook;
     const images = this.imageResolver();
 
     let data: Buffer;

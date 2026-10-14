@@ -85,6 +85,11 @@ export function buildBook(
   return { title: meta.title, author: meta.author, wordCount, characterCount, items };
 }
 
+/** Das Buch ohne Teile – die Kapitel folgen dann direkt aufeinander. */
+export function withoutParts(book: Book): Book {
+  return { ...book, items: book.items.filter((item) => item.kind !== 'part') };
+}
+
 export function normseiten(book: Book): number {
   return Math.max(1, Math.ceil(book.characterCount / NORMSEITE_CHARACTERS));
 }
