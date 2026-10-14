@@ -25,30 +25,29 @@
       }
       <span class="book-title">{{ store.project()?.title }}</span>
     </div>
-    <wm-global-search [compact]="compactTopbar()" />
-    <!-- Auf schmalen Fenstern verschwinden die Knöpfe hinter einem Burger-Menü -->
-    <div #topActions class="top-actions" [class.compact]="compactTopbar()">
-      @if (compactTopbar()) {
-        <button
-          #menuToggle
-          type="button"
-          class="menu-toggle"
-          [attr.aria-expanded]="actionsOpen()"
-          aria-controls="top-actions-menu"
-          [title]="t().workspace.moreActions"
-          [attr.aria-label]="t().workspace.moreActions"
-          (click)="actionsOpen.set(!actionsOpen())"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-          <!-- Neue Notizen vom Handy stecken im Menü – hier schon ein Hinweis -->
-          @if (proofInbox.inbox()?.newNotes) {
-            <span class="inbox-dot" aria-hidden="true"></span>
-          }
-        </button>
-      }
-      @if (!compactTopbar() || actionsOpen()) {
+    <wm-global-search [compact]="compactSearch()" />
+    <!-- Korrektur, Export, Einstellungen, Schließen: immer hinter dem Burger-Menü, damit die
+         Leiste ruhig bleibt -->
+    <div #topActions class="top-actions">
+      <button
+        #menuToggle
+        type="button"
+        class="menu-toggle"
+        [attr.aria-expanded]="actionsOpen()"
+        aria-controls="top-actions-menu"
+        [title]="t().workspace.moreActions"
+        [attr.aria-label]="t().workspace.moreActions"
+        (click)="actionsOpen.set(!actionsOpen())"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+        <!-- Neue Notizen vom Handy stecken im Menü – hier schon ein Hinweis -->
+        @if (proofInbox.inbox()?.newNotes) {
+          <span class="inbox-dot" aria-hidden="true"></span>
+        }
+      </button>
+      @if (actionsOpen()) {
         <div class="actions" id="top-actions-menu" (click)="closeActions()">
           <button
             type="button"
@@ -60,19 +59,42 @@
                 : ''
             "
           >
-            {{ t().workspace.proofreading }}
+            <!-- Handy mit Haken -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="6.5" y="2.5" width="11" height="19" rx="2" />
+              <path d="M10.5 18.5h3M9.5 10.5l2 2 3.5-4" />
+            </svg>
+            <span class="label">{{ t().workspace.proofreading }}</span>
             @if (proofInbox.inbox()?.newNotes; as count) {
               <span class="inbox-badge">{{ count }}</span>
             }
           </button>
           <button type="button" class="link" routerLink="/export">
-            {{ t().workspace.export }}
+            <!-- Pfeil aus dem Kasten -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" />
+              <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+            </svg>
+            <span class="label">{{ t().workspace.export }}</span>
           </button>
           <button type="button" class="link" routerLink="/settings">
-            {{ t().common.settings }}
+            <!-- Zahnrad: acht Zähne, Loch in der Mitte -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M10.4 5 10.3 2.5h3.4l-.1 2.5 2.3.9 1.6-1.8 2.4 2.4-1.8 1.6.9 2.3 2.5-.1v3.4l-2.5-.1-.9 2.3 1.8 1.6-2.4 2.4-1.6-1.8-2.3.9.1 2.5h-3.4l.1-2.5-2.3-.9-1.6 1.8-2.4-2.4 1.8-1.6-.9-2.3-2.5.1v-3.4l2.5.1.9-2.3-1.8-1.6 2.4-2.4 1.6 1.8z"
+              />
+              <circle cx="12" cy="12" r="2.8" />
+            </svg>
+            <span class="label">{{ t().common.settings }}</span>
           </button>
-          <button type="button" class="link" (click)="closeProject()">
-            {{ t().workspace.closeProject }}
+          <!-- Etwas anderes als die übrigen Punkte: abgesetzt -->
+          <button type="button" class="link close" (click)="closeProject()">
+            <!-- Tür mit Pfeil hinaus -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+              <path d="M10 16l-4-4 4-4M6 12h10" />
+            </svg>
+            <span class="label">{{ t().workspace.closeProject }}</span>
           </button>
         </div>
       }

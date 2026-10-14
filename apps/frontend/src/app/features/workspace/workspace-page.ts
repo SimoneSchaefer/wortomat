@@ -41,9 +41,9 @@ const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem bei mittlerer Schriftgröße
 // hinter „Manuskript“ rutschen die Buttons dort in eine zweite Zeile.
 const MIN_SIDEBAR_WIDTH = 256; // 16rem bei mittlerer Schriftgröße
 const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
-// Schmaler als das (bei mittlerer Schriftgröße) überdeckt die Suche (34rem, mittig) die Knöpfe
-// oben rechts („Exportieren … Projekt schließen“ ≈ 336px) – dann wandern sie ins Burger-Menü.
-const COMPACT_TOPBAR_WIDTH = 1300;
+// Schmaler als das (bei mittlerer Schriftgröße) passt „Im ganzen Buch suchen“ samt Tastenkürzel
+// nicht mehr in die Suche (halbe Fensterbreite) – dann nur „Suchen“.
+const COMPACT_SEARCH_WIDTH = 760;
 // Schmaler als das bliebe neben Menüleiste und Seitenleiste zu wenig Platz für den Text
 // (Editor bis 40rem breit) – dann wird die Seitenleiste zum Popover.
 const COMPACT_SIDEBAR_WIDTH = 1000;
@@ -123,10 +123,11 @@ export class WorkspacePage {
   });
   private readonly error = inject(StatusMessages).channel();
 
-  /** Schmales Fenster: Exportieren, Einstellungen und Schließen stecken im Burger-Menü. */
-  protected readonly compactTopbar = computed(
-    () => this.windowWidth() < COMPACT_TOPBAR_WIDTH * this.fontScale(),
+  /** Schmales Fenster: kürzerer Platzhalter in der Suche. */
+  protected readonly compactSearch = computed(
+    () => this.windowWidth() < COMPACT_SEARCH_WIDTH * this.fontScale(),
   );
+  /** Burger-Menü oben rechts (Korrektur, Export, Einstellungen, Schließen). */
   protected readonly actionsOpen = signal(false);
   private readonly topActions = viewChild.required<ElementRef<HTMLElement>>('topActions');
   private readonly menuToggle = viewChild<ElementRef<HTMLButtonElement>>('menuToggle');
@@ -189,7 +190,6 @@ export class WorkspacePage {
 
   protected onWindowResize(): void {
     this.windowWidth.set(window.innerWidth);
-    if (!this.compactTopbar()) this.actionsOpen.set(false);
   }
 
   /** @param refocus bei Escape: Fokus zurück auf den Menü-Knopf */
