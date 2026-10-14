@@ -84,27 +84,35 @@
           }
 
           @if (editingId() !== item.node.id) {
+            <!-- Symbole als SVG: Textzeichen wie + und × sitzen je nach Schrift nicht mittig -->
             <span class="actions">
               @if (item.node.kind === 'chapter') {
                 <button
                   type="button"
                   [title]="t().tree.addScene"
+                  [attr.aria-label]="t().tree.addScene"
                   (click)="add('scene', item.node.id)"
                 >
-                  +
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" /></svg>
                 </button>
               }
               @if (item.node.kind === 'part') {
                 <button
                   type="button"
                   [title]="t().tree.addChapter"
+                  [attr.aria-label]="t().tree.addChapter"
                   (click)="add('chapter', item.node.id)"
                 >
-                  +
+                  <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" /></svg>
                 </button>
               }
-              <button type="button" [title]="t().common.delete" (click)="remove(item.node)">
-                ×
+              <button
+                type="button"
+                [title]="t().common.delete"
+                [attr.aria-label]="t().common.delete"
+                (click)="remove(item.node)"
+              >
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" /></svg>
               </button>
             </span>
           }

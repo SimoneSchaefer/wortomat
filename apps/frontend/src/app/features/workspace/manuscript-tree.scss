@@ -109,6 +109,7 @@ li.chapter > ul {
 
     .actions {
       visibility: visible;
+      opacity: 1;
     }
   }
 }
@@ -207,28 +208,44 @@ input {
 }
 
 // Liegt beim Überfahren über Zählern und Wortzahl – nimmt sonst keinen Platz weg,
-// sodass alle Zeilen rechts bündig bleiben.
+// sodass alle Zeilen rechts bündig bleiben. Blendet weich ein; links läuft es aus,
+// was darunter liegt, wird dort unscharf statt hart abgeschnitten.
 .actions {
   visibility: hidden;
+  opacity: 0;
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   display: flex;
   align-items: center;
-  padding: 0 0.3rem 0 0.75rem;
+  gap: 0.25rem;
+  padding: 0 0.3rem 0 1.5rem;
   border-radius: 0 0.4rem 0.4rem 0;
-  background: linear-gradient(to right, transparent, var(--hover) 0.6rem);
+  // Hintergrund der Zeile (überfahren, geöffnete Szene, Teil) – plus Unschärfe dahinter
+  background: inherit;
+  backdrop-filter: blur(3px);
+  mask-image: linear-gradient(to right, transparent, #000 1.25rem);
+  transition:
+    opacity 0.15s,
+    visibility 0.15s;
 
   button {
-    border: none;
-    background: none;
-    padding: 0 0.3rem;
-    color: var(--text-muted);
-    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    padding: 0;
+    line-height: 1;
 
-    &:hover {
-      color: var(--text);
+    svg {
+      width: 0.6rem;
+      height: 0.6rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
     }
   }
 }
