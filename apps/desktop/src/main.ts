@@ -101,6 +101,12 @@ async function start(): Promise<void> {
   });
   appUrl = isDev ? DEV_FRONTEND_URL : server.url;
 
+  // Die Standard-Menüleiste (Datei, Bearbeiten, Ansicht …) braucht nur die Entwicklung.
+  // macOS behält sie: Dort hängt sie nicht am Fenster, und ohne sie gehen Cmd+C/V/Q nicht.
+  if (!isDev && process.platform !== 'darwin') {
+    Menu.setApplicationMenu(null);
+  }
+
   injectAuthHeader([server.url, appUrl]);
   session.defaultSession.setSpellCheckerLanguages(['de-DE']);
   registerIpcHandlers();
