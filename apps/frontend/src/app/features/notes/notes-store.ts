@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import type {
   AnnotationCounts,
+  ImageCrop,
   NoteGroup,
   NoteKind,
   NoteSummary,
@@ -92,9 +93,9 @@ export class NotesStore {
   }
 
   /** Nach Änderungen an der Galerie: Profilbild in der Liste aktualisieren. */
-  setCover(id: string, coverImageUrl: string | null): void {
+  setCover(id: string, coverImageUrl: string | null, coverCrop: ImageCrop | null): void {
     this.notes.update((notes) =>
-      notes.map((note) => (note.id === id ? { ...note, coverImageUrl } : note)),
+      notes.map((note) => (note.id === id ? { ...note, coverImageUrl, coverCrop } : note)),
     );
   }
 

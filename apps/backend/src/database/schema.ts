@@ -257,6 +257,9 @@ const MIGRATIONS: readonly Migration[] = [
       imported_at  TEXT NOT NULL
     );
   `,
+  /* 19: Ausschnitt eines Galeriebilds (JSON {x, y, width, height}, relativ); NULL = ganzes Bild */ `
+    ALTER TABLE note_images ADD COLUMN crop TEXT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -27,6 +27,8 @@
             [src]="image.url"
             [alt]="t().gallery.imageAlt(label(), i + 1, images().length)"
             draggable="false"
+            [class.cropped]="!!slideStyle(image)"
+            [style]="slideStyle(image)"
           />
         </figure>
       }
@@ -76,6 +78,18 @@
       <button
         type="button"
         class="icon"
+        [title]="t().gallery.crop"
+        [attr.aria-label]="t().gallery.crop"
+        [disabled]="busy()"
+        (click)="openCrop()"
+      >
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M3 0.5v8.5h8.5M0.5 3h8.5v8.5" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="icon"
         [title]="t().gallery.add"
         [attr.aria-label]="t().gallery.add"
         [disabled]="busy()"
@@ -120,3 +134,13 @@
     (change)="onPicked(picker)"
   />
 </div>
+
+@if (cropping(); as image) {
+  <wm-image-crop-dialog
+    [url]="image.url"
+    [initial]="image.crop"
+    [aspect]="aspect"
+    (applied)="applyCrop(image, $event)"
+    (cancelled)="cropping.set(null)"
+  />
+}

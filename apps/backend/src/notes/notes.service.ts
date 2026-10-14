@@ -6,7 +6,8 @@ import type {
   CreateNoteRequest,
   MoveNoteGroupRequest,
   EditorDoc,
-  ImageInfo,
+  GalleryImage,
+  ImageCrop,
   NoteContent,
   NoteGroup,
   NoteKind,
@@ -29,7 +30,9 @@ const MAX_SUMMARY_LENGTH = 2000;
 const SUMMARY_COLUMNS = `id, kind, title, summary, group_id, updated_at,
   todo_count, idea_count, fixme_count,
   (SELECT image_id FROM note_images WHERE note_id = notes.id ORDER BY sort_order LIMIT 1)
-    AS cover_image_id`;
+    AS cover_image_id,
+  (SELECT crop FROM note_images WHERE note_id = notes.id ORDER BY sort_order LIMIT 1)
+    AS cover_crop`;
 
 interface NoteRow {
   id: string;
@@ -39,6 +42,7 @@ interface NoteRow {
   group_id: string | null;
   updated_at: string;
   cover_image_id: string | null;
+  cover_crop: string | null;
   todo_count: number;
   idea_count: number;
   fixme_count: number;
@@ -224,12 +228,36 @@ export class NotesService {
   // Bildergalerie
   // -------------------------------------------------------------------------
 
-  galleryImages(id: string): ImageInfo[] {
+  galleryImages(id: string): GalleryImage[] {
     this.get(id);
-    return this.imageIds(id).map((imageId) => this.images.info(imageId));
+    return this.galleryRows(id).map((row) => ({
+      ...this.images.info(row.image_id),
+      crop: parseCrop(row.crop),
+    }));
   }
 
-  addImage(id: string, upload: UploadedImage): ImageInfo[] {
+  /** Ausschnitt eines Galeriebilds wählen; `null` zeigt wieder das ganze Bild. */
+  setImageCrop(id: string, imageId: string, rawCrop: unknown): GalleryImage[] {
+    this.get(id);
+    const crop = rawCrop === null ? null : validCrop(rawCrop);
+    if (crop === undefined) {
+      throw new BadRequestException(localized('Ungültiger Bildausschnitt.', 'Invalid image crop.'));
+    }
+    transaction(this.db, () => {
+      const { changes } = this.db
+        .prepare('UPDATE note_images SET crop = ? WHERE note_id = ? AND image_id = ?')
+        .run(crop ? JSON.stringify(crop) : null, id, imageId);
+      if (!changes) {
+        throw new NotFoundException(
+          localized('Bild nicht in dieser Galerie.', 'Image not in this gallery.'),
+        );
+      }
+      this.touchNote(id);
+    });
+    return this.galleryImages(id);
+  }
+
+  addImage(id: string, upload: UploadedImage): GalleryImage[] {
     this.get(id);
     transaction(this.db, () => {
       const image = this.images.save(upload);
@@ -246,7 +274,7 @@ export class NotesService {
     return this.galleryImages(id);
   }
 
-  removeImage(id: string, imageId: string): ImageInfo[] {
+  removeImage(id: string, imageId: string): GalleryImage[] {
     this.get(id);
     transaction(this.db, () => {
       const { changes } = this.db
@@ -264,7 +292,7 @@ export class NotesService {
   }
 
   /** Neue Reihenfolge; muss genau die vorhandenen Bilder enthalten. */
-  reorderImages(id: string, imageIds: unknown): ImageInfo[] {
+  reorderImages(id: string, imageIds: unknown): GalleryImage[] {
     this.get(id);
     const current = this.imageIds(id);
     const isPermutation =
@@ -291,11 +319,13 @@ export class NotesService {
   }
 
   private imageIds(id: string): string[] {
-    return (
-      this.db
-        .prepare('SELECT image_id FROM note_images WHERE note_id = ? ORDER BY sort_order')
-        .all(id) as Array<{ image_id: string }>
-    ).map((row) => row.image_id);
+    return this.galleryRows(id).map((row) => row.image_id);
+  }
+
+  private galleryRows(id: string): Array<{ image_id: string; crop: string | null }> {
+    return this.db
+      .prepare('SELECT image_id, crop FROM note_images WHERE note_id = ? ORDER BY sort_order')
+      .all(id) as Array<{ image_id: string; crop: string | null }>;
   }
 
   private touchNote(id: string): void {
@@ -389,8 +419,39 @@ function toSummary(row: NoteRow): NoteSummary {
     groupId: row.group_id,
     updatedAt: row.updated_at,
     coverImageUrl: row.cover_image_id ? `/api/images/${row.cover_image_id}` : null,
+    coverCrop: parseCrop(row.cover_crop),
     annotations: annotationCounts(row),
   };
+}
+
+/** Gespeicherter Ausschnitt; kaputtes JSON gilt als „ganzes Bild“. */
+function parseCrop(raw: string | null): ImageCrop | null {
+  if (!raw) return null;
+  try {
+    return validCrop(JSON.parse(raw)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Ausschnitt innerhalb des Bilds (kleine Rundungsfehler erlaubt), sonst `undefined`. */
+function validCrop(value: unknown): ImageCrop | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const { x, y, width, height } = value as Record<string, unknown>;
+  const numbers = [x, y, width, height];
+  if (!numbers.every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined;
+  const crop = { x, y, width, height } as ImageCrop;
+  const EPSILON = 1e-6;
+  const inside =
+    crop.x >= -EPSILON &&
+    crop.y >= -EPSILON &&
+    crop.width > 0.01 &&
+    crop.height > 0.01 &&
+    crop.x + crop.width <= 1 + EPSILON &&
+    crop.y + crop.height <= 1 + EPSILON;
+  if (!inside) return undefined;
+  const clamp = (n: number) => Math.min(1, Math.max(0, n));
+  return { x: clamp(crop.x), y: clamp(crop.y), width: crop.width, height: crop.height };
 }
 
 function annotationCounts(

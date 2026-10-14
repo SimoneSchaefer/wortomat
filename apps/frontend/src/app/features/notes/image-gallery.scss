@@ -52,8 +52,10 @@
 }
 
 .slide {
+  position: relative;
   flex: 0 0 100%;
   margin: 0;
+  overflow: hidden;
   scroll-snap-align: center;
   scroll-snap-stop: always;
 
@@ -62,6 +64,13 @@
     height: 100%;
     object-fit: contain;
     user-select: none;
+
+    // Gewählter Ausschnitt füllt das Bildfeld (Lage kommt aus slideStyle)
+    &.cropped {
+      position: absolute;
+      max-width: none;
+      object-fit: fill;
+    }
   }
 }
 

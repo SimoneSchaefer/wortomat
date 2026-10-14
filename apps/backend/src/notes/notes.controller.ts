@@ -17,13 +17,14 @@ import type {
   CreateNoteGroupRequest,
   CreateNoteRequest,
   MoveNoteGroupRequest,
-  ImageInfo,
+  GalleryImage,
   NoteContent,
   NoteGroup,
   NoteKind,
   NoteSummary,
   ReorderImagesRequest,
   SaveDocumentRequest,
+  SetImageCropRequest,
   UpdateNoteGroupRequest,
   UpdateNoteRequest,
 } from '@wortomat/shared';
@@ -102,7 +103,7 @@ export class NotesController {
   // Bildergalerie --------------------------------------------------------------
 
   @Get(':id/images')
-  images(@Param('id') id: string): ImageInfo[] {
+  images(@Param('id') id: string): GalleryImage[] {
     return this.notes.galleryImages(id);
   }
 
@@ -113,7 +114,7 @@ export class NotesController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File | undefined,
     @Body() body: { width?: string; height?: string },
-  ): ImageInfo[] {
+  ): GalleryImage[] {
     return this.notes.addImage(id, {
       buffer: file?.buffer as Buffer,
       originalName: file?.originalname,
@@ -123,12 +124,21 @@ export class NotesController {
   }
 
   @Put(':id/images')
-  reorderImages(@Param('id') id: string, @Body() body: ReorderImagesRequest): ImageInfo[] {
+  reorderImages(@Param('id') id: string, @Body() body: ReorderImagesRequest): GalleryImage[] {
     return this.notes.reorderImages(id, body?.imageIds);
   }
 
+  @Put(':id/images/:imageId/crop')
+  setImageCrop(
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+    @Body() body: SetImageCropRequest,
+  ): GalleryImage[] {
+    return this.notes.setImageCrop(id, imageId, body?.crop);
+  }
+
   @Delete(':id/images/:imageId')
-  removeImage(@Param('id') id: string, @Param('imageId') imageId: string): ImageInfo[] {
+  removeImage(@Param('id') id: string, @Param('imageId') imageId: string): GalleryImage[] {
     return this.notes.removeImage(id, imageId);
   }
 }

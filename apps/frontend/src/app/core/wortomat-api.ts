@@ -15,6 +15,8 @@ import type {
   ExportResult,
   ExportSettings,
   ExportSettingsResponse,
+  GalleryImage,
+  ImageCrop,
   ImageInfo,
   ManuscriptNode,
   MapSummary,
@@ -203,8 +205,8 @@ export class WortomatApi {
     return this.call(this.http.put<NoteContent>(`/api/notes/${id}/content`, request));
   }
 
-  noteImages(id: string): Promise<ImageInfo[]> {
-    return this.call(this.http.get<ImageInfo[]>(`/api/notes/${id}/images`));
+  noteImages(id: string): Promise<GalleryImage[]> {
+    return this.call(this.http.get<GalleryImage[]>(`/api/notes/${id}/images`));
   }
 
   /** Hängt ein Bild an die Galerie an; liefert die ganze Galerie zurück. */
@@ -214,20 +216,26 @@ export class WortomatApi {
     fileName: string,
     width: number,
     height: number,
-  ): Promise<ImageInfo[]> {
+  ): Promise<GalleryImage[]> {
     const form = new FormData();
     form.append('file', image, fileName);
     form.append('width', String(width));
     form.append('height', String(height));
-    return this.call(this.http.post<ImageInfo[]>(`/api/notes/${id}/images`, form));
+    return this.call(this.http.post<GalleryImage[]>(`/api/notes/${id}/images`, form));
   }
 
-  reorderNoteImages(id: string, imageIds: string[]): Promise<ImageInfo[]> {
-    return this.call(this.http.put<ImageInfo[]>(`/api/notes/${id}/images`, { imageIds }));
+  reorderNoteImages(id: string, imageIds: string[]): Promise<GalleryImage[]> {
+    return this.call(this.http.put<GalleryImage[]>(`/api/notes/${id}/images`, { imageIds }));
   }
 
-  removeNoteImage(id: string, imageId: string): Promise<ImageInfo[]> {
-    return this.call(this.http.delete<ImageInfo[]>(`/api/notes/${id}/images/${imageId}`));
+  setNoteImageCrop(id: string, imageId: string, crop: ImageCrop | null): Promise<GalleryImage[]> {
+    return this.call(
+      this.http.put<GalleryImage[]>(`/api/notes/${id}/images/${imageId}/crop`, { crop }),
+    );
+  }
+
+  removeNoteImage(id: string, imageId: string): Promise<GalleryImage[]> {
+    return this.call(this.http.delete<GalleryImage[]>(`/api/notes/${id}/images/${imageId}`));
   }
 
   // Verknüpfungen Szene ↔ Charakter/Ort ----------------------------------------

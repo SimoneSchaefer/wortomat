@@ -323,6 +323,13 @@ export const de = {
     dropHint: 'oder Bilder hierher ziehen',
     removeTitle: 'Bild entfernen?',
     removeMessage: 'Das Bild wird aus der Galerie entfernt.',
+    crop: 'Zuschneiden',
+    cropTitle: 'Bild zuschneiden',
+    cropHint:
+      'Rahmen verschieben oder an den Ecken größer und kleiner ziehen. Tastatur: Pfeiltasten, + und −. Das Original bleibt erhalten.',
+    cropFrame: 'Ausschnitt',
+    cropReset: 'Ganzes Bild',
+    cropApply: 'Übernehmen',
   },
 
   editor: {
