@@ -12,7 +12,7 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import type { ImageInfo, NoteKind, UpdateNoteRequest } from '@wortomat/shared';
+import type { GalleryImage, NoteKind, UpdateNoteRequest } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
@@ -120,8 +120,8 @@ export class NotePage {
     }
   }
 
-  protected onGalleryChanged(images: ImageInfo[]): void {
-    this.store.setCover(this.id(), images[0]?.url ?? null);
+  protected onGalleryChanged(images: GalleryImage[]): void {
+    this.store.setCover(this.id(), images[0]?.url ?? null, images[0]?.crop ?? null);
   }
 
   protected onSummaryInput(value: string): void {

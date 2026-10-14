@@ -10,7 +10,8 @@
 
   &.with-gallery {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 13rem;
+    // Breite Spalte, damit das Bild im Querformat nicht winzig wirkt
+    grid-template-columns: minmax(0, 1fr) 17rem;
     gap: 1.5rem;
     align-items: start;
   }
@@ -34,7 +35,7 @@
 
     .side {
       order: -1;
-      width: min(13rem, 100%);
+      width: min(17rem, 100%);
     }
   }
 }

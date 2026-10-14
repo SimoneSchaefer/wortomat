@@ -4,7 +4,8 @@
 
 .gallery {
   position: relative;
-  aspect-ratio: 3 / 4;
+  // Querformat: Fotos von Personen und Orten sind meist breiter als hoch
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 0.75rem;
   border: 1px solid var(--border);
@@ -51,8 +52,10 @@
 }
 
 .slide {
+  position: relative;
   flex: 0 0 100%;
   margin: 0;
+  overflow: hidden;
   scroll-snap-align: center;
   scroll-snap-stop: always;
 
@@ -61,6 +64,13 @@
     height: 100%;
     object-fit: contain;
     user-select: none;
+
+    // Gewählter Ausschnitt füllt das Bildfeld (Lage kommt aus slideStyle)
+    &.cropped {
+      position: absolute;
+      max-width: none;
+      object-fit: fill;
+    }
   }
 }
 

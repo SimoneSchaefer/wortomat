@@ -271,6 +271,8 @@ export interface NoteSummary {
   updatedAt: string;
   /** Erstes Bild der Galerie (Profilbild), z. B. `/api/images/<id>`; `null` ohne Bilder. */
   coverImageUrl: string | null;
+  /** Gewählter Ausschnitt des Profilbilds; `null` = ganzes Bild. */
+  coverCrop: ImageCrop | null;
   /** Todo/Idee/Fixme-Markierungen im Text. */
   annotations: AnnotationCounts;
 }
@@ -614,6 +616,28 @@ export interface ImageInfo {
   originalName: string | null;
   /** Relativ zum App-Origin, z. B. `/api/images/<id>`. */
   url: string;
+}
+
+/**
+ * Ausschnitt eines Bilds, relativ zur Bildgröße (0 … 1). Das Original bleibt unverändert;
+ * angezeigt wird nur der Ausschnitt, und er lässt sich jederzeit neu wählen.
+ */
+export interface ImageCrop {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** Bild in der Galerie einer Notiz, mit dem dort gewählten Ausschnitt. */
+export interface GalleryImage extends ImageInfo {
+  /** `null` = ganzes Bild. */
+  crop: ImageCrop | null;
+}
+
+/** `PUT /api/notes/:id/images/:imageId/crop` */
+export interface SetImageCropRequest {
+  crop: ImageCrop | null;
 }
 
 // ---------------------------------------------------------------------------

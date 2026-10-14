@@ -11,13 +11,15 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import type { ImageInfo } from '@wortomat/shared';
+import type { GalleryImage, ImageCrop } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { WortomatApi } from '../../core/wortomat-api';
 import { StatusMessages } from '../../core/status-messages';
 import { ConfirmDialog } from '../../core/confirm-dialog';
+import { coverCrop, cropStyle, GALLERY_ASPECT } from '../../core/image-crop';
+import { ImageCropDialog } from './image-crop-dialog';
 
 /** Ab dieser Zugstrecke (px) wechselt ein Maus-Drag zum nächsten Bild. */
 const DRAG_THRESHOLD = 40;
@@ -31,6 +33,7 @@ const DRAG_THRESHOLD = 40;
  */
 @Component({
   selector: 'wm-image-gallery',
+  imports: [ImageCropDialog],
   templateUrl: './image-gallery.html',
   styleUrl: './image-gallery.scss',
 })
@@ -40,14 +43,17 @@ export class ImageGallery {
   /** Symbol, solange die Galerie leer ist. */
   readonly placeholderIcon = input<'person' | 'picture'>('picture');
   /** Neue Bilderliste nach jeder Änderung (das erste ist das Profilbild). */
-  readonly changed = output<ImageInfo[]>();
+  readonly changed = output<GalleryImage[]>();
 
   protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   private readonly injector = inject(Injector);
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
 
-  protected readonly images = signal<ImageInfo[]>([]);
+  protected readonly images = signal<GalleryImage[]>([]);
+  /** Bild, dessen Ausschnitt gerade gewählt wird (Dialog offen). */
+  protected readonly cropping = signal<GalleryImage | null>(null);
+  protected readonly aspect = GALLERY_ASPECT;
   protected readonly index = signal(0);
   protected readonly loading = signal(true);
   protected readonly busy = signal(false);
@@ -250,7 +256,29 @@ export class ImageGallery {
     });
   }
 
-  private update(images: ImageInfo[]): void {
+  // Zuschneiden ------------------------------------------------------------------
+
+  /**
+   * Lage des Bilds, wenn ein Ausschnitt gewählt ist; sonst `null` (ganzes Bild, eingepasst).
+   * Ohne bekannte Bildmaße lässt sich der Ausschnitt nicht umrechnen – dann ganzes Bild.
+   */
+  protected slideStyle(image: GalleryImage): Record<string, string> | null {
+    if (!image.crop || !image.width || !image.height) return null;
+    return cropStyle(coverCrop(image.crop, image.width, image.height, GALLERY_ASPECT));
+  }
+
+  protected openCrop(): void {
+    this.cropping.set(this.images()[this.index()] ?? null);
+  }
+
+  protected async applyCrop(image: GalleryImage, crop: ImageCrop | null): Promise<void> {
+    this.cropping.set(null);
+    await this.run(async () => {
+      this.update(await this.api.setNoteImageCrop(this.noteId(), image.id, crop));
+    });
+  }
+
+  private update(images: GalleryImage[]): void {
     this.images.set(images);
     this.changed.emit(images);
   }

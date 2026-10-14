@@ -7,6 +7,7 @@ import { after, before, describe, it } from 'node:test';
 import type {
   AppSettings,
   DirectoryListing,
+  GalleryImage,
   ImageInfo,
   ManuscriptNode,
   MapSummary,
@@ -486,6 +487,34 @@ describe('REST-API', () => {
       body: JSON.stringify({ imageIds: [drei.id, eins.id] }),
     });
     assert.equal(badOrder.status, 400);
+
+    // Ausschnitt wählen: gilt in der Galerie und fürs Profilbild in den Listen
+    const cropUrl = (imageId: string) => `/api/notes/${ben.id}/images/${imageId}/crop`;
+    const crop = { x: 0.1, y: 0.2, width: 0.5, height: 0.375 };
+    const cropped = await api<GalleryImage[]>('PUT', cropUrl(drei.id), { crop });
+    assert.deepEqual(cropped[0]!.crop, crop);
+    assert.equal(cropped[1]!.crop, null);
+    const coverCrop = async () =>
+      (await api<NoteSummary[]>('GET', '/api/notes')).find((n) => n.id === ben.id)!.coverCrop;
+    assert.deepEqual(await coverCrop(), crop);
+    const cropStatus = async (imageId: string, body: unknown) =>
+      (
+        await fetch(server.url + cropUrl(imageId), {
+          method: 'PUT',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+    assert.equal(
+      await cropStatus(drei.id, { crop: { x: 0.8, y: 0, width: 0.5, height: 0.5 } }),
+      400,
+    );
+    assert.equal(await cropStatus(drei.id, { crop: 'mitte' }), 400);
+    assert.equal(await cropStatus('gibts-nicht', { crop }), 404);
+    // Das Original bleibt: „Ganzes Bild“ setzt den Ausschnitt zurück
+    const reset = await api<GalleryImage[]>('PUT', cropUrl(drei.id), { crop: null });
+    assert.equal(reset[0]!.crop, null);
+    assert.equal(await coverCrop(), null);
 
     // Entfernen löscht das Bild aus der Datei …
     await api('DELETE', `/api/notes/${ben.id}/images/${drei.id}`);

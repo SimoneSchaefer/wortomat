@@ -293,6 +293,13 @@ export const en: Texts = {
     dropHint: 'or drag images here',
     removeTitle: 'Remove image?',
     removeMessage: 'The image will be removed from the gallery.',
+    crop: 'Crop',
+    cropTitle: 'Crop image',
+    cropHint:
+      'Move the frame or drag its corners to resize it. Keyboard: arrow keys, + and −. The original is kept.',
+    cropFrame: 'Crop area',
+    cropReset: 'Whole image',
+    cropApply: 'Apply',
   },
 
   editor: {
