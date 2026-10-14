@@ -16,7 +16,7 @@
     "start": "electron app",
     "desktop-entry": "node scripts/desktop-entry.mjs",
     "dist": "electron-builder --config electron-builder.yml",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "npm run build -w @wortomat/backend && tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
     "@types/node": "^24.9.0",
