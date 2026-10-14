@@ -12,4 +12,14 @@ export class SearchRequest {
   search(query: string): void {
     this.request.set({ query });
   }
+
+  /**
+   * Holt die offene Anfrage ab; danach ist sie erledigt. Sonst führte die Suchleiste sie
+   * jedes Mal erneut aus, wenn sie neu entsteht (z. B. zurück aus den Einstellungen).
+   */
+  take(): { query: string } | null {
+    const request = this.request();
+    if (request) this.request.set(null);
+    return request;
+  }
 }

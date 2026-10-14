@@ -64,7 +64,7 @@ export class GlobalSearch {
     // Suche von anderswo angestoßen: Begriff eintragen, Ergebnisse zeigen, Fokus ins Feld
     const requests = inject(SearchRequest);
     effect(() => {
-      const request = requests.request();
+      const request = requests.take();
       if (!request) return;
       this.onInput(request.query);
       const input = this.input().nativeElement;
