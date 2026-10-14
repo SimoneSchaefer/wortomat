@@ -1,0 +1,14 @@
+# Manuell starten: Actions → „Release Windows“ → „Run workflow“.
+name: Release Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/release-build.yml
+    with:
+      runner: windows-latest
+      platform: --win
+      artifact: wortomat-windows
+      files: apps/desktop/release/*.exe

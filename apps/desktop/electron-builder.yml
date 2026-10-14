@@ -27,7 +27,10 @@ nsis:
   allowToChangeInstallationDirectory: true
 
 mac:
-  target: [dmg]
+  # Nur Apple Silicon; Intel-Macs bräuchten zusätzlich x64 (bzw. universal).
+  target:
+    - target: dmg
+      arch: [arm64]
   category: public.app-category.productivity
 
 linux:

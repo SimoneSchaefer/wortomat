@@ -1,0 +1,14 @@
+# Manuell starten: Actions → „Release macOS“ → „Run workflow“.
+name: Release macOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/release-build.yml
+    with:
+      runner: macos-latest
+      platform: --mac
+      artifact: wortomat-macos
+      files: apps/desktop/release/*.dmg

@@ -1,0 +1,16 @@
+# Manuell starten: Actions → „Release Linux“ → „Run workflow“.
+name: Release Linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/release-build.yml
+    with:
+      runner: ubuntu-latest
+      platform: --linux
+      artifact: wortomat-linux
+      files: |
+        apps/desktop/release/*.AppImage
+        apps/desktop/release/*.deb

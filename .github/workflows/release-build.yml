@@ -1,0 +1,44 @@
+# Gemeinsamer Ablauf der drei Release-Workflows: baut die App im Release-Modus
+# auf dem passenden Betriebssystem und legt die Installer als Artefakt ab.
+name: Release-Build
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: GitHub-Runner, z. B. ubuntu-latest
+        type: string
+        required: true
+      platform:
+        description: Plattform-Schalter für electron-builder (--linux, --win, --mac)
+        type: string
+        required: true
+      artifact:
+        description: Name des Artefakts
+        type: string
+        required: true
+      files:
+        description: Installer, die hochgeladen werden (Glob-Muster, eines pro Zeile)
+        type: string
+        required: true
+
+jobs:
+  package:
+    runs-on: ${{ inputs.runner }}
+    env:
+      # Ohne Zertifikat nicht signieren, statt nach einem im Schlüsselbund zu suchen.
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run dist -w @wortomat/desktop -- ${{ inputs.platform }} --publish never
+      - uses: actions/upload-artifact@v5
+        with:
+          name: ${{ inputs.artifact }}
+          path: ${{ inputs.files }}
+          if-no-files-found: error

@@ -4,6 +4,11 @@
   "version": "2.0.0",
   "private": true,
   "description": "Electron-Shell: startet das Backend im Hauptprozess und zeigt das Angular-Frontend an.",
+  "homepage": "https://github.com/SimoneSchaefer/wortomat",
+  "author": {
+    "name": "Simone Schäfer",
+    "email": "17407032+SimoneSchaefer@users.noreply.github.com"
+  },
   "type": "module",
   "scripts": {
     "build": "node scripts/bundle.mjs",

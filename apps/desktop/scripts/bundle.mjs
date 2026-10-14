@@ -98,7 +98,9 @@ await writeFile(
       productName: pkg.productName,
       version: pkg.version,
       description: 'Software zum Schreiben von Büchern und Romanen',
-      author: pkg.author ?? 'Wortomat',
+      // Das .deb-Paket braucht Homepage und Maintainer (Name mit E-Mail).
+      homepage: pkg.homepage,
+      author: pkg.author,
       // Linux: verknüpft laufende Fenster mit dem Starter-Eintrag (WM_CLASS).
       desktopName: 'wortomat.desktop',
       main: 'main.mjs',

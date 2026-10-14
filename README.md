@@ -153,8 +153,13 @@ npm run typecheck && npm test
 npm run dist
 ```
 
-Installer für alle drei Plattformen baut der GitHub-Workflow
-[`build.yml`](.github/workflows/build.yml), sobald ein Tag wie `v2.0.0` gepusht wird.
+**GitHub Actions:**
+
+- [`ci.yml`](.github/workflows/ci.yml) prüft Typen, baut und testet bei jedem Push und Pull Request.
+- „Release Linux“, „Release Windows“ und „Release macOS“ bauen die Installer im Release-Modus
+  auf dem jeweiligen Betriebssystem. Sie laufen nur von Hand (Actions → Workflow → „Run workflow“)
+  und legen die Installer als Artefakt am Lauf ab. Den gemeinsamen Ablauf beschreibt
+  [`release-build.yml`](.github/workflows/release-build.yml). Die Installer sind nicht signiert.
 
 ## REST-API
 
