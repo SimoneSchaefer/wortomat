@@ -52,7 +52,7 @@ const tree = buildTree([
 ]);
 
 describe('scenesInOrder', () => {
-  it('zählt Kapitel über Teile hinweg durch', () => {
+  it('numbers chapters across parts', () => {
     expect(scenesInOrder(tree).map((e) => [e.scene.id, e.chapterNumber])).toEqual([
       ['s1', 1],
       ['s2', 1],
@@ -63,7 +63,7 @@ describe('scenesInOrder', () => {
 });
 
 describe('chapterStats', () => {
-  it('summiert Wörter je Kapitel und Status und merkt sich den Teil', () => {
+  it('sums words per chapter and status and remembers the part', () => {
     const [k1, k2, k3] = chapterStats(tree);
     expect(k1).toMatchObject({ number: 1, part: 'teil', words: 150, scenes: 2 });
     expect(k1!.wordsByStatus).toEqual({ idea: 0, outline: 0, draft: 50, revised: 0, final: 100 });
@@ -73,7 +73,7 @@ describe('chapterStats', () => {
 });
 
 describe('statusTotals', () => {
-  it('zählt Wörter und Szenen je Status in Arbeitsreihenfolge', () => {
+  it('counts words and scenes per status in working order', () => {
     expect(statusTotals(scenesInOrder(tree))).toEqual([
       { status: 'idea', words: 0, scenes: 1 },
       { status: 'outline', words: 0, scenes: 0 },
@@ -85,7 +85,7 @@ describe('statusTotals', () => {
 });
 
 describe('presence', () => {
-  it('sortiert nach erstem Auftritt und listet Figuren ohne Szene extra', () => {
+  it('sorts by first appearance and lists characters without scenes separately', () => {
     const result = presence(
       scenesInOrder(tree),
       [note('Zora'), note('Anna'), note('Ben'), note('Carl')],
@@ -106,7 +106,7 @@ describe('presence', () => {
 });
 
 describe('chapterText', () => {
-  it('summiert Wörter, Dialog und Sätze je Kapitel, auch leere Kapitel', () => {
+  it('sums words, dialogue and sentences per chapter, empty chapters too', () => {
     const result = chapterText(tree, [
       { sceneId: 's1', words: 100, dialogueWords: 40, sentences: 8 },
       { sceneId: 's2', words: 50, dialogueWords: 0, sentences: 4 },

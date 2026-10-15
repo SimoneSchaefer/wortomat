@@ -51,20 +51,20 @@ describe('matchesScene', () => {
   const matches = (criteria: SceneFilterCriteria) =>
     matchesScene(scene, criteria, sceneLinks, kindOf);
 
-  it('prüft Status und offene Markierungen – eins aus der Gruppe genügt', () => {
+  it('checks status and open marks – one from the group is enough', () => {
     expect(matches(filter({ statuses: ['draft'] }))).toBe(true);
     expect(matches(filter({ statuses: ['idea', 'final'] }))).toBe(false);
     expect(matches(filter({ annotations: ['fixme', 'todo'] }))).toBe(true);
     expect(matches(filter({ annotations: ['idea'] }))).toBe(false);
   });
 
-  it('filtert nach Strängen – einer der gewählten genügt', () => {
+  it('filters by threads – one of the chosen ones is enough', () => {
     expect(matches(filter({ strandIds: ['tom', 'ermittlung'] }))).toBe(true);
     expect(matches(filter({ strandIds: ['ermittlung'] }))).toBe(false);
     expect(matchesScene(scene, filter({ strandIds: ['tom'] }), undefined, kindOf)).toBe(false);
   });
 
-  it('zeigt mit „Nur Wendepunkte“ nur Szenen, die als Wendepunkt markiert sind', () => {
+  it('with "Only turning points" shows only scenes marked as turning points', () => {
     expect(matches(filter({ flags: ['turningPoint'] }))).toBe(false);
     const wendepunkt = { ...scene, turningPoint: true };
     expect(matchesScene(wendepunkt, filter({ flags: ['turningPoint'] }), sceneLinks, kindOf)).toBe(
@@ -72,7 +72,7 @@ describe('matchesScene', () => {
     );
   });
 
-  it('verlangt je Art (Charakter, Ort) eine der gewählten Notizen', () => {
+  it('requires one of the chosen notes per kind (character, place)', () => {
     expect(matches(filter({ noteIds: ['anna', 'ben'] }))).toBe(true);
     expect(matches(filter({ noteIds: ['ben'] }))).toBe(false);
     expect(matches(filter({ noteIds: ['ben', 'hafen'] }))).toBe(false);
@@ -81,19 +81,19 @@ describe('matchesScene', () => {
     expect(matches(filter({ noteIds: ['gelöscht'] }))).toBe(true);
   });
 
-  it('verknüpft die Gruppen mit „und“', () => {
+  it('combines the groups with "and"', () => {
     expect(matches(filter({ statuses: ['draft'], tagIds: ['rückblende'] }))).toBe(true);
     expect(matches(filter({ statuses: ['draft'], tagIds: ['spannung'] }))).toBe(false);
   });
 
-  it('behandelt Szenen ohne Verknüpfungen', () => {
+  it('handles scenes without links', () => {
     expect(matchesScene(scene, filter({ tagIds: ['x'] }), undefined, kindOf)).toBe(false);
     expect(matchesScene(scene, filter({ statuses: ['draft'] }), undefined, kindOf)).toBe(true);
   });
 });
 
 describe('filterTree', () => {
-  it('blendet Kapitel ohne Treffer aus und summiert nur Sichtbares', () => {
+  it('hides chapters without hits and sums only what is visible', () => {
     const tree = buildTree([
       node('teil', 'part', null),
       node('k1', 'chapter', 'teil'),

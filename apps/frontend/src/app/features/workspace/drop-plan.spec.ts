@@ -29,7 +29,7 @@ const D = node('D', 'scene', 'K2', 1);
 const nodes = [T, K1, A, B, C, K2, D];
 
 describe('planDrop', () => {
-  it('setzt eine Szene vor bzw. hinter eine andere', () => {
+  it('puts a scene before or after another one', () => {
     expect(planDrop(C, A, 0.2, nodes)).toEqual({
       targetId: 'A',
       position: 'before',
@@ -40,7 +40,7 @@ describe('planDrop', () => {
     expect(planDrop(A, C, 0.8, nodes)?.request).toEqual({ parentId: 'K1', beforeId: null });
   });
 
-  it('legt eine Szene in ein anderes Kapitel (egal wo in der Zeile)', () => {
+  it('moves a scene into another chapter (wherever in the row)', () => {
     for (const ratio of [0.1, 0.5, 0.9]) {
       expect(planDrop(A, K2, ratio, nodes)).toEqual({
         targetId: 'K2',
@@ -50,13 +50,13 @@ describe('planDrop', () => {
     }
   });
 
-  it('nutzt bei Kapitel über Teil die Ränder für davor/danach und die Mitte für hinein', () => {
+  it('for a chapter over a part uses the edges for before/after and the middle for inside', () => {
     expect(planDrop(K2, T, 0.1, nodes)?.position).toBe('before');
     expect(planDrop(K2, T, 0.5, nodes)?.request).toEqual({ parentId: 'T', beforeId: null });
     expect(planDrop(K2, T, 0.9, nodes)?.request).toEqual({ parentId: null, beforeId: null });
   });
 
-  it('verbietet ungültige Ziele', () => {
+  it('forbids invalid targets', () => {
     expect(planDrop(A, A, 0.5, nodes)).toBeNull(); // onto itself
     expect(planDrop(K1, A, 0.5, nodes)).toBeNull(); // chapter next to a scene
     expect(planDrop(T, K1, 0.2, nodes)).toBeNull(); // part into its own subtree
@@ -65,14 +65,14 @@ describe('planDrop', () => {
 });
 
 describe('planRootDrop', () => {
-  it('erlaubt nur Teile und Kapitel auf oberster Ebene', () => {
+  it('allows only parts and chapters at the top level', () => {
     expect(planRootDrop(K1)?.request).toEqual({ parentId: null, beforeId: null });
     expect(planRootDrop(A)).toBeNull();
   });
 });
 
 describe('changesPosition', () => {
-  it('erkennt Drops, die nichts verändern', () => {
+  it('detects drops that change nothing', () => {
     expect(changesPosition(B, planDrop(B, A, 0.8, nodes)!, nodes)).toBe(false); // B after A
     expect(changesPosition(B, planDrop(B, C, 0.2, nodes)!, nodes)).toBe(false); // B before C
     expect(changesPosition(B, planDrop(B, A, 0.2, nodes)!, nodes)).toBe(true);

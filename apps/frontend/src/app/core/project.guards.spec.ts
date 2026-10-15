@@ -14,7 +14,7 @@ const PROJECT: ProjectInfo = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-describe('Projekt-Guards', () => {
+describe('project guards', () => {
   let openProject: ProjectInfo | null;
 
   beforeEach(() => {
@@ -45,7 +45,7 @@ describe('Projekt-Guards', () => {
   const urlOf = (result: boolean | UrlTree) =>
     result === true ? 'erlaubt' : TestBed.inject(Router).serializeUrl(result as UrlTree);
 
-  it('lässt nach dem Anlegen eines Projekts ohne Neuladen in den Schreibbereich', async () => {
+  it('lets into the writing area after creating a project, without reloading', async () => {
     // start page: no project open yet
     expect(urlOf(await run(noProjectGuard))).toBe('erlaubt');
 
@@ -54,7 +54,7 @@ describe('Projekt-Guards', () => {
     expect(urlOf(await run(projectOpenGuard))).toBe('erlaubt');
   });
 
-  it('lässt nach dem Öffnen eines Projekts ohne Neuladen in den Schreibbereich', async () => {
+  it('lets into the writing area after opening a project, without reloading', async () => {
     expect(urlOf(await run(noProjectGuard))).toBe('erlaubt');
 
     await TestBed.inject(ProjectStore).open('/tmp/Roman.wortomat');
@@ -62,7 +62,7 @@ describe('Projekt-Guards', () => {
     expect(urlOf(await run(projectOpenGuard))).toBe('erlaubt');
   });
 
-  it('schickt nach dem Schließen zurück zur Startseite', async () => {
+  it('sends back to the start page after closing', async () => {
     const store = TestBed.inject(ProjectStore);
     await store.open('/tmp/Roman.wortomat');
     expect(urlOf(await run(projectOpenGuard))).toBe('erlaubt');

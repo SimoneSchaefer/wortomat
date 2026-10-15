@@ -14,7 +14,7 @@ const paragraph = (...content: object[]) => ({ type: 'paragraph', content });
 const doc = (...content: object[]) => ({ type: 'doc', content });
 
 describe('countAnnotations', () => {
-  it('zählt zusammenhängend markierten Text einmal, auch wenn er fett unterbrochen ist', () => {
+  it('counts contiguously marked text once, even when interrupted by bold', () => {
     const counts = countAnnotations(
       doc(
         paragraph(
@@ -28,7 +28,7 @@ describe('countAnnotations', () => {
     assert.deepEqual(counts, { todo: 1, idea: 0, fixme: 0 });
   });
 
-  it('zählt getrennte Stellen und verschiedene Arten einzeln', () => {
+  it('counts separate passages and different kinds individually', () => {
     const counts = countAnnotations(
       doc(
         paragraph(text('a', 'todo'), text(' – '), text('b', 'todo'), text('c', 'idea')),
@@ -39,14 +39,14 @@ describe('countAnnotations', () => {
     assert.deepEqual(counts, { todo: 3, idea: 1, fixme: 1 });
   });
 
-  it('beendet eine Markierung am Absatzende', () => {
+  it('ends a mark at the end of the paragraph', () => {
     const counts = countAnnotations(
       doc(paragraph(text('Ende', 'idea')), paragraph(text('Anfang', 'idea'))),
     );
     assert.deepEqual(counts, { todo: 0, idea: 2, fixme: 0 });
   });
 
-  it('ignoriert unbekannte Arten, andere Marks und kaputte Dokumente', () => {
+  it('ignores unknown kinds, other marks and broken documents', () => {
     assert.deepEqual(
       countAnnotations(
         doc(

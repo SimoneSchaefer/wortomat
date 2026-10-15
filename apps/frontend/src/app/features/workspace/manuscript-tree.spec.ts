@@ -45,7 +45,7 @@ async function setup(api = book()) {
 }
 
 describe('ManuscriptTree', () => {
-  it('zeigt Teile, Kapitel und Szenen in Buchreihenfolge, Wortzahlen summiert', async () => {
+  it('shows parts, chapters and scenes in book order, word counts summed', async () => {
     const { row, titles } = await setup();
     expect(titles()).toEqual(['Teil I', 'Kapitel 1', 'A', 'B', 'C', 'Kapitel 2', 'D']);
     expect(text(row('Teil I').querySelector('.count'))).toBe('1.505');
@@ -56,7 +56,7 @@ describe('ManuscriptTree', () => {
     );
   });
 
-  it('klappt Kapitel ein und aus', async () => {
+  it('collapses and expands chapters', async () => {
     const { row, titles, settle } = await setup();
     const collapse = button(row('Kapitel 1'), `${de.tree.collapse}: Kapitel 1`);
     expect(collapse.getAttribute('aria-expanded')).toBe('true');
@@ -70,7 +70,7 @@ describe('ManuscriptTree', () => {
     expect(titles()).toContain('B');
   });
 
-  it('legt über das „+“ eines Kapitels eine Szene an und öffnet sie', async () => {
+  it('creates a scene via a chapter\'s "+" and opens it', async () => {
     const { api, row, router, settle } = await setup();
     const navigate = vi.spyOn(router, 'navigate');
     button(row('Kapitel 2'), de.tree.addScene).click();
@@ -83,7 +83,7 @@ describe('ManuscriptTree', () => {
     expect(navigate).toHaveBeenCalledWith(['/write/scene', 'neu-1']);
   });
 
-  it('legt ein Kapitel an und lässt es gleich benennen; Enter speichert', async () => {
+  it('creates a chapter and lets it be named right away; Enter saves', async () => {
     const { api, fixture, element, titles, settle } = await setup();
     await fixture.componentInstance.add('chapter', null);
     await settle();
@@ -98,7 +98,7 @@ describe('ManuscriptTree', () => {
     expect(titles()).toContain('Kapitel 3');
   });
 
-  it('benennt per Doppelklick um; Escape oder ein leerer Titel ändern nichts', async () => {
+  it('renames by double-click; Escape or an empty title change nothing', async () => {
     const { api, element, row, settle } = await setup();
     row('Kapitel 2').querySelector('.label')!.dispatchEvent(new MouseEvent('dblclick'));
     await settle();
@@ -117,7 +117,7 @@ describe('ManuscriptTree', () => {
     expect(api.updateNode).not.toHaveBeenCalled();
   });
 
-  it('löscht erst nach Rückfrage', async () => {
+  it('deletes only after confirmation', async () => {
     const { api, confirm, row, titles, settle } = await setup();
     button(row('B'), de.common.delete).click();
     await settle();
@@ -138,7 +138,7 @@ describe('ManuscriptTree', () => {
     expect(titles()).toEqual(['Teil I', 'Kapitel 2', 'D']);
   });
 
-  it('verlässt eine gelöschte Szene, die gerade offen ist', async () => {
+  it('leaves a deleted scene that is currently open', async () => {
     const { confirm, row, router, settle } = await setup();
     await router.navigateByUrl('/write/scene/c');
     button(row('C'), de.common.delete).click();
@@ -147,7 +147,7 @@ describe('ManuscriptTree', () => {
     await until(settle, () => router.url === '/write');
   });
 
-  it('verschiebt per Ziehen und markiert, wo es landet', async () => {
+  it('moves by dragging and marks where it lands', async () => {
     const { api, row, settle } = await setup();
     const drag = startDrag();
     drag.fire(row('C').parentElement!, 'dragstart');
@@ -163,7 +163,7 @@ describe('ManuscriptTree', () => {
     expect(row('A').parentElement!.hasAttribute('data-drop')).toBe(false);
   });
 
-  it('fragt nicht beim Backend, wenn ein Drop nichts ändert oder nicht erlaubt ist', async () => {
+  it('does not ask the backend when a drop changes nothing or is not allowed', async () => {
     const { api, row, settle } = await setup();
     const sceneOntoItsPlace = startDrag();
     sceneOntoItsPlace.fire(row('B').parentElement!, 'dragstart');
@@ -182,7 +182,7 @@ describe('ManuscriptTree', () => {
     expect(api.moveNode).not.toHaveBeenCalled();
   });
 
-  it('ignoriert Fremdes, das in den Baum gezogen wird (z. B. Dateien)', async () => {
+  it('ignores foreign things dragged into the tree (e.g. files)', async () => {
     const { row, settle } = await setup();
     const files = startDrag();
     const over = files.fire(row('A'), 'dragover');
@@ -190,7 +190,7 @@ describe('ManuscriptTree', () => {
     expect(over.defaultPrevented).toBe(false);
   });
 
-  it('zeigt beim Filtern nur passende Szenen, alles aufgeklappt und nicht ziehbar', async () => {
+  it('while filtering shows only matching scenes, everything expanded and not draggable', async () => {
     const { row, titles, settle, element } = await setup();
     button(row('Kapitel 1'), `${de.tree.collapse}: Kapitel 1`).click();
     TestBed.inject(SceneFilter).toggle('statuses', 'draft');
@@ -205,7 +205,7 @@ describe('ManuscriptTree', () => {
     expect(text(element.querySelector('.empty'))).toBe(de.filter.noMatch);
   });
 
-  it('lädt zum ersten Kapitel ein, solange das Buch leer ist', async () => {
+  it('invites to the first chapter while the book is empty', async () => {
     const { element } = await setup(new FakeApi());
     expect(text(element.querySelector('.empty'))).toBe(de.tree.empty);
   });

@@ -33,7 +33,7 @@ const note = (patch: Partial<ProofNote>): ProofNote => ({
 });
 
 describe('textBlocks', () => {
-  it('liest Absätze als reinen Text – auch leere, verschachtelte und mit Zeilenumbruch', () => {
+  it('reads paragraphs as plain text – empty ones, nested ones and with line breaks too', () => {
     const blocks = textBlocks(
       doc(
         paragraph(text('Erster '), text('Satz', [{ type: 'bold' }]), text('.')),
@@ -63,26 +63,26 @@ describe('findAnchor', () => {
     ),
   );
 
-  it('findet die Stelle anhand des Texts davor und danach', () => {
+  it('finds the passage by the text before and after it', () => {
     const anchor = findAnchor(blocks, note({ quote: 'Haus', prefix: 'Das ', suffix: ' brannte' }));
     assert.deepEqual([anchor?.block.index, anchor?.start, anchor?.end], [1, 20, 24]);
     const second = findAnchor(blocks, note({ quote: 'Haus', prefix: 'alt. Das ', suffix: ' war' }));
     assert.equal(second?.start, 23);
   });
 
-  it('nimmt bei gleicher Umgebung den Absatz, der der alten Nummer am nächsten liegt', () => {
+  it('with the same surroundings takes the paragraph closest to the old number', () => {
     const anchor = findAnchor(blocks, note({ quote: 'Das Haus', paragraph: 1 }));
     assert.equal(anchor?.block.index, 1);
   });
 
-  it('findet nichts, wenn der Text nicht mehr vorkommt', () => {
+  it('finds nothing when the text no longer occurs', () => {
     assert.equal(findAnchor(blocks, note({ quote: 'Scheune' })), null);
     assert.equal(findAnchor(blocks, note({ quote: '' })), null);
   });
 });
 
 describe('addMark', () => {
-  it('teilt Textknoten an den Rändern und behält andere Marken', () => {
+  it('splits text nodes at the edges and keeps other marks', () => {
     const document = doc(
       paragraph(text('Ein '), text('fettes', [{ type: 'bold' }]), text(' Wort')),
     );
@@ -98,7 +98,7 @@ describe('addMark', () => {
     ]);
   });
 
-  it('ersetzt eine vorhandene Markierung derselben Art', () => {
+  it('replaces an existing mark of the same kind', () => {
     const old = { type: 'annotation', attrs: { kind: 'todo' } };
     const document = doc(paragraph(text('abc', [old])));
     const mark = { type: 'annotation', attrs: { kind: 'fixme', note: 'x', suggestion: 'y' } };
@@ -106,7 +106,7 @@ describe('addMark', () => {
     assert.deepEqual(document.content[0]!.content, [text('abc', [mark])]);
   });
 
-  it('überspringt Zeilenumbrüche', () => {
+  it('skips line breaks', () => {
     const document = doc(paragraph(text('ab'), { type: 'hardBreak' }, text('cd')));
     const mark = { type: 'annotation', attrs: { kind: 'fixme' } };
     addMark({ block: textBlocks(document)[0]!, start: 1, end: 4 }, mark);

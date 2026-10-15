@@ -70,7 +70,7 @@ async function setup(source = fakeSource(), inputs: Record<string, unknown> = {}
 }
 
 describe('DocumentEditor', () => {
-  it('lädt das Dokument und zeigt Wortzahl und Speicherstand', async () => {
+  it('loads the document and shows word count and save status', async () => {
     const { source, prose, element } = await setup();
     expect(source.load).toHaveBeenCalledWith('s1');
     expect(text(prose())).toBe('Am Abend kam der alte Mann.');
@@ -78,7 +78,7 @@ describe('DocumentEditor', () => {
     expect(text(element.querySelector('.statusbar .status'))).toBe(de.editor.saveStatus.saved);
   });
 
-  it('listet alle Markierungen in Textreihenfolge, mit Notiz bzw. Vorschlag', async () => {
+  it('lists all marks in text order, with note or suggestion', async () => {
     const { element, items, listed, settle } = await setup();
     const toggle = button(element, new RegExp(de.editor.markCount(3)));
     expect(listed()).toEqual([
@@ -93,7 +93,7 @@ describe('DocumentEditor', () => {
     expect(items()).toEqual([]);
   });
 
-  it('springt aus der Liste an die Stelle und zeigt dort die Notiz', async () => {
+  it('jumps from the list to the passage and shows its note there', async () => {
     const { bar, jumpTo, items } = await setup();
     // After loading, the cursor sits at the start of the text – inside the todo.
     expect(text(bar()?.querySelector('.mark-label'))).toBe('Todo');
@@ -104,7 +104,7 @@ describe('DocumentEditor', () => {
     expect(items()[2]!.classList).toContain('current');
   });
 
-  it('trägt eine Notiz zu einer Markierung ohne Notiz ein', async () => {
+  it('adds a note to a mark without one', async () => {
     const { bar, jumpTo, listed, settle, saved } = await setup();
     await jumpTo('Am Abend');
     expect(text(bar()?.querySelector('.mark-empty'))).toBe(de.editor.noNote);
@@ -122,7 +122,7 @@ describe('DocumentEditor', () => {
     expect(JSON.stringify((await saved())?.doc)).toContain('"note":"Wetter prüfen"');
   });
 
-  it('verwirft mit Escape eine angefangene Notiz', async () => {
+  it('discards a started note with Escape', async () => {
     const { bar, jumpTo, settle, source } = await setup();
     await jumpTo('der alte Mann');
     button(bar()!, de.editor.editNote).click();
@@ -138,7 +138,7 @@ describe('DocumentEditor', () => {
     expect(source.save).not.toHaveBeenCalled();
   });
 
-  it('entfernt eine Notiz, wenn man das Feld leert – die Markierung bleibt', async () => {
+  it('removes a note when the field is emptied – the mark stays', async () => {
     const { bar, jumpTo, listed, settle } = await setup();
     await jumpTo('der alte Mann');
     button(bar()!, de.editor.editNote).click();
@@ -150,7 +150,7 @@ describe('DocumentEditor', () => {
     expect(listed()[2]).toEqual(['Idee', '„der alte Mann“', '']);
   });
 
-  it('übernimmt einen Vorschlag: Text ersetzt, Markierung weg', async () => {
+  it('accepts a suggestion: text replaced, mark gone', async () => {
     const { bar, jumpTo, prose, items, settle, saved } = await setup();
     await jumpTo('kam');
     button(bar()!, de.editor.proofAccept).click();
@@ -160,7 +160,7 @@ describe('DocumentEditor', () => {
     expect((await saved())?.text).toBe('Am Abend schlich der alte Mann.');
   });
 
-  it('hakt eine Markierung mit „Erledigt“ ab, der Text bleibt', async () => {
+  it('completes a mark with "Done", the text stays', async () => {
     const { bar, jumpTo, prose, items, settle } = await setup();
     await jumpTo('Am Abend');
     button(bar()!, de.editor.proofDone).click();
@@ -172,7 +172,7 @@ describe('DocumentEditor', () => {
     ]);
   });
 
-  it('speichert Ungespeichertes, bevor ein anderes Dokument geladen wird', async () => {
+  it('saves unsaved changes before another document is loaded', async () => {
     const source = fakeSource({ s1: SCENE, s2: null });
     const { fixture, bar, jumpTo, settle, prose } = await setup(source);
     await jumpTo('Am Abend');
@@ -185,7 +185,7 @@ describe('DocumentEditor', () => {
     expect(source.save.mock.calls.map(([id]) => id)).toEqual(['s1']);
   });
 
-  it('beginnt ein noch nie gespeichertes Dokument mit der Vorlage', async () => {
+  it('starts a never saved document with the template', async () => {
     const template = {
       type: 'doc',
       content: [
@@ -196,7 +196,7 @@ describe('DocumentEditor', () => {
     expect(prose()!.querySelector('h2')?.textContent).toBe('Aussehen');
   });
 
-  it('meldet, wenn das Dokument nicht geladen werden kann', async () => {
+  it('reports when the document cannot be loaded', async () => {
     const source = fakeSource();
     source.load.mockRejectedValueOnce(new Error('Datei gesperrt'));
     const view = await render(DocumentEditor, { inputs: { documentId: 's1', source } });

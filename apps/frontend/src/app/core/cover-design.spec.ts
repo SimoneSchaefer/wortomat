@@ -4,12 +4,12 @@ describe('wrapText', () => {
   // every character 10 px wide
   const measure = (text: string) => text.length * 10;
 
-  it('bricht an Leerzeichen um, so dass jede Zeile in die Breite passt', () => {
+  it('wraps at spaces so every line fits the width', () => {
     expect(wrapText('Die Häuser am Fluss', measure, 100)).toEqual(['Die Häuser', 'am Fluss']);
     expect(wrapText('  Kurz  ', measure, 100)).toEqual(['Kurz']);
   });
 
-  it('lässt zu lange Wörter ganz', () => {
+  it('keeps words that are too long whole', () => {
     expect(wrapText('Donaudampfschifffahrt ab', measure, 100)).toEqual([
       'Donaudampfschifffahrt',
       'ab',

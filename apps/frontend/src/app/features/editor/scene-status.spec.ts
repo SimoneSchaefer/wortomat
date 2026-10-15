@@ -22,14 +22,14 @@ async function setup(status: 'idea' | 'draft' = 'idea') {
 }
 
 describe('SceneStatusPicker', () => {
-  it('zeigt den aktuellen Status als gewählten Knopf mit einem einzigen Tab-Stopp', async () => {
+  it('shows the current status as the selected button with a single tab stop', async () => {
     const { element, checked } = await setup('draft');
     expect(checked()).toBe('Entwurf');
     const tabbable = element.querySelectorAll('[role=radio][tabindex="0"]');
     expect([...tabbable].map((b) => b.textContent?.trim())).toEqual(['Entwurf']);
   });
 
-  it('speichert einen angeklickten Status', async () => {
+  it('saves a clicked status', async () => {
     const { element, api, sync, checked } = await setup();
     button(element, 'Überarbeitet').click();
     await sync();
@@ -37,13 +37,13 @@ describe('SceneStatusPicker', () => {
     expect(checked()).toBe('Überarbeitet');
   });
 
-  it('speichert nichts, wenn der Status schon gilt', async () => {
+  it('saves nothing when the status already applies', async () => {
     const { element, api } = await setup('draft');
     button(element, 'Entwurf').click();
     expect(api.updateNode).not.toHaveBeenCalled();
   });
 
-  it('wechselt mit Pfeiltasten, Pos1 und Ende wie eine Radiogruppe', async () => {
+  it('switches with arrow keys, Home and End like a radio group', async () => {
     const { element, api, sync, checked } = await setup();
     const group = element.querySelector('[role=radiogroup]')!;
 
@@ -66,7 +66,7 @@ describe('SceneStatusPicker', () => {
     ]);
   });
 
-  it('meldet einen Fehler beim Speichern in der Statusleiste', async () => {
+  it('reports a save error in the status bar', async () => {
     const { element, api, settle } = await setup();
     api.updateNode.mockRejectedValueOnce(new Error('kaputt'));
     button(element, 'Fertig').click();

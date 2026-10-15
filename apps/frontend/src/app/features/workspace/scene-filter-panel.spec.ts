@@ -44,7 +44,7 @@ async function setup() {
 }
 
 describe('SceneFilterPanel', () => {
-  it('lädt beim Öffnen frisch, was den Szenen zugeordnet ist', async () => {
+  it('loads fresh on opening what is assigned to the scenes', async () => {
     const { api, open, group } = await setup();
     const popover = await open();
     expect(api.sceneRelations).toHaveBeenCalledTimes(1);
@@ -60,7 +60,7 @@ describe('SceneFilterPanel', () => {
     ]);
   });
 
-  it('filtert per Klick und zeigt, wie viele Szenen übrig sind', async () => {
+  it('filters by click and shows how many scenes are left', async () => {
     const { element, open, group, filter, settle } = await setup();
     const popover = await open();
 
@@ -83,7 +83,7 @@ describe('SceneFilterPanel', () => {
     expect(text(element.querySelector('[role=status]'))).toBe(de.filter.count(1, 3));
   });
 
-  it('filtert auf Wendepunkte und setzt mit „Zurücksetzen“ alles zurück', async () => {
+  it('filters by turning points and resets everything with "Reset"', async () => {
     const { element, open, group, filter, settle } = await setup();
     const popover = await open();
     button(group(popover, 'Wendepunkt'), de.filter.turningPoints).click();
@@ -96,7 +96,7 @@ describe('SceneFilterPanel', () => {
     expect(element.querySelector('[role=status]')).toBeNull();
   });
 
-  it('schließt mit Escape (Fokus zurück auf den Knopf), beim Klick daneben und beim zweiten Klick', async () => {
+  it('closes with Escape (focus back on the button), on a click elsewhere and on the second click', async () => {
     const { element, open, settle } = await setup();
     const toggle = button(element, new RegExp(`^${de.filter.toggle}`));
 
@@ -118,7 +118,7 @@ describe('SceneFilterPanel', () => {
     expect(element.querySelector('[role=dialog]')).toBeNull();
   });
 
-  it('vergisst gelöschte Stränge im Filter, damit noch Szenen passen können', async () => {
+  it('forgets deleted threads in the filter so scenes can still match', async () => {
     const { api, open, group, filter, settle } = await setup();
     let popover = await open();
     button(group(popover, 'Stränge'), 'Lena').click();
@@ -133,7 +133,7 @@ describe('SceneFilterPanel', () => {
     expect(popover.querySelector('[aria-label="Stränge"]')).toBeNull();
   });
 
-  it('meldet, wenn das Laden scheitert, und zeigt trotzdem die festen Zeilen', async () => {
+  it('reports when loading fails and still shows the fixed rows', async () => {
     const { api, open, group } = await setup();
     api.sceneRelations.mockRejectedValueOnce(new Error('offline'));
     const popover = await open();

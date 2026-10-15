@@ -4,24 +4,24 @@ const GUILLEMETS = { open: '»', close: '«' };
 const GERMAN = { open: '„', close: '“' };
 
 describe('analyzeText', () => {
-  it('zählt wörtliche Rede getrennt vom Erzähltext', () => {
+  it('counts direct speech separately from narration', () => {
     const stats = analyzeText('»Komm her«, sagte Anna. Sie lachte.', GUILLEMETS);
     expect(stats.words).toBe(6);
     expect(stats.dialogueWords).toBe(2);
   });
 
-  it('beendet die Rede am Absatzende, auch ohne schließendes Zeichen', () => {
+  it('ends speech at the end of the paragraph, even without a closing mark', () => {
     const text = '„Ich erzähle dir etwas.\n„Und dann ging ich.“\nDer Regen hörte auf.';
     const stats = analyzeText(text, GERMAN);
     expect(stats.dialogueWords).toBe(8);
     expect(stats.words).toBe(12);
   });
 
-  it('zählt ohne Anführungszeichen-Stil keine Rede', () => {
+  it('counts no speech without a quote style', () => {
     expect(analyzeText('»Hallo«', null).dialogueWords).toBe(0);
   });
 
-  it('erkennt Satzenden, aber nicht bei Abkürzungen, Ordnungszahlen und Redebegleitsätzen', () => {
+  it('detects sentence ends, but not at abbreviations, ordinals and speech tags', () => {
     const count = (text: string) => analyzeText(text, GUILLEMETS).sentences;
     expect(count('Er kam. Sie ging! Warum?')).toBe(3);
     expect(count('Er kam z. B. am 3. Mai mit Dr. Berger.')).toBe(1);
@@ -29,17 +29,17 @@ describe('analyzeText', () => {
     expect(count('Ich … weiß nicht. Vielleicht…')).toBe(2);
   });
 
-  it('zählt einen Absatz ohne Satzzeichen (Überschrift) als einen Satz', () => {
+  it('counts a paragraph without punctuation (heading) as one sentence', () => {
     expect(analyzeText('Kapitel eins\nEs regnete.', null).sentences).toBe(2);
   });
 
-  it('findet Füllwörter, auch aus zwei Wörtern, und zählt sie nicht doppelt', () => {
+  it('finds filler words, two-word ones too, and does not count them twice', () => {
     const stats = analyzeText('Eigentlich war es ein wenig kalt, eigentlich.', null);
     expect(Object.fromEntries(stats.fillers)).toEqual({ eigentlich: 2, 'ein wenig': 1 });
     expect(stats.wordCounts.has('wenig')).toBe(false);
   });
 
-  it('zählt Wörter ohne Funktionswörter, Zahlen und Satzzeichen', () => {
+  it('counts words without function words, numbers and punctuation', () => {
     const stats = analyzeText('Der Blick ging zum Fluss. Ihr Blick! Im Jahr 1920.', null);
     expect(stats.wordCounts.get('blick')).toBe(2);
     expect(Object.fromEntries(stats.wordForms.get('blick')!)).toEqual({ Blick: 2 });
@@ -50,14 +50,14 @@ describe('analyzeText', () => {
 });
 
 describe('fillerAt / isContentWord', () => {
-  it('erkennt Füllwörter aus einem und zwei Wörtern', () => {
+  it('detects one- and two-word fillers', () => {
     const words = ['er', 'war', 'ein', 'wenig', 'eigentlich', 'müde'];
     expect(fillerAt(words, 2)).toEqual({ filler: 'ein wenig', length: 2 });
     expect(fillerAt(words, 4)).toEqual({ filler: 'eigentlich', length: 1 });
     expect(fillerAt(words, 5)).toBeNull();
   });
 
-  it('nimmt nur bedeutungstragende Wörter', () => {
+  it('takes only content words', () => {
     expect(['blick', 'der', 'eigentlich', '1920', 'ja'].map(isContentWord)).toEqual([
       true,
       false,
@@ -69,7 +69,7 @@ describe('fillerAt / isContentWord', () => {
 });
 
 describe('analyzeBook', () => {
-  it('summiert die Szenen, ohne Namen und einmalige Wörter, in der häufigsten Schreibweise', () => {
+  it('sums the scenes, without names and one-off words, in the most frequent spelling', () => {
     const stats = analyzeBook(
       [
         { sceneId: 'a', text: '„Komm eigentlich her“, sagte Anna. Der Fluss rauschte.' },

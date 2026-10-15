@@ -25,7 +25,7 @@ function node(
 }
 
 describe('buildTree', () => {
-  it('summiert die Markierungen der Szenen für Kapitel und Teile', () => {
+  it("sums the scenes' marks for chapters and parts", () => {
     const tree = buildTree([
       node('teil', 'part', null, 1),
       node('k1', 'chapter', 'teil', 1),
@@ -44,7 +44,7 @@ describe('buildTree', () => {
     expect(leer!.annotations).toEqual({ todo: 0, idea: 0, fixme: 0 });
   });
 
-  it('summiert die Wortzahlen der Szenen für Kapitel und Teile', () => {
+  it("sums the scenes' word counts for chapters and parts", () => {
     const tree = buildTree([
       node('teil', 'part', null, 1),
       node('k1', 'chapter', 'teil', 1),

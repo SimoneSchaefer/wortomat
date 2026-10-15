@@ -22,7 +22,7 @@ async function setup() {
 }
 
 describe('ConfirmDialogHost', () => {
-  it('zeigt Frage und Hinweis und liefert „ja“ beim Bestätigen', async () => {
+  it('shows the question and hint and answers yes on confirming', async () => {
     const { dialog, ask, settle } = await setup();
     const answer = ask();
     await settle();
@@ -37,14 +37,14 @@ describe('ConfirmDialogHost', () => {
     expect(dialog.open).toBe(false);
   });
 
-  it('setzt den Fokus auf „Abbrechen“, damit ein versehentliches Enter nichts löscht', async () => {
+  it('focuses "Cancel" so an accidental Enter deletes nothing', async () => {
     const { dialog, ask, settle } = await setup();
     void ask();
     await settle();
     expect(document.activeElement).toBe(button(dialog, de.confirm.cancel));
   });
 
-  it('liefert „nein“ bei Abbrechen, Escape und Klick auf den Hintergrund', async () => {
+  it('answers no on Cancel, Escape and a click on the backdrop', async () => {
     const { dialog, ask, settle } = await setup();
 
     const cancelled = ask();
@@ -63,7 +63,7 @@ describe('ConfirmDialogHost', () => {
     expect(await outside).toBe(false);
   });
 
-  it('zeigt bei harmlosen Fragen keinen Hinweis und keinen roten Knopf', async () => {
+  it('shows neither hint nor red button for harmless questions', async () => {
     const { dialog, ask, settle } = await setup();
     void ask({ ...DELETE_SCENE, confirmLabel: 'Übernehmen', destructive: false } as never);
     await settle();
@@ -71,7 +71,7 @@ describe('ConfirmDialogHost', () => {
     expect(button(dialog, 'Übernehmen').classList).not.toContain('danger');
   });
 
-  it('bricht eine noch offene Frage ab, wenn eine neue kommt', async () => {
+  it('cancels a question still open when a new one comes', async () => {
     const { ask } = await setup();
     const first = ask();
     void ask({ ...DELETE_SCENE, title: 'Kapitel löschen?' });

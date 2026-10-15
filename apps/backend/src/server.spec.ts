@@ -42,7 +42,7 @@ const PNG_1PX = Buffer.from(
   'base64',
 );
 
-describe('REST-API', () => {
+describe('REST API', () => {
   let server: RunningServer;
   let tmpDir: string;
 
@@ -75,12 +75,12 @@ describe('REST-API', () => {
     await rm(tmpDir, { recursive: true, force: true });
   });
 
-  it('lehnt Anfragen ohne Token ab', async () => {
+  it('rejects requests without a token', async () => {
     const response = await fetch(`${server.url}/api/app`);
     assert.equal(response.status, 401);
   });
 
-  it('lehnt fremde Host-Header ab (DNS-Rebinding)', async () => {
+  it('rejects foreign Host headers (DNS rebinding)', async () => {
     const http = await import('node:http');
     const status = await new Promise<number>((resolve, reject) => {
       http
@@ -97,13 +97,13 @@ describe('REST-API', () => {
     assert.equal(status, 403);
   });
 
-  it('meldet 409, solange kein Projekt geöffnet ist', async () => {
+  it('responds with 409 while no project is open', async () => {
     assert.equal(await api('GET', '/api/project'), null);
     const response = await fetch(`${server.url}/api/nodes`, { headers: { [AUTH_HEADER]: TOKEN } });
     assert.equal(response.status, 409);
   });
 
-  it('durchläuft Projekt → Kapitel → Szene → Inhalt → Suche → Wiederöffnen', async () => {
+  it('goes through project → chapter → scene → content → search → reopening', async () => {
     const filePath = path.join(tmpDir, 'Roman');
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath,
@@ -155,7 +155,7 @@ describe('REST-API', () => {
     assert.deepEqual(await api('GET', '/api/search?q=hauser'), []);
   });
 
-  it('verschiebt Szenen und Kapitel und nummeriert neu', async () => {
+  it('moves scenes and chapters and renumbers', async () => {
     const node = (parentId: string | null, kind: string, title: string) =>
       api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
     const move = (id: string, parentId: string | null, beforeId: string | null) =>
@@ -204,16 +204,16 @@ describe('REST-API', () => {
       });
       return response.status;
     };
-    assert.equal(await rejected(b.id, null, null), 400, 'Szene auf oberster Ebene');
-    assert.equal(await rejected(teil.id, k2.id, null), 400, 'Teil in Kapitel');
-    assert.equal(await rejected(b.id, k2.id, c.id), 400, 'Bezugselement aus anderem Kapitel');
-    assert.equal(await rejected(k2.id, k2.id, null), 400, 'in sich selbst');
+    assert.equal(await rejected(b.id, null, null), 400, 'scene at the top level');
+    assert.equal(await rejected(teil.id, k2.id, null), 400, 'part into chapter');
+    assert.equal(await rejected(b.id, k2.id, c.id), 400, 'reference element from another chapter');
+    assert.equal(await rejected(k2.id, k2.id, null), 400, 'into itself');
 
     await api('DELETE', `/api/nodes/${teil.id}`);
     await api('DELETE', `/api/nodes/${k2.id}`);
   });
 
-  it('führt eine Liste aller angelegten und geöffneten Projekte', async () => {
+  it('keeps a list of all created and opened projects', async () => {
     const titles = (list: ProjectListEntry[]) => list.map((p) => p.title);
     const create = (name: string) =>
       api<ProjectInfo>('POST', '/api/project/create', {
@@ -298,7 +298,7 @@ describe('REST-API', () => {
     );
   });
 
-  it('verwaltet Charaktere, Orte und Forschung und findet sie in der Suche', async () => {
+  it('manages characters, places and research and finds them in the search', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'notizen', 'Buch'),
       title: 'Buch',
@@ -441,7 +441,7 @@ describe('REST-API', () => {
     assert.equal(invalid.status, 400);
   });
 
-  it('verwaltet eine Bildergalerie je Charakter und räumt ungenutzte Bilder auf', async () => {
+  it('manages an image gallery per character and cleans up unused images', async () => {
     const upload = async (noteId: string, name: string) => {
       const form = new FormData();
       form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), name);
@@ -535,7 +535,7 @@ describe('REST-API', () => {
     assert.equal(await imageExists(eins.url), false);
   });
 
-  it('verknüpft Szenen mit Charakteren und Orten – in beide Richtungen', async () => {
+  it('links scenes with characters and places – in both directions', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'links', 'Buch'),
       title: 'Buch',
@@ -600,8 +600,8 @@ describe('REST-API', () => {
           body: JSON.stringify({ noteId }),
         })
       ).status;
-    assert.equal(await status(k1.id, anna.id), 400, 'Kapitel statt Szene');
-    assert.equal(await status(ankunft.id, 'gibt-es-nicht'), 404, 'unbekannte Notiz');
+    assert.equal(await status(k1.id, anna.id), 400, 'chapter instead of scene');
+    assert.equal(await status(ankunft.id, 'gibt-es-nicht'), 404, 'unknown note');
 
     // Deleting cleans up links: scene, whole chapter, note
     await api('DELETE', `/api/nodes/${markt.id}`);
@@ -614,7 +614,7 @@ describe('REST-API', () => {
     assert.deepEqual(await linked(ankunft.id), []);
   });
 
-  it('zeichnet Karten und trägt Orte darauf ein', async () => {
+  it('draws maps and places places on them', async () => {
     const status = async (method: string, urlPath: string, body: unknown) =>
       (
         await fetch(server.url + urlPath, {
@@ -718,7 +718,7 @@ describe('REST-API', () => {
     assert.ok(!(await api<MapSummary[]>('GET', '/api/maps')).some((m) => m.id === map.id));
   });
 
-  it('zählt Todo/Idee/Fixme-Markierungen beim Speichern und zeigt sie im Baum', async () => {
+  it('counts todo/idea/fixme marks on save and shows them in the tree', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'markierungen', 'Buch'),
       title: 'Buch',
@@ -778,7 +778,7 @@ describe('REST-API', () => {
     });
   });
 
-  it('führt ein Schreib-Log: brutto geschrieben, Eingefügtes extra', async () => {
+  it('keeps a writing log: gross words written, pasted ones separately', async () => {
     await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'Schreiblog'),
       title: 'Schreiblog',
@@ -820,7 +820,7 @@ describe('REST-API', () => {
     await api('POST', '/api/project/close');
   });
 
-  it('liefert den reinen Text aller Szenen', async () => {
+  it('returns the plain text of all scenes', async () => {
     await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'Szenentexte'),
       title: 'Szenentexte',
@@ -847,7 +847,7 @@ describe('REST-API', () => {
     await api('POST', '/api/project/close');
   });
 
-  it('führt einen Status je Szene', async () => {
+  it('keeps a status per scene', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'status', 'Buch'),
       title: 'Buch',
@@ -893,7 +893,7 @@ describe('REST-API', () => {
     assert.equal(await status(kapitel.id, { status: 'final' }), 400);
   });
 
-  it('vergibt Tags an Szenen, verwendet sie wieder und räumt ungenutzte auf', async () => {
+  it('assigns tags to scenes, reuses them and cleans up unused ones', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'tags', 'Buch'),
       title: 'Buch',
@@ -965,7 +965,7 @@ describe('REST-API', () => {
     assert.equal(await invalid('x'.repeat(41)), 400);
   });
 
-  it('ordnet Szenen Handlungssträngen zu – neue Szenen starten ohne Strang', async () => {
+  it('assigns scenes to plot threads – new scenes start without a thread', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'straenge', 'Buch'),
       title: 'Buch',
@@ -1070,7 +1070,7 @@ describe('REST-API', () => {
     );
   });
 
-  it('markiert Szenen als Wendepunkt', async () => {
+  it('marks scenes as turning points', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'wendepunkte', 'Buch'),
       title: 'Buch',
@@ -1109,7 +1109,7 @@ describe('REST-API', () => {
     assert.equal(await status(szene.id, { turningPoint: 'ja' }), 400);
   });
 
-  it('legt die Reihenfolge der Handlung samt Abschnitten fest und setzt sie zurück', async () => {
+  it('sets the story order including sections and resets it', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'handlung', 'Buch'),
       title: 'Buch',
@@ -1189,7 +1189,7 @@ describe('REST-API', () => {
     );
   });
 
-  it('exportiert eine Korrekturfassung und übernimmt Notizen als Fixme-Markierungen', async () => {
+  it('exports a proofreading copy and imports notes as fixme marks', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'korrektur', 'Buch'),
       title: 'Korrekturbuch',
@@ -1364,7 +1364,7 @@ describe('REST-API', () => {
     );
   });
 
-  it('findet Notizdateien vom Handy im Download-Ordner und räumt erledigte auf', async () => {
+  it('finds notes files from the phone in the downloads folder and cleans up finished ones', async () => {
     await api('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'postkasten', 'Buch'),
       title: 'Postkasten',
@@ -1472,7 +1472,7 @@ describe('REST-API', () => {
     ]);
   });
 
-  it('aktualisiert ältere Projektdateien beim Öffnen auf das neue Schema', async () => {
+  it('upgrades older project files to the new schema on opening', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
       title: 'Altes Buch',
@@ -1508,7 +1508,7 @@ describe('REST-API', () => {
     assert.equal(nodes.find((n) => n.id === szene.id)?.turningPoint, false);
   });
 
-  it('speichert App-Einstellungen dauerhaft – auch ohne geöffnetes Projekt', async () => {
+  it('stores app settings permanently – even without an open project', async () => {
     const openProject = await api<ProjectInfo>('GET', '/api/project');
     await api('POST', '/api/project/close');
     assert.deepEqual(await api('GET', '/api/settings'), {
@@ -1645,7 +1645,7 @@ describe('REST-API', () => {
     await api('POST', '/api/project/open', { filePath: openProject.filePath });
   });
 
-  it('liefert Fehlermeldungen in der Sprache aus Accept-Language', async () => {
+  it('returns error messages in the language from Accept-Language', async () => {
     const message = async (language?: string) => {
       const response = await fetch(`${server.url}/api/notes/gibt-es-nicht/content`, {
         headers: { [AUTH_HEADER]: TOKEN, ...(language ? { 'Accept-Language': language } : {}) },
@@ -1659,7 +1659,7 @@ describe('REST-API', () => {
     assert.equal(await message('fr-FR,de;q=0.8'), 'Notiz nicht gefunden.');
   });
 
-  it('listet Ordner und Projektdateien für die Dateiauswahl', async () => {
+  it('lists folders and project files for the file picker', async () => {
     const root = path.join(tmpDir, 'auswahl');
     await mkdir(path.join(root, 'Kapitel 10'), { recursive: true });
     await mkdir(path.join(root, 'Kapitel 2'));
@@ -1692,7 +1692,7 @@ describe('REST-API', () => {
     assert.equal((await api<DirectoryListing>('GET', '/api/files')).path, tmpDir);
   });
 
-  it('verweigert Szenen direkt auf oberster Ebene', async () => {
+  it('refuses scenes directly at the top level', async () => {
     const response = await fetch(`${server.url}/api/nodes`, {
       method: 'POST',
       headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
@@ -1701,7 +1701,7 @@ describe('REST-API', () => {
     assert.equal(response.status, 400);
   });
 
-  it('speichert Bilder und prüft das Format anhand des Inhalts', async () => {
+  it('stores images and checks the format by their content', async () => {
     const upload = (bytes: Buffer, name: string, type: string) => {
       const form = new FormData();
       form.append('file', new Blob([new Uint8Array(bytes)], { type }), name);

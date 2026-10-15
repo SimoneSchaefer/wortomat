@@ -22,23 +22,23 @@ const notes = [
   note('4', 'Tom'),
 ];
 
-describe('Notiz-Auswahl', () => {
-  it('ignoriert Umlaute und Groß-/Kleinschreibung', () => {
+describe('note picker', () => {
+  it('ignores umlauts and case', () => {
     expect(normalizeForSearch('  Ärztin Özdemir ')).toBe('arztin ozdemir');
     expect(filterCandidates(notes, new Set(), 'ozde').map((n) => n.id)).toEqual(['3']);
     expect(filterCandidates(notes, new Set(), 'ARZT').map((n) => n.id)).toEqual(['1']);
   });
 
-  it('zeigt Treffer am Wortanfang vor Treffern mitten im Wort und in der Kurzbeschreibung', () => {
+  it('shows hits at the start of a word before hits inside a word and in the summary', () => {
     // "an": Anna (start) · Hanna (middle) · Ben (only in the summary "Annas Bruder")
     expect(filterCandidates(notes, new Set(), 'an').map((n) => n.id)).toEqual(['1', '3', '2']);
   });
 
-  it('blendet bereits verknüpfte Notizen aus und zeigt ohne Eingabe alle übrigen', () => {
+  it('hides notes already linked and shows all others without input', () => {
     expect(filterCandidates(notes, new Set(['1', '4']), '').map((n) => n.id)).toEqual(['2', '3']);
   });
 
-  it('erkennt exakt gleiche Titel', () => {
+  it('detects exactly equal titles', () => {
     expect(hasExactTitle(notes, 'tom')).toBe(true);
     expect(hasExactTitle(notes, 'Tomas')).toBe(false);
   });

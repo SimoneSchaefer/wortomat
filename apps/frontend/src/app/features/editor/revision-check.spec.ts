@@ -21,7 +21,7 @@ function marks(texts: string[], names: ReadonlySet<string> = NO_NAMES) {
 }
 
 describe('checkRevision', () => {
-  it('markiert beide Stellen einer Nahwiederholung und zählt sie als ein Paar', () => {
+  it('marks both passages of a close repetition and counts them as one pair', () => {
     const result = checkRevision(
       blocks('Sein Blick fiel auf den Fluss. Ihr Blick folgte.'),
       NO_NAMES,
@@ -35,31 +35,31 @@ describe('checkRevision', () => {
     expect(result.findings[1]).toMatchObject({ distance: 6, other: 'before' });
   });
 
-  it('erkennt Wiederholungen über Absätze hinweg, aber nicht jenseits des Abstands', () => {
+  it('detects repetitions across paragraphs, but not beyond the distance', () => {
     expect(marks(['Der Blick.', 'Ein Blick.'])).toEqual(['repetition:Blick', 'repetition:Blick']);
     const filler = Array.from({ length: REPETITION_DISTANCE }, (_, i) => `wort${i}`).join(' ');
     // (the test sentence is long itself – only look at the repetitions)
     expect(marks([`Blick ${filler} Blick`]).filter((m) => m.startsWith('repetition'))).toEqual([]);
   });
 
-  it('übergeht Funktionswörter und Namen von Figuren und Orten', () => {
+  it('skips function words and names of characters and places', () => {
     expect(marks(['Anna sah Anna. Und und so.'], new Set(['anna']))).toEqual(['double:Und und']);
   });
 
-  it('markiert Füllwörter, auch aus zwei Wörtern', () => {
+  it('marks filler words, two-word ones too', () => {
     expect(marks(['Er war eigentlich ein wenig müde.'])).toEqual([
       'filler:eigentlich',
       'filler:ein wenig',
     ]);
   });
 
-  it('markiert doppelte Wörter nur ohne Satzzeichen dazwischen', () => {
+  it('marks doubled words only without punctuation between them', () => {
     expect(marks(['Er sah den den Fluss.'])).toEqual(['double:den den']);
     // with a comma it is no typo, at most a repetition
     expect(marks(['»Komm, komm!«']).filter((m) => m.startsWith('double'))).toEqual([]);
   });
 
-  it('markiert lange Sätze, Absatzende beendet einen Satz', () => {
+  it('marks long sentences; the end of a paragraph ends a sentence', () => {
     const long = Array.from({ length: LONG_SENTENCE_WORDS }, (_, i) => `w${i}`).join(' ') + '.';
     const short = Array.from({ length: LONG_SENTENCE_WORDS - 1 }, (_, i) => `x${i}`).join(' ');
     const result = checkRevision(blocks(long, short), NO_NAMES);
@@ -67,7 +67,7 @@ describe('checkRevision', () => {
     expect(result.findings[0]).toMatchObject({ kind: 'long', from: 1, words: LONG_SENTENCE_WORDS });
   });
 
-  it('setzt die Markierung genau auf das Wort ohne Satzzeichen', () => {
+  it('puts the mark exactly on the word without punctuation', () => {
     expect(marks(['»Blick«, sagte er. (Blick!)'])).toEqual([
       'repetition:Blick',
       'repetition:Blick',

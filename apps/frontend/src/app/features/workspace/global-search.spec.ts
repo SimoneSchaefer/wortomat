@@ -32,7 +32,7 @@ async function setup() {
 }
 
 describe('GlobalSearch', () => {
-  it('sucht erst nach einer Tipp-Pause, und nur nach der letzten Eingabe', async () => {
+  it('searches only after a typing pause, and only for the latest input', async () => {
     const { api, input, settle } = await setup();
     type(input, 'Ha');
     type(input, 'Haf');
@@ -42,7 +42,7 @@ describe('GlobalSearch', () => {
     expect(api.search.mock.calls).toEqual([['Hafen']]);
   });
 
-  it('zeigt die Treffer nach Bereich gruppiert, Szenen zuerst, mit Ausschnitt', async () => {
+  it('shows the hits grouped by area, scenes first, with a snippet', async () => {
     const { element, search, options } = await setup();
     await search('Hafen');
 
@@ -56,7 +56,7 @@ describe('GlobalSearch', () => {
     expect(options()[0]!.querySelector('mark')?.textContent).toBe('Hafen');
   });
 
-  it('springt mit Pfeiltasten durch die Treffer und öffnet mit Enter', async () => {
+  it('moves through the hits with arrow keys and opens with Enter', async () => {
     const { input, search, options, navigate, settle } = await setup();
     await search('Hafen');
 
@@ -77,21 +77,21 @@ describe('GlobalSearch', () => {
     expect(options()).toEqual([]);
   });
 
-  it('öffnet einen angeklickten Treffer', async () => {
+  it('opens a clicked hit', async () => {
     const { search, options, navigate } = await setup();
     await search('Hafen');
     (options()[1] as HTMLElement).click();
     expect(navigate).toHaveBeenCalledWith(['/write/scene', 's2']);
   });
 
-  it('meldet, wenn nichts gefunden wurde', async () => {
+  it('reports when nothing was found', async () => {
     const { api, element, search } = await setup();
     api.hits = [];
     await search('  Zeppelin ');
     expect(text(element.querySelector('.empty'))).toBe(de.search.noHits('Zeppelin'));
   });
 
-  it('übernimmt keine Antwort, die zu einer älteren Eingabe gehört', async () => {
+  it('ignores a response that belongs to an older input', async () => {
     const { api, input, options, settle } = await setup();
     let answerOld!: (hits: SearchHit[]) => void;
     api.search.mockImplementationOnce(() => new Promise((resolve) => (answerOld = resolve)));
@@ -106,7 +106,7 @@ describe('GlobalSearch', () => {
     expect(options().map(text)).not.toContain('Veraltet');
   });
 
-  it('schließt mit Escape erst die Liste und leert dann die Eingabe', async () => {
+  it('first closes the list with Escape, then clears the input', async () => {
     const { input, search, options, settle } = await setup();
     await search('Hafen');
 
@@ -121,7 +121,7 @@ describe('GlobalSearch', () => {
     expect(document.activeElement).not.toBe(input);
   });
 
-  it('leert die Eingabe über das ×, und Strg+K springt von überall hinein', async () => {
+  it('clears the input via the ×, and Ctrl+K jumps in from anywhere', async () => {
     const { element, input, search, settle } = await setup();
     await search('Hafen');
     button(element, de.search.clear).click();
@@ -133,7 +133,7 @@ describe('GlobalSearch', () => {
     expect(document.activeElement).toBe(input);
   });
 
-  it('schließt die Liste beim Klick daneben', async () => {
+  it('closes the list on a click elsewhere', async () => {
     const { search, options, settle } = await setup();
     await search('Hafen');
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
@@ -141,7 +141,7 @@ describe('GlobalSearch', () => {
     expect(options()).toEqual([]);
   });
 
-  it('führt eine Suche aus, die von anderswo angestoßen wurde (z. B. ein Füllwort)', async () => {
+  it('runs a search triggered from elsewhere (e.g. a filler word)', async () => {
     const api = new FakeApi();
     api.hits = HITS;
     const { element, settle } = await render(GlobalSearch, {

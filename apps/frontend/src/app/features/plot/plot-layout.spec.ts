@@ -56,7 +56,7 @@ describe('layoutPlot', () => {
     scene('d', K2, []),
   ];
 
-  it('legt die Spalten von links nach rechts an, mit einer Lücke je Gruppe', () => {
+  it('lays out the columns from left to right, with a gap per group', () => {
     const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     const half = COLUMN_WIDTH / 2;
     expect(layout.nodes.map((n) => [n.scene.id, n.x, n.column])).toEqual([
@@ -72,7 +72,7 @@ describe('layoutPlot', () => {
     expect(layout.width).toBe(4 * COLUMN_WIDTH + GROUP_GAP);
   });
 
-  it('legt gemeinsame Szenen mittig zwischen die Stränge und bündelt die Linien', () => {
+  it('puts shared scenes centred between the threads and bundles the lines', () => {
     const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     const b = layout.nodes[1]!;
     expect(b.strands.map((s) => s.id)).toEqual(['lena', 'tom']); // order of the rows
@@ -87,7 +87,7 @@ describe('layoutPlot', () => {
     );
   });
 
-  it('sammelt Szenen ohne Strang in einer eigenen Zeile', () => {
+  it('collects scenes without a thread in a row of their own', () => {
     const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     expect(layout.lanes.map((l) => [l.strand?.id ?? null, l.y, l.nodeCount])).toEqual([
       ['lena', lane(0), 2],
@@ -98,13 +98,13 @@ describe('layoutPlot', () => {
     expect(layout.height).toBe(3 * LANE_HEIGHT);
   });
 
-  it('ignoriert unbekannte (gelöschte) Stränge', () => {
+  it('ignores unknown (deleted) threads', () => {
     const layout = layoutPlot(inBookOrder([scene('a', K1, ['weg'])]), [lena]);
     expect(layout.nodes[0]!.strands).toEqual([]);
     expect(layout.lanes.map((l) => l.strand?.id ?? null)).toEqual(['lena', null]);
   });
 
-  it('stellt gleichzeitige Szenen übereinander – oder nebeneinander, wenn sie sich stören', () => {
+  it("stacks simultaneous scenes – or places them side by side when they get in each other's way", () => {
     const group = { id: 'start', label: '', number: null };
     const x = scene('x', K1, ['lena']);
     const y = scene('y', K1, ['tom']);
@@ -124,8 +124,8 @@ describe('layoutPlot', () => {
   });
 });
 
-describe('layoutPlot kompakt', () => {
-  it('rückt Spalten und Zeilen ohne Titel enger zusammen', () => {
+describe('layoutPlot compact', () => {
+  it('moves columns and rows closer together without titles', () => {
     const { columnWidth, laneHeight } = PLOT_GEOMETRY.compact;
     const group = { id: 'start', label: '', number: null };
     const x = scene('x', K1, ['lena']);
@@ -147,7 +147,7 @@ describe('layoutPlot kompakt', () => {
 });
 
 describe('linePath', () => {
-  it('bleibt gerade, solange die Linie auf ihrer Zeile bleibt', () => {
+  it('stays straight as long as the line stays on its row', () => {
     expect(
       linePath(
         [
@@ -159,7 +159,7 @@ describe('linePath', () => {
     ).toBe('M10 28 H200');
   });
 
-  it('kehrt zwischen weit entfernten gemeinsamen Szenen auf die Zeile zurück', () => {
+  it('returns to the row between shared scenes far apart', () => {
     const path = linePath(
       [
         { x: 0, y: 50 },
