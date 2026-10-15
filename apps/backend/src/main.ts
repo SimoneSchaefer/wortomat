@@ -17,7 +17,9 @@ const documentsDir = path.join(os.homedir(), 'Documents');
 const server = await startServer({
   mode: 'browser',
   version: packageJson.version,
-  defaultProjectDir: existsSync(documentsDir) ? documentsDir : os.homedir(),
+  // Overridable so end-to-end tests create their books in a throwaway folder.
+  defaultProjectDir:
+    process.env['WORTOMAT_PROJECT_DIR'] ?? (existsSync(documentsDir) ? documentsDir : os.homedir()),
   // A folder of its own for development, so the installed app's project list stays untouched.
   dataDir: process.env['WORTOMAT_DATA_DIR'] ?? path.join(os.homedir(), '.wortomat-dev'),
   downloadsDir: process.env['WORTOMAT_DOWNLOADS_DIR'],
