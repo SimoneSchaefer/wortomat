@@ -9,7 +9,6 @@ import {
   type CalendarDay,
 } from './calendar';
 
-/** The surrounding statistics page shows the tooltips (`data-tip`). */
 @Component({
   selector: 'wm-writing-calendar',
   templateUrl: './writing-calendar.html',

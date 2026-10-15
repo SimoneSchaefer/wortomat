@@ -110,16 +110,4 @@ describe('StatsPage', () => {
     await settle();
     expect(rows()).toEqual([['Hafen', '·x·']]);
   });
-
-  it('shows a tooltip for anything with a hint, by pointer and by keyboard', async () => {
-    const { element, settle } = await setup();
-    const segment = element.querySelector<HTMLElement>('.progress-bar .segment')!;
-    segment.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
-    await settle();
-    expect(text(element.querySelector('.tooltip'))).toBe(segment.getAttribute('data-tip'));
-
-    segment.dispatchEvent(new PointerEvent('pointerout', { bubbles: true }));
-    await settle();
-    expect(element.querySelector('.tooltip')).toBeNull();
-  });
 });

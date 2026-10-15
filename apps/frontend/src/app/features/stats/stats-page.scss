@@ -384,26 +384,3 @@ h1 {
     background: var(--button-hover);
   }
 }
-
-.tooltip {
-  position: fixed;
-  z-index: 20;
-  transform: translate(-50%, calc(-100% - 0.4rem));
-
-  &[data-align='start'] {
-    transform: translate(0, calc(-100% - 0.4rem));
-  }
-
-  &[data-align='end'] {
-    transform: translate(-100%, calc(-100% - 0.4rem));
-  }
-  max-width: 20rem;
-  padding: 0.3rem 0.55rem;
-  border-radius: 0.35rem;
-  background: var(--text);
-  color: var(--bg);
-  font-size: 0.75rem;
-  line-height: 1.35;
-  pointer-events: none;
-  white-space: nowrap;
-}
