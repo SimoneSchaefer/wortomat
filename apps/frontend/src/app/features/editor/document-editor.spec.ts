@@ -3,8 +3,8 @@ import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
 import { StatusMessages } from '../../core/status-messages';
-import { button, findButton, key, render, text, type, until } from '../../testing/render';
-import { DocumentEditor, type DocumentSource, normalizeHref } from './document-editor';
+import { button, findButton, key, render, text, until } from '../../testing/render';
+import { DocumentEditor, type DocumentSource } from './document-editor';
 
 const mark = (kind: string, attrs: { note?: string; suggestion?: string } = {}) => [
   {
@@ -220,7 +220,7 @@ describe('DocumentEditor', () => {
   });
 
   it('sets paragraph style, alignment and indentation from the grouped menus', async () => {
-    const { choose, saved } = await setup(fakeSource({ s1: PLAIN }));
+    const { choose, saved, element, settle } = await setup(fakeSource({ s1: PLAIN }));
     const E = de.editor;
     await choose(E.blockStyle, E.heading);
     await choose(E.alignment, E.alignCenter);
@@ -238,7 +238,8 @@ describe('DocumentEditor', () => {
       content: [{ type: 'heading', attrs: { indent: 1 } }],
     });
 
-    await choose(E.textStyle, E.clearFormat);
+    button(element, E.clearFormat).click();
+    await settle();
     expect((await saved())?.doc.content?.[0]).toMatchObject({
       type: 'paragraph',
       attrs: { textAlign: null, indent: 0 },
@@ -255,28 +256,5 @@ describe('DocumentEditor', () => {
     expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'orderedList' });
     await choose(de.editor.lists, de.editor.orderedList);
     expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'paragraph' });
-  });
-
-  it('inserts a link – the address becomes the text when nothing is selected', async () => {
-    const { element, saved, settle } = await setup(fakeSource({ s1: PLAIN }));
-    button(element, de.editor.link).click();
-    await settle();
-    const input = element.querySelector<HTMLInputElement>('.link-form input')!;
-    expect(document.activeElement).toBe(input);
-    type(input, 'example.com');
-    input.form!.requestSubmit();
-    await settle();
-
-    expect(element.querySelector('.link-form')).toBeNull();
-    expect(JSON.stringify((await saved())?.doc)).toContain(
-      '{"type":"text","marks":[{"type":"link","attrs":{"href":"https://example.com"',
-    );
-  });
-
-  it('completes link addresses', () => {
-    expect(normalizeHref(' example.com/a ')).toBe('https://example.com/a');
-    expect(normalizeHref('anna@example.com')).toBe('mailto:anna@example.com');
-    expect(normalizeHref('http://example.com')).toBe('http://example.com');
-    expect(normalizeHref('  ')).toBe('');
   });
 });

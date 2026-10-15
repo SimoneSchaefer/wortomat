@@ -77,8 +77,7 @@
   // Background, border and hover as for all buttons (styles.scss), just more compact. All the same
   // height – text, icons and arrow glyphs have different line heights otherwise. Only the bar's own
   // buttons: the dropdown entries have their look (toolbar-menu.scss)
-  > button,
-  .link-toggle {
+  > button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -102,8 +101,7 @@
     stroke-linejoin: round;
   }
 
-  > button svg,
-  .link-toggle svg {
+  > button svg {
     display: block;
     width: 0.95rem;
     height: 0.95rem;
@@ -217,36 +215,6 @@
       border-radius: 2px;
       background: var(--revision-long);
     }
-  }
-}
-
-.link-wrapper {
-  position: relative;
-}
-
-.link-form {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  left: 0;
-  z-index: 10;
-  display: grid;
-  gap: 0.4rem;
-  width: 20rem;
-  padding: 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 0.6rem;
-  background: var(--bg);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
-  font-family: var(--font-ui);
-
-  input {
-    font-size: 0.85rem;
-  }
-
-  .link-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.35rem;
   }
 }
 

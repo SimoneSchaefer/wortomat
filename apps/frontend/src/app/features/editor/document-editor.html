@@ -59,13 +59,6 @@
             {{ t().editor.strike }}
             <span class="key">{{ shortcut('S', { shift: true }) }}</span>
           </button>
-          <span class="menu-sep" role="separator"></span>
-          <button type="button" role="menuitem" (click)="command('clearFormat')">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
-            </svg>
-            {{ t().editor.clearFormat }}
-          </button>
         </wm-toolbar-menu>
         <span class="sep"></span>
         <wm-toolbar-menu class="block-style" [label]="t().editor.blockStyle">
@@ -168,47 +161,6 @@
             {{ t().editor.outdent }}
           </button>
         </wm-toolbar-menu>
-        <div class="link-wrapper">
-          <button
-            #linkToggle
-            type="button"
-            class="link-toggle"
-            aria-haspopup="dialog"
-            [class.on]="isActive('link')"
-            [attr.aria-expanded]="linkOpen()"
-            [title]="hint(t().editor.link, 'K')"
-            [attr.aria-label]="t().editor.link"
-            (click)="toggleLink()"
-          >
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.link" /></svg>
-          </button>
-          @if (linkOpen()) {
-            <form
-              class="link-form"
-              role="dialog"
-              [attr.aria-label]="t().editor.link"
-              (submit)="$event.preventDefault(); setLink(linkInput.value)"
-              (keydown.escape)="closeLink(linkToggle)"
-            >
-              <input
-                #linkInput
-                type="text"
-                inputmode="url"
-                [value]="linkHref()"
-                [placeholder]="t().editor.linkPlaceholder"
-                [attr.aria-label]="t().editor.link"
-              />
-              <span class="link-actions">
-                @if (isActive('link')) {
-                  <button type="button" class="link" (click)="setLink('')">
-                    {{ t().editor.linkRemove }}
-                  </button>
-                }
-                <button type="submit">{{ t().editor.linkApply }}</button>
-              </span>
-            </form>
-          }
-        </div>
         <span class="sep"></span>
         <wm-toolbar-menu [label]="t().editor.annotations" [active]="isActive('annotation')">
           <span toggle class="swatches" aria-hidden="true">
@@ -231,6 +183,19 @@
             </button>
           }
         </wm-toolbar-menu>
+        <span class="sep"></span>
+        <!-- Directly in the bar: it also removes todo/idea/fixme marks -->
+        <button
+          type="button"
+          class="clear"
+          [title]="t().editor.clearFormat"
+          [attr.aria-label]="t().editor.clearFormat"
+          (click)="command('clearFormat')"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
+          </svg>
+        </button>
         <span class="sep"></span>
         <button
           type="button"

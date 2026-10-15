@@ -4,14 +4,14 @@ import {
   computed,
   DestroyRef,
   effect,
-  ElementRef,
+  type ElementRef,
   inject,
   input,
   signal,
   untracked,
   viewChild,
 } from '@angular/core';
-import { Editor, Extension, type JSONContent } from '@tiptap/core';
+import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
@@ -73,7 +73,6 @@ export interface DocumentSource {
   styleUrl: './document-editor.scss',
   host: {
     '(window:beforeunload)': 'onBeforeUnload($event)',
-    '(document:pointerdown)': 'closeLinkOutside($event)',
   },
 })
 export class DocumentEditor {
@@ -94,8 +93,6 @@ export class DocumentEditor {
   private readonly notes = inject(NotesStore, { optional: true });
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
   private readonly noteInput = viewChild<ElementRef<HTMLInputElement>>('noteInput');
-  private readonly linkInput = viewChild<ElementRef<HTMLInputElement>>('linkInput');
-  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
@@ -144,12 +141,6 @@ export class DocumentEditor {
     });
 
     effect(() => this.noteInput()?.nativeElement.focus());
-    effect(() => {
-      // Selected, so typing replaces the address of an existing link
-      const input = this.linkInput()?.nativeElement;
-      input?.focus();
-      input?.select();
-    });
 
     effect(() => {
       const revising = this.revising();
@@ -259,15 +250,6 @@ export class DocumentEditor {
         }),
         TextAlign.configure({ types: ['heading', 'paragraph'] }),
         Indent,
-        Extension.create({
-          name: 'linkShortcut',
-          addKeyboardShortcuts: () => ({
-            'Mod-k': () => {
-              this.toggleLink();
-              return true;
-            },
-          }),
-        }),
         Image.configure({ allowBase64: false }),
         CharacterCount,
         Annotation.configure({ label: (kind) => this.t().annotations[kind].label }),
@@ -390,7 +372,6 @@ export class DocumentEditor {
     outdent: 'M7.5 4h6M7.5 8h6M7.5 12h6M5 5.5L2.5 8 5 10.5',
     bulletList: 'M6.5 4h7M6.5 8h7M6.5 12h7M3 4h.01M3 8h.01M3 12h.01',
     orderedList: 'M6.5 4h7M6.5 8h7M6.5 12h7M2.5 3l1-.5v3M2.5 10h1.5l-1.5 2h1.5',
-    link: 'M7 9l2-2M7.5 4.5l1-1a2.5 2.5 0 0 1 3.5 3.5l-1 1M8.5 11.5l-1 1A2.5 2.5 0 0 1 4 9l1-1',
   } as const;
   protected readonly alignments: readonly Alignment[] = ['left', 'center', 'right', 'justify'];
   /** Shortcuts of the text-align extension (Ctrl+Shift+L/E/R/J). */
@@ -409,50 +390,6 @@ export class DocumentEditor {
       right: t.alignRight,
       justify: t.alignJustify,
     }[alignment];
-  }
-
-  protected readonly linkOpen = signal(false);
-  /** Address of the link at the cursor, prefilled into the link input. */
-  protected readonly linkHref = signal('');
-
-  protected toggleLink(): void {
-    if (!this.linkOpen()) {
-      this.linkHref.set(String(this.editor?.getAttributes('link')['href'] ?? ''));
-    }
-    this.linkOpen.update((open) => !open);
-  }
-
-  protected closeLink(refocus: HTMLElement): void {
-    this.linkOpen.set(false);
-    refocus.focus();
-  }
-
-  protected closeLinkOutside(event: PointerEvent): void {
-    if (!this.linkOpen()) return;
-    const wrapper = (event.target as Element | null)?.closest('.link-wrapper');
-    if (!wrapper || !this.element.nativeElement.contains(wrapper)) this.linkOpen.set(false);
-  }
-
-  protected setLink(value: string): void {
-    const editor = this.editor;
-    this.linkOpen.set(false);
-    if (!editor) return;
-    const href = normalizeHref(value);
-    const chain = editor.chain().focus().extendMarkRange('link');
-    if (!href) {
-      chain.unsetLink().run();
-    } else if (editor.state.selection.empty && !editor.isActive('link')) {
-      // Nothing selected: the address itself becomes the link text
-      chain
-        .insertContent({
-          type: 'text',
-          text: value.trim(),
-          marks: [{ type: 'link', attrs: { href } }],
-        })
-        .run();
-    } else {
-      chain.setLink({ href }).run();
-    }
   }
 
   protected readonly annotationKinds = ANNOTATION_KINDS;
@@ -626,15 +563,6 @@ export class DocumentEditor {
     }
     chain.run();
   }
-}
-
-/** "example.com" → "https://example.com", "anna@example.com" → "mailto:…"; empty removes. */
-export function normalizeHref(value: string): string {
-  const href = value.trim();
-  if (!href) return '';
-  if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return href;
-  if (/^[^\s/@]+@[^\s/@]+\.[^\s/@]+$/.test(href)) return `mailto:${href}`;
-  return `https://${href}`;
 }
 
 function imageFiles(data: DataTransfer | null): File[] {
