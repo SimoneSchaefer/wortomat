@@ -29,3 +29,18 @@ window.matchMedia ??= (query: string) =>
 
 Element.prototype.scrollIntoView ??= () => undefined;
 Element.prototype.scrollTo ??= () => undefined;
+
+Element.prototype.setPointerCapture ??= () => undefined;
+Element.prototype.releasePointerCapture ??= () => undefined;
+Element.prototype.hasPointerCapture ??= () => false;
+
+// Uploads read the image size first. Small enough that no resizing (OffscreenCanvas) is needed.
+globalThis.createImageBitmap ??= (async () =>
+  ({ width: 800, height: 600, close: () => undefined }) as ImageBitmap) as typeof createImageBitmap;
+
+// Without layout nothing ever resizes, so observing is a no-op.
+globalThis.ResizeObserver ??= class {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+} as unknown as typeof ResizeObserver;

@@ -198,6 +198,8 @@ export const en: Texts = {
     deleteTitle: (singular: string) => `Delete ${singular.toLowerCase()}?`,
     deleteMessage: (title: string) => `“${title}” will be deleted with everything recorded for it.`,
     deleteGroupTitle: 'Delete group?',
+    deleteLabel: (title: string) => `Delete ${title}`,
+    deleteGroupLabel: (name: string) => `Delete group ${name}`,
     notFound: 'This entry no longer exists.',
     summary: 'Short description',
     group: 'Group',
