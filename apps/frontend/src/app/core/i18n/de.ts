@@ -259,6 +259,7 @@ export const de = {
     add: 'Neue Karte zeichnen',
     addFirst: '+ Karte zeichnen',
     deleteTitle: 'Karte löschen?',
+    deleteLabel: (name: string) => `Karte ${name} löschen`,
     deleteMessage: (name: string) =>
       `„${name}“ wird mit der Zeichnung gelöscht. Die Orte selbst bleiben erhalten.`,
     notFound: 'Diese Karte existiert nicht mehr.',

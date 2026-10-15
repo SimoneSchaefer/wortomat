@@ -1,5 +1,14 @@
 import type {
   AppInfo,
+  SceneContent,
+  SceneText,
+  WritingDay,
+  CreateMapRequest,
+  MapSummary,
+  UpdateMapRequest,
+  SaveStoryRequest,
+  StoryMark,
+  StoryState,
   AppSettings,
   CreateProjectRequest,
   DesktopBridge,
@@ -250,7 +259,67 @@ export class FakeApi {
     warnings: [] as string[],
   }));
 
-  readonly listMaps = vi.fn(async () => []);
+  marks: StoryMark[] = [];
+  readonly storyMarks = vi.fn(async () => structuredClone(this.marks));
+  /** Columns become story positions 1, 2, 3 …; marks sit before the column they name. */
+  readonly saveStory = vi.fn(async (request: SaveStoryRequest): Promise<StoryState> => {
+    const position = new Map<string, number>();
+    request.columns.forEach((ids, index) => ids.forEach((id) => position.set(id, index + 1)));
+    this.nodes = this.nodes.map((node) =>
+      node.kind === 'scene' ? { ...node, storyOrder: position.get(node.id) ?? null } : node,
+    );
+    this.marks = request.marks.map((mark) => ({
+      id: mark.id ?? `marke-${this.nextId++}`,
+      label: mark.label,
+      position: mark.beforeColumn + 1,
+    }));
+    return { nodes: structuredClone(this.nodes), marks: structuredClone(this.marks) };
+  });
+  readonly moveStrand = vi.fn(async (id: string, beforeId: string | null): Promise<Strand[]> => {
+    const moved = this.strands.find((strand) => strand.id === id)!;
+    const rest = this.strands.filter((strand) => strand !== moved);
+    const at = beforeId ? rest.findIndex((strand) => strand.id === beforeId) : rest.length;
+    this.strands = [...rest.slice(0, at), moved, ...rest.slice(at)];
+    return structuredClone(this.strands);
+  });
+
+  maps = new Map<string, PlaceMap>();
+  today = '2026-10-15';
+  writing: WritingDay[] = [];
+  texts: SceneText[] = [];
+  readonly writingToday = vi.fn(
+    async (): Promise<WritingDay> =>
+      this.writing.find((day) => day.day === this.today) ?? {
+        day: this.today,
+        added: 0,
+        removed: 0,
+        pasted: 0,
+      },
+  );
+  readonly writingLog = vi.fn(async (from: string, to: string) =>
+    this.writing.filter((day) => day.day >= from && day.day <= to),
+  );
+  readonly sceneTexts = vi.fn(async () => structuredClone(this.texts));
+
+  readonly listMaps = vi.fn(async (): Promise<MapSummary[]> =>
+    [...this.maps.values()].map(({ id, name, updatedAt }) => ({ id, name, updatedAt })),
+  );
+  readonly map = vi.fn(async (id: string): Promise<PlaceMap> => {
+    const map = this.maps.get(id);
+    if (!map) throw new Error('Diese Karte gibt es nicht.');
+    return structuredClone(map);
+  });
+  readonly createMap = vi.fn(async (request: CreateMapRequest): Promise<PlaceMap> => {
+    const map = testMap(`karte-${this.nextId++}`, { name: request.name });
+    this.maps.set(map.id, map);
+    return structuredClone(map);
+  });
+  readonly updateMap = vi.fn(async (id: string, request: UpdateMapRequest): Promise<PlaceMap> => {
+    const map = { ...this.maps.get(id)!, ...request } as PlaceMap;
+    this.maps.set(id, map);
+    return structuredClone(map);
+  });
+  readonly deleteMap = vi.fn(async (id: string): Promise<void> => void this.maps.delete(id));
 
   readonly createNote = vi.fn(async (request: CreateNoteRequest): Promise<NoteSummary> => {
     const note = testNote(`notiz-${this.nextId++}`, request.kind, { title: request.title });
@@ -290,6 +359,25 @@ export class FakeApi {
     this.noteGroups = this.noteGroups.filter((group) => group.id !== id);
     for (const note of this.notes) if (note.groupId === id) note.groupId = null;
   });
+
+  sceneDocs = new Map<string, EditorDoc | null>();
+  readonly sceneContent = vi.fn(async (id: string): Promise<SceneContent> => ({
+    nodeId: id,
+    doc: structuredClone(this.sceneDocs.get(id) ?? null),
+    wordCount: this.nodes.find((node) => node.id === id)?.wordCount ?? 0,
+    annotations: { todo: 0, idea: 0, fixme: 0 },
+    updatedAt: null,
+  }));
+  readonly saveSceneContent = vi.fn(
+    async (id: string, request: SaveDocumentRequest): Promise<SceneContent> => {
+      this.sceneDocs.set(id, request.doc);
+      return {
+        ...(await this.sceneContent(id)),
+        wordCount: request.wordCount,
+        annotations: { todo: 0, idea: 0, fixme: 1 },
+      };
+    },
+  );
 
   noteDocs = new Map<string, EditorDoc | null>();
   readonly noteContent = vi.fn(async (id: string): Promise<NoteContent> => ({
@@ -342,7 +430,11 @@ export class FakeApi {
 
   appearances = new Map<string, SceneReference[]>();
   readonly noteScenes = vi.fn(async (noteId: string) => this.appearances.get(noteId) ?? []);
-  readonly mapsWithPlace = vi.fn(async (_noteId: string): Promise<PlaceMap[]> => []);
+  readonly mapsWithPlace = vi.fn(async (noteId: string): Promise<PlaceMap[]> =>
+    structuredClone(
+      [...this.maps.values()].filter((map) => map.pins.some((p) => p.noteId === noteId)),
+    ),
+  );
 
   /** Scene → linked note IDs, tags and threads. */
   links = new Map<string, string[]>();
@@ -532,6 +624,21 @@ export function testImage(id: string, overrides: Partial<GalleryImage> = {}): Ga
     originalName: `${id}.png`,
     url: `/api/images/${id}`,
     crop: null,
+    ...overrides,
+  };
+}
+
+export function testMap(id: string, overrides: Partial<PlaceMap> = {}): PlaceMap {
+  return {
+    id,
+    name: id,
+    updatedAt: '2026-10-01T10:00:00.000Z',
+    width: 1600,
+    height: 1000,
+    backgroundImageId: null,
+    backgroundOpacity: 1,
+    strokes: [],
+    pins: [],
     ...overrides,
   };
 }
