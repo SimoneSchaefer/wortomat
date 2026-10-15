@@ -9,10 +9,7 @@ import {
   type CalendarDay,
 } from './calendar';
 
-/**
- * Schreibtage: Kennzahlen und Kalender des letzten Jahres aus dem Schreib-Log.
- * Die Tooltips (`data-tip`) zeigt die Statistikseite drumherum.
- */
+/** The surrounding statistics page shows the tooltips (`data-tip`). */
 @Component({
   selector: 'wm-writing-calendar',
   templateUrl: './writing-calendar.html',
@@ -25,7 +22,7 @@ export class WritingCalendar {
 
   private readonly writing = resource({
     loader: async () => {
-      // „Heute“ kommt vom Backend, denn dort beginnt der Tag erst um 4 Uhr.
+      // "Today" comes from the backend, because there the day only starts at 4 am.
       const { day: today } = await this.api.writingToday();
       const from = calendarWeeks(today, [])[0]![0]!.day;
       return { today, entries: await this.api.writingLog(from, today) };
@@ -35,7 +32,7 @@ export class WritingCalendar {
     const data = this.writing.value();
     if (!data) return null;
     const weeks = calendarWeeks(data.today, data.entries);
-    // Monatsname über der ersten Woche, deren Montag im neuen Monat liegt
+    // Month name above the first week whose Monday is in the new month
     const months = weeks.map((week, index) => {
       if (!index) return null;
       const monday = parseDay(week[0]!.day);
@@ -49,10 +46,10 @@ export class WritingCalendar {
       empty: !data.entries.length,
     };
   });
-  /** Mo, Mi, Fr – wie üblich nur jede zweite Zeile beschriftet. */
+  /** Mon, Wed, Fri – as usual only every other row is labelled. */
   protected readonly weekdayLabels = computed(() => {
     const format = new Intl.DateTimeFormat(this.i18n.language(), { weekday: 'short' });
-    // 5.10.2026 ist ein Montag
+    // 5 Oct 2026 is a Monday
     return [0, 2, 4].map((offset) => ({
       row: offset + 2,
       label: format.format(new Date(2026, 9, 5 + offset)),

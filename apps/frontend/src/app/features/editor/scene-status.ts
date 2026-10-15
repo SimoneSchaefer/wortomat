@@ -9,8 +9,8 @@ import { StatusIcon } from '../../core/status-icon';
 import { StatusMessages } from '../../core/status-messages';
 
 /**
- * Arbeitsstand der Szene als Stufenleiste: Idee → … → Fertig.
- * Bedienung wie eine Radiogruppe (ein Tab-Stopp, Pfeiltasten wechseln den Status).
+ * As a step bar: idea → … → final. Behaves like a radio group (one tab stop, arrow keys change the
+ * status).
  */
 @Component({
   selector: 'wm-scene-status',
@@ -30,7 +30,7 @@ export class SceneStatusPicker {
   protected readonly currentIndex = computed(() => SCENE_STATUSES.indexOf(this.current()));
   private readonly error = inject(StatusMessages).channel();
 
-  /** `origin`: der Knopf der Stufe – bei „Fertig“ steigt dort ein kleines Feuerwerk auf. */
+  /** `origin`: the step's button – for final, small fireworks rise there. */
   protected async select(status: SceneStatus, origin?: Element): Promise<void> {
     if (status === this.current().status) return;
     this.error.set(null);

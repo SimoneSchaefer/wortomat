@@ -3,7 +3,6 @@ import type { Texts } from './de';
 const numberFormat = new Intl.NumberFormat('en');
 const decimalFormat = new Intl.NumberFormat('en', { maximumFractionDigits: 1 });
 
-/** Texte der Oberfläche auf Englisch. */
 export const en: Texts = {
   number: (value: number) => numberFormat.format(value),
   words: (count: number) => (count === 1 ? '1 word' : `${numberFormat.format(count)} words`),

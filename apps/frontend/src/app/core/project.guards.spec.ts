@@ -46,7 +46,7 @@ describe('Projekt-Guards', () => {
     result === true ? 'erlaubt' : TestBed.inject(Router).serializeUrl(result as UrlTree);
 
   it('lässt nach dem Anlegen eines Projekts ohne Neuladen in den Schreibbereich', async () => {
-    // Startseite: noch kein Projekt offen
+    // start page: no project open yet
     expect(urlOf(await run(noProjectGuard))).toBe('erlaubt');
 
     await TestBed.inject(ProjectStore).create('/tmp/Roman', 'Roman');

@@ -3,12 +3,11 @@ import type { FontSize } from '@wortomat/shared';
 import { AppSettingsStore } from './app-settings';
 import { DESKTOP_BRIDGE } from './desktop-bridge';
 
-/** Faktor gegenüber „mittel“ – muss zu `data-font-size` in styles.scss passen. */
+/** Factor relative to medium – must match `data-font-size` in styles.scss. */
 export const FONT_SCALE: Record<FontSize, number> = { small: 0.875, medium: 1, large: 1.125 };
 
 /**
- * Farbschema und Schriftgröße aus den Einstellungen: als `data-theme` und `data-font-size`
- * an `<html>` (die Farben und Größen dazu stehen in styles.scss).
+ * Set as `data-theme` and `data-font-size` on `<html>` (the colours and sizes live in styles.scss).
  */
 @Injectable({ providedIn: 'root' })
 export class Appearance {
@@ -16,7 +15,7 @@ export class Appearance {
 
   readonly theme = computed(() => this.settings.settings().theme);
   readonly fontSize = computed(() => this.settings.settings().fontSize);
-  /** Für Werte in Pixeln, die mit der Schrift wachsen sollen (z. B. Mindestbreiten). */
+  /** For pixel values that should grow with the font (e.g. minimum widths). */
   readonly fontScale = computed(() => FONT_SCALE[this.fontSize()]);
 
   constructor() {

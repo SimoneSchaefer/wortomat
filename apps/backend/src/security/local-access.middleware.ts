@@ -16,12 +16,12 @@ const CONTENT_SECURITY_POLICY = [
 ].join('; ');
 
 /**
- * Schützt den lokalen Server vor Zugriffen, die nicht von unserer App kommen:
+ * Protects the local server from requests that do not come from our app:
  *
- * - Host-Header-Prüfung verhindert DNS-Rebinding (eine fremde Website, deren
- *   Domain plötzlich auf 127.0.0.1 zeigt).
- * - Das Token verhindert, dass andere Websites im normalen Browser des Benutzers
- *   oder andere lokale Programme die API aufrufen. Electron hängt es automatisch an.
+ * - The Host header check prevents DNS rebinding (a foreign website whose domain suddenly
+ *   points to 127.0.0.1).
+ * - The token keeps other websites in the user's normal browser, and other local programs,
+ *   from calling the API. Electron adds it automatically.
  */
 export function localAccessMiddleware(token: string | undefined) {
   const expected = token ? Buffer.from(token) : null;

@@ -1,7 +1,7 @@
 import type { QuoteStyle } from '@wortomat/shared';
 import { NARROW_NBSP, smartQuote, swallowsSpace } from './quotes';
 
-/** Tippt `input` Zeichen für Zeichen und ersetzt dabei wie der Editor. */
+/** Types `input` character by character, replacing like the editor does. */
 function type(input: string, style: QuoteStyle): string {
   let text = '';
   for (const char of input) {

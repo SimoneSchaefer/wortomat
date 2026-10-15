@@ -26,7 +26,7 @@ const PNG_1PX = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
 );
-// Kopf einer WebP-Datei – genügt der Formaterkennung im Backend.
+// Header of a WebP file – enough for the backend's format detection.
 const WEBP_HEADER = Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WEBPVP8 ')]);
 
 const hasTool = (tool: string) => {
@@ -53,7 +53,6 @@ describe('Export', () => {
     assert.ok(response.ok, `${method} ${urlPath} → ${response.status}: ${text}`);
     return (text ? JSON.parse(text) : null) as T;
   };
-  /** Export im Desktop-Modus (Datei wird geschrieben). */
   const exportTo = async (
     format: string,
     template: string,
@@ -145,7 +144,7 @@ describe('Export', () => {
     ]);
     const s2 = await node(k1.id, 'scene', 'Markt');
     await save(s2.id, [paragraph(text('Am Markt roch es nach Fisch.'))]);
-    await node(k1.id, 'scene', 'Leere Szene'); // ohne Text → wird ausgelassen
+    await node(k1.id, 'scene', 'Leere Szene'); // without text → left out
     const k2 = await node(teil.id, 'chapter', 'Abschied');
     const s3 = await node(k2.id, 'scene', 'Kai');
     await save(s3.id, [
@@ -158,7 +157,7 @@ describe('Export', () => {
         text('.'),
       ),
       { type: 'image', attrs: { src: webp, alt: 'Foto' } },
-      { type: 'image', attrs: { src: png, alt: 'Karte, noch einmal' } }, // dasselbe Bild erneut
+      { type: 'image', attrs: { src: png, alt: 'Karte, noch einmal' } }, // the same image again
     ]);
   });
 
@@ -184,16 +183,16 @@ describe('Export', () => {
       fetch(server.url + urlPath, { headers: { [AUTH_HEADER]: TOKEN } });
     if (pdfAvailable) {
       const response = await get('/api/export/fonts/palatino/italic');
-      // nur, wenn TeX Gyre installiert ist (bei TeX Live „recommended“ dabei)
+      // only when TeX Gyre is installed (part of TeX Live "recommended")
       if (response.status === 200) {
         assert.equal(response.headers.get('content-type'), 'font/otf');
         const head = Buffer.from(await response.arrayBuffer())
           .subarray(0, 4)
           .toString('latin1');
-        assert.equal(head, 'OTTO'); // OpenType mit CFF-Umrissen
+        assert.equal(head, 'OTTO'); // OpenType with CFF outlines
       }
     }
-    // Nur Dateien aus dem Katalog – nichts anderes aus der TeX-Installation
+    // Only files from the catalogue – nothing else from the TeX installation
     for (const urlPath of [
       '/api/export/fonts/comic/regular',
       '/api/export/fonts/palatino/constructor',
@@ -220,14 +219,14 @@ describe('Export', () => {
         fontSize: 12.3,
       },
     });
-    assert.equal(saved.layout.fontSize, 12.5); // auf halbe Punkte gerundet
+    assert.equal(saved.layout.fontSize, 12.5); // rounded to half points
 
     const again = await api<ExportSettingsResponse>('GET', '/api/export/settings');
     assert.deepEqual(again.settings, saved);
     assert.equal(again.settings.format, 'pdf');
     assert.equal(again.settings.layout.font, 'garamond');
 
-    // Unsinn wird durch Vorgaben ersetzt
+    // nonsense is replaced by the defaults
     const repaired = await api<ExportSettings>('PUT', '/api/export/settings', {
       format: 'odt',
       layout: { font: 'comic-sans', pageWidth: 'breit' },
@@ -309,7 +308,7 @@ describe('Export', () => {
         document: await zip.file('word/document.xml')!.async('string'),
         styles: await zip.file('word/styles.xml')!.async('string'),
         settings: await zip.file('word/settings.xml')!.async('string'),
-        // nur Dateien, nicht den Ordnereintrag „word/media/“
+        // only files, not the "word/media/" folder entry
         media: Object.values(zip.files)
           .filter((entry) => entry.name.startsWith('word/media/') && !entry.dir)
           .map((entry) => entry.name),
@@ -319,9 +318,9 @@ describe('Export', () => {
     const normseite = await read('normseite');
     assert.match(normseite.styles, /Courier New/);
     assert.match(normseite.document, /<w:pgSz w:w="11906" w:h="16838"/); // A4
-    assert.match(normseite.styles, /w:line="360" w:lineRule="exact"/); // genau 18 pt
-    assert.match(normseite.document, /<wp:extent cx="9525" cy="9525"\/>/); // 1 × 1 px, nicht aufgeblasen
-    assert.doesNotMatch(normseite.document, /w:val="false"/); // keine überflüssigen Formatangaben
+    assert.match(normseite.styles, /w:line="360" w:lineRule="exact"/); // exactly 18 pt
+    assert.match(normseite.document, /<wp:extent cx="9525" cy="9525"\/>/); // 1 × 1 px, not blown up
+    assert.doesNotMatch(normseite.document, /w:val="false"/); // no redundant formatting
     assert.match(normseite.document, /ca\. \d+ Wörter · ca\. 1 Normseite</);
     assert.match(normseite.document, /Der Zug /);
     assert.match(normseite.document, /&lt;&lt;Tag&gt;&gt;/);
@@ -334,11 +333,11 @@ describe('Export', () => {
 
     const roman = await read('roman');
     assert.match(roman.styles, /Palatino Linotype/);
-    assert.match(roman.document, /<w:pgSz w:w="7087" w:h="10772"/); // 12,5 × 19 cm
+    assert.match(roman.document, /<w:pgSz w:w="7087" w:h="10772"/); // 12.5 × 19 cm
     assert.match(roman.settings, /autoHyphenation/);
-    assert.match(roman.settings, /<w:mirrorMargins\/>/); // innen/außen gespiegelt
+    assert.match(roman.settings, /<w:mirrorMargins\/>/); // inner/outer mirrored
     assert.doesNotMatch(normseite.settings, /mirrorMargins/);
-    assert.match(roman.document, /w:jc w:val="both"/); // Blocksatz
+    assert.match(roman.document, /w:jc w:val="both"/); // justified
   });
 
   it('übernimmt Seitengröße, Ränder, Schrift und Schriftgröße in die Vorlage Roman', async () => {
@@ -361,7 +360,7 @@ describe('Export', () => {
     assert.match(styles, /w:ascii="Garamond"/);
     assert.match(styles, /<w:sz w:val="24"\/>/); // 12 pt
 
-    // Die Normseite bleibt genormt, egal was mitgeschickt wird
+    // The standard page stays standardised, whatever is sent along
     const normseite = await exportTo('docx', 'normseite', false, layout);
     const normDoc = await (
       await JSZip.loadAsync(normseite.data)
@@ -375,7 +374,8 @@ describe('Export', () => {
     const { data, filePath, warnings } = await exportTo('epub', 'roman');
     assert.ok(filePath.endsWith('.epub'));
     assert.deepEqual(warnings, [], 'PNG und WebP sind EPUB-Kernformate');
-    // Erster ZIP-Eintrag „mimetype“, unkomprimiert (Methode 0) – so erkennen Reader das Format
+    // First ZIP entry "mimetype", uncompressed (method 0) – that is how readers recognise the
+    // format
     assert.equal(data.readUInt16LE(8), 0);
     assert.equal(data.toString('latin1', 30, 38), 'mimetype');
     assert.equal(data.toString('latin1', 38, 58), 'application/epub+zip');
@@ -414,7 +414,7 @@ describe('Export', () => {
     assert.match(kapitel, /<h2 class="chapter">Ankunft<\/h2>/);
     assert.match(kapitel, /<strong>hielt<\/strong>/);
     assert.match(kapitel, /&lt;&lt;Tag&gt;&gt; &quot;Zitat&quot;/);
-    assert.match(kapitel, /Smiley 😀 und Ελληνικά\./); // anders als pdfLaTeX: alles bleibt
+    assert.match(kapitel, /Smiley 😀 und Ελληνικά\./); // unlike pdfLaTeX: everything stays
     assert.match(kapitel, /<img src="\.\.\/images\/bild-1\.png" alt="Karte"\/>/);
     assert.equal(kapitel.match(/class="scene-break"/g)?.length, 1);
     assert.doesNotMatch(kapitel, /annotation/);
@@ -465,7 +465,7 @@ describe('Export', () => {
     );
     assert.match(await zip.file('OEBPS/nav.xhtml')!.async('string'), /epub:type="cover"/);
 
-    // Ersetzen: das alte Titelbild verschwindet aus der Datei, weil es sonst nirgends vorkommt
+    // Replacing: the old cover disappears from the file because it is used nowhere else
     const nextId = (await upload(PNG_1PX, 'neu.png')).split('/').pop()!;
     await patch({ coverImageId: nextId });
     const imageStatus = async (id: string) =>
@@ -473,7 +473,6 @@ describe('Export', () => {
     assert.equal(await imageStatus(coverId), 404);
     assert.equal(await imageStatus(nextId), 200);
 
-    // Entfernen: kein Cover mehr im EPUB
     assert.equal(
       ((await (await patch({ coverImageId: null })).json()) as ProjectInfo).coverImageId,
       null,
@@ -536,14 +535,14 @@ describe('Export', () => {
         'WebP-Hinweis',
       );
       assert.ok(
-        warnings.some((w) => w.startsWith('9 Zeichen')), // 😀 + die 8 Buchstaben von „Ελληνικά“
+        warnings.some((w) => w.startsWith('9 Zeichen')), // 😀 + the 8 letters of "Ελληνικά"
         `Hinweis auf 😀 und Griechisch: ${warnings}`,
       );
       if (hasTool('pdfinfo')) {
         assert.match(execFileSync('pdfinfo', [filePath]).toString(), size);
       }
       if (hasTool('pdftotext')) {
-        // Zeilenumbrüche/Mehrfach-Leerzeichen zusammenfassen – die Normseite bricht nach 60 Zeichen um
+        // Collapse line breaks and repeated spaces – the standard page wraps after 60 characters
         const pdfText = execFileSync('pdftotext', [filePath, '-']).toString().replace(/\s+/g, ' ');
         for (const needle of [
           'Die Häuser am Fluss',
@@ -564,7 +563,7 @@ describe('Export', () => {
       headers: {
         [AUTH_HEADER]: TOKEN,
         'Content-Type': 'application/json',
-        // Hinweise in der Sprache der Oberfläche
+        // warnings in the UI language
         'Accept-Language': 'en',
       },
       body: JSON.stringify({ format: 'docx', template: 'roman', includeSceneTitles: false }),
@@ -583,7 +582,7 @@ describe('Export', () => {
         .subarray(0, 2)
         .toString(),
       'PK',
-    ); // ZIP
+    );
   });
 
   it('weist ungültige Anfragen ab', async () => {
@@ -609,7 +608,7 @@ describe('Satzspiegel', () => {
     const tiny = sanitizeLayout({ ...DEFAULT_LAYOUT, pageWidth: 10, fontSize: 99 });
     assert.equal(tiny.pageWidth, 80);
     assert.equal(tiny.fontSize, 18);
-    // 80 mm breit mit 20 + 15 mm Rand ließe 45 mm – genug; bei 60 + 60 mm wird geschrumpft
+    // 80 mm wide with 20 + 15 mm margins leaves 45 mm – enough; with 60 + 60 mm it is squeezed
     const squeezed = sanitizeLayout({ ...DEFAULT_LAYOUT, marginInner: 60, marginOuter: 60 });
     assert.ok(squeezed.pageWidth - squeezed.marginInner - squeezed.marginOuter >= 40);
     assert.equal(squeezed.marginInner, squeezed.marginOuter);
@@ -637,7 +636,7 @@ describe('LaTeX-Hilfen', () => {
       String.raw`100 \% \& \$ \# \_ \textasciitilde{} \textbackslash{} \{x\} \textasciicircum{} \textless{}\textless{}a\textgreater{}\textgreater{} \textquotedbl{}b\textquotedbl{} \textasciigrave{}c ,{},d`,
     );
     assert.equal(escape('Größe – „gut“ … €', ctx), 'Größe – „gut“ … €');
-    // Anführungszeichen aller Stile, die der Editor setzt
+    // quotation marks of every style the editor sets
     assert.equal(
       escape('»a« ›b‹ ‚c‘ “d” ‘e’ «\u202ff\u202f» ‹g›', ctx),
       '»a« ›b‹ ‚c‘ “d” ‘e’ «\\,f\\,» ‹g›',

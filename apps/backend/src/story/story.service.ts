@@ -9,9 +9,9 @@ import { localized } from '../i18n.js';
 const MAX_LABEL_LENGTH = 40;
 
 /**
- * Reihenfolge der Handlung – unabhängig von der Reihenfolge im Buch. Die Oberfläche ordnet um
- * und schickt jedes Mal den ganzen Stand; das hält die Regeln (gleichzeitig, Marken) an einer
- * Stelle und die Zahlen klein (Spalte 1, 2, 3 …).
+ * Story order – independent of the order in the book. The UI rearranges and sends the whole state
+ * every time; that keeps the rules (simultaneous scenes, marks) in one place and the numbers small
+ * (column 1, 2, 3 …).
  */
 @Injectable()
 export class StoryService {

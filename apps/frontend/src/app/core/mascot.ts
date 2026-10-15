@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
 /**
- * Der Dino aus dem App-Icon – als Begleiter bei leeren Zuständen. Reine Dekoration,
- * deshalb ohne Alternativtext; der Hinweis daneben trägt die Information.
+ * The dino from the app icon – a companion for empty states. Pure decoration, hence no alt text;
+ * the hint next to it carries the information.
  */
 @Component({
   selector: 'wm-mascot',

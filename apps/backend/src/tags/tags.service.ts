@@ -10,8 +10,8 @@ const MAX_TAG_LENGTH = 40;
 const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
 
 /**
- * Freie Schlagwörter für Szenen. Tags gehören zum Projekt und werden über ihren Namen
- * wiederverwendet; ungenutzte Tags verschwinden aus den Vorschlägen und werden aufgeräumt.
+ * Tags belong to the project and are reused by name; unused tags disappear from the suggestions and
+ * are cleaned up.
  */
 @Injectable()
 export class TagsService {
@@ -24,7 +24,7 @@ export class TagsService {
     return this.projects.db;
   }
 
-  /** Alle Tags, die mindestens an einer Szene hängen, alphabetisch. */
+  /** Only tags attached to at least one scene. */
   list(): TagSummary[] {
     const rows = this.db
       .prepare(
@@ -49,7 +49,7 @@ export class TagsService {
     return rows.sort((a, b) => collator.compare(a.name, b.name));
   }
 
-  /** Vergibt einen Tag per Name – vorhandene werden wiederverwendet, neue angelegt. */
+  /** Existing tags are reused, new ones created. */
   add(sceneId: string, rawName: unknown): Tag[] {
     this.manuscript.requireScene(sceneId);
     const name = normalizeTagName(rawName);
@@ -82,15 +82,15 @@ export class TagsService {
   }
 
   /**
-   * Entfernt Tags ohne Szene – auch solche, die durch das Löschen von Szenen
-   * verwaist sind (dort räumt der Fremdschlüssel nur die Zuordnung ab).
+   * Also removes tags orphaned by deleting scenes (there the foreign key only removes the
+   * assignment).
    */
   private deleteUnusedTags(): void {
     this.db.exec('DELETE FROM tags WHERE id NOT IN (SELECT tag_id FROM scene_tags)');
   }
 }
 
-/** Anzeigeform: ohne führendes „#“, Leerraum zusammengefasst, höchstens 40 Zeichen. */
+/** Display form: no leading "#", whitespace collapsed, at most 40 characters. */
 export function normalizeTagName(raw: unknown): string {
   const name =
     typeof raw === 'string' ? raw.trim().replace(/^#+/, '').replace(/\s+/g, ' ').trim() : '';
@@ -110,7 +110,7 @@ export function normalizeTagName(raw: unknown): string {
   return name;
 }
 
-/** Vergleichsschlüssel – auch Umlaute werden kleingeschrieben (SQLite-NOCASE kann nur A–Z). */
+/** Comparison key – umlauts are lowercased too (SQLite NOCASE only handles A–Z). */
 export function tagKey(name: string): string {
   return name.toLocaleLowerCase('de');
 }

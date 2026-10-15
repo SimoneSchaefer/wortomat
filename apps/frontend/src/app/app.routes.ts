@@ -6,7 +6,6 @@ import { NOTE_KINDS } from './features/notes/note-kinds';
 
 const emptyState = () => import('./features/workspace/empty-state').then((m) => m.EmptyState);
 
-/** `write/characters` (Auswahlhinweis) und `write/characters/:id` (Eintrag) – analog für Orte usw. */
 function noteRoutes(kind: NoteKind): Route[] {
   const config = NOTE_KINDS[kind];
   return [
@@ -44,7 +43,7 @@ export const routes: Routes = [
       },
       {
         path: 'scene/:id',
-        // Der Editor (Tiptap/ProseMirror) wird erst geladen, wenn ein Dokument geöffnet wird.
+        // The editor (Tiptap/ProseMirror) is only loaded once a document is opened.
         loadComponent: () => import('./features/editor/scene-page').then((m) => m.ScenePage),
       },
       ...noteRoutes('character'),

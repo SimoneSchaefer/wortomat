@@ -4,16 +4,16 @@ import { contentHtml, escapeHtml } from './html-renderer.js';
 import { type Localized, localized } from '../i18n.js';
 
 export interface EpubMeta {
-  /** Bleibt für ein Buch über alle Exporte gleich, damit Reader Neuauflagen zuordnen können. */
+  /** Stays the same for a book across exports so readers can match new editions. */
   identifier: string;
   modified: Date;
-  /** Titelbild; ohne zeigen Reader in der Bibliothek nur eine neutrale Kachel. */
+  /** Without it, readers show only a neutral tile in the library. */
   cover: ResolvedImage | null;
 }
 
 /**
- * Bildformate, die jeder EPUB-3-Reader darstellen muss („Core Media Types“).
- * WebP gehört seit EPUB 3.3 dazu; AVIF nicht.
+ * Image formats every EPUB 3 reader must display ("core media types"). WebP is one since EPUB 3.3;
+ * AVIF is not.
  */
 const CORE_IMAGE_TYPES: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -44,18 +44,17 @@ body.cover svg { display: block; width: 100%; height: 100%; }
 body.cover img { max-width: 100%; max-height: 100%; }
 `;
 
-/** Eintrag im Inhaltsverzeichnis: Teil oder Kapitel. */
 interface Chapter {
   id: string;
   fileName: string;
   title: string;
-  /** Bei Teilen: die Kapitel darin (für das verschachtelte Inhaltsverzeichnis). */
+  /** For parts: their chapters, for the nested table of contents. */
   children: Chapter[];
 }
 
 /**
- * EPUB 3 mit einer Datei je Teil und Kapitel, Inhaltsverzeichnis (nav.xhtml) und – für ältere
- * Reader – zusätzlich toc.ncx. Bilder werden je Quelle nur einmal abgelegt.
+ * EPUB 3 with one file per part and chapter, a nav.xhtml and – for older readers – an additional
+ * toc.ncx. Each image source is stored only once.
  */
 export async function renderEpub(
   book: Book,
@@ -65,14 +64,14 @@ export async function renderEpub(
 ): Promise<{ data: Buffer; warnings: Localized[] }> {
   const warnings: Localized[] = [];
   const zip = new JSZip();
-  // Muss der erste Eintrag sein und unkomprimiert – daran erkennen Reader das Format.
+  // Must be the first entry and uncompressed – that is how readers recognise the format.
   zip.file('mimetype', 'application/epub+zip', { compression: 'STORE' });
   zip.file('META-INF/container.xml', CONTAINER_XML);
 
   const manifest: string[] = [];
   const spine: string[] = [];
   const toc: Chapter[] = [];
-  /** Bild-`src` → Verweis aus der Kapiteldatei (`null` = weggelassen); jedes Bild nur einmal. */
+  /** Image `src` → reference from the chapter file (`null` = left out). */
   const imageFiles = new Map<string, string | null>();
 
   const imageSource = (src: string): string | null => {
@@ -96,7 +95,6 @@ export async function renderEpub(
         );
       }
     }
-    // Kapiteldateien liegen in text/, die Bilder daneben in images/
     const href = fileName && `../${fileName}`;
     imageFiles.set(src, href);
     return href;
@@ -105,7 +103,7 @@ export async function renderEpub(
   const addPage = (id: string, title: string, body: string, bodyClass?: string): Chapter => {
     const fileName = `text/${id}.xhtml`;
     zip.file(`OEBPS/${fileName}`, page(title, body, bodyClass));
-    // Seiten mit eingebettetem SVG müssen das im Manifest angeben
+    // Pages with embedded SVG must declare it in the manifest
     const properties = body.includes('<svg') ? 'svg' : undefined;
     manifest.push(item(id, fileName, 'application/xhtml+xml', properties));
     spine.push(`<itemref idref="${id}"/>`);
@@ -192,8 +190,8 @@ const CONTAINER_XML = `<?xml version="1.0" encoding="UTF-8"?>
 `;
 
 /**
- * Titelbild seitenfüllend. Mit bekannten Maßen als SVG, das skaliert in allen Readern sauber
- * ohne Verzerrung; sonst als einfaches Bild.
+ * With known dimensions as SVG, which scales cleanly without distortion in every reader; otherwise
+ * as a plain image.
  */
 function coverBody(href: string, image: ResolvedImage, title: string): string {
   const alt = escapeHtml(title);
@@ -232,7 +230,7 @@ function packageDocument(
   spine: string[],
   hasCover: boolean,
 ): string {
-  // dcterms:modified verlangt Sekundengenauigkeit ohne Millisekunden
+  // dcterms:modified requires second precision without milliseconds
   const modified = meta.modified.toISOString().replace(/\.\d{3}Z$/, 'Z');
   const creator = book.author
     ? `\n    <dc:creator id="autor">${escapeHtml(book.author)}</dc:creator>
@@ -246,7 +244,7 @@ function packageDocument(
     <dc:language>de</dc:language>
     <meta property="dcterms:modified">${modified}</meta>
     <meta name="generator" content="Wortomat"/>${
-      // Für EPUB-2-Reader, die `properties="cover-image"` nicht kennen
+      // For EPUB 2 readers that do not know `properties="cover-image"`
       hasCover ? '\n    <meta name="cover" content="titelbild"/>' : ''
     }
   </metadata>
@@ -298,7 +296,7 @@ ${toc.length ? list(toc) : '<ol><li><a href="text/titel.xhtml">Titel</a></li></o
 `;
 }
 
-/** Inhaltsverzeichnis im EPUB-2-Format – manche ältere Reader lesen nur dieses. */
+/** Some older readers only read this EPUB 2 table of contents. */
 function ncxDocument(book: Book, meta: EpubMeta, toc: Chapter[]): string {
   let order = 0;
   const points = (entries: Chapter[]): string =>

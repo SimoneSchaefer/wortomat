@@ -5,7 +5,7 @@ export interface PreparedImage {
   height: number;
 }
 
-/** Größer braucht kein Buch – auch nicht für den Druck einer Abbildung im Satzspiegel. */
+/** No book needs more – not even for printing a figure in the type area. */
 const MAX_DIMENSION = 2400;
 const SUPPORTED_TYPES = new Set([
   'image/jpeg',
@@ -16,8 +16,8 @@ const SUPPORTED_TYPES = new Set([
 ]);
 
 /**
- * Formate, die auch Word und pdfLaTeX verstehen. WebP und AVIF werden daher beim Hochladen
- * umgewandelt – sonst fehlen die Bilder später im Export.
+ * Formats Word and pdfLaTeX understand too. WebP and AVIF are therefore converted on upload –
+ * otherwise the images would be missing from the export later.
  */
 const EXPORT_COMPATIBLE = new Set(['image/jpeg', 'image/png', 'image/gif']);
 
@@ -26,8 +26,8 @@ export function isSupportedImage(file: File): boolean {
 }
 
 /**
- * Verkleinert große Fotos vor dem Upload (Handyfotos haben oft 5–8 MB) und wandelt Formate um,
- * die der Export nicht kann. GIFs bleiben unverändert, damit Animationen erhalten bleiben.
+ * Shrinks large photos before upload (phone photos are often 5–8 MB) and converts formats the
+ * export cannot handle. GIFs stay unchanged so animations survive.
  */
 export async function prepareImage(file: File): Promise<PreparedImage> {
   const bitmap = await createImageBitmap(file);
@@ -48,7 +48,7 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
     }
     context.imageSmoothingQuality = 'high';
     context.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
-    // JPEG für Fotos; PNG, wo Transparenz vorkommen kann (PNG, WebP, AVIF).
+    // JPEG for photos; PNG where transparency may occur (PNG, WebP, AVIF).
     const type = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
     const blob = await canvas.convertToBlob({ type, quality: 0.88 });
     const fileName = file.name.replace(/\.[^.]+$/, '') + (type === 'image/jpeg' ? '.jpg' : '.png');

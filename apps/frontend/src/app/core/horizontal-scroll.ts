@@ -1,16 +1,16 @@
 import { afterNextRender, DestroyRef, Directive, ElementRef, inject, signal } from '@angular/core';
 
-/** So weit springt ein kurzer Klick auf einen Pfeil (Anteil der sichtbaren Breite). */
+/** How far a short click on an arrow jumps (share of the visible width). */
 const STEP_RATIO = 0.6;
-/** Ab dieser Druckdauer wird fortlaufend gescrollt … */
+/** After pressing this long, scrolling continues … */
 const HOLD_DELAY_MS = 300;
-/** … mit dieser Geschwindigkeit. */
+/** … at this speed. */
 const HOLD_SPEED_PX_PER_S = 500;
 
 /**
- * Seitlich scrollbare Zeile ohne sichtbare Scrollleiste. Meldet, ob es links bzw. rechts
- * noch etwas zu sehen gibt (für Pfeil-Buttons), und scrollt per Klick, Gedrückthalten
- * oder Mausrad. Tastatur: Fokus auf einen Eintrag scrollt ihn wie gewohnt ins Bild.
+ * Horizontally scrollable row without a visible scrollbar. Reports whether there is more to see
+ * left or right (for arrow buttons) and scrolls by click, hold or mouse wheel. Keyboard: focusing
+ * an entry scrolls it into view as usual.
  */
 @Directive({
   selector: '[wmHorizontalScroll]',
@@ -30,7 +30,7 @@ export class HorizontalScroll {
   private frame: number | undefined;
 
   constructor() {
-    // Breite der Zeile oder ihr Inhalt ändert sich → Pfeile neu bestimmen
+    // Width of the row or its content changes → recompute the arrows
     const resize = new ResizeObserver(() => this.update());
     const mutation = new MutationObserver(() => this.update());
     afterNextRender(() => {
@@ -52,12 +52,12 @@ export class HorizontalScroll {
   }
 
   /**
-   * Für `pointerdown` auf einem Pfeil: sofort ein Stück, nach kurzem Halten fortlaufend –
-   * bis die Maus losgelassen wird oder das Ende erreicht ist.
+   * For `pointerdown` on an arrow: one step right away, continuously after a short hold – until the
+   * mouse is released or the end is reached.
    */
   start(direction: -1 | 1, event: PointerEvent): void {
     if (event.button !== 0) return;
-    event.preventDefault(); // kein Fokus, keine Textauswahl
+    event.preventDefault(); // no focus, no text selection
     this.stop();
     this.element.scrollBy({
       left: direction * this.element.clientWidth * STEP_RATIO,
@@ -87,11 +87,11 @@ export class HorizontalScroll {
   };
 
   /**
-   * Mausrad über einer überlaufenden Zeile scrollt seitlich. Am Anfang bzw. Ende der Zeile
-   * scrollt wieder die Seite, damit man nicht „hängen bleibt“.
+   * The mouse wheel over an overflowing row scrolls sideways. At the start or end of the row the
+   * page scrolls again, so you do not get stuck.
    */
   protected onWheel(event: WheelEvent): void {
-    if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return; // Touchpad: schon seitlich
+    if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return; // touchpad: already sideways
     const more = event.deltaY < 0 ? this.canScrollLeft() : this.canScrollRight();
     if (!more) return;
     event.preventDefault();

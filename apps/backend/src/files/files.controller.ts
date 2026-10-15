@@ -7,9 +7,9 @@ import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 const PROJECT_EXTENSION = '.wortomat';
 
 /**
- * Ordner durchsuchen für den Dateiauswahl-Dialog im Browser-Modus. Ein Browser kann keine
- * echten Dateipfade liefern, daher liest der lokale Server die Ordner (die Electron-App
- * nutzt stattdessen den nativen Dialog). Gezeigt werden nur Ordner und Projektdateien.
+ * Folder browsing for the file picker in browser mode. A browser cannot provide real file paths, so
+ * the local server reads the folders (the Electron app uses the native dialog instead). Only
+ * folders and project files are listed.
  */
 @Controller('files')
 export class FilesController {
@@ -28,14 +28,14 @@ export class FilesController {
   }
 }
 
-/** Gibt es den Ordner nicht (mehr), dann den nächsten vorhandenen darüber. */
+/** If the folder does not exist (any more), the nearest existing one above it. */
 function nearestDirectory(dir: string): string {
   let current = dir;
   for (;;) {
     try {
       if (statSync(current).isDirectory()) return current;
     } catch {
-      // existiert nicht oder kein Zugriff – eine Ebene höher versuchen
+      // does not exist or no access – try one level up
     }
     const parent = path.dirname(current);
     if (parent === current) return current;
@@ -48,7 +48,7 @@ function readEntries(dir: string): DirectoryEntry[] {
   try {
     names = readdirSync(dir);
   } catch {
-    return []; // kein Leserecht: leer anzeigen, nach oben geht es trotzdem
+    return []; // no read permission: show it empty, going up still works
   }
   const entries: DirectoryEntry[] = [];
   for (const name of names) {
@@ -56,7 +56,7 @@ function readEntries(dir: string): DirectoryEntry[] {
     const fullPath = path.join(dir, name);
     let isDirectory: boolean;
     try {
-      isDirectory = statSync(fullPath).isDirectory(); // folgt Verknüpfungen
+      isDirectory = statSync(fullPath).isDirectory(); // follows symlinks
     } catch {
       continue;
     }

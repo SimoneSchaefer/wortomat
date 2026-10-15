@@ -1,4 +1,4 @@
-// Leicht getönte Seite mit hellen Kästen darauf – wie Statistik und Szenen
+// Lightly tinted page with light boxes on it – like statistics and scenes
 :host {
   display: block;
   min-height: 100%;
@@ -14,7 +14,6 @@
   gap: 1rem;
 }
 
-// Schalter „Szenentitel“ – an/aus wie die Pillen daneben
 .titles {
   height: 1.9rem;
   padding: 0 0.8rem;
@@ -117,7 +116,6 @@ h1 {
   }
 }
 
-// Umschalter „Wendepunkte | Alle Szenen“ – wie die Stufen des Szenenstatus
 .mode {
   display: flex;
 
@@ -142,7 +140,7 @@ h1 {
     }
 
     &[aria-checked='true'] {
-      position: relative; // Rahmen liegt über dem des Nachbarn
+      position: relative; // the border lies above the neighbour's
       border-color: var(--accent);
       background: var(--button-hover);
       color: var(--text);
@@ -172,7 +170,6 @@ h1 {
   border-radius: 50%;
 }
 
-// Infozeile über der Zeichnung
 .info {
   display: flex;
   align-items: center;

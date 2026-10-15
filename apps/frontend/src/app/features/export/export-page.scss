@@ -1,4 +1,3 @@
-// Seite wie die Einstellungen, etwas breiter: oben die Optionen, darunter die Vorschau
 .export-page {
   display: grid;
   gap: 1.5rem;
@@ -35,7 +34,6 @@ header {
   min-width: 0;
 }
 
-// Jede Gruppe als Karte wie auf der Einstellungsseite
 .options > fieldset,
 .options > .check {
   padding: 1rem 1.25rem 1.25rem;
@@ -44,13 +42,13 @@ header {
   background: var(--surface);
 }
 
-// Browser setzen die Legende eines fieldset mittig auf dessen Rahmen. Als float steht sie
-// stattdessen ganz normal oben in der Karte; der Inhalt danach beginnt darunter.
+// Browsers put a fieldset's legend centred on its border. As a float it sits normally at the top of
+// the card instead; the content after it starts below.
 .options > fieldset > legend {
   float: left;
   width: 100%;
 
-  // (wirkt nur auf Block-Elemente – eingebettete Komponenten brauchen `:host { display: block }`)
+  // (only affects block elements – embedded components need `:host { display: block }`)
   + * {
     clear: both;
   }
@@ -60,7 +58,6 @@ header {
   padding-block: 0.9rem;
 }
 
-// Satzspiegel der Vorlage „Roman“
 .layout legend {
   display: flex;
   align-items: baseline;
@@ -150,7 +147,6 @@ header {
   }
 }
 
-// Vorschau
 .preview-pane {
   display: grid;
   gap: 0.5rem;
@@ -220,7 +216,7 @@ legend {
   align-content: start;
   gap: 0.25rem;
   padding: 0.6rem 0.7rem;
-  // wie alle Buttons, damit die Kacheln als anklickbar erkennbar sind
+  // like all buttons, so the tiles are recognisable as clickable
   border: 1px solid var(--button-border);
   border-radius: 0.5rem;
   background: var(--button-bg);
@@ -241,13 +237,13 @@ legend {
     opacity: 0.6;
   }
 
-  // Tastaturfokus sichtbar, aber anders als „ausgewählt“ (gestrichelt, mit Abstand)
+  // Keyboard focus visible, but different from "selected" (dashed, with an offset)
   &:has(input:focus-visible) {
     outline: 2px dashed var(--accent);
     outline-offset: 3px;
   }
 
-  // Radio-Button unsichtbar, aber per Tastatur bedienbar
+  // Radio button invisible, but usable by keyboard
   input {
     position: absolute;
     opacity: 0;

@@ -13,7 +13,7 @@ import { StatusBar } from './core/status-bar';
 export class App {
   constructor() {
     const pendingSaves = inject(PendingSaves);
-    // Electron fragt vor dem Schließen des Fensters nach – dann alles speichern.
+    // Electron asks before closing the window – save everything then.
     inject(DESKTOP_BRIDGE)?.onBeforeClose(() => pendingSaves.flushAll());
   }
 }

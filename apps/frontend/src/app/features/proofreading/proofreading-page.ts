@@ -14,9 +14,8 @@ import { StatusMessages } from '../../core/status-messages';
 import { WortomatApi } from '../../core/wortomat-api';
 
 /**
- * Korrekturlesen unterwegs: Notizen vom Handy ins Buch übernehmen. Liegt außerhalb des
- * Arbeitsbereichs – so ist beim Import kein Editor offen, der die neuen Markierungen mit einem
- * älteren Stand überschreiben könnte.
+ * Lives outside the workspace – so during import no editor is open that could overwrite the new
+ * marks with an older state.
  */
 @Component({
   selector: 'wm-proofreading-page',
@@ -39,13 +38,11 @@ export class ProofreadingPage {
   private readonly pendingSaves = inject(PendingSaves);
 
   protected readonly creating = signal(false);
-  /** Wohin die Korrekturfassung ging: Pfad (Desktop) bzw. Dateiname (Download). */
+  /** Path (desktop) or file name (download). */
   protected readonly created = signal<{ filePath: string | null; fileName: string } | null>(null);
   protected readonly importing = signal(false);
   protected readonly result = signal<ProofImportResult | null>(null);
-  /** Namen der zuletzt gelöschten Notizdateien. */
   protected readonly cleaned = signal<string[] | null>(null);
-  /** Notizdateien, deren Notizen alle im Buch sind – können weg. */
   protected readonly doneFiles = computed(
     () => this.inbox.inbox()?.files.filter((file) => file.done).length ?? 0,
   );
@@ -58,12 +55,11 @@ export class ProofreadingPage {
     return relativeTime(iso, this.i18n.language());
   }
 
-  /** Alle neuen Notizen aus dem Download-Ordner übernehmen. */
   protected async importInbox(): Promise<void> {
     await this.runImport(() => this.api.importProofInbox());
   }
 
-  /** Erledigte Notizdateien löschen – nach Rückfrage, sie liegen im Download-Ordner. */
+  /** Asks first, since they live in the downloads folder. */
   protected async clean(): Promise<void> {
     const t = this.t().proofreading;
     const confirmed = await this.confirm.ask({
@@ -89,11 +85,10 @@ export class ProofreadingPage {
     }
   }
 
-  /** Korrekturfassung erstellen: Desktop mit Speichern-Dialog, im Browser als Download. */
   protected async createCopy(): Promise<void> {
     this.error.set(null);
     this.created.set(null);
-    await this.pendingSaves.flushAll(); // das Neueste aus dem Editor gehört dazu
+    await this.pendingSaves.flushAll(); // the newest text from the editor belongs in it
     this.creating.set(true);
     try {
       if (this.desktop) {
@@ -125,7 +120,7 @@ export class ProofreadingPage {
 
   protected async onPicked(input: HTMLInputElement): Promise<void> {
     const file = input.files?.[0];
-    input.value = ''; // dieselbe Datei noch einmal wählen können
+    input.value = ''; // so the same file can be picked again
     if (!file) return;
     this.error.set(null);
     this.result.set(null);
@@ -146,7 +141,7 @@ export class ProofreadingPage {
     this.importing.set(true);
     try {
       this.result.set(await run());
-      await this.store.reloadNodes(); // neue Fixme-Zahlen im Baum
+      await this.store.reloadNodes(); // new fixme counts in the tree
       await this.inbox.refresh();
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));

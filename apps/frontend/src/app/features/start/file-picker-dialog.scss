@@ -40,7 +40,7 @@ h2 {
   font-size: 1rem;
 }
 
-// Lange Pfade vorne kürzen – das Ende (der aktuelle Ordner) ist das Wichtige
+// Truncate long paths at the front – the end (the current folder) is what matters
 .path {
   overflow: hidden;
   text-overflow: ellipsis;

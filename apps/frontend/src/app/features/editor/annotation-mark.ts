@@ -11,34 +11,33 @@ declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     annotation: {
       /**
-       * Wie Fett, mit einer Ergänzung:
-       * - Text ausgewählt: markieren bzw. entfernen, wenn er schon ganz so markiert ist.
-       *   Eine andere Art wird ersetzt (eine Stelle hat immer nur eine Art).
-       * - Cursor mitten in einer Markierung dieser Art: die ganze Markierung entfernen.
-       * - Sonst: „ab hier so weitertippen“ ein- bzw. ausschalten.
+       * Like bold, with one addition:
+       * - Text selected: mark it, or unmark it if it is fully marked like that already. Another
+       *   kind is replaced (a passage always has just one kind).
+       * - Cursor inside a mark of this kind: remove the whole mark.
+       * - Otherwise: toggle "keep typing like this".
        */
       toggleAnnotation: (kind: AnnotationKind) => ReturnType;
       /**
-       * Markierung am Cursor erledigen: mit `accept` den Vorschlag übernehmen (der markierte
-       * Text wird ersetzt), sonst nur die Markierung entfernen. Der Text bleibt dabei formatiert.
+       * With `accept` the suggestion is applied (replacing the marked text), otherwise only the
+       * mark is removed. The text keeps its formatting.
        */
       resolveAnnotation: (accept: boolean) => ReturnType;
-      /** Notiz der Markierung am Cursor setzen; leer oder `null` entfernt sie. */
+      /** Empty or `null` removes it. */
       setAnnotationNote: (note: string | null) => ReturnType;
     };
   }
 }
 
 /**
- * Tiptap-Mark für Stellen, an denen noch etwas zu tun ist. Im Dokument:
- * `{ type: 'annotation', attrs: { kind: 'todo' | 'idea' | 'fixme', note, suggestion } }`,
- * im HTML: `<mark class="wm-annotation" data-annotation="todo">`.
- * `note` ist eine Notiz zur Stelle – im Editor eingetragen oder vom Korrekturlesen unterwegs;
- * `suggestion` (Ersetzungsvorschlag für den markierten Text) kommt nur vom Korrekturlesen.
- * Gezählt wird im Backend (apps/backend/src/manuscript/annotations.ts).
+ * Tiptap mark for passages where something is still to do. In the document: `{ type: 'annotation',
+ * attrs: { kind: 'todo' | 'idea' | 'fixme', note, suggestion } }`, in HTML: `<mark
+ * class="wm-annotation" data-annotation="todo">`. `note` is a note on the passage – entered in the
+ * editor or from proofreading on the go; `suggestion` (a replacement for the marked text) only
+ * comes from proofreading. Counted in the backend (apps/backend/src/manuscript/annotations.ts).
  */
 export interface AnnotationOptions {
-  /** Tooltip der Markierung, z. B. „Todo“ – wird beim Darstellen gelesen. */
+  /** Tooltip of the mark, e.g. "Todo" – read when rendering. */
   label: (kind: AnnotationKind) => string;
 }
 
@@ -97,7 +96,7 @@ export const Annotation = Mark.create<AnnotationOptions>({
           const { empty, $from } = state.selection;
 
           if (!empty) {
-            // Selbst prüfen: Tiptaps isActive() meldet schon bei teilweiser Markierung „aktiv“.
+            // Check ourselves: Tiptap's isActive() already reports "active" for a partial mark.
             let fullyMarked = true;
             state.doc.nodesBetween(state.selection.from, state.selection.to, (node) => {
               if (node.isText && !node.marks.some(isKind)) fullyMarked = false;
@@ -116,7 +115,7 @@ export const Annotation = Mark.create<AnnotationOptions>({
               .setTextSelection($from.pos)
               .run();
           }
-          // Leere Auswahl: setMark/unsetMark wirken auf die „gespeicherten“ Marks fürs Weitertippen.
+          // Empty selection: setMark/unsetMark act on the stored marks for further typing.
           const typingAs = (state.storedMarks ?? $from.marks()).some(isKind);
           return typingAs
             ? chain().unsetMark(this.name).run()
@@ -131,7 +130,7 @@ export const Annotation = Mark.create<AnnotationOptions>({
           if (dispatch) {
             const { from, to, suggestion } = found;
             tr.removeMark(from, to, state.schema.marks[this.name]);
-            // insertText übernimmt die übrigen Marks (kursiv …); leerer Vorschlag = löschen
+            // insertText keeps the other marks (italic …); an empty suggestion = delete
             const replace = accept && suggestion !== null;
             if (replace) tr.insertText(suggestion, from, to);
             const end = replace ? from + suggestion.length : to;
@@ -165,21 +164,16 @@ export const Annotation = Mark.create<AnnotationOptions>({
   },
 });
 
-/** Eine Markierung samt Notiz und Vorschlag – für die Leiste über dem Text und die Liste. */
 export interface AnnotationAt {
   kind: AnnotationKind;
   note: string | null;
   suggestion: string | null;
-  /** Der markierte Text. */
   text: string;
   from: number;
   to: number;
 }
 
-/**
- * Sucht eine Markierung am Anfang der Auswahl – auch, wenn der Cursor genau an ihrem Anfang
- * steht.
- */
+/** At the start of the selection – also when the cursor sits exactly at the mark's start. */
 export function annotationAt(state: EditorState): AnnotationAt | null {
   const type = state.schema.marks['annotation'];
   if (!type) return null;
@@ -193,8 +187,8 @@ export function annotationAt(state: EditorState): AnnotationAt | null {
 }
 
 /**
- * Alle Markierungen im Dokument, in Textreihenfolge. Wie beim Zählen bleibt eine Markierung eine,
- * auch wenn darin z. B. ein Wort fett ist; sie endet am Absatzende.
+ * As when counting, a mark stays one even if a word in it is bold; it ends at the end of the
+ * paragraph.
  */
 export function annotationsIn(doc: ProseMirrorNode): AnnotationAt[] {
   const type = doc.type.schema.marks['annotation'];
@@ -202,7 +196,7 @@ export function annotationsIn(doc: ProseMirrorNode): AnnotationAt[] {
   const found: AnnotationAt[] = [];
   doc.descendants((block, blockPos) => {
     if (!block.isTextblock) return true;
-    // `as`: sonst hält TypeScript `open` nach dem forEach für immer `null`
+    // `as`: otherwise TypeScript considers `open` to be `null` forever after the forEach
     let open = null as { mark: ProseMirrorMark; from: number; to: number } | null;
     block.forEach((child, offset) => {
       const from = blockPos + 1 + offset;
@@ -231,7 +225,7 @@ function describe(
   return {
     kind: mark.attrs['kind'] as AnnotationKind,
     note: (mark.attrs['note'] as string | null) || null,
-    // Ein Vorschlag, der nichts ändert, ist nur eine Notiz (nichts zu übernehmen)
+    // A suggestion that changes nothing is just a note (nothing to apply)
     suggestion: suggestion === text ? null : suggestion,
     text,
     from,

@@ -20,7 +20,7 @@ import { fitImage, normseitenLabel, printMarks } from './book.js';
 import { BOOK_FONTS, DEFAULT_LAYOUT } from './layout.js';
 import { type Localized, localized } from '../i18n.js';
 
-/** Maße in Twips (1/20 Punkt; 1 cm = 567 Twips). */
+/** Measurements in twips (1/20 pt; 1 cm = 567 twips). */
 interface Layout {
   page: { width: number; height: number };
   margin: {
@@ -32,25 +32,28 @@ interface Layout {
     footer: number;
   };
   font: string;
-  /** Schriftgröße in halben Punkten. */
+  /** In half points. */
   size: number;
-  /** Zeilenabstand: genau (Normseite) oder als Vielfaches (240 = einfach). */
+  /** Exact (standard page) or a multiple (240 = single). */
   line: number;
   lineRule: (typeof LineRuleType)[keyof typeof LineRuleType];
   align: (typeof AlignmentType)[keyof typeof AlignmentType];
   indent: number;
   hyphenate: boolean;
   sceneBreak: string;
-  /** Normseite: Autor und Titel oben, Seitenzahl rechts; Roman: Seitenzahl unten mittig. */
+  /**
+   * Standard page: author and title at the top, page number right; novel: page number bottom
+   * centre.
+   */
   pageNumbers: 'header' | 'footer';
-  /** Doppelseitig: links = innen (Bund), rechts = außen; Word spiegelt auf geraden Seiten. */
+  /** Two-sided: left = inner (gutter), right = outer; Word mirrors them on even pages. */
   mirrorMargins: boolean;
 }
 
 /**
- * Normseite: Courier 12 pt, genau 30 Zeilen à 60 Anschläge auf A4.
- * Courier hat 7,2 pt Zeichenbreite → 60 Zeichen = 432 pt = 8640 Twips Textbreite;
- * 30 Zeilen à 18 pt = 540 pt = 10800 Twips Texthöhe. Die Ränder ergeben sich daraus.
+ * Standard page: Courier 12 pt, exactly 30 lines of 60 characters on A4. Courier is 7.2 pt wide →
+ * 60 characters = 432 pt = 8640 twips text width; 30 lines of 18 pt = 540 pt = 10800 twips text
+ * height. The margins follow from that.
  */
 const NORMSEITE: Layout = {
   page: { width: 11906, height: 16838 },
@@ -65,10 +68,10 @@ const NORMSEITE: Layout = {
   font: 'Courier New',
   size: 24,
   line: 360,
-  // „EXACT“, nicht „EXACTLY“: Letzteres schreibt lineRule="exactly", das kennt das Word-Format nicht.
+  // EXACT, not EXACTLY: the latter writes lineRule="exactly", which the Word format does not know.
   lineRule: LineRuleType.EXACT,
   align: AlignmentType.LEFT,
-  indent: 432, // 3 Zeichen
+  indent: 432, // 3 characters
   hyphenate: false,
   sceneBreak: '*',
   pageNumbers: 'header',
@@ -77,7 +80,7 @@ const NORMSEITE: Layout = {
 
 const TWIPS_PER_MM = 1440 / 25.4;
 
-/** Roman: Buchformat nach dem Satzspiegel des Buchs, Blocksatz mit Silbentrennung. */
+/** Novel: page size from the book's type area, justified with hyphenation. */
 function romanLayout(book: BookLayout): Layout {
   const twips = (mm: number) => Math.round(mm * TWIPS_PER_MM);
   const top = twips(book.marginTop);
@@ -90,7 +93,7 @@ function romanLayout(book: BookLayout): Layout {
       bottom,
       left: twips(book.marginInner),
       header: Math.min(567, Math.max(0, top - 170)),
-      // Seitenzahl gut 1 cm über der Unterkante – bei kleinem Rand entsprechend tiefer
+      // Page number a good 1 cm above the bottom edge – lower for small margins
       footer: Math.max(170, Math.min(680, bottom - 340)),
     },
     font: BOOK_FONTS[book.font].docx,
@@ -98,7 +101,7 @@ function romanLayout(book: BookLayout): Layout {
     line: 276,
     lineRule: LineRuleType.AUTO,
     align: AlignmentType.BOTH,
-    // gut 1,2 Geviert wie im PDF
+    // a good 1.2 em, as in the PDF
     indent: Math.round((340 * book.fontSize) / 11),
     hyphenate: true,
     sceneBreak: '*   *   *',
@@ -107,7 +110,7 @@ function romanLayout(book: BookLayout): Layout {
   };
 }
 
-const TWIPS_PER_PIXEL = 15; // docx rechnet Bildgrößen in Pixeln à 1/96 Zoll
+const TWIPS_PER_PIXEL = 15; // docx measures images in pixels of 1/96 inch
 
 export async function renderDocx(
   book: Book,
@@ -136,7 +139,8 @@ export async function renderDocx(
         newPageSpacer(Math.round(textHeight / 3)),
         new Paragraph({
           alignment: AlignmentType.CENTER,
-          // Normseite bleibt durchgehend 12 pt Courier; im Roman darf der Teil größer sein.
+          // The standard page stays 12 pt Courier throughout; in the novel layout the part title
+          // may be larger.
           children: [
             layout === NORMSEITE
               ? new TextRun({ text: item.title, bold: true })
@@ -183,7 +187,6 @@ export async function renderDocx(
     },
     sections: [
       {
-        // Titelseite ohne Kopf- und Fußzeile
         properties: { page: { size: layout.page, margin: layout.margin } },
         children: titlePage(book, template, ctx, textHeight),
       },
@@ -231,9 +234,9 @@ export async function renderDocx(
 }
 
 /**
- * Die docx-Bibliothek kennt die Einstellung „Gegenüberliegende Seiten“ nicht – also nachträglich
- * `<w:mirrorMargins/>` in word/settings.xml eintragen. Laut Schema steht es vor allen anderen
- * Einstellungen, die docx schreibt (bis auf `w:displayBackgroundShape`).
+ * The docx library does not support mirrored margins, so `<w:mirrorMargins/>` is added to
+ * word/settings.xml afterwards. The schema puts it before every other setting docx writes (except
+ * `w:displayBackgroundShape`).
  */
 async function withMirrorMargins(data: Buffer): Promise<Buffer> {
   const zip = await JSZip.loadAsync(data);
@@ -257,7 +260,7 @@ interface Context {
   images: ImageResolver;
   warnings: Localized[];
   maxImage: { width: number; height: number };
-  /** Einzug erst ab dem zweiten Absatz nach Überschrift oder Szenentrenner. */
+  /** Indent only from the second paragraph after a heading or scene break. */
   indentNext: boolean;
   textHeight: number;
 }
@@ -272,7 +275,7 @@ function titlePage(
   const stats = `ca. ${book.wordCount.toLocaleString('de-DE')} Wörter · ca. ${normseitenLabel(book)}`;
   const result: Paragraph[] = [];
   if (template === 'normseite') {
-    // Klassisch: Autor oben links, Umfang oben rechts, Titel mittig
+    // Classic layout: author top left, length top right, title centred
     result.push(new Paragraph({ children: [new TextRun(book.author || ' ')] }));
     result.push(new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun(stats)] }));
   }
@@ -320,7 +323,7 @@ function chapterHeading(title: string, ctx: Context): Paragraph[] {
         }),
       ]
     : [
-        // wie im PDF: Kapitelanfang 15 % der Satzspiegelhöhe tiefer
+        // as in the PDF: chapter openings start 15 % of the type area lower
         newPageSpacer(Math.round(ctx.textHeight * 0.15)),
         new Paragraph({
           keepNext: true,
@@ -332,8 +335,8 @@ function chapterHeading(title: string, ctx: Context): Paragraph[] {
 }
 
 /**
- * Neue Seite mit Leerraum oben. „Abstand vor“ direkt nach einem Seitenumbruch lassen Word und
- * LibreOffice weg – ein leerer Absatz mit fester Höhe wird dagegen immer eingehalten.
+ * Word and LibreOffice drop "space before" right after a page break – an empty paragraph with a
+ * fixed height is always kept.
  */
 function newPageSpacer(height: number): Paragraph {
   return new Paragraph({
@@ -489,9 +492,9 @@ function inline(nodes: JsonNode[], italicsDefault: boolean): ParagraphChild[] {
       runs.push(
         new TextRun({
           text: node.text,
-          // nur setzen, was gilt – sonst steht an jedem Textstück „fett: nein, kursiv: nein …“
+          // only set what applies – otherwise every run says "bold: no, italic: no …"
           bold: marks.has('bold') || undefined,
-          italics: marks.has('italic') !== italicsDefault || undefined, // kursiv im Zitat wird gerade
+          italics: marks.has('italic') !== italicsDefault || undefined, // italic inside a quote turns upright
           underline: marks.has('underline') ? {} : undefined,
           strike: marks.has('strike') || undefined,
           font: marks.has('code') ? 'Courier New' : undefined,

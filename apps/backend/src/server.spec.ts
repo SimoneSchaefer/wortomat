@@ -36,7 +36,7 @@ import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
 
 const TOKEN = 'test-token';
 const DEFAULT_PLOT_VIEW = { order: 'story', onlyTurningPoints: true, compact: false };
-// Kleinstes gültiges PNG (1×1 Pixel).
+// Smallest valid PNG (1×1 pixel).
 const PNG_1PX = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
@@ -126,7 +126,7 @@ describe('REST-API', () => {
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Die Häuser am Fluss.' }] }],
     };
-    // Größer als das Express-Standardlimit von 100 KB.
+    // Larger than Express's default limit of 100 KB.
     const longText = 'Wort '.repeat(40_000);
     await api('PUT', `/api/scenes/${scene.id}/content`, {
       doc,
@@ -172,7 +172,7 @@ describe('REST-API', () => {
     const b = await node(k1.id, 'scene', 'B');
     const c = await node(k1.id, 'scene', 'C');
 
-    // C vor A
+    // C before A
     let nodes = await move(c.id, k1.id, a.id);
     assert.deepEqual(titlesUnder(nodes, k1.id), ['C', 'A', 'B']);
     assert.deepEqual(
@@ -183,12 +183,12 @@ describe('REST-API', () => {
       [1, 2, 3],
     );
 
-    // A ans Ende von K2
+    // A to the end of K2
     nodes = await move(a.id, k2.id, null);
     assert.deepEqual(titlesUnder(nodes, k1.id), ['C', 'B']);
     assert.deepEqual(titlesUnder(nodes, k2.id), ['A']);
 
-    // Kapitel umsortieren, dann in einen Teil schieben (Szenen wandern mit)
+    // Reorder chapters, then move into a part (scenes move along)
     nodes = await move(k2.id, null, k1.id);
     assert.deepEqual(titlesUnder(nodes, null), ['K2', 'K1']);
     const teil = await node(null, 'part', 'Teil I');
@@ -224,11 +224,11 @@ describe('REST-API', () => {
     const erstes = await create('Erstes Buch');
     const zweites = await create('Zweites Buch');
     let list = await api<ProjectListEntry[]>('GET', '/api/projects');
-    // zuletzt verwendet zuerst; das "Roman"-Projekt aus dem vorigen Test steht dahinter
+    // most recently used first; the "Roman" project from the previous test comes after
     assert.deepEqual(titles(list).slice(0, 2), ['Zweites Buch', 'Erstes Buch']);
     assert.equal(list.find((p) => p.isOpen)?.title, 'Zweites Buch');
 
-    // Erneutes Öffnen schiebt nach vorne; Titeländerungen und Wörter kommen frisch aus der Datei
+    // Opening again moves it to the front; title changes and words come fresh from the file
     await api('POST', '/api/project/open', { filePath: erstes.filePath });
     await api('PATCH', '/api/project', { title: 'Erstes Buch (neu)' });
     const chapter = await api<ManuscriptNode>('POST', '/api/nodes', {
@@ -253,7 +253,7 @@ describe('REST-API', () => {
     assert.equal(list[1]!.isOpen, false);
     assert.equal(list[0]!.coverImageId, null);
 
-    // Titelbild: steht in der Liste und ist abrufbar, auch wenn ein anderes Buch offen ist
+    // Cover: listed and retrievable even while another book is open
     const form = new FormData();
     form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), 'c.png');
     const image = (await (
@@ -276,19 +276,19 @@ describe('REST-API', () => {
     assert.equal(coverResponse.status, 200);
     assert.equal(coverResponse.headers.get('content-type'), 'image/png');
     assert.deepEqual(Buffer.from(await coverResponse.arrayBuffer()), PNG_1PX);
-    // ohne Titelbild bzw. für Dateien, die nicht in der Liste stehen: nichts
+    // without a cover, or for files not in the list: nothing
     for (const filePath of [zweites.filePath, path.join(tmpDir, 'fremd.wortomat')]) {
       const response = await fetch(coverUrl(filePath), { headers: { [AUTH_HEADER]: TOKEN } });
       assert.equal(response.status, 404);
     }
     await api('POST', '/api/project/open', { filePath: erstes.filePath });
 
-    // Gelöschte Datei bleibt sichtbar, aber als nicht verfügbar
+    // A deleted file stays visible, but as unavailable
     await rm(zweites.filePath);
     list = await api<ProjectListEntry[]>('GET', '/api/projects');
     const missing = list.find((p) => p.filePath === zweites.filePath)!;
     assert.equal(missing.available, false);
-    assert.equal(missing.title, 'Zweites Buch'); // Dateiname als Ersatz
+    assert.equal(missing.title, 'Zweites Buch'); // file name as a fallback
 
     await api('POST', '/api/projects/forget', { filePath: zweites.filePath });
     list = await api<ProjectListEntry[]>('GET', '/api/projects');
@@ -316,7 +316,7 @@ describe('REST-API', () => {
     );
     assert.equal((await api<NoteSummary[]>('GET', '/api/notes')).length, 3);
 
-    // Gleich nach dem Anlegen über den Titel auffindbar
+    // Findable by title right after creation
     let hits = await api<SearchHit[]>('GET', '/api/search?q=berger');
     assert.deepEqual(
       hits.map((h) => [h.kind, h.id]),
@@ -330,7 +330,7 @@ describe('REST-API', () => {
     assert.equal(updated.summary, 'Protagonistin, 34, Ärztin');
     assert.equal(updated.groupId, null);
 
-    // Gruppen: auch leer vorhanden, umbenennbar; Löschen lässt die Notizen stehen
+    // Groups: exist even when empty, can be renamed; deleting keeps the notes
     const family = await api<NoteGroup>('POST', '/api/note-groups', {
       kind: 'character',
       name: '  Familie Berger ',
@@ -340,7 +340,7 @@ describe('REST-API', () => {
       groupId: family.id,
     });
     assert.equal(grouped.groupId, family.id);
-    assert.equal(grouped.summary, 'Protagonistin, 34, Ärztin'); // bleibt unverändert
+    assert.equal(grouped.summary, 'Protagonistin, 34, Ärztin'); // unchanged
     const places = await api<NoteGroup>('POST', '/api/note-groups', {
       kind: 'place',
       name: 'Küste',
@@ -360,7 +360,7 @@ describe('REST-API', () => {
       ],
     );
 
-    // Neue Gruppen kommen ans Ende; Verschieben ordnet nur innerhalb der Art um
+    // New groups go to the end; moving only reorders within the kind
     const police = await api<NoteGroup>('POST', '/api/note-groups', {
       kind: 'character',
       name: 'Polizei',
@@ -411,18 +411,18 @@ describe('REST-API', () => {
     assert.deepEqual(content.doc, doc);
     assert.equal(content.wordCount, 4);
     assert.deepEqual(content.annotations, { todo: 1, idea: 0, fixme: 0 });
-    // auch in der Liste, damit die Seitenleiste die Zähler zeigen kann
+    // in the list too, so the sidebar can show the counts
     assert.deepEqual(
       (await api<NoteSummary[]>('GET', '/api/notes')).find((n) => n.id === hafen.id)!.annotations,
       { todo: 1, idea: 0, fixme: 0 },
     );
 
-    // Kurzbeschreibung und Text sind durchsuchbar
+    // Summary and text are searchable
     hits = await api<SearchHit[]>('GET', '/api/search?q=arztin');
     assert.equal(hits[0]?.id, anna.id);
-    assert.match(hits[0]!.snippetHtml, /<mark>Ärztin<\/mark>/); // aus der Kurzbeschreibung
+    assert.match(hits[0]!.snippetHtml, /<mark>Ärztin<\/mark>/); // from the summary
     hits = await api<SearchHit[]>('GET', '/api/search?q=berger');
-    assert.equal(hits[0]?.snippetHtml, ''); // nur der Titel passt → kein doppelter Ausschnitt
+    assert.equal(hits[0]?.snippetHtml, ''); // only the title matches → no duplicate snippet
     hits = await api<SearchHit[]>('GET', '/api/search?q=fischkutter');
     assert.deepEqual(
       hits.map((h) => [h.kind, h.id]),
@@ -472,7 +472,7 @@ describe('REST-API', () => {
     const [eins, zwei, drei] = gallery as [ImageInfo, ImageInfo, ImageInfo];
     assert.equal(await cover(ben.id), eins.url);
 
-    // "Als Profilbild": drei nach vorne
+    // "As profile picture": three to the front
     const reordered = await api<ImageInfo[]>('PUT', `/api/notes/${ben.id}/images`, {
       imageIds: [drei.id, eins.id, zwei.id],
     });
@@ -488,7 +488,7 @@ describe('REST-API', () => {
     });
     assert.equal(badOrder.status, 400);
 
-    // Ausschnitt wählen: gilt in der Galerie und fürs Profilbild in den Listen
+    // Choosing a crop: applies in the gallery and to the profile picture in the lists
     const cropUrl = (imageId: string) => `/api/notes/${ben.id}/images/${imageId}/crop`;
     const crop = { x: 0.1, y: 0.2, width: 0.5, height: 0.375 };
     const cropped = await api<GalleryImage[]>('PUT', cropUrl(drei.id), { crop });
@@ -511,17 +511,17 @@ describe('REST-API', () => {
     );
     assert.equal(await cropStatus(drei.id, { crop: 'mitte' }), 400);
     assert.equal(await cropStatus('gibts-nicht', { crop }), 404);
-    // Das Original bleibt: „Ganzes Bild“ setzt den Ausschnitt zurück
+    // The original stays: "whole image" resets the crop
     const reset = await api<GalleryImage[]>('PUT', cropUrl(drei.id), { crop: null });
     assert.equal(reset[0]!.crop, null);
     assert.equal(await coverCrop(), null);
 
-    // Entfernen löscht das Bild aus der Datei …
+    // Removing deletes the image from the file …
     await api('DELETE', `/api/notes/${ben.id}/images/${drei.id}`);
     assert.equal(await imageExists(drei.url), false);
     assert.equal(await cover(ben.id), eins.url);
 
-    // … außer es steckt noch im Text
+    // … unless it is still used in the text
     await api('PUT', `/api/notes/${ben.id}/content`, {
       doc: { type: 'doc', content: [{ type: 'image', attrs: { src: zwei.url } }] },
       text: '',
@@ -530,7 +530,7 @@ describe('REST-API', () => {
     await api('DELETE', `/api/notes/${ben.id}/images/${zwei.id}`);
     assert.equal(await imageExists(zwei.url), true);
 
-    // Notiz löschen räumt die Galerie mit auf
+    // Deleting the note cleans up its gallery too
     await api('DELETE', `/api/notes/${ben.id}`);
     assert.equal(await imageExists(eins.url), false);
   });
@@ -560,28 +560,28 @@ describe('REST-API', () => {
     const anna = await note('character', 'Anna');
     const hafen = await note('place', 'Hafen');
 
-    // Szene → Notizen
+    // Scene → notes
     await api('POST', `/api/scenes/${abschied.id}/links`, { noteId: anna.id });
     await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: anna.id });
     await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: hafen.id });
-    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: hafen.id }); // doppelt: egal
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: hafen.id }); // twice: no harm
     await api('POST', `/api/scenes/${markt.id}/links`, { noteId: anna.id });
     assert.deepEqual(await linked(ankunft.id), ['Anna', 'Hafen']);
 
-    // Notiz → Szenen, in Manuskript-Reihenfolge mit Pfad
+    // Note → scenes, in manuscript order with path
     assert.deepEqual(await appearances(anna.id), [
       { id: ankunft.id, title: 'Ankunft', path: ['Teil I', 'Kapitel 1'] },
       { id: markt.id, title: 'Markt', path: ['Teil I', 'Kapitel 1'] },
       { id: abschied.id, title: 'Abschied', path: ['Kapitel 2'] },
     ]);
-    // Umsortieren wirkt sich auf die Reihenfolge aus
+    // Reordering affects the order
     await api('POST', `/api/nodes/${k2.id}/move`, { parentId: null, beforeId: teil.id });
     assert.deepEqual(
       (await appearances(anna.id)).map((s) => s.title),
       ['Abschied', 'Ankunft', 'Markt'],
     );
 
-    // Lösen
+    // Unlinking
     const afterUnlink = await api<NoteSummary[]>(
       'DELETE',
       `/api/scenes/${ankunft.id}/links/${hafen.id}`,
@@ -591,7 +591,7 @@ describe('REST-API', () => {
       ['Anna'],
     );
 
-    // Ungültige Ziele
+    // Invalid targets
     const status = async (sceneId: string, noteId: string) =>
       (
         await fetch(`${server.url}/api/scenes/${sceneId}/links`, {
@@ -603,7 +603,7 @@ describe('REST-API', () => {
     assert.equal(await status(k1.id, anna.id), 400, 'Kapitel statt Szene');
     assert.equal(await status(ankunft.id, 'gibt-es-nicht'), 404, 'unbekannte Notiz');
 
-    // Löschen räumt Verknüpfungen mit auf: Szene, ganzes Kapitel, Notiz
+    // Deleting cleans up links: scene, whole chapter, note
     await api('DELETE', `/api/nodes/${markt.id}`);
     await api('DELETE', `/api/nodes/${k2.id}`);
     assert.deepEqual(
@@ -641,7 +641,7 @@ describe('REST-API', () => {
       pins: [
         { noteId: hafen.id, x: 100, y: 200 },
         { noteId: leuchtturm.id, x: 300, y: 50 },
-        // keine Orte: werden übergangen
+        // not places: skipped
         { noteId: anna.id, x: 1, y: 1 },
         { noteId: 'gibt-es-nicht', x: 1, y: 1 },
       ],
@@ -654,7 +654,7 @@ describe('REST-API', () => {
       [hafen.id, leuchtturm.id],
     );
 
-    // Nur der Name ändert sich – Zeichnung und Orte bleiben
+    // Only the name changes – drawing and places stay
     const renamed = await api<PlaceMap>('PATCH', `/api/maps/${map.id}`, { name: 'Küste' });
     assert.equal(renamed.name, 'Küste');
     assert.equal(renamed.strokes.length, 1);
@@ -669,7 +669,7 @@ describe('REST-API', () => {
     );
     assert.equal(await status('PATCH', `/api/maps/${map.id}`, { name: ' ' }), 400);
 
-    // Die Seite des Orts zeigt, auf welchen Karten er liegt
+    // The place's page shows which maps it is on
     const stadt = await api<PlaceMap>('POST', '/api/maps', { name: 'Stadt' });
     await api('PATCH', `/api/maps/${stadt.id}`, { pins: [{ noteId: hafen.id, x: 5, y: 6 }] });
     assert.deepEqual(
@@ -679,12 +679,12 @@ describe('REST-API', () => {
     await api('DELETE', `/api/maps/${stadt.id}`);
     assert.deepEqual(await api('GET', `/api/notes/${anna.id}/maps`), []);
 
-    // Ort gelöscht → verschwindet von der Karte
+    // Place deleted → disappears from the map
     await api('DELETE', `/api/notes/${leuchtturm.id}`);
     const after = await api<PlaceMap>('GET', `/api/maps/${map.id}`);
     assert.deepEqual(after.pins, [{ noteId: hafen.id, x: 100, y: 200 }]);
 
-    // Hintergrundbild: beim Ersetzen bzw. Löschen der Karte wird das alte aufgeräumt
+    // Background image: replacing it or deleting the map cleans up the old one
     const uploadImage = async () => {
       const form = new FormData();
       form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), 'k.png');
@@ -759,7 +759,7 @@ describe('REST-API', () => {
         },
       ],
     };
-    // Die Zahlen des Clients werden ignoriert – das Backend zählt selbst.
+    // The client's numbers are ignored – the backend counts itself.
     const saved = await api<SceneContent>('PUT', `/api/scenes/${szene.id}/content`, {
       doc,
       text: '',
@@ -801,8 +801,8 @@ describe('REST-API', () => {
         pastedWords,
       });
 
-    await save('Es war einmal ein alter König.'); // 6 geschrieben
-    await save('Es war einmal ein junger König.'); // 1 ersetzt
+    await save('Es war einmal ein alter König.'); // 6 written
+    await save('Es war einmal ein junger König.'); // 1 replaced
     await save('Es war einmal ein junger König. Aus dem alten Entwurf kopiert.', 5);
 
     const days = await api<WritingDay[]>('GET', '/api/writing-log');
@@ -814,7 +814,7 @@ describe('REST-API', () => {
     assert.deepEqual(await api('GET', '/api/writing-log?from=2000-01-01&to=2000-12-31'), []);
     assert.deepEqual(await api('GET', '/api/writing-log/today'), days[0]);
 
-    // Der Verlauf bleibt, auch wenn die Szene gelöscht wird
+    // The history stays even when the scene is deleted
     await api('DELETE', `/api/nodes/${chapter.id}`);
     assert.equal((await api<WritingDay[]>('GET', '/api/writing-log')).length, 1);
     await api('POST', '/api/project/close');
@@ -862,15 +862,15 @@ describe('REST-API', () => {
       kind: 'scene',
       title: 'S',
     });
-    assert.equal(szene.status, 'idea'); // neue Szenen starten als Idee
-    assert.equal(kapitel.status, null); // Kapitel haben keinen Status
+    assert.equal(szene.status, 'idea'); // new scenes start as idea
+    assert.equal(kapitel.status, null); // chapters have no status
 
     const updated = await api<ManuscriptNode>('PATCH', `/api/nodes/${szene.id}`, {
       status: 'revised',
     });
     assert.equal(updated.status, 'revised');
     assert.equal(updated.title, 'S');
-    // Umbenennen lässt den Status in Ruhe
+    // Renaming leaves the status alone
     await api('PATCH', `/api/nodes/${szene.id}`, { title: 'S neu' });
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.deepEqual(
@@ -911,10 +911,10 @@ describe('REST-API', () => {
 
     assert.deepEqual(names(await addTag(s1.id, '  Rückblende ')), ['Rückblende']);
     await addTag(s1.id, 'Spannung');
-    // Gleicher Tag trotz anderer Schreibweise (auch bei Umlauten) und mit "#"
+    // Same tag despite different spelling (umlauts too) and with "#"
     assert.deepEqual(names(await addTag(s2.id, '#RÜCKBLENDE')), ['Rückblende']);
     assert.deepEqual(names(await addTag(s1.id, 'rückblende')), ['Rückblende', 'Spannung']);
-    await addTag(s2.id, 'Arc  Anna'); // Leerraum wird zusammengefasst
+    await addTag(s2.id, 'Arc  Anna'); // whitespace is collapsed
 
     assert.deepEqual(await allTags().then((t) => t.map((x) => [x.name, x.sceneCount])), [
       ['Arc Anna', 1],
@@ -922,7 +922,7 @@ describe('REST-API', () => {
       ['Spannung', 1],
     ]);
 
-    // Alles auf einmal für den Szenenfilter: Tags (alphabetisch) und verknüpfte Notizen
+    // Everything at once for the scene filter: tags (alphabetical) and linked notes
     const anna = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Anna' });
     await api('POST', `/api/scenes/${s2.id}/links`, { noteId: anna.id });
     const relations = await api<SceneRelations[]>('GET', '/api/scene-relations');
@@ -936,7 +936,7 @@ describe('REST-API', () => {
       ].sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
     );
 
-    // Entfernen; der letzte Einsatz eines Tags lässt ihn verschwinden
+    // Removing; the last use of a tag makes it disappear
     const spannung = (await allTags()).find((t) => t.name === 'Spannung')!;
     assert.deepEqual(
       names(await api<Tag[]>('DELETE', `/api/scenes/${s1.id}/tags/${spannung.id}`)),
@@ -947,7 +947,7 @@ describe('REST-API', () => {
       false,
     );
 
-    // Szene löschen: ihre Tags tauchen nicht mehr als Vorschlag auf
+    // Deleting a scene: its tags no longer show up as suggestions
     await api('DELETE', `/api/nodes/${s2.id}`);
     assert.deepEqual(await allTags().then((t) => t.map((x) => [x.name, x.sceneCount])), [
       ['Rückblende', 1],
@@ -983,7 +983,7 @@ describe('REST-API', () => {
         })
       ).status;
 
-    // Farben werden der Reihe nach vergeben, solange man keine wählt
+    // Colours are assigned in turn as long as none is chosen
     const lena = await api<Strand>('POST', '/api/strands', { name: '  Lena ' });
     const tom = await api<Strand>('POST', '/api/strands', { name: 'Tom' });
     assert.deepEqual([lena.name, lena.color, tom.color], ['Lena', 'violet', 'teal']);
@@ -992,10 +992,10 @@ describe('REST-API', () => {
     const s1 = await node(k1.id, 'scene', 'S1');
     assert.deepEqual(await strandsOf(s1.id), []);
     await api('POST', `/api/scenes/${s1.id}/strands`, { strandId: lena.id });
-    // Neue Szenen übernehmen nichts von der Szene davor
+    // New scenes take over nothing from the scene before
     const s2 = await node(k1.id, 'scene', 'S2');
     assert.deepEqual(await strandsOf(s2.id), []);
-    // Zusammenlaufen: eine Szene in zwei Strängen, sortiert nach Strang-Reihenfolge
+    // Merging: one scene in two threads, sorted by thread order
     await api('POST', `/api/scenes/${s2.id}/strands`, { strandId: tom.id });
     await api('POST', `/api/scenes/${s2.id}/strands`, { strandId: lena.id });
     assert.deepEqual(await strandsOf(s2.id), ['Lena', 'Tom']);
@@ -1018,7 +1018,7 @@ describe('REST-API', () => {
     const relations = await api<SceneRelations[]>('GET', '/api/scene-relations');
     assert.deepEqual(relations.find((r) => r.sceneId === s2.id)?.strandIds, [lena.id, tom.id]);
 
-    // Umbenennen und umfärben
+    // Rename and recolour
     const renamed = await api<Strand>('PATCH', `/api/strands/${tom.id}`, {
       name: 'Toms Flucht',
       color: 'amber',
@@ -1035,7 +1035,7 @@ describe('REST-API', () => {
     );
     assert.equal(await status('POST', `/api/scenes/${k1.id}/strands`, { strandId: lena.id }), 400);
 
-    // Reihenfolge der Zeilen ändern
+    // Change the order of the rows
     const ermittlung = await api<Strand>('POST', '/api/strands', { name: 'Ermittlung' });
     const names = (strands: Strand[]) => strands.map((s) => s.name);
     assert.deepEqual(
@@ -1052,7 +1052,7 @@ describe('REST-API', () => {
     assert.equal(await status('POST', `/api/strands/${lena.id}/move`, { beforeId: 'weg' }), 404);
     await api('DELETE', `/api/strands/${ermittlung.id}`);
 
-    // Ein Strang ohne Szenen bleibt bestehen; gelöscht wird nur ausdrücklich
+    // A thread without scenes stays; it is only deleted explicitly
     await api('DELETE', `/api/scenes/${s1.id}/strands/${lena.id}`);
     await api('DELETE', `/api/scenes/${s2.id}/strands/${lena.id}`);
     assert.deepEqual(
@@ -1092,7 +1092,7 @@ describe('REST-API', () => {
       turningPoint: true,
     });
     assert.deepEqual([marked.turningPoint, marked.status, marked.title], [true, 'idea', 'S']);
-    // Status ändern lässt den Wendepunkt in Ruhe
+    // Changing the status leaves the turning point alone
     await api('PATCH', `/api/nodes/${szene.id}`, { status: 'draft' });
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.equal(nodes.find((n) => n.id === szene.id)?.turningPoint, true);
@@ -1122,12 +1122,12 @@ describe('REST-API', () => {
       await node(k.id, 'scene', 'B'),
       await node(k.id, 'scene', 'C'),
     ];
-    assert.equal(a.storyOrder, null); // ohne Festlegung: wie im Buch
+    assert.equal(a.storyOrder, null); // not set: as in the book
     assert.equal(k.storyOrder, null);
     const order = (nodes: ManuscriptNode[]) =>
       nodes.filter((n) => n.kind === 'scene').map((n) => [n.title, n.storyOrder]);
 
-    // C passiert zuerst, A und B gleichzeitig danach; „Tag 2“ beginnt vor A/B
+    // C happens first, A and B at the same time afterwards; "day 2" starts before A/B
     const saved = await api<StoryState>('PUT', '/api/story', {
       columns: [[c.id], [a.id, b.id]],
       marks: [
@@ -1148,7 +1148,7 @@ describe('REST-API', () => {
       ],
     );
 
-    // Neue Szenen haben noch keine Position; Marken behalten beim Umbenennen ihre ID
+    // New scenes have no position yet; marks keep their ID when renamed
     const d = await node(k.id, 'scene', 'D');
     assert.equal(d.storyOrder, null);
     const tag2 = saved.marks[1]!;
@@ -1163,7 +1163,7 @@ describe('REST-API', () => {
     assert.deepEqual(await api<StoryMark[]>('GET', '/api/story/marks'), renamed.marks);
     assert.equal(renamed.nodes.find((n) => n.id === d.id)?.storyOrder, null);
 
-    // Zurücksetzen: alles wieder wie im Buch, Marken weg
+    // Reset: everything as in the book again, marks gone
     const reset = await api<StoryState>('PUT', '/api/story', { columns: [], marks: [] });
     assert.ok(reset.nodes.every((n) => n.storyOrder === null));
     assert.deepEqual(reset.marks, []);
@@ -1176,8 +1176,8 @@ describe('REST-API', () => {
           body: JSON.stringify(body),
         })
       ).status;
-    assert.equal(await status({ columns: [[a.id], [a.id]], marks: [] }), 400); // doppelt
-    assert.equal(await status({ columns: [[k.id]], marks: [] }), 400); // keine Szene
+    assert.equal(await status({ columns: [[a.id], [a.id]], marks: [] }), 400); // duplicate
+    assert.equal(await status({ columns: [[k.id]], marks: [] }), 400); // not a scene
     assert.equal(await status({ columns: [[]], marks: [] }), 400);
     assert.equal(
       await status({ columns: [[a.id]], marks: [{ label: 'X', beforeColumn: 1 }] }),
@@ -1267,7 +1267,7 @@ describe('REST-API', () => {
         note({ id: 'c', quote: 'Flughafen' }),
         note({ id: 'd', sceneId: leer.id, quote: 'irgendwas' }),
         note({ id: 'e', sceneId: 'gibt-es-nicht', quote: 'x' }),
-        // Vorschlag ohne Änderung: wird zur Notiz
+        // Suggestion without change: becomes a note
         note({ id: 'f', paragraph: 0, quote: 'Bahnhof', suggestion: 'Bahnhof', note: 'Grün' }),
       ],
     });
@@ -1308,13 +1308,13 @@ describe('REST-API', () => {
         ],
       },
     ]);
-    // Text und Wortzahl bleiben; die Markierungen zählen im Baum mit
+    // Text and word count stay; the marks count in the tree
     assert.equal(content.wordCount, 9);
     assert.deepEqual(content.annotations, { todo: 0, idea: 0, fixme: 3 });
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.equal(nodes.find((n) => n.id === szene.id)?.annotations?.fixme, 3);
 
-    // Das Handy sendet immer alle Notizen: schon übernommene werden übersprungen
+    // The phone always sends all notes: already imported ones are skipped
     const again = await api<ProofImportResult>('POST', '/api/proofreading/import', {
       format: 'wortomat-proof-notes',
       version: 1,
@@ -1328,7 +1328,7 @@ describe('REST-API', () => {
     });
     assert.deepEqual([again.applied, again.skipped, again.unmatched.length], [0, 1, 1]);
 
-    // Korrekturfassung als HTML-Datei: als Download (Browser) oder in eine Datei (Desktop)
+    // Proofreading copy as an HTML file: as a download (browser) or into a file (desktop)
     const download = await fetch(`${server.url}/api/proofreading/export`, {
       method: 'POST',
       headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
@@ -1417,10 +1417,10 @@ describe('REST-API', () => {
       const time = new Date(Date.now() - minutesAgo * 60_000);
       await utimes(file, time, time);
     };
-    // Das Handy sendet immer alle Notizen: die zweite Datei enthält die erste noch einmal
+    // The phone always sends all notes: the second file contains the first one again
     await notesFile('Postkasten.notizen.txt', [note('a', 'zwei')], 10);
     await notesFile('Postkasten.notizen(1).txt', [note('a', 'zwei'), note('b', 'vier')], 1);
-    // Andere Bücher, kaputte und fremde Dateien bleiben außen vor
+    // Other books, broken and foreign files are left out
     await notesFile('Anderes Buch.notizen.txt', [note('x', 'y', 'fremde-szene')], 5);
     await notesFile(
       'Gemischt.notizen.txt',
@@ -1440,7 +1440,7 @@ describe('REST-API', () => {
         ['Gemischt.notizen.txt', 1, 1, false],
       ],
     );
-    assert.equal(inbox.newNotes, 3); // a, b, c – jede nur einmal
+    assert.equal(inbox.newNotes, 3); // a, b, c – each only once
 
     const result = await api<ProofImportResult>('POST', '/api/proofreading/inbox/import');
     assert.deepEqual([result.applied, result.skipped, result.unmatched.length], [3, 0, 0]);
@@ -1448,7 +1448,7 @@ describe('REST-API', () => {
     assert.equal(content.annotations.fixme, 3);
     const after = await api<ProofInbox>('GET', '/api/proofreading/inbox');
     assert.equal(after.newNotes, 0);
-    // die gemischte Datei enthält Notizen zu einem anderen Buch – nie löschen
+    // the mixed file contains notes for another book – never delete it
     assert.deepEqual(
       after.files.map((f) => [f.name, f.done]),
       [
@@ -1458,7 +1458,7 @@ describe('REST-API', () => {
       ],
     );
 
-    // Aufräumen: nur Dateien, deren Notizen alle zu diesem Buch gehören und übernommen sind
+    // Cleaning up: only files whose notes all belong to this book and are imported
     const cleaned = await api<{ deleted: string[] }>('POST', '/api/proofreading/inbox/clean');
     assert.deepEqual(cleaned.deleted.sort(), [
       'Postkasten.notizen(1).txt',
@@ -1489,7 +1489,7 @@ describe('REST-API', () => {
     });
     await api('POST', '/api/project/close');
 
-    // Datei auf den Stand vor Notizen und Szenenstatus (Schema 1) zurücksetzen
+    // Reset the file to the state before notes and scene status (schema 1)
     const old = new DatabaseSync(project.filePath);
     old.exec(
       'DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
@@ -1502,7 +1502,7 @@ describe('REST-API', () => {
     assert.equal(upgraded.coverImageId, null);
     const note = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Mühle' });
     assert.equal(note.title, 'Mühle');
-    // Bestehende Szenen bekommen beim Upgrade den Status „Idee“
+    // Existing scenes get the status idea on upgrade
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.equal(nodes.find((n) => n.id === szene.id)?.status, 'idea');
     assert.equal(nodes.find((n) => n.id === szene.id)?.turningPoint, false);
@@ -1530,7 +1530,7 @@ describe('REST-API', () => {
       revisionMode: false,
       plotView: DEFAULT_PLOT_VIEW,
     });
-    // Einzelne Werte ändern lässt die anderen stehen
+    // Changing single values leaves the others alone
     assert.deepEqual(await api('PATCH', '/api/settings', { quoteStyle: 'de-guillemets' }), {
       language: null,
       sidebarWidth: 341,
@@ -1550,7 +1550,7 @@ describe('REST-API', () => {
       plotView: DEFAULT_PLOT_VIEW,
     });
 
-    // Zweiter Server mit demselben Datenordner (= App-Neustart) liest den Wert
+    // A second server with the same data folder (= app restart) reads the value
     const restarted = await startServer({
       mode: 'desktop',
       version: 'test',
@@ -1594,7 +1594,7 @@ describe('REST-API', () => {
     assert.equal(await invalid({ revisionMode: 'ja' }), 400);
     assert.equal(await invalid({ plotView: { order: 'zufällig' } }), 400);
     assert.equal(await invalid({ plotView: { compact: 'ja' } }), 400);
-    // Die Ansicht der Handlung lässt sich teilweise ändern
+    // The plot view can be changed partially
     assert.deepEqual(
       (await api<AppSettings>('PATCH', '/api/settings', { plotView: { order: 'book' } })).plotView,
       { order: 'book', onlyTurningPoints: true, compact: false },
@@ -1619,7 +1619,7 @@ describe('REST-API', () => {
       plotView: DEFAULT_PLOT_VIEW,
     });
 
-    // Zurück auf Standard
+    // Back to the defaults
     assert.deepEqual(
       await api('PATCH', '/api/settings', {
         language: null,
@@ -1641,7 +1641,7 @@ describe('REST-API', () => {
       },
     );
 
-    // Für die folgenden Tests wieder öffnen
+    // Reopen for the following tests
     await api('POST', '/api/project/open', { filePath: openProject.filePath });
   });
 
@@ -1673,7 +1673,7 @@ describe('REST-API', () => {
     );
     assert.equal(listing.path, root);
     assert.equal(listing.parent, tmpDir);
-    // erst Ordner (natürlich sortiert), dann Projekte; keine versteckten oder fremden Dateien
+    // folders first (natural sort), then projects; no hidden or foreign files
     assert.deepEqual(
       listing.entries.map((entry) => [entry.name, entry.kind]),
       [
@@ -1683,7 +1683,7 @@ describe('REST-API', () => {
       ],
     );
 
-    // Nicht vorhandener Ordner → nächster vorhandener darüber; ohne Angabe der Standardordner
+    // Missing folder → nearest existing one above; without one, the default folder
     const missing = await api<DirectoryListing>(
       'GET',
       `/api/files?dir=${encodeURIComponent(path.join(root, 'gibt', 'es', 'nicht'))}`,
@@ -1724,7 +1724,7 @@ describe('REST-API', () => {
     assert.equal(download.headers.get('content-type'), 'image/png');
     assert.deepEqual(Buffer.from(await download.arrayBuffer()), PNG_1PX);
 
-    // SVG mit Skript, als PNG getarnt → abgelehnt.
+    // SVG with a script disguised as PNG → rejected.
     const fake = await upload(Buffer.from('<svg onload="alert(1)"/>'), 'boese.png', 'image/png');
     assert.equal(fake.status, 400);
   });

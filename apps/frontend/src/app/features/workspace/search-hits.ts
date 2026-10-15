@@ -6,13 +6,10 @@ export interface HitGroup {
   hits: SearchHit[];
 }
 
-/** Reihenfolge der Gruppen – wie in der Menüleiste. */
+/** Group order – as in the menu bar. */
 const GROUP_ORDER: ReadonlyArray<SearchHit['kind']> = ['scene', 'character', 'place', 'research'];
 
-/**
- * Gruppiert Suchtreffer nach Bereich (Szenen, Charaktere, Orte, Forschung).
- * Innerhalb einer Gruppe bleibt die Relevanz-Reihenfolge des Backends erhalten.
- */
+/** Within a group the backend's relevance order is kept. */
 export function groupHits(hits: readonly SearchHit[]): HitGroup[] {
   return GROUP_ORDER.map((kind) => ({
     kind,
@@ -20,7 +17,6 @@ export function groupHits(hits: readonly SearchHit[]): HitGroup[] {
   })).filter((group) => group.hits.length > 0);
 }
 
-/** Wohin ein Treffer führt. */
 export function hitLink(hit: SearchHit): string[] {
   return hit.kind === 'scene'
     ? ['/write/scene', hit.id]

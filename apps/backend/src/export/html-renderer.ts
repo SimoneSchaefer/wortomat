@@ -25,7 +25,7 @@ const STYLE = `
   }
 `;
 
-/** Eine eigenständige HTML-Datei: Bilder sind eingebettet, kein Netz nötig. */
+/** Self-contained: images are embedded, no network needed. */
 export function renderHtml(book: Book, options: ExportOptions, images: ImageResolver): Buffer {
   const embedImage = (src: string) => {
     const image = images(src);
@@ -78,15 +78,12 @@ ${parts.join('\n')}
 }
 
 /**
- * Liefert für eine Bild-`src` die Adresse im Export (Data-URI, Pfad im EPUB …) oder `null`,
- * wenn das Bild weggelassen wird.
+ * Address of an image in the export (data URI, path in the EPUB …), or `null` when the image is
+ * left out.
  */
 export type ImageSource = (src: string) => string | null;
 
-/**
- * Szeneninhalt als HTML. Die Ausgabe ist zugleich gültiges XHTML (`<br/>`, `<img … />`),
- * damit sie auch im EPUB verwendet werden kann.
- */
+/** The output is valid XHTML as well (`<br/>`, `<img … />`) so the EPUB can use it too. */
 export function contentHtml(nodes: JsonNode[], image: ImageSource): string {
   return nodes.map((node) => block(node, image)).join('');
 }
@@ -145,7 +142,7 @@ function inline(nodes: JsonNode[]): string {
     .join('');
 }
 
-/** Maskiert für HTML/XML; Steuerzeichen, die in XML verboten sind, fallen weg. */
+/** Control characters that XML forbids are dropped. */
 export function escapeHtml(text: string): string {
   return text
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/g, '')

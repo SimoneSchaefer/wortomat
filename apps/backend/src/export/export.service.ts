@@ -61,7 +61,7 @@ const FORMATS: Record<ExportFormat, { extension: string; mimeType: string }> = {
   epub: { extension: 'epub', mimeType: 'application/epub+zip' },
 };
 const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
-/** Etwa so viel Text, wie auf die Vorschauseiten passt (eher mehr). */
+/** Roughly as much text as fits on the preview pages (rather more). */
 const PREVIEW_CHARACTERS = 8000;
 
 export interface ExportedFile {
@@ -96,8 +96,8 @@ export class ExportService {
   }
 
   /**
-   * Pfad einer Schriftdatei für die Vorschau – nur Dateien aus dem Schriftkatalog, gesucht in
-   * der TeX-Installation. `null`, wenn es sie (oder TeX) nicht gibt.
+   * Only files from the font catalogue, looked up in the TeX installation. `null` if the file (or
+   * TeX) is missing.
    */
   async fontFile(font: string, style: string): Promise<string | null> {
     const files: FontFiles | undefined =
@@ -111,10 +111,10 @@ export class ExportService {
     return this.fontPaths.get(name) ?? null;
   }
 
-  /** Gefundene Schriftdateien (Name → Pfad); auch Fehlanzeigen, damit nicht ständig gesucht wird. */
+  /** Misses are cached too, so we do not search again and again. */
   private readonly fontPaths = new Map<string, string | null>();
 
-  /** Gespeicherte Einstellungen des Export-Dialogs; fehlt etwas, gelten die Vorgaben. */
+  /** Anything missing falls back to the defaults. */
   settings(): ExportSettingsResponse {
     this.requireProject();
     const row = this.projects.db
@@ -124,7 +124,7 @@ export class ExportService {
     try {
       stored = row?.export_settings ? JSON.parse(row.export_settings) : null;
     } catch {
-      // kaputtes JSON → Vorgaben
+      // broken JSON → defaults
     }
     return { settings: sanitizeSettings(stored), defaults: DEFAULT_SETTINGS };
   }
@@ -138,13 +138,12 @@ export class ExportService {
     return settings;
   }
 
-  /** Anfang des Buchs für die Seitenvorschau: Titel und das erste Kapitel mit Text. */
   preview(includeSceneTitles: boolean): ExportPreview {
     const project = this.requireProject();
     const book = this.book(project);
     const chapter = book.items.find((item) => item.kind === 'chapter' && item.scenes.length > 0);
-    const image = (src: string) => src; // Bilder lädt der Browser selbst über /api/images/…
-    // Die Vorschau zeigt nur wenige Seiten – mehr als den Kapitelanfang braucht sie nicht.
+    const image = (src: string) => src; // the browser loads images itself via /api/images/…
+    // The preview shows only a few pages – it needs no more than the start of a chapter.
     let budget = PREVIEW_CHARACTERS;
     const parts: string[] = [];
     if (chapter?.kind === 'chapter') {
@@ -243,7 +242,7 @@ export class ExportService {
       extension: FORMATS[format].extension,
       mimeType: FORMATS[format].mimeType,
       data,
-      // Gleiche Hinweise (z. B. dasselbe Bild mehrfach) nur einmal melden
+      // Report identical warnings (e.g. the same image several times) only once
       warnings: [...new Map(warnings.map((warning) => [warning.de, warning])).values()],
     };
   }
@@ -271,7 +270,7 @@ export class ExportService {
     );
   }
 
-  /** Bilder im Text verweisen auf `/api/images/<id>` – für den Export die Daten dazu holen. */
+  /** Images in the text point to `/api/images/<id>`; the export needs their data. */
   private imageResolver(): ImageResolver {
     return (src) => {
       const id = /^\/api\/images\/([0-9a-f-]{36})$/.exec(src)?.[1];
@@ -279,7 +278,7 @@ export class ExportService {
       try {
         const info = this.images.info(id);
         const { data } = this.images.data(id);
-        // Ältere Uploads haben evtl. keine gespeicherten Maße – dann aus den Daten lesen.
+        // Older uploads may have no stored dimensions – then read them from the data.
         const measured = info.width && info.height ? null : imageSize(data);
         return {
           mimeType: info.mimeType,
@@ -294,7 +293,6 @@ export class ExportService {
   }
 }
 
-/** Schriften, für die mindestens eins ihrer TeX-Pakete installiert ist. */
 async function availableFonts(pdflatex: PdflatexInstallation): Promise<Set<BookFont>> {
   const ids = Object.keys(BOOK_FONTS) as BookFont[];
   const packages = await findLatexPackages(
@@ -305,8 +303,8 @@ async function availableFonts(pdflatex: PdflatexInstallation): Promise<Set<BookF
 }
 
 /**
- * Stabile Kennung fürs EPUB: aus dem Anlagezeitpunkt des Buchs abgeleitet (ändert sich nicht,
- * auch wenn der Titel geändert wird), im Format einer UUID (Version 5).
+ * Derived from the book's creation time, so it stays the same when the title changes; formatted as
+ * a UUID (version 5).
  */
 export function bookIdentifier(createdAt: string): string {
   const hash = createHash('sha1').update(`wortomat:${createdAt}`).digest();

@@ -7,7 +7,7 @@ import { I18n } from '../../core/i18n/i18n';
 import { StatusMessages } from '../../core/status-messages';
 import { MapsStore } from './maps-store';
 
-/** Karten über der Liste der Orte – eine Karte wie eine Gruppe, darin die Karten. */
+/** Above the list of places – a card like a group, with the maps inside. */
 @Component({
   selector: 'wm-map-list',
   imports: [RouterLink, RouterLinkActive],

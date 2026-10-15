@@ -21,7 +21,7 @@ import { SceneFilter } from './scene-filter';
 import { StatusMessages } from '../../core/status-messages';
 import { ConfirmDialog } from '../../core/confirm-dialog';
 
-/** Eigener Datentyp, damit Drags von außen (z. B. Dateien) den Baum nicht auslösen. */
+/** A data type of its own so drags from outside (e.g. files) do not trigger the tree. */
 const DRAG_TYPE = 'application/x-wortomat-node';
 
 @Component({
@@ -44,23 +44,21 @@ export class ManuscriptTree {
   protected readonly store = inject(ProjectStore);
   protected readonly filter = inject(SceneFilter);
 
-  /** ID des Elements, dessen Titel gerade bearbeitet wird. */
   protected readonly editingId = signal<string | null>(null);
   private readonly error = inject(StatusMessages).channel();
   private readonly confirm = inject(ConfirmDialog);
 
-  /** Gerade gezogenes Element und wohin es beim Loslassen käme. */
   protected readonly draggingId = signal<string | null>(null);
   protected readonly dropPlan = signal<DropPlan | null>(null);
 
-  /** Auch von der Kopfzeile der Seitenleiste aus aufgerufen (neues Kapitel/neuer Teil). */
+  /** Also called from the sidebar header (new chapter/part). */
   async add(kind: NodeKind, parentId: string | null): Promise<void> {
-    if (parentId) this.store.reveal(parentId); // Neues soll sichtbar sein
+    if (parentId) this.store.reveal(parentId); // new entries should be visible
     await this.run(async () => {
       const title = this.t().tree.newTitle[kind];
       const node = await this.store.addNode({ kind, parentId, title });
       if (node.kind === 'scene') {
-        // Umbenannt wird auf der Szenenseite, die den neuen Titel gleich markiert.
+        // Renaming happens on the scene page, which selects the new title right away.
         await this.router.navigate(['/write/scene', node.id]);
       } else {
         this.editingId.set(node.id);
@@ -98,8 +96,8 @@ export class ManuscriptTree {
   }
 
   /**
-   * Arten, die irgendwo im Buch vorkommen. Jede bekommt in allen Zeilen eine feste Spalte –
-   * auch wo sie fehlt –, damit die Zähler untereinander stehen.
+   * Kinds that occur anywhere in the book. Each gets a fixed column in every row – even where it is
+   * missing – so the counts line up.
    */
   protected readonly annotationKinds = computed(() => {
     const total = this.filter
@@ -111,15 +109,15 @@ export class ManuscriptTree {
   protected readonly noAnnotations = NO_ANNOTATIONS;
 
   /**
-   * Zeichen der längsten Wortzahl – so breit wird die Spalte, damit sie bündig steht, ohne
-   * Platz zu verschenken. Die größte Zahl steht immer oben: Teile und Kapitel zeigen die Summe.
+   * Characters of the longest word count – the column gets this wide so it lines up without wasting
+   * space. The largest number is always at the top: parts and chapters show the sum.
    */
   protected readonly countChars = computed(() => {
     const max = Math.max(0, ...this.filter.tree().map((item) => item.wordCount));
     return this.t().number(max).length;
   });
 
-  /** Beim Filtern sind alle Teile und Kapitel offen – sonst lägen Treffer verborgen. */
+  /** While filtering, all parts and chapters are open – otherwise hits would be hidden. */
   protected isCollapsed(id: string): boolean {
     return !this.filter.active() && this.store.collapsed().has(id);
   }
@@ -128,11 +126,9 @@ export class ManuscriptTree {
     return statusInfo(node.status ?? 'idea');
   }
 
-  // Drag & Drop --------------------------------------------------------------
-
   protected onDragStart(event: DragEvent, node: ManuscriptNode): void {
     if (!event.dataTransfer) return;
-    event.stopPropagation(); // sonst würde auch das Eltern-Element mitgezogen
+    event.stopPropagation(); // otherwise the parent element would be dragged along
     event.dataTransfer.setData(DRAG_TYPE, node.id);
     event.dataTransfer.effectAllowed = 'move';
     this.draggingId.set(node.id);
@@ -141,7 +137,7 @@ export class ManuscriptTree {
   protected onDragOverItem(event: DragEvent, target: ManuscriptNode): void {
     const dragged = this.draggedNode(event);
     if (!dragged) return;
-    event.stopPropagation(); // nicht als Drop auf die freie Fläche werten
+    event.stopPropagation(); // do not count it as a drop onto the free area
     const row = event.currentTarget as HTMLElement;
     const { top, height } = row.getBoundingClientRect();
     const ratio = height > 0 ? (event.clientY - top) / height : 0.5;
@@ -178,7 +174,7 @@ export class ManuscriptTree {
     this.dropPlan.set(null);
   }
 
-  /** Wo am Element `id` der Einfügemarker angezeigt wird (für `data-drop`). */
+  /** For `data-drop`. */
   protected dropMarker(id: string | null): DropPosition | null {
     const plan = this.dropPlan();
     return plan && plan.targetId === id ? plan.position : null;
@@ -194,7 +190,7 @@ export class ManuscriptTree {
   private acceptDrop(event: DragEvent, plan: DropPlan | null): void {
     this.dropPlan.set(plan);
     if (plan && event.dataTransfer) {
-      event.preventDefault(); // signalisiert dem Browser: hier darf abgelegt werden
+      event.preventDefault(); // tells the browser that dropping is allowed here
       event.dataTransfer.dropEffect = 'move';
     }
   }

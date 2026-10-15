@@ -1,82 +1,69 @@
 /**
- * API-Vertrag zwischen Angular-Frontend, NestJS-Backend und Electron-Shell.
+ * API contract between the Angular frontend, the NestJS backend and the Electron shell.
  *
- * Dieses Paket enthält bewusst nur Typen. Es wird überall mit `import type`
- * eingebunden und verschwindet beim Kompilieren vollständig.
+ * This package deliberately contains only types. It is imported everywhere with `import type` and
+ * disappears completely when compiling.
  */
-
-// ---------------------------------------------------------------------------
-// App
-// ---------------------------------------------------------------------------
 
 export type AppMode = 'desktop' | 'browser';
 
 export interface AppInfo {
   version: string;
   mode: AppMode;
-  /** Vorschlag für den Speicherort neuer Projekte (z. B. ~/Documents). */
+  /** Suggested location for new projects (e.g. ~/Documents). */
   defaultProjectDir: string;
 }
 
 /**
- * Welche Anführungszeichen der Editor beim Tippen von " und ' setzt:
- * - `de`: „Deutsch“ und ‚einfach‘
- * - `de-guillemets`: »Deutsch« und ›einfach‹ (Buchsatz)
- * - `ch`: «Schweiz» und ‹einfach›
+ * Which quotation marks the editor sets when typing " and ':
+ * - `de`: „Deutsch“ and ‚einfach‘
+ * - `de-guillemets`: »Deutsch« and ›einfach‹ (book typesetting)
+ * - `ch`: «Schweiz» and ‹einfach›
  * - `en`: “English” and ‘single’
- * - `fr`: « français » et ‹ simple › (mit schmalem geschütztem Leerzeichen)
- * - `off`: nichts ersetzen
+ * - `fr`: « français » et ‹ simple › (with a narrow no-break space)
+ * - `off`: replace nothing
  */
 export type QuoteStyle = 'de' | 'de-guillemets' | 'ch' | 'en' | 'fr' | 'off';
 
-/** Sprache der Oberfläche (nicht des Buchs). */
+/** Of the UI, not of the book. */
 export type Language = 'de' | 'en';
 
-/** Farbschema: `system` folgt der Einstellung des Betriebssystems. */
+/** `system` follows the OS setting. */
 export type Theme = 'system' | 'light' | 'dark';
 
-/** Schriftgröße der ganzen Oberfläche (inkl. Editor). */
+/** Of the whole UI, including the editor. */
 export type FontSize = 'small' | 'medium' | 'large';
 
-/** Einstellungen der App (nicht des Buchs) – z. B. Breite der Seitenleiste. */
+/** Of the app, not of the book. */
 export interface AppSettings {
-  /** Sprache der Oberfläche; `null` = wie das System (Deutsch, sonst Englisch). */
+  /** `null` = like the system (German, else English). */
   language: Language | null;
-  /** Breite der Seitenleiste in Pixeln; `null` = Standardbreite. */
+  /** In pixels; `null` = default width. */
   sidebarWidth: number | null;
-  /** Typografische Anführungszeichen beim Schreiben. */
   quoteStyle: QuoteStyle;
   theme: Theme;
   fontSize: FontSize;
-  /** Überarbeitungsmodus im Editor: Wiederholungen, Füllwörter usw. markieren. */
+  /** Revision mode in the editor: marks repetitions, filler words etc. */
   revisionMode: boolean;
-  /** Wie die Übersicht „Handlung“ zuletzt eingestellt war. */
   plotView: PlotViewSettings;
 }
 
 export interface PlotViewSettings {
-  /** Von links nach rechts in der Reihenfolge der Handlung oder des Buchs. */
   order: 'story' | 'book';
-  /** Nur Wendepunkte statt aller Szenen. */
   onlyTurningPoints: boolean;
-  /** Schmale Spalten ohne Szenentitel – für lange Bücher. */
+  /** Narrow columns without scene titles – for long books. */
   compact: boolean;
 }
 
-/** `plotView` lässt sich auch teilweise ändern. */
 export type UpdateAppSettingsRequest = Partial<Omit<AppSettings, 'plotView'>> & {
   plotView?: Partial<PlotViewSettings>;
 };
-
-// ---------------------------------------------------------------------------
-// Projekt (= eine .wortomat-Datei, intern eine SQLite-Datenbank)
-// ---------------------------------------------------------------------------
 
 export interface ProjectInfo {
   filePath: string;
   title: string;
   author: string;
-  /** Titelbild (z. B. fürs E-Book); `null`, wenn keins gesetzt ist. */
+  /** `null` when none is set. */
   coverImageId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -92,39 +79,35 @@ export interface OpenProjectRequest {
   filePath: string;
 }
 
-/** Eintrag der Projektliste auf der Startseite. */
 export interface ProjectListEntry {
   filePath: string;
-  /** Aus der Datei gelesen; bei fehlender Datei der Dateiname. */
+  /** Read from the file; the file name when the file is missing. */
   title: string;
   author: string;
-  /** `false`, wenn die Datei verschoben, gelöscht oder unlesbar ist. */
+  /** `false` when the file was moved, deleted or is unreadable. */
   available: boolean;
-  /** Gerade geöffnet? */
   isOpen: boolean;
   wordCount: number;
   /**
-   * Titelbild aus der Datei; `null`, wenn keins gesetzt ist. Abrufbar unter
-   * `/api/projects/cover?filePath=…&id=…` – auch wenn das Buch nicht geöffnet ist.
+   * `null` when none is set. Available at `/api/projects/cover?filePath=…&id=…` – even when the
+   * book is not open.
    */
   coverImageId: string | null;
-  /** Letzte Änderung am Buch (aus der Datei); `null` wenn nicht lesbar. */
+  /** From the file; `null` when unreadable. */
   updatedAt: string | null;
-  /** Wann das Buch zuletzt in Wortomat geöffnet wurde. */
   lastOpenedAt: string;
 }
 
-/** Eintrag im Dateiauswahl-Dialog (Browser-Modus): Ordner oder Projektdatei. */
 export interface DirectoryEntry {
   name: string;
   path: string;
   kind: 'directory' | 'project';
 }
 
-/** Inhalt eines Ordners – nur Unterordner und .wortomat-Dateien, ohne versteckte. */
+/** Only subfolders and .wortomat files, without hidden ones. */
 export interface DirectoryListing {
   path: string;
-  /** `null` im Wurzelverzeichnis. */
+  /** `null` at the root. */
   parent: string | null;
   entries: DirectoryEntry[];
 }
@@ -136,23 +119,18 @@ export interface ForgetProjectRequest {
 export interface UpdateProjectRequest {
   title?: string;
   author?: string;
-  /** Ein hochgeladenes Bild als Titelbild setzen; `null` entfernt es. */
+  /** `null` removes it. */
   coverImageId?: string | null;
 }
 
-// ---------------------------------------------------------------------------
-// Manuskript-Baum: Teil → Kapitel → Szene
-// ---------------------------------------------------------------------------
-
 export type NodeKind = 'part' | 'chapter' | 'scene';
 
-/** Markierungen im Text: Stellen, an denen noch etwas zu tun ist. */
 export type AnnotationKind = 'todo' | 'idea' | 'fixme';
 
-/** Anzahl markierter Stellen je Art; zusammenhängend markierter Text zählt einmal. */
+/** Contiguously marked text counts once. */
 export type AnnotationCounts = Record<AnnotationKind, number>;
 
-/** Arbeitsstand einer Szene – in dieser Reihenfolge. */
+/** In this order. */
 export type SceneStatus = 'idea' | 'outline' | 'draft' | 'revised' | 'final';
 
 export interface ManuscriptNode {
@@ -161,17 +139,17 @@ export interface ManuscriptNode {
   kind: NodeKind;
   title: string;
   sortOrder: number;
-  /** Nur bei Szenen > 0. */
+  /** Greater than 0 only for scenes. */
   wordCount: number;
-  /** Nur bei Szenen gesetzt, sonst `null`. */
+  /** Only set for scenes, otherwise `null`. */
   status: SceneStatus | null;
-  /** Todo/Idee/Fixme-Markierungen im Text; nur bei Szenen, sonst `null`. */
+  /** Only for scenes, otherwise `null`. */
   annotations: AnnotationCounts | null;
-  /** Wichtiges Ereignis der Handlung; nur bei Szenen, sonst `null`. */
+  /** Only for scenes, otherwise `null`. */
   turningPoint: boolean | null;
   /**
-   * Position in der Reihenfolge der Handlung (unabhängig vom Buch); gleiche Werte bedeuten
-   * „gleichzeitig“. `null`: noch nie festgelegt – die Szene folgt ihrer Vorgängerin im Buch.
+   * Position in the story order (independent of the book); equal values mean "simultaneous".
+   * `null`: never set – the scene follows its predecessor in the book.
    */
   storyOrder: number | null;
 }
@@ -184,31 +162,21 @@ export interface CreateNodeRequest {
 
 export interface UpdateNodeRequest {
   title?: string;
-  /** Nur für Szenen. */
+  /** Only for scenes. */
   status?: SceneStatus;
-  /** Nur für Szenen. */
+  /** Only for scenes. */
   turningPoint?: boolean;
 }
 
-/**
- * Verschiebt einen Knoten (samt Unterknoten) an eine neue Stelle im Baum.
- * Die Reihenfolge berechnet das Backend; der Client nennt nur den Nachbarn.
- */
+/** The backend computes the order; the client only names the neighbour. */
 export interface MoveNodeRequest {
-  /** Neues Elternelement; `null` = oberste Ebene. */
+  /** `null` = top level. */
   parentId: string | null;
-  /** Geschwister, vor dem eingefügt wird; `null` = ans Ende. */
+  /** Sibling to insert before; `null` = at the end. */
   beforeId: string | null;
 }
 
-// ---------------------------------------------------------------------------
-// Szeneninhalt
-// ---------------------------------------------------------------------------
-
-/**
- * Editor-Dokument im ProseMirror/Tiptap-JSON-Format.
- * Das Backend behandelt es als undurchsichtigen Blob.
- */
+/** The backend treats it as an opaque blob. */
 export interface EditorDoc {
   type: 'doc';
   content?: unknown[];
@@ -219,44 +187,39 @@ export interface SceneContent {
   nodeId: string;
   doc: EditorDoc | null;
   wordCount: number;
-  /** Vom Backend aus dem Dokument gezählt. */
+  /** Counted by the backend from the document. */
   annotations: AnnotationCounts;
   updatedAt: string | null;
 }
 
-/** Speichern eines Editor-Dokuments – gleich für Szenen und Notizen. */
+/** Same for scenes and notes. */
 export interface SaveDocumentRequest {
   doc: EditorDoc;
-  /** Reiner Text für die Volltextsuche, kommt aus `editor.getText()`. */
+  /** For full-text search, from `editor.getText()`. */
   text: string;
   wordCount: number;
   /**
-   * Seit dem letzten Speichern eingefügte oder per Ziehen verschobene Wörter. Sie zählen im
-   * Schreib-Log nicht als geschrieben.
+   * Words pasted or moved by dragging since the last save. They do not count as written in the
+   * writing log.
    */
   pastedWords?: number;
 }
 
-/** `GET /api/scene-texts`: reiner Text einer Szene (z. B. für die Textstatistik). */
 export interface SceneText {
   sceneId: string;
-  /** Absätze durch Zeilenumbrüche getrennt. */
+  /** Paragraphs separated by line breaks. */
   text: string;
 }
 
-/** Ein Tag im Schreib-Log (Summe über alle Szenen). */
+/** Summed over all scenes. */
 export interface WritingDay {
-  /** YYYY-MM-DD; der Tag beginnt um 4 Uhr. */
+  /** YYYY-MM-DD; the day starts at 4 am. */
   day: string;
-  /** Selbst geschriebene Wörter (brutto, Überarbeiten zählt mit). */
+  /** Words written by the author (gross, revising counts). */
   added: number;
   removed: number;
   pasted: number;
 }
-
-// ---------------------------------------------------------------------------
-// Notizen: Charaktere, Orte, Forschung
-// ---------------------------------------------------------------------------
 
 export type NoteKind = 'character' | 'place' | 'research';
 
@@ -264,16 +227,15 @@ export interface NoteSummary {
   id: string;
   kind: NoteKind;
   title: string;
-  /** Einzeilige Kurzbeschreibung für die Liste, z. B. „Protagonistin, 34, Ärztin“. */
+  /** One line for the list, e.g. "Protagonist, 34, doctor". */
   summary: string;
-  /** Gruppe in der Liste (`NoteGroup`); `null` = ohne Gruppe. */
+  /** `null` = no group. */
   groupId: string | null;
   updatedAt: string;
-  /** Erstes Bild der Galerie (Profilbild), z. B. `/api/images/<id>`; `null` ohne Bilder. */
+  /** First gallery image (profile picture), e.g. `/api/images/<id>`; `null` without images. */
   coverImageUrl: string | null;
-  /** Gewählter Ausschnitt des Profilbilds; `null` = ganzes Bild. */
+  /** `null` = whole image. */
   coverCrop: ImageCrop | null;
-  /** Todo/Idee/Fixme-Markierungen im Text. */
   annotations: AnnotationCounts;
 }
 
@@ -281,7 +243,7 @@ export interface NoteContent {
   id: string;
   doc: EditorDoc | null;
   wordCount: number;
-  /** Vom Backend aus dem Dokument gezählt. */
+  /** Counted by the backend from the document. */
   annotations: AnnotationCounts;
   updatedAt: string | null;
 }
@@ -294,11 +256,11 @@ export interface CreateNoteRequest {
 export interface UpdateNoteRequest {
   title?: string;
   summary?: string;
-  /** `null` nimmt die Notiz aus ihrer Gruppe. */
+  /** `null` takes the note out of its group. */
   groupId?: string | null;
 }
 
-/** Gruppe in der Notizliste, z. B. „Familie Berger“ – gehört zu genau einer Notizart. */
+/** Belongs to exactly one note kind. */
 export interface NoteGroup {
   id: string;
   kind: NoteKind;
@@ -314,30 +276,24 @@ export interface UpdateNoteGroupRequest {
   name: string;
 }
 
-/** Verschiebt eine Gruppe innerhalb ihrer Notizart. */
+/** Within its note kind. */
 export interface MoveNoteGroupRequest {
-  /** Gruppe, vor der eingefügt wird; `null` = ans Ende. */
+  /** Group to insert before; `null` = at the end. */
   beforeId: string | null;
 }
 
-/** Verknüpft eine Notiz (Charakter, Ort …) mit einer Szene. */
 export interface LinkNoteRequest {
   noteId: string;
 }
 
-/** Szene, in der eine Notiz vorkommt – mit Pfad im Manuskript für die Anzeige. */
+/** With the path in the manuscript, for display. */
 export interface SceneReference {
   id: string;
   title: string;
-  /** Titel der übergeordneten Teile/Kapitel, von außen nach innen. */
+  /** Titles of the enclosing parts/chapters, outermost first. */
   path: string[];
 }
 
-// ---------------------------------------------------------------------------
-// Karten: grob gezeichnete Landkarten, auf denen Orte eingezeichnet sind
-// ---------------------------------------------------------------------------
-
-/** Eintrag der Kartenliste in der Seitenleiste „Orte“. */
 export interface MapSummary {
   id: string;
   name: string;
@@ -345,21 +301,21 @@ export interface MapSummary {
 }
 
 /**
- * Ein Strich auf der Karte, freihand gezeichnet:
- * - `pen`: Linie (Küste, Fluss, Straße …)
- * - `area`: geschlossene, halb durchsichtig gefüllte Fläche (See, Wald …)
+ * A freehand stroke:
+ * - `pen`: line (coast, river, road …)
+ * - `area`: closed, semi-transparently filled area (lake, forest …)
  */
 export interface MapStroke {
   tool: 'pen' | 'area';
   /** `#rrggbb` */
   color: string;
-  /** Strichstärke in Karteneinheiten. */
+  /** In map units. */
   width: number;
-  /** Abwechselnd x und y in Karteneinheiten: `[x0, y0, x1, y1, …]`. */
+  /** Alternating x and y in map units: `[x0, y0, x1, y1, …]`. */
   points: number[];
 }
 
-/** Ein Ort (Notiz der Art `place`) auf der Karte, in Karteneinheiten. */
+/** A place (note of kind `place`) on the map, in map units. */
 export interface MapPin {
   noteId: string;
   x: number;
@@ -367,12 +323,12 @@ export interface MapPin {
 }
 
 export interface PlaceMap extends MapSummary {
-  /** Größe der Zeichenfläche in Karteneinheiten (Seitenverhältnis wie das Hintergrundbild). */
+  /** Canvas size in map units (aspect ratio of the background image). */
   width: number;
   height: number;
-  /** Hintergrundbild, z. B. eine abfotografierte Skizze; `null` = leeres Papier. */
+  /** E.g. a photographed sketch; `null` = blank paper. */
   backgroundImageId: string | null;
-  /** Deckkraft des Hintergrundbilds, 0.1 … 1 (blasser zum Nachzeichnen). */
+  /** 0.1 … 1 (paler for tracing). */
   backgroundOpacity: number;
   strokes: MapStroke[];
   pins: MapPin[];
@@ -382,7 +338,7 @@ export interface CreateMapRequest {
   name: string;
 }
 
-/** Nur die angegebenen Felder ändern sich; `strokes` und `pins` ersetzen den alten Stand. */
+/** Only the given fields change; `strokes` and `pins` replace the previous state. */
 export interface UpdateMapRequest {
   name?: string;
   width?: number;
@@ -393,57 +349,43 @@ export interface UpdateMapRequest {
   pins?: MapPin[];
 }
 
-// ---------------------------------------------------------------------------
-// Tags (projektweit, an Szenen vergeben)
-// ---------------------------------------------------------------------------
-
 export interface Tag {
   id: string;
   name: string;
 }
 
-/** Tag mit Anzahl der Szenen, in denen er vorkommt – für Vorschläge. */
+/** With the number of scenes using it – for suggestions. */
 export interface TagSummary extends Tag {
   sceneCount: number;
 }
 
-/** Was einer Szene zugeordnet ist (Charaktere, Orte, Tags) – z. B. für den Szenenfilter. */
 export interface SceneRelations {
   sceneId: string;
-  /** Verknüpfte Notizen (Charaktere, Orte …). */
   noteIds: string[];
   tags: Tag[];
   strandIds: string[];
 }
 
-/** Vergibt einen Tag per Name; gibt es ihn (ohne Groß-/Kleinschreibung) schon, wird er wiederverwendet. */
+/** If it exists already (ignoring case), it is reused. */
 export interface AddTagRequest {
   name: string;
 }
 
-// ---------------------------------------------------------------------------
-// Handlungsstränge (projektweit, an Szenen vergeben)
-// ---------------------------------------------------------------------------
-
-/** Feste Farben für Stränge; die Töne stehen in styles.scss (`--strand-<farbe>`), hell und dunkel. */
+/** The shades live in styles.scss (`--strand-<colour>`), light and dark. */
 export type StrandColor =
   'violet' | 'teal' | 'rose' | 'amber' | 'blue' | 'green' | 'coral' | 'slate';
 
-/**
- * Ein Handlungsstrang, z. B. „Lena“ oder „Die Ermittlung“. Eine Szene kann zu mehreren
- * Strängen gehören – dort laufen sie zusammen.
- */
+/** A scene can belong to several threads – that is where they merge. */
 export interface Strand {
   id: string;
   name: string;
   color: StrandColor;
-  /** Anzahl der Szenen in diesem Strang. */
   sceneCount: number;
 }
 
 export interface CreateStrandRequest {
   name: string;
-  /** Ohne Angabe die am wenigsten benutzte Farbe. */
+  /** Without one, the least used colour. */
   color?: StrandColor;
 }
 
@@ -452,37 +394,31 @@ export interface UpdateStrandRequest {
   color?: StrandColor;
 }
 
-/** Verschiebt einen Strang (seine Zeile in der Übersicht „Handlung“). */
+/** Its row in the plot view. */
 export interface MoveStrandRequest {
-  /** Strang, vor dem eingefügt wird; `null` = ans Ende. */
+  /** Thread to insert before; `null` = at the end. */
   beforeId: string | null;
 }
 
-/** Ordnet eine Szene einem Strang zu. */
 export interface AddSceneStrandRequest {
   strandId: string;
 }
 
-// ---------------------------------------------------------------------------
-// Reihenfolge der Handlung
-// ---------------------------------------------------------------------------
-
-/** Beginn eines Abschnitts in der Handlung, z. B. „Tag 1“ oder „Winter“. */
+/** Start of a section in the story, e.g. "Day 1" or "Winter". */
 export interface StoryMark {
   id: string;
   label: string;
-  /** Die Marke steht vor der ersten Szene, deren `storyOrder` mindestens so groß ist. */
+  /** The mark sits before the first scene whose `storyOrder` is at least this large. */
   position: number;
 }
 
 /**
- * Legt die ganze Reihenfolge der Handlung fest. Szenen, die fehlen, folgen wieder ihrer
- * Vorgängerin im Buch; leer = alles zurück auf die Buchreihenfolge.
+ * Missing scenes follow their predecessor in the book again; empty = everything back to book order.
  */
 export interface SaveStoryRequest {
-  /** Spalten von früh nach spät; Szenen in derselben Spalte passieren gleichzeitig. */
+  /** From early to late; scenes in the same column happen at the same time. */
   columns: string[][];
-  /** Alle Marken (ersetzen die bisherigen); ohne `id` wird eine neu angelegt. */
+  /** All marks (replace the previous ones); without `id` a new one is created. */
   marks: Array<{ id?: string; label: string; beforeColumn: number }>;
 }
 
@@ -491,20 +427,16 @@ export interface StoryState {
   marks: StoryMark[];
 }
 
-/** Neue Reihenfolge der Galerie; das erste Bild ist das Profilbild. */
+/** The first image is the profile picture. */
 export interface ReorderImagesRequest {
   imageIds: string[];
 }
 
-// ---------------------------------------------------------------------------
-// Korrekturlesen unterwegs: Korrekturfassung hin, Notizen zurück
-// ---------------------------------------------------------------------------
-
-/** Das Manuskript zum Korrekturlesen – nur Text, Absatz für Absatz. */
+/** Text only, paragraph by paragraph. */
 export interface ProofPackage {
   format: 'wortomat-proof';
   version: 1;
-  /** Kennung dieser Fassung; die Notizen beziehen sich darauf. */
+  /** The notes refer to this ID. */
   id: string;
   title: string;
   author: string;
@@ -515,9 +447,9 @@ export interface ProofPackage {
 export interface ProofChapter {
   id: string;
   title: string;
-  /** Laufende Nummer im Buch (ab 1). */
+  /** Running number in the book (from 1). */
   number: number;
-  /** Titel des Teils, zu dem das Kapitel gehört; `null` ohne Teil. */
+  /** `null` without a part. */
   part: string | null;
   scenes: ProofScene[];
 }
@@ -525,11 +457,11 @@ export interface ProofChapter {
 export interface ProofScene {
   id: string;
   title: string;
-  /** Reiner Text je Absatz (auch leere, damit die Nummern zum Buch passen). */
+  /** Plain text per paragraph (empty ones too, so the numbers match the book). */
   paragraphs: string[];
 }
 
-/** Notizen vom Handy zurück an den Rechner. */
+/** Notes from the phone back to the computer. */
 export interface ProofNotesFile {
   format: 'wortomat-proof-notes';
   version: 1;
@@ -540,71 +472,62 @@ export interface ProofNotesFile {
 }
 
 /**
- * Eine Notiz an einer Textstelle. Die Stelle wird über den markierten Text samt ein paar
- * Zeichen davor und danach wiedergefunden – auch wenn sich der Absatz verschoben hat.
+ * The passage is found again via the marked text plus a few characters before and after – even if
+ * the paragraph moved.
  */
 export interface ProofNote {
   id: string;
   sceneId: string;
-  /** Absatz in der Korrekturfassung (ab 0). */
+  /** Paragraph in the proofreading copy (from 0). */
   paragraph: number;
-  /** Der markierte Text. */
   quote: string;
-  /** Text direkt davor bzw. danach (im selben Absatz, höchstens ein paar Dutzend Zeichen). */
+  /** Text right before and after (in the same paragraph, at most a few dozen characters). */
   prefix: string;
   suffix: string;
-  /** Freitext; bei Vorschlägen die optionale Begründung. */
+  /** For suggestions, the optional reason. */
   note: string;
-  /** Ersetzungsvorschlag für den markierten Text; `null` bei reinen Notizen. */
+  /** `null` for plain notes. */
   suggestion: string | null;
   createdAt: string;
 }
 
-/** `POST /api/proofreading/export`: mit Pfad (Desktop) dort speichern, sonst als Download. */
+/** With a path (desktop) save there, otherwise as a download. */
 export interface ProofExportRequest {
   filePath?: string;
 }
 
-/** Notizdateien zum geöffneten Buch im Download-Ordner (`GET /api/proofreading/inbox`). */
 export interface ProofInbox {
-  /** Der Ordner, in dem gesucht wird. */
   dir: string;
-  /** Neueste zuerst. */
+  /** Newest first. */
   files: ProofInboxFile[];
-  /** Notizen aus allen Dateien, die noch nicht im Buch sind (jede nur einmal gezählt). */
+  /** Each counted only once. */
   newNotes: number;
 }
 
 export interface ProofInboxFile {
   name: string;
   modifiedAt: string;
-  /** Notizen zu diesem Buch in der Datei. */
+  /** Notes for this book in the file. */
   notes: number;
-  /** Davon noch nicht übernommen. */
+  /** Of those, not yet imported. */
   newNotes: number;
-  /** Alles übernommen und nichts zu anderen Büchern darin – darf gelöscht werden. */
+  /** Everything imported and nothing for other books in it – may be deleted. */
   done: boolean;
 }
 
-/** Ergebnis von `POST /api/proofreading/import`. */
 export interface ProofImportResult {
-  /** So viele Notizen stehen jetzt als Fixme-Markierung im Text. */
   applied: number;
-  /** Schon bei einem früheren Import übernommen – das Handy sendet immer alle Notizen. */
+  /** Already imported earlier – the phone always sends all notes. */
   skipped: number;
-  /** Notizen, deren Stelle sich nicht mehr finden ließ. */
+  /** Notes whose passage could no longer be found. */
   unmatched: Array<{
     note: ProofNote;
-    /** Titel der Szene; `null`, wenn es die Szene nicht mehr gibt. */
+    /** `null` when the scene no longer exists. */
     sceneTitle: string | null;
   }>;
 }
 
-// ---------------------------------------------------------------------------
-// Bilder
-// ---------------------------------------------------------------------------
-
-/** SVG ist absichtlich ausgeschlossen (kann Skripte enthalten). */
+/** SVG is excluded on purpose (it can contain scripts). */
 export type ImageMimeType = 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif' | 'image/avif';
 
 export interface ImageInfo {
@@ -614,13 +537,13 @@ export interface ImageInfo {
   height: number | null;
   byteSize: number;
   originalName: string | null;
-  /** Relativ zum App-Origin, z. B. `/api/images/<id>`. */
+  /** Relative to the app origin, e.g. `/api/images/<id>`. */
   url: string;
 }
 
 /**
- * Ausschnitt eines Bilds, relativ zur Bildgröße (0 … 1). Das Original bleibt unverändert;
- * angezeigt wird nur der Ausschnitt, und er lässt sich jederzeit neu wählen.
+ * Relative to the image size (0 … 1). The original stays unchanged; only the crop is shown, and it
+ * can be chosen again at any time.
  */
 export interface ImageCrop {
   x: number;
@@ -629,43 +552,33 @@ export interface ImageCrop {
   height: number;
 }
 
-/** Bild in der Galerie einer Notiz, mit dem dort gewählten Ausschnitt. */
 export interface GalleryImage extends ImageInfo {
-  /** `null` = ganzes Bild. */
+  /** `null` = whole image. */
   crop: ImageCrop | null;
 }
 
-/** `PUT /api/notes/:id/images/:imageId/crop` */
 export interface SetImageCropRequest {
   crop: ImageCrop | null;
 }
 
-// ---------------------------------------------------------------------------
-// Suche
-// ---------------------------------------------------------------------------
-
 export interface SearchHit {
-  /** Szene oder Art der Notiz – bestimmt, wohin ein Klick führt. */
+  /** Determines where a click leads. */
   kind: 'scene' | NoteKind;
   id: string;
   title: string;
   /**
-   * Textausschnitt aus Text oder Kurzbeschreibung; Treffer sind mit <mark>…</mark> markiert,
-   * sonst HTML-escaped. Leer, wenn nur der Titel passt.
+   * From text or summary; hits are wrapped in <mark>…</mark>, everything else is HTML-escaped.
+   * Empty when only the title matches.
    */
   snippetHtml: string;
 }
 
-// ---------------------------------------------------------------------------
-// Export des Manuskripts
-// ---------------------------------------------------------------------------
-
 export type ExportFormat = 'html' | 'docx' | 'pdf' | 'epub';
 
-/** Vorlage für Word und PDF (HTML und EPUB haben ein festes Layout). */
+/** For Word and PDF (HTML and EPUB have a fixed layout). */
 export type ExportTemplate = 'normseite' | 'roman';
 
-/** Schriften zur Auswahl für die Vorlage „Roman“ (jeweils für PDF und Word verfügbar). */
+/** Available for both PDF and Word. */
 export type BookFont =
   | 'palatino'
   | 'garamond'
@@ -680,9 +593,9 @@ export type BookFont =
   | 'computermodern';
 
 /**
- * Satzspiegel der Vorlage „Roman“ (die Normseite ist genormt und bleibt fest).
- * Maße in Millimetern, Schriftgröße in Punkt. Gedruckt wird doppelseitig: „innen“ ist der
- * Rand am Bund, „außen“ der am Seitenrand.
+ * Type area of the "novel" template (the standard page is standardised and fixed). Measurements in
+ * millimetres, font size in points. Printed two-sided: "inner" is the margin at the gutter, "outer"
+ * the one at the page edge.
  */
 export interface BookLayout {
   pageWidth: number;
@@ -695,7 +608,7 @@ export interface BookLayout {
   fontSize: number;
 }
 
-/** Was der Export-Dialog sich pro Buch merkt (in der Projektdatei gespeichert). */
+/** Stored per book in the project file. */
 export interface ExportSettings {
   format: ExportFormat;
   template: ExportTemplate;
@@ -704,92 +617,83 @@ export interface ExportSettings {
   layout: BookLayout;
 }
 
-/** `GET /api/export/settings` */
 export interface ExportSettingsResponse {
   settings: ExportSettings;
-  /** Vorgaben, z. B. für „Zurücksetzen“. */
+  /** E.g. for "Reset". */
   defaults: ExportSettings;
 }
 
-/** Eine wählbare Schrift samt CSS-Schriftfamilie für die Vorschau. */
 export interface BookFontInfo {
   id: BookFont;
   label: string;
   cssFamily: string;
-  /** Ist ein passendes TeX-Paket installiert? Sonst setzt das PDF in Latin Modern. */
+  /** Without a matching TeX package the PDF falls back to Latin Modern. */
   pdfAvailable: boolean;
-  /** Nur anbieten, wenn `pdfAvailable` (oder die Schrift schon gewählt ist). */
+  /** Only offered when `pdfAvailable` (or already chosen). */
   optional: boolean;
 }
 
-/** `GET /api/export/preview`: Anfang des Buchs für die Seitenvorschau. */
 export interface ExportPreview {
   title: string;
   author: string;
-  /** Erstes Kapitel mit Text; `null`, wenn das Buch noch leer ist. */
+  /** First chapter with text; `null` while the book is empty. */
   chapterTitle: string | null;
-  /** Szenen dieses Kapitels als HTML (Absätze, Szenentrenner bzw. -titel, Bilder). */
   html: string;
 }
 
 export interface ExportRequest {
   format: ExportFormat;
   template: ExportTemplate;
-  /** Szenentitel als Zwischenüberschriften drucken (sonst nur Szenentrenner). */
+  /** Otherwise only scene breaks. */
   includeSceneTitles: boolean;
   /**
-   * Teile als eigene Seiten bzw. Überschriften drucken. Fehlt der Wert, werden sie gedruckt;
-   * ohne sie folgen die Kapitel direkt aufeinander.
+   * Parts as pages or headings of their own. Missing means printed; without them the chapters
+   * follow each other directly.
    */
   includeParts?: boolean;
-  /** Satzspiegel für „Roman“; fehlt er, gelten die Vorgaben. */
+  /** Missing means the defaults. */
   layout?: BookLayout;
   /**
-   * Zielpfad (Desktop: aus dem Speichern-Dialog). Ohne Pfad liefert der Server die Datei
-   * direkt als Download aus (Browser-Modus).
+   * Desktop: from the save dialog. Without a path the server returns the file directly as a
+   * download (browser mode).
    */
   filePath?: string;
 }
 
 export interface ExportResult {
   filePath: string;
-  /** Hinweise, z. B. Bilder, die in diesem Format nicht übernommen werden konnten. */
+  /** E.g. images this format could not take over. */
   warnings: string[];
 }
 
 export interface ExportCapabilities {
   pdf: {
     available: boolean;
-    /** z. B. „pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023)“ */
+    /** e.g. "pdfTeX 3.141592653-2.6-1.40.25 (TeX Live 2023)" */
     version: string | null;
   };
-  /** Schriften für die Vorlage „Roman“. */
   fonts: BookFontInfo[];
 }
 
-// ---------------------------------------------------------------------------
-// Electron-Bridge (vom Preload-Skript als `window.wortomat` bereitgestellt)
-// ---------------------------------------------------------------------------
+// Provided by the preload script as `window.wortomat`.
 
 export interface DesktopBridge {
   readonly isDesktop: true;
-  /** Zeigt den nativen „Öffnen“-Dialog. `null` = abgebrochen. */
+  /** `null` = cancelled. */
   showOpenProjectDialog(): Promise<string | null>;
-  /** Zeigt den nativen „Speichern unter“-Dialog. `null` = abgebrochen. */
+  /** `null` = cancelled. */
   showCreateProjectDialog(suggestedName: string): Promise<string | null>;
   /**
-   * Wird aufgerufen, bevor das Fenster schließt oder ein anderes Projekt geöffnet wird.
-   * Das Fenster wartet (mit Timeout), bis das Promise erfüllt ist – Zeit, um zu speichern.
+   * Called before the window closes or another project is opened. The window waits (with a timeout)
+   * until the promise settles – time to save.
    */
   onBeforeClose(handler: () => Promise<void>): void;
-  /** „Speichern unter“ für einen Export. `null` = abgebrochen. */
+  /** `null` = cancelled. */
   showExportDialog(suggestedName: string, format: ExportFormat): Promise<string | null>;
-  /** Öffnet eine exportierte Datei mit dem Standardprogramm. */
   openPath(filePath: string): Promise<void>;
-  /** Zeigt eine Datei im Dateimanager. */
   showItemInFolder(filePath: string): Promise<void>;
-  /** Sprache für native Menüs und Dialoge (Kontextmenü, „Speichern unter“ …). */
+  /** For native menus and dialogs (context menu, "Save as" …). */
   setLanguage(language: Language): void;
-  /** Farbschema für Fensterrahmen, Menüs und Dialoge. */
+  /** For window frame, menus and dialogs. */
   setTheme(theme: Theme): void;
 }

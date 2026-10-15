@@ -29,10 +29,8 @@ import { StatusMessages } from '../../core/status-messages';
 
 const MAX_SUGGESTIONS = 8;
 
-/** Wofür die Auswahl gerade offen ist: Stränge, eine Notizart oder Tags. */
 type Target = 'strand' | NoteKind | 'tag';
 
-/** Ein Chip in einer Zeile – ein Strang, eine verknüpfte Notiz oder ein Tag. */
 interface Chip {
   id: string;
   title: string;
@@ -47,7 +45,6 @@ interface Row {
   chips: Chip[];
 }
 
-/** Eintrag in der Auswahlliste. */
 type Option =
   | { type: 'note'; note: NoteSummary }
   | { type: 'tag'; tag: TagSummary }
@@ -55,9 +52,9 @@ type Option =
   | { type: 'create'; title: string };
 
 /**
- * Leiste unter dem Szenentitel: zu welchen Handlungssträngen gehört die Szene, welche Charaktere
- * und Orte kommen vor, welche Tags hat sie? Alle Zeilen teilen sich dieselbe Auswahl (Suche,
- * Tastatur, „neu anlegen“). Neben den Strängen: ist die Szene ein Wendepunkt?
+ * Bar below the scene title: which plot threads the scene belongs to, which characters and places
+ * appear, which tags it has. All rows share the same picker (search, keyboard, "create new"). Next
+ * to the threads: is the scene a turning point?
  */
 @Component({
   selector: 'wm-scene-links',
@@ -79,13 +76,13 @@ export class SceneLinks {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
 
-  /** Nur IDs merken – Titel und Profilbild kommen aktuell aus dem NotesStore. */
+  /** Only remember IDs – title and profile picture come up to date from the NotesStore. */
   private readonly linkedIds = signal<ReadonlySet<string>>(new Set());
   private readonly tags = signal<Tag[]>([]);
   private readonly strands = signal<Strand[]>([]);
-  /** Alle Stränge des Projekts; wird beim Öffnen der Strang-Auswahl frisch geladen. */
+  /** Loaded fresh whenever the thread picker opens. */
   private readonly allStrands = signal<Strand[]>([]);
-  /** Alle Tags des Projekts; wird beim Öffnen der Tag-Auswahl frisch geladen. */
+  /** Loaded fresh whenever the tag picker opens. */
   private readonly allTags = signal<TagSummary[]>([]);
   private readonly error = inject(StatusMessages).channel();
 
@@ -113,12 +110,11 @@ export class SceneLinks {
     },
   ]);
 
-  // Auswahl (Popover) ---------------------------------------------------------
   protected readonly pickerTarget = signal<Target | null>(null);
   protected readonly query = signal('');
   protected readonly activeIndex = signal(0);
 
-  /** Eingabe ohne führendes „#“ – Tags werden gern so getippt. */
+  /** Tags are often typed with a leading "#". */
   private readonly term = computed(() => this.query().trim().replace(/^#+/, '').trim());
 
   protected readonly options = computed<Option[]>(() => {
@@ -161,7 +157,7 @@ export class SceneLinks {
     return options;
   });
 
-  /** Text, wenn die Auswahl leer ist (Neuanlage ist dann über die Eingabe möglich). */
+  /** Creating a new entry is still possible via the input then. */
   protected readonly emptyHint = computed(() => {
     const target = this.pickerTarget();
     if (!target) return '';
@@ -177,12 +173,10 @@ export class SceneLinks {
       : t.noteKinds[target].pickerEmpty;
   });
 
-  // Wendepunkt ----------------------------------------------------------------
   protected readonly turningPoint = computed(
     () => this.projectStore.findNode(this.sceneId())?.turningPoint ?? false,
   );
 
-  // Strang bearbeiten (Popover beim Klick auf einen Strang) -------------------
   protected readonly editingStrand = signal<Strand | null>(null);
   protected readonly strandColors = STRAND_COLORS;
   protected readonly strandColor = strandColor;
@@ -301,7 +295,7 @@ export class SceneLinks {
     });
   }
 
-  /** Neu hinzugefügte Einträge stehen hinten – dorthin scrollen, damit man sie sieht. */
+  /** New entries are at the end – scroll there so they are visible. */
   private scrollToEnd(target: Target): void {
     afterNextRender(
       () => {
@@ -326,7 +320,9 @@ export class SceneLinks {
     });
   }
 
-  /** Damit der Szenenfilter im Baum gleich die neuen Stränge, Charaktere, Orte und Tags kennt. */
+  /**
+   * So the scene filter in the tree knows the new threads, characters, places and tags right away.
+   */
   private reportToFilter(sceneId: string): void {
     if (sceneId === this.sceneId()) {
       this.filter.updateScene(sceneId, {
@@ -369,7 +365,7 @@ export class SceneLinks {
     );
   }
 
-  /** Löscht den Strang im ganzen Buch – nach Rückfrage, denn er hängt an vielen Szenen. */
+  /** Asks first, because the thread is attached to many scenes. */
   protected async deleteStrand(strand: Strand): Promise<void> {
     const t = this.t();
     const confirmed = await this.confirm.ask({

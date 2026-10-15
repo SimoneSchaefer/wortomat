@@ -5,9 +5,9 @@ const KEY_STEP = 16;
 const KEY_STEP_LARGE = 64;
 
 /**
- * Senkrechter Griff zum Ändern einer Breite (WAI-ARIA „Window Splitter“):
- * ziehen mit der Maus, ← → mit der Tastatur (mit Umschalt in großen Schritten),
- * Pos1/Ende für Minimum/Maximum, Doppelklick setzt auf den Standard zurück.
+ * Vertical handle for changing a width (WAI-ARIA "window splitter"): drag with the mouse, ← → with
+ * the keyboard (with Shift in large steps), Home/End for minimum/maximum, double-click resets to
+ * the default.
  */
 @Component({
   selector: 'wm-resize-handle',
@@ -34,7 +34,7 @@ export class ResizeHandle {
   readonly max = input.required<number>();
   readonly label = input.required<string>();
 
-  /** Neue Breite (bereits auf min/max begrenzt). */
+  /** Already clamped to min/max. */
   readonly resized = output<number>();
   readonly reset = output<void>();
 
@@ -48,7 +48,7 @@ export class ResizeHandle {
 
   protected onPointerDown(event: PointerEvent): void {
     if (event.button !== 0) return;
-    event.preventDefault(); // keine Textauswahl beim Ziehen
+    event.preventDefault(); // no text selection while dragging
     const startX = event.clientX;
     const startValue = this.value();
 
@@ -61,7 +61,7 @@ export class ResizeHandle {
       this.dragging.set(false);
       this.stopDragging = null;
     };
-    // Am Dokument lauschen, damit das Ziehen auch über dem Editor weiterläuft.
+    // Listen on the document so dragging continues over the editor.
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', stop);
     document.addEventListener('pointercancel', stop);

@@ -66,7 +66,7 @@
               [checked]="settings.settings().fontSize === size"
               (change)="chooseFontSize(size)"
             />
-            <!-- In px, damit die Beispiele nicht selbst mit der Einstellung wachsen -->
+            <!-- In px so the samples do not grow with the setting themselves -->
             <span class="size-sample" [style.font-size.px]="20 * fontScale[size]">Aa</span>
             <span class="choice-label">{{ t().settings.fontSizes[size] }}</span>
           </label>

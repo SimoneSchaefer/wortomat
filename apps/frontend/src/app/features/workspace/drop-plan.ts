@@ -3,15 +3,15 @@ import type { ManuscriptNode, MoveNodeRequest, NodeKind } from '@wortomat/shared
 export type DropPosition = 'before' | 'after' | 'inside';
 
 export interface DropPlan {
-  /** Element, an dem der Einfügemarker angezeigt wird; `null` = Ende der obersten Ebene. */
+  /** `null` = end of the top level. */
   targetId: string | null;
   position: DropPosition;
   request: MoveNodeRequest;
 }
 
 /**
- * Welche Art unter welcher Elternart liegen darf (`null` = oberste Ebene).
- * Muss zu `ALLOWED_PARENTS` in apps/backend/src/manuscript/manuscript.service.ts passen.
+ * `null` = top level. Must match `ALLOWED_PARENTS` in
+ * apps/backend/src/manuscript/manuscript.service.ts.
  */
 const ALLOWED_PARENTS: Record<NodeKind, ReadonlyArray<NodeKind | null>> = {
   part: [null],
@@ -24,10 +24,8 @@ function canContain(parentKind: NodeKind | null, childKind: NodeKind): boolean {
 }
 
 /**
- * Bestimmt, was passiert, wenn `dragged` über `target` losgelassen wird.
- *
- * @param ratio vertikale Zeigerposition innerhalb der Zielzeile (0 = oben, 1 = unten)
- * @returns `null`, wenn der Drop dort nicht erlaubt ist
+ * @param ratio vertical pointer position within the target row (0 = top, 1 = bottom)
+ * @returns `null` when dropping there is not allowed
  */
 export function planDrop(
   dragged: ManuscriptNode,
@@ -47,7 +45,7 @@ export function planDrop(
 
   let position: DropPosition;
   if (canInside && canBeSibling) {
-    // z. B. Kapitel über einem Teil: Ränder = davor/danach, Mitte = hinein
+    // e.g. a chapter over a part: edges = before/after, middle = inside
     position = ratio < 0.25 ? 'before' : ratio > 0.75 ? 'after' : 'inside';
   } else if (canInside) {
     position = 'inside';
@@ -78,14 +76,14 @@ export function planDrop(
   }
 }
 
-/** Drop auf freie Fläche unterhalb des Baums: ans Ende der obersten Ebene. */
+/** Drop onto the free area below the tree: to the end of the top level. */
 export function planRootDrop(dragged: ManuscriptNode): DropPlan | null {
   return canContain(null, dragged.kind)
     ? { targetId: null, position: 'after', request: { parentId: null, beforeId: null } }
     : null;
 }
 
-/** Ändert der Drop überhaupt etwas? (Vermeidet unnötige Anfragen.) */
+/** Avoids needless requests. */
 export function changesPosition(
   dragged: ManuscriptNode,
   plan: DropPlan,

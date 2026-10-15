@@ -2,9 +2,9 @@ import { Component, computed, input } from '@angular/core';
 import { COVER_PALETTES } from '../../core/cover-design';
 
 /**
- * Titelbild eines Buchs im Hochformat (1 : 1,6). Ohne Bild ein schlichtes Ersatz-Cover aus
- * Titel und Autor, dessen Farben fest zum Buch gehören (aus dem Dateipfad abgeleitet).
- * Die Schrift wächst mit der Breite – das Cover funktioniert groß wie als Daumennagel.
+ * Portrait format (1 : 1.6). Without an image, a plain fallback cover from title and author whose
+ * colours belong to the book for good (derived from the file path). The font grows with the width –
+ * the cover works large as well as as a thumbnail.
  */
 @Component({
   selector: 'wm-book-cover',
@@ -95,7 +95,7 @@ export class BookCover {
   readonly url = input<string | null>(null);
   readonly title = input.required<string>();
   readonly author = input('');
-  /** Bestimmt die Farben des Ersatz-Covers, damit jedes Buch stets gleich aussieht. */
+  /** So every book always looks the same. */
   readonly seed = input('');
 
   protected readonly palette = computed(() => {

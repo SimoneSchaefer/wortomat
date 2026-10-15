@@ -1,12 +1,11 @@
 import type { MapStroke } from '@wortomat/shared';
 
-/** Punkte abwechselnd als x und y: `[x0, y0, x1, y1, …]` – wie in `MapStroke.points`. */
+/** Alternating x and y: `[x0, y0, x1, y1, …]` – as in `MapStroke.points`. */
 type Points = readonly number[];
 
 /**
- * SVG-Pfad durch die Punkte, mit quadratischen Kurven über die Mittelpunkte geglättet –
- * so wirkt ein mit der Maus gezogener Strich weniger zittrig. Ein einzelner Punkt wird
- * zu einem winzigen Strich, damit er (mit runden Enden) als Punkt sichtbar ist.
+ * Smoothed with quadratic curves through the midpoints – so a stroke drawn with the mouse looks
+ * less shaky. A single point becomes a tiny stroke so it shows (with round caps) as a dot.
  */
 export function strokePath(points: Points, closed = false): string {
   const count = points.length / 2;
@@ -27,10 +26,10 @@ export function strokePath(points: Points, closed = false): string {
 }
 
 /**
- * Glättet einen von Hand gezogenen Strich, damit das Zittern der Maus verschwindet: Die Punkte
- * werden in gleichen Abständen (`spacing`) neu verteilt und dann mit ihren Nachbarn gemittelt
- * (Dreiecksgewichte über `radius` Punkte je Seite). Offene Striche behalten Anfang und Ende,
- * geschlossene (Flächen) werden auch über die Naht hinweg geglättet.
+ * Removes the mouse jitter from a hand-drawn stroke: the points are redistributed at equal
+ * distances (`spacing`) and then averaged with their neighbours (triangular weights over `radius`
+ * points per side). Open strokes keep start and end; closed ones (areas) are smoothed across the
+ * seam too.
  */
 export function smooth(points: Points, spacing: number, radius: number, closed = false): number[] {
   const even = resample(points, spacing);
@@ -42,7 +41,7 @@ export function smooth(points: Points, spacing: number, radius: number, closed =
       result.push(even[2 * i]!, even[2 * i + 1]!);
       continue;
     }
-    // Am Rand offener Striche schrumpft das Fenster, damit die Enden nicht wegrutschen
+    // At the ends of open strokes the window shrinks so the ends do not slide away
     const reach = closed
       ? Math.min(radius, Math.floor((count - 1) / 2))
       : Math.min(radius, i, count - 1 - i);
@@ -61,12 +60,12 @@ export function smooth(points: Points, spacing: number, radius: number, closed =
   return result;
 }
 
-/** Verteilt die Punkte im Abstand `spacing` entlang des Strichs; der letzte bleibt erhalten. */
+/** The last point is kept. */
 function resample(points: Points, spacing: number): number[] {
   const count = points.length / 2;
   if (count < 2 || spacing <= 0) return [...points];
   const result = [points[0]!, points[1]!];
-  let carry = 0; // Wegstück seit dem letzten gesetzten Punkt
+  let carry = 0; // distance travelled since the last placed point
   for (let i = 1; i < count; i++) {
     const ax = points[2 * i - 2]!;
     const ay = points[2 * i - 1]!;
@@ -87,8 +86,8 @@ function resample(points: Points, spacing: number): number[] {
 }
 
 /**
- * Lässt Punkte weg, die kaum von der Linie abweichen (Douglas-Peucker), damit die
- * Projektdatei nicht mit jedem Mauszucken wächst. `tolerance` in Karteneinheiten.
+ * Drops points that barely deviate from the line (Douglas-Peucker) so the project file does not
+ * grow with every twitch of the mouse. `tolerance` in map units.
  */
 export function simplify(points: Points, tolerance: number): number[] {
   const count = points.length / 2;
@@ -127,8 +126,8 @@ export function simplify(points: Points, tolerance: number): number[] {
 }
 
 /**
- * Trifft der Radierer (Kreis um x/y) den Strich? Linien zählen samt ihrer Breite,
- * Flächen auch, wenn der Punkt mitten in ihnen liegt.
+ * Does the eraser (circle around x/y) hit the stroke? Lines count with their width, areas also when
+ * the point lies inside them.
  */
 export function hitsStroke(stroke: MapStroke, x: number, y: number, radius: number): boolean {
   const { points } = stroke;
@@ -149,7 +148,6 @@ export function hitsStroke(stroke: MapStroke, x: number, y: number, radius: numb
   return stroke.tool === 'area' && insidePolygon(points, x, y);
 }
 
-/** Abstand des Punkts p von der Strecke a–b. */
 function segmentDistance(
   px: number,
   py: number,
@@ -168,7 +166,7 @@ function segmentDistance(
   return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
 }
 
-/** Strahlverfahren: Wie oft schneidet ein Strahl nach rechts den Rand? Ungerade = innen. */
+/** Ray casting: how often does a ray to the right cross the edge? Odd = inside. */
 function insidePolygon(points: Points, x: number, y: number): boolean {
   const count = points.length / 2;
   let inside = false;

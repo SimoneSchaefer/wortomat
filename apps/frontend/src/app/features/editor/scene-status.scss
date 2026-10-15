@@ -5,7 +5,7 @@
   font-family: var(--font-ui);
 }
 
-// gleiche Spaltenbreite wie die Beschriftungen der Verknüpfungen darunter
+// same column width as the link labels below
 .label {
   width: 5.5rem;
   flex-shrink: 0;
@@ -20,8 +20,8 @@
   flex-wrap: wrap;
 }
 
-// Nahtlos aneinander: benachbarte Rahmen überlappen um 1px, dazwischen bleibt eine Linie.
-// Farbige Rahmen (erledigt, aktuell) liegen oben, damit sie nicht halb verdeckt werden.
+// Seamless: neighbouring borders overlap by 1px, leaving one line between. Coloured borders (done,
+// current) lie on top so they are not half covered.
 button {
   position: relative;
   display: inline-flex;
@@ -53,7 +53,6 @@ button {
     color: var(--text);
   }
 
-  // erledigte Stufen: leicht in der Farbe des aktuellen Status gefüllt
   &.done {
     z-index: 1;
     border-color: color-mix(in srgb, var(--current-color) 45%, var(--border));
@@ -67,7 +66,7 @@ button {
     background: var(--current-color);
     color: var(--bg);
     font-weight: 600;
-    // Haken im Fertig-Icon in der Statusfarbe, sonst verschwände er auf der Füllung
+    // Check mark in the finished icon in the status colour, or it would vanish on the fill
     --status-icon-contrast: var(--current-color);
   }
 

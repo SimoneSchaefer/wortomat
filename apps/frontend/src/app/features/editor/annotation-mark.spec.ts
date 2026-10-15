@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { de } from '../../core/i18n/de';
 import { Annotation, annotationAt, annotationsIn } from './annotation-mark';
 
-/** Echter Tiptap-Editor (jsdom) mit dem Satz „Hier fehlt noch was.“ */
+/** Real Tiptap editor (jsdom) with the sentence "Hier fehlt noch was." */
 function createEditor(): Editor {
   return new Editor({
     element: document.createElement('div'),
@@ -17,7 +17,7 @@ interface TextJson {
   marks?: Array<{ type: string; attrs?: Record<string, unknown> }>;
 }
 
-/** [Text, Art der Markierung] je Textstück des ersten Absatzes. */
+/** [text, mark kind] per text node of the first paragraph. */
 const marksOf = (editor: Editor) =>
   ((editor.getJSON().content?.[0]?.content ?? []) as TextJson[]).map((node) => [
     node.text,
@@ -64,11 +64,11 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     const typeKeys = (text: string) => {
       for (const char of text) editor.view.dispatch(editor.state.tr.insertText(char));
     };
-    editor.commands.setTextSelection(21); // Ende des Absatzes
+    editor.commands.setTextSelection(21); // end of the paragraph
     typeKeys(' ');
     editor.commands.toggleAnnotation('todo');
     typeKeys('Namen?');
-    editor.commands.toggleAnnotation('todo'); // direkt hinter der Markierung: ausschalten
+    editor.commands.toggleAnnotation('todo'); // right after the mark: switch off
     typeKeys(' Weiter.');
     expect(marksOf(editor)).toEqual([
       ['Hier fehlt noch was. ', null],
@@ -100,7 +100,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
 });
 
 describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
-  /** „Hier fehlt noch was.“ mit „fehlt“ kursiv und als Fixme mit Vorschlag markiert. */
+  /** "Hier fehlt noch was." with "fehlt" italic and marked as fixme with a suggestion. */
   function editorWithNote(attrs: { note: string | null; suggestion: string | null }): Editor {
     return new Editor({
       element: document.createElement('div'),

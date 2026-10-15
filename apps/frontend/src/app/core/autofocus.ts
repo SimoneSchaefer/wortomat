@@ -1,6 +1,5 @@
 import { afterNextRender, Directive, ElementRef, inject } from '@angular/core';
 
-/** Fokussiert (und markiert) ein Eingabefeld, sobald es eingeblendet wird. */
 @Directive({ selector: 'input[wmAutofocus]' })
 export class Autofocus {
   constructor() {

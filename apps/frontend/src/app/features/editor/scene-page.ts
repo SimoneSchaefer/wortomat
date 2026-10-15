@@ -24,7 +24,6 @@ import { StatusMessages } from '../../core/status-messages';
 
 const TITLE_SAVE_DELAY_MS = 600;
 
-/** Eine Szene des Manuskripts: Route `write/scene/:id`. */
 @Component({
   selector: 'wm-scene-page',
   imports: [DocumentEditor, SceneLinks, SceneStatusPicker],
@@ -48,7 +47,7 @@ const TITLE_SAVE_DELAY_MS = 600;
     </wm-document-editor>
   `,
   styles: `
-    // Leicht getönte Seite: Szenendetails und Text liegen als helle Kästen darauf
+    // Lightly tinted page: scene details and text lie on it as light boxes
     :host {
       display: flex;
       flex-direction: column;
@@ -57,8 +56,8 @@ const TITLE_SAVE_DELAY_MS = 600;
       background: var(--editor-page-bg);
     }
 
-    // Szenendetails als zusammengehöriger Kasten zwischen Titel und Text – Rahmen wie der
-    // Kasten von Toolbar und Text darunter
+    // Scene details as one box between title and text – framed like the toolbar and text
+    // box below
     .scene-meta {
       display: grid;
       gap: 0.4rem;
@@ -82,8 +81,8 @@ export class ScenePage {
   protected readonly node = computed(() => this.store.findNode(this.id()));
   private readonly error = inject(StatusMessages).channel();
 
-  // Nur beim Wechsel der Szene aus dem Store füllen – nicht nach jedem Speichern,
-  // sonst könnte eine verspätete Antwort gerade Getipptes überschreiben.
+  // Only fill from the store when the scene changes – not after every save, or a late response
+  // could overwrite what was just typed.
   protected readonly titleDraft = linkedSignal({
     source: this.id,
     computation: (id) => untracked(() => this.store.findNode(id)?.title ?? ''),
@@ -111,10 +110,10 @@ export class ScenePage {
     effect(() => {
       const id = this.id();
       untracked(() => {
-        void this.flushTitle(); // Änderungen der vorherigen Szene
+        void this.flushTitle(); // changes of the previous scene
         this.error.set(null);
-        this.store.reveal(id); // z. B. über die Suche geöffnet: im Baum aufklappen
-        // Frisch angelegt (Standardtitel)? Dann gleich den Titel zum Überschreiben markieren.
+        this.store.reveal(id); // e.g. opened via the search: expand it in the tree
+        // Freshly created (default title)? Then select the title right away for overwriting.
         if (this.store.findNode(id)?.title === this.t().tree.newTitle.scene) {
           afterNextRender(
             () => {
@@ -137,7 +136,6 @@ export class ScenePage {
     this.titleTimer = setTimeout(() => void this.flushTitle(), TITLE_SAVE_DELAY_MS);
   }
 
-  /** Leeren Titel nicht stehen lassen. */
   protected onTitleBlur(): void {
     if (!this.titleDraft().trim()) {
       this.titleDraft.set(this.node()?.title ?? '');

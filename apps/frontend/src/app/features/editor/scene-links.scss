@@ -3,12 +3,13 @@
 :host {
   display: grid;
   gap: 0.4rem;
-  min-width: 0; // sonst wächst die Komponente mit langen Chip-Zeilen über die Textspalte
+  min-width: 0; // otherwise the component grows past the text column with
+  // long chip rows
   font-family: var(--font-ui);
 }
 
 .group {
-  position: relative; // Bezug für das Popover „Strang bearbeiten“
+  position: relative; // anchor for the edit-thread popover
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -24,19 +25,18 @@
   color: var(--text-muted);
 }
 
-// Rahmen für die scrollende Zeile; die Pfeile liegen als Overlay an den Rändern.
+// The arrows lie on the edges as an overlay.
 .scroller {
   position: relative;
   min-width: 0;
 }
 
-// Eine Zeile; was nicht passt, wird über Pfeile oder Mausrad seitlich gescrollt.
 .chips {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   margin: 0;
-  padding: 2px 0; // Platz für den Fokusrahmen
+  padding: 2px 0; // room for the focus ring
   list-style: none;
   overflow-x: auto;
   overscroll-behavior-x: contain;
@@ -59,7 +59,7 @@
   border: 1px solid var(--border);
   border-radius: 50%;
   background: var(--bg);
-  // weicher Übergang: die Chips verschwinden unter dem Pfeil statt hart abgeschnitten
+  // soft transition: the chips disappear under the arrow instead of being cut off hard
   box-shadow: 0 0 0.5rem 0.5rem var(--bg);
   color: var(--text-muted);
   font-size: 1rem;
@@ -86,7 +86,6 @@
   }
 }
 
-// Tags: ohne Avatar, mit „#“ davor
 .chip.tag .open {
   padding: 0 0.15rem 0 0.6rem;
   cursor: default;
@@ -97,7 +96,6 @@
   color: var(--accent-strong);
 }
 
-// Stränge: Farbpunkt statt Avatar; ein Klick öffnet „Strang bearbeiten“
 .dot {
   flex-shrink: 0;
   width: 0.6rem;
@@ -110,7 +108,6 @@
   color: inherit;
 }
 
-// Wendepunkt: Schalter am rechten Ende der Strang-Zeile
 .turning-point {
   display: flex;
   align-items: center;
@@ -146,11 +143,11 @@
 .strand-editor {
   position: absolute;
   top: calc(100% + 0.35rem);
-  left: 6.1rem; // unter den Chips, neben der Beschriftung
+  left: 6.1rem; // below the chips, next to the label
   z-index: 10;
   display: grid;
   gap: 0.4rem;
-  width: 16.5rem; // alle acht Farben in einer Reihe
+  width: 16.5rem; // all eight colours in one row
   padding: 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.6rem;
@@ -193,7 +190,7 @@
   padding: 0;
   border: 2px solid transparent;
   border-radius: 50%;
-  // Ring mit Abstand: zeigt die gewählte Farbe, ohne sie zu verdecken
+  // Ring with a gap: shows the chosen colour without covering it
   box-shadow: inset 0 0 0 2px var(--bg);
 
   &[aria-checked='true'] {

@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import type { Texts } from './i18n/i18n';
 
-/** Macht aus einem Fehler (meist eine NestJS-Fehlerantwort) eine lesbare Meldung. */
+/** Usually from a NestJS error response. */
 export function errorMessage(error: unknown, t: Texts): string {
   if (error instanceof HttpErrorResponse) {
     if (error.status === 0) {

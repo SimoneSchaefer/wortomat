@@ -27,15 +27,15 @@ import { MapsStore } from './maps-store';
 const SAVE_DELAY_MS = 800;
 const MAX_HISTORY = 100;
 const PLACE_DRAG_TYPE = 'application/x-wortomat-place';
-/** Breite der Zeichenfläche in Karteneinheiten (wie im Backend); die Höhe folgt dem Bild. */
+/** Canvas width in map units (as in the backend); the height follows the image. */
 const MAP_WIDTH = 1600;
-/** Stärkste Vergrößerung; 1 = ganze Karte. */
+/** 1 = the whole map. */
 const MAX_ZOOM = 8;
 const ZOOM_STEP = 1.5;
 
 type Tool = 'pen' | 'area' | 'eraser' | 'hand' | 'zoom';
 
-/** Farben für grobe Karten – auf hellem Papier gut zu unterscheiden. */
+/** Colours for rough maps – easy to tell apart on light paper. */
 export const MAP_COLORS = [
   { key: 'ink', value: '#3d3530' },
   { key: 'water', value: '#2f6fbf' },
@@ -45,23 +45,22 @@ export const MAP_COLORS = [
   { key: 'sand', value: '#c99a2e' },
 ] as const;
 
-/** Strichstärken in Bildschirmpixeln bei 100 % – gespeichert wird in Karteneinheiten. */
+/** Stroke widths in screen pixels at 100 % – stored in map units. */
 const WIDTHS = [2, 4, 9] as const;
 
 /**
- * Glättung beim Zeichnen: Abstand der Stützpunkte und wie viele Nachbarn je Seite gemittelt
- * werden – zusammen etwa 15 Bildschirmpixel, genug gegen Mauszittern, ohne Ecken zu verwischen.
+ * Smoothing while drawing: spacing of the points and how many neighbours per side are averaged –
+ * together about 15 screen pixels, enough against mouse jitter without blurring corners.
  */
 const SMOOTH_SPACING = 2.5;
 const SMOOTH_RADIUS = 6;
 
-/** Stand für Rückgängig/Wiederholen. */
 interface Snapshot {
   strokes: MapStroke[];
   pins: MapPin[];
 }
 
-/** Sichtbarer Ausschnitt der Karte in Karteneinheiten. */
+/** In map units. */
 interface View {
   x: number;
   y: number;
@@ -69,7 +68,7 @@ interface View {
   h: number;
 }
 
-/** Mit der Lupe aufgezogener Bereich: Start- und aktueller Punkt in Karteneinheiten. */
+/** Start and current point in map units. */
 interface ZoomDrag {
   pointerId: number;
   startX: number;
@@ -87,7 +86,6 @@ interface PinDrag {
   before: Snapshot;
 }
 
-/** Eine grob gezeichnete Karte mit eingezeichneten Orten: Route `write/places/maps/:id`. */
 @Component({
   selector: 'wm-map-page',
   imports: [RouterLink],
@@ -101,7 +99,7 @@ interface PinDrag {
 })
 export class MapPage {
   readonly id = input.required<string>();
-  /** `?place=<id>` (von der Seite eines Orts): ihn auswählen bzw. zum Einzeichnen vormerken. */
+  /** `?place=<id>` (from a place's page): select it, or queue it for placing. */
   readonly place = input<string>();
 
   protected readonly t = inject(I18n).t;
@@ -126,11 +124,11 @@ export class MapPage {
   protected readonly backgroundOpacity = signal(1);
   protected readonly uploading = signal(false);
 
-  /** Startet mit „Verschieben“ – sonst malt man beim Umsehen leicht aus Versehen. */
+  /** Starts with "Move" – otherwise you easily draw by accident while looking around. */
   protected readonly tool = signal<Tool>('hand');
   protected readonly color = signal<string>(MAP_COLORS[0].value);
   protected readonly widthIndex = signal(1);
-  /** Zeichnet das Werkzeug (Stift, Fläche)? Dann gelten Farbe und Strichstärke. */
+  /** Colour and stroke width only apply to drawing tools. */
   protected readonly drawing = computed(() => this.tool() === 'pen' || this.tool() === 'area');
 
   private readonly undoStack = signal<Snapshot[]>([]);
@@ -146,26 +144,23 @@ export class MapPage {
   protected readonly zoom = computed(() => (this.map()?.width ?? this.view().w) / this.view().w);
   protected readonly zoomPercent = computed(() => this.t().number(Math.round(this.zoom() * 100)));
   protected readonly maxZoom = MAX_ZOOM;
-  /** Breite der Zeichenfläche auf dem Bildschirm (px). */
   private readonly canvasWidth = signal(0);
   /**
-   * Karteneinheiten je Bildschirmpixel – Orte und Schrift bleiben beim Zoomen gleich groß,
-   * neue Striche gleich dick auf dem Bildschirm (vergrößert also feiner).
+   * Map units per screen pixel – places and text stay the same size when zooming, new strokes the
+   * same thickness on screen (so finer when zoomed in).
    */
   protected readonly unit = computed(() => {
     const width = this.canvasWidth();
     return width > 0 ? this.view().w / width : 1;
   });
-  /** Leertaste gedrückt: Ziehen verschiebt den Ausschnitt (wie das Hand-Werkzeug). */
+  /** Space held: dragging moves the view (like the hand tool). */
   protected readonly spaceHeld = signal(false);
   protected readonly panning = signal(false);
   private pan: { pointerId: number; lastX: number; lastY: number } | null = null;
-  /** Der Strich, der gerade gezogen wird. */
   protected readonly draft = signal<number[] | null>(null);
-  /** Position des Radierers (für den Kreis unter dem Mauszeiger). */
+  /** For the circle under the mouse pointer. */
   protected readonly eraserAt = signal<{ x: number; y: number } | null>(null);
   private erasing: { pointerId: number; before: Snapshot } | null = null;
-  /** Lupe: der Bereich, der gerade aufgezogen wird. */
   private readonly zoomDrag = signal<ZoomDrag | null>(null);
   protected readonly zoomArea = computed(() => {
     const drag = this.zoomDrag();
@@ -180,9 +175,9 @@ export class MapPage {
   });
   private pinDrag: PinDrag | null = null;
 
-  /** Ausgewählter Ort auf der Karte (zeigt „Öffnen“ und „Von der Karte nehmen“). */
+  /** Shows "Open" and "Remove from map". */
   protected readonly selectedPin = signal<string | null>(null);
-  /** Ort, der mit dem nächsten Klick auf die Karte eingezeichnet wird. */
+  /** Placed with the next click on the map. */
   protected readonly placing = signal<string | null>(null);
   protected readonly dropActive = signal(false);
 
@@ -216,7 +211,7 @@ export class MapPage {
   protected readonly selected = computed(() =>
     this.placedPins().find((entry) => entry.pin.noteId === this.selectedPin()),
   );
-  /** Feld über dem ausgewählten Ort: Lage in Prozent des Ausschnitts; außerhalb `null`. */
+  /** Position in percent of the view; `null` outside. */
   protected readonly popover = computed(() => {
     const entry = this.selected();
     const view = this.view();
@@ -262,7 +257,7 @@ export class MapPage {
   }
 
   private async load(id: string): Promise<void> {
-    void this.flush(); // Änderungen der vorherigen Karte
+    void this.flush(); // changes of the previous map
     const loadId = ++this.loadCounter;
     this.error.set(null);
     this.selectedPin.set(null);
@@ -285,7 +280,7 @@ export class MapPage {
         if (map.pins.some((pin) => pin.noteId === place)) this.selectedPin.set(place);
         else this.placing.set(place);
       }
-      // Frisch angelegt? Dann gleich den Namen zum Überschreiben markieren.
+      // Freshly created? Then select the name right away for overwriting.
       if (map.name === this.t().maps.newName && !map.strokes.length) {
         afterNextRender(
           () => {
@@ -308,14 +303,12 @@ export class MapPage {
     if (width > 0) this.canvasWidth.set(width);
   }
 
-  // Zoomen und Verschieben ----------------------------------------------------------
-
   protected fitView(): void {
     const map = this.map();
     if (map) this.view.set({ x: 0, y: 0, w: map.width, h: map.height });
   }
 
-  /** Vergrößert um `factor` (< 1 verkleinert); der Punkt `center` bleibt an seiner Stelle. */
+  /** `factor` < 1 zooms out; the point `center` stays in place. */
   protected zoomBy(factor: number, center?: { x: number; y: number }): void {
     const map = this.map();
     if (!map) return;
@@ -333,11 +326,11 @@ export class MapPage {
     });
   }
 
-  /** Zeigt den Bereich so groß wie möglich (Seitenverhältnis der Karte bleibt). */
+  /** As large as possible (the map's aspect ratio stays). */
   private zoomTo(area: View): void {
     const map = this.map();
     if (!map || area.w <= 0 || area.h <= 0) return;
-    // Der ganze Bereich muss hineinpassen – die knappere Richtung bestimmt den Zoom
+    // The whole area must fit – the tighter direction decides the zoom
     const fit = Math.min(map.width / area.w, map.height / area.h);
     const zoom = Math.min(MAX_ZOOM, Math.max(1, fit));
     const w = map.width / zoom;
@@ -345,14 +338,14 @@ export class MapPage {
     this.setView({ x: area.x + area.w / 2 - w / 2, y: area.y + area.h / 2 - h / 2, w, h });
   }
 
-  /** Verschiebt den Ausschnitt um Bildschirmpixel (positiv = nach rechts/unten). */
+  /** In screen pixels (positive = right/down). */
   private scrollView(dx: number, dy: number): void {
     const view = this.view();
     const unit = this.unit();
     this.setView({ ...view, x: view.x + dx * unit, y: view.y + dy * unit });
   }
 
-  /** Der Ausschnitt bleibt innerhalb der Karte. */
+  /** The view stays within the map. */
   private setView(view: View): void {
     const map = this.map();
     if (!map) return;
@@ -363,7 +356,10 @@ export class MapPage {
     });
   }
 
-  /** Strg + Mausrad bzw. Zwei-Finger-Zoom am Trackpad zoomt; sonst verschiebt das Rad. */
+  /**
+   * Ctrl + mouse wheel or a two-finger pinch on the trackpad zooms; otherwise the wheel moves the
+   * view.
+   */
   protected onWheel(event: WheelEvent): void {
     const lines = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : 1;
     if (event.ctrlKey || event.metaKey) {
@@ -377,8 +373,6 @@ export class MapPage {
     }
   }
 
-  // Name ----------------------------------------------------------------------
-
   protected onNameInput(value: string): void {
     this.nameDraft.set(value);
     if (value.trim()) this.queue({ name: value });
@@ -387,8 +381,6 @@ export class MapPage {
   protected onNameBlur(): void {
     if (!this.nameDraft().trim()) this.nameDraft.set(this.map()?.name ?? '');
   }
-
-  // Werkzeuge ---------------------------------------------------------------------
 
   protected selectTool(tool: Tool): void {
     this.tool.set(tool);
@@ -434,7 +426,6 @@ export class MapPage {
     this.queue({ strokes: snapshot.strokes, pins: snapshot.pins });
   }
 
-  /** Nach einer Änderung: den Stand davor merken und speichern. */
   private commit(before: Snapshot): void {
     this.undoStack.update((stack) => [...stack.slice(-(MAX_HISTORY - 1)), before]);
     this.redoStack.set([]);
@@ -445,7 +436,7 @@ export class MapPage {
     const target = event.target as Element | null;
     if (target?.closest('input, textarea, [contenteditable], dialog')) return;
     if (event.key === ' ' && !target?.closest('button, a, select')) {
-      event.preventDefault(); // nicht scrollen
+      event.preventDefault(); // do not scroll
       this.spaceHeld.set(true);
       return;
     }
@@ -477,9 +468,6 @@ export class MapPage {
     if (event.key === ' ') this.spaceHeld.set(false);
   }
 
-  // Zeichnen und Radieren ----------------------------------------------------------
-
-  /** Bildschirmposition → Karteneinheiten. */
   private toMap(event: { clientX: number; clientY: number }): { x: number; y: number } | null {
     const canvas = this.canvas()?.nativeElement;
     const map = this.map();
@@ -492,7 +480,7 @@ export class MapPage {
     };
   }
 
-  /** Verschieben: Hand-Werkzeug, gedrückte Leertaste oder mittlere Maustaste. */
+  /** Moving: hand tool, held space bar or middle mouse button. */
   private pansWith(event: PointerEvent): boolean {
     return event.button === 1 || this.tool() === 'hand' || this.spaceHeld();
   }
@@ -563,7 +551,7 @@ export class MapPage {
     }
     const draft = this.draft();
     if (!draft) return;
-    // Zwischenpunkte, die der Browser zusammengefasst hat, machen schnelle Striche runder
+    // Intermediate points the browser coalesced make fast strokes rounder
     const events = event.getCoalescedEvents?.() ?? [];
     const points = [...draft];
     const minDistance = 1.5 * this.unit();
@@ -592,7 +580,7 @@ export class MapPage {
       const area = this.zoomArea()!;
       this.zoomDrag.set(null);
       if (event.type === 'pointercancel') return;
-      // Nur geklickt: eine Stufe näher heran (mit Alt weiter weg), der Punkt bleibt stehen
+      // Just clicked: one step closer (further away with Alt), the point stays in place
       if (Math.hypot(event.clientX - zoomDrag.startX, event.clientY - zoomDrag.startY) < 4) {
         this.zoomBy(event.altKey ? 1 / ZOOM_STEP : ZOOM_STEP, zoomDrag.start);
       } else {
@@ -612,7 +600,7 @@ export class MapPage {
     const tool = this.tool();
     if (tool !== 'pen' && tool !== 'area') return;
     const points = simplify(this.smoothed(draft, tool === 'area'), 0.4 * this.unit());
-    if (tool === 'area' && points.length < 6) return; // Fläche braucht mindestens drei Punkte
+    if (tool === 'area' && points.length < 6) return; // an area needs at least three points
     const before = this.snapshot();
     const width = WIDTHS[this.widthIndex()]! * this.unit();
     this.strokes.update((strokes) => [
@@ -622,7 +610,7 @@ export class MapPage {
     this.commit(before);
   }
 
-  /** Geglättet in Bildschirmpixeln gemessen – beim Zoomen also entsprechend feiner. */
+  /** Measured in screen pixels – so correspondingly finer when zoomed. */
   private smoothed(points: readonly number[], closed: boolean): number[] {
     return smooth(points, SMOOTH_SPACING * this.unit(), SMOOTH_RADIUS, closed);
   }
@@ -638,8 +626,6 @@ export class MapPage {
     if (remaining.length !== strokes.length) this.strokes.set(remaining);
   }
 
-  // Orte auf der Karte ---------------------------------------------------------------
-
   protected onPinPointerDown(event: PointerEvent, noteId: string): void {
     const tool = this.tool();
     if (
@@ -649,7 +635,7 @@ export class MapPage {
       tool === 'zoom' ||
       this.spaceHeld()
     ) {
-      return; // dann verschiebt bzw. vergrößert das Ziehen den Ausschnitt
+      return; // then dragging moves or zooms the view
     }
     event.stopPropagation();
     event.preventDefault();
@@ -685,7 +671,7 @@ export class MapPage {
     if (drag.moved) {
       this.commit(drag.before);
     } else {
-      // Nur angeklickt: auswählen bzw. wieder abwählen
+      // Just clicked: select, or deselect again
       this.selectedPin.update((current) => (current === drag.noteId ? null : drag.noteId));
     }
   }
@@ -704,7 +690,7 @@ export class MapPage {
     this.commit(before);
   }
 
-  /** In der Liste rechts: eingezeichnete Orte auswählen, die anderen zum Einzeichnen vormerken. */
+  /** In the list on the right: select placed places, queue the others for placing. */
   protected pickPlace(note: NoteSummary): void {
     if (this.pins().some((pin) => pin.noteId === note.id)) {
       this.placing.set(null);
@@ -738,8 +724,6 @@ export class MapPage {
     this.setPin(noteId, point.x, point.y);
   }
 
-  // Hintergrundbild ------------------------------------------------------------------
-
   protected async onBackgroundSelected(input: HTMLInputElement): Promise<void> {
     const file = input.files?.[0];
     input.value = '';
@@ -759,7 +743,7 @@ export class MapPage {
         image.width,
         image.height,
       );
-      // Die Zeichenfläche übernimmt das Seitenverhältnis des Bilds
+      // The canvas takes over the image's aspect ratio
       const height = Math.round((MAP_WIDTH * image.height) / image.width);
       await this.saveNow(map.id, {
         backgroundImageId: uploaded.id,
@@ -789,8 +773,6 @@ export class MapPage {
     this.queue({ backgroundOpacity: opacity });
   }
 
-  // Speichern ------------------------------------------------------------------------
-
   private queue(patch: UpdateMapRequest): void {
     const id = this.map()?.id;
     if (!id) return;
@@ -800,7 +782,7 @@ export class MapPage {
     this.saveTimer = setTimeout(() => void this.flush(), SAVE_DELAY_MS);
   }
 
-  /** Bild und Größe sofort – zusammen mit allem, was noch auf das Speichern wartet. */
+  /** Image and size right away – together with everything still waiting to be saved. */
   private async saveNow(id: string, patch: UpdateMapRequest): Promise<void> {
     const previous = this.pending?.id === id ? this.pending.request : {};
     this.pending = null;
@@ -808,9 +790,9 @@ export class MapPage {
     const saved = await this.api.updateMap(id, { ...previous, ...patch });
     this.maps.updated(saved);
     if (this.map()?.id === id) {
-      // Zeichnung und Orte bleiben wie auf dem Bildschirm – sie können sich inzwischen geändert haben
+      // Drawing and places stay as on screen – they may have changed meanwhile
       this.map.set(saved);
-      this.fitView(); // die Größe kann sich mit dem Bild geändert haben
+      this.fitView(); // the size may have changed with the image
       afterNextRender(() => this.measure(), { injector: this.injector });
     }
   }

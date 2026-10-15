@@ -15,11 +15,11 @@ export { AUTH_HEADER, type ServerOptions } from './config.js';
 export interface RunningServer {
   port: number;
   url: string;
-  /** Fährt Nest herunter und schließt dabei das geöffnete Projekt sauber. */
+  /** Also closes the open project cleanly. */
   close(): Promise<void>;
 }
 
-/** Startet das REST-Backend. Wird von der Electron-Shell und von `main.ts` aufgerufen. */
+/** Called by the Electron shell and by `main.ts`. */
 export async function startServer(options: ServerOptions): Promise<RunningServer> {
   const host = options.host ?? '127.0.0.1';
 
@@ -32,11 +32,11 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
     },
   );
   app.disable('x-powered-by');
-  // Szenen können groß werden; Express' Standardlimit liegt bei 100 KB.
+  // Scenes can get large; Express's default limit is 100 KB.
   app.useBodyParser('json', { limit: '50mb' });
   app.use(localAccessMiddleware(options.token));
   app.setGlobalPrefix('api');
-  // Fehlermeldungen in der Sprache der Oberfläche
+  // error messages in the UI language
   app.useGlobalFilters(new LocalizedExceptionFilter(app.get(HttpAdapterHost).httpAdapter));
 
   if (options.staticDir) {
@@ -53,7 +53,7 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
   };
 }
 
-/** Liefert das gebaute Angular-Frontend aus, inklusive Fallback auf index.html fürs Routing. */
+/** Falls back to index.html for client-side routing. */
 function serveFrontend(app: NestExpressApplication, staticDir: string): void {
   const indexHtml = path.join(staticDir, 'index.html');
   if (!existsSync(indexHtml)) {
@@ -64,8 +64,8 @@ function serveFrontend(app: NestExpressApplication, staticDir: string): void {
     const isAppRoute =
       req.method === 'GET' && !req.path.startsWith('/api/') && !path.extname(req.path);
     if (isAppRoute) {
-      // Mit `root` prüft Express nur den Teil danach auf Punkt-Ordner – sonst gäbe es
-      // z. B. im AppImage (/tmp/.mount_…) immer 404.
+      // With `root`, Express checks only the part after it for dot folders – otherwise e.g. the
+      // AppImage (/tmp/.mount_…) would always get a 404.
       res.sendFile('index.html', { root: staticDir });
     } else {
       next();

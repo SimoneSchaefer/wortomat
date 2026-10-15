@@ -8,7 +8,6 @@
   align-items: flex-start;
 }
 
-// Rahmen, leeres Feld und Bildleiste wie in der Bildergalerie der Notizen
 .cover-frame {
   position: relative;
   flex: none;
@@ -29,7 +28,7 @@
     opacity: 1;
   }
 
-  // Touchscreens kennen kein Hover – Bedienelemente immer zeigen.
+  // Touchscreens have no hover – always show the controls.
   @media (hover: none) {
     .toolbar {
       opacity: 1;

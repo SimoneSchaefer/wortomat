@@ -2,18 +2,17 @@ import { Extension, InputRule } from '@tiptap/core';
 import type { QuoteStyle } from '@wortomat/shared';
 import { type QuoteReplacement, smartQuote, swallowsSpace } from '../../core/quotes';
 
-/** So viel Text vor dem Cursor reicht, um offene Anführungszeichen zu erkennen. */
+/** This much text before the cursor is enough to detect open quotation marks. */
 const CONTEXT_CHARS = 2000;
 
 export interface SmartQuotesOptions {
-  /** Wird bei jedem Tastendruck gelesen – eine geänderte Einstellung gilt sofort. */
+  /** Read on every keystroke – a changed setting applies right away. */
   style: () => QuoteStyle;
 }
 
 /**
- * Ersetzt beim Tippen " und ' durch typografische Anführungszeichen bzw. Apostrophe.
- * Die Rücktaste direkt danach stellt das gerade Zeichen wieder her (Tiptap-Standard für
- * Input-Regeln). In Code wird nichts ersetzt, eingefügter Text bleibt, wie er ist.
+ * Backspace right after restores the straight character (Tiptap's default for input rules). Nothing
+ * is replaced in code, and pasted text stays as it is.
  */
 export const SmartQuotes = Extension.create<SmartQuotesOptions>({
   name: 'smartQuotes',
@@ -34,7 +33,7 @@ export const SmartQuotes = Extension.create<SmartQuotesOptions>({
   },
 });
 
-/** Regel für ein einzelnes getipptes Zeichen; `replacement` bekommt den Absatztext davor. */
+/** `replacement` gets the paragraph text before it. */
 function replaceTyped(
   find: RegExp,
   replacement: (before: string) => QuoteReplacement | null,
@@ -42,10 +41,10 @@ function replaceTyped(
   return new InputRule({
     find,
     handler: ({ state, range }) => {
-      // Das getippte Zeichen steht schon im Dokument, `range` umfasst genau dieses.
+      // The typed character is already in the document; `range` spans exactly that one.
       const $from = state.doc.resolve(range.from);
       const start = Math.max(0, $from.parentOffset - CONTEXT_CHARS);
-      // Zeilenumbrüche & Co. zählen als Leerraum
+      // line breaks etc. count as whitespace
       const before = $from.parent.textBetween(start, $from.parentOffset, undefined, ' ');
       const result = replacement(before);
       if (!result) return null;

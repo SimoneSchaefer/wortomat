@@ -32,24 +32,24 @@ export class StartPage {
 
   protected readonly appInfo = resource({ loader: () => this.api.appInfo() });
   protected readonly projects = resource({ loader: () => this.api.listProjects() });
-  /** Das Buch in der Mitte des Karussells; nach dem Neuladen der Liste bleibt die Stelle. */
+  /** Keeps its place after the list reloads. */
   protected readonly selected = linkedSignal<ProjectListEntry[] | undefined, number>({
     source: () => this.projects.value(),
     computation: (list, previous) =>
       Math.min(previous?.value ?? 0, Math.max(0, (list?.length ?? 0) - 1)),
   });
   protected readonly current = computed(() => this.projects.value()?.[this.selected()] ?? null);
-  /** Formular für ein neues Buch; ohne Bücher in der Liste gleich aufgeklappt. */
+  /** Expanded right away when the list has no books. */
   protected readonly creating = linkedSignal(() => this.projects.value()?.length === 0);
   protected readonly title = signal('');
   protected readonly busy = signal(false);
   private readonly error = inject(StatusMessages).channel();
 
-  /** Im Dialog gewählter Speicherort für neue Bücher; `null` = Standardordner. */
+  /** `null` = default folder. */
   private readonly newDir = signal<string | null>(null);
   /**
-   * Nur im Browser-Modus (es gibt keinen nativen Dialog): Ordner + Titel als Dateiname.
-   * Lässt sich von Hand ändern oder per „Durchsuchen …“ in einen anderen Ordner legen.
+   * Browser mode only (there is no native dialog): folder + title as file name. Can be edited by
+   * hand or moved to another folder via "Browse …".
    */
   protected readonly newPath = linkedSignal(() => {
     const dir = this.newDir() ?? this.appInfo.value()?.defaultProjectDir ?? '';
@@ -81,7 +81,7 @@ export class StartPage {
     }
   }
 
-  /** Adresse des Titelbilds; die ID macht sie bei jedem neuen Bild eindeutig (Cache). */
+  /** The ID makes the URL unique for every new image (cache). */
   protected coverUrl(entry: ProjectListEntry): string | null {
     if (!entry.coverImageId) return null;
     const filePath = encodeURIComponent(entry.filePath);
@@ -106,7 +106,7 @@ export class StartPage {
     this.select(target);
   }
 
-  /** Mausrad und Touchpad blättern – gesammelt, damit ein Wisch nicht durch alle Bücher rast. */
+  /** Mouse wheel and touchpad page – accumulated so one swipe does not race through all books. */
   private wheelDelta = 0;
   private wheelReset: ReturnType<typeof setTimeout> | undefined;
   protected onCarouselWheel(event: WheelEvent): void {
@@ -121,7 +121,6 @@ export class StartPage {
     }
   }
 
-  /** Wischen auf Touchscreens. */
   private swipeStart: number | null = null;
   protected onPointerDown(event: PointerEvent): void {
     this.swipeStart = event.pointerType === 'mouse' ? null : event.clientX;
@@ -133,7 +132,7 @@ export class StartPage {
     if (Math.abs(distance) > 40) this.select(this.selected() - Math.sign(distance));
   }
 
-  /** Klick auf ein Cover: das mittlere öffnet das Buch, die anderen holen es in die Mitte. */
+  /** The middle one opens the book, the others are brought to the middle. */
   protected async clickCover(entry: ProjectListEntry, index: number): Promise<void> {
     if (index === this.selected()) {
       await this.openFromList(entry);
@@ -142,7 +141,7 @@ export class StartPage {
     }
   }
 
-  /** Speicherort wählen – startet im Ordner des aktuellen Pfads. */
+  /** Starts in the folder of the current path. */
   protected browseLocation(picker: FilePickerDialog): void {
     picker.open(this.newPath().trim() || undefined);
   }
@@ -151,7 +150,7 @@ export class StartPage {
     this.newDir.set(dir.replace(/[\\/]+$/, '') || dir);
   }
 
-  /** Startet beim eingetippten Pfad (bzw. dessen Ordner), sonst im Standardordner. */
+  /** Starts at the typed path (or its folder), otherwise in the default folder. */
   protected browse(picker: FilePickerDialog): void {
     picker.open(this.openPath().trim() || undefined);
   }
@@ -180,7 +179,7 @@ export class StartPage {
       await this.router.navigate(['/write']);
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
-      // z. B. Datei zwischenzeitlich gelöscht → Liste neu einlesen
+      // e.g. the file was deleted meanwhile → read the list again
       this.projects.reload();
     } finally {
       this.busy.set(false);

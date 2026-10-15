@@ -11,7 +11,7 @@ const UNITS: ReadonlyArray<[Intl.RelativeTimeFormatUnit, number]> = [
 
 const JUST_NOW: Record<Language, string> = { de: 'gerade eben', en: 'just now' };
 
-/** „gerade eben“, „vor 5 Minuten“, „gestern“, „vor 3 Wochen“ … (bzw. „5 minutes ago“ …) */
+/** "just now", "5 minutes ago", "yesterday", "3 weeks ago" … */
 export function relativeTime(iso: string, language: Language, now = Date.now()): string {
   const seconds = (new Date(iso).getTime() - now) / 1000;
   const format = new Intl.RelativeTimeFormat(language, { numeric: 'auto' });

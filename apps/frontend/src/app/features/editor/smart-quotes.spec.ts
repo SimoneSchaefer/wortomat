@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import type { QuoteStyle } from '@wortomat/shared';
 import { SmartQuotes } from './smart-quotes';
 
-/** Echter Tiptap-Editor (jsdom); der Stil lässt sich wie die Einstellung jederzeit ändern. */
+/** Real Tiptap editor (jsdom); like the setting, the style can change at any time. */
 function createEditor(content = '<p></p>') {
   let style: QuoteStyle = 'de';
   const editor = new Editor({
@@ -14,7 +14,7 @@ function createEditor(content = '<p></p>') {
   return { editor, setStyle: (next: QuoteStyle) => (style = next) };
 }
 
-/** Tippt wie über die Tastatur: erst die Input-Regeln, sonst normal einfügen. */
+/** Types like the keyboard: input rules first, otherwise a plain insert. */
 function type(editor: Editor, text: string): void {
   for (const char of text) {
     const { view } = editor;

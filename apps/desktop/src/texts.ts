@@ -1,6 +1,6 @@
 import type { ExportFormat, Language } from '@wortomat/shared';
 
-/** Texte für native Menüs und Dialoge – in der Sprache, die das Frontend meldet. */
+/** In the language the frontend reports. */
 export const TEXTS = {
   de: {
     startFailed: 'Wortomat konnte nicht gestartet werden',
@@ -52,7 +52,7 @@ export const TEXTS = {
   },
 } satisfies Record<Language, unknown>;
 
-/** Wie im Frontend: Deutsch, wenn das System Deutsch spricht, sonst Englisch. */
+/** As in the frontend: German if the system speaks German, otherwise English. */
 export function systemLanguage(languages: readonly string[]): Language {
   const preferred = languages.find((tag) => /^(de|en)\b/i.test(tag));
   return preferred?.toLowerCase().startsWith('de') ? 'de' : 'en';

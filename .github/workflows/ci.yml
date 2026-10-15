@@ -1,4 +1,3 @@
-# Baut und testet bei jedem Push und jedem Pull Request.
 name: CI
 
 on:

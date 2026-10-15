@@ -15,7 +15,6 @@ export class ProjectController {
     private readonly images: ImagesService,
   ) {}
 
-  /** Liefert das geöffnete Projekt oder `null`. */
   @Get()
   current(): ProjectInfo | null {
     return this.projects.info();
@@ -36,7 +35,7 @@ export class ProjectController {
   update(@Body() body: UpdateProjectRequest): ProjectInfo {
     const previousCover = this.projects.info()?.coverImageId ?? null;
     const updated = this.projects.update(body);
-    // Ein ersetztes Titelbild aus der Datei entfernen, wenn es sonst nirgends vorkommt
+    // Remove a replaced cover from the file if it is used nowhere else
     if (previousCover && previousCover !== updated.coverImageId) {
       this.images.deleteIfUnused(previousCover);
     }

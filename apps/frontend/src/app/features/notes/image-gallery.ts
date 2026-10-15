@@ -21,15 +21,13 @@ import { ConfirmDialog } from '../../core/confirm-dialog';
 import { coverCrop, cropStyle, GALLERY_ASPECT } from '../../core/image-crop';
 import { ImageCropDialog } from './image-crop-dialog';
 
-/** Ab dieser Zugstrecke (px) wechselt ein Maus-Drag zum nächsten Bild. */
+/** From this drag distance (px) a mouse drag switches to the next image. */
 const DRAG_THRESHOLD = 40;
 
 /**
- * Bildergalerie einer Notiz, z. B. Profilbilder eines Charakters.
- *
- * Wischen: Die Bilder liegen in einem horizontal scrollenden Streifen mit CSS-Scroll-Snapping.
- * Touch und Trackpad wischen damit nativ (inkl. Schwung); für die Maus gibt es Ziehen,
- * außerdem Pfeiltasten, Pfeil-Buttons und Punkte.
+ * Swiping: the images lie in a horizontally scrolling strip with CSS scroll snapping. Touch and
+ * trackpad swipe natively with it (including momentum); for the mouse there is dragging, plus arrow
+ * keys, arrow buttons and dots.
  */
 @Component({
   selector: 'wm-image-gallery',
@@ -40,9 +38,9 @@ const DRAG_THRESHOLD = 40;
 export class ImageGallery {
   readonly noteId = input.required<string>();
   readonly label = input.required<string>();
-  /** Symbol, solange die Galerie leer ist. */
+  /** While the gallery is empty. */
   readonly placeholderIcon = input<'person' | 'picture'>('picture');
-  /** Neue Bilderliste nach jeder Änderung (das erste ist das Profilbild). */
+  /** After every change (the first image is the profile picture). */
   readonly changed = output<GalleryImage[]>();
 
   protected readonly t = inject(I18n).t;
@@ -51,7 +49,7 @@ export class ImageGallery {
   private readonly track = viewChild<ElementRef<HTMLElement>>('track');
 
   protected readonly images = signal<GalleryImage[]>([]);
-  /** Bild, dessen Ausschnitt gerade gewählt wird (Dialog offen). */
+  /** Image whose crop is being chosen (dialog open). */
   protected readonly cropping = signal<GalleryImage | null>(null);
   protected readonly aspect = GALLERY_ASPECT;
   protected readonly index = signal(0);
@@ -88,12 +86,10 @@ export class ImageGallery {
     }
   }
 
-  // Navigation ----------------------------------------------------------------
-
   /**
-   * @param afterRender nach Änderungen an der Bilderliste: erst scrollen, wenn die neue
-   *   Reihenfolge im DOM ist. Sonst rastet der Browser am alten Bild ein und folgt ihm
-   *   beim Umsortieren an seine neue Position (CSS-Scroll-Snapping „re-snap“).
+   * @param afterRender after changes to the image list: only scroll once the new order is in the
+   * DOM. Otherwise the browser snaps to the old image and follows it to its new position when
+   * reordering (CSS scroll snapping "re-snap").
    */
   protected goTo(index: number, smooth = true, afterRender = false): void {
     const target = Math.max(0, Math.min(index, this.images().length - 1));
@@ -112,7 +108,7 @@ export class ImageGallery {
     }
   }
 
-  /** Scrollt zum Bild; liefert ein Promise, das nach Ende der Animation erfüllt ist. */
+  /** Resolves once the animation has ended. */
   private scrollTrack(track: HTMLElement, index: number, smooth: boolean): Promise<void> {
     const animate = smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches;
     const left = index * track.clientWidth;
@@ -126,7 +122,7 @@ export class ImageGallery {
         track.removeEventListener('scrollend', done);
         resolve();
       };
-      // Sicherheitsnetz, falls `scrollend` ausbleibt (z. B. unterbrochene Animation).
+      // Safety net in case `scrollend` never comes (e.g. an interrupted animation).
       const fallback = setTimeout(done, 800);
       track.addEventListener('scrollend', done);
       track.scrollTo({ left, behavior: 'smooth' });
@@ -147,7 +143,7 @@ export class ImageGallery {
     event.preventDefault();
   }
 
-  // Mit der Maus ziehen (Touch/Trackpad scrollen nativ) -------------------------
+  // Mouse dragging (touch/trackpad scroll natively)
 
   protected onPointerDown(event: PointerEvent): void {
     const track = this.track()?.nativeElement;
@@ -158,7 +154,7 @@ export class ImageGallery {
       startScroll: track.scrollLeft,
     };
     track.setPointerCapture(event.pointerId);
-    this.dragging.set(true); // schaltet Scroll-Snapping ab, solange gezogen wird
+    this.dragging.set(true); // turns scroll snapping off while dragging
   }
 
   protected onPointerMove(event: PointerEvent): void {
@@ -175,12 +171,10 @@ export class ImageGallery {
     const step = distance <= -DRAG_THRESHOLD ? 1 : distance >= DRAG_THRESHOLD ? -1 : 0;
     const target = Math.max(0, Math.min(this.index() + step, this.images().length - 1));
     this.index.set(target);
-    // Snapping erst nach der Animation wieder einschalten – sonst rastet der Streifen
-    // sofort am nächstgelegenen Bild ein und springt kurz zurück.
+    // Only turn snapping back on after the animation – otherwise the strip snaps to the nearest
+    // image right away and jumps back briefly.
     void this.scrollTrack(track, target, true).then(() => this.dragging.set(false));
   }
-
-  // Bilder verwalten ------------------------------------------------------------
 
   protected onPicked(input: HTMLInputElement): void {
     const files = Array.from(input.files ?? []).filter(isSupportedImage);
@@ -221,7 +215,7 @@ export class ImageGallery {
         if (noteId !== this.noteId()) return;
         this.update(images);
       }
-      this.goTo(this.images().length - 1, true, true); // zum zuletzt hinzugefügten Bild
+      this.goTo(this.images().length - 1, true, true); // to the image added last
     });
   }
 
@@ -240,7 +234,7 @@ export class ImageGallery {
     });
   }
 
-  /** Aktuelles Bild an die erste Stelle = Profilbild. */
+  /** The first image is the profile picture. */
   protected async makeCover(): Promise<void> {
     const current = this.images()[this.index()];
     if (!current) return;
@@ -256,11 +250,9 @@ export class ImageGallery {
     });
   }
 
-  // Zuschneiden ------------------------------------------------------------------
-
   /**
-   * Lage des Bilds, wenn ein Ausschnitt gewählt ist; sonst `null` (ganzes Bild, eingepasst).
-   * Ohne bekannte Bildmaße lässt sich der Ausschnitt nicht umrechnen – dann ganzes Bild.
+   * `null` without a crop (whole image, fitted). Without known image dimensions the crop cannot be
+   * converted – whole image then.
    */
   protected slideStyle(image: GalleryImage): Record<string, string> | null {
     if (!image.crop || !image.width || !image.height) return null;

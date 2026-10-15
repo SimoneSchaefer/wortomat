@@ -26,15 +26,14 @@ import { ProofreadingService } from './proofreading.service.js';
 export class ProofreadingController {
   constructor(private readonly proofreading: ProofreadingService) {}
 
-  /** Das Manuskript als reiner Text zum Korrekturlesen unterwegs. */
   @Get('proofreading/package')
   package(): ProofPackage {
     return this.proofreading.package();
   }
 
   /**
-   * Die Korrekturfassung als HTML-Datei fürs Handy. Mit `filePath` (Desktop, aus dem
-   * Speichern-Dialog) wird sie dort geschrieben, ohne Pfad (Browser-Modus) kommt sie als Download.
+   * With `filePath` (desktop, from the save dialog) it is written there; without a path (browser
+   * mode) it comes back as a download.
    */
   @Post('proofreading/export')
   @HttpCode(200)
@@ -67,27 +66,24 @@ export class ProofreadingController {
     return new StreamableFile(data, { type: 'text/html; charset=utf-8', length: data.length });
   }
 
-  /** Notizdateien zu diesem Buch im Download-Ordner – vom Handy geschickt. */
   @Get('proofreading/inbox')
   inbox(): ProofInbox {
     return this.proofreading.inbox();
   }
 
-  /** Alle neuen Notizen aus dem Download-Ordner übernehmen. */
   @Post('proofreading/inbox/import')
   @HttpCode(200)
   importInbox(): ProofImportResult {
     return this.proofreading.importInbox();
   }
 
-  /** Erledigte Notizdateien aus dem Download-Ordner löschen; liefert ihre Namen. */
+  /** Returns the names of the deleted files. */
   @Post('proofreading/inbox/clean')
   @HttpCode(200)
   cleanInbox(): { deleted: string[] } {
     return { deleted: this.proofreading.cleanInbox() };
   }
 
-  /** Notizen aus der Korrekturfassung als Fixme-Markierungen ins Buch übernehmen. */
   @Post('proofreading/import')
   @HttpCode(200)
   import(@Body() body: ProofNotesFile): ProofImportResult {

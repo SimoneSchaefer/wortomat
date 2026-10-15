@@ -55,13 +55,13 @@ legend {
   gap: 0.5rem;
 }
 
-// Wie im Export-Dialog: ganze Karte klickbar, Radio-Button unsichtbar
+// As in the export dialog: the whole card is clickable, the radio button invisible
 .choice {
   position: relative;
   display: grid;
   gap: 0.25rem;
   padding: 0.6rem 0.75rem;
-  // wie alle Buttons, damit die Kacheln als anklickbar erkennbar sind
+  // like all buttons, so the tiles are recognisable as clickable
   border: 1px solid var(--button-border);
   border-radius: 0.5rem;
   background: var(--button-bg);
@@ -97,7 +97,7 @@ legend {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-// Kleine Vorschau je Farbschema – feste Farben, unabhängig vom gerade aktiven Schema
+// Small preview per colour scheme – fixed colours, independent of the active scheme
 .theme-preview {
   display: grid;
   place-items: center;

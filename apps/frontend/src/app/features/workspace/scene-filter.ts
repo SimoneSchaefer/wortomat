@@ -6,17 +6,17 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
 
 /**
- * Wonach gefiltert wird. Innerhalb einer Gruppe reicht eins („Anna oder Ben“),
- * zwischen den Gruppen muss alles passen („Anna und Status Entwurf“).
+ * Within a group one match is enough ("Anna or Ben"), across groups everything must match ("Anna
+ * and status draft").
  */
 export interface SceneFilterCriteria {
   statuses: readonly SceneStatus[];
-  /** Szenen mit offenen Todos/Ideen/Fixmes dieser Arten. */
+  /** Scenes with open todos/ideas/fixmes of these kinds. */
   annotations: readonly AnnotationKind[];
-  /** Merkmale, die eine Szene haben muss (bisher nur „Wendepunkt“). */
+  /** Flags a scene must have (so far only "turning point"). */
   flags: readonly SceneFlag[];
   strandIds: readonly string[];
-  /** Charaktere und Orte (eine Gruppe je Art, s. `noteKinds`). */
+  /** Characters and places (one group per kind, see `noteKinds`). */
   noteIds: readonly string[];
   tagIds: readonly string[];
 }
@@ -34,7 +34,6 @@ export const NO_FILTER: SceneFilterCriteria = {
   tagIds: [],
 };
 
-/** Was einer Szene zugeordnet ist. */
 export interface SceneLinksInfo {
   noteIds: ReadonlySet<string>;
   tags: readonly Tag[];
@@ -42,8 +41,7 @@ export interface SceneLinksInfo {
 }
 
 /**
- * Filter für die Szenen im Manuskript-Baum. Wird im Arbeitsbereich bereitgestellt:
- * bleibt beim Wechsel zwischen den Bereichen erhalten und gilt nur für das geöffnete Projekt.
+ * Provided in the workspace: survives switching between areas and only applies to the open project.
  */
 @Injectable()
 export class SceneFilter {
@@ -52,15 +50,15 @@ export class SceneFilter {
   private readonly notes = inject(NotesStore);
 
   readonly criteria = signal<SceneFilterCriteria>(NO_FILTER);
-  /** Charaktere, Orte und Tags je Szene; wird beim Öffnen des Filters frisch geladen. */
+  /** Loaded fresh whenever the filter opens. */
   readonly links = signal<ReadonlyMap<string, SceneLinksInfo>>(new Map());
-  /** Stränge, zu denen mindestens eine Szene gehört – in ihrer Reihenfolge. */
+  /** Threads with at least one scene – in their order. */
   readonly strands = signal<readonly Strand[]>([]);
 
   readonly active = computed(() => activeCount(this.criteria()) > 0);
   readonly activeCount = computed(() => activeCount(this.criteria()));
 
-  /** Der Manuskript-Baum, wie er angezeigt wird – bei aktivem Filter nur mit passenden Szenen. */
+  /** As displayed – while filtering, only with matching scenes. */
   readonly tree = computed(() => {
     const tree = this.store.tree();
     if (!this.active()) return tree;
@@ -72,7 +70,7 @@ export class SceneFilter {
   readonly shownCount = computed(() => countScenes(this.tree()));
   readonly totalCount = computed(() => countScenes(this.store.tree()));
 
-  /** Alle vergebenen Tags, alphabetisch. */
+  /** Alphabetical. */
   readonly tags = computed(() => {
     const byId = new Map<string, Tag>();
     for (const info of this.links().values()) {
@@ -83,7 +81,6 @@ export class SceneFilter {
     );
   });
 
-  /** Notizen, die in mindestens einer Szene vorkommen. */
   readonly linkedNoteIds = computed(() => {
     const ids = new Set<string>();
     for (const info of this.links().values()) info.noteIds.forEach((id) => ids.add(id));
@@ -104,7 +101,7 @@ export class SceneFilter {
       ),
     );
     this.strands.set(strands.filter((strand) => strand.sceneCount > 0));
-    // Gelöschte Stränge nicht weiter filtern (sonst passt keine Szene mehr)
+    // Stop filtering by deleted threads (no scene would match any more)
     const known = new Set(strands.map((strand) => strand.id));
     this.criteria.update((criteria) => ({
       ...criteria,
@@ -112,7 +109,7 @@ export class SceneFilter {
     }));
   }
 
-  /** Nach Änderungen in einer Szene (Strang zugeordnet, Charakter verknüpft, Tag vergeben …). */
+  /** After changes in a scene (thread assigned, character linked, tag added …). */
   updateScene(
     sceneId: string,
     info: { noteIds: readonly string[]; tags: readonly Tag[]; strandIds: readonly string[] },
@@ -150,9 +147,8 @@ function activeCount(criteria: SceneFilterCriteria): number {
 }
 
 /**
- * Passt die Szene zum Filter?
- * @param noteKindOf Art einer Notiz (Charakter, Ort …); unbekannte (gelöschte) Notizen
- *   werden im Filter ignoriert.
+ * @param noteKindOf kind of a note (character, place …); unknown (deleted) notes are ignored by the
+ * filter.
  */
 export function matchesScene(
   node: ManuscriptNode,
@@ -179,7 +175,7 @@ export function matchesScene(
   if (criteria.tagIds.length && !links?.tags.some((tag) => criteria.tagIds.includes(tag.id))) {
     return false;
   }
-  // Charaktere und Orte sind eigene Gruppen: je Art muss eine der gewählten Notizen vorkommen.
+  // Characters and places are groups of their own: per kind, one of the chosen notes must appear.
   const notesByKind = new Map<string, string[]>();
   for (const id of criteria.noteIds) {
     const kind = noteKindOf(id);
@@ -192,8 +188,8 @@ export function matchesScene(
 }
 
 /**
- * Baum nur mit passenden Szenen; Kapitel und Teile ohne Treffer fallen weg.
- * Wortzahlen und Markierungen werden für das Sichtbare neu summiert.
+ * Chapters and parts without hits drop out. Word counts and marks are summed again for what is
+ * visible.
  */
 export function filterTree(
   items: readonly TreeItem[],
@@ -217,7 +213,6 @@ export function filterTree(
   });
 }
 
-/** Anzahl der Szenen im (ggf. gefilterten) Baum. */
 export function countScenes(items: readonly TreeItem[]): number {
   return items.reduce(
     (sum, item) => sum + (item.node.kind === 'scene' ? 1 : countScenes(item.children)),

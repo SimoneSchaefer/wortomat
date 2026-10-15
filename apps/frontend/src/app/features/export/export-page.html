@@ -6,7 +6,7 @@
 
   <form class="export-form" (submit)="$event.preventDefault(); run()">
     <div class="options">
-      <!-- Gilt für alle Formate, daher vor der Formatauswahl -->
+      <!-- Applies to all formats, hence before the format choice -->
       <label class="check">
         <input
           type="checkbox"
@@ -255,7 +255,7 @@
       </footer>
     </div>
 
-    <!-- Immer da, damit die Seite beim Wechsel des Formats nicht springt -->
+    <!-- Always present so the page does not jump when switching formats -->
     <aside class="preview-pane" [attr.aria-label]="t().export.preview">
       <div class="preview-head">
         <span class="legend">{{ t().export.preview }}</span>

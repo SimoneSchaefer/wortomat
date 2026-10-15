@@ -6,10 +6,7 @@ import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 
-/**
- * Titelbild des geöffneten Buchs: Vorschau, eigenes Bild wählen, aus dem Titel gestalten
- * oder entfernen. Wird im Export-Dialog und im Titelbild-Dialog der oberen Leiste verwendet.
- */
+/** Used in the export dialog and in the cover dialog of the top bar. */
 @Component({
   selector: 'wm-cover-picker',
   templateUrl: './cover-picker.html',
@@ -20,7 +17,7 @@ export class CoverPicker {
   protected readonly t = inject(I18n).t;
   private readonly project = inject(ProjectStore);
 
-  /** Erklärt, wo das Titelbild erscheint – je nach Ort, an dem die Auswahl steht. */
+  /** Explains where the cover appears – depending on where the picker sits. */
   readonly hint = input<string>('');
 
   protected readonly coverUrl = computed(() => {
@@ -30,7 +27,6 @@ export class CoverPicker {
   protected readonly busy = signal(false);
   protected readonly dropActive = signal(false);
   protected readonly error = signal<string | null>(null);
-  /** Welcher Stil als Nächstes gestaltet wird – jeder Klick zeigt einen anderen. */
   private nextPalette = 0;
   protected readonly designedOnce = signal(false);
 
@@ -70,7 +66,7 @@ export class CoverPicker {
     this.designedOnce.set(false);
   }
 
-  /** Typografisches Titelbild aus Titel und Autor; jeder weitere Klick wählt andere Farben. */
+  /** Each further click picks other colours. */
   protected async design(): Promise<void> {
     const project = this.project.project();
     if (!project) return;

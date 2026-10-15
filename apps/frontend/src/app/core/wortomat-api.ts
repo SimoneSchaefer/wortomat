@@ -56,8 +56,7 @@ import type {
 import { firstValueFrom, type Observable } from 'rxjs';
 
 /**
- * Typisierter Client für das lokale REST-Backend.
- * Die URLs sind relativ: In Electron und im Dev-Server (Proxy) zeigt `/api` aufs Backend.
+ * The URLs are relative: in Electron and in the dev server (proxy) `/api` points to the backend.
  */
 @Injectable({ providedIn: 'root' })
 export class WortomatApi {
@@ -75,24 +74,22 @@ export class WortomatApi {
     return this.call(this.http.patch<AppSettings>('/api/settings', request));
   }
 
-  /** Ordnerinhalt für den Dateiauswahl-Dialog (Browser-Modus); ohne `dir` der Standardordner. */
+  /** For the file picker (browser mode); without `dir` the default folder. */
   listDirectory(dir?: string): Promise<DirectoryListing> {
     const params: Record<string, string> = dir ? { dir } : {};
     return this.call(this.http.get<DirectoryListing>('/api/files', { params }));
   }
 
-  // Projekt -----------------------------------------------------------------
-
   currentProject(): Promise<ProjectInfo | null> {
     return this.call(this.http.get<ProjectInfo | null>('/api/project'));
   }
 
-  /** Alle bekannten Projekte, zuletzt verwendete zuerst. */
+  /** Most recently used first. */
   listProjects(): Promise<ProjectListEntry[]> {
     return this.call(this.http.get<ProjectListEntry[]>('/api/projects'));
   }
 
-  /** Entfernt ein Projekt aus der Liste; die Datei bleibt erhalten. */
+  /** The file is kept. */
   forgetProject(filePath: string): Promise<void> {
     return this.call(this.http.post<void>('/api/projects/forget', { filePath }));
   }
@@ -113,8 +110,6 @@ export class WortomatApi {
     return this.call(this.http.post<void>('/api/project/close', null));
   }
 
-  // Manuskript --------------------------------------------------------------
-
   listNodes(): Promise<ManuscriptNode[]> {
     return this.call(this.http.get<ManuscriptNode[]>('/api/nodes'));
   }
@@ -127,7 +122,7 @@ export class WortomatApi {
     return this.call(this.http.patch<ManuscriptNode>(`/api/nodes/${id}`, request));
   }
 
-  /** Liefert den kompletten Baum nach dem Verschieben. */
+  /** Returns the complete tree after moving. */
   moveNode(id: string, request: MoveNodeRequest): Promise<ManuscriptNode[]> {
     return this.call(this.http.post<ManuscriptNode[]>(`/api/nodes/${id}/move`, request));
   }
@@ -144,22 +139,20 @@ export class WortomatApi {
     return this.call(this.http.put<SceneContent>(`/api/scenes/${id}/content`, request));
   }
 
-  /** Heute geschriebene Wörter (Schreib-Log; der Tag beginnt um 4 Uhr). */
+  /** The day starts at 4 am. */
   writingToday(): Promise<WritingDay> {
     return this.call(this.http.get<WritingDay>('/api/writing-log/today'));
   }
 
-  /** Reiner Text aller Szenen (Absätze durch Zeilenumbrüche getrennt). */
+  /** Paragraphs separated by line breaks. */
   sceneTexts(): Promise<SceneText[]> {
     return this.call(this.http.get<SceneText[]>('/api/scene-texts'));
   }
 
-  /** Schreib-Log je Tag von `from` bis `to` (YYYY-MM-DD, inklusive). */
+  /** `from` to `to` (YYYY-MM-DD, inclusive). */
   writingLog(from: string, to: string): Promise<WritingDay[]> {
     return this.call(this.http.get<WritingDay[]>('/api/writing-log', { params: { from, to } }));
   }
-
-  // Notizen (Charaktere, Orte, Forschung) -----------------------------------
 
   listNotes(): Promise<NoteSummary[]> {
     return this.call(this.http.get<NoteSummary[]>('/api/notes'));
@@ -209,7 +202,7 @@ export class WortomatApi {
     return this.call(this.http.get<GalleryImage[]>(`/api/notes/${id}/images`));
   }
 
-  /** Hängt ein Bild an die Galerie an; liefert die ganze Galerie zurück. */
+  /** Returns the whole gallery. */
   addNoteImage(
     id: string,
     image: Blob,
@@ -238,8 +231,6 @@ export class WortomatApi {
     return this.call(this.http.delete<GalleryImage[]>(`/api/notes/${id}/images/${imageId}`));
   }
 
-  // Verknüpfungen Szene ↔ Charakter/Ort ----------------------------------------
-
   sceneLinks(sceneId: string): Promise<NoteSummary[]> {
     return this.call(this.http.get<NoteSummary[]>(`/api/scenes/${sceneId}/links`));
   }
@@ -252,12 +243,10 @@ export class WortomatApi {
     return this.call(this.http.delete<NoteSummary[]>(`/api/scenes/${sceneId}/links/${noteId}`));
   }
 
-  /** Szenen, in denen eine Notiz vorkommt – in Manuskript-Reihenfolge. */
+  /** In manuscript order. */
   noteScenes(noteId: string): Promise<SceneReference[]> {
     return this.call(this.http.get<SceneReference[]>(`/api/notes/${noteId}/scenes`));
   }
-
-  // Karten ------------------------------------------------------------------------
 
   listMaps(): Promise<MapSummary[]> {
     return this.call(this.http.get<MapSummary[]>('/api/maps'));
@@ -275,7 +264,6 @@ export class WortomatApi {
     return this.call(this.http.patch<PlaceMap>(`/api/maps/${id}`, request));
   }
 
-  /** Karten, auf denen ein Ort eingezeichnet ist. */
   mapsWithPlace(noteId: string): Promise<PlaceMap[]> {
     return this.call(this.http.get<PlaceMap[]>(`/api/notes/${noteId}/maps`));
   }
@@ -284,25 +272,19 @@ export class WortomatApi {
     return this.call(this.http.delete<void>(`/api/maps/${id}`));
   }
 
-  // Tags --------------------------------------------------------------------------
-
-  /** Charaktere, Orte und Tags aller Szenen – für den Szenenfilter. */
+  /** For the scene filter. */
   sceneRelations(): Promise<SceneRelations[]> {
     return this.call(this.http.get<SceneRelations[]>('/api/scene-relations'));
   }
-
-  // Korrekturlesen unterwegs --------------------------------------------------
 
   proofPackage(): Promise<ProofPackage> {
     return this.call(this.http.get<ProofPackage>('/api/proofreading/package'));
   }
 
-  /** Desktop: Korrekturfassung (HTML fürs Handy) an den gewählten Ort schreiben. */
   proofCopyToFile(filePath: string): Promise<ExportResult> {
     return this.call(this.http.post<ExportResult>('/api/proofreading/export', { filePath }));
   }
 
-  /** Browser-Modus: Korrekturfassung kommt als Download zurück. */
   async proofCopyDownload(): Promise<{ blob: Blob; fileName: string }> {
     const response = await this.call(
       this.http.post('/api/proofreading/export', {}, { observe: 'response', responseType: 'blob' }),
@@ -315,45 +297,36 @@ export class WortomatApi {
     };
   }
 
-  /** Notizdateien zu diesem Buch im Download-Ordner. */
   proofInbox(): Promise<ProofInbox> {
     return this.call(this.http.get<ProofInbox>('/api/proofreading/inbox'));
   }
 
-  /** Alle neuen Notizen aus dem Download-Ordner übernehmen. */
   importProofInbox(): Promise<ProofImportResult> {
     return this.call(this.http.post<ProofImportResult>('/api/proofreading/inbox/import', null));
   }
 
-  /** Erledigte Notizdateien aus dem Download-Ordner löschen. */
   cleanProofInbox(): Promise<{ deleted: string[] }> {
     return this.call(this.http.post<{ deleted: string[] }>('/api/proofreading/inbox/clean', null));
   }
 
-  /** Notizen vom Handy als Fixme-Markierungen ins Buch übernehmen. */
   importProofNotes(file: ProofNotesFile): Promise<ProofImportResult> {
     return this.call(this.http.post<ProofImportResult>('/api/proofreading/import', file));
   }
-
-  // Reihenfolge der Handlung -------------------------------------------------
 
   storyMarks(): Promise<StoryMark[]> {
     return this.call(this.http.get<StoryMark[]>('/api/story/marks'));
   }
 
-  /** Ersetzt die ganze Reihenfolge samt Abschnittsmarken; liefert Baum und Marken neu. */
+  /** Replaces the whole order including section marks. */
   saveStory(request: SaveStoryRequest): Promise<StoryState> {
     return this.call(this.http.put<StoryState>('/api/story', request));
   }
 
-  // Handlungsstränge --------------------------------------------------------
-
-  /** Alle Stränge in ihrer Reihenfolge (mit Anzahl der Szenen). */
   listStrands(): Promise<Strand[]> {
     return this.call(this.http.get<Strand[]>('/api/strands'));
   }
 
-  /** Ohne Farbe bekommt der Strang die bisher seltenste. */
+  /** Without a colour the thread gets the least used one. */
   createStrand(name: string, color?: StrandColor): Promise<Strand> {
     return this.call(this.http.post<Strand>('/api/strands', { name, color }));
   }
@@ -362,12 +335,11 @@ export class WortomatApi {
     return this.call(this.http.patch<Strand>(`/api/strands/${id}`, changes));
   }
 
-  /** Liefert alle Stränge in der neuen Reihenfolge. */
   moveStrand(id: string, beforeId: string | null): Promise<Strand[]> {
     return this.call(this.http.post<Strand[]>(`/api/strands/${id}/move`, { beforeId }));
   }
 
-  /** Die Szenen bleiben, sie verlieren nur die Zuordnung. */
+  /** The scenes stay; they only lose the assignment. */
   deleteStrand(id: string): Promise<void> {
     return this.call(this.http.delete<void>(`/api/strands/${id}`));
   }
@@ -384,7 +356,6 @@ export class WortomatApi {
     return this.call(this.http.delete<Strand[]>(`/api/scenes/${sceneId}/strands/${strandId}`));
   }
 
-  /** Alle verwendeten Tags des Projekts (mit Anzahl der Szenen). */
   listTags(): Promise<TagSummary[]> {
     return this.call(this.http.get<TagSummary[]>('/api/tags'));
   }
@@ -393,7 +364,7 @@ export class WortomatApi {
     return this.call(this.http.get<Tag[]>(`/api/scenes/${sceneId}/tags`));
   }
 
-  /** Vergibt einen Tag per Name (vorhandene werden wiederverwendet). */
+  /** Existing tags are reused. */
   addSceneTag(sceneId: string, name: string): Promise<Tag[]> {
     return this.call(this.http.post<Tag[]>(`/api/scenes/${sceneId}/tags`, { name }));
   }
@@ -402,13 +373,10 @@ export class WortomatApi {
     return this.call(this.http.delete<Tag[]>(`/api/scenes/${sceneId}/tags/${tagId}`));
   }
 
-  // Export --------------------------------------------------------------------
-
   exportCapabilities(): Promise<ExportCapabilities> {
     return this.call(this.http.get<ExportCapabilities>('/api/export/capabilities'));
   }
 
-  /** Was sich der Export-Dialog für das geöffnete Buch gemerkt hat. */
   exportSettings(): Promise<ExportSettingsResponse> {
     return this.call(this.http.get<ExportSettingsResponse>('/api/export/settings'));
   }
@@ -425,12 +393,10 @@ export class WortomatApi {
     );
   }
 
-  /** Desktop: Backend schreibt die Datei an `filePath`. */
   exportToFile(request: ExportRequest & { filePath: string }): Promise<ExportResult> {
     return this.call(this.http.post<ExportResult>('/api/export', request));
   }
 
-  /** Browser-Modus: Datei kommt als Download zurück. */
   async exportDownload(
     request: ExportRequest,
   ): Promise<{ blob: Blob; fileName: string; warnings: string[] }> {
@@ -446,8 +412,6 @@ export class WortomatApi {
       warnings: warnings ? (JSON.parse(decodeURIComponent(warnings)) as string[]) : [],
     };
   }
-
-  // Bilder & Suche ----------------------------------------------------------
 
   uploadImage(image: Blob, fileName: string, width: number, height: number): Promise<ImageInfo> {
     const form = new FormData();

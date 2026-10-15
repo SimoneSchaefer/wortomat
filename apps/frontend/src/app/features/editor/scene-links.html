@@ -1,8 +1,10 @@
 @for (row of rows(); track row.target) {
   <div class="group">
     <span class="label">{{ row.label }}</span>
-    <!-- Eine Zeile; bei vielen Einträgen seitlich scrollbar über die Pfeile (gedrückt halten
-         scrollt weiter) oder das Mausrad. Das + steht immer sichtbar dahinter. -->
+    <!--
+      One row; with many entries it scrolls sideways via the arrows (holding keeps scrolling) or the
+      mouse wheel. The + always stays visible after it.
+    -->
     @if (row.chips.length) {
       <div class="scroller">
         <ul

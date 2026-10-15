@@ -27,14 +27,13 @@ interface Tooltip {
   text: string;
   x: number;
   y: number;
-  /** Am Fensterrand liegt der Tooltip neben statt mittig über dem Element. */
+  /** Near the window edge the tooltip sits beside instead of centred above the element. */
   align: 'center' | 'start' | 'end';
 }
 
-/** So nah am Fensterrand wird der Tooltip zur Seite ausgerichtet (etwa halbe Breite). */
+/** This close to the window edge the tooltip is aligned to the side (about half its width). */
 const TOOLTIP_EDGE_PX = 180;
 
-/** Statistik über das Buch: Fortschritt nach Status, Wörter je Kapitel, Auftritte. */
 @Component({
   selector: 'wm-stats-page',
   imports: [RouterLink, StatusIcon, NoteAvatar, TextStats, WritingCalendar],
@@ -61,14 +60,14 @@ export class StatsPage {
   protected readonly totals = computed(() => statusTotals(this.scenes()));
   protected readonly totalWords = computed(() => this.store.totalWords());
   protected readonly pages = computed(() => Math.round(this.totalWords() / WORDS_PER_PAGE));
-  /** Anteil „Fertig“ an allen Wörtern in Prozent; `null` ohne Wörter. */
+  /** Share of final in all words in percent; `null` without words. */
   protected readonly finalShare = computed(() => {
     const total = this.totalWords();
     const final = this.totals().find((entry) => entry.status === 'final')!.words;
     return total ? Math.round((final / total) * 100) : null;
   });
 
-  /** Ohne geschriebene Wörter misst der Fortschritt in Szenen – sonst wäre der Balken leer. */
+  /** Without written words, progress is measured in scenes – otherwise the bar would be empty. */
   private readonly chosenUnit = signal<Unit>('words');
   protected readonly unit = computed<Unit>(() =>
     this.totalWords() ? this.chosenUnit() : 'scenes',
@@ -94,7 +93,6 @@ export class StatsPage {
     const notes = this.notes.notes().filter((note) => note.kind === kind);
     return { ...presence(this.scenes(), notes, relations), total: notes.length };
   });
-  /** Kopfzeile der Auftritte: ein Feld je Kapitel über dessen Szenen. */
   protected readonly chapterColumns = computed(() => {
     const columns: { entry: SceneEntry; span: number }[] = [];
     for (const entry of this.scenes()) {
@@ -107,7 +105,6 @@ export class StatsPage {
 
   protected readonly tip = signal<Tooltip | null>(null);
 
-  /** Seite der Notiz, z. B. `/write/characters/<id>`. */
   protected notePath(note: NoteSummary): string[] {
     return ['/write', NOTE_KINDS[note.kind].path, note.id];
   }
@@ -120,7 +117,7 @@ export class StatsPage {
     return this.t().sceneStatus.names[status];
   }
 
-  /** „Entwurf: 1.234 Wörter · 3 Szenen“ */
+  /** "Draft: 1,234 words · 3 scenes" */
   protected statusTip(status: SceneStatus, words: number, scenes: number): string {
     const t = this.t();
     return `${this.statusName(status)}: ${t.words(words)} · ${t.stats.scenes(scenes)}`;
@@ -131,7 +128,7 @@ export class StatsPage {
     return index > 0 && scenes[index]!.chapter.id !== scenes[index - 1]!.chapter.id;
   }
 
-  // Tooltip: ein gemeinsamer für alle Elemente mit `data-tip` (Maus und Tastatur)
+  // Tooltip: one shared by all elements with `data-tip` (mouse and keyboard)
 
   protected showTip(event: Event): void {
     const target = (event.target as Element | null)?.closest<HTMLElement>('[data-tip]');

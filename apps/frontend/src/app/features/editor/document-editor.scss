@@ -4,8 +4,8 @@
   flex: 1;
 }
 
-// Toolbar und Text als ein Kasten – Rahmen wie der Kasten der Szenendetails darüber.
-// Kein overflow: hidden, sonst bleibt die Toolbar beim Scrollen nicht oben stehen.
+// Toolbar and text as one box – framed like the scene details box above. No overflow: hidden, or
+// the toolbar would not stick to the top when scrolling.
 .writing {
   flex: 1;
   display: flex;
@@ -15,8 +15,8 @@
   border-radius: 0.75rem;
   background: var(--bg);
 
-  // Beim Schreiben derselbe Fokusrahmen wie bei den anderen Eingabefeldern (2px Akzent über
-  // dem Rahmen). Als eigene Ebene, sonst verdeckt die klebende Toolbar ihn oben.
+  // While writing, the same focus ring as the other inputs (2px accent over the border). As a layer
+  // of its own, or the sticky toolbar would cover it at the top.
   &:has(.wm-prose:focus)::after {
     content: '';
     position: absolute;
@@ -40,13 +40,13 @@
   top: 0;
   z-index: 1;
   container-type: scroll-state;
-  // Eigene Ebene: Firefox führt die Leiste dann beim asynchronen Scrollen direkt mit,
-  // statt sie einen Moment später nachzusetzen
+  // A layer of its own: Firefox then moves the bar along directly during async scrolling instead of
+  // repositioning it a moment later
   will-change: transform;
 
-  // Streifen in Seitenfarbe über der Leiste (oberhalb des Kastenrahmens). Im Ruhezustand
-  // unsichtbar auf gleichfarbigem Grund; hängt die Leiste beim Scrollen doch kurz nach,
-  // deckt er die Lücke zur Menüleiste ab, damit kein Text durchblitzt.
+  // Strip in page colour above the bar (above the box border). Invisible at rest on the same
+  // colour; if the bar lags behind while scrolling after all, it covers the gap to the menu bar so
+  // no text flashes through.
   &::before {
     content: '';
     position: absolute;
@@ -58,7 +58,6 @@
   }
 }
 
-// Kopfzeile des Kastens, getönt
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -69,14 +68,14 @@
   border-radius: calc(0.75rem - 1px) calc(0.75rem - 1px) 0 0;
   background: color-mix(in srgb, var(--bg) 50%, var(--surface));
 
-  // Klebt sie oben, würde der Text durch die runden Ecken scheinen – dann eckig
-  // (Firefox kennt scroll-state noch nicht und behält die runden Ecken)
+  // When stuck at the top, the text would shine through the rounded corners – so square them
+  // (Firefox does not know scroll-state yet and keeps the rounded corners)
   @container scroll-state(stuck: top) {
     border-radius: 0;
   }
 
-  // Hintergrund, Rahmen und Überfahren wie alle Buttons (styles.scss), nur kompakter
-  // Alle gleich hoch – Text, Symbole und Pfeilzeichen haben sonst unterschiedliche Zeilenhöhen
+  // Background, border and hover as for all buttons (styles.scss), just more compact. All the same
+  // height – text, icons and arrow glyphs have different line heights otherwise
   button {
     display: inline-flex;
     align-items: center;
@@ -87,7 +86,6 @@
     line-height: 1;
     transition: background-color 0.1s;
 
-    // Eingeschaltet (fett, Todo-Markierung …): kräftiger grün, mit Rahmen in der Akzentfarbe
     &.on {
       background: color-mix(in srgb, var(--accent) 35%, var(--bg));
       border-color: var(--accent);
@@ -105,7 +103,6 @@
     stroke-linecap: round;
   }
 
-  // Überarbeitungsmodus: nur Symbol (der Name steht im Tooltip)
   .revision {
     svg {
       display: block;
@@ -119,7 +116,6 @@
     }
   }
 
-  // Todo/Idee/Fixme mit Farbmuster wie im Text
   .annotation {
     display: inline-flex;
     align-items: center;
@@ -135,8 +131,8 @@
   }
 }
 
-// Spalte bis zum unteren Rand: der Textkasten wächst in den freien Platz, ohne dass die
-// Seite schon leer einen Scrollbalken bekommt
+// Column down to the bottom edge: the text box grows into the free space without the page getting a
+// scrollbar while empty
 .page {
   flex: 1;
   display: flex;
@@ -167,12 +163,10 @@
     color: var(--danger);
   }
 
-  // Schreib-Log des Tages, rechts abgesetzt vom Stand des Dokuments
   .today {
     margin-left: auto;
   }
 
-  // Überarbeitungsmodus: Anzahl je Art; ein Klick springt zur nächsten Stelle
   .findings {
     display: flex;
     flex-wrap: wrap;
@@ -195,7 +189,7 @@
     }
   }
 
-  // Muster wie im Text: Linienart und Farbe bzw. Hinterlegung
+  // Same pattern as in the text: line style and colour, or a background
   .key {
     width: 0.9rem;
     height: 0.55rem;
@@ -220,7 +214,7 @@
   }
 }
 
-// Markierung am Cursor unter der Toolbar – in der Farbe ihrer Art, klebt mit der Toolbar oben
+// Sticks to the top together with the toolbar
 .mark-note {
   display: flex;
   align-items: baseline;
@@ -274,14 +268,14 @@
   }
 }
 
-// Alle Markierungen im Text, zwischen Toolbar und Text; scrollt mit dem Text weg
+// Not sticky: scrolls away with the text
 .mark-list {
   padding: 0.35rem 0.5rem 0.5rem;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
   font-family: var(--font-ui);
   font-size: 0.85rem;
 
-  // Bei vielen Markierungen scrollt die Liste in sich, statt den Text weit nach unten zu schieben
+  // With many marks the list scrolls by itself instead of pushing the text far down
   ul {
     display: grid;
     gap: 0.15rem;
@@ -338,7 +332,6 @@
     background: color-mix(in srgb, var(--annotation-color) 10%, var(--bg));
   }
 
-  // Die Stelle, an der der Cursor gerade steht
   &.current {
     border-color: color-mix(in srgb, var(--annotation-color) 45%, var(--border));
     background: color-mix(in srgb, var(--annotation-color) 10%, var(--bg));
@@ -352,7 +345,6 @@
   min-width: 0;
 }
 
-// Farbmuster wie im Text – in der Toolbar und in der Liste
 .swatch {
   flex-shrink: 0;
   width: 0.7rem;
@@ -377,7 +369,7 @@
   color: var(--text-muted);
 }
 
-// eingerückt unter das Farbmuster, höchstens zwei Zeilen
+// indented under the swatch, at most two lines
 .mark-item-suggestion,
 .mark-item-note {
   padding-left: 1.15rem;

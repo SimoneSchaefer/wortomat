@@ -1,6 +1,5 @@
 import type { ManuscriptNode } from '@wortomat/shared';
 
-/** Ein Knoten im Tiptap/ProseMirror-JSON (nur die Felder, die der Export braucht). */
 export interface JsonNode {
   type?: string;
   text?: string;
@@ -17,12 +16,14 @@ export interface BookScene {
 export type BookItem =
   { kind: 'part'; title: string } | { kind: 'chapter'; title: string; scenes: BookScene[] };
 
-/** Formatneutrales Abbild des Manuskripts in Lesereihenfolge. */
+/** Format-neutral view of the manuscript in reading order. */
 export interface Book {
   title: string;
   author: string;
   wordCount: number;
-  /** Zeichen inkl. Leerzeichen – Grundlage für Normseiten (1 Normseite = 1800 Zeichen). */
+  /**
+   * Characters including spaces – the basis for standard pages (1 standard page = 1800 characters).
+   */
   characterCount: number;
   items: BookItem[];
 }
@@ -31,7 +32,7 @@ export interface ExportOptions {
   includeSceneTitles: boolean;
 }
 
-/** Bilddaten zu einer `src` wie `/api/images/<id>`; `null`, wenn unbekannt. */
+/** `null` when unknown. */
 export type ImageResolver = (src: string) => ResolvedImage | null;
 
 export interface ResolvedImage {
@@ -44,8 +45,8 @@ export interface ResolvedImage {
 export const NORMSEITE_CHARACTERS = 1800;
 
 /**
- * Baut das Buch aus dem Manuskript-Baum. Teile werden zu eigenen Einträgen, Kapitel enthalten
- * ihre Szenen; Szenen ohne Text werden ausgelassen.
+ * Parts become entries of their own, chapters contain their scenes; scenes without text are left
+ * out.
  */
 export function buildBook(
   meta: { title: string; author: string },
@@ -85,7 +86,6 @@ export function buildBook(
   return { title: meta.title, author: meta.author, wordCount, characterCount, items };
 }
 
-/** Das Buch ohne Teile – die Kapitel folgen dann direkt aufeinander. */
 export function withoutParts(book: Book): Book {
   return { ...book, items: book.items.filter((item) => item.kind !== 'part') };
 }
@@ -94,7 +94,6 @@ export function normseiten(book: Book): number {
   return Math.max(1, Math.ceil(book.characterCount / NORMSEITE_CHARACTERS));
 }
 
-/** Reiner Text; Absätze werden durch Zeilenumbrüche getrennt. */
 export function plainText(node: JsonNode): string {
   if (node.type === 'text') return node.text ?? '';
   if (node.type === 'hardBreak') return '\n';
@@ -113,7 +112,7 @@ function containsImage(node: JsonNode): boolean {
   return node.type === 'image' || (node.content ?? []).some(containsImage);
 }
 
-/** Markierungen, die im Export gedruckt werden; Todo/Idee/Fixme fallen bewusst weg. */
+/** Todo/idea/fixme are left out on purpose: they are notes to the author, not part of the book. */
 export type PrintMark = 'bold' | 'italic' | 'underline' | 'strike' | 'code' | 'link';
 
 export function printMarks(node: JsonNode): Set<PrintMark> {
@@ -126,7 +125,7 @@ export function printMarks(node: JsonNode): Set<PrintMark> {
   return result;
 }
 
-/** Bildmaße passend in einen Rahmen skalieren (ohne Hochskalieren). */
+/** Never scales up. */
 export function fitImage(
   image: { width: number | null; height: number | null },
   maxWidth: number,
@@ -138,7 +137,6 @@ export function fitImage(
   return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }
 
-/** Dateiname ohne Zeichen, die Windows, macOS oder Linux nicht mögen. */
 export function safeFileName(title: string): string {
   return (
     title
@@ -148,7 +146,6 @@ export function safeFileName(title: string): string {
   );
 }
 
-/** Liest Breite/Höhe aus PNG-, GIF- oder JPEG-Daten; `null`, wenn unbekannt. */
 export function imageSize(data: Buffer): { width: number; height: number } | null {
   if (data.length >= 24 && data.toString('latin1', 1, 4) === 'PNG') {
     return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
@@ -157,7 +154,7 @@ export function imageSize(data: Buffer): { width: number; height: number } | nul
     return { width: data.readUInt16LE(6), height: data.readUInt16LE(8) };
   }
   if (data[0] === 0xff && data[1] === 0xd8) {
-    // JPEG: Segmente bis zum „Start of Frame“ durchgehen
+    // JPEG: walk the segments up to the start-of-frame marker
     let offset = 2;
     while (offset + 9 < data.length && data[offset] === 0xff) {
       const marker = data[offset + 1]!;
@@ -173,7 +170,6 @@ export function imageSize(data: Buffer): { width: number; height: number } | nul
   return null;
 }
 
-/** „1 Normseite“, „2 Normseiten“ */
 export function normseitenLabel(book: Book): string {
   const count = normseiten(book);
   return `${count.toLocaleString('de-DE')} ${count === 1 ? 'Normseite' : 'Normseiten'}`;

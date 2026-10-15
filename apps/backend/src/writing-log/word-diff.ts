@@ -1,4 +1,4 @@
-/** Ab dieser Größe (Wörter alt × neu im geänderten Bereich) wird nicht mehr genau verglichen. */
+/** From this size (old × new words in the changed range) we stop comparing exactly. */
 const MAX_DIFF_CELLS = 4_000_000;
 
 export interface WordDiff {
@@ -7,15 +7,14 @@ export interface WordDiff {
 }
 
 /**
- * Wie viele Wörter zwischen zwei Fassungen eines Texts dazugekommen bzw. weggefallen sind.
- * Ein ersetztes Wort zählt als eins hinzu und eins weg – so ergibt Überarbeiten ein
- * Brutto, auch wenn die Länge gleich bleibt.
+ * A replaced word counts as one added and one removed – so revising yields a gross count even when
+ * the length stays the same.
  */
 export function diffWords(before: string, after: string): WordDiff {
   const a = words(before);
   const b = words(after);
 
-  // Gleicher Anfang und gleiches Ende fallen weg – meist bleibt nur die Stelle der Änderung.
+  // Drop the common start and end – usually only the changed spot remains.
   let start = 0;
   while (start < a.length && start < b.length && a[start] === b[start]) start++;
   let endA = a.length;
@@ -30,8 +29,8 @@ export function diffWords(before: string, after: string): WordDiff {
     return { added: newPart.length, removed: oldPart.length };
   }
 
-  // Mehrere Änderungen auseinander: gemeinsame Wörter dazwischen nicht doppelt zählen.
-  // Ist der Bereich riesig, reicht die Längendifferenz.
+  // Several changes far apart: do not count the common words in between twice. If the range is
+  // huge, the length difference is enough.
   if (oldPart.length * newPart.length > MAX_DIFF_CELLS) {
     const delta = newPart.length - oldPart.length;
     return { added: Math.max(0, delta), removed: Math.max(0, -delta) };
@@ -40,7 +39,7 @@ export function diffWords(before: string, after: string): WordDiff {
   return { added: newPart.length - common, removed: oldPart.length - common };
 }
 
-/** Zählt wie der Editor (Tiptap CharacterCount): Folgen ohne Leerraum. */
+/** Counts like the editor (Tiptap CharacterCount): runs without whitespace. */
 export function words(text: string): string[] {
   return text.split(/\s+/).filter(Boolean);
 }

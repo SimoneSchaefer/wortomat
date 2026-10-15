@@ -1,4 +1,4 @@
-# Manuell starten: Actions → „Release Linux“ → „Run workflow“.
+# Start manually: Actions → "Release Linux" → "Run workflow".
 name: Release Linux
 
 on:

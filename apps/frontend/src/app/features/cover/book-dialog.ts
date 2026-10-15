@@ -8,12 +8,11 @@ const SAVE_DELAY_MS = 600;
 
 type Field = 'title' | 'author';
 
-/** Dialog „Buch“ aus der oberen Leiste: Titel, Autor und Titelbild des geöffneten Buchs. */
 @Component({
   selector: 'wm-book-dialog',
   imports: [CoverPicker],
   template: `
-    <!-- Anfangsfokus auf dem Dialog selbst: kein Feld wirkt beim Öffnen hervorgehoben -->
+    <!-- Initial focus on the dialog itself: no field looks highlighted on opening -->
     <dialog
       #dialog
       tabindex="-1"
@@ -133,7 +132,6 @@ export class BookDialog {
   protected readonly title = signal('');
   protected readonly author = signal('');
   protected readonly error = signal<string | null>(null);
-  /** Noch nicht gespeicherte Eingaben. */
   private pending: Partial<Record<Field, string>> = {};
   private timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -149,15 +147,15 @@ export class BookDialog {
   }
 
   protected close(): void {
-    this.dialog().nativeElement.close(); // speichert über das close-Ereignis
+    this.dialog().nativeElement.close(); // saves via the close event
   }
 
-  /** Klick auf den abgedunkelten Hintergrund schließt (nur der trifft das Dialog-Element selbst). */
+  /** Only a click on the dimmed backdrop hits the dialog element itself. */
   protected closeOnBackdrop(event: MouseEvent): void {
     if (event.target === this.dialog().nativeElement) this.close();
   }
 
-  /** Kurz nach dem Tippen speichern; ein leerer Titel wird nicht gespeichert. */
+  /** An empty title is not saved. */
   protected edit(field: Field, value: string): void {
     (field === 'title' ? this.title : this.author).set(value);
     if (field === 'title' && !value.trim()) {
@@ -170,8 +168,8 @@ export class BookDialog {
   }
 
   /**
-   * Leeren Titel nicht stehen lassen. Das Feld direkt zurücksetzen: Für die Bindung hat sich der
-   * Wert oft gar nicht geändert (zuletzt angezeigt war schon der gespeicherte Titel).
+   * Do not leave an empty title. Reset the field directly: for the binding the value often did not
+   * change at all (the saved title was the last one shown).
    */
   protected leaveTitle(input: HTMLInputElement): void {
     if (!this.title().trim()) {

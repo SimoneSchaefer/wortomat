@@ -37,7 +37,7 @@ const scene = (id: string, chapter: ManuscriptNode, strandIds: string[]): PlotSc
   bookNumber: ++bookNumber,
   strandIds,
 });
-/** Buchreihenfolge: eine Szene je Spalte, gruppiert nach Kapitel. */
+/** Book order: one scene per column, grouped by chapter. */
 const inBookOrder = (scenes: PlotScene[]): PlotColumnInput[] =>
   scenes.map((entry) => ({
     scenes: [entry],
@@ -75,10 +75,10 @@ describe('layoutPlot', () => {
   it('legt gemeinsame Szenen mittig zwischen die Stränge und bündelt die Linien', () => {
     const layout = layoutPlot(inBookOrder(scenes), [lena, tom]);
     const b = layout.nodes[1]!;
-    expect(b.strands.map((s) => s.id)).toEqual(['lena', 'tom']); // Reihenfolge der Zeilen
+    expect(b.strands.map((s) => s.id)).toEqual(['lena', 'tom']); // order of the rows
     expect(b.y).toBe((lane(0) + lane(1)) / 2);
     expect(b.height).toBe(NODE_SIZE + BUNDLE_GAP);
-    // Lena läuft oben ein, Tom unten
+    // Lena enters from above, Tom from below
     expect(layout.lines.find((l) => l.strand.id === 'lena')!.path).toContain(
       `${b.x} ${b.y - BUNDLE_GAP / 2}`,
     );
@@ -109,14 +109,14 @@ describe('layoutPlot', () => {
     const x = scene('x', K1, ['lena']);
     const y = scene('y', K1, ['tom']);
     const z = scene('z', K1, ['lena']);
-    // x und y in verschiedenen Zeilen: eine Spalte, übereinander
+    // x and y in different rows: one column, stacked
     const stacked = layoutPlot([{ scenes: [x, y], group }], [lena, tom]);
     expect(stacked.nodes.map((n) => [n.scene.id, n.x, n.y])).toEqual([
       ['x', COLUMN_WIDTH / 2, lane(0)],
       ['y', COLUMN_WIDTH / 2, lane(1)],
     ]);
     expect(stacked.columns).toEqual([{ left: 0, width: COLUMN_WIDTH, sceneIds: ['x', 'y'] }]);
-    // x und z im selben Strang: die Spalte wird doppelt so breit
+    // x and z in the same thread: the column gets twice as wide
     const spread = layoutPlot([{ scenes: [x, z], group }], [lena, tom]);
     expect(spread.nodes.map((n) => n.x)).toEqual([COLUMN_WIDTH / 2, COLUMN_WIDTH * 1.5]);
     expect(spread.columns[0]!.width).toBe(2 * COLUMN_WIDTH);

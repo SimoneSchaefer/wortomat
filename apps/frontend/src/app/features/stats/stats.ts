@@ -3,27 +3,25 @@ import type { TreeItem } from '../../core/project-store';
 import { SCENE_STATUSES } from '../../core/scene-status';
 import type { SceneTextStats } from '../../core/text-analysis';
 
-/** Faustregel für eine Normseite (1.800 Zeichen). */
+/** Rule of thumb for a standard page (1,800 characters). */
 export const WORDS_PER_PAGE = 250;
 
 export type StatusTally = Record<SceneStatus, number>;
 
-/** Eine Szene in Lesereihenfolge, mit ihrem Kapitel. */
 export interface SceneEntry {
   scene: ManuscriptNode;
   chapter: ManuscriptNode;
-  /** Laufende Nummer des Kapitels im Buch, ab 1. */
+  /** Running number of the chapter in the book, from 1. */
   chapterNumber: number;
 }
 
 export interface ChapterStats {
   chapter: ManuscriptNode;
   number: number;
-  /** Titel des Teils, wenn das Kapitel in einem liegt. */
   part: string | null;
   words: number;
   scenes: number;
-  /** Wörter je Status – für den gestapelten Balken. */
+  /** For the stacked bar. */
   wordsByStatus: StatusTally;
 }
 
@@ -35,16 +33,16 @@ export interface StatusTotal {
 
 export interface PresenceRow {
   note: NoteSummary;
-  /** Index der Szene (in `SceneEntry[]`) → kommt vor. */
+  /** Scene indices (in `SceneEntry[]`) it appears in. */
   appearances: ReadonlySet<number>;
-  /** Summe der Wörter aller Szenen mit dieser Figur. */
+  /** Sum of the words of all scenes with this character. */
   words: number;
 }
 
 export interface Presence {
-  /** Nach erstem Auftritt sortiert. */
+  /** Sorted by first appearance. */
   rows: PresenceRow[];
-  /** Mit keiner Szene verknüpft. */
+  /** Linked to no scene. */
   absent: NoteSummary[];
 }
 
@@ -52,7 +50,7 @@ export function emptyTally(): StatusTally {
   return { idea: 0, outline: 0, draft: 0, revised: 0, final: 0 };
 }
 
-/** Alle Szenen in Lesereihenfolge; Kapitel werden über Teile hinweg durchgezählt. */
+/** Chapters are numbered across parts. */
 export function scenesInOrder(tree: readonly TreeItem[]): SceneEntry[] {
   const entries: SceneEntry[] = [];
   let chapterNumber = 0;
@@ -99,7 +97,7 @@ export function chapterStats(tree: readonly TreeItem[]): ChapterStats[] {
   return chapters;
 }
 
-/** Wörter und Szenen je Status, in Arbeitsreihenfolge (Idee → Fertig). */
+/** In working order (idea → final). */
 export function statusTotals(scenes: readonly SceneEntry[]): StatusTotal[] {
   const totals = SCENE_STATUSES.map(({ status }) => ({ status, words: 0, scenes: 0 }));
   for (const { scene } of scenes) {
@@ -110,7 +108,7 @@ export function statusTotals(scenes: readonly SceneEntry[]): StatusTotal[] {
   return totals;
 }
 
-/** Wer kommt wo vor: eine Zeile je Notiz, sortiert nach erstem Auftritt. */
+/** One row per note, sorted by first appearance. */
 export function presence(
   scenes: readonly SceneEntry[],
   notes: readonly NoteSummary[],
@@ -150,7 +148,7 @@ export interface ChapterText {
   sentences: number;
 }
 
-/** Textstatistik der Szenen je Kapitel summiert, in Lesereihenfolge (auch leere Kapitel). */
+/** Summed per chapter, in reading order (empty chapters too). */
 export function chapterText(
   tree: readonly TreeItem[],
   scenes: readonly SceneTextStats[],

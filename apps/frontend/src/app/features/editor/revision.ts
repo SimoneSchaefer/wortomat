@@ -13,20 +13,19 @@ import {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     revision: {
-      /** Überarbeitungsmodus an/aus – die Hinweise werden nie im Dokument gespeichert. */
+      /** The hints are never stored in the document. */
       setRevisionMode: (enabled: boolean) => ReturnType;
-      /** Wählt die nächste Stelle dieser Art hinter der Auswahl (am Ende wieder von vorn). */
+      /** After the selection; wraps around at the end. */
       selectNextFinding: (kind: FindingKind) => ReturnType;
     };
   }
 }
 
 export interface RevisionOptions {
-  /** Namen von Figuren und Orten (klein) – werden bei jeder Prüfung neu gelesen. */
+  /** Lowercase; read again on every check. */
   names: () => ReadonlySet<string>;
-  /** Text für den Tooltip einer Stelle. */
   describe: (finding: Finding) => string;
-  /** Tastenkürzel: Modus umschalten (gespeichert wird draußen, in den Einstellungen). */
+  /** Shortcut: toggle the mode (it is stored outside, in the settings). */
   toggle: () => void;
 }
 
@@ -38,15 +37,15 @@ interface RevisionState {
 
 export const revisionKey = new PluginKey<RevisionState>('revision');
 
-/** Ergebnis der letzten Prüfung; `null`, solange der Modus aus ist. */
+/** `null` while the mode is off. */
 export function revisionResult(state: EditorState): RevisionResult | null {
   return revisionKey.getState(state)?.result ?? null;
 }
 
 /**
- * Überarbeitungsmodus: markiert Nahwiederholungen, Füllwörter, lange Sätze und doppelte
- * Wörter als Dekorationen – nur Anzeige, das Dokument bleibt unverändert.
- * Geprüft wird bei jeder Änderung neu; bei Szenenlänge dauert das wenige Millisekunden.
+ * Marks close repetitions, filler words, long sentences and doubled words as decorations – display
+ * only, the document stays unchanged. Checked again on every change; at scene length that takes a
+ * few milliseconds.
  */
 export const Revision = Extension.create<RevisionOptions>({
   name: 'revision',
@@ -127,9 +126,8 @@ export const Revision = Extension.create<RevisionOptions>({
 });
 
 /**
- * Textblöcke (Absätze, Überschriften) mit Position ihres ersten Zeichens. Bilder und
- * Zeilenumbrüche werden zu einem Leerzeichen – sie belegen wie ein Zeichen genau eine
- * Position, so bleibt Textindex = Position − Start.
+ * Images and line breaks become a space – they take exactly one position like a character, so text
+ * index = position − start.
  */
 function textBlocks(doc: ProseMirrorNode): TextBlock[] {
   const blocks: TextBlock[] = [];

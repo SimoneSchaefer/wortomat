@@ -1,12 +1,12 @@
 import type { QuoteStyle } from '@wortomat/shared';
 
 /**
- * Textanalyse für deutsche Prosa: Dialoganteil, Sätze, Füllwörter, häufige Wörter.
- * Bewusst einfache Regeln – die Zahlen sollen Tendenzen zeigen, keine Linguistik ersetzen.
- * Statistik und Überarbeitungsmodus nutzen dieselben Regeln, damit sie gleich zählen.
+ * Text analysis for German prose: dialogue share, sentences, filler words, frequent words.
+ * Deliberately simple rules – the numbers should show tendencies, not replace linguistics.
+ * Statistics and revision mode share the rules so they count the same.
  */
 
-/** Feste Liste typischer Füllwörter; Mehrwortausdrücke mit Leerzeichen. */
+/** Multi-word expressions contain spaces. */
 export const FILLER_WORDS: readonly string[] = [
   'eigentlich',
   'plötzlich',
@@ -31,8 +31,8 @@ export const FILLER_WORDS: readonly string[] = [
 ];
 
 /**
- * Häufige Funktionswörter, die bei den „Lieblingswörtern“ nur stören würden
- * (Artikel, Pronomen, Präpositionen, Hilfsverben, Konjunktionen …).
+ * Common function words that would only get in the way of the "favourite words" (articles,
+ * pronouns, prepositions, auxiliaries, conjunctions …).
  */
 const STOP_WORDS = new Set(
   `aber alle allem allen aller alles als also am an ans auch auf aus bei beim bin bis bist da
@@ -51,7 +51,9 @@ const STOP_WORDS = new Set(
     .filter(Boolean),
 );
 
-/** Gängige Abkürzungen mit Punkt, die kein Satzende sind (klein, ohne Punkt). */
+/**
+ * Common abbreviations with a period that do not end a sentence (lowercase, without the period).
+ */
 const ABBREVIATIONS = new Set([
   'bzw',
   'ca',
@@ -82,8 +84,8 @@ export interface QuotePair {
 }
 
 /**
- * Wörtliche Rede je Stil – nur das jeweils erste bzw. letzte Zeichen (beim französischen Stil
- * gehören schmale Leerzeichen dazu). Ohne Ersetzen tippt man meist gerade Anführungszeichen.
+ * Direct speech per style – only the first or last character (the French style includes narrow
+ * spaces). Without replacement people usually type straight quotes.
  */
 const QUOTES: Record<QuoteStyle, QuotePair> = {
   de: { open: '„', close: '“' },
@@ -99,28 +101,28 @@ export function quotePair(style: QuoteStyle): QuotePair {
 }
 
 export interface TextStats {
-  /** Wörter (Folgen mit mindestens einem Buchstaben oder einer Ziffer). */
+  /** Runs with at least one letter or digit. */
   words: number;
-  /** Davon in wörtlicher Rede. */
+  /** Of those, in direct speech. */
   dialogueWords: number;
   sentences: number;
-  /** Füllwort → Anzahl; nur gefundene. */
+  /** Only found ones. */
   fillers: Map<string, number>;
-  /** Wort (klein) → Anzahl, ohne Stopp- und Füllwörter. */
+  /** Lowercase word → count, without stop and filler words. */
   wordCounts: Map<string, number>;
-  /** Wort (klein) → Schreibweise → Anzahl, damit „Blick“ groß angezeigt wird. */
+  /** Lowercase word → spelling → count, so "Blick" is shown capitalised. */
   wordForms: Map<string, Map<string, number>>;
 }
 
 const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u;
 const TRIM_PUNCTUATION = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu;
 
-/** Wort ohne Satzzeichen davor und dahinter („»Blick!«“ → „Blick“); leer bei reinen Zeichen. */
+/** Strips punctuation on both sides ("»Blick!«" → "Blick"); empty for punctuation only. */
 export function wordCore(token: string): string {
   return token.replace(TRIM_PUNCTUATION, '');
 }
 
-/** Bedeutungstragendes Wort (klein geschrieben übergeben): kein Funktions-/Füllwort, keine Zahl. */
+/** Pass the word lowercased. Not a function word, filler word or number. */
 export function isContentWord(word: string): boolean {
   return (
     word.length > 2 &&
@@ -130,10 +132,7 @@ export function isContentWord(word: string): boolean {
   );
 }
 
-/**
- * Füllwort an Stelle `index` der (klein geschriebenen) Wortfolge – auch aus zwei Wörtern
- * („ein wenig“). Liefert den Ausdruck und wie viele Wörter er umfasst.
- */
+/** Also two-word fillers ("ein wenig"). Returns the expression and how many words it spans. */
 export function fillerAt(
   words: readonly string[],
   index: number,
@@ -163,9 +162,9 @@ export function analyzeText(text: string, quotes: QuotePair | null): TextStats {
 }
 
 function analyzeParagraph(paragraph: string, quotes: QuotePair | null, stats: TextStats): void {
-  // Erzähltext und wörtliche Rede trennen. Am Absatzende endet die Rede immer – fehlt das
-  // schließende Zeichen (im Deutschen bei Rede über mehrere Absätze üblich), verschluckt sie
-  // so höchstens den Rest des Absatzes.
+  // Separate narration from direct speech. Speech always ends at the end of a paragraph – if the
+  // closing mark is missing (common in German for speech across paragraphs), it swallows at most
+  // the rest of the paragraph.
   if (quotes) {
     let inQuote = false;
     let dialogue = '';
@@ -182,7 +181,7 @@ function analyzeParagraph(paragraph: string, quotes: QuotePair | null, stats: Te
   const forms = tokens.map(wordCore);
   const words = forms.map((form) => form.toLowerCase());
   let wordsInSentence = 0;
-  // zweites Wort eines Füllausdrucks („ein wenig“) – nicht noch einmal einzeln zählen
+  // second word of a filler expression ("ein wenig") – do not count it again on its own
   let partOfFiller = false;
   tokens.forEach((token, index) => {
     const word = words[index]!;
@@ -207,14 +206,14 @@ function analyzeParagraph(paragraph: string, quotes: QuotePair | null, stats: Te
       wordsInSentence = 0;
     }
   });
-  // Absatz ohne Satzzeichen am Ende (z. B. eine Überschrift) zählt als ein Satz.
+  // A paragraph without final punctuation (e.g. a heading) counts as one sentence.
   if (wordsInSentence) stats.sentences++;
 }
 
 /**
- * Satzende: Punkt, Ausrufe-/Fragezeichen oder Auslassung am Wortende – außer bei
- * Abkürzungen, Einzelbuchstaben („z. B.“, „J. R.“), Ordnungszahlen („3. Mai“) und wenn das
- * nächste Wort klein beginnt („»Komm!«, rief sie“).
+ * Period, exclamation/question mark or ellipsis at the end of a word – except for abbreviations,
+ * single letters ("z. B.", "J. R."), ordinals ("3. Mai") and when the next word starts lowercase
+ * ("»Komm!«, rief sie").
  */
 export function endsSentence(token: string, word: string, nextToken: string | undefined): boolean {
   const trailing = token.replace(/[»«„“”"'’‹›)\]]+$/u, '');
@@ -238,10 +237,6 @@ function increment(map: Map<string, number>, key: string): void {
   map.set(key, (map.get(key) ?? 0) + 1);
 }
 
-// ---------------------------------------------------------------------------
-// Auswertung über das ganze Buch (Statistikseite)
-// ---------------------------------------------------------------------------
-
 const TOP_WORDS = 15;
 
 export interface SceneTextStats {
@@ -258,17 +253,17 @@ export interface WordCount {
 
 export interface BookTextStats {
   scenes: SceneTextStats[];
-  /** Gefundene Füllwörter, häufigste zuerst. */
+  /** Most frequent first. */
   fillers: WordCount[];
   /**
-   * Häufigste Wörter (ab zwei Vorkommen) ohne Funktions-, Füllwörter und `names`, in ihrer
-   * häufigsten Schreibweise.
+   * Most frequent words (from two occurrences) without function words, fillers and `names`, in
+   * their most frequent spelling.
    */
   topWords: WordCount[];
   words: number;
 }
 
-/** Wertet alle Szenen aus; `names` (z. B. Charaktere, Orte) zählen nicht als Lieblingswörter. */
+/** `names` (e.g. characters, places) do not count as favourite words. */
 export function analyzeBook(
   texts: readonly { sceneId: string; text: string }[],
   quotes: QuotePair | null,
@@ -303,8 +298,8 @@ export function analyzeBook(
   return {
     scenes,
     fillers: ranked(fillers),
-    // erst ab zwei Vorkommen – einmalige Wörter sind kein Muster; in der häufigsten
-    // Schreibweise: „Blick“, aber „ging“
+    // only from two occurrences – one-off words are no pattern; in the most frequent spelling:
+    // "Blick", but "ging"
     topWords: ranked(wordCounts)
       .filter(({ count }) => count > 1)
       .slice(0, TOP_WORDS)
@@ -317,7 +312,7 @@ function merge(into: Map<string, number>, from: ReadonlyMap<string, number>): vo
   for (const [key, count] of from) into.set(key, (into.get(key) ?? 0) + count);
 }
 
-/** Häufigste zuerst, bei Gleichstand alphabetisch. */
+/** Most frequent first, alphabetical on ties. */
 function ranked(counts: ReadonlyMap<string, number>): WordCount[] {
   return [...counts]
     .map(([word, count]) => ({ word, count }))

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Patch } from '@nestjs/common';
 import type { AppSettings, UpdateAppSettingsRequest } from '@wortomat/shared';
 import { AppSettingsService } from './app-settings.service.js';
 
-/** App-Einstellungen; funktionieren auch ohne geöffnetes Projekt. */
+/** Work without an open project too. */
 @Controller('settings')
 export class AppSettingsController {
   constructor(private readonly settings: AppSettingsService) {}

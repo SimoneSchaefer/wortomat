@@ -6,7 +6,7 @@ import type {
   ExportTemplate,
 } from '@wortomat/shared';
 
-/** Bisheriges Layout der Vorlage „Roman“: 12,5 × 19 cm, Palatino 11 pt. */
+/** The former layout of the "novel" template: 12.5 × 19 cm, Palatino 11 pt. */
 export const DEFAULT_LAYOUT: BookLayout = {
   pageWidth: 125,
   pageHeight: 190,
@@ -28,15 +28,15 @@ export const DEFAULT_SETTINGS: ExportSettings = {
 
 export interface FontSpec {
   label: string;
-  /** TeX-Pakete in Reihenfolge der Vorliebe; alle funktionieren mit pdfLaTeX. */
+  /** TeX packages in order of preference; all work with pdfLaTeX. */
   latex: readonly string[];
-  /** Schriftname in der Word-Datei (dort muss die Schrift beim Leser installiert sein). */
+  /** Font name in the Word file (the reader must have the font installed). */
   docx: string;
-  /** Für die Vorschau im Browser: TeX- und Systemnamen der Schrift. */
+  /** TeX and system names of the font, for the browser preview. */
   css: string;
-  /** Nur anbieten, wenn eins der TeX-Pakete installiert ist. */
+  /** Only offered when one of the TeX packages is installed. */
   optional?: boolean;
-  /** OpenType-Dateien aus der TeX-Installation – die Vorschau lädt genau diese Schrift. */
+  /** OpenType files from the TeX installation – the preview loads exactly this font. */
   files: FontFiles;
 }
 
@@ -50,10 +50,9 @@ const texGyre = (name: string): FontFiles => ({
   boldItalic: `texgyre${name}-bolditalic.otf`,
 });
 
-/** Courier der Normseite (für deren Vorschau). */
 export const COURIER_FILES: FontFiles = texGyre('cursor');
 
-/** Gute Buchschriften, die es als TeX-Paket und als verbreitete Systemschrift gibt. */
+/** Good book fonts that exist both as a TeX package and as a common system font. */
 export const BOOK_FONTS: Record<BookFont, FontSpec> = {
   palatino: {
     label: 'Palatino',
@@ -165,8 +164,8 @@ export const BOOK_FONTS: Record<BookFont, FontSpec> = {
       boldItalic: 'lmroman10-bolditalic.otf',
     },
   },
-  // Die LaTeX-Standardschrift. Mit T1 (Umlaute, Silbentrennung) braucht sie cm-super als
-  // Type-1-Schrift – ohne das würde pdfLaTeX unscharfe Bitmaps einsetzen, daher dann Latin Modern.
+  // The LaTeX default font. With T1 (umlauts, hyphenation) it needs cm-super as a Type 1 font –
+  // without it pdfLaTeX would use blurry bitmaps, so Latin Modern then.
   computermodern: {
     label: 'Computer Modern',
     latex: ['type1ec'],
@@ -183,7 +182,7 @@ export const BOOK_FONTS: Record<BookFont, FontSpec> = {
   },
 };
 
-/** Grenzen für die Eingaben – großzügig, aber so, dass immer ein brauchbarer Satzspiegel bleibt. */
+/** Generous, but always leaving a usable type area. */
 const LIMITS = {
   pageWidth: [80, 300],
   pageHeight: [100, 400],
@@ -196,7 +195,7 @@ const MIN_TEXT_HEIGHT = 50;
 const FORMATS: readonly ExportFormat[] = ['html', 'docx', 'pdf', 'epub'];
 const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
 
-/** Unbekanntes oder Ungültiges wird durch die Vorgabe ersetzt, Zahlen in ihre Grenzen gelegt. */
+/** Unknown or invalid values fall back to the defaults, numbers are clamped to their limits. */
 export function sanitizeLayout(input: unknown): BookLayout {
   const value = (input ?? {}) as Partial<Record<keyof BookLayout, unknown>>;
   const number = (raw: unknown, fallback: number, [min, max]: readonly [number, number]) => {
@@ -215,10 +214,10 @@ export function sanitizeLayout(input: unknown): BookLayout {
       typeof value.font === 'string' && value.font in BOOK_FONTS
         ? (value.font as BookFont)
         : d.font,
-    // halbe Punkte genügen
+    // half points are enough
     fontSize: round(number(value.fontSize, d.fontSize, LIMITS.fontSize) * 2, 0) / 2,
   };
-  // Bleibt kein sinnvoller Satzspiegel übrig, die Ränder anteilig verkleinern.
+  // If no sensible type area is left, shrink the margins proportionally.
   const shrink = (size: number, a: number, b: number, min: number): [number, number] => {
     if (size - a - b >= min) return [a, b];
     const factor = Math.max(0, size - min) / (a + b);
@@ -249,7 +248,7 @@ export function sanitizeSettings(input: unknown): ExportSettings {
       ? (value.template as ExportTemplate)
       : DEFAULT_SETTINGS.template,
     includeSceneTitles: value.includeSceneTitles === true,
-    // Ältere Einstellungen kennen den Schalter nicht – dort wurden Teile immer gedruckt
+    // Older settings do not know the switch – parts were always printed there
     includeParts: value.includeParts !== false,
     layout: sanitizeLayout(value.layout),
   };

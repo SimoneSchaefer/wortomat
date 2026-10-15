@@ -10,7 +10,7 @@ import { ProjectStore } from '../../core/project-store';
 import { APOSTROPHE, QUOTE_STYLES, type QuoteStyleInfo } from '../../core/quotes';
 import { StatusMessages } from '../../core/status-messages';
 
-/** Einstellungen der App: Route `settings`, mit und ohne geöffnetes Projekt erreichbar. */
+/** Reachable with and without an open project. */
 @Component({
   selector: 'wm-settings-page',
   templateUrl: './settings-page.html',
@@ -47,7 +47,6 @@ export class SettingsPage {
     return this.save(() => this.settings.setQuoteStyle(style));
   }
 
-  /** Beispiel mit doppelten und einfachen Anführungszeichen und einem Apostroph. */
   protected example(info: QuoteStyleInfo): string {
     const { quoteExample } = this.t().settings;
     return info.marks
@@ -64,7 +63,7 @@ export class SettingsPage {
     }
   }
 
-  /** Dorthin zurück, woher man kam – beim direkten Aufruf zum Buch bzw. zur Startseite. */
+  /** Back to where we came from – to the book or the start page when opened directly. */
   protected back(): void {
     if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
       this.location.back();

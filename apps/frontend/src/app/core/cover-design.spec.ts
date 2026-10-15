@@ -1,7 +1,7 @@
 import { wrapText } from './cover-design';
 
 describe('wrapText', () => {
-  // Jedes Zeichen 10 px breit
+  // every character 10 px wide
   const measure = (text: string) => text.length * 10;
 
   it('bricht an Leerzeichen um, so dass jede Zeile in die Breite passt', () => {

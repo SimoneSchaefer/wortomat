@@ -8,7 +8,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { MapPreview } from './map-preview';
 import { MapsStore } from './maps-store';
 
-/** „Lage“ auf der Seite eines Orts: die Karten, auf denen er eingezeichnet ist. */
+/** "Location" on a place's page: the maps it is placed on. */
 @Component({
   selector: 'wm-note-location',
   imports: [RouterLink, MapPreview],

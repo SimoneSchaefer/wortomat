@@ -3,12 +3,12 @@ import type { DesktopBridge } from '@wortomat/shared';
 
 declare global {
   interface Window {
-    /** Vom Electron-Preload bereitgestellt; fehlt im normalen Browser. */
+    /** Provided by the Electron preload; missing in a normal browser. */
     wortomat?: DesktopBridge;
   }
 }
 
-/** Zugriff auf native Funktionen der Electron-Shell; `null` im Browser-Modus. */
+/** `null` in browser mode. */
 export const DESKTOP_BRIDGE = new InjectionToken<DesktopBridge | null>('DESKTOP_BRIDGE', {
   providedIn: 'root',
   factory: () => window.wortomat ?? null,

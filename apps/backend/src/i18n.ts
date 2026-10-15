@@ -10,8 +10,8 @@ import type { Language } from '@wortomat/shared';
 import type { Request, Response } from 'express';
 
 /**
- * Meldung in allen Sprachen der Oberfläche. Ausgewählt wird erst beim Antworten – nach
- * `Accept-Language`, das das Frontend mit der eingestellten Sprache schickt.
+ * A message in every UI language. The language is chosen only when responding – from
+ * `Accept-Language`, which the frontend sends with the configured language.
  */
 export type Localized = Readonly<Record<Language, string>>;
 
@@ -28,14 +28,14 @@ export function isLocalized(value: unknown): value is Localized {
   );
 }
 
-/** Fehler mit übersetzbarer Meldung (`message` ist die deutsche, z. B. fürs Log). */
+/** `message` is the German text, e.g. for the log. */
 export class LocalizedError extends Error {
   constructor(readonly text: Localized) {
     super(text.de);
   }
 }
 
-/** Erste Sprache aus `Accept-Language`, die wir kennen; ohne Angabe Deutsch. */
+/** First language from `Accept-Language` that we know; German without one. */
 export function requestLanguage(req: Pick<Request, 'headers'>): Language {
   const header = req.headers['accept-language'] ?? '';
   for (const part of header.split(',')) {
@@ -47,8 +47,8 @@ export function requestLanguage(req: Pick<Request, 'headers'>): Language {
 }
 
 /**
- * `throw new BadRequestException(localized('…', '…'))` → `{ statusCode, message }` in der
- * Sprache der Anfrage. Alle anderen Fehler behandelt Nest wie gewohnt.
+ * `throw new BadRequestException(localized('…', '…'))` → `{ statusCode, message }` in the request's
+ * language. Nest handles all other errors as usual.
  */
 @Catch()
 export class LocalizedExceptionFilter extends BaseExceptionFilter implements ExceptionFilter {

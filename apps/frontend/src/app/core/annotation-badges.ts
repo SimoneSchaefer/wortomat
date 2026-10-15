@@ -4,9 +4,8 @@ import { type AnnotationInfo, ANNOTATION_KINDS } from './annotations';
 import { I18n } from './i18n/i18n';
 
 /**
- * Zähler der Todo/Idee/Fixme-Markierungen als farbige Badges.
- * Jede Art in `kinds` bekommt einen gleich breiten Platz – auch wo sie fehlt –, damit die
- * Zähler in einer Liste untereinander stehen; vorhandene rücken nach rechts.
+ * Every kind in `kinds` gets a slot of the same width – even where it is missing – so the counts
+ * line up in a list; present ones move to the right.
  */
 @Component({
   selector: 'wm-annotation-badges',
@@ -60,7 +59,6 @@ import { I18n } from './i18n/i18n';
 })
 export class AnnotationBadges {
   readonly counts = input.required<AnnotationCounts>();
-  /** Arten mit eigenem Platz; standardmäßig alle. */
   readonly kinds = input<readonly AnnotationInfo[]>(ANNOTATION_KINDS);
 
   protected readonly t = inject(I18n).t;

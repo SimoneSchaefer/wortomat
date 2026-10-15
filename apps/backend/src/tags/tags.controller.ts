@@ -6,7 +6,6 @@ import { TagsService } from './tags.service.js';
 export class TagsController {
   constructor(private readonly tags: TagsService) {}
 
-  /** Alle verwendeten Tags des Projekts mit Anzahl der Szenen. */
   @Get('tags')
   list(): TagSummary[] {
     return this.tags.list();

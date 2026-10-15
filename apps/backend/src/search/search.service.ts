@@ -9,14 +9,14 @@ const MARK_END = '\u0002';
 export class SearchService {
   constructor(private readonly projects: ProjectService) {}
 
-  /** Durchsucht Szenen und Notizen gemeinsam, beste Treffer zuerst. */
+  /** Best hits first. */
   search(query: string, limit = 50): SearchHit[] {
     const match = toFtsQuery(query);
     if (!match) {
       return [];
     }
-    // Ausschnitte nur aus Kurzbeschreibung und Text – der Titel wird ohnehin angezeigt.
-    // snippet() liefert auch ohne Treffer in der Spalte Text; dann bleibt der Ausschnitt leer.
+    // Snippets only from summary and text – the title is shown anyway. snippet() returns text even
+    // without a hit in the column; the snippet then stays empty.
     const rows = this.projects.db
       .prepare(
         `SELECT 'scene' AS kind, node_id AS id, title,
@@ -58,10 +58,7 @@ export class SearchService {
   }
 }
 
-/**
- * Wandelt Benutzereingaben in eine sichere FTS5-Abfrage um: Jedes Wort wird
- * in Anführungszeichen gesetzt (keine FTS-Syntax möglich) und als Präfix gesucht.
- */
+/** Every word is quoted (so no FTS syntax is possible) and searched as a prefix. */
 export function toFtsQuery(input: string): string {
   return (input ?? '')
     .split(/\s+/)

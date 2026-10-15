@@ -1,6 +1,6 @@
 import { checkRevision, LONG_SENTENCE_WORDS, REPETITION_DISTANCE } from './revision-check';
 
-/** Absätze ab Position 1, jeweils mit Abstand wie im Dokument (Absatzgrenze = 2 Positionen). */
+/** Paragraphs from position 1, spaced as in the document (paragraph boundary = 2 positions). */
 function blocks(...texts: string[]) {
   let start = 1;
   return texts.map((text) => {
@@ -12,11 +12,11 @@ function blocks(...texts: string[]) {
 
 const NO_NAMES = new Set<string>();
 
-/** Markierter Text je Fundstelle, z. B. `repetition:Blick`. */
+/** Marked text per finding, e.g. `repetition:Blick`. */
 function marks(texts: string[], names: ReadonlySet<string> = NO_NAMES) {
   const all = texts.join('\n\n');
   const result = checkRevision(blocks(...texts), names);
-  // Position → Zeichen im zusammengesetzten Text (Absatzgrenze zählt 2, wie "\n\n")
+  // position → character in the joined text (a paragraph boundary counts 2, like "\n\n")
   return result.findings.map((f) => `${f.kind}:${all.slice(f.from - 1, f.to - 1)}`);
 }
 
@@ -38,7 +38,7 @@ describe('checkRevision', () => {
   it('erkennt Wiederholungen über Absätze hinweg, aber nicht jenseits des Abstands', () => {
     expect(marks(['Der Blick.', 'Ein Blick.'])).toEqual(['repetition:Blick', 'repetition:Blick']);
     const filler = Array.from({ length: REPETITION_DISTANCE }, (_, i) => `wort${i}`).join(' ');
-    // (der Testsatz ist selbst lang – nur die Wiederholungen ansehen)
+    // (the test sentence is long itself – only look at the repetitions)
     expect(marks([`Blick ${filler} Blick`]).filter((m) => m.startsWith('repetition'))).toEqual([]);
   });
 
@@ -55,7 +55,7 @@ describe('checkRevision', () => {
 
   it('markiert doppelte Wörter nur ohne Satzzeichen dazwischen', () => {
     expect(marks(['Er sah den den Fluss.'])).toEqual(['double:den den']);
-    // mit Komma ist es kein Tippfehler, sondern höchstens eine Wiederholung
+    // with a comma it is no typo, at most a repetition
     expect(marks(['»Komm, komm!«']).filter((m) => m.startsWith('double'))).toEqual([]);
   });
 

@@ -1,15 +1,15 @@
 import type { WritingDay } from '@wortomat/shared';
 
-/** Untergrenzen der Farbstufen 1–5 (geschriebene Wörter am Tag). */
+/** Lower bounds of colour levels 1–5 (words written per day). */
 export const LEVEL_THRESHOLDS = [1, 250, 500, 1000, 2000] as const;
 
 export interface CalendarDay {
   /** YYYY-MM-DD */
   day: string;
-  /** Nach heute: Platzhalter am Ende der letzten Woche. */
+  /** After today: placeholders at the end of the last week. */
   future: boolean;
   entry: WritingDay | null;
-  /** 0 = nichts geschrieben, 1–5 nach `LEVEL_THRESHOLDS`. */
+  /** 0 = nothing written, 1–5 by `LEVEL_THRESHOLDS`. */
   level: number;
 }
 
@@ -29,8 +29,8 @@ export function level(words: number): number {
 }
 
 /**
- * Wochen (Montag bis Sonntag) bis einschließlich der Woche von `today`, älteste zuerst.
- * Jede Woche hat 7 Tage; Tage nach heute sind als `future` markiert.
+ * Weeks (Monday to Sunday) up to and including the week of `today`, oldest first. Every week has 7
+ * days; days after today are marked as `future`.
  */
 export function calendarWeeks(
   today: string,
@@ -68,7 +68,7 @@ export function writingSummary(today: string, entries: readonly WritingDay[]): W
   return { today: sum(today), last7: sum(since(7)), last30: sum(since(30)), best };
 }
 
-/** YYYY-MM-DD als Datum um Mitternacht Ortszeit. */
+/** At midnight local time. */
 export function parseDay(day: string): Date {
   const [year, month, date] = day.split('-').map(Number);
   return new Date(year!, month! - 1, date!);
@@ -80,12 +80,12 @@ export function formatDay(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-/** Über den Kalender gezählt – sicher bei Sommer-/Winterzeit. */
+/** Counted by calendar – safe across daylight saving changes. */
 function addDays(date: Date, days: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 }
 
-/** 0 = Montag … 6 = Sonntag */
+/** 0 = Monday … 6 = Sunday */
 function weekday(date: Date): number {
   return (date.getDay() + 6) % 7;
 }

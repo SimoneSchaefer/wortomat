@@ -11,16 +11,13 @@ import { WortomatApi } from '../../core/wortomat-api';
 
 const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
 
-/** Eine Gruppe mit ihren Notizen; `group` ist `null` für „ohne Gruppe“. */
+/** `group` is `null` for "no group". */
 export interface GroupedNotes {
   group: NoteGroup | null;
   notes: NoteSummary[];
 }
 
-/**
- * Charaktere, Orte und Recherchen des geöffneten Projekts.
- * Wird im Arbeitsbereich bereitgestellt und daher bei jedem Projektwechsel neu angelegt.
- */
+/** Provided in the workspace and therefore created anew on every project switch. */
 @Injectable()
 export class NotesStore {
   private readonly api = inject(WortomatApi);
@@ -28,7 +25,6 @@ export class NotesStore {
   readonly notes = signal<NoteSummary[]>([]);
   readonly groups = signal<NoteGroup[]>([]);
   readonly loaded = signal(false);
-  /** Eingeklappte Gruppen in der Seitenleiste (Gruppen-IDs). */
   readonly collapsedGroups = signal<ReadonlySet<string>>(new Set());
 
   async load(): Promise<void> {
@@ -38,14 +34,14 @@ export class NotesStore {
     this.loaded.set(true);
   }
 
-  /** Alphabetisch sortiert („Ärztin“ bei A, „Kapitel 10“ nach „Kapitel 9“). */
+  /** Alphabetical ("Ärztin" under A, "Kapitel 10" after "Kapitel 9"). */
   byKind(kind: NoteKind): NoteSummary[] {
     return this.notes()
       .filter((note) => note.kind === kind)
       .sort((a, b) => collator.compare(a.title, b.title));
   }
 
-  /** Gruppen einer Art in ihrer Reihenfolge (vom Backend so geliefert, neue hinten). */
+  /** In their order (as the backend delivers them, new ones last). */
   groupsOfKind(kind: NoteKind): NoteGroup[] {
     return this.groups().filter((group) => group.kind === kind);
   }
@@ -54,7 +50,7 @@ export class NotesStore {
     return id === null ? undefined : this.groups().find((group) => group.id === id);
   }
 
-  /** Alle Gruppen (auch leere), dahinter die Notizen ohne Gruppe – sofern es welche gibt. */
+  /** All groups (empty ones too), followed by the notes without a group – if there are any. */
   groupedByKind(kind: NoteKind): GroupedNotes[] {
     const notes = this.byKind(kind);
     const grouped: GroupedNotes[] = this.groupsOfKind(kind).map((group) => ({
@@ -92,14 +88,14 @@ export class NotesStore {
     this.notes.update((notes) => notes.map((note) => (note.id === id ? updated : note)));
   }
 
-  /** Nach Änderungen an der Galerie: Profilbild in der Liste aktualisieren. */
+  /** After changes to the gallery: update the profile picture in the list. */
   setCover(id: string, coverImageUrl: string | null, coverCrop: ImageCrop | null): void {
     this.notes.update((notes) =>
       notes.map((note) => (note.id === id ? { ...note, coverImageUrl, coverCrop } : note)),
     );
   }
 
-  /** Nach dem Speichern des Textes: Todo/Idee/Fixme-Zähler in der Liste aktualisieren. */
+  /** After saving the text: update the todo/idea/fixme counts in the list. */
   setAnnotations(id: string, annotations: AnnotationCounts): void {
     this.notes.update((notes) =>
       notes.map((note) => (note.id === id ? { ...note, annotations } : note)),
@@ -110,8 +106,6 @@ export class NotesStore {
     await this.api.deleteNote(id);
     this.notes.update((notes) => notes.filter((note) => note.id !== id));
   }
-
-  // Gruppen --------------------------------------------------------------------
 
   async createGroup(kind: NoteKind, name: string): Promise<NoteGroup> {
     const group = await this.api.createNoteGroup({ kind, name });
@@ -124,12 +118,12 @@ export class NotesStore {
     this.groups.update((groups) => groups.map((group) => (group.id === id ? updated : group)));
   }
 
-  /** Vor eine andere Gruppe derselben Art setzen; `null` = ans Ende. */
+  /** `null` = at the end. */
   async moveGroup(id: string, beforeId: string | null): Promise<void> {
     this.groups.set(await this.api.moveNoteGroup(id, { beforeId }));
   }
 
-  /** Die Notizen der Gruppe bleiben erhalten und stehen danach ohne Gruppe da. */
+  /** The group's notes are kept and end up without a group. */
   async removeGroup(id: string): Promise<void> {
     await this.api.deleteNoteGroup(id);
     this.groups.update((groups) => groups.filter((group) => group.id !== id));

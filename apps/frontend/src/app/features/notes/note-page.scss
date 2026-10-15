@@ -4,13 +4,13 @@
   min-height: 100%;
 }
 
-// Kopf: links Art, Titel, Kurzbeschreibung – bei Charakteren rechts die Bildergalerie.
+// Head: kind, title and summary on the left – for characters the image gallery on the right.
 .note-head {
   margin-bottom: 1.75rem;
 
   &.with-gallery {
     display: grid;
-    // Breite Spalte, damit das Bild im Querformat nicht winzig wirkt
+    // A wide column so the landscape image does not look tiny
     grid-template-columns: minmax(0, 1fr) 17rem;
     gap: 1.5rem;
     align-items: start;
@@ -21,14 +21,14 @@
   }
 }
 
-// Rechte Spalte: Bildergalerie, bei Orten darunter die Lage auf den Karten
+// Right column: image gallery, for places the map location below it
 .side {
   display: grid;
   gap: 1rem;
   min-width: 0;
 }
 
-// Schmales Fenster: Galerie über den Titel statt daneben.
+// Narrow window: gallery above the title instead of next to it.
 @media (max-width: 62rem) {
   .note-head.with-gallery {
     grid-template-columns: minmax(0, 1fr);

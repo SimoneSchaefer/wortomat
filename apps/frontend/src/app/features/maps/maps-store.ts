@@ -3,8 +3,8 @@ import type { MapSummary, PlaceMap } from '@wortomat/shared';
 import { WortomatApi } from '../../core/wortomat-api';
 
 /**
- * Karten des geöffneten Projekts (nur die Liste; Zeichnung und Orte lädt die Kartenseite).
- * Wird im Arbeitsbereich bereitgestellt und daher bei jedem Projektwechsel neu angelegt.
+ * Only the list; the map page loads drawing and places. Provided in the workspace and therefore
+ * created anew on every project switch.
  */
 @Injectable()
 export class MapsStore {
@@ -26,7 +26,7 @@ export class MapsStore {
     return map;
   }
 
-  /** Nach dem Speichern auf der Kartenseite: Name in der Liste nachziehen. */
+  /** After saving on the map page: update the name in the list. */
   updated(map: PlaceMap): void {
     this.maps.update((maps) => maps.map((entry) => (entry.id === map.id ? summary(map) : entry)));
   }

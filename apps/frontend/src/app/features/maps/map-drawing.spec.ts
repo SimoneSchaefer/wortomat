@@ -25,7 +25,7 @@ describe('simplify', () => {
 
 describe('smooth', () => {
   it('glättet Zittern, behält aber Anfang und Ende', () => {
-    // Zickzack um die Gerade y = 0
+    // zigzag around the line y = 0
     const jagged = Array.from({ length: 41 }, (_, i) => [i * 5, i % 2 ? 4 : -4]).flat();
     const result = smooth(jagged, 5, 4);
     expect(result.slice(0, 2)).toEqual([0, -4]);
@@ -41,7 +41,7 @@ describe('smooth', () => {
   it('glättet Flächen auch über die Naht', () => {
     const square = [0, 0, 100, 0, 100, 100, 0, 100, 0, 0];
     const result = smooth(square, 10, 3, true);
-    // die Ecke am Anfang wird ebenfalls abgerundet
+    // the corner at the start is rounded too
     expect(result[0]).toBeGreaterThan(0);
   });
 });

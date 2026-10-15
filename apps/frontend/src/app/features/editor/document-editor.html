@@ -1,11 +1,11 @@
 <article class="page">
-  <!-- Eigener Block, damit Titel & Co. ihr Layout (Abstände) außerhalb der Flex-Spalte behalten -->
+  <!-- A block of its own so the title etc. keep their layout (spacing) outside the flex column -->
   <div>
     <ng-content />
   </div>
-  <!-- Toolbar und Text als ein Kasten: die Formatierung gilt nur für den Text darunter -->
+  <!-- Toolbar and text as one box: the formatting only applies to the text below -->
   <div class="writing">
-    <!-- Klebt beim Scrollen oben; die Leiste darin wird dann eckig (siehe SCSS) -->
+    <!-- Sticks to the top when scrolling; the bar inside then gets square corners (see SCSS) -->
     <div class="toolbar-sticky">
       <div class="toolbar" role="toolbar" [attr.aria-label]="t().editor.toolbar">
         <button
@@ -56,7 +56,6 @@
           </button>
         }
         <span class="sep"></span>
-        <!-- Ganz rechts: entfernt alle Formatierungen samt Markierungen -->
         <button
           type="button"
           class="clear"
@@ -64,7 +63,6 @@
           [attr.aria-label]="t().editor.clearFormat"
           (click)="command('clearFormat')"
         >
-          <!-- „T“ mit Schrägstrich: Formatierung entfernen -->
           <svg viewBox="0 0 16 16" aria-hidden="true">
             <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
           </svg>
@@ -88,7 +86,7 @@
         </button>
         @if (revisable()) {
           <span class="sep"></span>
-          <!-- Überarbeitungsmodus: markiert Wiederholungen, Füllwörter … (nur Anzeige); nur Symbol, damit die Leiste nicht umbricht -->
+          <!-- Icon only, so the bar does not wrap -->
           <button
             type="button"
             class="revision"
@@ -106,7 +104,6 @@
           </button>
         }
       </div>
-      <!-- Markierung am Cursor: Notiz (selbst eingetragen oder vom Korrekturlesen) und Vorschlag -->
       @if (annotation(); as mark) {
         <div class="mark-note" role="note" [style.--annotation-color]="colorOf(mark.kind)">
           <span class="mark-label">{{ t().annotations[mark.kind].label }}</span>
@@ -164,7 +161,6 @@
         </div>
       }
     </div>
-    <!-- Alle Markierungen im Text; ein Klick springt an die Stelle -->
     @let listed = allAnnotations();
     @if (listed.length) {
       <section class="mark-list">
@@ -219,7 +215,6 @@
   <span>{{ t().words(wordCount()) }}</span>
   <span class="status" [class]="status()">{{ t().editor.saveStatus[status()] }}</span>
   @if (revising() && revision(); as result) {
-    <!-- je Art: Anzahl, ein Klick springt zur nächsten Stelle -->
     <span class="findings" role="group" [attr.aria-label]="t().revision.label">
       @for (kind of findingKinds; track kind) {
         <button

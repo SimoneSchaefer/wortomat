@@ -12,13 +12,10 @@ import {
 import { I18n } from './i18n/i18n';
 
 export interface ConfirmRequest {
-  /** Die Frage als Überschrift, z. B. „Szene löschen?“ */
   title: string;
-  /** Was genau passiert. */
   message: string;
-  /** Beschriftung der bestätigenden Schaltfläche, z. B. „Löschen“. */
   confirmLabel: string;
-  /** Unumkehrbar (Löschen): Schaltfläche rot, Hinweis dazu. Standard: ja. */
+  /** Irreversible (deleting): red button plus a hint. Defaults to true. */
   destructive?: boolean;
 }
 
@@ -26,16 +23,13 @@ interface PendingRequest extends ConfirmRequest {
   resolve: (confirmed: boolean) => void;
 }
 
-/**
- * Ersatz für `window.confirm()`: fragt in einem eigenen Dialog nach und liefert,
- * ob bestätigt wurde. Angezeigt wird der Dialog von {@link ConfirmDialogHost}.
- */
+/** Replacement for `window.confirm()`. The dialog is rendered by {@link ConfirmDialogHost}. */
 @Injectable({ providedIn: 'root' })
 export class ConfirmDialog {
   readonly pending = signal<PendingRequest | null>(null);
 
   ask(request: ConfirmRequest): Promise<boolean> {
-    // Eine noch offene Frage gilt als abgebrochen.
+    // A question still open counts as cancelled.
     this.pending()?.resolve(false);
     return new Promise((resolve) => this.pending.set({ ...request, resolve }));
   }
@@ -48,7 +42,7 @@ export class ConfirmDialog {
   }
 }
 
-/** Der Dialog selbst – einmal in der App eingebunden. */
+/** Included once in the app. */
 @Component({
   selector: 'wm-confirm-dialog',
   template: `
@@ -69,7 +63,7 @@ export class ConfirmDialog {
             }
           </p>
           <footer>
-            <!-- Fokus auf „Abbrechen“: Ein versehentliches Enter löscht nichts. -->
+            <!-- Focus on "Cancel": an accidental Enter deletes nothing. -->
             <button type="button" class="cancel" (click)="confirm.answer(false)">
               {{ t().confirm.cancel }}
             </button>
@@ -141,7 +135,7 @@ export class ConfirmDialog {
     .danger {
       border-color: var(--danger);
       background: var(--danger);
-      // hell auf dunklem Rot bzw. dunkel auf hellem Rot (dunkles Farbschema)
+      // light on dark red, or dark on light red (dark colour scheme)
       color: var(--bg);
 
       &:hover:not(:disabled) {
@@ -175,7 +169,7 @@ export class ConfirmDialogHost {
       const dialog = this.dialog().nativeElement;
       if (this.confirm.pending() && !dialog.open) {
         dialog.showModal();
-        // Erst nach dem Rendern gibt es die Schaltflächen
+        // The buttons only exist after rendering
         afterNextRender(() => dialog.querySelector<HTMLElement>('.cancel')?.focus(), {
           injector: this.injector,
         });
@@ -185,7 +179,7 @@ export class ConfirmDialogHost {
     });
   }
 
-  /** Klick auf den abgedunkelten Hintergrund bricht ab (nur der trifft das Dialog-Element). */
+  /** Only a click on the dimmed backdrop hits the dialog element itself. */
   protected closeOnBackdrop(event: MouseEvent): void {
     if (event.target === this.dialog().nativeElement) this.confirm.answer(false);
   }

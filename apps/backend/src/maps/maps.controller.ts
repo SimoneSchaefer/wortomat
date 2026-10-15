@@ -26,7 +26,6 @@ export class MapsController {
     return this.maps.update(id, body);
   }
 
-  /** Karten, auf denen ein Ort eingezeichnet ist. */
   @Get('notes/:id/maps')
   containing(@Param('id') noteId: string): PlaceMap[] {
     return this.maps.containing(noteId);

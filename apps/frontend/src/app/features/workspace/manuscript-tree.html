@@ -1,6 +1,8 @@
-<!-- Zähler für Todo/Idee/Fixme; bei Kapiteln und Teilen die Summe der Szenen darunter –
-     aber nur zugeklappt, aufgeklappt stehen sie ja an den Szenen. Nur vorhandene Arten, rechtsbündig aufgerückt (keine Lücken). Der Bereich ist überall
-     gleich breit, damit die Wortzahl dahinter (ebenfalls summiert) bündig untereinander steht. -->
+<!--
+  Todo/idea/fixme counts; for chapters and parts the sum of the scenes below – but only when
+  collapsed, expanded they sit on the scenes. Only present kinds, right-aligned without gaps. The
+  area is equally wide everywhere so the word count after it (summed too) lines up.
+-->
 <ng-template #rowStats let-counts let-words="words">
   <wm-annotation-badges [counts]="counts" [kinds]="annotationKinds()" />
   <span class="count">{{ t().number(words) }}</span>
@@ -84,7 +86,7 @@
           }
 
           @if (editingId() !== item.node.id) {
-            <!-- Symbole als SVG: Textzeichen wie + und × sitzen je nach Schrift nicht mittig -->
+            <!-- Icons as SVG: text glyphs like + and × sit off centre depending on the font -->
             <span class="actions">
               @if (item.node.kind === 'chapter') {
                 <button
@@ -112,7 +114,9 @@
                 [attr.aria-label]="t().common.delete"
                 (click)="remove(item.node)"
               >
-                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7" /></svg>
+                <svg viewBox="0 0 12 12" aria-hidden="true">
+                  <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+                </svg>
               </button>
             </span>
           }

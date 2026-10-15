@@ -3,9 +3,8 @@ import { Injectable } from '@angular/core';
 type Flush = () => Promise<void>;
 
 /**
- * Sammelstelle für „bitte jetzt sofort speichern“. Komponenten mit ungespeicherten
- * Änderungen (z. B. der Editor mit Autosave-Verzögerung) melden sich hier an.
- * Aufgerufen vor dem Schließen des Fensters oder des Projekts.
+ * Collects "please save right now" requests. Components with unsaved changes (e.g. the editor with
+ * its autosave delay) register here. Called before the window or the project closes.
  */
 @Injectable({ providedIn: 'root' })
 export class PendingSaves {

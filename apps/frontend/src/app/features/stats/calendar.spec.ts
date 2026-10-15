@@ -6,7 +6,7 @@ function day(date: string, added: number): WritingDay {
 }
 
 describe('calendarWeeks', () => {
-  // 13.10.2026 ist ein Dienstag
+  // 13 Oct 2026 is a Tuesday
   const weeks = calendarWeeks('2026-10-13', [day('2026-10-13', 600), day('2026-10-05', 10)], 2);
 
   it('beginnt jede Woche am Montag und endet mit der Woche von heute', () => {
@@ -21,7 +21,7 @@ describe('calendarWeeks', () => {
   });
 
   it('zählt über die Zeitumstellung hinweg richtig', () => {
-    // 25.10.2026: Ende der Sommerzeit in Europa
+    // 25 Oct 2026: end of daylight saving time in Europe
     const days = calendarWeeks('2026-10-28', [], 2)
       .flat()
       .map((d) => d.day);

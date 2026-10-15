@@ -1,22 +1,22 @@
 import type { StoryMark } from '@wortomat/shared';
 
-/** Eine Spalte der Handlung: Szenen, die gleichzeitig passieren. */
+/** Scenes that happen at the same time. */
 export interface StoryColumn {
   sceneIds: string[];
-  /** Gespeicherte Position; `null` bei Szenen, die noch nie platziert wurden. */
+  /** `null` for scenes that were never placed. */
   value: number | null;
 }
 
 /**
- * Reihenfolge der Handlung aus den Szenen in Buchreihenfolge. Platzierte Szenen stehen nach
- * ihrer Position (gleiche Position = eine Spalte). Nie platzierte Szenen – alle, solange man
- * nichts geordnet hat, später nur neue – folgen direkt der Szene, die im Buch davor steht.
+ * Placed scenes go by their position (same position = one column). Never placed scenes – all of
+ * them until something was arranged, later only new ones – follow right after the scene before them
+ * in the book.
  */
 export function storyColumns(
   scenes: ReadonlyArray<{ id: string; storyOrder: number | null }>,
 ): StoryColumn[] {
   const placed = new Map<number, string[]>();
-  /** Nie platzierte Szenen je Spalte, hinter der sie stehen (`null` = ganz vorn). */
+  /** Never placed scenes per column they follow (`null` = at the very front). */
   const following = new Map<number | null, string[]>();
   let anchor: number | null = null;
   for (const scene of scenes) {
@@ -36,14 +36,13 @@ export function storyColumns(
   return columns;
 }
 
-/** Wohin eine Szene gezogen wird. */
 export type DropTarget =
-  /** in dieselbe Spalte wie diese Szene: gleichzeitig */
+  /** into the same column as this scene: simultaneous */
   | { join: string }
-  /** als eigene Spalte vor die Spalte mit dieser Szene; `null` = ans Ende */
+  /** as a column of its own before the column with this scene; `null` = at the end */
   | { before: string | null };
 
-/** Verschiebt eine Szene; leere Spalten fallen weg. */
+/** Empty columns drop out. */
 export function moveScene(
   columns: readonly (readonly string[])[],
   sceneId: string,
@@ -65,9 +64,9 @@ export function moveScene(
 }
 
 /**
- * Szenen, die im Buch an anderer Stelle stehen als in der Handlung (Rückblenden, Vorgriffe …):
- * alle außer der längsten Folge, deren Reihenfolge in beiden übereinstimmt – also so wenige
- * wie möglich. Gleichzeitige Szenen zählen in Buchreihenfolge.
+ * Scenes placed differently in the book than in the story (flashbacks, flash-forwards …): all
+ * except the longest sequence whose order matches in both – so as few as possible. Simultaneous
+ * scenes count in book order.
  */
 export function displacedScenes(
   columns: readonly (readonly string[])[],
@@ -76,8 +75,8 @@ export function displacedScenes(
   const sequence = columns.flatMap((ids) =>
     [...ids].sort((a, b) => bookIndex.get(a)! - bookIndex.get(b)!),
   );
-  // Längste aufsteigende Teilfolge (Patience Sorting) über die Buchpositionen
-  const tails: number[] = []; // Index in `sequence` des kleinsten Endes je Länge
+  // Longest increasing subsequence (patience sorting) over the book positions
+  const tails: number[] = []; // index in `sequence` of the smallest end per length
   const previous = new Array<number>(sequence.length).fill(-1);
   sequence.forEach((id, i) => {
     const value = bookIndex.get(id)!;
@@ -97,8 +96,8 @@ export function displacedScenes(
 }
 
 /**
- * Welche Marke vor welcher Spalte beginnt: vor der ersten platzierten Spalte, deren Position
- * mindestens so groß ist wie die der Marke. Marken ohne solche Spalte fallen weg.
+ * Before the first placed column whose position is at least the mark's. Marks without such a column
+ * drop out.
  */
 export function marksByColumn(
   columns: readonly StoryColumn[],
@@ -116,8 +115,8 @@ export function marksByColumn(
 }
 
 /**
- * Wo eine Marke nach dem Verschieben einer Szene steht: weiter vor derselben Spalte – oder,
- * wenn die verschobene Szene allein dort stand, vor der Spalte, die danach kam.
+ * Still before the same column – or, if the moved scene stood alone there, before the column that
+ * came after it.
  */
 export function remapMark(
   before: readonly (readonly string[])[],

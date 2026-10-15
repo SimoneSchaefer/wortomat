@@ -1,17 +1,16 @@
 import type { EditorDoc, NoteKind } from '@wortomat/shared';
 
-/** Texte je Art (Bezeichnung, Platzhalter, Gliederung …): `t().noteKinds[kind]`. */
+/** Texts per kind (label, placeholder, outline …): `t().noteKinds[kind]`. */
 export interface NoteKindConfig {
   kind: NoteKind;
-  /** Pfad unter /write, z. B. `characters`. */
+  /** Path below /write, e.g. `characters`. */
   path: string;
-  /** Eigene Bildergalerie (erstes Bild = Profilbild, auch als Avatar in der Liste). */
+  /** Own image gallery (first image = profile picture, also the avatar in the list). */
   gallery: boolean;
-  /** Symbol in der leeren Galerie. */
   galleryIcon: 'person' | 'picture';
-  /** Mit Szenen verknüpfbar („kommt vor in …“). */
+  /** Can be linked to scenes ("appears in …"). */
   linkable: boolean;
-  /** Lässt sich auf Karten einzeichnen (Vorschau der Lage auf der Seite). */
+  /** Can be placed on maps (location preview on the page). */
   mappable: boolean;
 }
 
@@ -45,8 +44,8 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
 export const NOTE_KIND_LIST: readonly NoteKindConfig[] = Object.values(NOTE_KINDS);
 
 /**
- * Vorgeschlagene Gliederung für neue Einträge – frei änderbar: Zwischenüberschriften mit
- * je einem leeren Absatz darunter. Ohne Überschriften `null` (leeres Dokument).
+ * Suggested outline for new entries – freely editable: subheadings with an empty paragraph below
+ * each. Without headings `null` (empty document).
  */
 export function outlineDoc(headings: readonly string[]): EditorDoc | null {
   if (!headings.length) return null;
