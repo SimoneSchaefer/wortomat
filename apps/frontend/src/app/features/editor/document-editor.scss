@@ -146,6 +146,8 @@
 .statusbar {
   position: sticky;
   bottom: 0;
+  // Above the text box's focus ring (z-index 2), which would otherwise be drawn across the bar
+  z-index: 3;
   display: flex;
   gap: 1.25rem;
   padding: 0.35rem 1rem;
