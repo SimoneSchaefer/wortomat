@@ -2,7 +2,15 @@
   <div class="head">
     <span class="label">{{ t().maps.label }}</span>
     @if (store.maps().length) {
-      <button type="button" class="add" [title]="t().maps.add" (click)="add()">+</button>
+      <button
+        type="button"
+        class="add"
+        [title]="t().maps.add"
+        [attr.aria-label]="t().maps.add"
+        (click)="add()"
+      >
+        +
+      </button>
     }
   </div>
   <ul>
@@ -15,7 +23,13 @@
           </svg>
           <span class="name" [title]="map.name">{{ map.name }}</span>
         </a>
-        <button type="button" class="remove" [title]="t().common.delete" (click)="remove(map)">
+        <button
+          type="button"
+          class="remove"
+          [title]="t().common.delete"
+          [attr.aria-label]="t().maps.deleteLabel(map.name)"
+          (click)="remove(map)"
+        >
           ×
         </button>
       </li>

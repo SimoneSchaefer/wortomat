@@ -228,6 +228,7 @@ export const en: Texts = {
     add: 'Draw a new map',
     addFirst: '+ Draw a map',
     deleteTitle: 'Delete map?',
+    deleteLabel: (name: string) => `Delete map ${name}`,
     deleteMessage: (name: string) =>
       `“${name}” will be deleted along with its drawing. The places themselves are kept.`,
     notFound: 'This map no longer exists.',

@@ -21,6 +21,7 @@
             class="tool"
             [attr.aria-pressed]="tool() === entry"
             [title]="t().maps[entry]"
+            [attr.aria-label]="t().maps[entry]"
             (click)="selectTool(entry)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -100,6 +101,7 @@
           class="zoom-level"
           [disabled]="zoom() <= 1"
           [title]="t().maps.zoomFit + ' (0) – ' + t().maps.zoomHint"
+          [attr.aria-label]="t().maps.zoomFit + ' (' + zoomPercent() + ' %)'"
           (click)="fitView()"
         >
           {{ zoomPercent() }} %
