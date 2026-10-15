@@ -40,6 +40,26 @@ test('exports the manuscript as Word document', async ({ page }) => {
   expect(bytes.subarray(0, 2).toString()).toBe('PK');
 });
 
+test('keeps a format chosen while pdfLaTeX is still being detected', async ({ page }) => {
+  let detect!: () => void;
+  const detecting = new Promise<void>((resolve) => (detect = resolve));
+  await page.route('**/api/export/capabilities', async (route) => {
+    await detecting;
+    await route.continue();
+  });
+
+  await page.getByRole('button', { name: 'Export' }).click();
+  await expect(page.getByText('Suche pdfLaTeX …')).toBeVisible();
+  await chooseFormat(page, 'HTML');
+  detect();
+  await expect(page.getByText('Suche pdfLaTeX …')).toBeHidden();
+  await expect(page.getByRole('radio', { name: 'HTML' })).toBeChecked();
+
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Herunterladen' }).click();
+  expect((await downloading).suggestedFilename()).toMatch(/\.html$/);
+});
+
 test('creates a proofreading copy for the phone', async ({ page }) => {
   await page.getByRole('button', { name: 'Korrektur' }).click();
 
@@ -55,9 +75,8 @@ test('creates a proofreading copy for the phone', async ({ page }) => {
 
 // The radio buttons are hidden behind styled cards, so pick the card as a user would.
 async function chooseFormat(page: Page, label: string): Promise<void> {
-  // Loading the remembered settings sets the format, so a choice made earlier would be lost.
-  await expect(page.getByRole('button', { name: 'Herunterladen' })).toBeVisible();
-  await expect(page.getByText('Suche pdfLaTeX …')).toBeHidden();
+  // The options stay locked until the remembered settings have loaded.
+  await expect(page.getByRole('radio', { name: label })).toBeEnabled();
   await page.locator('label.choice').filter({ hasText: label }).click();
   await expect(page.getByRole('radio', { name: label })).toBeChecked();
 }
