@@ -5,7 +5,8 @@ import { mkdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
-const tmp = path.join(import.meta.dirname, '.tmp');
+// One folder per port, so a second run (e.g. next to `--ui`) does not wipe the first one's books.
+const tmp = path.join(import.meta.dirname, '.tmp', process.env['PORT'] ?? 'default');
 
 rmSync(tmp, { recursive: true, force: true });
 for (const dir of ['data', 'books', 'downloads'])
