@@ -1,6 +1,7 @@
 import {
   AlignmentType,
   Document,
+  ExternalHyperlink,
   Footer,
   Header,
   ImageRun,
@@ -15,8 +16,8 @@ import {
 } from 'docx';
 import JSZip from 'jszip';
 import type { BookLayout, ExportTemplate } from '@wortomat/shared';
-import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
-import { fitImage, normseitenLabel, printMarks } from './book.js';
+import type { BlockAlign, Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
+import { blockFormat, fitImage, linkHref, normseitenLabel, printMarks } from './book.js';
 import { BOOK_FONTS, DEFAULT_LAYOUT } from './layout.js';
 import { type Localized, localized } from '../i18n.js';
 
@@ -374,29 +375,40 @@ function block(node: JsonNode, ctx: Context, extra: ParagraphExtra): Paragraph[]
     case 'paragraph': {
       const children = inline(node.content ?? [], extra.italics ?? false);
       if (!children.length) return [];
-      const firstLine = extra.indentLeft || extra.prefix ? 0 : ctx.indentNext ? layout.indent : 0;
+      const { align, indent } = blockFormat(node);
+      // A first-line indent would push centred or right-aligned lines off their axis
+      const firstLine =
+        extra.indentLeft || extra.prefix || align === 'center' || align === 'right'
+          ? 0
+          : ctx.indentNext
+            ? layout.indent
+            : 0;
       ctx.indentNext = true;
       return [
         new Paragraph({
-          alignment: extra.prefix ? AlignmentType.LEFT : layout.align,
+          alignment: extra.prefix ? AlignmentType.LEFT : alignment(align, layout),
           indent: {
             firstLine,
-            left: extra.indentLeft ?? 0,
+            left: (extra.indentLeft ?? 0) + indent * INDENT_STEP,
             hanging: extra.prefix ? 284 : undefined,
           },
           children: extra.prefix ? [new TextRun(extra.prefix), ...children] : children,
         }),
       ];
     }
-    case 'heading':
+    case 'heading': {
       ctx.indentNext = false;
+      const { align, indent } = blockFormat(node);
       return [
         new Paragraph({
           keepNext: true,
+          alignment: align ? alignment(align, layout) : undefined,
+          indent: indent ? { left: indent * INDENT_STEP } : undefined,
           spacing: { before: layout.line, after: layout === NORMSEITE ? 0 : 120 },
-          children: inline(node.content ?? [], false).map((run) => run),
+          children: inline(node.content ?? [], false),
         }),
       ];
+    }
     case 'blockquote': {
       const result = blocks(node.content ?? [], ctx, {
         ...extra,
@@ -440,6 +452,22 @@ function block(node: JsonNode, ctx: Context, extra: ParagraphExtra): Paragraph[]
     default:
       return node.content ? blocks(node.content, ctx, extra) : [];
   }
+}
+
+/** One indentation step from the editor's toolbar: 1 cm. */
+const INDENT_STEP = 567;
+
+const ALIGNMENT = {
+  left: AlignmentType.LEFT,
+  center: AlignmentType.CENTER,
+  right: AlignmentType.RIGHT,
+  justify: AlignmentType.BOTH,
+} as const;
+
+/** The standard page is always ragged – justified text would break its fixed characters per line. */
+function alignment(align: BlockAlign | null, layout: Layout): Layout['align'] {
+  if (!align || (align === 'justify' && layout === NORMSEITE)) return layout.align;
+  return ALIGNMENT[align];
 }
 
 function imageParagraph(node: JsonNode, ctx: Context): Paragraph {
@@ -489,17 +517,17 @@ function inline(nodes: JsonNode[], italicsDefault: boolean): ParagraphChild[] {
       runs.push(new TextRun({ text: '', break: 1 }));
     } else if (node.type === 'text' && node.text) {
       const marks = printMarks(node);
-      runs.push(
-        new TextRun({
-          text: node.text,
-          // only set what applies – otherwise every run says "bold: no, italic: no …"
-          bold: marks.has('bold') || undefined,
-          italics: marks.has('italic') !== italicsDefault || undefined, // italic inside a quote turns upright
-          underline: marks.has('underline') ? {} : undefined,
-          strike: marks.has('strike') || undefined,
-          font: marks.has('code') ? 'Courier New' : undefined,
-        }),
-      );
+      const run = new TextRun({
+        text: node.text,
+        // only set what applies – otherwise every run says "bold: no, italic: no …"
+        bold: marks.has('bold') || undefined,
+        italics: marks.has('italic') !== italicsDefault || undefined, // italic inside a quote turns upright
+        underline: marks.has('underline') ? {} : undefined,
+        strike: marks.has('strike') || undefined,
+        font: marks.has('code') ? 'Courier New' : undefined,
+      });
+      const href = marks.has('link') ? linkHref(node) : null;
+      runs.push(href ? new ExternalHyperlink({ link: href, children: [run] }) : run);
     }
   }
   return runs;

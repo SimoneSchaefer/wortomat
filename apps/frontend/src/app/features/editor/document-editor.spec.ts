@@ -3,8 +3,8 @@ import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
 import { StatusMessages } from '../../core/status-messages';
-import { button, findButton, key, render, text, until } from '../../testing/render';
-import { DocumentEditor, type DocumentSource } from './document-editor';
+import { button, findButton, key, render, text, type, until } from '../../testing/render';
+import { DocumentEditor, type DocumentSource, normalizeHref } from './document-editor';
 
 const mark = (kind: string, attrs: { note?: string; suggestion?: string } = {}) => [
   {
@@ -66,8 +66,20 @@ async function setup(source = fakeSource(), inputs: Record<string, unknown> = {}
     await TestBed.inject(PendingSaves).flushAll();
     return source.save.mock.calls.at(-1)?.[1];
   };
-  return { ...view, source, prose, items, listed, bar, jumpTo, saved };
+  /** Opens a toolbar dropdown and chooses an entry (its name without the shortcut). */
+  const choose = async (menu: string, entry: string) => {
+    button(view.element, menu).click();
+    await view.settle();
+    button(view.element, new RegExp(`^${entry}( |$)`)).click();
+    await view.settle();
+  };
+  return { ...view, source, prose, items, listed, bar, jumpTo, saved, choose };
 }
+
+const PLAIN: EditorDoc = {
+  type: 'doc',
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Es war einmal.' }] }],
+} as EditorDoc;
 
 describe('DocumentEditor', () => {
   it('loads the document and shows word count and save status', async () => {
@@ -205,5 +217,66 @@ describe('DocumentEditor', () => {
       () => text(view.element.querySelector('.statusbar .status')) === de.editor.saveStatus.error,
     );
     expect(TestBed.inject(StatusMessages).messages()[0]!.text).toBe('Datei gesperrt');
+  });
+
+  it('sets paragraph style, alignment and indentation from the grouped menus', async () => {
+    const { choose, saved } = await setup(fakeSource({ s1: PLAIN }));
+    const E = de.editor;
+    await choose(E.blockStyle, E.heading);
+    await choose(E.alignment, E.alignCenter);
+    await choose(E.alignment, E.indent);
+    await choose(E.alignment, E.indent);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({
+      type: 'heading',
+      attrs: { level: 2, textAlign: 'center', indent: 2 },
+    });
+
+    await choose(E.alignment, E.outdent);
+    await choose(E.blockStyle, E.blockquote);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({
+      type: 'blockquote',
+      content: [{ type: 'heading', attrs: { indent: 1 } }],
+    });
+
+    await choose(E.textStyle, E.clearFormat);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({
+      type: 'paragraph',
+      attrs: { textAlign: null, indent: 0 },
+    });
+  });
+
+  it('turns a paragraph into a list and back', async () => {
+    const { choose, saved, element } = await setup(fakeSource({ s1: PLAIN }));
+    await choose(de.editor.lists, de.editor.bulletList);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'bulletList' });
+    expect(button(element, de.editor.lists).classList).toContain('on');
+
+    await choose(de.editor.lists, de.editor.orderedList);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'orderedList' });
+    await choose(de.editor.lists, de.editor.orderedList);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'paragraph' });
+  });
+
+  it('inserts a link – the address becomes the text when nothing is selected', async () => {
+    const { element, saved, settle } = await setup(fakeSource({ s1: PLAIN }));
+    button(element, de.editor.link).click();
+    await settle();
+    const input = element.querySelector<HTMLInputElement>('.link-form input')!;
+    expect(document.activeElement).toBe(input);
+    type(input, 'example.com');
+    input.form!.requestSubmit();
+    await settle();
+
+    expect(element.querySelector('.link-form')).toBeNull();
+    expect(JSON.stringify((await saved())?.doc)).toContain(
+      '{"type":"text","marks":[{"type":"link","attrs":{"href":"https://example.com"',
+    );
+  });
+
+  it('completes link addresses', () => {
+    expect(normalizeHref(' example.com/a ')).toBe('https://example.com/a');
+    expect(normalizeHref('anna@example.com')).toBe('mailto:anna@example.com');
+    expect(normalizeHref('http://example.com')).toBe('http://example.com');
+    expect(normalizeHref('  ')).toBe('');
   });
 });

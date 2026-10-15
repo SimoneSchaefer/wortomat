@@ -1,6 +1,6 @@
 import type { BookLayout, ExportTemplate } from '@wortomat/shared';
-import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
-import { normseitenLabel, printMarks } from './book.js';
+import type { BlockAlign, Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
+import { blockFormat, linkHref, normseitenLabel, printMarks } from './book.js';
 import { BOOK_FONTS, DEFAULT_LAYOUT } from './layout.js';
 import { type Localized, localized } from '../i18n.js';
 
@@ -30,6 +30,8 @@ const NORMSEITE_PREAMBLE = String.raw`\documentclass[12pt,a4paper]{article}
 \usepackage{fancyhdr}
 % Unterstreichen/Durchstreichen mit Zeilenumbruch; ohne ulem bleibt nur \underline bzw. nichts
 \IfFileExists{ulem.sty}{\usepackage[normalem]{ulem}\newcommand{\wmuline}[1]{\uline{##1}}\newcommand{\wmstrike}[1]{\sout{##1}}}{\newcommand{\wmuline}[1]{\underline{##1}}\newcommand{\wmstrike}[1]{##1}}
+% Klickbare Links (ohne Rahmen); ohne hyperref bleibt der Text
+\IfFileExists{hyperref.sty}{\usepackage[hidelinks]{hyperref}}{\providecommand{\href}[2]{##2}}
 \renewcommand{\ttdefault}{pcr}
 \renewcommand{\familydefault}{\ttdefault}
 \pagestyle{fancy}
@@ -83,6 +85,8 @@ ${font}
 \usepackage{fancyhdr}
 % Unterstreichen/Durchstreichen mit Zeilenumbruch; ohne ulem bleibt nur \underline bzw. nichts
 \IfFileExists{ulem.sty}{\usepackage[normalem]{ulem}\newcommand{\wmuline}[1]{\uline{##1}}\newcommand{\wmstrike}[1]{\sout{##1}}}{\newcommand{\wmuline}[1]{\underline{##1}}\newcommand{\wmstrike}[1]{##1}}
+% Klickbare Links (ohne Rahmen); ohne hyperref bleibt der Text
+\IfFileExists{hyperref.sty}{\usepackage[hidelinks]{hyperref}}{\providecommand{\href}[2]{##2}}
 \pagestyle{fancy}
 \fancyhf{}
 \fancyfoot[C]{\small\thepage}
@@ -197,11 +201,11 @@ function block(node: JsonNode, ctx: Context): string {
       if (!text) return '';
       const prefix = ctx.indentNext ? '' : '\\noindent ';
       ctx.indentNext = true;
-      return prefix + text;
+      return formatted(node, prefix + text);
     }
     case 'heading':
       ctx.indentNext = false;
-      return `\\par\\medskip\\noindent\\textbf{${inline(node.content ?? [], ctx)}}\\par\\nopagebreak\\smallskip`;
+      return `\\par\\medskip${formatted(node, `\\noindent\\textbf{${inline(node.content ?? [], ctx)}}`)}\\par\\nopagebreak\\smallskip`;
     case 'blockquote':
       ctx.indentNext = false;
       return `\\begin{quote}\\itshape\n${blocks(node.content ?? [], ctx)}\n\\end{quote}`;
@@ -238,6 +242,26 @@ function block(node: JsonNode, ctx: Context): string {
     default:
       return node.content ? blocks(node.content, ctx) : '';
   }
+}
+
+const ALIGNMENT: Record<BlockAlign, string> = {
+  left: '\\raggedright',
+  center: '\\centering',
+  right: '\\raggedleft',
+  // The novel justifies anyway; the standard page stays ragged on purpose
+  justify: '',
+};
+
+/**
+ * Alignment and indentation from the editor, in a group so they end with the paragraph. \advance
+ * keeps the stretch that \centering and \raggedleft put into \leftskip.
+ */
+function formatted(node: JsonNode, paragraph: string): string {
+  const { align, indent } = blockFormat(node);
+  const commands =
+    (align ? ALIGNMENT[align] : '') +
+    (indent ? `\\advance\\leftskip by ${indent * 2}em\\relax` : '');
+  return commands ? `{${commands} ${paragraph}\\par}` : paragraph;
 }
 
 function image(node: JsonNode, ctx: Context): string {
@@ -278,9 +302,25 @@ function inline(nodes: JsonNode[], ctx: Context): string {
     if (marks.has('underline')) text = `\\wmuline{${text}}`;
     if (marks.has('italic')) text = `\\emph{${text}}`;
     if (marks.has('bold')) text = `\\textbf{${text}}`;
+    const href = marks.has('link') ? linkHref(node) : null;
+    if (href) text = `\\href{${latexUrl(href)}}{${text}}`;
     out += text;
   }
   return out;
+}
+
+/**
+ * \href inside another command's argument (bold, a group) chokes on #, %, &, ~, _ …: those are
+ * escaped or percent-encoded, which addresses the same resource.
+ */
+function latexUrl(href: string): string {
+  return href
+    .replace(/[^A-Za-z0-9\-.:/?=+,;@!*'()#%&]/g, (char) =>
+      [...new TextEncoder().encode(char)]
+        .map((byte) => `%${byte.toString(16).toUpperCase().padStart(2, '0')}`)
+        .join(''),
+    )
+    .replace(/[#%&]/g, (char) => `\\${char}`);
 }
 
 /** Punctuation allowed on top of Latin-1 and Latin Extended-A (all defined in T1/utf8). */

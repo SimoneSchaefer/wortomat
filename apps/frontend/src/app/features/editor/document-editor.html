@@ -8,65 +8,229 @@
     <!-- Sticks to the top when scrolling; the bar inside then gets square corners (see SCSS) -->
     <div class="toolbar-sticky">
       <div class="toolbar" role="toolbar" [attr.aria-label]="t().editor.toolbar">
-        <button
-          type="button"
-          [title]="hint(t().editor.bold, 'B')"
-          [class.on]="isActive('bold')"
-          (click)="command('bold')"
+        <!-- Grouped in dropdowns so the bar does not wrap; the shortcuts work without opening them -->
+        <wm-toolbar-menu
+          [label]="t().editor.textStyle"
+          [active]="
+            isActive('bold') || isActive('italic') || isActive('underline') || isActive('strike')
+          "
         >
-          <b>{{ t().editor.boldLetter }}</b>
-        </button>
-        <button
-          type="button"
-          [title]="hint(t().editor.italic, 'I')"
-          [class.on]="isActive('italic')"
-          (click)="command('italic')"
-        >
-          <i>{{ t().editor.italicLetter }}</i>
-        </button>
-        <button
-          type="button"
-          [title]="hint(t().editor.underline, 'U')"
-          [class.on]="isActive('underline')"
-          (click)="command('underline')"
-        >
-          <u>{{ t().editor.underlineLetter }}</u>
-        </button>
-        <button
-          type="button"
-          [title]="hint(t().editor.strike, 'S', { shift: true })"
-          [class.on]="isActive('strike')"
-          (click)="command('strike')"
-        >
-          <s>{{ t().editor.strikeLetter }}</s>
-        </button>
-        <span class="sep"></span>
-        @for (info of annotationKinds; track info.kind) {
+          <span toggle class="format-glyph" aria-hidden="true"
+            ><b>{{ t().editor.boldLetter }}</b
+            ><i>{{ t().editor.italicLetter }}</i></span
+          >
           <button
             type="button"
-            class="annotation"
-            [style.--annotation-color]="info.color"
-            [title]="
-              hint(t().editor.annotate(t().annotations[info.kind].label), info.key, { alt: true })
-            "
-            [class.on]="isActive('annotation', { kind: info.kind })"
-            (click)="annotate(info.kind)"
+            role="menuitemcheckbox"
+            [attr.aria-checked]="isActive('bold')"
+            (click)="command('bold')"
           >
-            <span class="swatch" aria-hidden="true"></span>{{ t().annotations[info.kind].label }}
+            <b class="glyph">{{ t().editor.boldLetter }}</b>
+            {{ t().editor.bold }}
+            <span class="key">{{ shortcut('B') }}</span>
           </button>
-        }
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            [attr.aria-checked]="isActive('italic')"
+            (click)="command('italic')"
+          >
+            <i class="glyph">{{ t().editor.italicLetter }}</i>
+            {{ t().editor.italic }}
+            <span class="key">{{ shortcut('I') }}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            [attr.aria-checked]="isActive('underline')"
+            (click)="command('underline')"
+          >
+            <u class="glyph">{{ t().editor.underlineLetter }}</u>
+            {{ t().editor.underline }}
+            <span class="key">{{ shortcut('U') }}</span>
+          </button>
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            [attr.aria-checked]="isActive('strike')"
+            (click)="command('strike')"
+          >
+            <s class="glyph">{{ t().editor.strikeLetter }}</s>
+            {{ t().editor.strike }}
+            <span class="key">{{ shortcut('S', { shift: true }) }}</span>
+          </button>
+          <span class="menu-sep" role="separator"></span>
+          <button type="button" role="menuitem" (click)="command('clearFormat')">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
+            </svg>
+            {{ t().editor.clearFormat }}
+          </button>
+        </wm-toolbar-menu>
         <span class="sep"></span>
-        <button
-          type="button"
-          class="clear"
-          [title]="t().editor.clearFormat"
-          [attr.aria-label]="t().editor.clearFormat"
-          (click)="command('clearFormat')"
+        <wm-toolbar-menu class="block-style" [label]="t().editor.blockStyle">
+          <span toggle class="menu-label">{{ blockStyle() }}</span>
+          <button
+            type="button"
+            role="menuitemradio"
+            [attr.aria-checked]="blockStyle() === t().editor.paragraph"
+            (click)="command('paragraph')"
+          >
+            {{ t().editor.paragraph }}
+          </button>
+          <button
+            type="button"
+            role="menuitemradio"
+            class="heading"
+            [attr.aria-checked]="isActive('heading', { level: 2 })"
+            (click)="command('heading')"
+          >
+            {{ t().editor.heading }}
+          </button>
+          <button
+            type="button"
+            role="menuitemradio"
+            class="subheading"
+            [attr.aria-checked]="isActive('heading', { level: 3 })"
+            (click)="command('subheading')"
+          >
+            {{ t().editor.subheading }}
+          </button>
+          <button
+            type="button"
+            role="menuitemradio"
+            class="quote"
+            [attr.aria-checked]="isActive('blockquote')"
+            (click)="command('blockquote')"
+          >
+            {{ t().editor.blockquote }}
+            <span class="key">{{ shortcut('B', { shift: true }) }}</span>
+          </button>
+        </wm-toolbar-menu>
+        <wm-toolbar-menu
+          [label]="t().editor.lists"
+          [active]="isActive('bulletList') || isActive('orderedList')"
         >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M3.5 3h9M8 3v10M2.5 13.5l11-11" />
+          <svg toggle viewBox="0 0 16 16" aria-hidden="true">
+            <path [attr.d]="isActive('orderedList') ? icons.orderedList : icons.bulletList" />
           </svg>
-        </button>
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            [attr.aria-checked]="isActive('bulletList')"
+            (click)="command('bulletList')"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.bulletList" /></svg>
+            {{ t().editor.bulletList }}
+          </button>
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            [attr.aria-checked]="isActive('orderedList')"
+            (click)="command('orderedList')"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.orderedList" /></svg>
+            {{ t().editor.orderedList }}
+          </button>
+          <span class="menu-sep" role="separator"></span>
+          <button type="button" role="menuitem" (click)="command('indent')">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.indent" /></svg>
+            {{ t().editor.indent }}
+          </button>
+          <button type="button" role="menuitem" (click)="command('outdent')">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.outdent" /></svg>
+            {{ t().editor.outdent }}
+          </button>
+        </wm-toolbar-menu>
+        <wm-toolbar-menu [label]="t().editor.alignment">
+          <svg toggle viewBox="0 0 16 16" aria-hidden="true">
+            <path [attr.d]="icons[alignment()]" />
+          </svg>
+          @for (option of alignments; track option) {
+            <button
+              type="button"
+              role="menuitemradio"
+              [attr.aria-checked]="alignment() === option"
+              (click)="align(option)"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons[option]" /></svg>
+              {{ alignLabel(option) }}
+              <span class="key">{{ shortcut(alignKeys[option], { shift: true }) }}</span>
+            </button>
+          }
+          <span class="menu-sep" role="separator"></span>
+          <button type="button" role="menuitem" (click)="command('indent')">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.indent" /></svg>
+            {{ t().editor.indent }}
+          </button>
+          <button type="button" role="menuitem" (click)="command('outdent')">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.outdent" /></svg>
+            {{ t().editor.outdent }}
+          </button>
+        </wm-toolbar-menu>
+        <div class="link-wrapper">
+          <button
+            #linkToggle
+            type="button"
+            class="link-toggle"
+            aria-haspopup="dialog"
+            [class.on]="isActive('link')"
+            [attr.aria-expanded]="linkOpen()"
+            [title]="hint(t().editor.link, 'K')"
+            [attr.aria-label]="t().editor.link"
+            (click)="toggleLink()"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="icons.link" /></svg>
+          </button>
+          @if (linkOpen()) {
+            <form
+              class="link-form"
+              role="dialog"
+              [attr.aria-label]="t().editor.link"
+              (submit)="$event.preventDefault(); setLink(linkInput.value)"
+              (keydown.escape)="closeLink(linkToggle)"
+            >
+              <input
+                #linkInput
+                type="text"
+                inputmode="url"
+                [value]="linkHref()"
+                [placeholder]="t().editor.linkPlaceholder"
+                [attr.aria-label]="t().editor.link"
+              />
+              <span class="link-actions">
+                @if (isActive('link')) {
+                  <button type="button" class="link" (click)="setLink('')">
+                    {{ t().editor.linkRemove }}
+                  </button>
+                }
+                <button type="submit">{{ t().editor.linkApply }}</button>
+              </span>
+            </form>
+          }
+        </div>
+        <span class="sep"></span>
+        <wm-toolbar-menu [label]="t().editor.annotations" [active]="isActive('annotation')">
+          <span toggle class="swatches" aria-hidden="true">
+            @for (info of annotationKinds; track info.kind) {
+              <span class="swatch" [style.--annotation-color]="info.color"></span>
+            }
+          </span>
+          @for (info of annotationKinds; track info.kind) {
+            <button
+              type="button"
+              role="menuitemcheckbox"
+              [style.--annotation-color]="info.color"
+              [attr.aria-checked]="isActive('annotation', { kind: info.kind })"
+              [title]="t().editor.annotate(t().annotations[info.kind].label)"
+              (click)="annotate(info.kind)"
+            >
+              <span class="swatch" aria-hidden="true"></span>
+              {{ t().annotations[info.kind].label }}
+              <span class="key">{{ shortcut(info.key, { alt: true }) }}</span>
+            </button>
+          }
+        </wm-toolbar-menu>
         <span class="sep"></span>
         <button
           type="button"

@@ -1,0 +1,138 @@
+// Not encapsulated (see toolbar-menu.ts) – everything below the element.
+wm-toolbar-menu {
+  position: relative;
+  display: inline-flex;
+
+  // Same size as the other toolbar buttons (document-editor.scss)
+  > .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+    height: 1.75rem;
+    padding: 0 0.3rem 0 0.45rem;
+    line-height: 1;
+    transition: background-color 0.1s;
+
+    &.on {
+      background: color-mix(in srgb, var(--accent) 35%, var(--bg));
+      border-color: var(--accent);
+    }
+
+    &[aria-expanded='true'] {
+      border-color: var(--accent);
+    }
+
+    > svg:not(.caret) {
+      display: block;
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+  }
+
+  // Fixed width: the label changes with the cursor, the bar must not jump
+  &.block-style > .menu-toggle {
+    width: 7.5rem;
+    justify-content: space-between;
+    font-size: 0.8rem;
+  }
+
+  .menu-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .caret {
+    width: 0.75rem;
+    height: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  // Same look as the pickers (core/_picker.scss)
+  > .menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    z-index: 10;
+    display: grid;
+    min-width: 12rem;
+    padding: 0.3rem;
+    border: 1px solid var(--border);
+    border-radius: 0.6rem;
+    background: var(--bg);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
+    font-family: var(--font-ui);
+  }
+
+  // Specific enough to beat the compact toolbar buttons of the editor
+  .menu button[role^='menuitem'] {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.55rem;
+    width: 100%;
+    height: auto;
+    min-height: 2rem;
+    padding: 0.3rem 0.6rem;
+    border-color: transparent;
+    background: none;
+    font-size: 0.85rem;
+    text-align: left;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: var(--button-hover);
+    }
+
+    &[aria-checked='true'] {
+      background: color-mix(in srgb, var(--accent) 20%, var(--bg));
+    }
+
+    > svg {
+      flex-shrink: 0;
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+  }
+
+  // Previews of the paragraph styles
+  .menu .heading {
+    font-family: var(--font-prose);
+    font-size: 1.1rem;
+  }
+
+  .menu .subheading {
+    font-family: var(--font-prose);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .menu .quote {
+    font-family: var(--font-prose);
+    font-style: italic;
+  }
+
+  .key {
+    margin-left: auto;
+    padding-left: 1rem;
+    font-family: var(--font-ui);
+    font-style: normal;
+    font-weight: normal;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .menu-sep {
+    height: 1px;
+    margin: 0.25rem 0.3rem;
+    background: var(--border);
+  }
+}
