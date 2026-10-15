@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
-  it('wird erstellt', async () => {
+  it('is created', async () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideRouter([])],

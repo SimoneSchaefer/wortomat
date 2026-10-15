@@ -8,8 +8,8 @@ const hit = (kind: SearchHit['kind'], id: string): SearchHit => ({
   snippetHtml: '',
 });
 
-describe('Suchtreffer', () => {
-  it('gruppiert nach Bereich in Menü-Reihenfolge und behält die Relevanz innerhalb der Gruppe', () => {
+describe('search hits', () => {
+  it('groups by area in menu order and keeps the relevance within a group', () => {
     const groups = groupHits([
       hit('place', 'hafen'),
       hit('scene', 's2'),
@@ -23,7 +23,7 @@ describe('Suchtreffer', () => {
     ]);
   });
 
-  it('verlinkt Szenen und Notizen auf ihre Seiten', () => {
+  it('links scenes and notes to their pages', () => {
     expect(hitLink(hit('scene', 'x'))).toEqual(['/write/scene', 'x']);
     expect(hitLink(hit('research', 'y'))).toEqual(['/write', 'research', 'y']);
   });

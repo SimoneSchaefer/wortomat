@@ -24,8 +24,8 @@ const marksOf = (editor: Editor) =>
     node.marks?.find((mark) => mark.type === 'annotation')?.attrs?.['kind'] ?? null,
   ]);
 
-describe('Annotation (Todo/Idee/Fixme)', () => {
-  it('markiert die Auswahl und rendert ein <mark> mit Art', () => {
+describe('Annotation (todo/idea/fixme)', () => {
+  it('marks the selection and renders a <mark> with its kind', () => {
     const editor = createEditor();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('todo').run();
     expect(marksOf(editor)).toEqual([
@@ -39,7 +39,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     editor.destroy();
   });
 
-  it('entfernt die ganze Markierung, wenn der Cursor darin steht', () => {
+  it('removes the whole mark when the cursor is inside it', () => {
     const editor = createEditor();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('idea').run();
     editor.chain().setTextSelection(8).toggleAnnotation('idea').run();
@@ -47,7 +47,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     editor.destroy();
   });
 
-  it('ersetzt eine andere Art statt zu stapeln', () => {
+  it('replaces another kind instead of stacking', () => {
     const editor = createEditor();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('todo').run();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('fixme').run();
@@ -59,7 +59,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     editor.destroy();
   });
 
-  it('ohne Auswahl: schaltet „so weitertippen“ ein und wieder aus (Tastendruck für Tastendruck)', () => {
+  it('without a selection: toggles "keep typing like this" on and off again (keystroke by keystroke)', () => {
     const editor = createEditor();
     const typeKeys = (text: string) => {
       for (const char of text) editor.view.dispatch(editor.state.tr.insertText(char));
@@ -78,7 +78,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     editor.destroy();
   });
 
-  it('entfernt mit Auswahl nur, wenn sie ganz markiert ist – sonst wird markiert', () => {
+  it('with a selection removes only if it is fully marked – otherwise marks', () => {
     const editor = createEditor();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('todo').run();
     editor.chain().setTextSelection({ from: 1, to: 11 }).toggleAnnotation('todo').run();
@@ -91,7 +91,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
     editor.destroy();
   });
 
-  it('liest Markierungen aus HTML (z. B. beim Einfügen aus der Zwischenablage)', () => {
+  it('reads marks from HTML (e.g. when pasting from the clipboard)', () => {
     const editor = createEditor();
     editor.commands.setContent('<p><mark data-annotation="idea">Möwe?</mark></p>');
     expect(marksOf(editor)).toEqual([['Möwe?', 'idea']]);
@@ -99,7 +99,7 @@ describe('Annotation (Todo/Idee/Fixme)', () => {
   });
 });
 
-describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
+describe('proofreading notes (from proofreading on the go)', () => {
   /** "Hier fehlt noch was." with "fehlt" italic and marked as fixme with a suggestion. */
   function editorWithNote(attrs: { note: string | null; suggestion: string | null }): Editor {
     return new Editor({
@@ -131,7 +131,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     });
   }
 
-  it('findet die Notiz am Cursor – auch direkt an ihrem Anfang – und zeigt sie im Tooltip', () => {
+  it('finds the note at the cursor – also right at its start – and shows it in the tooltip', () => {
     const editor = editorWithNote({ note: 'Was fehlt?', suggestion: 'mangelt' });
     for (const position of [6, 8]) {
       editor.commands.setTextSelection(position);
@@ -151,7 +151,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
-  it('übernimmt einen Vorschlag: Text ersetzt, Kursiv bleibt, Markierung weg', () => {
+  it('accepts a suggestion: text replaced, italic stays, mark gone', () => {
     const editor = editorWithNote({ note: null, suggestion: 'mangelt' });
     editor.chain().setTextSelection(8).resolveAnnotation(true).run();
     expect(editor.getText()).toBe('Hier mangelt noch was.');
@@ -159,14 +159,14 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
-  it('verwirft einen Vorschlag bzw. erledigt eine Notiz: nur die Markierung geht', () => {
+  it('rejects a suggestion or completes a note: only the mark goes', () => {
     const editor = editorWithNote({ note: 'Was fehlt?', suggestion: null });
     editor.chain().setTextSelection(8).resolveAnnotation(true).run();
     expect(editor.getHTML()).toBe('<p>Hier <em>fehlt</em> noch was.</p>');
     editor.destroy();
   });
 
-  it('behandelt einen Vorschlag, der nichts ändert, als Notiz – nichts zu übernehmen', () => {
+  it('treats a suggestion that changes nothing as a note – nothing to accept', () => {
     const editor = editorWithNote({ note: 'Grün', suggestion: 'fehlt' });
     editor.commands.setTextSelection(8);
     expect(annotationAt(editor.state)).toMatchObject({ note: 'Grün', suggestion: null });
@@ -175,7 +175,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
-  it('trägt eine Notiz ein, ändert und entfernt sie – Art, Vorschlag und Kursiv bleiben', () => {
+  it('adds, changes and removes a note – kind, suggestion and italic stay', () => {
     const editor = editorWithNote({ note: null, suggestion: 'mangelt' });
     editor.chain().setTextSelection(8).setAnnotationNote('  Lieber kürzer? ').run();
     expect(annotationAt(editor.state)).toMatchObject({
@@ -191,7 +191,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
-  it('findet auch Markierungen ohne Notiz am Cursor', () => {
+  it('also finds marks without a note at the cursor', () => {
     const editor = createEditor();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('idea').run();
     editor.commands.setTextSelection(8);
@@ -201,7 +201,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
-  it('listet alle Markierungen in Textreihenfolge – eine bleibt eine, auch mit Fett darin', () => {
+  it('lists all marks in text order – one stays one, even with bold inside', () => {
     const editor = new Editor({
       element: document.createElement('div'),
       extensions: [StarterKit, Annotation],
@@ -218,7 +218,7 @@ describe('Korrekturnotizen (aus dem Korrekturlesen unterwegs)', () => {
     editor.destroy();
   });
 
-  it('löscht den Text bei einem leeren Vorschlag', () => {
+  it('deletes the text for an empty suggestion', () => {
     const editor = editorWithNote({ note: null, suggestion: '' });
     editor.chain().setTextSelection(8).resolveAnnotation(true).run();
     expect(editor.getText()).toBe('Hier  noch was.');

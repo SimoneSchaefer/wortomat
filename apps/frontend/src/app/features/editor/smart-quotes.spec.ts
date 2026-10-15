@@ -29,7 +29,7 @@ function type(editor: Editor, text: string): void {
 const paragraph = (editor: Editor) => editor.state.doc.firstChild!.textContent;
 
 describe('SmartQuotes', () => {
-  it('ersetzt beim Tippen und liest die Einstellung bei jedem Zeichen', () => {
+  it('replaces while typing and reads the setting on every character', () => {
     const { editor, setStyle } = createEditor();
     type(editor, `"Hallo", sagt's. `);
     setStyle('de-guillemets');
@@ -37,20 +37,20 @@ describe('SmartQuotes', () => {
     expect(paragraph(editor)).toBe('„Hallo“, sagt’s. »Tschüss«');
   });
 
-  it('macht die Ersetzung mit der Rücktaste rückgängig', () => {
+  it('undoes the replacement with Backspace', () => {
     const { editor } = createEditor();
     type(editor, `Zoll: 12"`);
     editor.commands.undoInputRule();
     expect(paragraph(editor)).toBe('Zoll: 12"');
   });
 
-  it('lässt Code in Ruhe', () => {
+  it('leaves code alone', () => {
     const { editor } = createEditor('<pre><code></code></pre>');
     type(editor, `x = "a"`);
     expect(paragraph(editor)).toBe('x = "a"');
   });
 
-  it('ersetzt nichts, wenn ausgeschaltet', () => {
+  it('replaces nothing when switched off', () => {
     const { editor, setStyle } = createEditor();
     setStyle('off');
     type(editor, `"a"`);

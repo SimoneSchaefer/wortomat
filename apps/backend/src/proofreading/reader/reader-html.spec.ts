@@ -24,24 +24,24 @@ const proof: ProofPackage = {
 describe('readerHtml', () => {
   const html = readerHtml(proof);
 
-  it('bettet die Daten so ein, dass Text aus dem Buch den Skript-Block nicht beendet', () => {
+  it('embeds the data so that book text cannot end the script block', () => {
     const data = /<script type="application\/json" id="proof-data">(.*?)<\/script>/s.exec(html);
-    assert.ok(data, 'Datenblock fehlt');
+    assert.ok(data, 'data block missing');
     assert.deepEqual(JSON.parse(data[1]!), proof);
     // exactly two script blocks: data and app
     assert.equal(html.match(/<\/script>/g)?.length, 2);
   });
 
-  it('enthält die Lese-App als eigenständiges Skript und einen lesbaren Titel', () => {
+  it('contains the reader app as a self-contained script and a readable title', () => {
     assert.match(html, /<title>Liebe &amp; &lt;Tod&gt; – Korrekturfassung<\/title>/);
     const app = /<script>(.*)<\/script>/s.exec(html.slice(html.lastIndexOf('<script>')))?.[1];
-    assert.ok(app?.includes(';(function readerApp()'), 'App fehlt');
+    assert.ok(app?.includes(';(function readerApp()'), 'app missing');
     // no reference to modules – otherwise the file would not run on the phone
     assert.doesNotMatch(app!, /\brequire\(|\bimport\b|\bexports\b/);
     assert.doesNotThrow(() => new Function(app!));
   });
 
-  it('stellt __name bereit, das esbuild (keepNames) im Desktop-Bundle in die App einfügt', () => {
+  it('provides __name, which esbuild (keepNames) inserts into the app in the desktop bundle', () => {
     const app = html.slice(html.lastIndexOf('<script>') + '<script>'.length);
     const prelude = app.slice(0, app.indexOf('(function readerApp()'));
     const named = new Function(`${prelude} return __name(function f() {}, 'f');`)();

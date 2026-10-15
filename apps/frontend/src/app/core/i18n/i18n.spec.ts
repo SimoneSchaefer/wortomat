@@ -3,7 +3,7 @@ import { en } from './en';
 import { systemLanguage } from './i18n';
 
 describe('systemLanguage', () => {
-  it('nimmt die erste bekannte Sprache des Systems, sonst Englisch', () => {
+  it("takes the system's first known language, otherwise English", () => {
     expect(systemLanguage(['de-DE', 'en-US'])).toBe('de');
     expect(systemLanguage(['de-CH'])).toBe('de');
     expect(systemLanguage(['fr-FR', 'en-GB', 'de'])).toBe('en');
@@ -13,8 +13,8 @@ describe('systemLanguage', () => {
   });
 });
 
-describe('Texte', () => {
-  it('formatiert Zahlen und Wortzahlen je Sprache', () => {
+describe('texts', () => {
+  it('formats numbers and word counts per language', () => {
     expect(de.words(12345)).toBe('12.345 Wörter');
     expect(de.words(1)).toBe('1 Wort');
     expect(en.words(12345)).toBe('12,345 words');

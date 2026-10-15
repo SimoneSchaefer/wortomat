@@ -166,7 +166,7 @@ describe('Export', () => {
     await rm(tmpDir, { recursive: true, force: true });
   });
 
-  it('meldet, ob pdfLaTeX verfügbar ist', async () => {
+  it('reports whether pdfLaTeX is available', async () => {
     const caps = await api<ExportCapabilities>('GET', '/api/export/capabilities');
     assert.equal(typeof caps.pdf.available, 'boolean');
     if (caps.pdf.available) assert.match(caps.pdf.version ?? '', /pdfTeX/);
@@ -178,7 +178,7 @@ describe('Export', () => {
     if (!caps.pdf.available) assert.ok(caps.fonts.every((font) => !font.pdfAvailable));
   });
 
-  it('liefert die Schriftdateien der TeX-Installation für die Vorschau', async () => {
+  it("serves the TeX installation's font files for the preview", async () => {
     const get = (urlPath: string) =>
       fetch(server.url + urlPath, { headers: { [AUTH_HEADER]: TOKEN } });
     if (pdfAvailable) {
@@ -202,7 +202,7 @@ describe('Export', () => {
     }
   });
 
-  it('merkt sich die Einstellungen des Export-Dialogs im Buch', async () => {
+  it('remembers the export dialog settings in the book', async () => {
     const initial = await api<ExportSettingsResponse>('GET', '/api/export/settings');
     assert.deepEqual(initial.settings, initial.defaults);
     assert.deepEqual(initial.defaults.layout, DEFAULT_LAYOUT);
@@ -236,7 +236,7 @@ describe('Export', () => {
     assert.equal(repaired.layout.pageWidth, DEFAULT_LAYOUT.pageWidth);
   });
 
-  it('liefert den Anfang des Buchs für die Seitenvorschau', async () => {
+  it('returns the start of the book for the page preview', async () => {
     const preview = await api<ExportPreview>('GET', '/api/export/preview');
     assert.equal(preview.title, 'Die Häuser am Fluss');
     assert.ok(preview.chapterTitle);
@@ -246,7 +246,7 @@ describe('Export', () => {
     assert.match(withTitles.html, /class="scene-title"/);
   });
 
-  it('exportiert eigenständiges HTML in Lesereihenfolge – ohne Todo-Markierungen', async () => {
+  it('exports self-contained HTML in reading order – without todo marks', async () => {
     const { data, filePath, warnings } = await exportTo('html', 'normseite');
     const html = data.toString('utf8');
     assert.ok(filePath.endsWith('.html'));
@@ -258,9 +258,9 @@ describe('Export', () => {
     assert.deepEqual(
       order,
       [...order].sort((a, b) => a - b),
-      'Reihenfolge',
+      'order',
     );
-    assert.equal(html.match(/scene-break/g)?.length, 2, 'ein Szenentrenner (+ CSS-Regel)');
+    assert.equal(html.match(/scene-break/g)?.length, 2, 'one scene break (+ CSS rule)');
     assert.match(html, /<strong>hielt<\/strong>/);
     assert.match(html, /<em>Hafen<\/em>/);
     assert.match(html, /<u>Stand<\/u>/);
@@ -269,13 +269,13 @@ describe('Export', () => {
     assert.doesNotMatch(html, /annotation|wm-annotation/);
     assert.match(html, /Recherche nötig/);
     assert.match(html, /src="data:image\/png;base64,/);
-    assert.doesNotMatch(html, /Bahnhof \(Arbeitstitel\)/, 'Szenentitel standardmäßig nicht');
+    assert.doesNotMatch(html, /Bahnhof \(Arbeitstitel\)/, 'no scene titles by default');
     assert.doesNotMatch(html, /Leere Szene/);
     const withTitles = (await exportTo('html', 'normseite', true)).data.toString('utf8');
     assert.match(withTitles, /<h3 class="scene-title">Bahnhof \(Arbeitstitel\)<\/h3>/);
   });
 
-  it('lässt Teile auf Wunsch weg – die Kapitel bleiben', async () => {
+  it('leaves out parts on request – the chapters stay', async () => {
     const exportWithoutParts = async (format: string) => {
       const result = await api<ExportResult>('POST', '/api/export', {
         format,
@@ -299,7 +299,7 @@ describe('Export', () => {
     assert.ok(!Object.keys(epub.files).some((name) => name.includes('teil-')));
   });
 
-  it('exportiert Word-Dateien mit den Vorlagen Normseite und Roman', async () => {
+  it('exports Word files with the standard page and novel templates', async () => {
     const read = async (template: string) => {
       const { data, warnings } = await exportTo('docx', template);
       const zip = await JSZip.loadAsync(data);
@@ -340,7 +340,7 @@ describe('Export', () => {
     assert.match(roman.document, /w:jc w:val="both"/); // justified
   });
 
-  it('übernimmt Seitengröße, Ränder, Schrift und Schriftgröße in die Vorlage Roman', async () => {
+  it('applies page size, margins, font and font size to the novel template', async () => {
     const layout: BookLayout = {
       pageWidth: 148,
       pageHeight: 210,
@@ -370,10 +370,10 @@ describe('Export', () => {
     assert.match(normDoc, /<w:pgSz w:w="11906" w:h="16838"/);
   });
 
-  it('exportiert ein EPUB 3 mit Inhaltsverzeichnis, Kapiteldateien und Bildern', async () => {
+  it('exports an EPUB 3 with table of contents, chapter files and images', async () => {
     const { data, filePath, warnings } = await exportTo('epub', 'roman');
     assert.ok(filePath.endsWith('.epub'));
-    assert.deepEqual(warnings, [], 'PNG und WebP sind EPUB-Kernformate');
+    assert.deepEqual(warnings, [], 'PNG and WebP are EPUB core media types');
     // First ZIP entry "mimetype", uncompressed (method 0) – that is how readers recognise the
     // format
     assert.equal(data.readUInt16LE(8), 0);
@@ -390,7 +390,7 @@ describe('Export', () => {
     assert.match(opf, /<dc:language>de<\/dc:language>/);
     assert.match(opf, /<meta property="dcterms:modified">\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ<\/meta>/);
     const identifier = /<dc:identifier id="buch-id">(urn:uuid:[0-9a-f-]{36})</.exec(opf)?.[1];
-    assert.ok(identifier, 'UUID als Kennung');
+    assert.ok(identifier, 'UUID as identifier');
     const spine = [...opf.matchAll(/<itemref idref="([^"]+)"/g)].map((match) => match[1]);
     assert.deepEqual(spine, ['titel', 'teil-1', 'kapitel-1', 'kapitel-2']);
     assert.match(opf, /href="images\/bild-1\.png" media-type="image\/png"/);
@@ -398,14 +398,14 @@ describe('Export', () => {
     assert.equal(
       opf.match(/media-type="image\//g)?.length,
       2,
-      'mehrfach verwendetes Bild nur einmal',
+      'an image used several times only once',
     );
 
     const nav = await read('OEBPS/nav.xhtml');
     assert.match(
       nav,
       /<li><a href="text\/teil-1\.xhtml">Erster Teil<\/a><ol><li><a href="text\/kapitel-1\.xhtml">Ankunft<\/a><\/li><li><a href="text\/kapitel-2\.xhtml">Abschied<\/a><\/li><\/ol><\/li>/,
-      'Kapitel stehen unter ihrem Teil',
+      'chapters sit below their part',
     );
     assert.match(await read('OEBPS/toc.ncx'), /playOrder="3"><navLabel><text>Abschied</);
 
@@ -421,7 +421,7 @@ describe('Export', () => {
     assert.match(
       await read('OEBPS/text/kapitel-2.xhtml'),
       /<img src="\.\.\/images\/bild-1\.png" alt="Karte, noch einmal"\/>/,
-      'auch der zweite Verweis auf dasselbe Bild zeigt auf die Datei',
+      'the second reference to the same image points to the file too',
     );
 
     const again = await exportTo('epub', 'normseite');
@@ -430,10 +430,10 @@ describe('Export', () => {
     )
       .file('OEBPS/content.opf')!
       .async('string');
-    assert.ok(againOpf.includes(identifier), 'Kennung bleibt bei jedem Export gleich');
+    assert.ok(againOpf.includes(identifier), 'the identifier stays the same on every export');
   });
 
-  it('setzt ein Titelbild und legt es als Cover ins EPUB', async () => {
+  it('sets a cover and adds it to the EPUB', async () => {
     const coverPng = await upload(PNG_1PX, 'cover.png');
     const coverId = coverPng.split('/').pop()!;
     const patch = async (body: object) =>
@@ -458,7 +458,7 @@ describe('Export', () => {
     assert.match(opf, /<meta name="cover" content="titelbild"\/>/);
     assert.match(opf, /<item id="cover" href="text\/cover\.xhtml" [^>]*properties="svg"\/>/);
     const spine = [...opf.matchAll(/<itemref idref="([^"]+)"/g)].map((match) => match[1]);
-    assert.deepEqual(spine.slice(0, 2), ['cover', 'titel'], 'Titelbild vor der Titelseite');
+    assert.deepEqual(spine.slice(0, 2), ['cover', 'titel'], 'cover before the title page');
     assert.match(
       await zip.file('OEBPS/text/cover.xhtml')!.async('string'),
       /viewBox="0 0 1 1"[^>]*><image width="1" height="1" xlink:href="\.\.\/images\/titelbild\.png"\/>/,
@@ -482,7 +482,7 @@ describe('Export', () => {
     assert.equal(withoutCover.file('OEBPS/text/cover.xhtml'), null);
   });
 
-  it('behält ein Titelbild, das auch im Text vorkommt', async () => {
+  it('keeps a cover that also appears in the text', async () => {
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     const scene = nodes.find((node) => node.title === 'Markt')!;
     const shared = await upload(PNG_1PX, 'beides.png');
@@ -503,7 +503,7 @@ describe('Export', () => {
     const response = await fetch(`${server.url}/api/images/${sharedId}`, {
       headers: { [AUTH_HEADER]: TOKEN },
     });
-    assert.equal(response.status, 200, 'Bild wird in der Szene noch gebraucht');
+    assert.equal(response.status, 200, 'the image is still needed in the scene');
     await api('PUT', `/api/scenes/${scene.id}/content`, {
       doc: { type: 'doc', content: [paragraph(text('Am Markt roch es nach Fisch.'))] },
       text: '',
@@ -511,7 +511,7 @@ describe('Export', () => {
     });
   });
 
-  it('erzeugt PDFs mit pdfLaTeX (wenn installiert)', { timeout: 240_000 }, async (t) => {
+  it('creates PDFs with pdfLaTeX (when installed)', { timeout: 240_000 }, async (t) => {
     if (!pdfAvailable) {
       t.skip('pdfLaTeX ist nicht installiert');
       return;
@@ -532,7 +532,7 @@ describe('Export', () => {
       assert.equal(data.subarray(0, 5).toString(), '%PDF-');
       assert.ok(
         warnings.some((w) => w.includes('WEBP')),
-        'WebP-Hinweis',
+        'WebP hint',
       );
       assert.ok(
         warnings.some((w) => w.startsWith('9 Zeichen')), // 😀 + the 8 letters of "Ελληνικά"
@@ -557,7 +557,7 @@ describe('Export', () => {
     }
   });
 
-  it('liefert ohne Pfad die Datei als Download (Browser-Modus)', async () => {
+  it('returns the file as a download without a path (browser mode)', async () => {
     const response = await fetch(`${server.url}/api/export`, {
       method: 'POST',
       headers: {
@@ -585,7 +585,7 @@ describe('Export', () => {
     );
   });
 
-  it('weist ungültige Anfragen ab', async () => {
+  it('rejects invalid requests', async () => {
     const status = async (body: object) =>
       (
         await fetch(`${server.url}/api/export`, {
@@ -602,8 +602,8 @@ describe('Export', () => {
   });
 });
 
-describe('Satzspiegel', () => {
-  it('legt Zahlen in ihre Grenzen und lässt immer Platz für Text', () => {
+describe('type area', () => {
+  it('clamps numbers to their limits and always leaves room for text', () => {
     assert.deepEqual(sanitizeLayout(undefined), DEFAULT_LAYOUT);
     const tiny = sanitizeLayout({ ...DEFAULT_LAYOUT, pageWidth: 10, fontSize: 99 });
     assert.equal(tiny.pageWidth, 80);
@@ -615,8 +615,8 @@ describe('Satzspiegel', () => {
   });
 });
 
-describe('LaTeX-Hilfen', () => {
-  it('setzt Computer Modern mit cm-super und weicht sonst auf Latin Modern aus', () => {
+describe('LaTeX helpers', () => {
+  it('uses Computer Modern with cm-super and falls back to Latin Modern otherwise', () => {
     const book = { title: 'T', author: '', wordCount: 0, characterCount: 0, items: [] };
     const { tex } = renderLatex(book, 'roman', { includeSceneTitles: false }, () => null, {
       ...DEFAULT_LAYOUT,
@@ -629,7 +629,7 @@ describe('LaTeX-Hilfen', () => {
     );
   });
 
-  it('escapt Sonderzeichen und ersetzt nicht darstellbare Zeichen', () => {
+  it('escapes special characters and replaces characters that cannot be typeset', () => {
     const ctx = { unsupported: 0 };
     assert.equal(
       escape('100 % & $ # _ ~ \\ {x} ^ <<a>> "b" `c ,,d', ctx),
@@ -645,7 +645,7 @@ describe('LaTeX-Hilfen', () => {
     assert.equal(ctx.unsupported, 2);
   });
 
-  it('übersetzt typische LaTeX-Fehler in verständliche Meldungen', () => {
+  it('translates typical LaTeX errors into understandable messages', () => {
     assert.match(
       describeLatexError("! LaTeX Error: File `tgpagella.sty' not found.\n").de,
       /Paket „tgpagella\.sty“ fehlt/,

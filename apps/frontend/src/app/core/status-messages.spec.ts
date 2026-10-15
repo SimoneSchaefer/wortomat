@@ -15,7 +15,7 @@ describe('StatusMessages', () => {
     status = TestBed.inject(StatusMessages);
   });
 
-  it('zählt dieselbe Meldung hoch statt sie zu wiederholen', () => {
+  it('counts the same message up instead of repeating it', () => {
     status.error('Speichern fehlgeschlagen');
     status.error('Anderes');
     status.error('Speichern fehlgeschlagen');
@@ -25,7 +25,7 @@ describe('StatusMessages', () => {
     ]);
   });
 
-  it('ersetzt je Kanal die vorige Meldung und nimmt sie mit null zurück', () => {
+  it('replaces the previous message per channel and withdraws it with null', () => {
     const editor = status.channel();
     const tree = status.channel();
     editor.set('Szene nicht gespeichert');
@@ -39,7 +39,7 @@ describe('StatusMessages', () => {
     expect(texts()).toEqual([['Kapitel nicht verschoben', 1]]);
   });
 
-  it('behält höchstens fünf Meldungen, die neuesten', () => {
+  it('keeps at most five messages, the newest', () => {
     for (let i = 1; i <= 7; i++) status.error(`Fehler ${i}`);
     expect(texts().map(([text]) => text)).toEqual([
       'Fehler 3',

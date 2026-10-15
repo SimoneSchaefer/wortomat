@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { SearchRequest } from './search-request';
 
 describe('SearchRequest', () => {
-  it('liefert eine Anfrage nur einmal aus', () => {
+  it('hands out a request only once', () => {
     const requests = TestBed.inject(SearchRequest);
     requests.search('eigentlich');
     expect(requests.take()).toEqual({ query: 'eigentlich' });

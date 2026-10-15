@@ -17,7 +17,7 @@ function type(input: string, style: QuoteStyle): string {
 }
 
 describe('smartQuote', () => {
-  it('setzt deutsche Anführungszeichen und Apostrophe', () => {
+  it('sets German quotation marks and apostrophes', () => {
     expect(type(`Sie sagte: "Komm 'rein', geht's?"`, 'de')).toBe(
       'Sie sagte: „Komm ‚rein‘, geht’s?“',
     );
@@ -25,29 +25,29 @@ describe('smartQuote', () => {
     expect(type(`Max' Hut`, 'de')).toBe('Max’ Hut');
   });
 
-  it('öffnet nach Klammern, Gedankenstrichen und verschachtelt', () => {
+  it('opens after brackets, dashes and when nested', () => {
     expect(type(`("ja")`, 'de')).toBe('(„ja“)');
     expect(type(`–"so"`, 'de')).toBe('–„so“');
     expect(type(`"'innen'"`, 'de')).toBe('„‚innen‘“');
   });
 
-  it('kennt Guillemets in beide Richtungen', () => {
+  it('knows guillemets in both directions', () => {
     expect(type(`"Sag 'bitte'", flüstert's.`, 'de-guillemets')).toBe('»Sag ›bitte‹«, flüstert’s.');
     expect(type(`"Sag 'bitte'", flüstert's.`, 'ch')).toBe('«Sag ‹bitte›», flüstert’s.');
   });
 
-  it('setzt englische Anführungszeichen', () => {
+  it('sets English quotation marks', () => {
     expect(type(`"Don't say 'never'"`, 'en')).toBe('“Don’t say ‘never’”');
   });
 
-  it('setzt im Französischen schmale geschützte Leerzeichen – auch wenn mit Leerzeichen getippt', () => {
+  it('sets narrow no-break spaces in French – also when typed with spaces', () => {
     const n = NARROW_NBSP;
     expect(type(`"Bonjour"`, 'fr')).toBe(`«${n}Bonjour${n}»`);
     expect(type(`" Bonjour "`, 'fr')).toBe(`«${n}Bonjour${n}»`);
     expect(type(`C'est 'ça'`, 'fr')).toBe(`C’est ‹${n}ça${n}›`);
   });
 
-  it('ersetzt nichts, wenn ausgeschaltet', () => {
+  it('replaces nothing when switched off', () => {
     expect(type(`"Sag 'bitte'", flüstert's.`, 'off')).toBe(`"Sag 'bitte'", flüstert's.`);
   });
 });
