@@ -44,3 +44,24 @@ globalThis.ResizeObserver ??= class {
   unobserve(): void {}
   disconnect(): void {}
 } as unknown as typeof ResizeObserver;
+
+// Font files never load here; the export preview then falls back to system fonts.
+globalThis.FontFace ??= class {
+  readonly status = 'unloaded';
+  constructor(
+    readonly family: string,
+    readonly source: string,
+  ) {}
+} as unknown as typeof FontFace;
+if (!('fonts' in document)) {
+  Object.defineProperty(document, 'fonts', {
+    value: { add: () => undefined, load: async () => [] },
+  });
+}
+
+// jsdom has no 2D canvas and would log "not implemented" for every call; callers handle `null`.
+HTMLCanvasElement.prototype.getContext = (() =>
+  null) as typeof HTMLCanvasElement.prototype.getContext;
+
+URL.createObjectURL ??= () => 'blob:test';
+URL.revokeObjectURL ??= () => undefined;
