@@ -147,6 +147,19 @@ npm run desktop-entry -w @wortomat/desktop
 npm run typecheck && npm test
 ```
 
+**End-to-End-Tests** (Playwright, Chromium und Firefox): klicken die wichtigsten Abläufe – Buch
+anlegen und wieder öffnen, schreiben, Szenen löschen, Charaktere verknüpfen, Suche, Export,
+Korrekturfassung – in der gebauten App gegen das echte Backend durch. Das Backend läuft dafür auf
+Port 3101 und legt alles in `e2e/.tmp/` ab, eigene Bücher und `~/Downloads` bleiben unberührt.
+
+```bash
+npx playwright install chromium firefox   # einmalig
+npm run build && npm run e2e
+```
+
+Einzelne Tests oder Browser: `npm run e2e -- --project=firefox tests/writing.spec.ts`,
+mit `--ui` interaktiv.
+
 **Installer bauen** (für das aktuelle Betriebssystem, Ergebnis in `apps/desktop/release/`):
 
 ```bash
@@ -155,7 +168,9 @@ npm run dist
 
 **GitHub Actions:**
 
-- [`ci.yml`](.github/workflows/ci.yml) prüft Typen, baut und testet bei jedem Push und Pull Request.
+- [`ci.yml`](.github/workflows/ci.yml) prüft Typen, baut und testet bei jedem Push und Pull Request;
+  ein zweiter Job führt die End-to-End-Tests aus und legt bei Fehlern den Playwright-Bericht
+  (mit Traces) als Artefakt ab.
 - „Release Linux“, „Release Windows“ und „Release macOS“ bauen die Installer im Release-Modus
   auf dem jeweiligen Betriebssystem. Sie laufen nur von Hand (Actions → Workflow → „Run workflow“)
   und legen die Installer als Artefakt am Lauf ab. Den gemeinsamen Ablauf beschreibt

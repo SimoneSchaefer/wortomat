@@ -7,7 +7,8 @@
     "libs/shared",
     "apps/backend",
     "apps/frontend",
-    "apps/desktop"
+    "apps/desktop",
+    "e2e"
   ],
   "engines": {
     "node": ">=24.15"
@@ -20,7 +21,8 @@
     "dist": "npm run build && npm run dist -w @wortomat/desktop",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "format": "prettier --write \"apps/*/src/**/*.{ts,html,scss}\" \"apps/desktop/scripts/*.mjs\" \"libs/*/src/**/*.ts\""
+    "e2e": "npm run e2e -w @wortomat/e2e --",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,html,scss}\" \"apps/desktop/scripts/*.mjs\" \"libs/*/src/**/*.ts\" \"e2e/*.{ts,mjs}\" \"e2e/tests/**/*.ts\""
   },
   "devDependencies": {
     "concurrently": "^10.0.6",
