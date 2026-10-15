@@ -1,5 +1,22 @@
 import type {
+  AppInfo,
   AppSettings,
+  CreateProjectRequest,
+  DesktopBridge,
+  DirectoryListing,
+  ExportCapabilities,
+  ExportPreview,
+  ExportRequest,
+  ExportResult,
+  ExportSettings,
+  ExportSettingsResponse,
+  ImageInfo,
+  ProjectInfo,
+  ProjectListEntry,
+  ProofImportResult,
+  ProofInbox,
+  ProofNotesFile,
+  UpdateProjectRequest,
   CreateNodeRequest,
   CreateNoteGroupRequest,
   CreateNoteRequest,
@@ -111,6 +128,129 @@ export class FakeApi {
   readonly search = vi.fn(async (_query: string): Promise<SearchHit[]> =>
     structuredClone(this.hits),
   );
+
+  project: ProjectInfo | null = null;
+  projects: ProjectListEntry[] = [];
+  readonly appInfo = vi.fn(async (): Promise<AppInfo> => ({
+    version: '2.0.0',
+    mode: 'browser',
+    defaultProjectDir: '/home/test/Dokumente',
+  }));
+  readonly currentProject = vi.fn(async () => structuredClone(this.project));
+  readonly listProjects = vi.fn(async () => structuredClone(this.projects));
+  readonly forgetProject = vi.fn(async (filePath: string): Promise<void> => {
+    this.projects = this.projects.filter((entry) => entry.filePath !== filePath);
+  });
+  readonly createProject = vi.fn(async (request: CreateProjectRequest) => {
+    this.project = testProject({ filePath: request.filePath, title: request.title });
+    return structuredClone(this.project);
+  });
+  readonly openProject = vi.fn(async (filePath: string) => {
+    const entry = this.projects.find((p) => p.filePath === filePath);
+    this.project = testProject({ filePath, title: entry?.title ?? 'Buch' });
+    return structuredClone(this.project);
+  });
+  readonly closeProject = vi.fn(async (): Promise<void> => {
+    this.project = null;
+  });
+  readonly updateProject = vi.fn(async (request: UpdateProjectRequest) => {
+    this.project = { ...(this.project ?? testProject()), ...request };
+    return structuredClone(this.project);
+  });
+
+  directories = new Map<string, DirectoryListing>();
+  readonly listDirectory = vi.fn(async (dir?: string): Promise<DirectoryListing> => {
+    const listing = this.directories.get(dir ?? '') ?? [...this.directories.values()][0];
+    if (!listing) throw new Error(`no listing for ${dir}`);
+    return structuredClone(listing);
+  });
+
+  readonly uploadImage = vi.fn(
+    async (_image: Blob, fileName: string, width: number, height: number): Promise<ImageInfo> => {
+      const id = `bild-${this.nextId++}`;
+      return testImage(id, { originalName: fileName, width, height });
+    },
+  );
+
+  inboxState: ProofInbox = { dir: '/home/test/Downloads', files: [], newNotes: 0 };
+  importResult: ProofImportResult = { applied: 0, skipped: 0, unmatched: [] };
+  readonly proofInbox = vi.fn(async () => structuredClone(this.inboxState));
+  readonly importProofInbox = vi.fn(async () => structuredClone(this.importResult));
+  readonly importProofNotes = vi.fn(async (_file: ProofNotesFile) =>
+    structuredClone(this.importResult),
+  );
+  readonly cleanProofInbox = vi.fn(async () => {
+    const deleted = this.inboxState.files.filter((f) => f.done).map((f) => f.name);
+    this.inboxState = {
+      ...this.inboxState,
+      files: this.inboxState.files.filter((f) => !f.done),
+    };
+    return { deleted };
+  });
+  readonly proofCopyToFile = vi.fn(async (filePath: string): Promise<ExportResult> => ({
+    filePath,
+    warnings: [],
+  }));
+  readonly proofCopyDownload = vi.fn(async () => ({
+    blob: new Blob(['<html>']),
+    fileName: 'Buch – Korrekturfassung.html',
+  }));
+
+  capabilities: ExportCapabilities = {
+    pdf: { available: true, version: 'pdfTeX 3.14' },
+    fonts: [
+      {
+        id: 'palatino',
+        label: 'Palatino',
+        cssFamily: 'Palatino, serif',
+        pdfAvailable: true,
+        optional: false,
+      },
+      {
+        id: 'garamond',
+        label: 'Garamond',
+        cssFamily: 'Garamond, serif',
+        pdfAvailable: true,
+        optional: false,
+      },
+      {
+        id: 'computermodern',
+        label: 'Computer Modern',
+        cssFamily: 'serif',
+        pdfAvailable: false,
+        optional: true,
+      },
+    ],
+  };
+  exportState: ExportSettingsResponse = {
+    settings: TEST_EXPORT_SETTINGS,
+    defaults: TEST_EXPORT_SETTINGS,
+  };
+  readonly exportCapabilities = vi.fn(async () => structuredClone(this.capabilities));
+  readonly exportSettings = vi.fn(async () => structuredClone(this.exportState));
+  readonly saveExportSettings = vi.fn(async (settings: ExportSettings) => {
+    this.exportState = { ...this.exportState, settings: structuredClone(settings) };
+    return structuredClone(settings);
+  });
+  readonly exportPreview = vi.fn(async (_includeSceneTitles: boolean): Promise<ExportPreview> => ({
+    title: 'Buch',
+    author: '',
+    chapterTitle: 'Kapitel 1',
+    html: '<p>Es war einmal.</p>',
+  }));
+  readonly exportToFile = vi.fn(
+    async (request: ExportRequest & { filePath: string }): Promise<ExportResult> => ({
+      filePath: request.filePath,
+      warnings: [],
+    }),
+  );
+  readonly exportDownload = vi.fn(async (request: ExportRequest) => ({
+    blob: new Blob(['x']),
+    fileName: `Buch.${request.format}`,
+    warnings: [] as string[],
+  }));
+
+  readonly listMaps = vi.fn(async () => []);
 
   readonly createNote = vi.fn(async (request: CreateNoteRequest): Promise<NoteSummary> => {
     const note = testNote(`notiz-${this.nextId++}`, request.kind, { title: request.title });
@@ -290,6 +430,55 @@ export class FakeApi {
 /** A call the test did not prepare fails loudly with "… is not a function". */
 export function provideFakeApi(api: FakeApi): Provider {
   return { provide: WortomatApi, useValue: api };
+}
+
+export const TEST_EXPORT_SETTINGS: ExportSettings = {
+  format: 'docx',
+  template: 'normseite',
+  includeSceneTitles: false,
+  includeParts: true,
+  layout: {
+    pageWidth: 125,
+    pageHeight: 190,
+    marginInner: 20,
+    marginOuter: 15,
+    marginTop: 18,
+    marginBottom: 22,
+    font: 'palatino',
+    fontSize: 11,
+  },
+};
+
+export function testProject(overrides: Partial<ProjectInfo> = {}): ProjectInfo {
+  return {
+    filePath: '/home/test/Dokumente/Buch.wortomat',
+    title: 'Buch',
+    author: '',
+    coverImageId: null,
+    createdAt: '2026-10-01T10:00:00.000Z',
+    updatedAt: '2026-10-01T10:00:00.000Z',
+    ...overrides,
+  };
+}
+
+/** The Electron bridge with every native dialog answering as if the user picked a file. */
+export function fakeDesktop() {
+  return {
+    isDesktop: true as const,
+    showOpenProjectDialog: vi.fn(async (): Promise<string | null> => '/home/test/Anderes.wortomat'),
+    showCreateProjectDialog: vi.fn(
+      async (name: string): Promise<string | null> => `/home/test/${name}.wortomat`,
+    ),
+    onBeforeClose: vi.fn(),
+    showExportDialog: vi.fn(
+      async (name: string, format: string): Promise<string | null> =>
+        `/home/test/${name}.${format}`,
+    ),
+    openPath: vi.fn(async () => undefined),
+    showItemInFolder: vi.fn(async () => undefined),
+    setLanguage: vi.fn(),
+    setTheme: vi.fn(),
+  } satisfies DesktopBridge;
 }
 
 export function testNode(
