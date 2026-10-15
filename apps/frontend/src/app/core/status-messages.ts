@@ -5,35 +5,32 @@ import { I18n } from './i18n/i18n';
 export interface StatusMessage {
   id: number;
   text: string;
-  /** Wie oft dieselbe Meldung kam (z. B. bei jedem fehlgeschlagenen Speichern). */
+  /** How often the same message came (e.g. on every failed save). */
   count: number;
 }
 
-/** Was eine Komponente zum Melden braucht – wie früher ihr eigenes `error`-Signal. */
 export interface StatusChannel {
-  /** Zeigt eine Meldung in der Statusleiste; `null` nimmt die vorige dieses Kanals zurück. */
+  /** `null` withdraws this channel's previous message. */
   set(text: string | null): void;
 }
 
-/** Höchstens so viele Meldungen gleichzeitig; ältere fallen weg. */
+/** At most this many messages at a time; older ones drop out. */
 const MAX_MESSAGES = 5;
 
 /**
- * Sammelt Fehlermeldungen für die Statusleiste am unteren Fensterrand. Meldungen bleiben
- * stehen, bis sie weggeklickt oder von ihrer Quelle zurückgenommen werden (z. B. weil
- * ein neuer Versuch geklappt hat) – sie verschwinden also nicht unbemerkt.
+ * Messages stay until they are dismissed or withdrawn by their source (e.g. because a retry worked)
+ * – so they never disappear unnoticed.
  */
 @Injectable({ providedIn: 'root' })
 export class StatusMessages {
   private readonly t = inject(I18n).t;
   private nextId = 1;
   private nextChannel = 1;
-  /** Welche Meldung zu welchem Kanal gehört. */
   private readonly channels = new Map<number, number>();
 
   readonly messages = signal<readonly StatusMessage[]>([]);
 
-  /** Eigener Kanal für eine Komponente: Jede neue Meldung ersetzt die vorige des Kanals. */
+  /** Each new message replaces the channel's previous one. */
   channel(): StatusChannel {
     const channel = this.nextChannel++;
     return {
@@ -46,7 +43,7 @@ export class StatusMessages {
     };
   }
 
-  /** Zeigt eine Fehlermeldung; dieselbe Meldung noch einmal zählt nur hoch. */
+  /** The same message again only counts up. */
   error(text: string): number {
     const existing = this.messages().find((message) => message.text === text);
     if (existing) {
@@ -61,7 +58,6 @@ export class StatusMessages {
     return id;
   }
 
-  /** Wie {@link error}, aber für einen gefangenen Fehler (z. B. eine Antwort des Backends). */
   report(error: unknown): number {
     return this.error(errorMessage(error, this.t()));
   }
@@ -76,12 +72,12 @@ export class StatusMessages {
 }
 
 /**
- * Unerwartete Fehler (nicht gefangene Ausnahmen, abgelehnte Promises) landen nicht nur in
- * der Konsole, sondern auch in der Statusleiste – sonst bliebe ein Fehlschlag unbemerkt.
+ * Uncaught exceptions and rejected promises end up in the status bar too, not only in the console –
+ * otherwise a failure would go unnoticed.
  */
 @Injectable()
 export class StatusErrorHandler extends ErrorHandler {
-  // Erst beim ersten Fehler holen: Der ErrorHandler entsteht sehr früh beim Start.
+  // Resolve lazily on the first error: the ErrorHandler is created very early during startup.
   private readonly injector = inject(Injector);
 
   override handleError(error: unknown): void {
@@ -91,12 +87,12 @@ export class StatusErrorHandler extends ErrorHandler {
       const t = this.injector.get(I18n).t();
       this.injector.get(StatusMessages).error(t.errors.unexpected(errorMessage(error, t)));
     } catch {
-      // Die Statusleiste selbst ist kaputt – dann bleibt es bei der Konsole.
+      // the status bar itself is broken – the console has to do then
     }
   }
 }
 
-/** Meldungen des Browsers, die nichts kaputt machen. */
+/** Browser messages that break nothing. */
 function isHarmless(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return message.startsWith('ResizeObserver loop');

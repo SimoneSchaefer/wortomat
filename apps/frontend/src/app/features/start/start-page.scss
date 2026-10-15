@@ -56,7 +56,6 @@ form button {
   justify-self: start;
 }
 
-// Pfadfeld mit „Durchsuchen …“ daneben
 .path-row {
   display: flex;
   gap: 0.5rem;
@@ -92,7 +91,7 @@ footer {
   margin: 0;
 }
 
-// Karussell: das gewählte Buch groß in der Mitte, die Nachbarn kleiner und gestaffelt dahinter
+// Carousel: the selected book large in the middle, the neighbours smaller and staggered behind it
 .carousel {
   --slide-width: 8.5rem;
   display: flex;
@@ -120,7 +119,7 @@ footer {
   background: none;
   line-height: 0;
   z-index: calc(10 - var(--distance));
-  // Hintere Bücher deckend, aber etwas dunkler und blasser – so treten sie zurück
+  // Books in the back are opaque but a little darker and paler – so they recede
   filter: brightness(calc(1 - var(--distance) * 0.12)) saturate(calc(1 - var(--distance) * 0.2));
   transform: translateX(calc(-50% + var(--offset) * 58%)) scale(calc(1 - var(--distance) * 0.16));
   transform-origin: 50% 85%;
@@ -134,7 +133,7 @@ footer {
     background: none;
   }
 
-  // Weiter außen ist kein Platz mehr: dort nur beim Blättern kurz ein- und ausblenden
+  // Further out there is no room: there they only fade in and out briefly while paging
   &.far {
     visibility: hidden;
     opacity: 0;
@@ -269,7 +268,6 @@ footer {
   }
 }
 
-// „Neues Buch beginnen“ – klappt das Formular erst auf Klick auf
 .new-book {
   padding-bottom: 1.25rem;
 

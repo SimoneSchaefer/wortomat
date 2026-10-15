@@ -2,13 +2,13 @@ import type { ProofPackage } from '@wortomat/shared';
 import { readerApp } from './reader-app.js';
 
 /**
- * Der Desktop-Bundle (esbuild mit `keepNames`) fügt in `readerApp` Aufrufe von `__name(fn, "…")`
- * ein. Der Helfer selbst bleibt im Bundle zurück, wenn die Funktion per `toString()` ins HTML
- * wandert – ohne diesen Ersatz bricht das Script mit „__name is not defined“ ab.
+ * The desktop bundle (esbuild with `keepNames`) inserts calls to `__name(fn, "…")` into
+ * `readerApp`. The helper itself stays behind in the bundle when the function is moved into the
+ * HTML via `toString()` – without this stand-in the script stops with "__name is not defined".
  */
 const READER_PRELUDE = 'var __name = function (fn) { return fn; };';
 
-/** Für ruhiges Lesen auf dem Handy: Serifenschrift, viel Zeilenabstand, hell und dunkel. */
+/** For calm reading on the phone: serif font, generous line height, light and dark. */
 const READER_CSS = `
 :root {
   color-scheme: light dark;
@@ -117,9 +117,8 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * Die Korrekturfassung als eigenständige HTML-Datei: Styles, Daten und Lese-App stecken darin,
- * sie läuft ohne Netz. Die Daten stehen als JSON in einem eigenen Skript-Block; `<` wird dort
- * als `<` geschrieben, damit ein „</script>“ im Buchtext den Block nicht vorzeitig beendet.
+ * Self-contained, it runs without a network. The data sits as JSON in a script block of its own;
+ * `<` is written as `\u003c` there so a "</script>" in the book text cannot end the block early.
  */
 export function readerHtml(proof: ProofPackage): string {
   const data = JSON.stringify(proof).replace(/</g, '\\u003c');

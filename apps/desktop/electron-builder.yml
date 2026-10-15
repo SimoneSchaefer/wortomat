@@ -1,5 +1,5 @@
-# Erzeugt Installer für Windows, macOS und Linux: `npm run dist` (im Repo-Root).
-# Jede Plattform baut man am besten auf ihrem eigenen Betriebssystem (z. B. per GitHub Actions).
+# Builds installers for Windows, macOS and Linux: `npm run dist` (in the repo root). Each platform
+# is best built on its own OS (e.g. via GitHub Actions).
 appId: de.wortomat.app
 productName: Wortomat
 copyright: Copyright © 2026 Wortomat
@@ -7,7 +7,7 @@ copyright: Copyright © 2026 Wortomat
 directories:
   app: app
   output: release
-  buildResources: build   # icon.png (1024×1024), gerendert aus icon.svg
+  buildResources: build   # icon.png (1024×1024), rendered from icon.svg
 
 files:
   - "**/*"
@@ -27,15 +27,15 @@ nsis:
   allowToChangeInstallationDirectory: true
 
 mac:
-  # Nur Apple Silicon; Intel-Macs bräuchten zusätzlich x64 (bzw. universal).
+  # Apple Silicon only; Intel Macs would need x64 (or universal) as well.
   target:
     - target: dmg
       arch: [arm64]
   category: public.app-category.productivity
 
 linux:
-  # Fertige Größen bis 512 px: das hicolor-Theme kennt keinen 1024er-Ordner, und nur mit
-  # icon.png landet das Icon allein dort – GNOME findet es dann nicht.
+  # Ready-made sizes up to 512 px: the hicolor theme has no 1024 folder, and with only icon.png the
+  # icon lands there alone – GNOME then does not find it.
   icon: build/icons
   target: [AppImage, deb]
   category: Office

@@ -1,4 +1,4 @@
-// Füllt die Seitenleiste, damit auch die freie Fläche unter dem Baum Drop-Ziel ist.
+// Fills the sidebar so the free area below the tree is a drop target too.
 :host {
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@ nav {
   flex: 1;
 }
 
-// Per Tastatur angesteuerte Einträge nicht unter dem stehenbleibenden Teil verstecken
+// Do not hide keyboard-focused entries under the sticky part
 :host {
   scroll-padding-top: 2rem;
 }
@@ -19,11 +19,10 @@ ul {
   padding: 0;
 }
 
-// Gliederung -------------------------------------------------------------------
-// Teile sind durch eine Linie getrennt, jedes Kapitel ist eine Karte mit seinen Szenen
-// (eingerückt). So bleibt auch ein langes Buch überschaubar.
+// Parts are separated by a line, each chapter is a card with its (indented) scenes. That keeps even
+// a long book manageable.
 
-// Abstand und Linie vor jedem Teil – die Linie geht über die ganze Breite der Seitenleiste
+// The line spans the full width of the sidebar
 nav > ul > li.part:not(:first-child) {
   position: relative;
   margin-top: 0.9rem;
@@ -39,7 +38,8 @@ nav > ul > li.part:not(:first-child) {
   }
 }
 
-// Kapitel ohne Teil direkt nach einem Teil: deutlich abgesetzt, damit es nicht dazugehörig wirkt
+// A chapter without a part right after a part: clearly set apart so it does not look like it
+// belongs to it
 nav > ul > li.part + li.chapter {
   margin-top: 0.9rem;
 }
@@ -48,9 +48,8 @@ li.part > ul {
   padding-left: 0.4rem;
 }
 
-// Der Teil bleibt oben stehen, solange man durch seine Kapitel scrollt – samt „+“ für ein
-// neues Kapitel; der nächste Teil schiebt ihn hinaus. Eckig und deckend, damit die
-// Kapitel-Karten nicht durchscheinen.
+// The part sticks to the top while scrolling through its chapters – with the "+" for a new chapter;
+// the next part pushes it out. Square and opaque so the chapter cards do not shine through.
 li.part > .row {
   position: sticky;
   top: 0;
@@ -70,15 +69,15 @@ li.part > .row {
 li.chapter {
   margin-top: 0.4rem;
   padding: 0.15rem;
-  // zurückhaltender Rahmen: halb Linienfarbe, halb Hintergrund der Seitenleiste
+  // restrained border: half border colour, half sidebar background
   border: 1px solid color-mix(in srgb, var(--border) 50%, var(--surface));
   border-radius: 0.55rem;
-  // dezent abgesetzt: halb Seitenhintergrund, halb Hintergrund der Seitenleiste
+  // subtly set apart: half page background, half sidebar background
   background: color-mix(in srgb, var(--bg) 50%, var(--surface));
 }
 
-// Aufeinanderfolgende Kapitel ohne Abstand: die Rahmen überlappen zu einer Linie,
-// gerundet sind nur die äußeren Ecken des Blocks
+// Consecutive chapters without a gap: the borders overlap into one line, only the block's outer
+// corners are rounded
 li.chapter + li.chapter {
   margin-top: -1px;
   border-top-left-radius: 0;
@@ -145,7 +144,6 @@ a {
   }
 }
 
-// Geöffnete Szene zusätzlich hinterlegt
 .row:has(> a.active) {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
@@ -156,7 +154,6 @@ input {
   padding: 0.2rem 0.4rem;
 }
 
-// Auf-/Zuklappen von Teilen und Kapiteln; der Pfeil zeigt nach unten, solange sie offen sind
 .collapse {
   flex-shrink: 0;
   display: grid;
@@ -196,8 +193,8 @@ input {
   height: 0.75rem;
 }
 
-// Badges (wm-annotation-badges) in festen Plätzen, Wortzahl rechtsbündig – so breit wie
-// die längste Zahl im Baum (`--count-chars`, Ziffern sind dank tabular-nums gleich breit)
+// Badges (wm-annotation-badges) in fixed slots, word count right-aligned – as wide as the longest
+// number in the tree (`--count-chars`; digits are equally wide thanks to tabular-nums)
 .count {
   flex-shrink: 0;
   width: calc(var(--count-chars, 4) * 1ch);
@@ -207,9 +204,9 @@ input {
   font-variant-numeric: tabular-nums;
 }
 
-// Liegt beim Überfahren über Zählern und Wortzahl – nimmt sonst keinen Platz weg,
-// sodass alle Zeilen rechts bündig bleiben. Blendet weich ein; links läuft es aus,
-// was darunter liegt, wird dort unscharf statt hart abgeschnitten.
+// Lies over the counts and word count on hover – takes no space otherwise, so all rows stay
+// right-aligned. Fades in softly; on the left it fades out, and what lies beneath is blurred there
+// instead of cut off hard.
 .actions {
   visibility: hidden;
   opacity: 0;
@@ -222,7 +219,7 @@ input {
   gap: 0.25rem;
   padding: 0 0.3rem 0 1.5rem;
   border-radius: 0 0.4rem 0.4rem 0;
-  // Hintergrund der Zeile (überfahren, geöffnete Szene, Teil) – plus Unschärfe dahinter
+  // The row's background (hovered, open scene, part) – plus blur behind it
   background: inherit;
   backdrop-filter: blur(3px);
   mask-image: linear-gradient(to right, transparent, #000 1.25rem);
@@ -255,8 +252,6 @@ input {
   font-size: 0.85rem;
 }
 
-// Drag & Drop ------------------------------------------------------------------
-
 li[draggable='true'] > .row {
   cursor: grab;
 }
@@ -265,8 +260,8 @@ li.dragging > .row {
   opacity: 0.4;
 }
 
-// Davor/danach markiert den ganzen Eintrag inkl. Unterelementen: „nach Kapitel 2“
-// landet hinter dessen Szenen, nicht zwischen Kapitel und erster Szene.
+// Before/after marks the whole entry including its children: "after chapter 2" lands behind its
+// scenes, not between the chapter and its first scene.
 li[data-drop='before'] {
   box-shadow: inset 0 2px 0 var(--accent);
 }

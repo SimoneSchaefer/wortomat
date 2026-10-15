@@ -1,4 +1,4 @@
-/** IPC-Kanäle zwischen Hauptprozess und Preload. Nur für native OS-Funktionen – Daten laufen über REST. */
+/** Only for native OS features – data goes through REST. */
 export const IPC = {
   openProjectDialog: 'dialog:open-project',
   createProjectDialog: 'dialog:create-project',

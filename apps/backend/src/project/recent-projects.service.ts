@@ -29,9 +29,8 @@ interface ProjectSummary {
 }
 
 /**
- * Merkt sich alle Projektdateien, die angelegt oder geöffnet wurden – egal wo sie liegen.
- * Die Liste enthält nur Pfade; Titel & Co. werden bei jeder Abfrage frisch aus den
- * Dateien gelesen und sind daher nie veraltet.
+ * Remembers every project file that was created or opened, wherever it lives. The list holds only
+ * paths; titles etc. are read fresh from the files on every request, so they are never stale.
  */
 @Injectable()
 export class RecentProjectsService {
@@ -61,10 +60,7 @@ export class RecentProjectsService {
       });
   }
 
-  /**
-   * Liest das Titelbild eines Buchs aus der Liste – auch wenn es gerade nicht geöffnet ist.
-   * Nur für Dateien, die in der Liste stehen, damit sich so keine beliebigen Dateien lesen lassen.
-   */
+  /** Only for files in the list, so this cannot be used to read arbitrary files. */
   cover(filePath: string): { mimeType: ImageMimeType; data: Buffer } | null {
     if (!this.read().some((entry) => samePath(entry.filePath, filePath))) {
       return null;
@@ -78,7 +74,7 @@ export class RecentProjectsService {
     this.write(entries.slice(0, MAX_ENTRIES));
   }
 
-  /** Entfernt den Eintrag aus der Liste. Die Datei selbst bleibt unangetastet. */
+  /** The file itself is left untouched. */
   forget(filePath: string): void {
     this.write(this.read().filter((entry) => !samePath(entry.filePath, filePath)));
   }
@@ -93,7 +89,7 @@ export class RecentProjectsService {
         ? data.projects.filter((entry) => typeof entry?.filePath === 'string')
         : [];
     } catch (error) {
-      // Kaputte Liste beiseitelegen statt die App zu blockieren; die Bücher selbst sind sicher.
+      // Move a broken list aside instead of blocking the app; the books themselves are safe.
       const backup = `${this.listFile}.${Date.now()}.defekt`;
       this.logger.warn(`Projektliste unlesbar, verschoben nach ${backup}: ${String(error)}`);
       renameSync(this.listFile, backup);
@@ -104,14 +100,14 @@ export class RecentProjectsService {
   private write(projects: StoredEntry[]): void {
     mkdirSync(path.dirname(this.listFile), { recursive: true });
     const data: StoredList = { version: 1, projects };
-    // Erst in eine Temp-Datei schreiben, dann umbenennen: nie eine halb geschriebene Liste.
+    // Write to a temp file first, then rename: never a half-written list.
     const tmpFile = `${this.listFile}.tmp`;
     writeFileSync(tmpFile, JSON.stringify(data, null, 2));
     renameSync(tmpFile, this.listFile);
   }
 }
 
-/** Liest Titel & Co. direkt aus der Projektdatei (nur lesend). `null` = nicht verfügbar. */
+/** Read-only. `null` = not available. */
 function readSummary(filePath: string): ProjectSummary | null {
   if (!existsSync(filePath)) {
     return null;
@@ -171,7 +167,7 @@ function readCover(filePath: string): { mimeType: ImageMimeType; data: Buffer } 
   }
 }
 
-/** Windows und macOS unterscheiden bei Pfaden standardmäßig keine Groß-/Kleinschreibung. */
+/** Windows and macOS do not distinguish case in paths by default. */
 function samePath(a: string, b: string): boolean {
   const normalize = (p: string) => {
     const resolved = path.resolve(p);

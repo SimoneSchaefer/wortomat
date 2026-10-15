@@ -11,7 +11,7 @@ import { WortomatApi } from './wortomat-api';
 
 const SAVE_DELAY_MS = 400;
 
-/** App-Einstellungen (z. B. Sprache, Breite der Seitenleiste), gespeichert im Backend. */
+/** Stored in the backend. */
 @Injectable({ providedIn: 'root' })
 export class AppSettingsStore {
   private readonly api = inject(WortomatApi);
@@ -27,7 +27,7 @@ export class AppSettingsStore {
     plotView: { order: 'story', onlyTurningPoints: true, compact: false },
   });
 
-  /** Fehler sind hier kein Grund, die App nicht zu starten – dann gelten die Standardwerte. */
+  /** Errors are no reason not to start the app – the defaults apply then. */
   async load(): Promise<void> {
     try {
       this.settings.set(await this.api.settings());
@@ -36,7 +36,7 @@ export class AppSettingsStore {
     }
   }
 
-  /** Sofort übernehmen, verzögert speichern (z. B. bei mehreren Pfeiltasten-Schritten). */
+  /** Apply right away, save delayed (e.g. for several arrow key steps). */
   setSidebarWidth(width: number | null): void {
     this.settings.update((settings) => ({ ...settings, sidebarWidth: width }));
     clearTimeout(this.saveTimer);
@@ -67,7 +67,7 @@ export class AppSettingsStore {
     return this.saveNow('revisionMode', revisionMode);
   }
 
-  /** Ansicht der Handlung: sofort übernehmen, im Hintergrund speichern. */
+  /** Apply right away, save in the background. */
   setPlotView(changes: Partial<PlotViewSettings>): void {
     this.settings.update((settings) => ({
       ...settings,
@@ -78,7 +78,7 @@ export class AppSettingsStore {
       .catch((error: unknown) => console.warn('Einstellungen nicht gespeichert', error));
   }
 
-  /** Sofort übernehmen und speichern; schlägt das Speichern fehl, gilt wieder der alte Wert. */
+  /** Apply right away and save; if saving fails, the old value applies again. */
   private async saveNow<K extends Exclude<keyof AppSettings, 'sidebarWidth' | 'plotView'>>(
     key: K,
     value: AppSettings[K],

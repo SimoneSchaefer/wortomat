@@ -2,7 +2,7 @@ import { Component, computed, input, linkedSignal } from '@angular/core';
 import type { NoteSummary } from '@wortomat/shared';
 import { coverCrop, cropStyle } from '../../core/image-crop';
 
-/** Rundes Profilbild einer Notiz; ohne Bild die Initialen („Anna Berger“ → „AB“). */
+/** Without an image, the initials ("Anna Berger" → "AB"). */
 @Component({
   selector: 'wm-note-avatar',
   template: `
@@ -41,7 +41,7 @@ import { coverCrop, cropStyle } from '../../core/image-crop';
       object-fit: cover;
     }
 
-    // Gewählter Ausschnitt: das Bild so verschieben und vergrößern, dass er den Kreis füllt
+    // Chosen crop: move and scale the image so the crop fills the circle
     img.cropped {
       position: absolute;
       max-width: none;
@@ -55,16 +55,16 @@ export class NoteAvatar {
 
   private readonly url = computed(() => this.note().coverImageUrl);
   /**
-   * Bildmaße – erst nach dem Laden bekannt, nötig für den runden Ausschnitt. Nur bei einem
-   * anderen Bild zurücksetzen (über `url`, nicht bei jeder Änderung der Notiz): dasselbe
-   * Bild lädt nicht neu, die Maße kämen sonst nie wieder.
+   * Image dimensions – only known after loading, needed for the round crop. Reset only for a
+   * different image (via `url`, not on every change to the note): the same image does not load
+   * again, so the dimensions would never come back.
    */
   private readonly size = linkedSignal<string | null, { width: number; height: number } | null>({
     source: this.url,
     computation: () => null,
   });
 
-  /** Lage des Bilds, wenn ein Ausschnitt gewählt ist; sonst `null` (ganzes Bild, mittig). */
+  /** `null` without a crop (whole image, centred). */
   protected readonly cropped = computed(() => {
     const crop = this.note().coverCrop;
     const size = this.size();

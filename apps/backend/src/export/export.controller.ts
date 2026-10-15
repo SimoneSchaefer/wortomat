@@ -31,13 +31,12 @@ import { localized, requestLanguage } from '../i18n.js';
 export class ExportController {
   constructor(private readonly exporter: ExportService) {}
 
-  /** Welche Formate gehen auf diesem Rechner? (PDF nur mit pdfLaTeX) */
+  /** PDF needs pdfLaTeX on this machine. */
   @Get('capabilities')
   capabilities(): Promise<ExportCapabilities> {
     return this.exporter.capabilities();
   }
 
-  /** Was der Export-Dialog sich für dieses Buch gemerkt hat. */
   @Get('settings')
   settings(): ExportSettingsResponse {
     return this.exporter.settings();
@@ -48,7 +47,7 @@ export class ExportController {
     return this.exporter.saveSettings(body);
   }
 
-  /** Schriftdatei (OpenType) für die Vorschau, z. B. `fonts/garamond/italic`. */
+  /** OpenType font file for the preview, e.g. `fonts/garamond/italic`. */
   @Get('fonts/:font/:style')
   async font(
     @Param('font') font: string,
@@ -66,16 +65,15 @@ export class ExportController {
     res.sendFile(file);
   }
 
-  /** Titel und erstes Kapitel für die Seitenvorschau im Dialog. */
   @Get('preview')
   preview(@Query('sceneTitles') sceneTitles?: string): ExportPreview {
     return this.exporter.preview(sceneTitles === 'true');
   }
 
   /**
-   * Mit `filePath` (Desktop, aus dem Speichern-Dialog) wird die Datei dort geschrieben und
-   * `ExportResult` geliefert; ohne Pfad (Browser-Modus) kommt die Datei als Download zurück,
-   * Hinweise dann im Header `X-Export-Warnings` (URL-kodiertes JSON).
+   * With `filePath` (desktop, from the save dialog) the file is written there and an `ExportResult`
+   * returned; without a path (browser mode) the file comes back as a download, with warnings in the
+   * `X-Export-Warnings` header (URL-encoded JSON).
    */
   @Post()
   @HttpCode(200)

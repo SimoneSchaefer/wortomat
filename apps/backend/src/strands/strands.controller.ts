@@ -27,7 +27,6 @@ export class StrandsController {
     return this.strands.update(id, body);
   }
 
-  /** Liefert alle Stränge in der neuen Reihenfolge. */
   @Post('strands/:id/move')
   @HttpCode(200)
   move(@Param('id') id: string, @Body() body: MoveStrandRequest): Strand[] {
@@ -45,7 +44,7 @@ export class StrandsController {
     return this.strands.forScene(sceneId);
   }
 
-  /** Mehrfaches Zuordnen ist unschädlich. Liefert alle Stränge der Szene. */
+  /** Assigning twice is harmless. */
   @Post('scenes/:id/strands')
   add(@Param('id') sceneId: string, @Body() body: AddSceneStrandRequest): Strand[] {
     return this.strands.add(sceneId, body?.strandId);

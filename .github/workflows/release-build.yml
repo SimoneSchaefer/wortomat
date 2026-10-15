@@ -1,5 +1,5 @@
-# Gemeinsamer Ablauf der drei Release-Workflows: baut die App im Release-Modus
-# auf dem passenden Betriebssystem und legt die Installer als Artefakt ab.
+# Shared by the three release workflows: builds the app in release mode on the matching OS and
+# uploads the installers as an artifact.
 name: Release-Build
 
 on:
@@ -26,7 +26,7 @@ jobs:
   package:
     runs-on: ${{ inputs.runner }}
     env:
-      # Ohne Zertifikat nicht signieren, statt nach einem im Schlüsselbund zu suchen.
+      # Without a certificate, do not sign instead of searching the keychain for one.
       CSC_IDENTITY_AUTO_DISCOVERY: false
     steps:
       - uses: actions/checkout@v5

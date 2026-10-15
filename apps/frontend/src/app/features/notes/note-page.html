@@ -8,8 +8,10 @@
     <div class="note-head" [class.with-gallery]="config().gallery">
       <div class="note-meta">
         <p class="doc-kind">{{ texts().singular }}</p>
-        <!-- Titel und Kurzbeschreibung sind mehrzeilig: sie wachsen mit dem Text
-             (field-sizing), damit lange Namen nicht abgeschnitten werden -->
+        <!--
+          Title and summary are multi-line: they grow with the text (field-sizing) so long names are
+          not cut off
+        -->
         <textarea
           #titleInput
           class="doc-title doc-input"

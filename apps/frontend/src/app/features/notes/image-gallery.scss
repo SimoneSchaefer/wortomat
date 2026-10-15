@@ -4,7 +4,7 @@
 
 .gallery {
   position: relative;
-  // Querformat: Fotos von Personen und Orten sind meist breiter als hoch
+  // Landscape: photos of people and places are usually wider than tall
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 0.75rem;
@@ -22,7 +22,7 @@
     opacity: 1;
   }
 
-  // Touchscreens kennen kein Hover – Bedienelemente immer zeigen.
+  // Touchscreens have no hover – always show the controls.
   @media (hover: none) {
     .nav,
     .toolbar {
@@ -31,7 +31,7 @@
   }
 }
 
-// Horizontaler Streifen; Scroll-Snapping sorgt fürs Einrasten pro Bild.
+// Horizontal strip; scroll snapping makes it snap per image.
 .track {
   display: flex;
   height: 100%;
@@ -65,7 +65,7 @@
     object-fit: contain;
     user-select: none;
 
-    // Gewählter Ausschnitt füllt das Bildfeld (Lage kommt aus slideStyle)
+    // The chosen crop fills the image box (position comes from slideStyle)
     &.cropped {
       position: absolute;
       max-width: none;
@@ -140,7 +140,7 @@
   opacity: 0;
   transition: opacity 0.15s;
 
-  // Alle gleich hoch, Inhalt mittig
+  // All the same height, content centred
   button {
     display: inline-flex;
     align-items: center;

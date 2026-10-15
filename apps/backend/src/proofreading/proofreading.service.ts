@@ -21,29 +21,28 @@ import { localized } from '../i18n.js';
 import { addMark, findAnchor, textBlocks } from './proof-text.js';
 import { readerHtml } from './reader/reader-html.js';
 
-/** Höchstlängen, damit eine kaputte oder fremde Datei nichts Unsinniges ins Buch schreibt. */
+/** Upper limits, so a broken or foreign file cannot write nonsense into the book. */
 const MAX_NOTE_LENGTH = 5000;
 const MAX_QUOTE_LENGTH = 2000;
 const MAX_CONTEXT_LENGTH = 200;
 
-/** So heißen Notizdateien vom Handy – auch mit „(1)“ o. Ä., wenn es sie schon gab. */
+/** Also with "(1)" or similar when the name was taken. */
 const NOTES_FILE_NAME = /notizen.*\.txt$/i;
-/** Größere Dateien sind keine Notizdateien; nicht erst einlesen. */
+/** Larger files are no notes files; do not even read them. */
 const MAX_NOTES_FILE_BYTES = 5 * 1024 * 1024;
 
-/** Eine Notizdatei im Download-Ordner mit den Notizen, die zu diesem Buch gehören. */
 interface InboxFile {
   name: string;
   path: string;
   modifiedAt: Date;
   notes: ProofNote[];
-  /** Enthält die Datei auch Notizen zu anderen Büchern? Dann nie löschen. */
+  /** Such a file is never deleted. */
   foreign: boolean;
 }
 
 /**
- * Korrekturlesen unterwegs: das Manuskript als reiner Text zum Mitnehmen, und die Notizen von
- * dort zurück ins Buch – als Fixme-Markierungen mit Notiz bzw. Ersetzungsvorschlag.
+ * Proofreading on the go: the manuscript as plain text to take along, and the notes from there back
+ * into the book – as fixme marks with a note or a replacement suggestion.
  */
 @Injectable()
 export class ProofreadingService {
@@ -57,9 +56,8 @@ export class ProofreadingService {
     return this.projects.db;
   }
 
-  /** Alle Kapitel mit ihren Szenen in Buchreihenfolge, Absatz für Absatz. */
   package(): ProofPackage {
-    const nodes = this.manuscript.list(); // meldet 409, wenn kein Buch geöffnet ist
+    const nodes = this.manuscript.list(); // responds with 409 when no book is open
     const project = this.projects.info()!;
     const docs = this.docs();
     const children = (parentId: string | null) =>
@@ -102,8 +100,7 @@ export class ProofreadingService {
   }
 
   /**
-   * Trägt die Notizen ins Buch ein. Je Szene wird das Dokument einmal gelesen, alle Notizen
-   * werden markiert und es wird einmal gespeichert – alles oder nichts.
+   * Each scene's document is read once, all notes are marked and it is saved once – all or nothing.
    */
   import(file: unknown): ProofImportResult {
     const notes = requireNotes(file);
@@ -124,7 +121,7 @@ export class ProofreadingService {
         result.skipped++;
         continue;
       }
-      const doc = docs.get(note.sceneId); // dasselbe Objekt, auch nach früheren Notizen
+      const doc = docs.get(note.sceneId); // the same object, also after earlier notes
       const anchor = doc ? findAnchor(textBlocks(doc), note) : null;
       if (!doc || !anchor) {
         result.unmatched.push({ note, sceneTitle: titles.get(note.sceneId) ?? null });
@@ -132,7 +129,7 @@ export class ProofreadingService {
       }
       addMark(anchor, {
         type: 'annotation',
-        // Ein „Vorschlag“, der den Text nicht ändert, ist eine Notiz
+        // A "suggestion" that does not change the text is a note
         attrs: {
           kind: 'fixme',
           note: note.note || null,
@@ -146,7 +143,7 @@ export class ProofreadingService {
 
     transaction(this.db, () => {
       for (const [sceneId, doc] of changed) this.manuscript.replaceMarkedDoc(sceneId, doc);
-      // Nicht zuordenbare Notizen bleiben offen: vielleicht passt die Stelle nach einer Korrektur
+      // Notes that cannot be placed stay open: maybe the passage matches after a correction
       const remember = this.db.prepare(
         'INSERT OR IGNORE INTO proof_imported (note_id, imported_at) VALUES (?, ?)',
       );
@@ -157,11 +154,10 @@ export class ProofreadingService {
     return result;
   }
 
-  // -------------------------------------------------------------------------
-  // Postkasten: Notizdateien im Download-Ordner (Mail-Anhang, GSConnect …)
-  // -------------------------------------------------------------------------
-
-  /** Notizdateien zu diesem Buch im Download-Ordner, und wie viele Notizen daraus neu sind. */
+  /**
+   * Notes files for this book in the downloads folder (mail attachment, GSConnect …), and how many
+   * of their notes are new.
+   */
   inbox(): ProofInbox {
     const files = this.inboxFiles();
     const imported = this.importedIds();
@@ -181,8 +177,8 @@ export class ProofreadingService {
   }
 
   /**
-   * Übernimmt die neuen Notizen aus allen Notizdateien. Kommt eine Notiz in mehreren Dateien vor
-   * (das Handy sendet immer alle), gilt die Fassung aus der neuesten Datei.
+   * If a note appears in several files (the phone always sends all of them), the version from the
+   * newest file wins.
    */
   importInbox(): ProofImportResult {
     const byId = new Map<string, ProofNote>();
@@ -200,9 +196,8 @@ export class ProofreadingService {
   }
 
   /**
-   * Löscht Notizdateien, deren Notizen alle schon im Buch sind. Dateien mit offenen oder
-   * fremden Notizen (anderes Buch) bleiben liegen.
-   * @returns die Namen der gelöschten Dateien
+   * Files with open or foreign notes (another book) stay.
+   * @returns the names of the deleted files
    */
   cleanInbox(): string[] {
     const imported = this.importedIds();
@@ -219,7 +214,7 @@ export class ProofreadingService {
     return this.options.downloadsDir ?? path.join(os.homedir(), 'Downloads');
   }
 
-  /** Neueste zuerst; unlesbare oder fremde Dateien werden still übergangen. */
+  /** Newest first; unreadable or foreign files are skipped silently. */
   private inboxFiles(): InboxFile[] {
     const dir = this.downloadsDir;
     if (!existsSync(dir)) return [];
@@ -247,7 +242,7 @@ export class ProofreadingService {
           foreign: notes.length < all.length,
         });
       } catch {
-        // keine (gültige) Notizdatei
+        // not a (valid) notes file
       }
     }
     return files.sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
@@ -261,14 +256,12 @@ export class ProofreadingService {
     );
   }
 
-  /** Die Korrekturfassung als eine HTML-Datei fürs Handy (Lese-App und Text darin). */
   readerFile(): { fileName: string; html: string } {
     const proof = this.package();
     const name = proof.title.replace(/[\\/:*?"<>|]+/g, '').trim() || 'Wortomat';
     return { fileName: `${name} – Korrekturfassung.html`, html: readerHtml(proof) };
   }
 
-  /** Die Dokumente aller Szenen mit Text. */
   private docs(): Map<string, EditorDoc> {
     const rows = this.db
       .prepare(

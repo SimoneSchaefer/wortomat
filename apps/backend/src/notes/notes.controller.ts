@@ -31,7 +31,6 @@ import type {
 import { MAX_IMAGE_BYTES } from '../images/images.service.js';
 import { NotesService } from './notes.service.js';
 
-/** Gruppen der Notizliste, z. B. „Familie Berger“. */
 @Controller('note-groups')
 export class NoteGroupsController {
   constructor(private readonly notes: NotesService) {}
@@ -68,7 +67,6 @@ export class NoteGroupsController {
 export class NotesController {
   constructor(private readonly notes: NotesService) {}
 
-  /** Alle Notizen oder nur eine Art (`?kind=character`). */
   @Get()
   list(@Query('kind') kind?: NoteKind): NoteSummary[] {
     return this.notes.list(kind);
@@ -100,14 +98,12 @@ export class NotesController {
     return this.notes.saveContent(id, body);
   }
 
-  // Bildergalerie --------------------------------------------------------------
-
   @Get(':id/images')
   images(@Param('id') id: string): GalleryImage[] {
     return this.notes.galleryImages(id);
   }
 
-  /** Multipart: Feld `file`, optional `width`/`height`. Liefert die ganze Galerie zurück. */
+  /** Returns the whole gallery. */
   @Post(':id/images')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_IMAGE_BYTES, files: 1 } }))
   addImage(

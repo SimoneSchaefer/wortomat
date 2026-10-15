@@ -41,10 +41,7 @@ interface ProjectRow {
   updated_at: string;
 }
 
-/**
- * Hält die aktuell geöffnete Projektdatei. Es ist immer höchstens ein Projekt offen;
- * alle anderen Services greifen über {@link db} darauf zu.
- */
+/** At most one project is open at a time; all other services reach it via {@link db}. */
 @Injectable()
 export class ProjectService implements OnApplicationShutdown {
   private readonly logger = new Logger(ProjectService.name);
@@ -193,7 +190,6 @@ export class ProjectService implements OnApplicationShutdown {
     return this.info()!;
   }
 
-  /** Vermerkt eine Änderung am Projekt. */
   touch(): void {
     this.db.prepare('UPDATE project SET updated_at = ? WHERE id = 1').run(nowIso());
   }
@@ -205,8 +201,8 @@ export class ProjectService implements OnApplicationShutdown {
     const { db, filePath } = this.current;
     this.current = null;
     try {
-      // WAL-Inhalt in die Hauptdatei zurückschreiben, damit das Projekt wieder
-      // aus genau einer Datei besteht (wichtig fürs Kopieren und Sichern).
+      // Write the WAL back into the main file so the project consists of exactly one file again
+      // (matters for copying and backups).
       db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
     } finally {
       db.close();
@@ -224,7 +220,7 @@ export class ProjectService implements OnApplicationShutdown {
     try {
       this.recent.remember(next.filePath);
     } catch (error) {
-      // Die Projektliste ist Komfort – ein Fehler dort darf das Öffnen nicht verhindern.
+      // The project list is a convenience – an error there must not prevent opening.
       this.logger.warn(`Projektliste konnte nicht aktualisiert werden: ${String(error)}`);
     }
   }

@@ -1,4 +1,4 @@
-# Manuell starten: Actions → „Release macOS“ → „Run workflow“.
+# Start manually: Actions → "Release macOS" → "Run workflow".
 name: Release macOS
 
 on:

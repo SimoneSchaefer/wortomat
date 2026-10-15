@@ -1,19 +1,19 @@
 import type { QuoteStyle } from '@wortomat/shared';
 
-/** Schmales geschütztes Leerzeichen – im Französischen zwischen Guillemets und Text. */
+/** Narrow no-break space – in French between guillemets and text. */
 export const NARROW_NBSP = ' ';
 export const APOSTROPHE = '’';
 
-/** Öffnendes und schließendes Zeichen (ggf. mit Leerzeichen), doppelt und einfach. */
+/** Opening and closing mark (with spaces where needed), double and single. */
 export interface QuoteMarks {
   double: readonly [open: string, close: string];
   single: readonly [open: string, close: string];
 }
 
-/** Name des Stils: `t().settings.quoteStyles[style]`. */
+/** Name of the style: `t().settings.quoteStyles[style]`. */
 export interface QuoteStyleInfo {
   style: QuoteStyle;
-  /** `null`: nichts ersetzen. */
+  /** `null`: replace nothing. */
   marks: QuoteMarks | null;
 }
 
@@ -42,20 +42,16 @@ export function quoteMarks(style: QuoteStyle): QuoteMarks | null {
   return QUOTE_STYLES.find((info) => info.style === style)?.marks ?? null;
 }
 
-/** Was statt des getippten Zeichens eingesetzt wird. */
 export interface QuoteReplacement {
   text: string;
-  /** So viele Zeichen vor dem getippten werden mit ersetzt (z. B. ein Leerzeichen). */
+  /** This many characters before the typed one are replaced too (e.g. a space). */
   replaceBefore: number;
 }
 
-/** Nach diesen Zeichen beginnt ein Zitat (zusätzlich zu Leerraum und den öffnenden Zeichen). */
+/** A quote starts after these characters (in addition to whitespace and the opening marks). */
 const OPENING_CONTEXT = '([{–—/';
 
-/**
- * Typografisches Zeichen für ein getipptes `"` oder `'`.
- * @param before Text des Absatzes vor dem Cursor
- */
+/** @param before paragraph text before the cursor */
 export function smartQuote(
   typed: '"' | "'",
   before: string,
@@ -65,8 +61,8 @@ export function smartQuote(
   if (!marks) return null;
   const [open, close] = typed === '"' ? marks.double : marks.single;
 
-  // Französisch wird oft mit Leerzeichen getippt: „Bonjour "“ schließt, das Leerzeichen
-  // wird zum schmalen geschützten.
+  // French is often typed with spaces: "Bonjour \"" closes, the space becomes a narrow no-break
+  // space.
   if (style === 'fr' && before.endsWith(' ') && isUnclosed(before, open, close)) {
     return { text: close, replaceBefore: 1 };
   }
@@ -76,8 +72,8 @@ export function smartQuote(
   if (typed === '"') {
     return { text: close, replaceBefore: 0 };
   }
-  // Einfaches Zeichen direkt nach Text: schließend nur, wenn vorher eins geöffnet wurde –
-  // sonst ist es ein Apostroph (geht’s, Max’ Hut).
+  // A single mark right after text closes only if one was opened before – otherwise it is an
+  // apostrophe (geht’s, Max’ Hut).
   if (close === APOSTROPHE || isUnclosed(before, open, close)) {
     return { text: close, replaceBefore: 0 };
   }
@@ -85,8 +81,8 @@ export function smartQuote(
 }
 
 /**
- * Leerzeichen direkt nach einem französischen öffnenden Zeichen weglassen – das schmale
- * Leerzeichen ist schon da („"Bonjour“ und „" Bonjour“ ergeben dasselbe).
+ * Drop a space right after a French opening mark – the narrow space is already there ("\"Bonjour"
+ * and "\" Bonjour" give the same).
  */
 export function swallowsSpace(before: string, style: QuoteStyle): boolean {
   const marks = style === 'fr' ? quoteMarks(style) : null;
@@ -96,7 +92,7 @@ export function swallowsSpace(before: string, style: QuoteStyle): boolean {
 function opensQuote(before: string, marks: QuoteMarks): boolean {
   const last = before.at(-1);
   if (last === undefined || /\s/.test(last) || OPENING_CONTEXT.includes(last)) return true;
-  // Verschachtelt: „‚ …
+  // nested: „‚ …
   return before.endsWith(marks.double[0]) || before.endsWith(marks.single[0]);
 }
 

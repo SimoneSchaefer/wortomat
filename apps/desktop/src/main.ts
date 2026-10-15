@@ -21,11 +21,11 @@ import { IPC } from './ipc.js';
 import { isLanguage, systemLanguage, TEXTS } from './texts.js';
 
 const isDev = process.argv.includes('--dev');
-/** Im Dev-Modus kommt das Frontend vom Angular-Dev-Server (mit Live-Reload). */
+/** In dev mode the frontend comes from the Angular dev server (with live reload). */
 const DEV_FRONTEND_URL = 'http://localhost:4200';
-/** Muss zu apps/frontend/proxy.conf.json passen. */
+/** Must match apps/frontend/proxy.conf.json. */
 const DEV_BACKEND_PORT = 3000;
-/** So lange warten wir beim Schließen höchstens auf das Speichern im Frontend. */
+/** The longest we wait for the frontend to save when closing. */
 const FLUSH_TIMEOUT_MS = 5000;
 
 const appDir = path.dirname(fileURLToPath(import.meta.url));
@@ -34,14 +34,13 @@ const token = randomBytes(32).toString('base64url');
 let server: RunningServer | null = null;
 let appUrl = '';
 let mainWindow: BrowserWindow | null = null;
-/** Projektdatei, mit der die App gestartet wurde (Doppelklick auf eine .wortomat-Datei). */
+/** Project file the app was started with (double-click on a .wortomat file). */
 let pendingProjectPath = findProjectPath(process.argv);
-/** Läuft, bis das Backend gestartet und das Fenster erzeugt ist. */
 let starting: Promise<void> | null = null;
-/** Sprache der Oberfläche, vom Frontend gemeldet; bis dahin die des Systems. */
+/** Reported by the frontend; until then the system language. */
 let language: Language | null = null;
 
-/** Erst nach `ready` aufrufen (vorher kennt Electron die Systemsprache nicht). */
+/** Call only after `ready` (before that Electron does not know the system language). */
 function currentLanguage(): Language {
   return language ?? systemLanguage(app.getPreferredSystemLanguages());
 }
@@ -68,7 +67,7 @@ if (!app.requestSingleInstanceLock()) {
     }
   });
 
-  // macOS meldet geöffnete Dateien über ein Event statt über argv.
+  // macOS reports opened files via an event instead of argv.
   app.on('open-file', (event, filePath) => {
     event.preventDefault();
     if (server) {
@@ -101,8 +100,8 @@ async function start(): Promise<void> {
   });
   appUrl = isDev ? DEV_FRONTEND_URL : server.url;
 
-  // Die Standard-Menüleiste (Datei, Bearbeiten, Ansicht …) braucht nur die Entwicklung.
-  // macOS behält sie: Dort hängt sie nicht am Fenster, und ohne sie gehen Cmd+C/V/Q nicht.
+  // Only development needs the default menu bar (File, Edit, View …). macOS keeps it: there it is
+  // not attached to the window, and without it Cmd+C/V/Q do not work.
   if (!isDev && process.platform !== 'darwin') {
     Menu.setApplicationMenu(null);
   }
@@ -119,8 +118,7 @@ async function start(): Promise<void> {
 }
 
 /**
- * Hängt das Token an jede Anfrage an unser Backend an. Das Frontend kennt es
- * dadurch nicht und muss sich um nichts kümmern – auch `<img src>` funktioniert.
+ * The frontend therefore never knows it and has nothing to take care of – `<img src>` works too.
  */
 function injectAuthHeader(origins: string[]): void {
   const allowed = new Set(origins.map((url) => new URL(url).origin));
@@ -143,7 +141,7 @@ function createMainWindow(): BrowserWindow {
     minHeight: 500,
     show: false,
     title: 'Wortomat',
-    // macOS nimmt das Icon aus dem App-Bundle, Windows und Linux brauchen es am Fenster.
+    // macOS takes the icon from the app bundle, Windows and Linux need it on the window.
     icon: process.platform === 'darwin' ? undefined : path.join(appDir, 'icon.png'),
     webPreferences: {
       preload: path.join(appDir, 'preload.cjs'),
@@ -156,7 +154,7 @@ function createMainWindow(): BrowserWindow {
 
   window.once('ready-to-show', () => window.show());
 
-  // Externe Links im Standardbrowser öffnen, nie im App-Fenster.
+  // Open external links in the default browser, never in the app window.
   window.webContents.setWindowOpenHandler(({ url }) => {
     openExternal(url);
     return { action: 'deny' };
@@ -195,8 +193,8 @@ function createMainWindow(): BrowserWindow {
   });
 
   closeAfterFlush(window);
-  // Windows: Abmelden/Herunterfahren schickt kein Signal, sondern WM_ENDSESSION.
-  // `query-session-end` lassen wir in Ruhe – das Abmelden kann noch abgebrochen werden.
+  // Windows: logging off/shutting down sends no signal but WM_ENDSESSION. We leave
+  // `query-session-end` alone – logging off can still be cancelled then.
   window.on('session-end', () => app.quit());
   window.on('closed', () => {
     if (mainWindow === window) mainWindow = null;
@@ -206,11 +204,11 @@ function createMainWindow(): BrowserWindow {
   return window;
 }
 
-/** Vor dem Schließen gibt das Frontend noch ungespeicherte Änderungen ans Backend. */
+/** Before closing, the frontend hands unsaved changes to the backend. */
 function closeAfterFlush(window: BrowserWindow): void {
   let flushed = false;
   window.on('close', (event) => {
-    // Beim Beenden der App wurde bereits in `shutdown()` gespeichert.
+    // When quitting the app, `shutdown()` has already saved.
     if (flushed || quitReady) return;
     event.preventDefault();
     void flushRenderer(window).finally(() => {
@@ -222,8 +220,8 @@ function closeAfterFlush(window: BrowserWindow): void {
 
 function flushRenderer(window: BrowserWindow): Promise<void> {
   const contents = window.webContents;
-  // Ist das Frontend schon weg (z. B. SIGTERM an alle Prozesse beim Abmelden),
-  // kann es nichts mehr speichern – dann nicht unnötig auf den Timeout warten.
+  // If the frontend is gone already (e.g. SIGTERM to all processes on logout), it cannot save
+  // anything – then do not wait for the timeout needlessly.
   if (window.isDestroyed() || contents.isCrashed()) return Promise.resolve();
   return new Promise((resolve) => {
     const done = () => {
@@ -317,7 +315,7 @@ function registerIpcHandlers(): void {
     if (isTrusted(event) && isLanguage(value)) language = value;
   });
 
-  // Fensterrahmen, Kontextmenü und Dialoge im gewählten Farbschema
+  // window frame, context menu and dialogs in the chosen colour scheme
   ipcMain.on(IPC.setTheme, (event, value: unknown) => {
     if (isTrusted(event) && (value === 'system' || value === 'light' || value === 'dark')) {
       nativeTheme.themeSource = value;
@@ -333,9 +331,8 @@ const EXPORT_FORMATS = {
 } as const;
 
 /**
- * Nur exportierte Dateien öffnen: vorhandene .html/.docx/.pdf/.epub. So kann selbst eine
- * kompromittierte Seite über diesen Weg keine Programme starten (unter Windows würde
- * „Öffnen“ einer .exe sie ausführen).
+ * Only open exported files: existing .html/.docx/.pdf/.epub. That way even a compromised page
+ * cannot start programs through this path (on Windows, opening an .exe would run it).
  */
 function requireExportedFile(filePath: unknown): string {
   if (
@@ -349,7 +346,6 @@ function requireExportedFile(filePath: unknown): string {
   return filePath;
 }
 
-/** IPC nur von unserer eigenen Seite akzeptieren. */
 function trustedWindow(event: IpcMainInvokeEvent): BrowserWindow {
   const window = BrowserWindow.fromWebContents(event.sender);
   if (!window || !isTrusted(event)) {
@@ -404,9 +400,7 @@ function showError(error: unknown): void {
   dialog.showErrorBox('Wortomat', error instanceof Error ? error.message : String(error));
 }
 
-// ---------------------------------------------------------------------------
-// Beenden: erst Fenster (mit Speichern), dann Backend (schließt die Datenbank)
-// ---------------------------------------------------------------------------
+// Quitting: windows first (with saving), then the backend (closes the database)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
@@ -418,12 +412,12 @@ app.on('activate', () => {
   }
 });
 
-/** Wird gesetzt, sobald gespeichert und die Datenbank geschlossen ist. */
+/** Set once everything is saved and the database is closed. */
 let quitReady = false;
 let shutdownStarted = false;
 
-// Strg+Q / Cmd+Q / letztes Fenster geschlossen: Electron feuert `before-quit`, bevor es
-// die Fenster schließt. Wir halten das an, bis gespeichert und die Datenbank zu ist.
+// Ctrl+Q / Cmd+Q / last window closed: Electron fires `before-quit` before closing the windows. We
+// hold that until everything is saved and the database is closed.
 app.on('before-quit', (event) => {
   if (quitReady) return;
   event.preventDefault();
@@ -433,9 +427,9 @@ app.on('before-quit', (event) => {
   }
 });
 
-// SIGTERM (kill, Abmelden/Herunterfahren unter Linux, systemd) und SIGINT (Strg+C im
-// Terminal) laufen ausdrücklich über das normale Beenden oben. Ein zweites Signal
-// während des Beendens bricht hart ab, falls das Speichern hängt.
+// SIGTERM (kill, logout/shutdown on Linux, systemd) and SIGINT (Ctrl+C in the terminal) explicitly
+// go through the normal quit above. A second signal during quitting aborts hard in case saving
+// hangs.
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   process.on(signal, () => {
     if (shutdownStarted || !app.isReady()) {
@@ -448,7 +442,8 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
 
 async function shutdown(): Promise<void> {
   try {
-    // Kommt das Beenden mitten im Start, erst fertig starten – sonst bliebe das Backend offen.
+    // If quitting arrives in the middle of starting, finish starting first – otherwise the backend
+    // would stay open.
     await starting;
     await Promise.all(BrowserWindow.getAllWindows().map((window) => flushRenderer(window)));
     await server?.close();

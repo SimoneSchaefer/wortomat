@@ -32,24 +32,21 @@ import type { Finding, FindingKind, RevisionResult } from './revision-check';
 import { SmartQuotes } from './smart-quotes';
 import { StatusMessages } from '../../core/status-messages';
 
-/** Nach dieser Tipp-Pause wird gespeichert. */
+/** Saves after this typing pause. */
 const AUTOSAVE_DELAY_MS = 800;
 
 type SaveStatus = 'loading' | 'saved' | 'unsaved' | 'saving' | 'error';
 type ToolbarCommand = 'bold' | 'italic' | 'underline' | 'strike' | 'clearFormat' | 'undo' | 'redo';
 
-/** Woher der Editor ein Dokument lädt und wohin er speichert (Szene, Charakter, Ort …). */
+/** Scene, character, place … */
 export interface DocumentSource {
   load(id: string): Promise<{ doc: EditorDoc | null; wordCount: number }>;
   save(id: string, request: SaveDocumentRequest): Promise<void>;
-  /** Heute geschriebene Wörter fürs Schreib-Log – nur Szenen haben eins. */
+  /** Only scenes have a writing log. */
   writtenToday?(): Promise<number>;
 }
 
-/**
- * Rich-Text-Editor mit Autosave, Bildern und Toolbar – für Szenen wie für Notizen.
- * Überschriften o. Ä. werden per Content-Projection über dem Text eingefügt.
- */
+/** For scenes and notes alike. Titles etc. are inserted above the text via content projection. */
 @Component({
   selector: 'wm-document-editor',
   templateUrl: './document-editor.html',
@@ -59,11 +56,11 @@ export interface DocumentSource {
 export class DocumentEditor {
   readonly documentId = input.required<string>();
   readonly source = input.required<DocumentSource>();
-  /** Platzhalter im leeren Dokument; ohne Angabe „Es war einmal …“. */
+  /** Without one, "Once upon a time …". */
   readonly placeholder = input<string>();
-  /** Startinhalt für Dokumente, die noch nie gespeichert wurden (z. B. Gliederung eines Charakters). */
+  /** Initial content for documents that were never saved (e.g. a character's outline). */
   readonly template = input<EditorDoc | null>(null);
-  /** Überarbeitungsmodus anbieten (Szenen); Notizen brauchen ihn nicht. */
+  /** Scenes only; notes do not need it. */
   readonly revisable = input(false);
 
   private readonly i18n = inject(I18n);
@@ -77,13 +74,13 @@ export class DocumentEditor {
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
-  /** `null`, solange unbekannt oder die Quelle kein Schreib-Log hat. */
+  /** `null` while unknown or when the source has no writing log. */
   protected readonly writtenToday = signal<number | null>(null);
-  /** Überarbeitungsmodus: Einstellung gilt für alle Szenen. */
+  /** The setting applies to all scenes. */
   protected readonly revising = computed(
     () => this.revisable() && this.settings.settings().revisionMode,
   );
-  /** Fundstellen der letzten Prüfung; `null` bei ausgeschaltetem Modus. */
+  /** `null` while the mode is off. */
   protected readonly revision = signal<RevisionResult | null>(null);
   protected readonly findingKinds: readonly FindingKind[] = [
     'repetition',
@@ -92,16 +89,16 @@ export class DocumentEditor {
     'double',
   ];
   private readonly error = inject(StatusMessages).channel();
-  /** Wird bei jeder Editor-Transaktion erhöht, damit die Toolbar ihren Zustand neu berechnet. */
+  /** Bumped on every editor transaction so the toolbar recomputes its state. */
   private readonly editorTick = signal(0);
 
   private editor: Editor | null = null;
   private currentId: string | null = null;
   private dirty = false;
-  /** Seit dem letzten Speichern eingefügte/verschobene Wörter – zählen im Schreib-Log nicht. */
+  /** Words pasted/moved since the last save – they do not count in the writing log. */
   private pastedWords = 0;
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
-  /** Speichervorgänge laufen strikt nacheinander. */
+  /** Saves run strictly one after another. */
   private saveQueue: Promise<void> = Promise.resolve();
   private loadCounter = 0;
 
@@ -110,7 +107,7 @@ export class DocumentEditor {
     inject(DestroyRef).onDestroy(() => {
       unregister();
       const editor = this.editor;
-      // flush() liest den Inhalt synchron aus; danach darf der Editor weg.
+      // flush() reads the content synchronously; the editor may go after that.
       void this.flush();
       editor?.destroy();
       this.editor = null;
@@ -121,7 +118,6 @@ export class DocumentEditor {
       untracked(() => void this.load(id));
     });
 
-    // Notizfeld erscheint → gleich hineinschreiben können
     effect(() => this.noteInput()?.nativeElement.focus());
 
     effect(() => {
@@ -129,10 +125,6 @@ export class DocumentEditor {
       untracked(() => this.editor?.commands.setRevisionMode(revising));
     });
   }
-
-  // -------------------------------------------------------------------------
-  // Laden & Speichern
-  // -------------------------------------------------------------------------
 
   private async load(id: string): Promise<void> {
     const loadId = ++this.loadCounter;
@@ -142,9 +134,9 @@ export class DocumentEditor {
 
     try {
       const content = await this.source().load(id);
-      if (loadId !== this.loadCounter) return; // inzwischen wurde ein anderes Dokument gewählt
+      if (loadId !== this.loadCounter) return; // another document was chosen meanwhile
 
-      // Pro Dokument ein eigener Editor, damit sich der Undo-Verlauf nicht vermischt.
+      // One editor per document so the undo history does not mix.
       this.editor?.destroy();
       this.currentId = id;
       this.dirty = false;
@@ -169,7 +161,6 @@ export class DocumentEditor {
     this.saveTimer = setTimeout(() => void this.flush(), AUTOSAVE_DELAY_MS);
   }
 
-  /** Speichert sofort, falls es ungespeicherte Änderungen gibt. */
   flush(): Promise<void> {
     clearTimeout(this.saveTimer);
     if (!this.dirty || !this.editor || !this.currentId) {
@@ -194,9 +185,9 @@ export class DocumentEditor {
         if (this.currentId === documentId && !this.dirty) this.status.set('saved');
         void this.refreshWrittenToday();
       } catch (error) {
-        if (error instanceof HttpErrorResponse && error.status === 404) return; // wurde gelöscht
+        if (error instanceof HttpErrorResponse && error.status === 404) return; // it was deleted
         if (this.currentId === documentId) {
-          this.dirty = true; // beim nächsten Tastendruck erneut versuchen
+          this.dirty = true; // retry on the next keystroke
           this.pastedWords += request.pastedWords ?? 0;
           this.status.set('error');
           this.error.set(errorMessage(error, this.t()));
@@ -215,20 +206,16 @@ export class DocumentEditor {
     try {
       this.writtenToday.set(await source.writtenToday());
     } catch {
-      // nur eine Anzeige – beim nächsten Speichern klappt es wieder
+      // display only – it works again on the next save
     }
   }
 
   protected onBeforeUnload(event: BeforeUnloadEvent): void {
-    // In Electron speichert der Hauptprozess vorher über die Bridge; dort nie blockieren.
+    // In Electron the main process saves through the bridge beforehand; never block there.
     if (!this.desktop && this.dirty) {
       event.preventDefault();
     }
   }
-
-  // -------------------------------------------------------------------------
-  // Editor
-  // -------------------------------------------------------------------------
 
   private createEditor(doc: EditorDoc | null): Editor {
     return new Editor({
@@ -307,14 +294,12 @@ export class DocumentEditor {
           ? chain.insertContent(content)
           : chain.insertContentAt(position, content)
         ).run();
-        position = undefined; // weitere Bilder hinter dem ersten einfügen
+        position = undefined; // insert further images after the first one
       } catch (error) {
         this.error.set(this.t().editor.imageFailed(file.name, errorMessage(error, this.t())));
       }
     }
   }
-
-  // Toolbar -------------------------------------------------------------------
 
   protected isActive(name: string, attributes?: Record<string, unknown>): boolean {
     this.editorTick();
@@ -327,7 +312,7 @@ export class DocumentEditor {
   }
 
   protected readonly annotationKinds = ANNOTATION_KINDS;
-  /** z. B. „Fett (Strg+B)“ */
+  /** e.g. "Bold (Ctrl+B)" */
   protected hint(label: string, key: string, options?: { shift?: boolean; alt?: boolean }): string {
     return `${label} (${this.i18n.shortcut()(key, options)})`;
   }
@@ -340,20 +325,16 @@ export class DocumentEditor {
     return ANNOTATION_KINDS.find((info) => info.kind === kind)?.color ?? 'var(--annotation-todo)';
   }
 
-  // Markierungen mit Notiz ------------------------------------------------------
-
-  /** Markierung am Cursor – erscheint mit Notiz bzw. Vorschlag unter der Toolbar. */
   protected readonly annotation = computed(() => {
     this.editorTick();
     return this.editor ? annotationAt(this.editor.state) : null;
   });
 
-  /** Alle Markierungen (mit und ohne Notiz) – als Liste über dem Text. */
   protected readonly allAnnotations = computed(() => {
     this.editorTick();
     const doc = this.editor?.state.doc;
     if (!doc) return [];
-    // Bei Cursorbewegungen bleibt das Dokument dasselbe – dann nicht neu suchen
+    // Cursor moves keep the same document – do not search again then
     if (doc !== this.listedFor) {
       this.listedFor = doc;
       this.listed = annotationsIn(doc);
@@ -364,24 +345,23 @@ export class DocumentEditor {
   private listed: AnnotationAt[] = [];
 
   protected readonly listOpen = signal(true);
-  /** Anfang der Markierung, deren Notiz gerade bearbeitet wird. */
+  /** Start of the mark whose note is being edited. */
   protected readonly editingNoteAt = signal<number | null>(null);
 
-  /** Vorschlag übernehmen (`accept`) oder die Markierung ohne Änderung abhaken. */
   protected resolveAnnotation(accept: boolean): void {
     this.editor?.chain().focus().resolveAnnotation(accept).run();
   }
 
   protected editNote(annotation: AnnotationAt): void {
-    // Sofort aus dem Text: das Feld bekommt den Fokus erst nach dem Rendern, bis dahin
-    // Getipptes landete sonst in der Szene
+    // Leave the text right away: the input only gets focus after rendering, and anything typed
+    // until then would otherwise land in the scene
     this.editor?.commands.blur();
     this.editingNoteAt.set(annotation.from);
   }
 
-  /** Enter, „Fertig“ oder Klick daneben. Danach geht es im Text weiter. */
+  /** Enter, "Done" or a click elsewhere. */
   protected saveNote(note: string): void {
-    if (this.editingNoteAt() === null) return; // schon gespeichert (Enter, dann blur)
+    if (this.editingNoteAt() === null) return; // already saved (Enter, then blur)
     this.editingNoteAt.set(null);
     this.editor?.chain().focus().setAnnotationNote(note).run();
   }
@@ -392,8 +372,8 @@ export class DocumentEditor {
   }
 
   /**
-   * Aus der Liste: Cursor an den Anfang der Stelle – dann zeigt die Leiste die Markierung. Die Stelle
-   * kommt in die Mitte; ProseMirror schöbe sie nur knapp ins Bild, unter Toolbar oder Statusleiste.
+   * Puts the cursor at the start of the passage so the bar shows the mark. The passage goes to the
+   * middle; ProseMirror would push it barely into view, under the toolbar or status bar.
    */
   protected jumpTo(annotation: AnnotationAt): void {
     const editor = this.editor;
@@ -403,8 +383,6 @@ export class DocumentEditor {
     const element = node instanceof Element ? node : node.parentElement;
     element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
-
-  // Überarbeitungsmodus ---------------------------------------------------------
 
   protected toggleRevision(): void {
     if (!this.revisable()) return;
@@ -417,7 +395,7 @@ export class DocumentEditor {
     this.editor?.commands.selectNextFinding(kind);
   }
 
-  /** Namen von Figuren und Orten, klein und in Einzelwörter zerlegt („Anna Berger“). */
+  /** Names of characters and places, lowercase and split into single words ("Anna Berger"). */
   private names(): ReadonlySet<string> {
     const names = new Set<string>();
     for (const note of this.notes?.notes() ?? []) {
@@ -462,8 +440,8 @@ export class DocumentEditor {
         chain.toggleStrike();
         break;
       case 'clearFormat':
-        // Alle Marks (Fett, Kursiv, Links, Todo/Idee/Fixme …) entfernen und
-        // Überschriften/Zitate zu normalen Absätzen machen.
+        // Remove all marks (bold, italic, links, todo/idea/fixme …) and turn headings/quotes into
+        // plain paragraphs.
         chain.unsetAllMarks().clearNodes();
         break;
       case 'undo':
@@ -481,7 +459,7 @@ function imageFiles(data: DataTransfer | null): File[] {
   return Array.from(data?.files ?? []).filter(isSupportedImage);
 }
 
-/** Wörter in eingefügtem oder gezogenem Inhalt – gezählt wie vom Editor. */
+/** Counted like the editor does. */
 function wordsIn(slice: Slice): number {
   return slice.content.textBetween(0, slice.content.size, ' ', ' ').split(/\s+/).filter(Boolean)
     .length;

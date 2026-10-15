@@ -1,13 +1,13 @@
 import type { SceneStatus } from '@wortomat/shared';
 
-/** Name des Status: `t().sceneStatus.names[status]`. */
+/** Name of the status: `t().sceneStatus.names[status]`. */
 export interface SceneStatusInfo {
   status: SceneStatus;
-  /** CSS-Variable mit der Farbe (in styles.scss, hell und dunkel). */
+  /** CSS variable with the colour (in styles.scss, light and dark). */
   color: string;
 }
 
-/** Alle Status in Arbeitsreihenfolge. */
+/** In working order. */
 export const SCENE_STATUSES: readonly SceneStatusInfo[] = [
   { status: 'idea', color: 'var(--status-idea)' },
   { status: 'outline', color: 'var(--status-outline)' },

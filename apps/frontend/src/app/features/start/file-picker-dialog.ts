@@ -13,12 +13,12 @@ import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
 
 /**
- * Dateiauswahl für den Browser-Modus: Ein Browser liefert keine echten Dateipfade, daher
- * liest der lokale Server die Ordner. Gezeigt werden nur Ordner und .wortomat-Dateien.
- * Klick auf einen Ordner öffnet ihn, Doppelklick auf eine Datei wählt sie sofort.
+ * File picker for browser mode: a browser provides no real file paths, so the local server reads
+ * the folders. Only folders and .wortomat files are shown. Clicking a folder opens it,
+ * double-clicking a file picks it right away.
  *
- * Im Modus `folder` wird ein Ordner gewählt (Speicherort für ein neues Buch): Vorhandene
- * Bücher sind nur zur Orientierung zu sehen, gewählt wird der gerade angezeigte Ordner.
+ * In `folder` mode a folder is picked (location for a new book): existing books are only shown for
+ * orientation, the folder currently shown is what gets picked.
  */
 @Component({
   selector: 'wm-file-picker-dialog',
@@ -31,7 +31,6 @@ export class FilePickerDialog {
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
 
   readonly mode = input<'file' | 'folder'>('file');
-  /** Der gewählte Pfad einer .wortomat-Datei bzw. eines Ordners. */
   readonly chosen = output<string>();
 
   protected readonly listing = signal<DirectoryListing | null>(null);
@@ -39,7 +38,7 @@ export class FilePickerDialog {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
 
-  /** Öffnet den Dialog im Ordner `dir` (bzw. dem nächsten vorhandenen darüber). */
+  /** Or in the nearest existing folder above it. */
   open(dir?: string): void {
     this.selected.set(null);
     this.dialog().nativeElement.showModal();
@@ -81,7 +80,7 @@ export class FilePickerDialog {
     this.chosen.emit(filePath);
   }
 
-  /** Klick auf den abgedunkelten Hintergrund schließt (nur der trifft das Dialog-Element selbst). */
+  /** Only a click on the dimmed backdrop hits the dialog element itself. */
   protected closeOnBackdrop(event: MouseEvent): void {
     if (event.target === this.dialog().nativeElement) this.close();
   }

@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import type { SceneStatus } from '@wortomat/shared';
 
-/** Anteil des gefüllten Tortenstücks je Status; `null` = gestrichelter leerer Kreis. */
+/** Share of the filled pie slice per status; `null` = dashed empty circle. */
 const PROGRESS: Record<SceneStatus, number | null> = {
   idea: null,
   outline: 0.25,
@@ -11,9 +11,9 @@ const PROGRESS: Record<SceneStatus, number | null> = {
 };
 
 /**
- * Status als Form statt nur als Farbe (auch für Farbenblinde lesbar): ein Kreis, der sich
- * mit dem Fortschritt füllt – leer gestrichelt, ¼, ½, ¾, voll mit Haken.
- * Zeichnet in `currentColor`; der Haken nimmt `--status-icon-contrast` (Standard: Hintergrund).
+ * Status as a shape, not only a colour (readable for colour-blind people too): a circle that fills
+ * with progress – dashed when empty, ¼, ½, ¾, full with a check mark. Draws in `currentColor`; the
+ * check mark uses `--status-icon-contrast` (default: background).
  */
 @Component({
   selector: 'wm-status-icon',
@@ -63,7 +63,7 @@ export class StatusIcon {
 
   protected readonly progress = computed(() => PROGRESS[this.status()]);
 
-  /** Tortenstück ab 12 Uhr im Uhrzeigersinn. */
+  /** Pie slice from 12 o'clock, clockwise. */
   protected readonly slice = computed(() => {
     const fraction = this.progress() ?? 0;
     const radius = 4;

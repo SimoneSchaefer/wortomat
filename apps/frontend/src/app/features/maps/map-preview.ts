@@ -4,8 +4,8 @@ import { NotesStore } from '../notes/notes-store';
 import { strokePath } from './map-drawing';
 
 /**
- * Kleine, nicht bearbeitbare Ansicht einer Karte – mit einem hervorgehobenen Ort
- * (Nadel und Name); die übrigen Orte erscheinen als Punkte.
+ * Small read-only view of a map with one highlighted place (pin and name); the other places appear
+ * as dots.
  */
 @Component({
   selector: 'wm-map-preview',
@@ -103,12 +103,11 @@ import { strokePath } from './map-drawing';
 })
 export class MapPreview {
   readonly map = input.required<PlaceMap>();
-  /** Der hervorgehobene Ort. */
   readonly noteId = input.required<string>();
 
   private readonly notes = inject(NotesStore);
 
-  /** Karteneinheiten je Bildschirmpixel, damit Nadel und Schrift lesbar groß bleiben. */
+  /** Map units per screen pixel, so the pin and text stay readable. */
   protected readonly unit = signal(1);
 
   protected readonly strokes = computed(() =>

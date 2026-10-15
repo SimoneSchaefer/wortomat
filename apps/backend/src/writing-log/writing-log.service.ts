@@ -3,13 +3,10 @@ import type { WritingDay } from '@wortomat/shared';
 import { ProjectService } from '../project/project.service.js';
 import { diffWords } from './word-diff.js';
 
-/** Bis zu dieser Uhrzeit zählt das Schreiben noch zum Vortag. */
+/** Until this hour, writing still counts towards the previous day. */
 const DAY_STARTS_AT_HOUR = 4;
 
-/**
- * Schreib-Log: wie viele Wörter an welchem Tag in welcher Szene geschrieben wurden.
- * Gezählt wird brutto – Überarbeiten (ein Wort raus, eins rein) zählt als geschrieben.
- */
+/** Counted gross – revising (one word out, one in) counts as written. */
 @Injectable()
 export class WritingLogService {
   constructor(private readonly projects: ProjectService) {}
@@ -18,11 +15,7 @@ export class WritingLogService {
     return this.projects.db;
   }
 
-  /**
-   * Vergleicht den alten mit dem neuen Text einer Szene und schreibt die Differenz zum
-   * heutigen Tag. Eingefügte Wörter (`pastedWords`) gelten nicht als geschrieben.
-   * Läuft in der Transaktion des Speicherns.
-   */
+  /** Pasted words (`pastedWords`) do not count as written. Runs inside the save transaction. */
   record(sceneId: string, before: string, after: string, pastedWords: number, now = new Date()) {
     const { added, removed } = diffWords(before, after);
     const pasted = Math.min(added, Math.max(0, Math.floor(pastedWords) || 0));
@@ -38,13 +31,13 @@ export class WritingLogService {
       .run(writingDay(now), sceneId, added - pasted, removed, pasted);
   }
 
-  /** Der heutige Tag (ab 4 Uhr) – auch ohne Einträge, dann mit Nullen. */
+  /** Also without entries, then with zeros. */
   today(now = new Date()): WritingDay {
     const day = writingDay(now);
     return this.days(day, day)[0] ?? { day, added: 0, removed: 0, pasted: 0 };
   }
 
-  /** Summen je Tag, älteste zuerst; Tage ohne Schreiben fehlen. */
+  /** Oldest first; days without writing are missing. */
   days(from?: string, to?: string): WritingDay[] {
     return this.db
       .prepare(
@@ -61,7 +54,7 @@ export class WritingLogService {
   }
 }
 
-/** Kalendertag in Ortszeit; vor 4 Uhr ist noch gestern. */
+/** Before 4 am it is still yesterday. */
 export function writingDay(date: Date): string {
   const shifted = new Date(date.getTime() - DAY_STARTS_AT_HOUR * 60 * 60 * 1000);
   const month = String(shifted.getMonth() + 1).padStart(2, '0');

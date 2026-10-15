@@ -2,10 +2,6 @@
   display: block;
 }
 
-// ---------------------------------------------------------------------------
-// Schreibtage: Kalender, eine Spalte je Woche (Mo–So)
-// ---------------------------------------------------------------------------
-
 .figures {
   display: flex;
   flex-wrap: wrap;
@@ -31,7 +27,7 @@
   }
 }
 
-// Eine Stufe je Farbe: von zart bis kräftig (hell: dunkler, dunkel: heller)
+// One step per colour: from faint to strong (light: darker, dark: lighter)
 .calendar-scroll,
 .scale {
   --level-0: color-mix(in srgb, var(--border) 55%, var(--bg));
@@ -64,7 +60,7 @@
   padding-bottom: 0.15rem;
 }
 
-// Bleibt beim seitlichen Scrollen links stehen
+// Stays on the left when scrolling sideways
 .weekday {
   grid-column: 1;
   position: sticky;

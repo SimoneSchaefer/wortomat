@@ -5,24 +5,24 @@ export interface ServerOptions {
   mode: AppMode;
   version: string;
   defaultProjectDir: string;
-  /** Verzeichnis für App-Daten, die zu keinem Buch gehören (z. B. die Projektliste). */
+  /** App data that belongs to no book, e.g. the project list. */
   dataDir: string;
   /**
-   * Wo Notizdateien vom Handy ankommen (Mail-Anhänge, GSConnect …). Ohne Angabe ~/Downloads.
+   * Where notes files from the phone arrive (mail attachments, GSConnect …). Defaults to
+   * ~/Downloads.
    */
   downloadsDir?: string;
-  /** Standard: 127.0.0.1. Niemals 0.0.0.0, sonst ist die API im Netzwerk erreichbar. */
+  /** Defaults to 127.0.0.1. Never 0.0.0.0, or the API becomes reachable from the network. */
   host?: string;
-  /** 0 = zufälliger freier Port (Produktion in Electron). */
+  /** 0 picks a random free port (production in Electron). */
   port?: number;
-  /** Wenn gesetzt, muss jede Anfrage diesen Wert im Header {@link AUTH_HEADER} mitschicken. */
+  /** When set, every request must send this value in the {@link AUTH_HEADER} header. */
   token?: string;
-  /** Verzeichnis mit dem gebauten Angular-Frontend. Ohne Angabe wird nur die API bereitgestellt. */
+  /** Without it, only the API is served. */
   staticDir?: string;
   logger?: LogLevel[] | false;
 }
 
 export const SERVER_OPTIONS = Symbol('SERVER_OPTIONS');
 
-/** Header, den die Electron-Shell automatisch an jede Anfrage anhängt. */
 export const AUTH_HEADER = 'x-wortomat-token';

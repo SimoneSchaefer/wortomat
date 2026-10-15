@@ -6,20 +6,20 @@ import { type Localized, localized } from '../i18n.js';
 
 export interface LatexDocument {
   tex: string;
-  /** Zusätzliche Dateien (Bilder) neben der .tex-Datei. */
+  /** Extra files (images) next to the .tex file. */
   files: Map<string, Buffer>;
   warnings: Localized[];
 }
 
 /*
- * Präambeln. Bewusst nur Pakete aus den üblichen Grundausstattungen (TeX Live „recommended“,
- * MiKTeX Basic); Schöneres (Buchschriften, microtype) nur, wenn vorhanden.
+ * Preambles. On purpose only packages from the usual base installations (TeX Live "recommended",
+ * MiKTeX Basic); nicer things (book fonts, microtype) only when present.
  */
 
 /**
- * Normseite: Courier 12 pt, 30 Zeilen à 60 Anschläge. Courier ist 0,6 em breit → 60 × 7,2 pt
- * = 432 pt; 30 Zeilen à 18 pt → Satzspiegelhöhe 29 × 18 pt + \topskip (12 pt) = 534 pt.
- * Genormt, daher nicht einstellbar.
+ * Standard page: Courier 12 pt, 30 lines of 60 characters. Courier is 0.6 em wide → 60 × 7.2 pt =
+ * 432 pt; 30 lines of 18 pt → type area height 29 × 18 pt + \topskip (12 pt) = 534 pt.
+ * Standardised, so not configurable.
  */
 const NORMSEITE_PREAMBLE = String.raw`\documentclass[12pt,a4paper]{article}
 \usepackage[T1]{fontenc}
@@ -46,19 +46,19 @@ const NORMSEITE_PREAMBLE = String.raw`\documentclass[12pt,a4paper]{article}
 `;
 
 /**
- * Roman: doppelseitiger Buchsatz, Blocksatz mit deutscher Silbentrennung. Seitengröße, Ränder,
- * Schrift und Schriftgröße kommen aus dem Satzspiegel des Buchs.
+ * Novel: two-sided book typesetting, justified with German hyphenation. Page size, margins, font
+ * and font size come from the book's type area.
  */
 function romanPreamble(layout: BookLayout): string {
   const mm = (value: number) => `${value}mm`;
-  // Grundgröße der Klasse (10/11/12 pt) möglichst nah an der gewählten: Davon hängen die
-  // Größen der Überschriften (\Large usw.) ab.
+  // Base size of the class (10/11/12 pt) as close as possible to the chosen one: the heading sizes
+  // (\Large etc.) depend on it.
   const classSize = layout.fontSize < 10.5 ? 10 : layout.fontSize < 11.5 ? 11 : 12;
-  // Zeilenabstand wie in der Klasse „book“ (11 pt auf 13,6 pt), \linespread kommt noch dazu
+  // Line spacing as in the book class (11 pt on 13.6 pt); \linespread is added on top
   const baseline = Math.round(layout.fontSize * (13.6 / 11) * 100) / 100;
-  // Abstand Textende → Seitenzahl; muss in den unteren Rand passen
+  // Distance from the end of the text to the page number; must fit into the bottom margin
   const footskip = Math.round(Math.min(10, Math.max(4, layout.marginBottom * 0.45)) * 10) / 10;
-  // Gewünschte Schrift, sonst Latin Modern (oder notfalls die Standardschrift)
+  // Chosen font, else Latin Modern (or the default font as a last resort)
   const font = BOOK_FONTS[layout.font].latex.reduceRight(
     (fallback, name) => `\\IfFileExists{${name}.sty}{\\usepackage{${name}}}{${fallback}}`,
     '\\IfFileExists{lmodern.sty}{\\usepackage{lmodern}}{}',
@@ -123,7 +123,7 @@ export function renderLatex(
   };
   const out: string[] = [template === 'normseite' ? NORMSEITE_PREAMBLE : romanPreamble(layout)];
   if (template === 'normseite') {
-    // Kopfzeile der Normseite: „Autor: Titel“ links, Seitenzahl rechts
+    // Standard page header: "Author: Title" left, page number right
     const header = [book.author, book.title]
       .filter(Boolean)
       .map((t) => escape(t, ctx))
@@ -211,7 +211,7 @@ function block(node: JsonNode, ctx: Context): string {
       const start = Number(node.attrs?.['start'] ?? 1);
       const items = (node.content ?? [])
         .map((item) => {
-          ctx.indentNext = true; // keine \noindent in Listenpunkten
+          ctx.indentNext = true; // no \noindent in list items
           return `\\item ${blocks(item.content ?? [], ctx)}`;
         })
         .join('\n');
@@ -244,7 +244,7 @@ function image(node: JsonNode, ctx: Context): string {
   const altText = String(node.attrs?.['alt'] ?? '');
   const alt = altText || 'ohne Namen';
   const resolved = ctx.images(String(node.attrs?.['src'] ?? ''));
-  // pdfLaTeX kann nur PNG, JPEG und PDF einbinden.
+  // pdfLaTeX can only include PNG, JPEG and PDF.
   const extension =
     resolved?.mimeType === 'image/png' ? 'png' : resolved?.mimeType === 'image/jpeg' ? 'jpg' : null;
   if (!resolved || !extension) {
@@ -266,7 +266,7 @@ function inline(nodes: JsonNode[], ctx: Context): string {
   let out = '';
   for (const node of nodes) {
     if (node.type === 'hardBreak') {
-      // \newline am Absatzanfang ist in LaTeX ein Fehler – dort einfach weglassen.
+      // \newline at the start of a paragraph is an error in LaTeX – just leave it out there.
       if (out.trim()) out += '\\newline\n';
       continue;
     }
@@ -283,7 +283,7 @@ function inline(nodes: JsonNode[], ctx: Context): string {
   return out;
 }
 
-/** Zusätzlich zu Latin-1 und Latin Extended-A erlaubte Satzzeichen (alle in T1/utf8 definiert). */
+/** Punctuation allowed on top of Latin-1 and Latin Extended-A (all defined in T1/utf8). */
 const EXTRA_CHARACTERS = new Set('–—‘’‚“”„…•‹›«»€†‡′″');
 
 const REPLACEMENTS: Record<string, string> = {
@@ -297,16 +297,16 @@ const REPLACEMENTS: Record<string, string> = {
   _: '\\_',
   '^': '\\textasciicircum{}',
   '~': '\\textasciitilde{}',
-  '<': '\\textless{}', // sonst bilden „<<“ und „>>“ in T1 Guillemets
+  '<': '\\textless{}', // otherwise "<<" and ">>" form guillemets in T1
   '>': '\\textgreater{}',
   '|': '\\textbar{}',
-  '"': '\\textquotedbl{}', // mit ngerman ist " ein Steuerzeichen
-  '`': '\\textasciigrave{}', // verhindert die Ligaturen !` und ?`
+  '"': '\\textquotedbl{}', // with ngerman, " is a control character
+  '`': '\\textasciigrave{}', // prevents the ligatures !` and ?`
   '\t': ' ',
-  '\u202f': '\\,', // schmales geschütztes Leerzeichen (französische Anführungszeichen)
+  '\u202f': '\\,', // narrow no-break space (French quotation marks)
 };
 
-/** Escapt LaTeX-Sonderzeichen; nicht darstellbare Zeichen werden zu „?“. */
+/** Characters that cannot be typeset become "?". */
 export function escape(text: string, ctx: { unsupported: number }): string {
   let out = '';
   for (const char of text.normalize('NFC')) {
@@ -324,6 +324,6 @@ export function escape(text: string, ctx: { unsupported: number }): string {
       out += '?';
     }
   }
-  // ",," würde in T1 zu „ – Komma-Ligatur aufbrechen
+  // ",," would become „ in T1 – break up the comma ligature
   return out.replaceAll(',,', ',{},');
 }

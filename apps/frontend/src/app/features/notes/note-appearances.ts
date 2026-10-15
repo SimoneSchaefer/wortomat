@@ -6,7 +6,7 @@ import { I18n } from '../../core/i18n/i18n';
 import { WortomatApi } from '../../core/wortomat-api';
 import { StatusMessages } from '../../core/status-messages';
 
-/** „Kommt vor in“: Szenen, mit denen ein Charakter oder Ort verknüpft ist. */
+/** "Appears in": scenes a character or place is linked to. */
 @Component({
   selector: 'wm-note-appearances',
   imports: [RouterLink],
@@ -48,7 +48,7 @@ import { StatusMessages } from '../../core/status-messages';
       color: var(--text-muted);
     }
 
-    // Eine Szene je Zeile – nebeneinander passten selten zwei, das wirkte zufällig
+    // One scene per row – two rarely fitted side by side, which looked random
     ol {
       display: grid;
       gap: 0.25rem;

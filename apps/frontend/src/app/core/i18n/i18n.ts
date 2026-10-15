@@ -10,13 +10,13 @@ export type { Texts } from './de';
 
 const TEXTS: Record<Language, Texts> = { de, en };
 
-/** Zur Auswahl in den Einstellungen – jeweils in der eigenen Sprache benannt. */
+/** For the settings – each named in its own language. */
 export const LANGUAGES: ReadonlyArray<{ language: Language; name: string }> = [
   { language: 'de', name: 'Deutsch' },
   { language: 'en', name: 'English' },
 ];
 
-/** Ohne Einstellung: Deutsch, wenn das System Deutsch spricht, sonst Englisch. */
+/** Without a setting: German if the system speaks German, otherwise English. */
 export function systemLanguage(languages: readonly string[] = navigator.languages): Language {
   const preferred = languages.find((tag) => /^(de|en)\b/i.test(tag));
   return preferred?.toLowerCase().startsWith('de') ? 'de' : 'en';
@@ -25,8 +25,8 @@ export function systemLanguage(languages: readonly string[] = navigator.language
 const IS_MAC = /Mac|iPhone|iPad/.test(navigator.userAgent);
 
 /**
- * Sprache der Oberfläche. Komponenten lesen ihre Texte aus `t()` – ein Wechsel in den
- * Einstellungen wirkt sofort, ohne Neuladen.
+ * Components read their texts from `t()`, so a change in the settings applies right away, without
+ * reloading.
  */
 @Injectable({ providedIn: 'root' })
 export class I18n {
@@ -35,7 +35,7 @@ export class I18n {
   readonly language = computed(() => this.settings.settings().language ?? systemLanguage());
   readonly t = computed(() => TEXTS[this.language()]);
 
-  /** Tastenkürzel zum Anzeigen, z. B. `shortcut('B')` → „Strg+B“ bzw. „⌘B“. */
+  /** For display, e.g. `shortcut('B')` → "Ctrl+B" or "⌘B". */
   readonly shortcut = computed(() => {
     const { ctrl, shift } = this.t().keys;
     return (key: string, options: { shift?: boolean; alt?: boolean } = {}) =>
@@ -55,6 +55,6 @@ export class I18n {
   }
 }
 
-/** Das Backend antwortet (z. B. mit Fehlermeldungen) in der Sprache der Oberfläche. */
+/** The backend answers (e.g. with error messages) in the UI language. */
 export const languageInterceptor: HttpInterceptorFn = (request, next) =>
   next(request.clone({ setHeaders: { 'Accept-Language': inject(I18n).language() } }));

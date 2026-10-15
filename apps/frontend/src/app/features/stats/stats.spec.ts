@@ -39,7 +39,7 @@ function note(id: string): NoteSummary {
   };
 }
 
-// Teil mit zwei Kapiteln, dahinter ein Kapitel ohne Teil
+// a part with two chapters, followed by a chapter without a part
 const tree = buildTree([
   node('teil', 'part', null, 1),
   node('k1', 'chapter', 'teil', 1),
@@ -97,7 +97,7 @@ describe('presence', () => {
     );
     expect(result.rows.map((row) => [row.note.id, [...row.appearances], row.words])).toEqual([
       ['Ben', [0, 2], 130],
-      // gleicher erster Auftritt: wer öfter vorkommt, zuerst
+      // same first appearance: whoever appears more often comes first
       ['Anna', [2, 3], 30],
       ['Zora', [2], 30],
     ]);

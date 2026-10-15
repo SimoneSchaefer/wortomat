@@ -12,9 +12,9 @@ import { SceneFilter } from './scene-filter';
 import { StatusMessages } from '../../core/status-messages';
 
 /**
- * Filter über dem Manuskript-Baum: ein Knopf, der ein Popover öffnet – darin je Zeile
- * Status, offene Markierungen, Wendepunkte, Stränge, Charaktere, Orte und Tags zum An- und Abwählen.
- * Daneben, solange gefiltert wird: „3 von 12 Szenen“ und „Zurücksetzen“.
+ * A button above the manuscript tree that opens a popover with one row each for status, open marks,
+ * turning points, threads, characters, places and tags to toggle. Next to it, while filtering: "3
+ * of 12 scenes" and "Reset".
  */
 @Component({
   selector: 'wm-scene-filter-panel',
@@ -40,7 +40,7 @@ export class SceneFilterPanel {
   protected readonly strandColor = strandColor;
   private readonly error = inject(StatusMessages).channel();
 
-  /** Je verknüpfbarer Art (Charaktere, Orte) die Einträge, die in Szenen vorkommen. */
+  /** Per linkable kind (characters, places), the entries that appear in scenes. */
   protected readonly noteGroups = computed(() => {
     const linked = this.filter.linkedNoteIds();
     return NOTE_KIND_LIST.filter((config) => config.linkable)
@@ -59,13 +59,13 @@ export class SceneFilterPanel {
     this.error.set(null);
     this.open.set(true);
     try {
-      await this.filter.load(); // könnte sich seit dem letzten Öffnen geändert haben
+      await this.filter.load(); // may have changed since the last opening
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
     }
   }
 
-  /** @param refocus bei Escape: Fokus zurück auf den Filter-Knopf */
+  /** @param refocus on Escape: focus back on the filter button */
   protected close(refocus = false): void {
     if (!this.open()) return;
     this.open.set(false);

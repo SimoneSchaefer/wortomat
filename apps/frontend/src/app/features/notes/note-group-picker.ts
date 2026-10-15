@@ -7,12 +7,11 @@ import { filterCandidates, hasExactTitle } from './note-matching';
 import { NotesStore } from './notes-store';
 import { StatusMessages } from '../../core/status-messages';
 
-/** Eintrag in der Auswahlliste: vorhandene Gruppe oder neue anlegen. */
 type Option = { type: 'group'; group: NoteGroup; count: number } | { type: 'create'; name: string };
 
 /**
- * Gruppe einer Notiz (z. B. „Familie Berger“) – als Chip mit derselben Auswahl wie die
- * Verknüpfungen einer Szene: suchen, vorhandene Gruppe wählen oder neue anlegen.
+ * As a chip with the same picker as a scene's links: search, pick an existing group or create a new
+ * one.
  */
 @Component({
   selector: 'wm-note-group-picker',

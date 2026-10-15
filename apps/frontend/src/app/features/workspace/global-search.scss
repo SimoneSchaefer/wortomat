@@ -42,7 +42,7 @@
       outline: none;
     }
 
-    // Eigenes „Leeren“ statt des browsereigenen (blauen) Kreuzes
+    // A custom clear button instead of the browser's own (blue) cross
     &::-webkit-search-cancel-button {
       appearance: none;
     }

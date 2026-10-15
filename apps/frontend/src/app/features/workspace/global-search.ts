@@ -21,10 +21,7 @@ import { StatusMessages } from '../../core/status-messages';
 
 const SEARCH_DELAY_MS = 250;
 
-/**
- * Suche über das ganze Buch (Szenen, Charaktere, Orte, Forschung) in der oberen Leiste.
- * Strg+K / ⌘K springt von überall hinein; Treffer erscheinen gruppiert darunter.
- */
+/** Ctrl+K / ⌘K jumps into it from anywhere; hits appear grouped below. */
 @Component({
   selector: 'wm-global-search',
   templateUrl: './global-search.html',
@@ -44,7 +41,7 @@ export class GlobalSearch {
   private readonly i18n = inject(I18n);
   protected readonly t = this.i18n.t;
   protected readonly shortcut = computed(() => this.i18n.shortcut()('K'));
-  /** Schmales Fenster: nur „Suchen“ als Platzhalter. */
+  /** Narrow window: only "Search" as the placeholder. */
   readonly compact = input(false);
   protected readonly query = signal('');
   protected readonly hits = signal<SearchHit[]>([]);
@@ -54,14 +51,14 @@ export class GlobalSearch {
   protected readonly activeIndex = signal(0);
 
   protected readonly groups = computed(() => groupHits(this.hits()));
-  /** Treffer in Anzeige-Reihenfolge – für die Tastaturnavigation. */
+  /** In display order – for keyboard navigation. */
   private readonly flat = computed(() => this.groups().flatMap((group) => group.hits));
   protected readonly showResults = computed(() => this.open() && !!this.query().trim());
 
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
-    // Suche von anderswo angestoßen: Begriff eintragen, Ergebnisse zeigen, Fokus ins Feld
+    // Search triggered from elsewhere: enter the term, show the results, focus the field
     const requests = inject(SearchRequest);
     effect(() => {
       const request = requests.take();
@@ -90,7 +87,7 @@ export class GlobalSearch {
     this.searchTimer = setTimeout(async () => {
       try {
         const hits = await this.api.search(value);
-        // Nur übernehmen, wenn die Eingabe sich inzwischen nicht geändert hat.
+        // Only take over when the input has not changed meanwhile.
         if (this.query() === value) {
           this.hits.set(hits);
           this.error.set(null);
@@ -119,7 +116,7 @@ export class GlobalSearch {
         break;
       }
       case 'Escape':
-        // Erst Ergebnisliste schließen, beim zweiten Mal Eingabe leeren und Fokus abgeben.
+        // First close the result list; the second time clear the input and give up focus.
         if (this.showResults()) {
           this.open.set(false);
         } else {

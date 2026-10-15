@@ -35,22 +35,22 @@ import { StatusMessages } from '../../core/status-messages';
 
 type Section = 'manuscript' | 'plot' | NoteKind | 'stats';
 
-const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem bei mittlerer Schriftgröße
-// Platz für Überschrift und „+“-Buttons daneben – auch die längste Variante
-// („MANUSCRIPT  + Chapter  + Part“, gemessen ca. 246px) passt in eine Zeile. Mit der Wortzahl
-// hinter „Manuskript“ rutschen die Buttons dort in eine zweite Zeile.
-const MIN_SIDEBAR_WIDTH = 256; // 16rem bei mittlerer Schriftgröße
-const MAX_SIDEBAR_WIDTH = 1000; // wie im Backend
-// Schmaler als das (bei mittlerer Schriftgröße) passt „Im ganzen Buch suchen“ samt Tastenkürzel
-// nicht mehr in die Suche (halbe Fensterbreite) – dann nur „Suchen“.
+const DEFAULT_SIDEBAR_WIDTH = 272; // 17rem at medium font size
+// Room for the heading and the "+" buttons next to it – even the longest variant ("MANUSCRIPT +
+// Chapter + Part", measured at about 246px) fits on one line. With the word count after
+// "Manuscript", the buttons move to a second line there.
+const MIN_SIDEBAR_WIDTH = 256; // 16rem at medium font size
+const MAX_SIDEBAR_WIDTH = 1000; // as in the backend
+// Narrower than this (at medium font size), "Search the whole book" plus its shortcut no longer
+// fits into the search (half the window width) – then only "Search".
 const COMPACT_SEARCH_WIDTH = 760;
-// Schmaler als das bliebe neben Menüleiste und Seitenleiste zu wenig Platz für den Text
-// (Editor bis 40rem breit) – dann wird die Seitenleiste zum Popover.
+// Narrower than this, too little room would be left for the text next to the menu bar and the
+// sidebar (the editor is up to 40rem wide) – then the sidebar becomes a popover.
 const COMPACT_SIDEBAR_WIDTH = 1000;
 
 interface MenuItem {
   section: Section;
-  /** Wohin der Menüpunkt führt, solange dort noch nichts geöffnet war. */
+  /** Where the menu item leads as long as nothing was opened there yet. */
   url: string;
 }
 
@@ -77,13 +77,13 @@ const MENU: readonly MenuItem[] = [
   ],
   templateUrl: './workspace-page.html',
   styleUrl: './workspace-page.scss',
-  // Pro geöffnetem Projekt frisch – Notizen, Karten und Szenenfilter gehören zum Projekt.
+  // Fresh per opened project – notes, maps and the scene filter belong to the project.
   providers: [NotesStore, MapsStore, SceneFilter],
   host: {
     '(window:resize)': 'onWindowResize()',
     '(document:pointerdown)': 'onDocumentPointerDown($event)',
     '(keydown.escape)': 'onEscape($event)',
-    // Zurück vom Handy? Dann nachsehen, ob neue Notizen in „Downloads“ liegen.
+    // Back from the phone? Then check whether new notes are in "Downloads".
     '(window:focus)': 'proofInbox.refresh()',
   },
 })
@@ -102,9 +102,8 @@ export class WorkspacePage {
   protected readonly tree = viewChild(ManuscriptTree);
   protected readonly noteList = viewChild(NoteList);
 
-  // Breite der Seitenleiste: gespeichert in den App-Einstellungen, begrenzt auf
-  // mindestens 16rem und höchstens die halbe Fensterbreite (der Text braucht Platz).
-  // Mindest- und Standardbreite wachsen mit der eingestellten Schriftgröße.
+  // Sidebar width: stored in the app settings, at least 16rem and at most half the window width
+  // (the text needs room). Minimum and default width grow with the chosen font size.
   private readonly fontScale = inject(Appearance).fontScale;
   protected readonly minSidebarWidth = computed(() =>
     Math.round(MIN_SIDEBAR_WIDTH * this.fontScale()),
@@ -123,16 +122,13 @@ export class WorkspacePage {
   });
   private readonly error = inject(StatusMessages).channel();
 
-  /** Schmales Fenster: kürzerer Platzhalter in der Suche. */
   protected readonly compactSearch = computed(
     () => this.windowWidth() < COMPACT_SEARCH_WIDTH * this.fontScale(),
   );
-  /** Burger-Menü oben rechts (Korrektur, Export, Einstellungen, Schließen). */
   protected readonly actionsOpen = signal(false);
   private readonly topActions = viewChild.required<ElementRef<HTMLElement>>('topActions');
   private readonly menuToggle = viewChild<ElementRef<HTMLButtonElement>>('menuToggle');
 
-  /** Schmales Fenster: die Seitenleiste öffnet sich als Popover über dem Inhalt. */
   protected readonly compactSidebar = computed(
     () => this.hasSidebar() && this.windowWidth() < COMPACT_SIDEBAR_WIDTH * this.fontScale(),
   );
@@ -153,23 +149,23 @@ export class WorkspacePage {
     const section = this.section();
     return section === 'manuscript' || section === 'plot' || section === 'stats' ? null : section;
   });
-  /** Handlung und Statistik brauchen keine Liste links und nehmen die ganze Breite. */
+  /** Plot and statistics need no list on the left and take the full width. */
   protected readonly hasSidebar = computed(
     () => this.section() !== 'plot' && this.section() !== 'stats',
   );
-  /** Titel der geöffneten Szene bzw. des geöffneten Eintrags – für die Leiste im Inhalt. */
+  /** Title of the open scene or entry – for the bar in the content. */
   protected readonly currentTitle = computed(() => {
     const [, , segment, id, mapId] = this.url().split(/[?#]/)[0]!.split('/');
     if (!id) return null;
     if (segment === 'scene') return this.store.findNode(id)?.title;
     return id === 'maps' && mapId ? this.maps.find(mapId)?.name : this.notes.find(id)?.title;
   });
-  /** Zuletzt geöffnete Seite je Bereich, damit man beim Zurückwechseln dort weitermacht. */
+  /** Last opened page per area, so switching back continues there. */
   private readonly lastUrls = new Map<Section, string>();
 
   constructor() {
     effect(() => this.lastUrls.set(this.section(), this.url()));
-    // Nach der Auswahl (Navigation) oder wenn das Fenster wieder breit genug ist: zu
+    // Close it after picking (navigation) or when the window gets wide enough again
     effect(() => {
       this.url();
       this.compactSidebar();
@@ -192,7 +188,7 @@ export class WorkspacePage {
     this.windowWidth.set(window.innerWidth);
   }
 
-  /** @param refocus bei Escape: Fokus zurück auf den Menü-Knopf */
+  /** @param refocus on Escape: focus back on the menu button */
   protected closeActions(refocus = false): void {
     if (!this.actionsOpen()) return;
     this.actionsOpen.set(false);
@@ -201,7 +197,7 @@ export class WorkspacePage {
 
   protected onEscape(event: Event): void {
     this.closeActions(true);
-    // Escape beim Umbenennen im Baum bricht nur das Umbenennen ab
+    // Escape while renaming in the tree only cancels the renaming
     const target = event.target as Element;
     if (this.sidebarOpen() && !target.closest('input, textarea')) {
       this.sidebarOpen.set(false);
@@ -212,7 +208,7 @@ export class WorkspacePage {
   protected onDocumentPointerDown(event: PointerEvent): void {
     const target = event.target as Element;
     if (!this.topActions().nativeElement.contains(target)) this.closeActions();
-    // Klicks in die Seitenleiste oder einen Dialog daraus (z. B. „Löschen?“) lassen sie offen
+    // Clicks into the sidebar or a dialog opened from it (e.g. "Delete?") keep it open
     const inSidebar =
       this.sidebar()?.nativeElement.contains(target) ||
       this.sidebarToggle()?.nativeElement.contains(target) ||

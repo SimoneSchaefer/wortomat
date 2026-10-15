@@ -14,12 +14,12 @@ import { I18n } from '../../core/i18n/i18n';
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se';
 
-/** Kleinster Ausschnitt (Anteil der Bildbreite bzw. -höhe). */
+/** Smallest crop (share of the image width or height). */
 const MIN_SIZE = 0.05;
 
 interface Drag {
   pointerId: number;
-  /** `null` = Rahmen verschieben, sonst an dieser Ecke ziehen. */
+  /** `null` = move the frame, otherwise drag at this corner. */
   corner: Corner | null;
   startX: number;
   startY: number;
@@ -27,8 +27,8 @@ interface Drag {
 }
 
 /**
- * Ausschnitt eines Bilds wählen: ein Rahmen im festen Seitenverhältnis, der sich verschieben
- * und an den Ecken vergrößern lässt. Das Bild selbst bleibt unverändert.
+ * A frame with a fixed aspect ratio that can be moved and enlarged at the corners. The image itself
+ * stays unchanged.
  */
 @Component({
   selector: 'wm-image-crop-dialog',
@@ -106,7 +106,7 @@ interface Drag {
       color: var(--text-muted);
     }
 
-    // Das Bild bestimmt die Größe; der Rahmen liegt in Prozent darüber
+    // The image determines the size; the frame lies on top in percent
     .stage {
       position: relative;
       width: fit-content;
@@ -127,7 +127,6 @@ interface Drag {
       position: absolute;
       box-sizing: border-box;
       border: 2px solid var(--accent);
-      // Außerhalb des Ausschnitts abdunkeln
       box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.55);
       cursor: move;
 
@@ -184,11 +183,11 @@ interface Drag {
 })
 export class ImageCropDialog {
   readonly url = input.required<string>();
-  /** Bisheriger Ausschnitt; `null` = noch keiner (Start: größter mittiger Ausschnitt). */
+  /** `null` = none yet (starts with the largest centred crop). */
   readonly initial = input<ImageCrop | null>(null);
-  /** Seitenverhältnis des Ausschnitts in Bildpixeln (Breite / Höhe). */
+  /** In image pixels (width / height). */
   readonly aspect = input.required<number>();
-  /** Gewählter Ausschnitt; `null` = ganzes Bild zeigen. */
+  /** `null` = show the whole image. */
   readonly applied = output<ImageCrop | null>();
   readonly cancelled = output<void>();
 
@@ -198,7 +197,7 @@ export class ImageCropDialog {
   private readonly stage = viewChild.required<ElementRef<HTMLElement>>('stage');
 
   protected readonly crop = signal<ImageCrop | null>(null);
-  /** Bildmaße in Pixeln – für das Seitenverhältnis des Rahmens. */
+  /** For the frame's aspect ratio. */
   private imageWidth = 1;
   private imageHeight = 1;
   private drag: Drag | null = null;
@@ -213,7 +212,6 @@ export class ImageCropDialog {
     this.crop.set(this.initial() ?? centeredCrop(this.aspect(), this.imageWidth, this.imageHeight));
   }
 
-  /** Höhe (Anteil) zu einer Breite (Anteil), passend zum Seitenverhältnis. */
   private heightFor(width: number): number {
     return (width * this.imageWidth) / (this.imageHeight * this.aspect());
   }
@@ -226,8 +224,8 @@ export class ImageCropDialog {
     const crop = this.crop();
     if (event.button !== 0 || !crop) return;
     event.preventDefault();
-    event.stopPropagation(); // Ecke: nicht zusätzlich verschieben
-    // Der Rahmen fängt den Zeiger – auch wenn an einer Ecke angefasst wurde
+    event.stopPropagation(); // corner: do not move as well
+    // The frame captures the pointer – also when grabbed at a corner
     (event.currentTarget as Element).closest('.frame')?.setPointerCapture(event.pointerId);
     this.drag = {
       pointerId: event.pointerId,
@@ -253,14 +251,14 @@ export class ImageCropDialog {
       });
       return;
     }
-    // Die gegenüberliegende Ecke bleibt stehen
+    // The opposite corner stays in place
     const west = drag.corner.includes('w');
     const north = drag.corner.includes('n');
     const anchorX = west ? start.x + start.width : start.x;
     const anchorY = north ? start.y + start.height : start.y;
     const pointerX = (west ? start.x : start.x + start.width) + dx;
     const pointerY = (north ? start.y : start.y + start.height) + dy;
-    // Die größere der beiden Richtungen bestimmt die Größe
+    // The larger of the two directions decides the size
     let width = Math.max(Math.abs(pointerX - anchorX), this.widthFor(Math.abs(pointerY - anchorY)));
     const maxWidth = Math.min(
       west ? anchorX : 1 - anchorX,
@@ -280,7 +278,7 @@ export class ImageCropDialog {
     if (this.drag?.pointerId === event.pointerId) this.drag = null;
   }
 
-  /** Pfeiltasten verschieben, + / − vergrößern bzw. verkleinern (um die Mitte). */
+  /** Arrow keys move, + / − enlarge or shrink (around the centre). */
   protected onKeydown(event: KeyboardEvent): void {
     const crop = this.crop();
     if (!crop) return;

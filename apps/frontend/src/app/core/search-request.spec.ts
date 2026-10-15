@@ -6,7 +6,7 @@ describe('SearchRequest', () => {
     const requests = TestBed.inject(SearchRequest);
     requests.search('eigentlich');
     expect(requests.take()).toEqual({ query: 'eigentlich' });
-    // Eine neu entstehende Suchleiste darf die alte Anfrage nicht noch einmal ausführen
+    // A newly created search bar must not run the old request again
     expect(requests.take()).toBeNull();
   });
 });

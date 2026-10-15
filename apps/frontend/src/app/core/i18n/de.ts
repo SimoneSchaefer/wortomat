@@ -11,28 +11,28 @@ const numberFormat = new Intl.NumberFormat('de');
 const decimalFormat = new Intl.NumberFormat('de', { maximumFractionDigits: 1 });
 
 interface NoteKindTexts {
-  /** Mehrzahl, z. B. Menüpunkt und Überschrift der Seitenleiste. */
+  /** Plural, e.g. menu item and sidebar heading. */
   label: string;
   singular: string;
   newTitle: string;
   addLabel: string;
-  /** Titel des „+“ an einer Gruppe in der Seitenleiste. */
+  /** Title of the "+" on a group in the sidebar. */
   addToGroup: string;
   deleteGroupMessage: (name: string) => string;
   emptyList: string;
-  /** In der Auswahl einer Szene, wenn es noch keine Einträge gibt. */
+  /** In a scene's picker when there are no entries yet. */
   pickerEmpty: string;
-  /** „… als neuen Charakter anlegen“ */
+  /** "… create as new character" */
   create: (title: string) => string;
   summaryPlaceholder: string;
   textPlaceholder: string;
-  /** Zwischenüberschriften für neue Einträge; leer = ohne Vorlage. */
+  /** Subheadings for new entries; empty = no template. */
   outline: string[];
 }
 
 /**
- * Texte der Oberfläche auf Deutsch – zugleich die Vorlage für alle anderen Sprachen
- * (`Texts`): Fehlt dort ein Text, meldet das der Compiler.
+ * German UI texts – also the template for every other language (`Texts`): if a text is missing
+ * there, the compiler reports it.
  */
 export const de = {
   number: (value: number) => numberFormat.format(value),
@@ -760,7 +760,7 @@ export const de = {
       fr: 'Französisch',
       off: 'Nicht ersetzen',
     } satisfies Record<QuoteStyle, string>,
-    /** Beispielsatz mit doppelten und einfachen Anführungszeichen und einem Apostroph. */
+    /** Example sentence with double and single quotation marks and an apostrophe. */
     quoteExample: (double: readonly string[], single: readonly string[], apostrophe: string) =>
       `${double[0]}Sag ${single[0]}bitte${single[1]}${double[1]}, flüstert${apostrophe}s.`,
   },

@@ -26,7 +26,8 @@ describe('storyColumns', () => {
 
   it('setzt neue Szenen direkt hinter ihre Vorgängerin im Buch', () => {
     const columns = storyColumns([
-      { id: 'neu0', storyOrder: null }, // ganz vorn im Buch: ganz vorn in der Handlung
+      { id: 'neu0', storyOrder: null }, // at the very front of the book: at the very front of the
+      // story
       { id: 'a', storyOrder: 3 },
       { id: 'neu1', storyOrder: null },
       { id: 'neu2', storyOrder: null },
@@ -62,7 +63,7 @@ describe('displacedScenes', () => {
   });
 
   it('markiert nur die Rückblende, nicht alles dazwischen', () => {
-    // „e“ steht im Buch am Ende, passiert aber zuerst
+    // "e" is at the end of the book but happens first
     expect(displacedScenes([['e'], ['a'], ['b'], ['c'], ['d']], book)).toEqual(new Set(['e']));
     expect(displacedScenes([['a'], ['d'], ['b'], ['c'], ['e']], book)).toEqual(new Set(['d']));
   });
@@ -89,7 +90,7 @@ describe('remapMark', () => {
   it('bleibt vor derselben Spalte – auch wenn die verschobene Szene dort allein stand', () => {
     const before = [['a'], ['b'], ['c']];
     expect(remapMark(before, moveScene(before, 'a', { before: null }), 1, 'a')).toBe(0);
-    // „b“ stand allein hinter der Marke und wandert weg: die Marke bleibt vor „c“
+    // "b" stood alone after the mark and moves away: the mark stays before "c"
     const after = moveScene(before, 'b', { before: 'a' });
     expect(after[remapMark(before, after, 1, 'b')]).toEqual(['c']);
   });

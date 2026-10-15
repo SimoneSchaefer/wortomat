@@ -1,6 +1,5 @@
 import type { DatabaseSync } from 'node:sqlite';
 
-/** Führt `fn` in einer Transaktion aus; bei einer Exception wird alles zurückgerollt. */
 export function transaction<T>(db: DatabaseSync, fn: () => T): T {
   db.exec('BEGIN IMMEDIATE');
   try {

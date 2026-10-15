@@ -17,10 +17,9 @@ export interface PdflatexInstallation {
 let found: PdflatexInstallation | null = null;
 
 /**
- * Sucht pdfLaTeX: erst im PATH, dann in den üblichen Installationsordnern. Desktop-Apps auf
- * macOS bekommen z. B. nicht den PATH der Shell – MacTeX liegt dann nicht im PATH.
- * Ein Fund wird gemerkt; ohne Fund wird beim nächsten Mal neu gesucht (vielleicht wurde
- * inzwischen TeX installiert).
+ * Looks in PATH first, then in the usual install folders: desktop apps on macOS, for example, do
+ * not get the shell's PATH, so MacTeX is not in it. A hit is remembered; a miss is searched again
+ * next time (TeX may have been installed meanwhile).
  */
 export async function findPdflatex(): Promise<PdflatexInstallation | null> {
   if (found) return found;
@@ -33,17 +32,13 @@ export async function findPdflatex(): Promise<PdflatexInstallation | null> {
       found = { executable: candidate, version: stdout.split('\n')[0]!.trim() };
       return found;
     } catch {
-      // nächster Kandidat
+      // not found or not runnable – try the next candidate
     }
   }
   return null;
 }
 
-/**
- * Welche der Pakete (ohne `.sty`) findet die TeX-Installation? Fragt `kpsewhich` neben
- * pdflatex; ohne kpsewhich gilt keins als vorhanden.
- */
-/** Vollständiger Pfad einer Datei der TeX-Installation (z. B. einer Schrift) oder `null`. */
+/** Full path of a file in the TeX installation (e.g. a font), or `null`. */
 export async function findTexFile(
   installation: PdflatexInstallation,
   name: string,
@@ -66,6 +61,7 @@ function kpsewhichFor(installation: PdflatexInstallation): string {
     : exe;
 }
 
+/** Asks kpsewhich next to pdflatex; without kpsewhich, no package counts as installed. */
 export async function findLatexPackages(
   installation: PdflatexInstallation,
   packages: readonly string[],
@@ -79,7 +75,8 @@ export async function findLatexPackages(
       { timeout: 15_000, windowsHide: true },
     ));
   } catch (error) {
-    // Fehlt eins der Pakete, endet kpsewhich mit Code 1 – die Funde stehen trotzdem in stdout.
+    // If one of the packages is missing, kpsewhich exits with code 1 – the hits are still in
+    // stdout.
     stdout = String((error as { stdout?: unknown }).stdout ?? '');
   }
   const found = new Set(
@@ -127,7 +124,7 @@ function candidates(): string[] {
   return list.filter((candidate) => candidate === exe || existsSync(candidate));
 }
 
-/** Übersetzt das Dokument in einem temporären Ordner und liefert das PDF. */
+/** Compiles in a temporary folder. */
 export async function compilePdf(
   installation: PdflatexInstallation,
   document: LatexDocument,
@@ -142,14 +139,14 @@ export async function compilePdf(
     try {
       await run(
         installation.executable,
-        // -no-shell-escape: Text aus dem Buch kann niemals Programme starten.
+        // -no-shell-escape: text from the book can never start programs.
         ['-interaction=nonstopmode', '-halt-on-error', '-no-shell-escape', 'manuskript.tex'],
         {
           cwd: dir,
           timeout: 180_000,
           windowsHide: true,
           maxBuffer: 20 * 1024 * 1024,
-          // Hilfsprogramme (z. B. für Schriften) liegen neben pdflatex.
+          // Helper programs (e.g. for fonts) live next to pdflatex.
           env: { ...process.env, PATH: [binDir, process.env['PATH'] ?? ''].join(path.delimiter) },
         },
       );
@@ -163,7 +160,6 @@ export async function compilePdf(
   }
 }
 
-/** Macht aus dem LaTeX-Log eine verständliche Meldung. */
 export function describeLatexError(log: string): Localized {
   const missing = /! LaTeX Error: File `([^']+)' not found/.exec(log);
   if (missing) {

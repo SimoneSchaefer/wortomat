@@ -6,13 +6,13 @@ import { WritingLogService } from './writing-log.service.js';
 export class WritingLogController {
   constructor(private readonly log: WritingLogService) {}
 
-  /** Was heute geschrieben wurde; der Tag beginnt um 4 Uhr. */
+  /** The day starts at 4 am. */
   @Get('today')
   today(): WritingDay {
     return this.log.today();
   }
 
-  /** Geschriebene Wörter je Tag; `from`/`to` (YYYY-MM-DD) sind optional und inklusive. */
+  /** `from`/`to` (YYYY-MM-DD) are optional and inclusive. */
   @Get()
   days(@Query('from') from?: string, @Query('to') to?: string): WritingDay[] {
     return this.log.days(from, to);

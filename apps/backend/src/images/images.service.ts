@@ -33,7 +33,7 @@ export class ImagesService {
         localized('Keine Bilddatei empfangen.', 'No image file received.'),
       );
     }
-    // Den Typ aus den Dateiinhalten bestimmen, nicht aus Dateiname oder Header.
+    // Determine the type from the file contents, not from the file name or a header.
     const mimeType = detectImageType(upload.buffer);
     if (!mimeType) {
       throw new BadRequestException(
@@ -64,8 +64,8 @@ export class ImagesService {
   }
 
   /**
-   * Löscht ein Bild aus der Projektdatei, sofern es nirgends mehr verwendet wird:
-   * weder in einer Galerie noch als Titel- oder Kartenbild noch im Text einer Szene oder Notiz.
+   * Only when it is used nowhere any more: not in a gallery, not as a cover or map image, not in
+   * the text of a scene or note.
    */
   deleteIfUnused(id: string): void {
     const reference = `%/api/images/${id}%`;
@@ -120,7 +120,6 @@ function positiveIntOrNull(value: unknown): number | null {
   return Number.isInteger(number) && number > 0 ? number : null;
 }
 
-/** Erkennt das Bildformat anhand der „Magic Bytes“. */
 export function detectImageType(buffer: Buffer): ImageMimeType | null {
   const ascii = (start: number, end: number) => buffer.subarray(start, end).toString('latin1');
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';

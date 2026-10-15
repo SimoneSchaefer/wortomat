@@ -75,7 +75,7 @@
         }
       </div>
 
-      <!-- Infozeile: welche Szene gerade unter dem Mauszeiger liegt -->
+      <!-- Info line: which scene is under the mouse pointer -->
       <div class="info" aria-live="polite">
         @if (active(); as node) {
           <span class="info-chapter">{{ t().plot.chapter(node.chapterNumber) }}</span>
@@ -115,11 +115,11 @@
       </div>
 
       <div class="card chart">
-        <!-- Links fest: die Namen der Stränge; rechts scrollt die Zeichnung seitlich -->
+        <!-- Fixed on the left: the thread names; the drawing scrolls sideways on the right -->
         <ul class="lanes" [style.padding-top.px]="headerHeight">
           @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
             @if (lane.strand; as strand) {
-              <!-- Zeile ziehen (oder Alt + Pfeil hoch/runter) ändert die Reihenfolge der Stränge -->
+              <!-- Dragging a row (or Alt + arrow up/down) changes the thread order -->
               <li
                 tabindex="0"
                 class="movable"
@@ -150,7 +150,7 @@
 
         <div class="scroller">
           @if (layout().nodes.length) {
-            <!-- Kopf: Kapitel (Buch) bzw. Abschnitte (Handlung); „+“ beginnt einen Abschnitt -->
+            <!-- Header: chapters (book) or sections (story); "+" starts a section -->
             <div
               class="groups"
               [class.story]="order() === 'story'"
@@ -226,7 +226,7 @@
                 [attr.height]="layout().height"
                 [attr.viewBox]="'0 0 ' + (layout().width + padding) + ' ' + layout().height"
               >
-                <!-- Gruppen (Kapitel bzw. Abschnitte), abwechselnd leicht getönt -->
+                <!-- Groups (chapters or sections), alternately tinted -->
                 @for (group of layout().groups; track group.id; let odd = $odd) {
                   @if (odd) {
                     <rect
@@ -238,7 +238,7 @@
                     />
                   }
                 }
-                <!-- Gleichzeitige Szenen: eine gemeinsame Spalte, leicht hinterlegt -->
+                <!-- Simultaneous scenes: one shared column, lightly shaded -->
                 @for (column of layout().columns; track $index; let index = $index) {
                   @if (column.sceneIds.length > 1 || dropColumn() === index) {
                     <rect
@@ -252,7 +252,6 @@
                     />
                   }
                 }
-                <!-- Spuren der Stränge als feine Hilfslinien -->
                 @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
                   <line
                     class="guide"
@@ -317,7 +316,6 @@
                         [attr.rx]="nodeSize / 2"
                       />
                     }
-                    <!-- Position im Buch -->
                     <text class="number" [attr.x]="node.x" [attr.y]="node.y">
                       {{ node.bookNumber }}
                     </text>
@@ -332,7 +330,7 @@
                   </g>
                 }
               </svg>
-              <!-- Titel unter den Knoten: als HTML, damit lange Titel umbrechen und gekürzt werden -->
+              <!-- Titles below the nodes: as HTML so long titles wrap and get truncated -->
               @for (node of compact() ? [] : layout().nodes; track node.scene.id) {
                 <span
                   class="label"

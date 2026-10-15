@@ -2,10 +2,7 @@ import { Component, inject, input } from '@angular/core';
 import { I18n, type Texts } from '../../core/i18n/i18n';
 import { Mascot } from '../../core/mascot';
 
-/**
- * Platzhalter im Inhaltsbereich, solange links nichts ausgewählt ist.
- * Der Text kommt aus den Routendaten – als Funktion, damit er der Sprache folgt.
- */
+/** The text comes from the route data – as a function so it follows the language. */
 @Component({
   selector: 'wm-empty-state',
   imports: [Mascot],

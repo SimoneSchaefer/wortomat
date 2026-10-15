@@ -1,11 +1,10 @@
 import type { AnnotationCounts, AnnotationKind } from '@wortomat/shared';
 
-/** Bezeichnung der Art: `t().annotations[kind]`. */
 export interface AnnotationInfo {
   kind: AnnotationKind;
-  /** Taste für Strg+Alt+… (⌘+Alt auf dem Mac). */
+  /** Key for Ctrl+Alt+… (⌘+Alt on the Mac). */
   key: string;
-  /** CSS-Variable mit der Farbe (in styles.scss, hell und dunkel). */
+  /** CSS variable with the colour (in styles.scss, light and dark). */
   color: string;
 }
 

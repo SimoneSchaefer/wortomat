@@ -15,18 +15,18 @@ import { I18n } from '../../core/i18n/i18n';
 
 const PT_PER_MM = 72 / 25.4;
 const PX_PER_MM = 96 / 25.4;
-/** Gezeigte Textseiten nach der Titelseite. */
+/** Text pages shown after the title page. */
 const TEXT_PAGES = 3;
 const PAGE_GAP_PX = 12;
-/** Abstand zwischen den Spalten, in die der Text umbrochen wird (unsichtbar, s. u.). */
+/** Gap between the columns the text is broken into (invisible, see below). */
 const COLUMN_GAP_MM = 10;
 
-/** Seitenmaße und Schrift, wie sie die Vorlage im PDF bzw. in Word verwendet. */
+/** Page dimensions and font as the template uses them in the PDF and in Word. */
 interface Geometry {
   style: ExportTemplate;
   width: number;
   height: number;
-  /** Rand am Bund bzw. links (Normseite: einseitig). */
+  /** Margin at the gutter, or left (standard page: one-sided). */
   inner: number;
   outer: number;
   top: number;
@@ -37,13 +37,13 @@ interface Geometry {
   fontSize: number;
   /** pt */
   lineHeight: number;
-  /** Abstand Textende → Seitenzahl (mm), nur Roman */
+  /** Distance from the end of the text to the page number (mm), novel only */
   footskip: number;
 }
 
 /**
- * Normseite wie im Export: A4, Courier 12 pt auf 18 pt, 60 Anschläge (432 pt) breit,
- * 30 Zeilen hoch, Satzspiegel 2,5 cm vom linken und 3 cm vom oberen Rand.
+ * Standard page as in the export: A4, Courier 12 pt on 18 pt, 60 characters (432 pt) wide, 30 lines
+ * high, type area 2.5 cm from the left and 3 cm from the top edge.
  */
 const NORMSEITE: Omit<Geometry, 'fontFamily'> = {
   style: 'normseite',
@@ -69,9 +69,9 @@ const FONT_STYLES = [
 const registered = new Set<string>();
 
 /**
- * Schriftfamilie für die Vorschau: zuerst die Schriftdateien aus der TeX-Installation (dieselben,
- * die das PDF verwendet – unabhängig davon, welche Schriften der Browser kennt oder freigibt),
- * dahinter die Systemschriften. Der Browser lädt eine Datei erst, wenn sie gebraucht wird.
+ * First the font files from the TeX installation (the same the PDF uses – regardless of which fonts
+ * the browser knows or exposes), then the system fonts. The browser only loads a file when it is
+ * needed.
  */
 export function previewFontFamily(id: string, systemFamily: string): string {
   const family = `Wortomat Vorschau ${id}`;
@@ -85,34 +85,34 @@ export function previewFontFamily(id: string, systemFamily: string): string {
   return `'${family}', ${systemFamily}`;
 }
 
-/** Steht die Schrift der Vorschau zur Verfügung – als Datei aus TeX oder als Systemschrift? */
+/** As a file from TeX or as a system font? */
 export async function isPreviewFontAvailable(id: string, systemFamily: string): Promise<boolean> {
   const family = previewFontFamily(id, systemFamily);
   try {
     const faces = await document.fonts.load(`16px 'Wortomat Vorschau ${id}'`);
     if (faces.some((face) => face.status === 'loaded')) return true;
   } catch {
-    // Datei nicht ladbar – dann zählt nur die Systemschrift
+    // file not loadable – then only the system font counts
   }
   return isFontInstalled(family.slice(family.indexOf(',') + 1));
 }
 
 /**
- * Seitenvorschau im Export-Dialog: Titelseite und die ersten Textseiten des ersten Kapitels in
- * echten Maßen (mm/pt), verkleinert auf die verfügbare Breite.
+ * Title page and the first text pages of the first chapter in real dimensions (mm/pt), scaled down
+ * to the available width.
  *
- * Seitenumbruch: Der Text fließt in CSS-Spalten von der Höhe des Satzspiegels; jede Seite zeigt
- * genau eine dieser Spalten (die übrigen sind weggeschoben und abgeschnitten). So bricht der
- * Browser zwischen Zeilen um – nie mitten durch eine Zeile, auch nicht nach Zitaten oder Bildern.
+ * Page breaks: the text flows in CSS columns as tall as the type area; each page shows exactly one
+ * of these columns (the others are shifted away and clipped). That way the browser breaks between
+ * lines – never through a line, not even after quotes or images.
  */
 @Component({
   selector: 'wm-export-preview',
-  // Das Kapitel-HTML kommt per innerHTML – die Regeln dafür müssen global greifen.
+  // The chapter HTML comes via innerHTML – its rules must apply globally.
   encapsulation: ViewEncapsulation.None,
   template: `
     <div #frame class="wm-export-preview" [attr.data-style]="geometry().style">
       <div class="pages" [style.gap.px]="gap">
-        <!-- Titelseite (rechte Seite, ohne Seitenzahl) -->
+        <!-- Title page (right-hand page, without page number) -->
         <div class="page" [style]="pageStyle()" [style.zoom]="scale()">
           <div class="text" [style]="textStyle(1)">
             @if (geometry().style === 'normseite') {
@@ -120,7 +120,7 @@ export async function isPreviewFontAvailable(id: string, systemFamily: string): 
               <div class="ns-title" [style.margin-top.pt]="8 * geometry().lineHeight">
                 <strong>{{ content()?.title }}</strong>
                 @if (content()?.author; as author) {
-                  <!-- wie im Export: immer „von“ -->
+                  <!-- as in the export: always "von" -->
                   <div [style.margin-top.pt]="geometry().lineHeight">von {{ author }}</div>
                 }
               </div>
@@ -178,7 +178,7 @@ export class ExportPreviewPages {
 
   readonly template = input.required<ExportTemplate>();
   readonly layout = input.required<BookLayout>();
-  /** CSS-Schriftfamilie der gewählten Schrift (nur „Roman“). */
+  /** Novel only. */
   readonly fontFamily = input.required<string>();
   readonly content = input<ExportPreview | null>(null);
 
@@ -204,7 +204,7 @@ export class ExportPreviewPages {
       mirror: true,
       fontFamily: this.fontFamily(),
       fontSize: layout.fontSize,
-      // wie im PDF: Klasse „book“ (11 pt auf 13,6 pt) mit \linespread{1.08}
+      // as in the PDF: book class (11 pt on 13.6 pt) with \linespread{1.08}
       lineHeight: layout.fontSize * (13.6 / 11) * 1.08,
       footskip: Math.min(10, Math.max(4, layout.marginBottom * 0.45)),
     };
@@ -215,7 +215,10 @@ export class ExportPreviewPages {
     return (g.height - g.top - g.bottom) * PT_PER_MM;
   });
 
-  /** Kapitelanfang: Roman 15 % tiefer, großer Titel, zwei Leerzeilen; Normseite: Titel + Leerzeile. */
+  /**
+   * Chapter opening: novel 15 % lower, large title, two blank lines; standard page: title + blank
+   * line.
+   */
   protected readonly chapterHeadPt = computed(() => {
     const g = this.geometry();
     if (g.style === 'normseite') return 2 * g.lineHeight;
@@ -226,7 +229,7 @@ export class ExportPreviewPages {
     [this.content()?.author, this.content()?.title].filter(Boolean).join(': '),
   );
 
-  /** Zwei Seiten nebeneinander, höchstens Originalgröße. */
+  /** Two pages side by side, at most the original size. */
   protected readonly scale = computed(() => {
     const width = this.availableWidth();
     if (!width) return 0.5;
@@ -253,7 +256,7 @@ export class ExportPreviewPages {
     };
   }
 
-  /** Rechte (ungerade) Seiten haben den Bund links, linke Seiten rechts. */
+  /** Right (odd) pages have the gutter on the left, left pages on the right. */
   private left(page: number): number {
     const g = this.geometry();
     return !g.mirror || page % 2 === 1 ? g.inner : g.outer;
@@ -269,7 +272,7 @@ export class ExportPreviewPages {
     };
   }
 
-  /** Spalten so breit und hoch wie der Satzspiegel; Seite n zeigt die n-te Spalte. */
+  /** Columns as wide and tall as the type area; page n shows the n-th column. */
   protected flowStyle(page: number): Record<string, string> {
     const g = this.geometry();
     const width = g.width - g.inner - g.outer;
@@ -283,7 +286,7 @@ export class ExportPreviewPages {
     };
   }
 
-  /** Normseite: „Autor: Titel“ links, Seitenzahl rechts, 24 pt über dem Text. */
+  /** Standard page: "Author: Title" left, page number right, 24 pt above the text. */
   protected headerStyle(page: number): Record<string, string> {
     const g = this.geometry();
     return {
@@ -303,8 +306,8 @@ export class ExportPreviewPages {
 }
 
 /**
- * Ist eine der genannten Schriften installiert? Misst einen Probetext mit der Schrift und
- * jeweils zwei Ersatzschriften – fehlt die Schrift, sind die Breiten gleich.
+ * Measures a sample text with the font and two fallback fonts each – if the font is missing, the
+ * widths are the same.
  */
 export function isFontInstalled(cssFamily: string): boolean {
   const context = document.createElement('canvas').getContext('2d');

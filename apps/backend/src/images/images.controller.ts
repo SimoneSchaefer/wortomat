@@ -19,8 +19,8 @@ export class ImagesController {
   constructor(private readonly images: ImagesService) {}
 
   /**
-   * Multipart-Upload: Feld `file` mit dem Bild, optional `width` und `height`
-   * (das Frontend kennt sie nach dem Verkleinern ohnehin).
+   * Multipart upload: field `file` with the image, optionally `width` and `height` (the frontend
+   * knows them anyway after resizing).
    */
   @Post()
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_IMAGE_BYTES, files: 1 } }))
@@ -39,7 +39,7 @@ export class ImagesController {
   @Get(':id')
   download(@Param('id') id: string, @Res({ passthrough: true }) res: Response): StreamableFile {
     const { mimeType, data } = this.images.data(id);
-    // Bilder ändern sich nie (neues Bild = neue ID), daher unbegrenzt cachen.
+    // Images never change (a new image gets a new ID), so cache them forever.
     res.setHeader('Cache-Control', 'private, max-age=31536000, immutable');
     return new StreamableFile(data, { type: mimeType, length: data.length });
   }

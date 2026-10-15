@@ -1,11 +1,10 @@
-/** Alles, was sich in der Auswahl suchen lässt: Notizen, Tags … */
 export interface Matchable {
   id: string;
   title: string;
   summary?: string;
 }
 
-/** Für Vergleiche: ohne Akzente/Umlaute, ohne Groß-/Kleinschreibung („Ärztin“ → „arztin“). */
+/** For comparisons: without accents/umlauts, case-insensitive ("Ärztin" → "arztin"). */
 export function normalizeForSearch(text: string): string {
   return text
     .normalize('NFD')
@@ -15,8 +14,8 @@ export function normalizeForSearch(text: string): string {
 }
 
 /**
- * Vorschläge für die Auswahl: noch nicht verknüpfte Notizen, deren Titel oder Kurzbeschreibung
- * die Eingabe enthält. Treffer am Wortanfang des Titels zuerst.
+ * Not yet linked notes whose title or summary contains the input. Hits at the start of a title word
+ * first.
  */
 export function filterCandidates<T extends Matchable>(
   notes: readonly T[],
@@ -35,11 +34,11 @@ export function filterCandidates<T extends Matchable>(
       return null;
     })
     .filter((entry): entry is { note: T; score: number } => entry !== null);
-  // Stabile Sortierung: innerhalb gleicher Güte bleibt die (alphabetische) Eingangsreihenfolge.
+  // Stable sort: within the same score the (alphabetical) input order stays.
   return scored.sort((a, b) => a.score - b.score).map((entry) => entry.note);
 }
 
-/** Gibt es schon eine Notiz mit genau diesem Titel? (Dann kein „neu anlegen“ anbieten.) */
+/** If so, no "create new" is offered. */
 export function hasExactTitle(notes: readonly Matchable[], query: string): boolean {
   const needle = normalizeForSearch(query);
   return notes.some((note) => normalizeForSearch(note.title) === needle);

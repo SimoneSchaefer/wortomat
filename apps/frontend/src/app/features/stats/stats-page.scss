@@ -1,9 +1,9 @@
-// Leicht getönte Seite mit hellen Kästen darauf – wie bei den Szenen
+// Lightly tinted page with light boxes on it – as for scenes
 :host {
   display: block;
   min-height: 100%;
   background: color-mix(in srgb, var(--bg) 40%, var(--surface));
-  // Linien und Gitter: eine Stufe neben der Fläche, zurückhaltend
+  // Lines and grid: one step off the surface, restrained
   --hairline: color-mix(in srgb, var(--border) 70%, var(--bg));
   --bar-height: 0.875rem;
 }
@@ -55,10 +55,6 @@ h1 {
   margin: -0.5rem 0 1rem;
 }
 
-// ---------------------------------------------------------------------------
-// Kennzahlen
-// ---------------------------------------------------------------------------
-
 .tiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
@@ -83,10 +79,6 @@ h1 {
     font-weight: 600;
   }
 }
-
-// ---------------------------------------------------------------------------
-// Umschalter (Wörter/Szenen, Charaktere/Orte)
-// ---------------------------------------------------------------------------
 
 .toggle {
   display: inline-flex;
@@ -118,9 +110,7 @@ h1 {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Gestapelte Balken: 2px Fläche zwischen den Stücken, rundes Ende nur rechts
-// ---------------------------------------------------------------------------
+// Stacked bars: 2px gap between the pieces, round end only on the right
 
 .stack {
   display: flex;
@@ -160,7 +150,7 @@ h1 {
     }
   }
 
-  // Symbol in Statusfarbe, Schrift in Textfarbe
+  // Icon in the status colour, text in the text colour
   wm-status-icon {
     width: 0.95rem;
     height: 0.95rem;
@@ -181,10 +171,6 @@ h1 {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Wörter je Kapitel
-// ---------------------------------------------------------------------------
-
 .chapters {
   display: grid;
   gap: 0.1rem;
@@ -204,7 +190,7 @@ h1 {
       margin-top: 0;
     }
 
-    // Kapitel nach einem Teil, die selbst in keinem liegen: nur eine Trennlinie
+    // Chapters after a part that are in no part themselves: just a divider
     &.no-part {
       height: 1px;
       margin: 0.35rem 0;
@@ -212,8 +198,8 @@ h1 {
     }
   }
 
-  // Eigenes Raster je Zeile (gleiche Spalten), damit die ganze Zeile hervorgehoben werden
-  // kann; ragt seitlich etwas über, damit Name und Zahl nicht am Rand der Fläche kleben
+  // A grid of its own per row (same columns) so the whole row can be highlighted; overhangs a
+  // little on the sides so name and number do not stick to the edge of the surface
   .chapter {
     display: grid;
     grid-template-columns: minmax(6rem, 15rem) minmax(0, 1fr);
@@ -234,7 +220,7 @@ h1 {
     white-space: nowrap;
   }
 
-  // Balken plus Zahl dahinter; der längste Balken lässt Platz für seine Zahl
+  // Bar plus number after it; the longest bar leaves room for its number
   .track {
     display: flex;
     align-items: center;
@@ -254,13 +240,9 @@ h1 {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Auftritte: Tabelle mit einem Punkt je Szene
-// ---------------------------------------------------------------------------
-
 .presence-scroll {
   overflow-x: auto;
-  // Platz für den Fokusrahmen der Punkte am Rand
+  // room for the focus ring of the dots at the edge
   padding: 2px;
   margin: -2px;
 }
@@ -278,7 +260,7 @@ h1 {
     padding-left: 0.3rem;
   }
 
-  // Namen bleiben beim seitlichen Scrollen stehen
+  // Names stay in place when scrolling sideways
   tbody th {
     position: sticky;
     left: 0;
@@ -289,7 +271,7 @@ h1 {
     text-align: left;
     white-space: nowrap;
 
-    // Link zur Notiz, in Textfarbe – die Zeile hebt ihn beim Darüberfahren hervor
+    // Link to the note, in text colour – the row highlights it on hover
     .name {
       display: inline-block;
       max-width: 11rem;
@@ -308,7 +290,7 @@ h1 {
     }
   }
 
-  // Jede Zeile eine dünne Spur, auf der die Punkte sitzen
+  // Each row a thin track the dots sit on
   tbody td {
     width: 1.25rem;
     min-width: 1.25rem;
@@ -317,13 +299,12 @@ h1 {
     background: linear-gradient(var(--hairline), var(--hairline)) center / 100% 1px no-repeat;
   }
 
-  // Kapitelgrenze
   .chapter-start {
     border-left: 1px solid var(--hairline);
   }
 
-  // Ganze Zeile hervorheben – auch die stehen bleibende Namensspalte (deckend, damit beim
-  // Scrollen nichts durchscheint); der Ring der Punkte nimmt die Zeilenfarbe an
+  // Highlight the whole row – the sticky name column too (opaque, so nothing shines through when
+  // scrolling); the dots' ring takes on the row colour
   tbody tr:hover {
     th,
     td {
@@ -345,7 +326,7 @@ h1 {
   }
 }
 
-// Ganze Zelle als Klickfläche, der Punkt (10px, mit Ring in Flächenfarbe) in der Mitte
+// The whole cell is the click target, the dot (10px, with a ring in surface colour) in the middle
 .dot {
   display: grid;
   place-items: center;
@@ -383,7 +364,7 @@ h1 {
   }
 }
 
-// Pille wie die Charaktere und Orte in den Szenendetails
+// Pill like the characters and places in the scene details
 .chip-link {
   --avatar-size: calc(var(--pill-height) - 6px);
   display: inline-flex;
@@ -403,10 +384,6 @@ h1 {
     background: var(--button-hover);
   }
 }
-
-// ---------------------------------------------------------------------------
-// Tooltip über dem Element
-// ---------------------------------------------------------------------------
 
 .tooltip {
   position: fixed;

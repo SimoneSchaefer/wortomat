@@ -28,7 +28,7 @@ describe('readerHtml', () => {
     const data = /<script type="application\/json" id="proof-data">(.*?)<\/script>/s.exec(html);
     assert.ok(data, 'Datenblock fehlt');
     assert.deepEqual(JSON.parse(data[1]!), proof);
-    // genau zwei Skript-Blöcke: Daten und App
+    // exactly two script blocks: data and app
     assert.equal(html.match(/<\/script>/g)?.length, 2);
   });
 
@@ -36,7 +36,7 @@ describe('readerHtml', () => {
     assert.match(html, /<title>Liebe &amp; &lt;Tod&gt; – Korrekturfassung<\/title>/);
     const app = /<script>(.*)<\/script>/s.exec(html.slice(html.lastIndexOf('<script>')))?.[1];
     assert.ok(app?.includes(';(function readerApp()'), 'App fehlt');
-    // ohne Bezug auf Module – sonst liefe die Datei auf dem Handy nicht
+    // no reference to modules – otherwise the file would not run on the phone
     assert.doesNotMatch(app!, /\brequire\(|\bimport\b|\bexports\b/);
     assert.doesNotThrow(() => new Function(app!));
   });

@@ -16,7 +16,6 @@ import { ProjectService } from './project.service.js';
 import { RecentProjectsService } from './recent-projects.service.js';
 import { localized } from '../i18n.js';
 
-/** Liste aller bekannten Projekte für die Startseite. */
 @Controller('projects')
 export class ProjectsController {
   constructor(
@@ -30,8 +29,8 @@ export class ProjectsController {
   }
 
   /**
-   * Titelbild eines Buchs aus der Liste, ohne es zu öffnen. Die Bild-ID im Query macht die
-   * Adresse eindeutig: Ein neues Titelbild hat eine neue ID, daher darf lange gecacht werden.
+   * Reads it without opening the book. The image ID in the query makes the URL unique: a new cover
+   * gets a new ID, so it may be cached for long.
    */
   @Get('cover')
   cover(
@@ -46,7 +45,7 @@ export class ProjectsController {
     return new StreamableFile(cover.data, { type: cover.mimeType, length: cover.data.length });
   }
 
-  /** Nimmt ein Projekt aus der Liste, ohne die Datei zu löschen. */
+  /** The file itself is not deleted. */
   @Post('forget')
   @HttpCode(204)
   forget(@Body() body: ForgetProjectRequest): void {

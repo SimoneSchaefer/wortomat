@@ -8,10 +8,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
 import { chapterText } from './stats';
 
-/**
- * Text: Dialoganteil und Satzlänge je Kapitel, Füll- und Lieblingswörter des Buchs.
- * Die Tooltips (`data-tip`) zeigt die Statistikseite drumherum.
- */
+/** The surrounding statistics page shows the tooltips (`data-tip`). */
 @Component({
   selector: 'wm-text-stats',
   templateUrl: './text-stats.html',
@@ -26,7 +23,7 @@ export class TextStats {
   private readonly notes = inject(NotesStore);
 
   private readonly texts = resource({ loader: () => this.api.sceneTexts() });
-  /** Namen von Charakteren und Orten – keine „Lieblingswörter“. */
+  /** Names of characters and places are no favourite words. */
   private readonly names = computed(() =>
     this.notes
       .notes()
@@ -56,7 +53,7 @@ export class TextStats {
       dialogue: stats.words ? (dialogueWords / stats.words) * 100 : 0,
       sentenceLength: sentences ? stats.words / sentences : 0,
       fillersPer1000: stats.words ? (fillers / stats.words) * 1000 : 0,
-      /** Längste Durchschnittssatzlänge – Maßstab der Balken. */
+      /** Longest average sentence length – the scale of the bars. */
       maxSentenceLength: Math.max(1, ...chapters.map((chapter) => chapter.sentenceLength ?? 0)),
     };
   });

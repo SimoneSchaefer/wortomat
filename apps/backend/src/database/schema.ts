@@ -3,21 +3,21 @@ import { LocalizedError, localized } from '../i18n.js';
 import { transaction } from './sqlite.js';
 import { countAnnotations } from '../manuscript/annotations.js';
 
-/** SQL – oder eine Funktion, wenn vorhandene Daten in TypeScript umgerechnet werden müssen. */
+/** A function when existing data has to be converted in TypeScript. */
 type Migration = string | ((db: DatabaseSync) => void);
 
 /**
- * Kennung im SQLite-Header ("WORT"), damit wir eigene Projektdateien
- * von beliebigen anderen SQLite-Dateien unterscheiden können.
+ * Marks the SQLite header ("WORT") so our project files can be told apart from any other SQLite
+ * file.
  */
 export const APPLICATION_ID = 0x574f5254;
 
 /**
- * Jede Migration wird genau einmal ausgeführt; der Stand steht in `PRAGMA user_version`.
- * Bestehende Einträge nie ändern, nur neue anhängen – sonst passen alte Projektdateien nicht mehr.
+ * Each migration runs exactly once; the version lives in `PRAGMA user_version`. Never change
+ * existing entries, only append – otherwise old project files no longer match.
  */
 const MIGRATIONS: readonly Migration[] = [
-  /* 1: Grundschema */ `
+  /* 1: base schema */ `
     CREATE TABLE project (
       id          INTEGER PRIMARY KEY CHECK (id = 1),
       title       TEXT NOT NULL,
@@ -55,7 +55,7 @@ const MIGRATIONS: readonly Migration[] = [
       created_at     TEXT NOT NULL
     );
 
-    -- Volltextsuche; "remove_diacritics" lässt "hauser" auch "Häuser" finden.
+    -- "remove_diacritics" lets "hauser" find "Häuser" too.
     CREATE VIRTUAL TABLE scene_fts USING fts5(
       node_id UNINDEXED,
       title,
@@ -63,7 +63,7 @@ const MIGRATIONS: readonly Migration[] = [
       tokenize = 'unicode61 remove_diacritics 2'
     );
   `,
-  /* 2: Notizen (Charaktere, Orte, Forschung) */ `
+  /* 2: notes (characters, places, research) */ `
     CREATE TABLE notes (
       id          TEXT PRIMARY KEY,
       kind        TEXT NOT NULL CHECK (kind IN ('character', 'place', 'research')),
@@ -84,7 +84,7 @@ const MIGRATIONS: readonly Migration[] = [
       tokenize = 'unicode61 remove_diacritics 2'
     );
   `,
-  /* 3: Bildergalerie je Notiz (z. B. Profilbilder eines Charakters) */ `
+  /* 3: image gallery per note */ `
     CREATE TABLE note_images (
       note_id     TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
       image_id    TEXT NOT NULL REFERENCES images(id),
@@ -93,7 +93,7 @@ const MIGRATIONS: readonly Migration[] = [
     );
     CREATE INDEX note_images_by_image ON note_images(image_id);
   `,
-  /* 4: Verknüpfungen Szene ↔ Notiz (wer/was kommt in welcher Szene vor) */ `
+  /* 4: scene ↔ note links */ `
     CREATE TABLE scene_links (
       scene_id  TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
       note_id   TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
@@ -101,11 +101,11 @@ const MIGRATIONS: readonly Migration[] = [
     );
     CREATE INDEX scene_links_by_note ON scene_links(note_id);
   `,
-  /* 5: Tags für Szenen – projektweit, damit gleiche Tags wiederverwendet werden */ `
+  /* 5: scene tags – project-wide so the same tags get reused */ `
     CREATE TABLE tags (
       id    TEXT PRIMARY KEY,
       name  TEXT NOT NULL,
-      -- normalisierte Form (klein, ohne #): "Rückblende" und "#rückblende" sind derselbe Tag
+      -- normalised form (lowercase, no #): "Rückblende" and "#rückblende" are the same tag
       key   TEXT NOT NULL UNIQUE
     );
 
@@ -116,22 +116,22 @@ const MIGRATIONS: readonly Migration[] = [
     );
     CREATE INDEX scene_tags_by_tag ON scene_tags(tag_id);
   `,
-  /* 6: Arbeitsstand je Szene; vorhandene Szenen starten als „Idee“ */ `
+  /* 6: status per scene; existing scenes start as idea */ `
     ALTER TABLE nodes ADD COLUMN status TEXT NOT NULL DEFAULT 'idea'
       CHECK (status IN ('idea', 'outline', 'draft', 'revised', 'final'));
   `,
-  /* 7: Anzahl der Todo/Idee/Fixme-Markierungen je Szene (beim Speichern gezählt) */ `
+  /* 7: todo/idea/fixme counts per scene, counted on save */ `
     ALTER TABLE scene_content ADD COLUMN todo_count INTEGER NOT NULL DEFAULT 0;
     ALTER TABLE scene_content ADD COLUMN idea_count INTEGER NOT NULL DEFAULT 0;
     ALTER TABLE scene_content ADD COLUMN fixme_count INTEGER NOT NULL DEFAULT 0;
   `,
-  /* 8: Titelbild des Buchs (z. B. Cover im E-Book) */ `
+  /* 8: book cover */ `
     ALTER TABLE project ADD COLUMN cover_image_id TEXT REFERENCES images(id) ON DELETE SET NULL;
   `,
-  /* 9: Gruppe je Notiz (z. B. „Familie Berger“); leer = ohne Gruppe */ `
+  /* 9: group per note; empty = no group */ `
     ALTER TABLE notes ADD COLUMN group_name TEXT NOT NULL DEFAULT '';
   `,
-  /* 10: Gruppen als eigene Einträge (auch leer, umbenennbar); übernimmt die Namen aus 9 */ `
+  /* 10: groups as rows of their own (can be empty and renamed); takes over the names from 9 */ `
     CREATE TABLE note_groups (
       id          TEXT PRIMARY KEY,
       kind        TEXT NOT NULL CHECK (kind IN ('character', 'place', 'research')),
@@ -140,7 +140,7 @@ const MIGRATIONS: readonly Migration[] = [
     );
     ALTER TABLE notes ADD COLUMN group_id TEXT REFERENCES note_groups(id) ON DELETE SET NULL;
 
-    -- Gleich geschriebene Namen („familie“, „Familie“) werden eine Gruppe.
+    -- Names spelled alike ("familie", "Familie") become one group.
     INSERT INTO note_groups (id, kind, name, created_at)
       SELECT lower(hex(randomblob(16))), kind, MIN(group_name), MIN(created_at)
         FROM notes WHERE group_name <> ''
@@ -151,7 +151,7 @@ const MIGRATIONS: readonly Migration[] = [
     ) WHERE group_name <> '';
     ALTER TABLE notes DROP COLUMN group_name;
   `,
-  /* 11: Reihenfolge der Gruppen (per Ziehen); vorhandene starten alphabetisch */ `
+  /* 11: group order (drag and drop); existing groups start alphabetically */ `
     ALTER TABLE note_groups ADD COLUMN sort_order REAL NOT NULL DEFAULT 0;
     UPDATE note_groups SET sort_order = 1 + (
       SELECT COUNT(*) FROM note_groups g
@@ -160,24 +160,24 @@ const MIGRATIONS: readonly Migration[] = [
               OR (lower(g.name) = lower(note_groups.name) AND g.id < note_groups.id))
     );
   `,
-  /* 12: Einstellungen des Export-Dialogs als JSON (Format, Vorlage, Satzspiegel); leer = Vorgaben */ `
+  /* 12: export dialog settings as JSON; empty = defaults */ `
     ALTER TABLE project ADD COLUMN export_settings TEXT;
   `,
-  /* 13: Schreib-Log – geschriebene und gestrichene Wörter je Tag und Szene */ `
+  /* 13: writing log – words written and deleted per day and scene */ `
     CREATE TABLE writing_log (
-      -- Kalendertag (YYYY-MM-DD, Ortszeit); er beginnt um 4 Uhr, Nachtschichten zählen zum Vortag
+      -- calendar day (YYYY-MM-DD, local time); it starts at 4 am, night shifts count towards the previous day
       day       TEXT NOT NULL,
-      -- ohne Fremdschlüssel: der Verlauf bleibt, auch wenn die Szene gelöscht wird
+      -- no foreign key: the history stays even when the scene is deleted
       scene_id  TEXT NOT NULL,
-      -- selbst getippt (brutto)
+      -- typed by the author (gross)
       added     INTEGER NOT NULL DEFAULT 0,
       removed   INTEGER NOT NULL DEFAULT 0,
-      -- eingefügt oder per Ziehen verschoben – zählt nicht als geschrieben
+      -- pasted or moved by dragging – does not count as written
       pasted    INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (day, scene_id)
     );
   `,
-  /* 14: Karten mit Zeichnung (Striche als JSON) und eingezeichneten Orten */ `
+  /* 14: maps with a drawing (strokes as JSON) and placed places */ `
     CREATE TABLE maps (
       id                   TEXT PRIMARY KEY,
       name                 TEXT NOT NULL,
@@ -199,9 +199,7 @@ const MIGRATIONS: readonly Migration[] = [
     );
     CREATE INDEX map_pins_by_note ON map_pins(note_id);
   `,
-  /* 15: Todo/Idee/Fixme-Markierungen auch je Notiz; vorhandene Notizen werden gleich gezählt */ (
-    db,
-  ) => {
+  /* 15: todo/idea/fixme counts per note too; existing notes are counted right away */ (db) => {
     db.exec(`
       ALTER TABLE notes ADD COLUMN todo_count INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE notes ADD COLUMN idea_count INTEGER NOT NULL DEFAULT 0;
@@ -219,11 +217,11 @@ const MIGRATIONS: readonly Migration[] = [
       update.run(counts.todo, counts.idea, counts.fixme, row.id);
     }
   },
-  /* 16: Handlungsstränge (eine Szene kann zu mehreren gehören) und Wendepunkte */ `
+  /* 16: plot threads (a scene can belong to several) and turning points */ `
     CREATE TABLE strands (
       id          TEXT PRIMARY KEY,
       name        TEXT NOT NULL,
-      -- Name einer festen Farbe (s. StrandColor), damit sie hell und dunkel passt
+      -- name of a fixed colour (see StrandColor) so it works in light and dark
       color       TEXT NOT NULL,
       sort_order  REAL NOT NULL,
       created_at  TEXT NOT NULL
@@ -238,12 +236,12 @@ const MIGRATIONS: readonly Migration[] = [
 
     ALTER TABLE nodes ADD COLUMN turning_point INTEGER NOT NULL DEFAULT 0;
   `,
-  /* 17: Reihenfolge der Handlung (unabhängig vom Buch) und Abschnittsmarken darin */ `
-    -- Position in der Handlung; gleiche Werte = gleichzeitig. NULL = noch nie festgelegt:
-    -- die Szene folgt dann ihrer Vorgängerin im Buch.
+  /* 17: story order (independent of the book) and section markers in it */ `
+    -- position in the story; equal values = simultaneous. NULL = never set:
+    -- the scene then follows its predecessor in the book.
     ALTER TABLE nodes ADD COLUMN story_order REAL;
 
-    -- Beginn eines Abschnitts („Tag 1“, „Winter“) vor der ersten Szene mit story_order >= position
+    -- start of a section ("Day 1", "Winter") before the first scene with story_order >= position
     CREATE TABLE story_marks (
       id          TEXT PRIMARY KEY,
       label       TEXT NOT NULL,
@@ -251,13 +249,13 @@ const MIGRATIONS: readonly Migration[] = [
       created_at  TEXT NOT NULL
     );
   `,
-  /* 18: Schon übernommene Notizen aus der Korrekturfassung – das Handy sendet immer alle */ `
+  /* 18: notes already imported from the proofreading copy – the phone always sends all of them */ `
     CREATE TABLE proof_imported (
       note_id      TEXT PRIMARY KEY,
       imported_at  TEXT NOT NULL
     );
   `,
-  /* 19: Ausschnitt eines Galeriebilds (JSON {x, y, width, height}, relativ); NULL = ganzes Bild */ `
+  /* 19: crop of a gallery image (JSON {x, y, width, height}, relative); NULL = whole image */ `
     ALTER TABLE note_images ADD COLUMN crop TEXT;
   `,
 ];
@@ -281,7 +279,6 @@ export function readSchemaVersion(db: DatabaseSync): number {
   return (db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version;
 }
 
-/** Bringt die Datenbank auf den aktuellen Schema-Stand. */
 export function migrate(db: DatabaseSync): void {
   const current = readSchemaVersion(db);
   if (current > SCHEMA_VERSION) {

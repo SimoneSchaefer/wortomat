@@ -1,20 +1,20 @@
 import type { ImageCrop } from '@wortomat/shared';
 
-/** Seitenverhältnis der Bildergalerie (Breite / Höhe) – Ausschnitte haben dasselbe. */
+/** Gallery aspect ratio (width / height) – crops have the same. */
 export const GALLERY_ASPECT = 4 / 3;
 
-/** Größter mittiger Ausschnitt mit dem Seitenverhältnis `aspect` (in Bildpixeln). */
+/** Largest centred crop with the aspect ratio `aspect` (in image pixels). */
 export function centeredCrop(aspect: number, imageWidth: number, imageHeight: number): ImageCrop {
   const imageAspect = imageWidth / imageHeight;
-  // relativ: Breite / Höhe des Ausschnitts in Anteilen des Bilds
+  // relative: width / height of the crop as fractions of the image
   const width = Math.min(1, aspect / imageAspect);
   const height = Math.min(1, imageAspect / aspect);
   return { x: (1 - width) / 2, y: (1 - height) / 2, width, height };
 }
 
 /**
- * Den Ausschnitt (oder das ganze Bild) so anpassen, dass er einen Rahmen mit dem
- * Seitenverhältnis `boxAspect` füllt – wie `object-fit: cover`, mittig im Ausschnitt.
+ * Adjusts the crop (or the whole image) to fill a box with the aspect ratio `boxAspect` – like
+ * `object-fit: cover`, centred in the crop.
  */
 export function coverCrop(
   crop: ImageCrop | null,
@@ -36,9 +36,9 @@ export function coverCrop(
 }
 
 /**
- * Lage eines `<img>` (absolut positioniert in einem Rahmen mit `overflow: hidden`), damit
- * genau der Ausschnitt den Rahmen füllt. Passt das Seitenverhältnis nicht, wird verzerrt –
- * vorher also mit {@link coverCrop} anpassen.
+ * Position of an `<img>` (absolutely positioned in a box with `overflow: hidden`) so exactly the
+ * crop fills the box. If the aspect ratio does not match, it is distorted – so adjust with {@link
+ * coverCrop} first.
  */
 export function cropStyle(crop: ImageCrop): Record<string, string> {
   const percent = (value: number) => `${value * 100}%`;

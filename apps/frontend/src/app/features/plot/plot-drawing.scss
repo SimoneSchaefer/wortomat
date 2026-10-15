@@ -1,8 +1,6 @@
-// Zeichnung der Übersicht „Handlung“ – getrennt vom Rest der Seite (Kopf, Schalter,
-// Infozeile), damit jedes Stylesheet übersichtlich bleibt. Gehört zu PlotPage.
-// ---------------------------------------------------------------------------
-// Zeichnung: links die Namen der Stränge, rechts die seitlich scrollende Fläche
-// ---------------------------------------------------------------------------
+// Drawing of the plot view – separate from the rest of the page (header, switches, info line) so
+// each stylesheet stays manageable. Belongs to PlotPage. Thread names on the left, the sideways
+// scrolling area on the right.
 
 .chart {
   display: flex;
@@ -25,7 +23,7 @@
     padding-right: 0.75rem;
     font-size: 0.85rem;
 
-    // Stränge lassen sich nach oben und unten ziehen
+    // Threads can be dragged up and down
     &.movable {
       cursor: grab;
       touch-action: none;
@@ -72,7 +70,7 @@
   }
 }
 
-// Kopf über der Zeichnung: Kapitel (Buch) bzw. Abschnitte (Handlung)
+// Header above the drawing: chapters (book) or sections (story)
 .groups {
   position: relative;
 
@@ -101,7 +99,7 @@
     }
   }
 
-  // Abschnitt der Handlung: anklicken zum Umbenennen
+  // Story section: click to rename
   .mark {
     border-bottom-color: var(--accent);
     color: var(--text);
@@ -114,7 +112,7 @@
   }
 }
 
-// „+“ vor jeder Spalte – erst sichtbar, wenn die Maus über dem Kopf ist
+// "+" before every column – only visible while the mouse is over the header
 .add-mark {
   position: absolute;
   top: 50%;
@@ -162,7 +160,7 @@
   fill: color-mix(in srgb, var(--surface) 60%, transparent);
 }
 
-// Gleichzeitige Szenen teilen sich eine hinterlegte Spalte; beim Ziehen die Zielspalte
+// Simultaneous scenes share a shaded column; while dragging, the target column
 .together {
   fill: color-mix(in srgb, var(--accent) 7%, transparent);
   stroke: color-mix(in srgb, var(--accent) 30%, transparent);
@@ -195,7 +193,7 @@
   stroke-linejoin: round;
 }
 
-// Szenen: Rand in der Farbe des Status, Wendepunkte gefüllt
+// Scenes: border in the status colour, turning points filled
 .node {
   cursor: pointer;
   outline: none;
@@ -224,7 +222,7 @@
     }
   }
 
-  // In der Reihenfolge der Handlung lassen sich Szenen ziehen
+  // In story order scenes can be dragged
   &.movable {
     cursor: grab;
     touch-action: none;
@@ -235,7 +233,7 @@
     opacity: 0.85;
   }
 
-  // Position im Buch
+  // Position in the book
   .number {
     fill: var(--text);
     font-size: 9px;
@@ -246,7 +244,7 @@
     user-select: none;
   }
 
-  // steht im Buch an anderer Stelle als in der Handlung
+  // sits elsewhere in the book than in the story
   .displaced {
     fill: var(--annotation-todo);
     stroke: var(--bg);
@@ -263,7 +261,7 @@
   visibility: hidden;
 }
 
-// SVG und Titel liegen übereinander; die Titel werden in Pixeln wie das SVG positioniert
+// SVG and titles lie on top of each other; the titles are positioned in pixels like the SVG
 .drawing {
   position: relative;
   width: max-content;
@@ -276,7 +274,8 @@
   padding: 0 0.25rem;
   box-sizing: border-box;
   cursor: pointer;
-  pointer-events: none; // nur der Text selbst reagiert, nicht die leere Breite daneben
+  pointer-events: none; // only the text itself reacts, not the empty width next to
+  // it
 
   span {
     display: -webkit-box;
@@ -286,7 +285,7 @@
     overflow: hidden;
     padding: 0 0.3rem;
     border-radius: 0.3rem;
-    // leicht deckend: Linien, die darunter durchlaufen, stören den Text nicht
+    // slightly opaque: lines running underneath do not disturb the text
     background: color-mix(in srgb, var(--bg) 85%, transparent);
     font-size: 0.72rem;
     line-height: 1.3;
@@ -311,7 +310,7 @@
   }
 }
 
-// Griff vor dem Namen eines Strangs – erst beim Hover sichtbar
+// Grip before a thread's name – only visible on hover
 .grip {
   flex-shrink: 0;
   width: 0.6rem;

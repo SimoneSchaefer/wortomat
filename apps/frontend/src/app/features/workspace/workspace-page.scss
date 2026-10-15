@@ -3,7 +3,7 @@
   grid-template-columns: 4.75rem var(--sidebar-width, 17rem) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   height: 100vh;
-  --picker-bar-height: 2.6rem; // Leiste über dem Inhalt auf schmalen Fenstern
+  --picker-bar-height: 2.6rem; // bar above the content on narrow windows
 
   &.no-sidebar,
   &.compact-sidebar {
@@ -11,13 +11,12 @@
   }
 }
 
-// Obere Leiste über die ganze Breite: Buch, Suche, Projekt schließen
 .topbar {
   grid-column: 1 / -1;
   display: grid;
-  // Die Suche nimmt die halbe Breite (höchstens 34rem) und schrumpft mit dem Fenster,
-  // damit sie den Buchtitel links nicht überdeckt; die Seitenspalten bleiben gleich breit,
-  // so steht sie immer mittig.
+  // The search takes half the width (at most 34rem) and shrinks with the window so it does not
+  // cover the book title on the left; the side columns stay equally wide, so it always sits
+  // centred.
   grid-template-columns: minmax(0, 1fr) minmax(12rem, 2fr) minmax(0, 1fr);
   align-items: center;
   gap: 1rem;
@@ -25,8 +24,8 @@
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, var(--topbar-bg));
   background: var(--topbar-bg);
   box-shadow: var(--topbar-shadow);
-  // Über Seitenleiste und Editor, damit der Schatten nicht verdeckt wird – und über dem
-  // Ziehgriff der Seitenleiste (z-index 5), damit die Suchergebnisse darüber liegen.
+  // Above sidebar and editor so the shadow is not covered – and above the sidebar's resize handle
+  // (z-index 5) so the search results lie on top of it.
   position: relative;
   z-index: 6;
 
@@ -38,7 +37,6 @@
     white-space: nowrap;
   }
 
-  // Kleines Titelbild vor dem Titel; ein Klick öffnet die Auswahl
   .cover-button {
     flex: none;
     padding: 0;
@@ -75,11 +73,11 @@
 
   .top-actions {
     justify-self: end;
-    position: relative; // Bezugspunkt fürs Burger-Menü
+    position: relative; // anchor for the burger menu
   }
 
   .menu-toggle {
-    position: relative; // Bezug für den Punkt bei neuen Notizen vom Handy
+    position: relative; // anchor for the dot for new notes from the phone
     display: grid;
     place-items: center;
     padding: 0.3rem;
@@ -98,7 +96,6 @@
     }
   }
 
-  // Die Knöpfe klappen unter dem Burger-Knopf auf, untereinander
   .actions {
     position: absolute;
     display: flex;
@@ -115,7 +112,7 @@
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
     white-space: nowrap;
 
-    // Symbol, Text, ggf. Zähler – etwas größer als die kleinen Knöpfe sonst
+    // Icon, text, count if any – a little larger than the small buttons elsewhere
     button {
       display: flex;
       align-items: center;
@@ -141,12 +138,12 @@
       color: var(--text-muted);
     }
 
-    // „Projekt schließen“ tut etwas anderes als die übrigen Punkte
+    // "Close project" does something different from the other items
     .close {
       position: relative;
       margin-top: 1rem;
 
-      // Linie etwa mittig zwischen den Punkten, mit Luft zum Knopf darunter
+      // Line roughly centred between the items, with air to the button below
       &::before {
         content: '';
         position: absolute;
@@ -159,7 +156,6 @@
   }
 }
 
-// Schmale Menüleiste ganz links: Manuskript, Charaktere, Orte, Forschung
 .rail {
   display: flex;
   flex-direction: column;
@@ -203,22 +199,22 @@
 }
 
 .sidebar {
-  position: relative; // für den Griff zum Breiterziehen
+  position: relative; // for the resize handle
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   min-height: 0;
-  // Seitlicher Innenabstand – als Variable, damit der Baum ihn für durchgehende Linien kennt
+  // Horizontal padding – as a variable so the tree knows it for full-width lines
   --sidebar-padding-x: 0.75rem;
   padding: 1rem var(--sidebar-padding-x);
   background: var(--surface);
   border-right: 1px solid var(--border);
 
-  // Überschrift, rechts daneben „+ Kapitel“ / „+ Teil“ bzw. „+ Charakter“ …
   .sidebar-head {
     display: flex;
     align-items: baseline;
-    flex-wrap: wrap; // Notfall (z. B. größere Systemschrift): umbrechen statt überlaufen
+    flex-wrap: wrap; // fallback (e.g. a larger system font): wrap instead of
+    // overflowing
     justify-content: space-between;
     gap: 0.25rem 0.75rem;
     padding: 0 0.5rem;
@@ -242,7 +238,6 @@
     text-transform: uppercase;
     color: var(--text-muted);
 
-    // Wortzahl des ganzen Buchs hinter „Manuskript“
     .word-count {
       margin-left: 0.4rem;
       font-weight: normal;
@@ -257,23 +252,23 @@
     overflow-y: auto;
   }
 
-  // Platz für die Scrollleiste immer freihalten (kein Springen) und Luft zum Inhalt
+  // Always keep room for the scrollbar (no jumping) and some air to the content
   wm-note-list {
     scrollbar-gutter: stable;
     padding-right: 0.4rem;
   }
 
-  // Der Baum reicht bis an die Ränder der Seitenleiste, damit die Linien zwischen den Teilen
-  // ganz durchgehen; den Abstand zum Inhalt hält er selbst. Ohne festen Scrollleisten-Platz,
-  // sonst endete jede Linie rechts davor.
+  // The tree reaches the edges of the sidebar so the lines between parts run all the way across; it
+  // keeps its own distance to the content. Without a fixed scrollbar gutter, or every line would
+  // end before it on the right.
   wm-manuscript-tree {
     margin: 0 calc(-1 * var(--sidebar-padding-x));
     padding: 0 var(--sidebar-padding-x);
   }
 }
 
-// Schmales Fenster: die Seitenleiste liegt als Popover über dem Inhalt, unter der Leiste
-// mit dem geöffneten Eintrag – in derselben Gitterzelle wie der Inhalt
+// Narrow window: the sidebar lies as a popover over the content, below the bar with the open entry
+// – in the same grid cell as the content
 .compact-sidebar .sidebar {
   grid-row: 2;
   grid-column: 2;
@@ -281,7 +276,7 @@
   justify-self: start;
   z-index: 20;
   display: none;
-  // Etwas breiter als die Seitenleiste, damit die Titel lesbar bleiben
+  // A little wider than the sidebar so the titles stay readable
   width: min(max(var(--sidebar-width), 22rem), calc(100% - 1rem));
   max-height: calc(100% - var(--picker-bar-height) - 1rem);
   margin: calc(var(--picker-bar-height) + 0.35rem) 0 0 0.5rem;
@@ -307,7 +302,7 @@
   overflow-y: auto;
 }
 
-// Leiste über dem Inhalt: „Manuskript › Szenentitel“ – ein Klick öffnet die Liste
+// Bar above the content: "Manuscript › scene title" – a click opens the list
 .picker-bar {
   display: flex;
   align-items: center;
@@ -363,7 +358,7 @@
   }
 }
 
-// Neue Notizen vom Handy im Download-Ordner – an „Korrektur unterwegs“
+// New notes from the phone in the downloads folder – on "Proofread on the go"
 .inbox-badge {
   display: inline-block;
   min-width: 1.2rem;

@@ -1,5 +1,5 @@
 :host {
-  position: relative; // Bezugspunkt fürs Popover
+  position: relative; // anchor for the popover
   display: grid;
   gap: 0.5rem;
   padding: 0 0.5rem;
@@ -67,7 +67,7 @@
   font-size: var(--pill-font-size);
 }
 
-// Wie die Auswahl im Szenenkopf: schwebt über dem Baum, darf breiter als die Seitenleiste sein
+// Like the picker in the scene header: floats above the tree and may be wider than the sidebar
 .popover {
   position: absolute;
   top: calc(var(--pill-height) + 0.35rem);
@@ -144,7 +144,6 @@
   color: var(--accent-strong);
 }
 
-// Farbe des Strangs
 .dot {
   flex-shrink: 0;
   width: 0.6rem;
@@ -152,7 +151,7 @@
   border-radius: 50%;
 }
 
-// Wendepunkt (Raute wie in den Szenendetails)
+// Turning point (diamond as in the scene details)
 .diamond {
   flex-shrink: 0;
   width: 0.75rem;

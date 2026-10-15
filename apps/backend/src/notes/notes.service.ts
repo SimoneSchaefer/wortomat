@@ -23,10 +23,10 @@ import { localized } from '../i18n.js';
 import { countAnnotations } from '../manuscript/annotations.js';
 
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
-/** Wie im Frontend (`NotePage`), das die Eingabe gleich begrenzt. */
+/** Same as in the frontend (`NotePage`), which limits the input the same way. */
 const MAX_SUMMARY_LENGTH = 2000;
 
-/** Spalten für NoteSummary; das Profilbild ist das erste Bild der Galerie. */
+/** The profile picture is the first image of the gallery. */
 const SUMMARY_COLUMNS = `id, kind, title, summary, group_id, updated_at,
   todo_count, idea_count, fixme_count,
   (SELECT image_id FROM note_images WHERE note_id = notes.id ORDER BY sort_order LIMIT 1)
@@ -48,7 +48,6 @@ interface NoteRow {
   fixme_count: number;
 }
 
-/** Charaktere, Orte und Forschungsnotizen – alles, was neben dem Manuskript zum Buch gehört. */
 @Injectable()
 export class NotesService {
   constructor(
@@ -80,7 +79,7 @@ export class NotesService {
           'INSERT INTO notes (id, kind, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
         )
         .run(id, kind, title, now, now);
-      // Gleich in den Suchindex, damit die Notiz auch ohne Text über den Titel gefunden wird.
+      // Into the search index right away, so the note can be found by its title even without text.
       this.db
         .prepare("INSERT INTO note_fts (note_id, title, summary, body) VALUES (?, ?, '', '')")
         .run(id, title);
@@ -112,7 +111,7 @@ export class NotesService {
     return this.get(id);
   }
 
-  /** `null` bleibt `null`; sonst muss die Gruppe existieren und zur selben Art gehören. */
+  /** The group must exist and belong to the same kind. */
   private requireGroup(groupId: unknown, kind: NoteKind): string | null {
     if (groupId === null) return null;
     const group = this.db
@@ -124,11 +123,6 @@ export class NotesService {
     return groupId as string;
   }
 
-  // -------------------------------------------------------------------------
-  // Gruppen
-  // -------------------------------------------------------------------------
-
-  /** Alle Gruppen in ihrer Reihenfolge (je Art). */
   listGroups(): NoteGroup[] {
     return this.db
       .prepare('SELECT id, kind, name FROM note_groups ORDER BY kind, sort_order')
@@ -164,10 +158,9 @@ export class NotesService {
   }
 
   /**
-   * Verschiebt eine Gruppe vor eine andere derselben Art (oder ans Ende); die Gruppen
-   * der Art werden dabei neu durchnummeriert.
+   * The groups of that kind are renumbered.
    *
-   * @returns alle Gruppen in der neuen Reihenfolge
+   * @returns all groups in their new order
    */
   moveGroup(id: string, request: MoveNoteGroupRequest): NoteGroup[] {
     const group = this.getGroup(id);
@@ -195,11 +188,11 @@ export class NotesService {
     return this.listGroups();
   }
 
-  /** Die Notizen bleiben erhalten und stehen danach ohne Gruppe da. */
+  /** The notes are kept and end up without a group. */
   removeGroup(id: string): void {
     this.getGroup(id);
     transaction(this.db, () => {
-      this.db.prepare('DELETE FROM note_groups WHERE id = ?').run(id); // group_id per SET NULL
+      this.db.prepare('DELETE FROM note_groups WHERE id = ?').run(id); // group_id via SET NULL
       this.projects.touch();
     });
   }
@@ -218,15 +211,11 @@ export class NotesService {
     const imageIds = this.imageIds(id);
     transaction(this.db, () => {
       this.db.prepare('DELETE FROM note_fts WHERE note_id = ?').run(id);
-      this.db.prepare('DELETE FROM notes WHERE id = ?').run(id); // Galerie-Einträge per CASCADE
+      this.db.prepare('DELETE FROM notes WHERE id = ?').run(id); // gallery entries via CASCADE
       imageIds.forEach((imageId) => this.images.deleteIfUnused(imageId));
       this.projects.touch();
     });
   }
-
-  // -------------------------------------------------------------------------
-  // Bildergalerie
-  // -------------------------------------------------------------------------
 
   galleryImages(id: string): GalleryImage[] {
     this.get(id);
@@ -236,7 +225,7 @@ export class NotesService {
     }));
   }
 
-  /** Ausschnitt eines Galeriebilds wählen; `null` zeigt wieder das ganze Bild. */
+  /** `null` shows the whole image again. */
   setImageCrop(id: string, imageId: string, rawCrop: unknown): GalleryImage[] {
     this.get(id);
     const crop = rawCrop === null ? null : validCrop(rawCrop);
@@ -291,7 +280,7 @@ export class NotesService {
     return this.galleryImages(id);
   }
 
-  /** Neue Reihenfolge; muss genau die vorhandenen Bilder enthalten. */
+  /** Must contain exactly the existing images. */
   reorderImages(id: string, imageIds: unknown): GalleryImage[] {
     this.get(id);
     const current = this.imageIds(id);
@@ -389,7 +378,6 @@ export class NotesService {
     return { id, doc: request.doc, wordCount, annotations, updatedAt: now };
   }
 
-  /** Alle Notizen, die mit der Szene verknüpft sind. */
   linkedToScene(sceneId: string): NoteSummary[] {
     const rows = this.db
       .prepare(
@@ -424,7 +412,7 @@ function toSummary(row: NoteRow): NoteSummary {
   };
 }
 
-/** Gespeicherter Ausschnitt; kaputtes JSON gilt als „ganzes Bild“. */
+/** Broken JSON counts as "whole image". */
 function parseCrop(raw: string | null): ImageCrop | null {
   if (!raw) return null;
   try {
@@ -434,7 +422,7 @@ function parseCrop(raw: string | null): ImageCrop | null {
   }
 }
 
-/** Ausschnitt innerhalb des Bilds (kleine Rundungsfehler erlaubt), sonst `undefined`. */
+/** Small rounding errors are allowed. */
 function validCrop(value: unknown): ImageCrop | undefined {
   if (typeof value !== 'object' || value === null) return undefined;
   const { x, y, width, height } = value as Record<string, unknown>;

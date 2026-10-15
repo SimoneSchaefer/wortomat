@@ -2,14 +2,14 @@
 import type { ProofNote, ProofNotesFile, ProofPackage } from '@wortomat/shared';
 
 /**
- * Die Lese-App der Korrekturfassung. Läuft auf dem Handy, offline, in einer einzelnen
- * HTML-Datei: `readerHtml()` bettet den Quelltext dieser Funktion als Skript ein.
+ * Runs on the phone, offline, inside a single HTML file: `readerHtml()` embeds the source of this
+ * function as a script.
  *
- * Deshalb muss alles hier drin stehen – keine Importe (außer Typen), keine Hilfsfunktionen
- * von außerhalb. Die Daten liest sie aus `<script id="proof-data">`.
+ * So everything must live in here – no imports (except types), no helpers from outside. The data
+ * comes from `<script id="proof-data">`.
  */
 export function readerApp(): void {
-  /** Notiz mit Position im Absatz – die Position braucht nur das Handy (Hervorhebung). */
+  /** Only the phone needs the position (for highlighting). */
   interface LocalNote extends ProofNote {
     start: number;
     end: number;
@@ -19,10 +19,8 @@ export function readerApp(): void {
 
   interface State {
     notes: LocalNote[];
-    /** Zuletzt gelesenes Kapitel (Index) und Scrollposition darin. */
     chapter: number | null;
     scroll: number;
-    /** Wann zuletzt gesendet – und wie viele Notizen es da waren. */
     sentAt: string | null;
     sentCount: number;
     fontScale: number;
@@ -136,10 +134,6 @@ export function readerApp(): void {
   });
   const formatDate = (iso: string) => dateFormat.format(new Date(iso));
 
-  // -------------------------------------------------------------------------
-  // Kleine DOM-Helfer
-  // -------------------------------------------------------------------------
-
   type Child = Node | string | null | undefined | false;
   function h<K extends keyof HTMLElementTagNameMap>(
     tag: K,
@@ -171,9 +165,8 @@ export function readerApp(): void {
       ? crypto.randomUUID()
       : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
-  // -------------------------------------------------------------------------
-  // Zustand: in IndexedDB je Korrekturfassung (localStorage hält auf Android nicht immer)
-  // -------------------------------------------------------------------------
+  // State lives in IndexedDB per proofreading copy (localStorage does not always persist on
+  // Android)
 
   let state: State = {
     notes: [],
@@ -221,10 +214,6 @@ export function readerApp(): void {
     saveTimer = setTimeout(saveNow, 300);
   }
 
-  // -------------------------------------------------------------------------
-  // Aufbau der Seite
-  // -------------------------------------------------------------------------
-
   const header = h('header', { class: 'bar' });
   const main = h('main', { id: 'main' });
   const actions = h('div', { class: 'actions', hidden: true });
@@ -243,7 +232,7 @@ export function readerApp(): void {
     toastTimer = setTimeout(() => (toast.hidden = true), 4000);
   }
 
-  /** Neue Ansicht mit Eintrag im Verlauf – so führt die Zurück-Geste von Android zurück. */
+  /** With a history entry, so Android's back gesture goes back. */
   function go(next: View): void {
     history.pushState(next, '');
     show(next);
@@ -442,7 +431,7 @@ export function readerApp(): void {
     return nodes;
   }
 
-  /** Absatztext mit hervorgehobenen Notizen (sie überlappen nie). */
+  /** Notes never overlap. */
   function fillParagraph(
     element: HTMLElement,
     text: string,
@@ -521,16 +510,12 @@ export function readerApp(): void {
     mark?.classList.add('flash');
   }
 
-  // -------------------------------------------------------------------------
-  // Markieren: Auswahl innerhalb eines Absatzes → „Notiz“ / „Vorschlag“
-  // -------------------------------------------------------------------------
-
   function paragraphOf(node: Node | null): HTMLElement | null {
     const element = node instanceof Element ? node : node?.parentElement;
     return element?.closest<HTMLElement>('p.para') ?? null;
   }
 
-  /** Zeichenposition im reinen Absatztext (Hervorhebungen zählen mit ihrem Text). */
+  /** Character offset in the plain paragraph text (highlights count with their text). */
   function offsetIn(paragraph: HTMLElement, node: Node, offset: number): number {
     const range = document.createRange();
     range.setStart(paragraph, 0);
@@ -560,7 +545,7 @@ export function readerApp(): void {
     let start = offsetIn(paragraph, selection.anchorNode, selection.anchorOffset);
     let end = offsetIn(paragraph, selection.focusNode, selection.focusOffset);
     if (start > end) [start, end] = [end, start];
-    // Leerraum am Rand der Auswahl gehört nicht dazu
+    // Whitespace at the edges of the selection does not belong to it
     while (start < end && /\s/.test(text[start]!)) start++;
     while (end > start && /\s/.test(text[end - 1]!)) end--;
     if (start === end) {
@@ -609,10 +594,6 @@ export function readerApp(): void {
     openSheet({ selection, suggest });
   }
 
-  // -------------------------------------------------------------------------
-  // Notiz bearbeiten (Blatt von unten)
-  // -------------------------------------------------------------------------
-
   function openSheet(input: { note: LocalNote } | { selection: Selected; suggest: boolean }): void {
     const existing = 'note' in input ? input.note : null;
     const quote = existing ? existing.quote : (input as { selection: Selected }).selection.quote;
@@ -633,7 +614,7 @@ export function readerApp(): void {
     const submit = () => {
       const noteText = noteField.value.trim();
       const suggestion = suggest ? replacement.value : null;
-      // Ein Vorschlag muss den Text ändern – sonst hieße „Übernehmen“ am Rechner: nichts tun
+      // A suggestion must change the text – otherwise "Accept" on the computer would do nothing
       const problem =
         suggestion === quote ? T.unchanged : suggestion === null && !noteText ? T.emptyNote : null;
       if (problem) {
@@ -703,7 +684,7 @@ export function readerApp(): void {
       ),
     );
     sheet.hidden = false;
-    // Der vorausgefüllte Ersatztext ist markiert: Tippen ersetzt ihn, statt ihn zu ergänzen
+    // The prefilled replacement is selected: typing replaces it instead of appending
     if (suggest) {
       replacement.focus();
       replacement.select();
@@ -725,9 +706,7 @@ export function readerApp(): void {
     window.scrollTo(0, scroll);
   }
 
-  // -------------------------------------------------------------------------
-  // Senden: als .txt über „Teilen“ (Chrome teilt kein .json), sonst herunterladen
-  // -------------------------------------------------------------------------
+  // Sent as .txt via Share (Chrome does not share .json), otherwise downloaded
 
   async function sendNotes(): Promise<void> {
     const file: ProofNotesFile = {
@@ -753,7 +732,7 @@ export function readerApp(): void {
         showToast(T.sent);
         return;
       } catch (error) {
-        if ((error as Error).name === 'AbortError') return; // abgebrochen
+        if ((error as Error).name === 'AbortError') return; // cancelled
       }
     }
     const url = URL.createObjectURL(blob);
@@ -766,10 +745,6 @@ export function readerApp(): void {
     showToast(T.downloaded);
   }
 
-  // -------------------------------------------------------------------------
-  // Start
-  // -------------------------------------------------------------------------
-
   let scrollTimer: ReturnType<typeof setTimeout> | undefined;
   window.addEventListener('scroll', () => {
     if (view.name !== 'chapter') return;
@@ -779,7 +754,7 @@ export function readerApp(): void {
       save();
     }, 400);
   });
-  // Beim Wegwechseln (App-Wechsel, Bildschirm aus) sofort sichern
+  // Save right away when leaving (app switch, screen off)
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') saveNow();
   });

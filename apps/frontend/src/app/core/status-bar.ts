@@ -3,8 +3,8 @@ import { I18n } from './i18n/i18n';
 import { StatusMessages } from './status-messages';
 
 /**
- * Statusleiste am unteren Fensterrand: zeigt Fehlermeldungen aus allen Bereichen an
- * derselben, gut sichtbaren Stelle. Erscheint nur, wenn es etwas zu melden gibt.
+ * Shows error messages from every area in the same, clearly visible place. Appears only when there
+ * is something to report.
  */
 @Component({
   selector: 'wm-status-bar',

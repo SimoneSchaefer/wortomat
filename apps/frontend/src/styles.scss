@@ -1,45 +1,42 @@
-// Globale Designwerte. Komponenten verwenden nur diese Variablen.
+// Global design values. Components only use these variables.
 :root {
   color-scheme: light dark;
 
   --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-prose: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
 
-  // Frische, fast neutrale Grautöne mit einem Hauch Wärme
   --bg: #fffdfa;
   --surface: #f6f3ee;
   --hover: #eeeae3;
   --border: #e3ddd4;
   --text: #1f1b17;
   --text-muted: #6b645c;
-  // Limettengrün als Primärfarbe: --accent leuchtet (Rahmen, Ringe, Markierungen, Flächen ohne
-  // Schrift), --accent-strong ist dunkler und erreicht 4,5 : 1 – für Schrift und für
-  // Flächen, auf denen Schrift steht
+  // Lime green as the primary colour: --accent glows (borders, rings, marks, areas without text),
+  // --accent-strong is darker and reaches 4.5 : 1 – for text and for areas with text on them
   --accent: #84cc16;
   --accent-strong: #4d7c0f;
   --danger: #c92a2a;
 
-  // Szenenstatus: von grau (Idee) bis grün (Fertig)
-  // Gleicher Farbton und gleiche Helligkeit, nur die Sättigung (Chroma) nimmt zu
+  // Scene status from grey (idea) to green (final). Same hue and lightness, only the chroma
+  // increases
   --status-idea: oklch(0.58 0 148);
   --status-outline: oklch(0.58 0.045 148);
   --status-draft: oklch(0.58 0.09 148);
   --status-revised: oklch(0.58 0.135 148);
   --status-final: oklch(0.58 0.18 148);
 
-  // Markierungen im Text (Todo/Idee/Fixme)
   --annotation-todo: #e0a800;
   --annotation-idea: #2f9e8f;
   --annotation-fixme: #d64545;
 
-  // Überarbeitungsmodus: Linien unter dem Text, zusätzlich an der Linienart unterscheidbar.
-  // Andere Farbtöne als Todo/Idee/Fixme; geprüft auf Farbfehlsichtigkeit (hell und dunkel)
+  // Revision mode: lines under the text, also distinguishable by line style. Other hues than
+  // todo/idea/fixme; checked for colour vision deficiencies (light and dark)
   --revision-repetition: #c2457a;
   --revision-filler: #2a78d6;
   --revision-double: #eb6834;
   --revision-long: color-mix(in srgb, var(--text) 7%, transparent);
 
-  // Handlungsstränge: gleiche Helligkeit, nur der Farbton wechselt („slate“ fast ohne Farbe)
+  // Plot threads: same lightness, only the hue changes ("slate" almost without colour)
   --strand-violet: oklch(0.58 0.15 295);
   --strand-teal: oklch(0.58 0.1 185);
   --strand-rose: oklch(0.58 0.16 5);
@@ -49,26 +46,26 @@
   --strand-coral: oklch(0.58 0.15 35);
   --strand-slate: oklch(0.58 0.03 250);
 
-  // Einheitliche Höhe und Schriftgröße der „Pillen“ im Szenenkopf (Status, Charaktere, Orte, Tags, +)
+  // Uniform height and font size of the pills in the scene header (status, characters, places,
+  // tags, +)
   --pill-height: 1.5rem;
   --pill-font-size: 0.78rem;
 
-  // Einheitlicher Hintergrund aller beschrifteten Buttons (auch „+ Kapitel“, „Exportieren“ …):
-  // ein Hauch Grün, hebt sich von Papier (--bg) und Seitenleiste (--surface) gleichermaßen ab
+  // Uniform background of all labelled buttons (also "+ Chapter", "Export" …): a hint of green that
+  // stands out from paper (--bg) and sidebar (--surface) alike
   --button-bg: color-mix(in srgb, var(--accent) 10%, var(--bg));
   --button-hover: color-mix(in srgb, var(--accent) 20%, var(--bg));
   --button-border: color-mix(in srgb, var(--accent) 30%, var(--border));
 
-  // Obere Leiste: eigene Farbe und Schatten – ein kräftiger Grünton
   --topbar-bg: color-mix(in srgb, var(--accent) 40%, var(--bg));
   --topbar-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
 
-  // Scrollleisten im Grün der Oberfläche; die Leiste selbst bleibt durchsichtig
+  // Scrollbars in the UI's green; the track itself stays transparent
   --scrollbar-thumb: color-mix(in srgb, var(--accent) 55%, var(--surface));
   --scrollbar-track: transparent;
 }
 
-// Dunkle Farben – je nach Einstellung immer, nie oder wie das System (data-theme an <html>)
+// Dark colours – always, never or like the system, depending on the setting (data-theme on <html>)
 @mixin dark-theme {
   color-scheme: dark;
 
@@ -78,11 +75,11 @@
   --border: #3b3835;
   --text: #eeeae4;
   --text-muted: #a19a91;
-  // auf dunklem Grund ist das hellere Grün das kontrastreichere
+  // on a dark background the lighter green has more contrast
   --accent: #a3e635;
   --accent-strong: #bef264;
   --danger: #ff8787;
-  // auf dunklem Grund braucht ein Schatten mehr Deckkraft, um sichtbar zu sein
+  // on a dark background a shadow needs more opacity to be visible
   --topbar-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
 
   --status-idea: oklch(0.74 0 148);
@@ -124,7 +121,7 @@
   color-scheme: light;
 }
 
-// Schriftgröße der ganzen Oberfläche: alle Größen sind in rem angegeben und wachsen mit.
+// UI font size: all sizes are in rem and grow with it.
 :root[data-font-size='small'] {
   font-size: 87.5%;
 }
@@ -145,13 +142,13 @@ body {
   height: 100%;
 }
 
-// scrollbar-color wird vererbt und gilt damit für alle scrollbaren Bereiche
+// scrollbar-color is inherited and so applies to every scrollable area
 :root {
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-// Export-Seite: Platz für die Scrollleiste immer freihalten – sonst springt das Layout, wenn die
-// Seite beim Wechsel des Formats länger oder kürzer als das Fenster wird.
+// Export page: always keep room for the scrollbar – otherwise the layout jumps when the page gets
+// longer or shorter than the window on switching formats.
 html:has(.export-page) {
   scrollbar-gutter: stable;
 }
@@ -170,7 +167,7 @@ textarea {
   color: inherit;
 }
 
-// .doc-input bringt eigene Regeln mit (sieht aus wie Text, siehe unten)
+// .doc-input brings its own rules (looks like text, see below)
 input:not([type='file'], .doc-input),
 textarea:not(.doc-input) {
   padding: 0.45rem 0.6rem;
@@ -212,7 +209,7 @@ button {
     }
   }
 
-  // Kleinere Variante für Nebenaktionen – gleicher Hintergrund wie alle Buttons
+  // Smaller variant for secondary actions – same background as all buttons
   &.link {
     padding: 0.2rem 0.6rem;
     font-size: 0.85rem;
@@ -234,16 +231,14 @@ mark {
   border-radius: 0.15rem;
 }
 
-// ---------------------------------------------------------------------------
-// Fließtext im Editor (ProseMirror-DOM entsteht außerhalb von Angular → global)
-// ---------------------------------------------------------------------------
+// Editor body text (the ProseMirror DOM is created outside Angular → global)
 
 .wm-prose {
   font-family: var(--font-prose);
   font-size: 1.15rem;
   line-height: 1.7;
   outline: none;
-  // Füllt den Kasten bis unten (siehe document-editor.scss), aber nie höher als nötig
+  // Fills the box to the bottom (see document-editor.scss), but never taller than needed
   flex: 1;
   min-height: 8rem;
   hyphens: auto;
@@ -252,12 +247,12 @@ mark {
     margin: 0;
   }
 
-  // Beginnt der Text mit einer Überschrift: kein Abstand zusätzlich zum Innenabstand des Kastens
+  // If the text starts with a heading: no space on top of the box's padding
   > :first-child {
     margin-top: 0;
   }
 
-  // Buchsatz: Absätze per Einzug statt Leerzeile
+  // Book typesetting: paragraphs by indent instead of a blank line
   p + p {
     text-indent: 1.5em;
   }
@@ -287,8 +282,8 @@ mark {
     }
   }
 
-  // Todo/Idee/Fixme: farbig hinterlegt, zusätzlich unterschiedlich unterstrichen
-  // (damit die Arten auch ohne Farbwahrnehmung unterscheidbar sind).
+  // Todo/idea/fixme: coloured background plus different underlines (so the kinds are
+  // distinguishable without colour perception too).
   mark.wm-annotation {
     --annotation-color: var(--annotation-todo);
     padding: 0.05em 0;
@@ -320,9 +315,9 @@ mark {
   }
 }
 
-// Überarbeitungsmodus: Hinweise als Dekorationen (nur Anzeige, nie gespeichert).
-// Wiederholung gepunktet, Füllwort gestrichelt, doppeltes Wort doppelt unterstrichen,
-// langer Satz zart hinterlegt – auch ohne Farbe unterscheidbar.
+// Revision mode: hints as decorations (display only, never saved). Repetition dotted, filler
+// dashed, doubled word double-underlined, long sentence lightly shaded – distinguishable without
+// colour too.
 .wm-rev {
   text-decoration-thickness: 2px;
   text-underline-offset: 0.22em;
@@ -353,9 +348,7 @@ mark {
   box-decoration-break: clone;
 }
 
-// ---------------------------------------------------------------------------
-// Kopfbereich über dem Editor (wird in <wm-document-editor> hineinprojiziert)
-// ---------------------------------------------------------------------------
+// Header area above the editor (projected into <wm-document-editor>)
 
 .doc-title {
   font-family: var(--font-prose);
@@ -372,7 +365,7 @@ mark {
   color: var(--accent-strong);
 }
 
-// Titel und Kurzbeschreibung sehen aus wie Text; erst im Fokus als Eingabefeld erkennbar.
+// Title and summary look like text; only recognisable as inputs when focused.
 .doc-input {
   display: block;
   width: 100%;
@@ -390,7 +383,7 @@ mark {
   }
 }
 
-// Mehrzeilige Felder: so hoch wie ihr Text, ohne Ziehgriff und Scrollleiste
+// Multi-line fields: as tall as their text, without a resize grip or scrollbar
 textarea.doc-input {
   field-sizing: content;
   min-height: 0;
@@ -413,7 +406,7 @@ textarea.doc-input {
   }
 }
 
-// Während eine Breite gezogen wird: überall der passende Cursor, keine Textauswahl.
+// While a width is being dragged: the matching cursor everywhere, no text selection.
 body.wm-resizing {
   cursor: col-resize;
   user-select: none;

@@ -15,13 +15,12 @@ import { WortomatApi } from './wortomat-api';
 export interface TreeItem {
   node: ManuscriptNode;
   children: TreeItem[];
-  /** Bei Szenen deren Markierungen, bei Kapiteln/Teilen die Summe darunter. */
+  /** For scenes their own marks, for chapters/parts the sum below. */
   annotations: AnnotationCounts;
-  /** Bei Szenen deren Wortzahl, bei Kapiteln/Teilen die Summe darunter. */
+  /** For scenes their own word count, for chapters/parts the sum below. */
   wordCount: number;
 }
 
-/** Zustand des geöffneten Projekts: Metadaten und Manuskript-Baum. */
 @Injectable({ providedIn: 'root' })
 export class ProjectStore {
   private readonly api = inject(WortomatApi);
@@ -31,13 +30,12 @@ export class ProjectStore {
   readonly nodes = signal<ManuscriptNode[]>([]);
   readonly tree = computed(() => buildTree(this.nodes()));
   readonly totalWords = computed(() => this.nodes().reduce((sum, node) => sum + node.wordCount, 0));
-  /** Eingeklappte Teile und Kapitel im Baum – nur Anzeige, gilt bis zum Schließen des Projekts. */
+  /** Display only, valid until the project is closed. */
   readonly collapsed = signal<ReadonlySet<string>>(new Set());
 
   /**
-   * Liefert das aktuell geöffnete Projekt. Beim ersten Aufruf wird das Backend gefragt
-   * (es kann schon ein Projekt offen sein, z. B. per Doppelklick gestartet); danach gilt
-   * der Zustand des Stores, der bei create/open/close aktualisiert wird.
+   * On the first call the backend is asked (a project may already be open, e.g. started by
+   * double-click); after that the store's state applies, updated on create/open/close.
    */
   async ensureLoaded(): Promise<ProjectInfo | null> {
     this.initialLoad ??= this.reload();
@@ -64,8 +62,6 @@ export class ProjectStore {
     this.collapsed.set(new Set());
   }
 
-  /** Titelbild setzen (hochgeladenes Bild) oder mit `null` entfernen. */
-  /** Titel und/oder Autor des Buchs ändern. */
   async updateDetails(changes: { title?: string; author?: string }): Promise<void> {
     this.project.set(await this.api.updateProject(changes));
   }
@@ -102,14 +98,14 @@ export class ProjectStore {
     this.nodes.update((nodes) => nodes.map((node) => (node.id === id ? updated : node)));
   }
 
-  /** Reihenfolge der Handlung speichern; liefert die Abschnittsmarken. */
+  /** Returns the section marks. */
   async saveStory(request: SaveStoryRequest): Promise<StoryMark[]> {
     const state = await this.api.saveStory(request);
     this.nodes.set(state.nodes);
     return state.marks;
   }
 
-  /** Den Baum neu laden – z. B. nachdem Markierungen von außen dazugekommen sind. */
+  /** E.g. after marks were added from outside. */
   async reloadNodes(): Promise<void> {
     this.nodes.set(await this.api.listNodes());
   }
@@ -120,11 +116,10 @@ export class ProjectStore {
 
   async deleteNode(id: string): Promise<void> {
     await this.api.deleteNode(id);
-    // Unterknoten werden im Backend mitgelöscht; einfach neu laden.
+    // The backend deletes the child nodes too; just reload.
     this.nodes.set(await this.api.listNodes());
   }
 
-  /** Nach dem Speichern einer Szene: Wortzahl und Markierungen im Baum aktualisieren. */
   updateSceneStats(id: string, wordCount: number, annotations: AnnotationCounts): void {
     this.nodes.update((nodes) =>
       nodes.map((node) => (node.id === id ? { ...node, wordCount, annotations } : node)),
@@ -139,7 +134,7 @@ export class ProjectStore {
     });
   }
 
-  /** Klappt alles auf, was über dem Element liegt – z. B. wenn eine Szene geöffnet wird. */
+  /** Expands everything above the element – e.g. when a scene is opened. */
   reveal(id: string): void {
     const collapsed = this.collapsed();
     const next = new Set(collapsed);

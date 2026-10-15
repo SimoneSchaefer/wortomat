@@ -16,13 +16,13 @@ import { ConfirmDialog } from '../../core/confirm-dialog';
 const DRAG_TYPE = 'application/x-wortomat-note';
 const GROUP_DRAG_TYPE = 'application/x-wortomat-note-group';
 
-/** Wohin eine gezogene Gruppe käme: vor oder hinter den Abschnitt (`''` = „Ohne Gruppe“). */
+/** Where a dragged group would land: before or after the section (`''` = "No group"). */
 interface GroupDrop {
   targetId: string;
   position: 'before' | 'after';
 }
 
-/** Seitenleiste für Charaktere, Orte oder Recherchen. */
+/** Sidebar for characters, places or research. */
 @Component({
   selector: 'wm-note-list',
   imports: [
@@ -46,11 +46,11 @@ export class NoteList {
   protected readonly config = computed(() => NOTE_KINDS[this.kind()]);
   protected readonly texts = computed(() => this.t().noteKinds[this.kind()]);
   protected readonly groups = computed(() => this.store.groupedByKind(this.kind()));
-  /** Überschriften erst, sobald es mindestens eine Gruppe gibt. */
+  /** Headings only once there is at least one group. */
   protected readonly showGroups = computed(() => this.groups().some((entry) => entry.group));
   /**
-   * Markierungsarten, die in dieser Liste vorkommen – mit festem Platz in jeder Zeile,
-   * damit die Zähler untereinander stehen (wie im Manuskript-Baum).
+   * Mark kinds occurring in this list – with a fixed slot in every row so the counts line up (as in
+   * the manuscript tree).
    */
   protected readonly annotationKinds = computed(() => {
     const total = this.groups()
@@ -58,31 +58,30 @@ export class NoteList {
       .reduce((sum, note) => addCounts(sum, note.annotations), NO_ANNOTATIONS);
     return ANNOTATION_KINDS.filter((info) => total[info.kind] > 0);
   });
-  /** Gruppe, deren Name gerade bearbeitet wird. */
   protected readonly editingGroupId = signal<string | null>(null);
   private readonly error = inject(StatusMessages).channel();
   private readonly confirm = inject(ConfirmDialog);
 
   protected readonly draggingId = signal<string | null>(null);
-  /** Gruppe, über der gerade eine Notiz schwebt (`''` = ohne Gruppe). */
+  /** Group a note is currently hovering over (`''` = no group). */
   protected readonly dropGroupId = signal<string | null>(null);
 
   protected readonly draggingGroupId = signal<string | null>(null);
   protected readonly groupDrop = signal<GroupDrop | null>(null);
 
-  /** Von der Kopfzeile der Seitenleiste aus aufgerufen – oder mit Gruppe über deren „+“. */
+  /** Called from the sidebar header – or with a group from its "+". */
   async add(groupId: string | null = null): Promise<void> {
     await this.run(async () => {
       const note = await this.store.create(this.kind(), this.texts().newTitle);
       if (groupId) {
         await this.store.update(note.id, { groupId });
-        if (this.store.isGroupCollapsed(groupId)) this.store.toggleGroup(groupId); // sichtbar machen
+        if (this.store.isGroupCollapsed(groupId)) this.store.toggleGroup(groupId); // make it visible
       }
       await this.router.navigate(['/write', this.config().path, note.id]);
     });
   }
 
-  /** Von der Kopfzeile aus: neue Gruppe anlegen und gleich den Namen bearbeiten. */
+  /** From the header: create a new group and edit its name right away. */
   async addGroup(): Promise<void> {
     await this.run(async () => {
       const group = await this.store.createGroup(this.kind(), this.t().notes.newGroup);
@@ -113,7 +112,7 @@ export class NoteList {
     return this.store.isGroupCollapsed(groupId ?? '');
   }
 
-  /** Summe der Gruppe – nur zugeklappt, aufgeklappt stehen die Zähler an den Notizen. */
+  /** Group total – only when collapsed; expanded, the counts sit on the notes. */
   protected groupAnnotations(groupId: string | null, notes: NoteSummary[]): AnnotationCounts {
     return this.isCollapsed(groupId)
       ? notes.reduce((sum, note) => addCounts(sum, note.annotations), NO_ANNOTATIONS)
@@ -123,8 +122,6 @@ export class NoteList {
   protected toggle(groupId: string | null): void {
     this.store.toggleGroup(groupId ?? '');
   }
-
-  // Ziehen in eine andere Gruppe ---------------------------------------------
 
   protected onDragStart(event: DragEvent, note: NoteSummary): void {
     if (!event.dataTransfer) return;
@@ -174,8 +171,6 @@ export class NoteList {
     await this.run(() => this.store.update(note.id, { groupId }));
   }
 
-  // Gruppen umsortieren --------------------------------------------------------
-
   protected onGroupDragStart(event: DragEvent, groupId: string | null): void {
     if (!groupId || !event.dataTransfer) return;
     event.dataTransfer.effectAllowed = 'move';
@@ -188,7 +183,9 @@ export class NoteList {
     this.groupDrop.set(null);
   }
 
-  /** Obere Hälfte des Abschnitts: davor, untere: dahinter. „Ohne Gruppe“ bleibt immer unten. */
+  /**
+   * Upper half of the section: before, lower half: after. "No group" always stays at the bottom.
+   */
   private onGroupDragOver(event: DragEvent, groupId: string | null): void {
     if (!event.dataTransfer?.types.includes(GROUP_DRAG_TYPE)) return;
     event.preventDefault();
@@ -196,7 +193,7 @@ export class NoteList {
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const upperHalf = event.clientY < rect.top + rect.height / 2;
     const position = groupId !== null && upperHalf ? 'before' : 'after';
-    // Hinter der letzten Gruppe = vor „Ohne Gruppe“: dort als Linie oben anzeigen
+    // After the last group = before "No group": show it as a line at the top there
     this.groupDrop.set(
       groupId === null ? { targetId: '', position: 'before' } : { targetId: groupId, position },
     );
@@ -216,7 +213,7 @@ export class NoteList {
     } else {
       beforeId = order[order.indexOf(drop.targetId) + 1] ?? null;
     }
-    // Schon an dieser Stelle? Dann nichts tun.
+    // Already in this place? Then do nothing.
     if (beforeId === id || (order[order.indexOf(id) + 1] ?? null) === beforeId) return;
     await this.run(() => this.store.moveGroup(id, beforeId));
   }

@@ -1,12 +1,10 @@
-/** Farben der Funken: Akzentgrün plus ein paar festliche Töne. */
 const COLORS = ['#84cc16', '#facc15', '#fb923c', '#f472b6', '#38bdf8', '#a78bfa'];
 const BURSTS = 3;
 const SPARKS_PER_BURST = 18;
 
 /**
- * Kleines Feuerwerk über einem Element, z. B. wenn eine Szene fertig ist.
- * Reine DOM-Funken mit der Web Animations API; sie räumen sich danach selbst weg.
- * Wer reduzierte Bewegung eingestellt hat, bekommt keins.
+ * Small fireworks above an element, e.g. when a scene is finished. Plain DOM sparks with the Web
+ * Animations API; they clean up after themselves. Nobody with reduced motion gets any.
  */
 export function celebrate(origin: Element): void {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -15,7 +13,7 @@ export function celebrate(origin: Element): void {
   const top = rect.top;
 
   for (let burst = 0; burst < BURSTS; burst++) {
-    // Leicht versetzt über dem Element, nacheinander gezündet
+    // Slightly offset above the element, fired one after another
     const x = centerX + (burst - 1) * 70 + random(-20, 20);
     const y = top - random(40, 90);
     const color = COLORS[Math.floor(Math.random() * COLORS.length)]!;
@@ -48,7 +46,6 @@ function explode(x: number, y: number, color: string): void {
       [
         { transform: 'translate(0, 0) scale(1)', opacity: 1 },
         { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 1, offset: 0.55 },
-        // zum Schluss sinken die Funken ein Stück und verglühen
         { transform: `translate(${dx * 1.1}px, ${dy * 1.1 + 25}px) scale(0.4)`, opacity: 0 },
       ],
       { duration: random(800, 1100), easing: 'cubic-bezier(0.2, 0.7, 0.3, 1)' },

@@ -21,12 +21,12 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { CoverPicker } from '../cover/cover-picker';
 import { ExportPreviewPages, isPreviewFontAvailable, previewFontFamily } from './export-preview';
 
-/** Bezeichnung und Beschreibung: `t().export.formats[…]` bzw. `t().export.templates[…]`. */
+/** Label and description: `t().export.formats[…]` and `t().export.templates[…]`. */
 const FORMATS: readonly ExportFormat[] = ['html', 'docx', 'pdf', 'epub'];
 const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
 const SAVE_DELAY_MS = 500;
 
-/** Übliche Buchformate in mm; die Vorgabe der Vorlage „Roman“ ist 125 × 190. */
+/** Common book sizes in mm; the default of the novel template is 125 × 190. */
 const PAGE_SIZES: ReadonlyArray<{ width: number; height: number; name?: string }> = [
   { width: 120, height: 190 },
   { width: 125, height: 190 },
@@ -38,10 +38,7 @@ const PAGE_SIZES: ReadonlyArray<{ width: number; height: number; name?: string }
 
 type MarginKey = 'marginInner' | 'marginOuter' | 'marginTop' | 'marginBottom';
 
-/**
- * Seite „Manuskript exportieren“ (Route `export`): Format, Vorlage, Satzspiegel mit Vorschau –
- * und danach Öffnen/Zeigen. Die Auswahl merkt sich das Buch.
- */
+/** The choice is remembered per book. */
 @Component({
   selector: 'wm-export-page',
   imports: [CoverPicker, ExportPreviewPages],
@@ -73,14 +70,14 @@ export class ExportPage {
   protected readonly includeParts = signal(true);
   protected readonly layout = signal<BookLayout | null>(null);
   private defaults: ExportSettings | null = null;
-  /** Erst nach dem Laden speichern – sonst überschrieben die Vorgaben das Gemerkte. */
+  /** Only save after loading – otherwise the defaults would overwrite what was remembered. */
   private loaded = false;
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
-  /** Zuletzt geladener bzw. gespeicherter Stand (JSON) – Unverändertes nicht erneut schreiben. */
+  /** Last loaded or saved state (JSON) – do not write unchanged state again. */
   private savedJson = '';
 
   protected readonly preview = signal<ExportPreview | null>(null);
-  /** Optionale Schriften (Computer Modern) nur, wenn installiert – oder schon gewählt. */
+  /** Optional fonts (Computer Modern) only when installed – or already chosen. */
   protected readonly fonts = computed<BookFontInfo[]>(() =>
     (this.capabilities()?.fonts ?? []).filter(
       (font) => !font.optional || font.pdfAvailable || font.id === this.layout()?.font,
@@ -89,17 +86,17 @@ export class ExportPage {
   protected readonly font = computed(() =>
     this.fonts().find((font) => font.id === this.layout()?.font),
   );
-  /** Schriftfamilie der Vorschau: die Datei aus TeX, sonst die Systemschrift. */
+  /** The file from TeX, otherwise the system font. */
   protected readonly previewFamily = computed(() => {
     const font = this.font();
     return font ? previewFontFamily(font.id, font.cssFamily) : 'serif';
   });
-  /** Kann die Vorschau die gewählte Schrift zeigen? Sonst zeigt sie eine Ersatzschrift. */
+  /** Otherwise the preview shows a substitute font. */
   protected readonly fontInstalled = signal(true);
-  /** Vorschau und Satzspiegel gibt es nur für Formate mit fester Seite. */
+  /** Preview and type area only exist for formats with a fixed page. */
   protected readonly paged = computed(() => this.hasTemplates(this.format()));
   protected readonly customizable = computed(() => this.paged() && this.template() === 'roman');
-  /** Index in `pageSizes` oder `-1` für eine eigene Größe. */
+  /** `-1` for a custom size. */
   protected readonly pageSizeIndex = computed(() => {
     const layout = this.layout();
     return PAGE_SIZES.findIndex(
@@ -114,7 +111,7 @@ export class ExportPage {
   protected readonly error = signal<string | null>(null);
 
   constructor() {
-    // Jede Änderung (kurz verzögert) im Buch merken
+    // Remember every change in the book (slightly delayed)
     effect(() => {
       const settings = this.currentSettings();
       if (!settings) return;
@@ -124,14 +121,14 @@ export class ExportPage {
         this.saveTimer = setTimeout(() => void this.save(settings), SAVE_DELAY_MS);
       });
     });
-    // Szenentitel ändern den Text der Vorschau
+    // Scene titles change the text of the preview
     effect(() => {
       const withTitles = this.includeSceneTitles();
       untracked(() => {
         if (this.loaded) void this.loadPreview(withTitles);
       });
     });
-    // Prüfen, ob die Vorschau die gewählte Schrift laden kann (Datei aus TeX oder Systemschrift)
+    // Check whether the preview can load the chosen font (file from TeX or system font)
     effect(() => {
       const font = this.font();
       if (!font) return;
@@ -156,7 +153,7 @@ export class ExportPage {
       : null;
   });
 
-  /** Dorthin zurück, woher man kam – beim direkten Aufruf zum Buch. */
+  /** Back to where we came from – to the book when opened directly. */
   protected back(): void {
     if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
       this.location.back();
@@ -166,8 +163,8 @@ export class ExportPage {
   }
 
   /**
-   * Fähigkeiten (bei jedem Besuch neu – vielleicht wurde TeX inzwischen installiert) und die
-   * gemerkten Einstellungen zusammen laden: Fehlt pdfLaTeX, wird ein gemerktes „PDF“ zu Word.
+   * Loads the capabilities (fresh on every visit – TeX may have been installed meanwhile) together
+   * with the remembered settings: without pdfLaTeX, a remembered PDF becomes Word.
    */
   private async load(): Promise<void> {
     try {
@@ -185,7 +182,8 @@ export class ExportPage {
       this.includeParts.set(settings.includeParts);
       this.layout.set(settings.layout);
       this.customSize.set(this.pageSizeIndex() < 0);
-      // Gespeichert ist, was im Buch steht – eine Umstellung PDF → Word erst bei Änderungen merken
+      // What is saved is what the book holds – only remember a switch from PDF to Word once
+      // something changes
       this.savedJson = JSON.stringify({ ...settings, format: this.format() });
       this.loaded = true;
       await this.loadPreview(settings.includeSceneTitles);
@@ -198,7 +196,7 @@ export class ExportPage {
     try {
       this.preview.set(await this.api.exportPreview(includeSceneTitles));
     } catch {
-      this.preview.set(null); // ohne Vorschau lässt sich trotzdem exportieren
+      this.preview.set(null); // exporting still works without a preview
     }
   }
 
@@ -212,7 +210,7 @@ export class ExportPage {
     }
   }
 
-  /** Noch nicht gespeicherte Änderung sofort schreiben (beim Schließen). */
+  /** On closing. */
   private flushSave(): void {
     if (this.saveTimer === undefined) return;
     clearTimeout(this.saveTimer);
@@ -243,7 +241,7 @@ export class ExportPage {
     this.updateLayout({ pageWidth: size.width, pageHeight: size.height });
   }
 
-  /** Zahlenfelder: Ungültiges ignorieren, das Backend legt Werte zusätzlich in ihre Grenzen. */
+  /** Number fields: ignore invalid input; the backend clamps values to their limits as well. */
   protected setNumber(key: keyof BookLayout, raw: string): void {
     const value = Number(raw.replace(',', '.'));
     if (raw.trim() && Number.isFinite(value) && value > 0) this.updateLayout({ [key]: value });
@@ -259,7 +257,7 @@ export class ExportPage {
     this.customSize.set(false);
   }
 
-  /** Vorlagen gibt es nur für Formate mit fester Seite. */
+  /** Templates only exist for formats with a fixed page. */
   protected hasTemplates(format: ExportFormat): boolean {
     return format === 'docx' || format === 'pdf';
   }
@@ -288,7 +286,8 @@ export class ExportPage {
     this.error.set(null);
     this.result.set(null);
     this.downloaded.set(null);
-    // Erst speichern, was im Editor noch offen ist – sonst fehlt das Neueste im Export.
+    // Save what is still open in the editor first – otherwise the newest text is missing from the
+    // export.
     await this.pendingSaves.flushAll();
 
     this.busy.set(true);
@@ -329,14 +328,14 @@ export class ExportPage {
   }
 }
 
-/** Beim Download kommt auch eine Fehlermeldung als Blob – dann den Text daraus lesen. */
+/** For downloads, an error message arrives as a blob too – read the text from it then. */
 async function exportErrorMessage(error: unknown, t: Texts): Promise<string> {
   if (error instanceof HttpErrorResponse && error.error instanceof Blob) {
     try {
       const body = JSON.parse(await error.error.text()) as { message?: unknown };
       if (typeof body.message === 'string') return body.message;
     } catch {
-      // kein JSON – unten die allgemeine Meldung
+      // not JSON – the generic message below
     }
   }
   return errorMessage(error, t);

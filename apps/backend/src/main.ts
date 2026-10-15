@@ -1,6 +1,6 @@
 /**
- * Eigenständiger Start für die Entwicklung im Browser (`npm run dev`).
- * In der fertigen App startet stattdessen die Electron-Shell den Server über `startServer()`.
+ * Standalone start for development in the browser (`npm run dev`). In the packaged app the Electron
+ * shell starts the server via `startServer()` instead.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import os from 'node:os';
@@ -18,7 +18,7 @@ const server = await startServer({
   mode: 'browser',
   version: packageJson.version,
   defaultProjectDir: existsSync(documentsDir) ? documentsDir : os.homedir(),
-  // Eigener Ordner für die Entwicklung, damit die Projektliste der installierten App unberührt bleibt.
+  // A folder of its own for development, so the installed app's project list stays untouched.
   dataDir: process.env['WORTOMAT_DATA_DIR'] ?? path.join(os.homedir(), '.wortomat-dev'),
   downloadsDir: process.env['WORTOMAT_DOWNLOADS_DIR'],
   port: Number(process.env['PORT'] ?? 3000),

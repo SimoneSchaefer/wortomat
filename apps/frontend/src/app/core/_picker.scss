@@ -1,6 +1,6 @@
-// Gemeinsame Optik für Chips mit „+“ und Auswahl-Popover (Suche, Liste, „neu anlegen“) –
-// z. B. Charaktere/Orte/Tags einer Szene und die Gruppe einer Notiz.
-// Einbinden mit `@use '../../core/picker';` im Komponenten-Stylesheet.
+// Shared look for chips with "+" and a picker popover (search, list, "create new") – e.g. a scene's
+// characters/places/tags and a note's group. Include with `@use '../../core/picker';` in the
+// component stylesheet.
 
 .chip {
   flex-shrink: 0;
@@ -13,7 +13,7 @@
   background: var(--surface);
   font-size: var(--pill-font-size);
 
-  // Avatar füllt die Pille bis auf einen schmalen Rand (2 × Rahmen + 2 × 2px)
+  // The avatar fills the pill except for a thin rim (2 × border + 2 × 2px)
   --avatar-size: calc(var(--pill-height) - 6px);
 
   .open {

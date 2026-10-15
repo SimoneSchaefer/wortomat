@@ -1,15 +1,15 @@
 /**
- * Baut den Inhalt von `apps/desktop/app/` – genau das, was electron-builder einpackt:
+ * Builds the contents of `apps/desktop/app/` – exactly what electron-builder packs:
  *
  *   app/
- *   ├─ package.json   (ohne Abhängigkeiten)
- *   ├─ main.mjs       (Electron-Hauptprozess + komplettes NestJS-Backend in einer Datei)
+ *   ├─ package.json   (without dependencies)
+ *   ├─ main.mjs       (Electron main process + the complete NestJS backend in one file)
  *   ├─ preload.cjs
- *   ├─ icon.png       (Fenster-Icon unter Windows und Linux)
- *   └─ frontend/      (Angular-Build; entfällt mit --dev, dann kommt es vom Dev-Server)
+ *   ├─ icon.png       (window icon on Windows and Linux)
+ *   └─ frontend/      (Angular build; omitted with --dev, then it comes from the dev server)
  *
- * Weil alles gebündelt ist, braucht die fertige App keinen node_modules-Ordner.
- * Voraussetzung: Backend (`tsc`) und – ohne --dev – Frontend sind bereits gebaut.
+ * Because everything is bundled, the packaged app needs no node_modules folder. Requires the
+ * backend (`tsc`) and – without --dev – the frontend to be built already.
  */
 import { existsSync } from 'node:fs';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -40,9 +40,8 @@ await rm(outDir, { recursive: true, force: true });
 await mkdir(outDir, { recursive: true });
 
 /**
- * NestJS lädt einige Pakete nur bei Bedarf (Microservices, WebSockets, Validierung …).
- * Wir nutzen sie nicht; als "external" markiert landen sie nicht im Bundle,
- * und Nest kommt mit ihrem Fehlen zurecht.
+ * NestJS loads some packages only on demand (microservices, websockets, validation …). We do not
+ * use them; marked as external they stay out of the bundle, and Nest copes with them missing.
  */
 const optionalNestPackages = [
   '@nestjs/microservices',
@@ -70,7 +69,7 @@ await build({
   outfile: path.join(outDir, 'main.mjs'),
   format: 'esm',
   external: ['electron', ...optionalNestPackages],
-  // Gebündelte CommonJS-Pakete (z. B. Express) rufen `require` auf.
+  // Bundled CommonJS packages (e.g. Express) call `require`.
   banner: {
     js: "import { createRequire as __wortomatCreateRequire } from 'node:module'; const require = __wortomatCreateRequire(import.meta.url);",
   },
@@ -98,10 +97,10 @@ await writeFile(
       productName: pkg.productName,
       version: pkg.version,
       description: 'Software zum Schreiben von Büchern und Romanen',
-      // Das .deb-Paket braucht Homepage und Maintainer (Name mit E-Mail).
+      // The .deb package needs a homepage and a maintainer (name with email).
       homepage: pkg.homepage,
       author: pkg.author,
-      // Linux: verknüpft laufende Fenster mit dem Starter-Eintrag (WM_CLASS).
+      // Linux: links running windows to the launcher entry (WM_CLASS).
       desktopName: 'wortomat.desktop',
       main: 'main.mjs',
     },

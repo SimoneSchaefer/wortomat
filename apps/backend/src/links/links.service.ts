@@ -4,10 +4,7 @@ import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { NotesService } from '../notes/notes.service.js';
 import { ProjectService } from '../project/project.service.js';
 
-/**
- * Verknüpfungen zwischen Szenen und Notizen (Charaktere, Orte …), in beide Richtungen.
- * Gelöscht wird automatisch per Fremdschlüssel, wenn Szene oder Notiz verschwinden.
- */
+/** Deleted automatically via foreign keys when the scene or note goes away. */
 @Injectable()
 export class LinksService {
   constructor(
@@ -40,7 +37,6 @@ export class LinksService {
     return this.notes.linkedToScene(sceneId);
   }
 
-  /** Notizen, Tags und Stränge aller Szenen, die überhaupt etwas zugeordnet haben. */
   relations(): SceneRelations[] {
     const db = this.projects.db;
     const result = new Map<string, SceneRelations>();
@@ -76,7 +72,6 @@ export class LinksService {
     return [...result.values()];
   }
 
-  /** Szenen, in denen die Notiz vorkommt – in Manuskript-Reihenfolge. */
   scenesForNote(noteId: string): SceneReference[] {
     this.notes.get(noteId);
     const rows = this.projects.db

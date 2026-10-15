@@ -1,10 +1,10 @@
 /**
- * Linux/GNOME unter Wayland: Das Fenster-Icon von Electron wird ignoriert, die Shell
- * sucht zur App-ID ("wortomat", aus `desktopName`) einen Starter-Eintrag und nimmt dessen Icon.
- * Installierte Pakete bringen den Eintrag mit; für `npm run dev:desktop` und
- * `npm run start:desktop` legt dieses Skript ihn unter ~/.local/share/applications an.
+ * Linux/GNOME on Wayland ignores Electron's window icon: the shell looks up a launcher entry for
+ * the app ID ("wortomat", from `desktopName`) and takes its icon. Installed packages bring the
+ * entry along; for `npm run dev:desktop` and `npm run start:desktop` this script creates it in
+ * ~/.local/share/applications.
  *
- * Eigener Dateiname, damit ein später installiertes Paket (wortomat.desktop) Vorrang hat.
+ * A file name of its own, so a package installed later (wortomat.desktop) takes precedence.
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';

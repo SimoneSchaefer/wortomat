@@ -30,7 +30,7 @@ describe('Notiz-Auswahl', () => {
   });
 
   it('zeigt Treffer am Wortanfang vor Treffern mitten im Wort und in der Kurzbeschreibung', () => {
-    // "an": Anna (Anfang) · Hanna (mitten) · Ben (nur Kurzbeschreibung „Annas Bruder“)
+    // "an": Anna (start) · Hanna (middle) · Ben (only in the summary "Annas Bruder")
     expect(filterCandidates(notes, new Set(), 'an').map((n) => n.id)).toEqual(['1', '3', '2']);
   });
 

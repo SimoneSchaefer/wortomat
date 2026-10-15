@@ -33,9 +33,9 @@ const DEFAULTS: AppSettings = {
 };
 
 /**
- * Einstellungen der App, unabhängig vom geöffneten Buch, als JSON im App-Datenordner.
- * (Nicht im localStorage des Fensters: Electron startet das Backend auf einem zufälligen Port,
- * und localStorage hängt am Origin – er wäre nach jedem Start leer.)
+ * Independent of the open book, stored as JSON in the app data folder. (Not in the window's
+ * localStorage: Electron starts the backend on a random port, and localStorage is tied to the
+ * origin – it would be empty after every start.)
  */
 @Injectable()
 export class AppSettingsService {
@@ -133,7 +133,7 @@ export class AppSettingsService {
       };
     }
     mkdirSync(path.dirname(this.file), { recursive: true });
-    // Erst in eine Temp-Datei schreiben, dann umbenennen: nie eine halb geschriebene Datei.
+    // Write to a temp file first, then rename: never a half-written file.
     const tmpFile = `${this.file}.tmp`;
     writeFileSync(tmpFile, JSON.stringify(next, null, 2));
     renameSync(tmpFile, this.file);
@@ -141,7 +141,7 @@ export class AppSettingsService {
   }
 }
 
-/** Unbekannte oder ungültige Werte aus der Datei ignorieren. */
+/** Ignores unknown or invalid values from the file. */
 function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
   const result: Partial<AppSettings> = {};
   if (isLanguage(stored?.language)) result.language = stored.language;
@@ -151,7 +151,7 @@ function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
   if (THEMES.includes(stored?.theme as Theme)) result.theme = stored.theme;
   if (FONT_SIZES.includes(stored?.fontSize as FontSize)) result.fontSize = stored.fontSize;
   if (typeof stored?.revisionMode === 'boolean') result.revisionMode = stored.revisionMode;
-  // Einzelne kaputte Werte durch die Vorgabe ersetzen, statt die ganze Ansicht zu verwerfen
+  // Replace single broken values with the default instead of discarding the whole view
   const plotView: Partial<PlotViewSettings> = stored?.plotView ?? {};
   const fallback = DEFAULTS.plotView;
   result.plotView = {

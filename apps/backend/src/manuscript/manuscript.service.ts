@@ -20,7 +20,7 @@ import { WritingLogService } from '../writing-log/writing-log.service.js';
 import { countAnnotations } from './annotations.js';
 import { localized } from '../i18n.js';
 
-/** Welche Knotenart unter welcher Elternart liegen darf (`null` = oberste Ebene). */
+/** `null` = top level. */
 const ALLOWED_PARENTS: Record<NodeKind, ReadonlyArray<NodeKind | null>> = {
   part: [null],
   chapter: [null, 'part'],
@@ -52,10 +52,6 @@ export class ManuscriptService {
   private get db() {
     return this.projects.db;
   }
-
-  // -------------------------------------------------------------------------
-  // Baum
-  // -------------------------------------------------------------------------
 
   list(): ManuscriptNode[] {
     const rows = this.db
@@ -137,10 +133,9 @@ export class ManuscriptService {
   }
 
   /**
-   * Verschiebt einen Knoten samt Unterknoten. Die Geschwister am Ziel werden dabei
-   * neu durchnummeriert (1, 2, 3 …), damit die Reihenfolge nie „ausfranst“.
+   * The siblings at the target are renumbered (1, 2, 3 …) so the order never frays.
    *
-   * @returns der komplette, aktualisierte Baum
+   * @returns the complete, updated tree
    */
   move(id: string, request: MoveNodeRequest): ManuscriptNode[] {
     const node = this.get(id);
@@ -185,11 +180,10 @@ export class ManuscriptService {
     return this.list();
   }
 
-  /** Löscht den Knoten mitsamt allen Unterknoten und Inhalten. */
   remove(id: string): void {
     this.get(id);
     transaction(this.db, () => {
-      // Die FTS-Tabelle kennt keine Fremdschlüssel, daher von Hand aufräumen.
+      // The FTS table has no foreign keys, so clean up by hand.
       this.db
         .prepare(
           `WITH RECURSIVE subtree(id) AS (
@@ -202,10 +196,6 @@ export class ManuscriptService {
       this.projects.touch();
     });
   }
-
-  // -------------------------------------------------------------------------
-  // Szeneninhalt
-  // -------------------------------------------------------------------------
 
   getContent(nodeId: string): SceneContent {
     this.requireScene(nodeId);
@@ -233,7 +223,6 @@ export class ManuscriptService {
     };
   }
 
-  /** Reiner Text aller Szenen – steht als solcher im Suchindex. */
   texts(): SceneText[] {
     return this.db
       .prepare(
@@ -252,12 +241,12 @@ export class ManuscriptService {
     const wordCount =
       Number.isInteger(request.wordCount) && request.wordCount >= 0 ? request.wordCount : 0;
     const text = typeof request.text === 'string' ? request.text : '';
-    // Selbst zählen statt dem Client zu glauben – das Dokument ist die Wahrheit.
+    // Count ourselves instead of trusting the client – the document is the truth.
     const annotations = countAnnotations(request.doc);
     const now = nowIso();
 
     transaction(this.db, () => {
-      // Der bisherige Text steht im Suchindex – daraus ergibt sich, was neu geschrieben wurde.
+      // The previous text is in the search index – the difference shows what was newly written.
       const before = this.db.prepare('SELECT body FROM scene_fts WHERE node_id = ?').get(nodeId) as
         { body: string } | undefined;
       this.writingLog.record(nodeId, before?.body ?? '', text, request.pastedWords ?? 0);
@@ -291,8 +280,8 @@ export class ManuscriptService {
   }
 
   /**
-   * Ersetzt das Dokument einer Szene, deren Text gleich bleibt – z. B. wenn nur Markierungen
-   * dazukommen. Suchindex, Wortzahl und Schreib-Log bleiben daher, wie sie sind.
+   * For changes that keep the text, e.g. when only marks are added. Search index, word count and
+   * writing log therefore stay as they are.
    */
   replaceMarkedDoc(nodeId: string, doc: EditorDoc): void {
     this.requireScene(nodeId);
@@ -313,8 +302,6 @@ export class ManuscriptService {
       );
   }
 
-  // -------------------------------------------------------------------------
-
   private get(id: string): ManuscriptNode {
     const row = this.db
       .prepare(
@@ -332,10 +319,7 @@ export class ManuscriptService {
     return toNode(row);
   }
 
-  /**
-   * Die angegebenen Szenen in der Reihenfolge, in der sie im Manuskript stehen,
-   * jeweils mit dem Pfad aus Teil- und Kapiteltiteln.
-   */
+  /** In manuscript order, each with the path of part and chapter titles. */
   sceneReferences(sceneIds: ReadonlySet<string>): SceneReference[] {
     const nodes = this.list();
     const children = new Map<string | null, ManuscriptNode[]>();

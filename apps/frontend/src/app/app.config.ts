@@ -16,14 +16,14 @@ import { StatusErrorHandler } from './core/status-messages';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // Unerwartete Fehler auch in der Statusleiste zeigen, nicht nur in der Konsole
+    // Show unexpected errors in the status bar too, not only in the console
     { provide: ErrorHandler, useClass: StatusErrorHandler },
     provideHttpClient(withFetch(), withInterceptors([languageInterceptor])),
     provideRouter(routes, withComponentInputBinding()),
-    // Einstellungen vor dem ersten Rendern laden, damit z. B. Sprache und Seitenleiste stimmen.
+    // Load the settings before the first render so language, sidebar etc. are right.
     provideAppInitializer(() => {
-      inject(I18n); // setzt <html lang> und meldet die Sprache an Electron
-      inject(Appearance); // Farbschema und Schriftgröße
+      inject(I18n); // sets <html lang> and reports the language to Electron
+      inject(Appearance);
       return inject(AppSettingsStore).load();
     }),
   ],

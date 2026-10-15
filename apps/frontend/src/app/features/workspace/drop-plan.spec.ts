@@ -16,9 +16,9 @@ function node(id: string, kind: NodeKind, parentId: string | null, sortOrder: nu
   } satisfies ManuscriptNode;
 }
 
-// Teil T
-//   Kapitel K1: Szenen A, B, C
-// Kapitel K2: Szene D
+// Part T
+//   Chapter K1: scenes A, B, C
+// Chapter K2: scene D
 const T = node('T', 'part', null, 1);
 const K1 = node('K1', 'chapter', 'T', 1);
 const A = node('A', 'scene', 'K1', 1);
@@ -35,7 +35,7 @@ describe('planDrop', () => {
       position: 'before',
       request: { parentId: 'K1', beforeId: 'A' },
     });
-    // "nach A" = vor dem nächsten Geschwister, das nicht die gezogene Szene ist
+    // "after A" = before the next sibling that is not the dragged scene
     expect(planDrop(C, A, 0.8, nodes)?.request).toEqual({ parentId: 'K1', beforeId: 'B' });
     expect(planDrop(A, C, 0.8, nodes)?.request).toEqual({ parentId: 'K1', beforeId: null });
   });
@@ -57,10 +57,10 @@ describe('planDrop', () => {
   });
 
   it('verbietet ungültige Ziele', () => {
-    expect(planDrop(A, A, 0.5, nodes)).toBeNull(); // auf sich selbst
-    expect(planDrop(K1, A, 0.5, nodes)).toBeNull(); // Kapitel neben Szene
-    expect(planDrop(T, K1, 0.2, nodes)).toBeNull(); // Teil in den eigenen Teilbaum
-    expect(planDrop(T, D, 0.5, nodes)).toBeNull(); // Teil neben Szene
+    expect(planDrop(A, A, 0.5, nodes)).toBeNull(); // onto itself
+    expect(planDrop(K1, A, 0.5, nodes)).toBeNull(); // chapter next to a scene
+    expect(planDrop(T, K1, 0.2, nodes)).toBeNull(); // part into its own subtree
+    expect(planDrop(T, D, 0.5, nodes)).toBeNull(); // part next to a scene
   });
 });
 
@@ -73,8 +73,8 @@ describe('planRootDrop', () => {
 
 describe('changesPosition', () => {
   it('erkennt Drops, die nichts verändern', () => {
-    expect(changesPosition(B, planDrop(B, A, 0.8, nodes)!, nodes)).toBe(false); // B nach A
-    expect(changesPosition(B, planDrop(B, C, 0.2, nodes)!, nodes)).toBe(false); // B vor C
+    expect(changesPosition(B, planDrop(B, A, 0.8, nodes)!, nodes)).toBe(false); // B after A
+    expect(changesPosition(B, planDrop(B, C, 0.2, nodes)!, nodes)).toBe(false); // B before C
     expect(changesPosition(B, planDrop(B, A, 0.2, nodes)!, nodes)).toBe(true);
     expect(changesPosition(B, planDrop(B, K2, 0.5, nodes)!, nodes)).toBe(true);
   });

@@ -13,12 +13,12 @@ import { ImagesService } from '../images/images.service.js';
 import { ProjectService } from '../project/project.service.js';
 import { localized } from '../i18n.js';
 
-/** Zeichenfläche einer neuen Karte (Querformat); das Frontend rechnet in diesen Einheiten. */
+/** Canvas of a new map (landscape); the frontend computes in these units. */
 const DEFAULT_WIDTH = 1600;
 const DEFAULT_HEIGHT = 1000;
 const MIN_SIZE = 100;
 const MAX_SIZE = 10_000;
-/** Großzügig – eine grobe Karte hat eher Hunderte als Tausende Striche. */
+/** Generous – a rough map has hundreds rather than thousands of strokes. */
 const MAX_STROKES = 20_000;
 const MAX_POINTS_PER_STROKE = 20_000;
 const MAX_STROKE_WIDTH = 200;
@@ -34,7 +34,6 @@ interface MapRow {
   updated_at: string;
 }
 
-/** Grob gezeichnete Landkarten mit eingezeichneten Orten. */
 @Injectable()
 export class MapsService {
   constructor(
@@ -46,7 +45,6 @@ export class MapsService {
     return this.projects.db;
   }
 
-  /** In der Reihenfolge, in der sie angelegt wurden. */
   list(): MapSummary[] {
     const rows = this.db
       .prepare('SELECT id, name, updated_at FROM maps ORDER BY created_at, id')
@@ -54,7 +52,7 @@ export class MapsService {
     return rows.map((row) => ({ id: row.id, name: row.name, updatedAt: row.updated_at }));
   }
 
-  /** Karten, auf denen der Ort eingezeichnet ist – komplett, damit sie als Vorschau passen. */
+  /** Complete, so they fit as a preview. */
   containing(noteId: string): PlaceMap[] {
     const rows = this.db
       .prepare(
@@ -153,15 +151,15 @@ export class MapsService {
   remove(id: string): void {
     const map = this.get(id);
     transaction(this.db, () => {
-      this.db.prepare('DELETE FROM maps WHERE id = ?').run(id); // Orte per CASCADE
+      this.db.prepare('DELETE FROM maps WHERE id = ?').run(id); // places via CASCADE
       if (map.backgroundImageId) this.images.deleteIfUnused(map.backgroundImageId);
       this.projects.touch();
     });
   }
 
   /**
-   * Ersetzt alle Orte der Karte. Unbekannte Notizen werden still übergangen – etwa ein Ort,
-   * der gelöscht wurde, während die Karte noch offen war.
+   * Unknown notes are skipped silently – e.g. a place that was deleted while the map was still
+   * open.
    */
   private replacePins(id: string, pins: MapPin[]): void {
     this.db.prepare('DELETE FROM map_pins WHERE map_id = ?').run(id);
@@ -209,7 +207,7 @@ function requireOpacity(value: unknown): number {
   return Math.min(1, Math.max(0.1, value));
 }
 
-/** Auf eine Nachkommastelle gerundet – genauer zeichnet niemand, und die Datei bleibt klein. */
+/** Rounded to one decimal – nobody draws more precisely, and the file stays small. */
 function coordinate(value: unknown): number {
   if (typeof value !== 'number' || !Number.isFinite(value)) throw invalid();
   return Math.round(value * 10) / 10;

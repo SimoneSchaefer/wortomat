@@ -1,79 +1,74 @@
 import type { ManuscriptNode, Strand } from '@wortomat/shared';
 
-/** Maße der Zeichnung in Pixeln. */
+/** In pixels. */
 export interface PlotGeometry {
-  /** Breite einer Spalte. */
   columnWidth: number;
-  /** Abstand der Stränge (Spuren) untereinander. */
+  /** Distance between the threads (lanes). */
   laneHeight: number;
-  /** So weit reicht der Titel unter einen Knoten; 0 = ohne Titel. */
+  /** How far the title reaches below a node; 0 = no title. */
   labelReach: number;
 }
 
 export const PLOT_GEOMETRY = {
-  /** Breit genug für zwei Zeilen Szenentitel unter jedem Knoten. */
+  /** Wide enough for two lines of scene title below each node. */
   regular: { columnWidth: 120, laneHeight: 88, labelReach: 40 },
-  /** Ohne Titel – für lange Bücher. */
+  /** Without titles – for long books. */
   compact: { columnWidth: 44, laneHeight: 56, labelReach: 0 },
 } satisfies Record<string, PlotGeometry>;
 
-/** Zusätzliche Lücke zwischen zwei Gruppen (Kapitel bzw. Abschnitte der Handlung). */
+/** Extra gap between two groups (chapters or story sections). */
 export const GROUP_GAP = 18;
-/** Durchmesser eines Szenenknotens. */
 export const NODE_SIZE = 20;
-/** Abstand der Linien, die gebündelt in eine gemeinsame Szene einlaufen. */
+/** Spacing of the lines that run bundled into a shared scene. */
 export const BUNDLE_GAP = 7;
-/** Strecke, auf der eine Linie zwischen Spur und gemeinsamer Szene umbiegt. */
+/** Distance over which a line bends between its lane and a shared scene. */
 const BEND = 40;
 
-/** Eine Szene mit ihrem Kapitel und ihren Strängen. */
 export interface PlotScene {
   scene: ManuscriptNode;
   chapter: ManuscriptNode;
-  /** Laufende Nummer des Kapitels im Buch (ab 1). */
+  /** Running number of the chapter in the book (from 1). */
   chapterNumber: number;
-  /** Position im Buch (ab 1). */
+  /** Position in the book (from 1). */
   bookNumber: number;
   strandIds: readonly string[];
 }
 
-/** Kapitel (Buchreihenfolge) bzw. Abschnitt der Handlung, z. B. „Tag 1“. */
+/** Chapter (book order) or story section, e.g. "Day 1". */
 export interface PlotGroupInfo {
   id: string;
-  /** Leer beim Abschnitt vor der ersten Marke. */
+  /** Empty for the section before the first mark. */
   label: string;
-  /** Kapitelnummer; `null` bei Abschnitten. */
+  /** `null` for sections. */
   number: number | null;
 }
 
-/** Eingabe: Szenen, die gleichzeitig passieren (in Buchreihenfolge: immer nur eine). */
+/** Input: scenes that happen at the same time (in book order: always just one). */
 export interface PlotColumnInput {
   scenes: readonly PlotScene[];
   group: PlotGroupInfo;
 }
 
-/** Eine Zeile der Übersicht: ein Strang oder die Sammelzeile für Szenen ohne Strang. */
+/** A thread, or the collecting row for scenes without a thread. */
 export interface PlotLane {
-  /** `null` = „Ohne Strang“ */
+  /** `null` = "No thread" */
   strand: Strand | null;
   y: number;
-  /** Wie viele Knoten in dieser Zeile zu sehen sind. */
   nodeCount: number;
 }
 
 export interface PlotNode extends PlotScene {
-  /** Stränge der Szene in der Reihenfolge der Zeilen. */
+  /** In row order. */
   strands: Strand[];
-  /** Index der Spalte. */
   column: number;
   x: number;
-  /** Mitte des Knotens. */
+  /** Centre of the node. */
   y: number;
-  /** Höhe: bei mehreren Strängen ein längliches Oval, sonst ein Kreis. */
+  /** With several threads an elongated oval, otherwise a circle. */
   height: number;
 }
 
-/** Platz einer Spalte – z. B. um beim Ziehen die Stelle unter dem Mauszeiger zu finden. */
+/** E.g. to find the spot under the mouse pointer while dragging. */
 export interface PlotColumn {
   left: number;
   width: number;
@@ -82,16 +77,14 @@ export interface PlotColumn {
 
 export interface PlotLine {
   strand: Strand;
-  /** SVG-Pfad (`d`). */
+  /** SVG path (`d`). */
   path: string;
 }
 
-/** Kopf über den Spalten einer Gruppe. */
 export interface PlotGroup extends PlotGroupInfo {
-  /** Linke Kante und Breite des Bereichs. */
+  /** Left edge and width of the area. */
   x: number;
   width: number;
-  /** Index der ersten Spalte. */
   firstColumn: number;
 }
 
@@ -106,10 +99,10 @@ export interface PlotLayout {
 }
 
 /**
- * Ordnet die Spalten von links nach rechts und die Stränge als Zeilen an. Eine Szene in mehreren
- * Strängen liegt mittig zwischen deren Zeilen; die Linien biegen dorthin ab, laufen gebündelt
- * ein und kehren danach in ihre Zeile zurück. Gleichzeitige Szenen stehen übereinander; kämen
- * sie sich (samt Titel) in die Quere, bekommt die Spalte nebeneinanderliegende Plätze.
+ * Arranges the columns from left to right and the threads as rows. A scene in several threads sits
+ * centred between their rows; the lines bend there, run in bundled and return to their row
+ * afterwards. Simultaneous scenes are stacked; if they (with their titles) would get in each
+ * other's way, the column gets side-by-side slots.
  */
 export function layoutPlot(
   input: readonly PlotColumnInput[],
@@ -138,7 +131,7 @@ export function layoutPlot(
   const nodes: PlotNode[] = [];
   const columns: PlotColumn[] = [];
   const groups: PlotGroup[] = [];
-  /** Wo jede Linie in ihre Knoten einläuft, je Strang von links nach rechts. */
+  /** Where each line enters its nodes, per thread from left to right. */
   const anchors = new Map<string, Array<{ x: number; y: number }>>();
   let left = 0;
   input.forEach((column, columnIndex) => {
@@ -149,7 +142,7 @@ export function layoutPlot(
       groups.push(group);
     }
 
-    // Erst die Höhe jedes Knotens, dann Plätze nebeneinander verteilen, wo nötig
+    // First each node's height, then spread them side by side where needed
     const placed = column.scenes.map((entry) => {
       const nodeStrands = strandsOf(entry);
       const rows = nodeStrands.length
@@ -163,7 +156,7 @@ export function layoutPlot(
     const slots: Array<Array<{ top: number; bottom: number }>> = [];
     for (const node of [...placed].sort((a, b) => a.y - b.y)) {
       const top = node.y - node.height / 2;
-      // Knoten brauchen auch ohne Titel etwas Luft zueinander
+      // Nodes need some air between them even without titles
       const bottom = node.y + node.height / 2 + Math.max(labelReach, BUNDLE_GAP);
       let slot = slots.findIndex((taken) =>
         taken.every((other) => bottom <= other.top || top >= other.bottom),
@@ -214,8 +207,8 @@ export function layoutPlot(
 }
 
 /**
- * Pfad einer Linie durch ihre Knoten. Zwischen zwei Knoten verläuft sie auf ihrer Zeile `laneY`
- * und biegt nur kurz vor bzw. nach einer gemeinsamen Szene ab.
+ * Between two nodes it runs on its row `laneY` and only bends shortly before or after a shared
+ * scene.
  */
 export function linePath(points: ReadonlyArray<{ x: number; y: number }>, laneY: number): string {
   const [first, ...rest] = points;
@@ -239,7 +232,7 @@ export function linePath(points: ReadonlyArray<{ x: number; y: number }>, laneY:
   return parts.join(' ');
 }
 
-/** Weiche S-Kurve von (x1, y1) nach (x2, y2) mit waagrechten Enden. */
+/** Soft S-curve from (x1, y1) to (x2, y2) with horizontal ends. */
 function curve(x1: number, y1: number, x2: number, y2: number): string {
   const middle = (x1 + x2) / 2;
   return `C${middle} ${y1} ${middle} ${y2} ${x2} ${y2}`;

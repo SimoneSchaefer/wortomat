@@ -41,7 +41,6 @@ export class ManuscriptController {
     this.manuscript.remove(id);
   }
 
-  /** Reiner Text aller Szenen, z. B. für die Textstatistik. */
   @Get('scene-texts')
   texts(): SceneText[] {
     return this.manuscript.texts();

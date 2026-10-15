@@ -1,6 +1,6 @@
 @use '../../core/picker';
 
-// Gleiche Zeile wie „Kommt vor in“: Beschriftung links, daneben der Chip.
+// Same row as "Appears in": label on the left, the chip next to it.
 :host {
   display: flex;
   align-items: center;

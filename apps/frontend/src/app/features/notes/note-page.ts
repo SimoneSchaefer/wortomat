@@ -27,10 +27,10 @@ import { NotesStore } from './notes-store';
 import { StatusMessages } from '../../core/status-messages';
 
 const META_SAVE_DELAY_MS = 600;
-/** Wie im Backend (`NotesService.update`). */
+/** As in the backend (`NotesService.update`). */
 const MAX_SUMMARY_LENGTH = 2000;
 
-/** Ein Charakter, Ort oder eine Recherche: Route `write/<art>/:id`. */
+/** A character, place or research note: route `write/<kind>/:id`. */
 @Component({
   selector: 'wm-note-page',
   imports: [DocumentEditor, ImageGallery, NoteAppearances, NoteGroupPicker, NoteLocation],
@@ -39,7 +39,7 @@ const MAX_SUMMARY_LENGTH = 2000;
 })
 export class NotePage {
   readonly id = input.required<string>();
-  /** Aus den Routendaten. */
+  /** From the route data. */
   readonly kind = input.required<NoteKind>();
 
   protected readonly t = inject(I18n).t;
@@ -55,8 +55,8 @@ export class NotePage {
   private readonly error = inject(StatusMessages).channel();
   protected readonly maxSummaryLength = MAX_SUMMARY_LENGTH;
 
-  // Eingabefelder nur beim Wechsel der Notiz aus dem Store füllen – nicht nach jedem
-  // Speichern, sonst könnte eine verspätete Antwort gerade Getipptes überschreiben.
+  // Only fill the inputs from the store when the note changes – not after every save, or a late
+  // response could overwrite what was just typed.
   protected readonly titleDraft = linkedSignal({
     source: this.id,
     computation: (id) => untracked(() => this.store.find(id)?.title ?? ''),
@@ -87,9 +87,9 @@ export class NotePage {
     effect(() => {
       const id = this.id();
       untracked(() => {
-        void this.flushMeta(); // Änderungen der vorherigen Notiz
+        void this.flushMeta(); // changes of the previous note
         this.error.set(null);
-        // Frisch angelegt? Dann gleich den Titel zum Überschreiben markieren.
+        // Freshly created? Then select the title right away for overwriting.
         if (this.store.find(id)?.title === this.texts().newTitle) {
           afterNextRender(
             () => {
@@ -103,7 +103,7 @@ export class NotePage {
     });
   }
 
-  /** Der Titel bricht nur um – eingefügte Zeilenumbrüche werden zu Leerzeichen. */
+  /** The title only wraps – pasted line breaks become spaces. */
   protected onTitleInput(field: HTMLTextAreaElement): void {
     if (/[\r\n]/.test(field.value)) field.value = field.value.replace(/\s*[\r\n]+\s*/g, ' ');
     const value = field.value;
@@ -113,7 +113,6 @@ export class NotePage {
     }
   }
 
-  /** Leeren Titel nicht stehen lassen. */
   protected onTitleBlur(): void {
     if (!this.titleDraft().trim()) {
       this.titleDraft.set(this.note()?.title ?? '');

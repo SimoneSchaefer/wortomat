@@ -9,11 +9,9 @@ interface JsonNode {
 }
 
 /**
- * Zählt die Todo/Idee/Fixme-Markierungen in einem Tiptap/ProseMirror-Dokument.
- *
- * Gezählt werden zusammenhängende Abschnitte: Tiptap teilt markierten Text intern in mehrere
- * Textknoten, sobald z. B. ein Wort fett ist – das soll trotzdem eine Markierung bleiben.
- * Ein Abschnitt endet am Absatzende oder dort, wo die Markierung aufhört.
+ * Counts contiguous stretches: Tiptap splits marked text into several text nodes as soon as, say,
+ * one word is bold – that should still be one mark. A stretch ends at the end of the paragraph or
+ * where the mark stops.
  */
 export function countAnnotations(doc: unknown): AnnotationCounts {
   const counts: AnnotationCounts = { todo: 0, idea: 0, fixme: 0 };
@@ -39,7 +37,6 @@ export function countAnnotations(doc: unknown): AnnotationCounts {
   return counts;
 }
 
-/** Text und Zeilenumbrüche sind inline; alles mit eigenem Inhalt ist ein Block. */
 function isInline(node: JsonNode): boolean {
   return node?.type === 'text' || node?.type === 'hardBreak';
 }

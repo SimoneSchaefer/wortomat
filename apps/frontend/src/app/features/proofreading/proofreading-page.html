@@ -30,7 +30,7 @@
 
   <section class="card">
     <h2>{{ t().proofreading.importTitle }}</h2>
-    <!-- Postkasten: Notizdateien, die im Download-Ordner liegen (Mail-Anhang, GSConnect …) -->
+    <!-- Inbox: notes files in the downloads folder (mail attachment, GSConnect …) -->
     @if (inbox.inbox(); as box) {
       @if (box.newNotes && box.files[0]; as newest) {
         <div class="inbox" role="status">

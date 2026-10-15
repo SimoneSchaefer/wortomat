@@ -1,4 +1,4 @@
-# Manuell starten: Actions → „Release Windows“ → „Run workflow“.
+# Start manually: Actions → "Release Windows" → "Run workflow".
 name: Release Windows
 
 on:

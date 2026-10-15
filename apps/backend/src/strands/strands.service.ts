@@ -8,7 +8,6 @@ import { localized } from '../i18n.js';
 
 const MAX_NAME_LENGTH = 60;
 
-/** Reihenfolge, in der neue Stränge ihre Farbe bekommen. */
 export const STRAND_COLORS: readonly StrandColor[] = [
   'violet',
   'teal',
@@ -28,8 +27,8 @@ interface StrandRow {
 }
 
 /**
- * Handlungsstränge. Anders als Tags leben sie unabhängig von Szenen: ein Strang bleibt,
- * bis er ausdrücklich gelöscht wird, auch wenn gerade keine Szene dazugehört.
+ * Unlike tags, threads live independently of scenes: a thread stays until it is deleted explicitly,
+ * even when no scene belongs to it.
  */
 @Injectable()
 export class StrandsService {
@@ -42,7 +41,6 @@ export class StrandsService {
     return this.projects.db;
   }
 
-  /** Alle Stränge in ihrer Reihenfolge. */
   list(): Strand[] {
     const rows = this.db
       .prepare(
@@ -83,8 +81,8 @@ export class StrandsService {
   }
 
   /**
-   * Verschiebt einen Strang vor einen anderen (oder ans Ende) und nummeriert alle neu.
-   * @returns alle Stränge in der neuen Reihenfolge
+   * Renumbers all threads.
+   * @returns all threads in the new order
    */
   move(id: string, beforeId: unknown): Strand[] {
     this.get(id);
@@ -113,7 +111,7 @@ export class StrandsService {
     return this.list();
   }
 
-  /** Löscht den Strang; die Szenen bleiben, verlieren nur die Zuordnung. */
+  /** The scenes stay and only lose the assignment. */
   remove(id: string): void {
     this.get(id);
     this.db.prepare('DELETE FROM strands WHERE id = ?').run(id);
@@ -172,7 +170,7 @@ export class StrandsService {
     return toStrand(row);
   }
 
-  /** Die Farbe, die bisher am seltensten vergeben ist – bei Gleichstand die vordere. */
+  /** The least used colour so far – on a tie the earlier one. */
   private leastUsedColor(): StrandColor {
     const used = new Map<string, number>();
     for (const { color } of this.db.prepare('SELECT color FROM strands').all() as Array<{

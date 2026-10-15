@@ -27,9 +27,7 @@
   }
 }
 
-// ---------------------------------------------------------------------------
-// Je Kapitel: zwei Spalten mit eigenem Maßstab, Zeile beim Darüberfahren hervorgehoben
-// ---------------------------------------------------------------------------
+// Per chapter: two columns with their own scale, row highlighted on hover
 
 .table {
   display: grid;
@@ -63,7 +61,7 @@
   white-space: nowrap;
 }
 
-// Balken mit Zahl dahinter; der längste lässt Platz für seine Zahl
+// Bar with the number after it; the longest leaves room for its number
 .cell {
   display: flex;
   align-items: center;
@@ -86,9 +84,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-// ---------------------------------------------------------------------------
-// Füll- und Lieblingswörter: Pillen wie die Charaktere in den Szenendetails
-// ---------------------------------------------------------------------------
+// Filler and favourite words: pills like the characters in the scene details
 
 h3 {
   margin: 1.5rem 0 0.2rem;

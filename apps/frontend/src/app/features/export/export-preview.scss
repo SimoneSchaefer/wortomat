@@ -1,5 +1,5 @@
-// Ohne View-Kapselung (wegen des Kapitel-HTML): alles unter .wm-export-preview.
-// Seiten sind immer weißes Papier mit schwarzer Schrift – auch im dunklen Farbschema.
+// Without view encapsulation (because of the chapter HTML): everything under .wm-export-preview.
+// Pages are always white paper with black text – in the dark colour scheme too.
 .wm-export-preview {
   .pages {
     display: grid;
@@ -27,7 +27,6 @@
     text-align: justify;
   }
 
-  // Kapitelanfang
   .chapter-head {
     text-align: center;
   }
@@ -40,7 +39,7 @@
   .content {
     p {
       margin: 0;
-      // wie im PDF (\clubpenalty/\widowpenalty): keine einzelne Zeile am Seitenanfang oder -ende
+      // as in the PDF (\clubpenalty/\widowpenalty): no single line at the top or bottom of a page
       orphans: 2;
       widows: 2;
     }
@@ -55,7 +54,7 @@
       break-inside: avoid;
     }
 
-    // Einzug ab dem zweiten Absatz – nicht nach Überschrift oder Szenentrenner
+    // Indent from the second paragraph on – not after a heading or scene break
     p + p {
       text-indent: 1.2em;
     }
@@ -81,7 +80,7 @@
       font-weight: 400;
     }
 
-    // erste Szene direkt unter dem Kapiteltitel: kein Abstand davor
+    // first scene right below the chapter title: no space before it
     > h3.scene-title:first-child {
       margin-top: 0;
     }
@@ -125,7 +124,6 @@
     text-align: center;
   }
 
-  // Titelseite „Roman“
   .title {
     text-align: center;
   }
@@ -149,7 +147,7 @@
     text-align: center;
   }
 
-  // Normseite: Flattersatz ohne Trennung, Einzug 3 Anschläge, Kopfzeile „Autor: Titel“
+  // Standard page: ragged right without hyphenation, 3-character indent, header "Author: Title"
   &[data-style='normseite'] {
     .flow {
       hyphens: manual;

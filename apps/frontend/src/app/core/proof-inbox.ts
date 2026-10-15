@@ -3,8 +3,8 @@ import type { ProofInbox } from '@wortomat/shared';
 import { WortomatApi } from './wortomat-api';
 
 /**
- * Notizdateien vom Handy im Download-Ordner. Der Arbeitsbereich fragt beim Öffnen und jedes Mal,
- * wenn das Fenster wieder in den Vordergrund kommt (z. B. nach dem Senden vom Handy).
+ * Notes files from the phone in the downloads folder. The workspace asks on opening and every time
+ * the window comes back to the front (e.g. after sending from the phone).
  */
 @Injectable({ providedIn: 'root' })
 export class ProofInboxStore {
@@ -12,7 +12,7 @@ export class ProofInboxStore {
 
   readonly inbox = signal<ProofInbox | null>(null);
 
-  /** Fehler (kein Buch offen, Ordner unlesbar …) sind hier kein Grund zur Meldung. */
+  /** Errors (no book open, folder unreadable …) are no reason for a message here. */
   async refresh(): Promise<ProofInbox | null> {
     try {
       this.inbox.set(await this.api.proofInbox());

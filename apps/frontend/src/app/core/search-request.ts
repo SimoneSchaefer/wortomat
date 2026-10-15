@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
 /**
- * Bittet die Suche in der oberen Leiste, nach einem Begriff zu suchen – z. B. ein Klick auf
- * ein Füllwort in der Statistik. Jede Anfrage ist ein neues Objekt, damit auch derselbe
- * Begriff zweimal hintereinander wieder auslöst.
+ * Asks the search in the top bar to search for a term – e.g. a click on a filler word in the
+ * statistics. Every request is a new object so the same term triggers again when requested twice in
+ * a row.
  */
 @Injectable({ providedIn: 'root' })
 export class SearchRequest {
@@ -14,8 +14,8 @@ export class SearchRequest {
   }
 
   /**
-   * Holt die offene Anfrage ab; danach ist sie erledigt. Sonst führte die Suchleiste sie
-   * jedes Mal erneut aus, wenn sie neu entsteht (z. B. zurück aus den Einstellungen).
+   * Picks up the open request; it is done after that. Otherwise the search bar would run it again
+   * every time it is created (e.g. back from the settings).
    */
   take(): { query: string } | null {
     const request = this.request();

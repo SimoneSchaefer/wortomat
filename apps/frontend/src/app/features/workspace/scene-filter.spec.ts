@@ -77,7 +77,7 @@ describe('matchesScene', () => {
     expect(matches(filter({ noteIds: ['ben'] }))).toBe(false);
     expect(matches(filter({ noteIds: ['ben', 'hafen'] }))).toBe(false);
     expect(matches(filter({ noteIds: ['anna', 'hafen'] }))).toBe(true);
-    // Gelöschte Notizen schränken nichts ein
+    // Deleted notes restrict nothing
     expect(matches(filter({ noteIds: ['gelöscht'] }))).toBe(true);
   });
 

@@ -10,7 +10,6 @@ header input.doc-title {
   margin-bottom: 1rem;
 }
 
-// Werkzeugleiste: Gruppen nebeneinander, auf schmalen Fenstern umbrechend
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -70,7 +69,6 @@ svg {
   padding: 0 0.4rem;
 }
 
-// Farben: runde Tupfer; der gewählte bekommt einen Ring
 .swatch {
   width: 1.5rem;
   height: 1.5rem;
@@ -126,8 +124,8 @@ svg {
   accent-color: var(--accent-strong);
 }
 
-// Zeichenfläche links, Liste der Orte rechts daneben. Die Fläche ist ganz sichtbar, auch bei
-// Hochformat: höchstens so hoch wie das Fenster unter der Werkzeugleiste.
+// Canvas on the left, list of places on the right. The canvas is fully visible, in portrait too: at
+// most as tall as the window below the toolbar.
 .body {
   --fit-width: calc((100vh - 15rem) * var(--aspect));
   display: flex;
@@ -147,7 +145,7 @@ svg {
   }
 }
 
-// Papier bleibt auch im dunklen Modus hell: die Farben sind auf hellen Grund abgestimmt
+// Paper stays light in dark mode too: the colours are tuned for a light background
 .canvas {
   display: block;
   width: 100%;
@@ -157,7 +155,7 @@ svg {
   border-radius: 0.5rem;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.08);
   cursor: crosshair;
-  touch-action: none; // Zeichnen mit Stift/Finger statt Scrollen
+  touch-action: none; // draw with pen/finger instead of scrolling
   user-select: none;
 
   &.erasing {
@@ -193,7 +191,6 @@ svg {
     fill-opacity: 0.3;
   }
 
-  // Lupe: der aufgezogene Bereich
   .zoom-area {
     fill: color-mix(in srgb, var(--accent) 15%, transparent);
     stroke: var(--accent-strong);
@@ -212,7 +209,7 @@ svg {
   }
 }
 
-// Orte: Stecknadel mit Namen darunter; Maße in Bildschirmpixeln (scale = unit)
+// Places: a pin with the name below; sizes in screen pixels (scale = unit)
 .pin {
   cursor: grab;
 
@@ -236,7 +233,7 @@ svg {
     font-weight: 600;
     text-anchor: middle;
     fill: #1f1b17;
-    // heller Rand um die Schrift, damit sie auf Strichen lesbar bleibt
+    // light halo around the text so it stays readable on strokes
     stroke: #fbf7ee;
     stroke-width: 3.5px;
     stroke-linejoin: round;
@@ -269,7 +266,6 @@ svg {
   pointer-events: none;
 }
 
-// Feld über dem ausgewählten Ort: Name, „Öffnen“, „Von der Karte nehmen“
 .pin-popover {
   position: absolute;
   z-index: 1;
@@ -349,7 +345,7 @@ svg {
   }
 }
 
-// Schmales Fenster: die Orte unter der Karte
+// Narrow window: the places go below the map
 @media (max-width: 62rem) {
   .body {
     flex-direction: column;

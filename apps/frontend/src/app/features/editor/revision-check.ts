@@ -1,8 +1,8 @@
 import { endsSentence, fillerAt, isContentWord, wordCore } from '../../core/text-analysis';
 
-/** So nah (in Wörtern) gilt dasselbe Wort als Nahwiederholung. */
+/** Within this many words the same word counts as a close repetition. */
 export const REPETITION_DISTANCE = 40;
-/** Ab so vielen Wörtern gilt ein Satz als lang. */
+/** From this many words a sentence counts as long. */
 export const LONG_SENTENCE_WORDS = 35;
 
 export type FindingKind = 'repetition' | 'filler' | 'long' | 'double';
@@ -13,9 +13,8 @@ export type Finding =
       from: number;
       to: number;
       word: string;
-      /** Abstand zur anderen Stelle in Wörtern. */
+      /** In words. */
       distance: number;
-      /** Wo die andere Stelle liegt. */
       other: 'before' | 'after';
     }
   | { kind: 'filler'; from: number; to: number; word: string }
@@ -23,27 +22,27 @@ export type Finding =
   | { kind: 'double'; from: number; to: number; word: string };
 
 export interface RevisionResult {
-  /** Nach Position sortiert. */
+  /** Sorted by position. */
   findings: Finding[];
-  /** Wiederholungen als Paare gezählt, sonst je Stelle. */
+  /** Repetitions counted as pairs, everything else per finding. */
   counts: Record<FindingKind, number>;
 }
 
-/** Ein Absatz (bzw. eine Überschrift): Text und Dokumentposition seines ersten Zeichens. */
+/** A paragraph (or heading): text and document position of its first character. */
 export interface TextBlock {
   text: string;
   start: number;
 }
 
 interface Word {
-  /** Ohne Satzzeichen, klein. */
+  /** Without punctuation, lowercase. */
   lower: string;
   form: string;
   from: number;
   to: number;
-  /** Ganzer Text zwischen Leerräumen, mit Satzzeichen. */
+  /** The whole text between whitespace, with punctuation. */
   token: string;
-  /** Index des Tokens im Absatz – für das nächste Token bei der Satzerkennung. */
+  /** Index of the token in the paragraph – for the next token in sentence detection. */
   tokenIndex: number;
   tokenStart: number;
   tokenEnd: number;
@@ -52,9 +51,8 @@ interface Word {
 const LEADING_PUNCTUATION = /^[^\p{L}\p{N}]+/u;
 
 /**
- * Sucht Nahwiederholungen, Füllwörter, lange Sätze und doppelte Wörter. Die Regeln für
- * Wörter, Füllwörter und Satzenden teilt sie mit der Textstatistik.
- * `names` (klein): Namen von Figuren und Orten wiederholen sich zwangsläufig – keine Hinweise.
+ * Shares the rules for words, fillers and sentence ends with the text statistics. `names`
+ * (lowercase): names of characters and places repeat by necessity – no hints for them.
  */
 export function checkRevision(
   blocks: readonly TextBlock[],
@@ -62,9 +60,9 @@ export function checkRevision(
 ): RevisionResult {
   const findings: Finding[] = [];
   const counts: Record<FindingKind, number> = { repetition: 0, filler: 0, long: 0, double: 0 };
-  /** Letztes Vorkommen je Wort, über Absätze hinweg. */
+  /** Last occurrence per word, across paragraphs. */
   const lastSeen = new Map<string, { ordinal: number; from: number; to: number }>();
-  /** Bereits als Wiederholung markierte Stellen (Anfangsposition). */
+  /** Positions already marked as a repetition (start position). */
   const marked = new Set<number>();
   let ordinal = 0;
 
@@ -95,7 +93,7 @@ export function checkRevision(
     let sentenceWords = 0;
     words.forEach((word, index) => {
       const previous = words[index - 1];
-      // „der der“: gleiches Wort, nur Leerraum dazwischen, keine Satzzeichen daran
+      // "der der": same word, only whitespace between, no punctuation attached
       const isDouble =
         !!previous &&
         previous.lower === word.lower &&
