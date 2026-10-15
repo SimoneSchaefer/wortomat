@@ -1,0 +1,80 @@
+import { TestBed } from '@angular/core/testing';
+import { ProjectStore } from '../../core/project-store';
+import { StatusMessages } from '../../core/status-messages';
+import { FakeApi, testNode } from '../../testing/fake-api';
+import { button, key, render } from '../../testing/render';
+import { SceneStatusPicker } from './scene-status';
+
+async function setup(status: 'idea' | 'draft' = 'idea') {
+  const api = new FakeApi();
+  api.nodes = [testNode('k', 'chapter', null), testNode('s', 'scene', 'k', { status })];
+  const view = await render(SceneStatusPicker, { api, inputs: { node: api.nodes[1] } });
+  const store = TestBed.inject(ProjectStore);
+  // As on the scene page: the input follows the store.
+  const sync = async () => {
+    await view.settle();
+    view.fixture.componentRef.setInput('node', store.findNode('s'));
+    await view.settle();
+  };
+  const checked = () =>
+    view.element.querySelector('[role=radio][aria-checked=true]')?.textContent?.trim();
+  return { ...view, sync, checked };
+}
+
+describe('SceneStatusPicker', () => {
+  it('zeigt den aktuellen Status als gewählten Knopf mit einem einzigen Tab-Stopp', async () => {
+    const { element, checked } = await setup('draft');
+    expect(checked()).toBe('Entwurf');
+    const tabbable = element.querySelectorAll('[role=radio][tabindex="0"]');
+    expect([...tabbable].map((b) => b.textContent?.trim())).toEqual(['Entwurf']);
+  });
+
+  it('speichert einen angeklickten Status', async () => {
+    const { element, api, sync, checked } = await setup();
+    button(element, 'Überarbeitet').click();
+    await sync();
+    expect(api.updateNode).toHaveBeenCalledWith('s', { status: 'revised' });
+    expect(checked()).toBe('Überarbeitet');
+  });
+
+  it('speichert nichts, wenn der Status schon gilt', async () => {
+    const { element, api } = await setup('draft');
+    button(element, 'Entwurf').click();
+    expect(api.updateNode).not.toHaveBeenCalled();
+  });
+
+  it('wechselt mit Pfeiltasten, Pos1 und Ende wie eine Radiogruppe', async () => {
+    const { element, api, sync, checked } = await setup();
+    const group = element.querySelector('[role=radiogroup]')!;
+
+    key(group, 'ArrowRight');
+    await sync();
+    expect(checked()).toBe('Struktur');
+    expect(document.activeElement?.textContent?.trim()).toBe('Struktur');
+
+    key(group, 'End');
+    await sync();
+    expect(checked()).toBe('Fertig');
+
+    key(group, 'Home');
+    await sync();
+    expect(checked()).toBe('Idee');
+    expect(api.updateNode.mock.calls.map(([, request]) => request.status)).toEqual([
+      'outline',
+      'final',
+      'idea',
+    ]);
+  });
+
+  it('meldet einen Fehler beim Speichern in der Statusleiste', async () => {
+    const { element, api, settle } = await setup();
+    api.updateNode.mockRejectedValueOnce(new Error('kaputt'));
+    button(element, 'Fertig').click();
+    await settle();
+    expect(
+      TestBed.inject(StatusMessages)
+        .messages()
+        .map((m) => m.text),
+    ).toEqual(['kaputt']);
+  });
+});

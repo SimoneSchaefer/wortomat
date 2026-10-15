@@ -1,0 +1,209 @@
+import { TestBed } from '@angular/core/testing';
+import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
+import { de } from '../../core/i18n/de';
+import { PendingSaves } from '../../core/pending-saves';
+import { StatusMessages } from '../../core/status-messages';
+import { button, findButton, key, render, text, until } from '../../testing/render';
+import { DocumentEditor, type DocumentSource } from './document-editor';
+
+const mark = (kind: string, attrs: { note?: string; suggestion?: string } = {}) => [
+  {
+    type: 'annotation',
+    attrs: { kind, note: attrs.note ?? null, suggestion: attrs.suggestion ?? null },
+  },
+];
+
+// "Am Abend kam der alte Mann." – a plain todo, a fixme with a suggestion, an idea with a note
+const SCENE: EditorDoc = {
+  type: 'doc',
+  content: [
+    {
+      type: 'paragraph',
+      content: [
+        { type: 'text', text: 'Am Abend', marks: mark('todo') },
+        { type: 'text', text: ' ' },
+        { type: 'text', text: 'kam', marks: mark('fixme', { suggestion: 'schlich' }) },
+        { type: 'text', text: ' ' },
+        { type: 'text', text: 'der alte Mann', marks: mark('idea', { note: 'Name klären' }) },
+        { type: 'text', text: '.' },
+      ],
+    },
+  ],
+} as EditorDoc;
+
+function fakeSource(docs: Record<string, EditorDoc | null> = { s1: SCENE }) {
+  return {
+    load: vi.fn(async (id: string) => ({ doc: structuredClone(docs[id] ?? null), wordCount: 6 })),
+    save: vi.fn(async (_id: string, _request: SaveDocumentRequest) => undefined),
+  } satisfies DocumentSource;
+}
+
+async function setup(source = fakeSource(), inputs: Record<string, unknown> = {}) {
+  const view = await render(DocumentEditor, {
+    inputs: { documentId: 's1', source, ...inputs },
+  });
+  const prose = () => view.element.querySelector<HTMLElement>('.ProseMirror');
+  const status = () => text(view.element.querySelector('.statusbar .status'));
+  // The editor mounts itself into the DOM; wait for Angular to show the loaded state too.
+  await until(view.settle, () => !!prose() && status() === de.editor.saveStatus.saved);
+  const items = () => [...view.element.querySelectorAll<HTMLElement>('.mark-item')];
+  /** [kind, quote, note or suggestion] per list entry. */
+  const listed = () =>
+    items().map((item) =>
+      ['.mark-item-kind', '.mark-item-quote', '.mark-item-suggestion, .mark-item-note'].map(
+        (selector) => text(item.querySelector(selector)),
+      ),
+    );
+  const bar = () => view.element.querySelector<HTMLElement>('.mark-note');
+  const jumpTo = async (quote: string) => {
+    items()
+      .find((item) => text(item).includes(de.editor.quote(quote)))!
+      .click();
+    await view.settle();
+  };
+  /** What would reach the backend if the app closed now. */
+  const saved = async () => {
+    await TestBed.inject(PendingSaves).flushAll();
+    return source.save.mock.calls.at(-1)?.[1];
+  };
+  return { ...view, source, prose, items, listed, bar, jumpTo, saved };
+}
+
+describe('DocumentEditor', () => {
+  it('lädt das Dokument und zeigt Wortzahl und Speicherstand', async () => {
+    const { source, prose, element } = await setup();
+    expect(source.load).toHaveBeenCalledWith('s1');
+    expect(text(prose())).toBe('Am Abend kam der alte Mann.');
+    expect(text(element.querySelector('.statusbar'))).toContain(de.words(6));
+    expect(text(element.querySelector('.statusbar .status'))).toBe(de.editor.saveStatus.saved);
+  });
+
+  it('listet alle Markierungen in Textreihenfolge, mit Notiz bzw. Vorschlag', async () => {
+    const { element, items, listed, settle } = await setup();
+    const toggle = button(element, new RegExp(de.editor.markCount(3)));
+    expect(listed()).toEqual([
+      ['Todo', '„Am Abend“', ''],
+      ['Fixme', '„kam“', de.editor.proofReplace('kam', 'schlich')],
+      ['Idee', '„der alte Mann“', 'Name klären'],
+    ]);
+
+    toggle.click();
+    await settle();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(items()).toEqual([]);
+  });
+
+  it('springt aus der Liste an die Stelle und zeigt dort die Notiz', async () => {
+    const { bar, jumpTo, items } = await setup();
+    // After loading, the cursor sits at the start of the text – inside the todo.
+    expect(text(bar()?.querySelector('.mark-label'))).toBe('Todo');
+
+    await jumpTo('der alte Mann');
+    expect(text(bar()?.querySelector('.mark-label'))).toBe('Idee');
+    expect(text(bar()?.querySelector('.mark-text'))).toBe('Name klären');
+    expect(items()[2]!.classList).toContain('current');
+  });
+
+  it('trägt eine Notiz zu einer Markierung ohne Notiz ein', async () => {
+    const { bar, jumpTo, listed, settle, saved } = await setup();
+    await jumpTo('Am Abend');
+    expect(text(bar()?.querySelector('.mark-empty'))).toBe(de.editor.noNote);
+
+    button(bar()!, de.editor.addNote).click();
+    await settle();
+    const input = bar()!.querySelector<HTMLInputElement>('input')!;
+    expect(document.activeElement).toBe(input);
+
+    input.value = 'Wetter prüfen';
+    key(input, 'Enter');
+    await settle();
+    expect(listed()[0]).toEqual(['Todo', '„Am Abend“', 'Wetter prüfen']);
+    expect(findButton(bar()!, de.editor.editNote)).not.toBeNull();
+    expect(JSON.stringify((await saved())?.doc)).toContain('"note":"Wetter prüfen"');
+  });
+
+  it('verwirft mit Escape eine angefangene Notiz', async () => {
+    const { bar, jumpTo, settle, source } = await setup();
+    await jumpTo('der alte Mann');
+    button(bar()!, de.editor.editNote).click();
+    await settle();
+    const input = bar()!.querySelector<HTMLInputElement>('input')!;
+    expect(input.value).toBe('Name klären');
+
+    input.value = 'Anders';
+    key(input, 'Escape');
+    await settle();
+    expect(text(bar()?.querySelector('.mark-text'))).toBe('Name klären');
+    await TestBed.inject(PendingSaves).flushAll();
+    expect(source.save).not.toHaveBeenCalled();
+  });
+
+  it('entfernt eine Notiz, wenn man das Feld leert – die Markierung bleibt', async () => {
+    const { bar, jumpTo, listed, settle } = await setup();
+    await jumpTo('der alte Mann');
+    button(bar()!, de.editor.editNote).click();
+    await settle();
+    const input = bar()!.querySelector<HTMLInputElement>('input')!;
+    input.value = '  ';
+    key(input, 'Enter');
+    await settle();
+    expect(listed()[2]).toEqual(['Idee', '„der alte Mann“', '']);
+  });
+
+  it('übernimmt einen Vorschlag: Text ersetzt, Markierung weg', async () => {
+    const { bar, jumpTo, prose, items, settle, saved } = await setup();
+    await jumpTo('kam');
+    button(bar()!, de.editor.proofAccept).click();
+    await settle();
+    expect(text(prose())).toBe('Am Abend schlich der alte Mann.');
+    expect(items()).toHaveLength(2);
+    expect((await saved())?.text).toBe('Am Abend schlich der alte Mann.');
+  });
+
+  it('hakt eine Markierung mit „Erledigt“ ab, der Text bleibt', async () => {
+    const { bar, jumpTo, prose, items, settle } = await setup();
+    await jumpTo('Am Abend');
+    button(bar()!, de.editor.proofDone).click();
+    await settle();
+    expect(text(prose())).toBe('Am Abend kam der alte Mann.');
+    expect(items().map((item) => text(item.querySelector('.mark-item-quote')))).toEqual([
+      '„kam“',
+      '„der alte Mann“',
+    ]);
+  });
+
+  it('speichert Ungespeichertes, bevor ein anderes Dokument geladen wird', async () => {
+    const source = fakeSource({ s1: SCENE, s2: null });
+    const { fixture, bar, jumpTo, settle, prose } = await setup(source);
+    await jumpTo('Am Abend');
+    button(bar()!, de.editor.proofDone).click();
+    await settle();
+
+    fixture.componentRef.setInput('documentId', 's2');
+    await until(settle, () => source.load.mock.calls.length === 2);
+    await until(settle, () => text(prose()) === '');
+    expect(source.save.mock.calls.map(([id]) => id)).toEqual(['s1']);
+  });
+
+  it('beginnt ein noch nie gespeichertes Dokument mit der Vorlage', async () => {
+    const template = {
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Aussehen' }] },
+      ],
+    } as EditorDoc;
+    const { prose } = await setup(fakeSource({ s1: null }), { template });
+    expect(prose()!.querySelector('h2')?.textContent).toBe('Aussehen');
+  });
+
+  it('meldet, wenn das Dokument nicht geladen werden kann', async () => {
+    const source = fakeSource();
+    source.load.mockRejectedValueOnce(new Error('Datei gesperrt'));
+    const view = await render(DocumentEditor, { inputs: { documentId: 's1', source } });
+    await until(
+      view.settle,
+      () => text(view.element.querySelector('.statusbar .status')) === de.editor.saveStatus.error,
+    );
+    expect(TestBed.inject(StatusMessages).messages()[0]!.text).toBe('Datei gesperrt');
+  });
+});
