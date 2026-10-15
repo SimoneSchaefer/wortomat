@@ -63,6 +63,10 @@
   // Scrollbars in the UI's green; the track itself stays transparent
   --scrollbar-thumb: color-mix(in srgb, var(--accent) 55%, var(--surface));
   --scrollbar-track: transparent;
+
+  // Inverted to stand out from the page
+  --tooltip-bg: var(--text);
+  --tooltip-text: var(--bg);
 }
 
 // Dark colours – always, never or like the system, depending on the setting (data-theme on <html>)
@@ -81,6 +85,8 @@
   --danger: #ff8787;
   // on a dark background a shadow needs more opacity to be visible
   --topbar-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
+  // the full light text colour glares on a dark page
+  --tooltip-bg: color-mix(in srgb, var(--text) 78%, var(--bg));
 
   --status-idea: oklch(0.74 0 148);
   --status-outline: oklch(0.74 0.045 148);

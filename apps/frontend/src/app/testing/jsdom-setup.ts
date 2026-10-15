@@ -63,5 +63,13 @@ if (!('fonts' in document)) {
 HTMLCanvasElement.prototype.getContext = (() =>
   null) as typeof HTMLCanvasElement.prototype.getContext;
 
+// Popovers (the tooltip): an attribute stands in for the top layer so tests can see the state.
+HTMLElement.prototype.showPopover ??= function (this: HTMLElement) {
+  this.setAttribute('data-popover-open', '');
+};
+HTMLElement.prototype.hidePopover ??= function (this: HTMLElement) {
+  this.removeAttribute('data-popover-open');
+};
+
 URL.createObjectURL ??= () => 'blob:test';
 URL.revokeObjectURL ??= () => undefined;

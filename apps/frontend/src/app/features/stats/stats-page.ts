@@ -23,28 +23,11 @@ import {
 type Unit = 'words' | 'scenes';
 type PresenceKind = 'character' | 'place';
 
-interface Tooltip {
-  text: string;
-  x: number;
-  y: number;
-  /** Near the window edge the tooltip sits beside instead of centred above the element. */
-  align: 'center' | 'start' | 'end';
-}
-
-/** This close to the window edge the tooltip is aligned to the side (about half its width). */
-const TOOLTIP_EDGE_PX = 180;
-
 @Component({
   selector: 'wm-stats-page',
   imports: [RouterLink, StatusIcon, NoteAvatar, TextStats, WritingCalendar],
   templateUrl: './stats-page.html',
   styleUrl: './stats-page.scss',
-  host: {
-    '(pointerover)': 'showTip($event)',
-    '(pointerout)': 'hideTip($event)',
-    '(focusin)': 'showTip($event)',
-    '(focusout)': 'hideTip($event)',
-  },
 })
 export class StatsPage {
   protected readonly t = inject(I18n).t;
@@ -103,8 +86,6 @@ export class StatsPage {
     return columns;
   });
 
-  protected readonly tip = signal<Tooltip | null>(null);
-
   protected notePath(note: NoteSummary): string[] {
     return ['/write', NOTE_KINDS[note.kind].path, note.id];
   }
@@ -126,25 +107,5 @@ export class StatsPage {
   protected isChapterStart(index: number): boolean {
     const scenes = this.scenes();
     return index > 0 && scenes[index]!.chapter.id !== scenes[index - 1]!.chapter.id;
-  }
-
-  // Tooltip: one shared by all elements with `data-tip` (mouse and keyboard)
-
-  protected showTip(event: Event): void {
-    const target = (event.target as Element | null)?.closest<HTMLElement>('[data-tip]');
-    if (!target) return;
-    const rect = target.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const align =
-      x > window.innerWidth - TOOLTIP_EDGE_PX ? 'end' : x < TOOLTIP_EDGE_PX ? 'start' : 'center';
-    const left = align === 'end' ? rect.right : align === 'start' ? rect.left : x;
-    this.tip.set({ text: target.dataset['tip']!, x: left, y: rect.top, align });
-  }
-
-  protected hideTip(event: Event): void {
-    const target = (event.target as Element | null)?.closest('[data-tip]');
-    const next = (event as FocusEvent | PointerEvent).relatedTarget as Node | null;
-    if (target && next && target.contains(next)) return;
-    this.tip.set(null);
   }
 }

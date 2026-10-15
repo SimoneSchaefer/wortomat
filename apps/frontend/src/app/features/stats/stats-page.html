@@ -248,15 +248,3 @@
     <wm-text-stats />
   </section>
 </div>
-
-@if (tip(); as tip) {
-  <div
-    class="tooltip"
-    aria-hidden="true"
-    [attr.data-align]="tip.align"
-    [style.left.px]="tip.x"
-    [style.top.px]="tip.y"
-  >
-    {{ tip.text }}
-  </div>
-}

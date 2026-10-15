@@ -8,7 +8,6 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
 import { chapterText } from './stats';
 
-/** The surrounding statistics page shows the tooltips (`data-tip`). */
 @Component({
   selector: 'wm-text-stats',
   templateUrl: './text-stats.html',
