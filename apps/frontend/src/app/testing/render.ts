@@ -26,7 +26,7 @@ export async function render<T>(
     routes?: Routes;
     api?: FakeApi;
     /** Runs after configuring and before creating, e.g. to prepare a service via TestBed.inject. */
-    before?: () => void;
+    before?: () => unknown;
   } = {},
 ): Promise<Rendered<T>> {
   const api = options.api ?? new FakeApi();
@@ -40,7 +40,7 @@ export async function render<T>(
   });
   TestBed.inject(AppSettingsStore).settings.set(TEST_SETTINGS);
   await TestBed.inject(ProjectStore).reloadNodes();
-  options.before?.();
+  await options.before?.();
 
   const fixture = TestBed.createComponent(component);
   for (const [name, value] of Object.entries(options.inputs ?? {})) {
@@ -112,19 +112,20 @@ export async function until(settle: () => Promise<void>, check: () => boolean): 
  * jsdom has neither DragEvent nor DataTransfer. One shared transfer object per drag, as in a
  * browser, so `dragstart` data is visible in `dragover` and `drop`.
  */
-export function startDrag(): {
+export function startDrag(options: { files?: File[] } = {}): {
   fire: (target: Element, type: 'dragstart' | 'dragover' | 'drop' | 'dragend') => Event;
 } {
   const data = new Map<string, string>();
+  const files = options.files ?? [];
   const transfer = {
     get types() {
-      return [...data.keys()];
+      return [...data.keys(), ...(files.length ? ['Files'] : [])];
     },
     setData: (format: string, value: string) => void data.set(format, value),
     getData: (format: string) => data.get(format) ?? '',
     effectAllowed: 'all',
     dropEffect: 'none',
-    files: [] as File[],
+    files,
   };
   return {
     fire(target, type) {

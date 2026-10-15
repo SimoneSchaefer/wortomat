@@ -229,6 +229,8 @@ export const de = {
     deleteTitle: (singular: string) => `${singular} löschen?`,
     deleteMessage: (title: string) => `„${title}“ wird mit allen Angaben gelöscht.`,
     deleteGroupTitle: 'Gruppe löschen?',
+    deleteLabel: (title: string) => `${title} löschen`,
+    deleteGroupLabel: (name: string) => `Gruppe ${name} löschen`,
     notFound: 'Dieser Eintrag existiert nicht mehr.',
     summary: 'Kurzbeschreibung',
     group: 'Gruppe',

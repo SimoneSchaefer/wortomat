@@ -27,7 +27,13 @@
               <wm-annotation-badges [counts]="note.annotations" [kinds]="annotationKinds()" />
             }
           </a>
-          <button type="button" class="remove" [title]="t().common.delete" (click)="remove(note)">
+          <button
+            type="button"
+            class="remove"
+            [title]="t().common.delete"
+            [attr.aria-label]="t().notes.deleteLabel(note.title)"
+            (click)="remove(note)"
+          >
             ×
           </button>
         </li>
@@ -93,10 +99,20 @@
               />
               <span class="group-count">{{ entry.notes.length }}</span>
               <span class="actions">
-                <button type="button" [title]="texts().addToGroup" (click)="add(group.id)">
+                <button
+                  type="button"
+                  [title]="texts().addToGroup"
+                  [attr.aria-label]="texts().addToGroup"
+                  (click)="add(group.id)"
+                >
                   +
                 </button>
-                <button type="button" [title]="t().common.delete" (click)="removeGroup(group)">
+                <button
+                  type="button"
+                  [title]="t().common.delete"
+                  [attr.aria-label]="t().notes.deleteGroupLabel(group.name)"
+                  (click)="removeGroup(group)"
+                >
                   ×
                 </button>
               </span>

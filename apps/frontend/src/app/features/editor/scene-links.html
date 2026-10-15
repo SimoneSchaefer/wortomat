@@ -84,6 +84,7 @@
         [class.open]="pickerTarget() === row.target"
         [attr.aria-expanded]="pickerTarget() === row.target"
         [title]="t().sceneLinks.add(row.singular)"
+        [attr.aria-label]="t().sceneLinks.add(row.singular)"
         (click)="openPicker(row.target)"
       >
         +
