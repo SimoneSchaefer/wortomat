@@ -11,6 +11,7 @@
         <input
           type="checkbox"
           [checked]="includeSceneTitles()"
+          [disabled]="!loaded()"
           (change)="includeSceneTitles.set($any($event.target).checked)"
         />
         {{ t().export.sceneTitles }}
@@ -20,6 +21,7 @@
         <input
           type="checkbox"
           [checked]="includeParts()"
+          [disabled]="!loaded()"
           (change)="includeParts.set($any($event.target).checked)"
         />
         {{ t().export.parts }}
@@ -41,7 +43,7 @@
                 [attr.autofocus]="format() === value ? '' : null"
                 [value]="value"
                 [checked]="format() === value"
-                [disabled]="isDisabled(value)"
+                [disabled]="!loaded() || isDisabled(value)"
                 (change)="choose(value)"
               />
               <span class="choice-label">{{ t().export.formats[value].label }}</span>
@@ -70,6 +72,7 @@
                   name="template"
                   [value]="value"
                   [checked]="template() === value"
+                  [disabled]="!loaded()"
                   (change)="template.set(value)"
                 />
                 <span class="choice-label">{{ t().export.templates[value].label }}</span>
@@ -243,7 +246,11 @@
       }
 
       <footer>
-        <button class="primary" type="submit" [disabled]="busy() || isDisabled(format())">
+        <button
+          class="primary"
+          type="submit"
+          [disabled]="!loaded() || busy() || isDisabled(format())"
+        >
           {{
             busy()
               ? t().export.exporting

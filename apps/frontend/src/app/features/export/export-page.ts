@@ -70,8 +70,11 @@ export class ExportPage {
   protected readonly includeParts = signal(true);
   protected readonly layout = signal<BookLayout | null>(null);
   private defaults: ExportSettings | null = null;
-  /** Only save after loading – otherwise the defaults would overwrite what was remembered. */
-  private loaded = false;
+  /**
+   * Only save after loading – otherwise the defaults would overwrite what was remembered. The
+   * options stay locked until then, so a choice made meanwhile is not replaced.
+   */
+  protected readonly loaded = signal(false);
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
   /** Last loaded or saved state (JSON) – do not write unchanged state again. */
   private savedJson = '';
@@ -116,7 +119,7 @@ export class ExportPage {
       const settings = this.currentSettings();
       if (!settings) return;
       untracked(() => {
-        if (!this.loaded || JSON.stringify(settings) === this.savedJson) return;
+        if (!this.loaded() || JSON.stringify(settings) === this.savedJson) return;
         clearTimeout(this.saveTimer);
         this.saveTimer = setTimeout(() => void this.save(settings), SAVE_DELAY_MS);
       });
@@ -125,7 +128,7 @@ export class ExportPage {
     effect(() => {
       const withTitles = this.includeSceneTitles();
       untracked(() => {
-        if (this.loaded) void this.loadPreview(withTitles);
+        if (this.loaded()) void this.loadPreview(withTitles);
       });
     });
     // Check whether the preview can load the chosen font (file from TeX or system font)
@@ -137,7 +140,7 @@ export class ExportPage {
       });
     });
     inject(DestroyRef).onDestroy(() => this.flushSave());
-    void this.load();
+    this.load();
   }
 
   private readonly currentSettings = computed<ExportSettings | null>(() => {
@@ -163,33 +166,52 @@ export class ExportPage {
   }
 
   /**
-   * Loads the capabilities (fresh on every visit – TeX may have been installed meanwhile) together
-   * with the remembered settings: without pdfLaTeX, a remembered PDF becomes Word.
+   * Loads the capabilities (fresh on every visit – TeX may have been installed meanwhile) apart from
+   * the remembered settings: detecting pdfLaTeX can take a while, and the options are locked until
+   * the settings are there – so nothing the user picks gets replaced by what was remembered.
    */
-  private async load(): Promise<void> {
+  private load(): void {
+    void this.loadSettings();
+    void this.loadCapabilities();
+  }
+
+  private async loadSettings(): Promise<void> {
     try {
-      const [capabilities, { settings, defaults }] = await Promise.all([
-        this.api.exportCapabilities(),
-        this.api.exportSettings(),
-      ]);
-      this.capabilities.set(capabilities);
+      const { settings, defaults } = await this.api.exportSettings();
       this.defaults = defaults;
-      this.format.set(
-        settings.format === 'pdf' && !capabilities.pdf.available ? 'docx' : settings.format,
-      );
+      this.format.set(settings.format);
       this.template.set(settings.template);
       this.includeSceneTitles.set(settings.includeSceneTitles);
       this.includeParts.set(settings.includeParts);
       this.layout.set(settings.layout);
       this.customSize.set(this.pageSizeIndex() < 0);
-      // What is saved is what the book holds – only remember a switch from PDF to Word once
-      // something changes
-      this.savedJson = JSON.stringify({ ...settings, format: this.format() });
-      this.loaded = true;
+      this.savedJson = JSON.stringify(settings);
+      this.loaded.set(true);
+      this.applyPdfFallback();
       await this.loadPreview(settings.includeSceneTitles);
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
     }
+  }
+
+  private async loadCapabilities(): Promise<void> {
+    try {
+      this.capabilities.set(await this.api.exportCapabilities());
+      this.applyPdfFallback();
+    } catch (error) {
+      this.error.set(errorMessage(error, this.t()));
+    }
+  }
+
+  /** Without pdfLaTeX, a remembered PDF becomes Word – whichever of the two requests ends last. */
+  private applyPdfFallback(): void {
+    const capabilities = this.capabilities();
+    if (!this.loaded() || !capabilities || capabilities.pdf.available) return;
+    if (this.format() !== 'pdf') return;
+    this.format.set('docx');
+    // What is saved is what the book holds – only remember the switch once something changes (a
+    // pending save takes it along)
+    if (this.saveTimer === undefined) this.savedJson = JSON.stringify(this.currentSettings());
   }
 
   private async loadPreview(includeSceneTitles: boolean): Promise<void> {

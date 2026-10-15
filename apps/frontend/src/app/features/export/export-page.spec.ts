@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import type { ExportCapabilities, ExportSettingsResponse } from '@wortomat/shared';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
@@ -57,6 +58,56 @@ describe('ExportPage', () => {
     expect(radio('format', 'docx').checked).toBe(true);
     expect(text(radio('format', 'pdf').closest('label'))).toContain(E.pdfMissing);
     expect(element.querySelector('wm-export-preview')).not.toBeNull();
+  });
+
+  it('keeps a format chosen while pdfLaTeX is still being searched for', async () => {
+    let finishSearch!: (capabilities: ExportCapabilities) => void;
+    const api = new FakeApi();
+    api.project = testProject({ title: 'Roman' });
+    api.exportState.settings = { ...TEST_EXPORT_SETTINGS, format: 'docx' };
+    const capabilities = { ...api.capabilities, pdf: { available: false, version: null } };
+    api.exportCapabilities.mockReturnValueOnce(new Promise((resolve) => (finishSearch = resolve)));
+    const { element, settle } = await render(ExportPage, {
+      api,
+      providers: [{ provide: DESKTOP_BRIDGE, useValue: null }],
+    });
+    const radio = (value: string) =>
+      element.querySelector<HTMLInputElement>(`input[name=format][value="${value}"]`)!;
+    await until(settle, () => !radio('html').disabled);
+    expect(text(radio('pdf').closest('label'))).toContain(E.pdfSearching);
+
+    radio('html').click();
+    await settle();
+    finishSearch(capabilities);
+    await until(settle, () => text(radio('pdf').closest('label')).includes(E.pdfMissing));
+    expect(radio('html').checked).toBe(true);
+    await wait(SAVE_DELAY);
+    await settle();
+    expect(api.saveExportSettings.mock.calls.at(-1)![0].format).toBe('html');
+  });
+
+  it('locks the options until the remembered settings have arrived', async () => {
+    let answer!: (state: ExportSettingsResponse) => void;
+    const api = new FakeApi();
+    api.project = testProject({ title: 'Roman' });
+    const state = {
+      ...api.exportState,
+      settings: { ...TEST_EXPORT_SETTINGS, format: 'epub' as const },
+    };
+    api.exportSettings.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
+    const { element, settle } = await render(ExportPage, {
+      api,
+      providers: [{ provide: DESKTOP_BRIDGE, useValue: null }],
+    });
+    const radio = (value: string) =>
+      element.querySelector<HTMLInputElement>(`input[name=format][value="${value}"]`)!;
+    expect(radio('html').disabled).toBe(true);
+    expect(button(element, E.download).disabled).toBe(true);
+
+    answer(state);
+    await until(settle, () => !radio('html').disabled);
+    expect(radio('epub').checked).toBe(true);
+    expect(button(element, E.download).disabled).toBe(false);
   });
 
   it('shows templates and a preview only for formats with a fixed page', async () => {
