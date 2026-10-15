@@ -66,8 +66,20 @@ async function setup(source = fakeSource(), inputs: Record<string, unknown> = {}
     await TestBed.inject(PendingSaves).flushAll();
     return source.save.mock.calls.at(-1)?.[1];
   };
-  return { ...view, source, prose, items, listed, bar, jumpTo, saved };
+  /** Opens a toolbar dropdown and chooses an entry (its name without the shortcut). */
+  const choose = async (menu: string, entry: string) => {
+    button(view.element, menu).click();
+    await view.settle();
+    button(view.element, new RegExp(`^${entry}( |$)`)).click();
+    await view.settle();
+  };
+  return { ...view, source, prose, items, listed, bar, jumpTo, saved, choose };
 }
+
+const PLAIN: EditorDoc = {
+  type: 'doc',
+  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Es war einmal.' }] }],
+} as EditorDoc;
 
 describe('DocumentEditor', () => {
   it('loads the document and shows word count and save status', async () => {
@@ -205,5 +217,44 @@ describe('DocumentEditor', () => {
       () => text(view.element.querySelector('.statusbar .status')) === de.editor.saveStatus.error,
     );
     expect(TestBed.inject(StatusMessages).messages()[0]!.text).toBe('Datei gesperrt');
+  });
+
+  it('sets paragraph style, alignment and indentation from the grouped menus', async () => {
+    const { choose, saved, element, settle } = await setup(fakeSource({ s1: PLAIN }));
+    const E = de.editor;
+    await choose(E.blockStyle, E.heading);
+    await choose(E.alignment, E.alignCenter);
+    await choose(E.alignment, E.indent);
+    await choose(E.alignment, E.indent);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({
+      type: 'heading',
+      attrs: { level: 2, textAlign: 'center', indent: 2 },
+    });
+
+    await choose(E.alignment, E.outdent);
+    await choose(E.blockStyle, E.blockquote);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({
+      type: 'blockquote',
+      content: [{ type: 'heading', attrs: { indent: 1 } }],
+    });
+
+    button(element, E.clearFormat).click();
+    await settle();
+    expect((await saved())?.doc.content?.[0]).toMatchObject({
+      type: 'paragraph',
+      attrs: { textAlign: null, indent: 0 },
+    });
+  });
+
+  it('turns a paragraph into a list and back', async () => {
+    const { choose, saved, element } = await setup(fakeSource({ s1: PLAIN }));
+    await choose(de.editor.lists, de.editor.bulletList);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'bulletList' });
+    expect(button(element, de.editor.lists).classList).toContain('on');
+
+    await choose(de.editor.lists, de.editor.orderedList);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'orderedList' });
+    await choose(de.editor.lists, de.editor.orderedList);
+    expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'paragraph' });
   });
 });

@@ -1,5 +1,17 @@
 import type { Book, ExportOptions, ImageResolver, JsonNode } from './book.js';
-import { printMarks } from './book.js';
+import { blockFormat, linkHref, printMarks } from './book.js';
+
+/** Rules for the classes of `formatClass`, shared by the HTML and EPUB stylesheets. */
+export const BLOCK_FORMAT_CSS = `
+.align-left { text-align: left; }
+.align-center { text-align: center; text-indent: 0; }
+.align-right { text-align: right; text-indent: 0; }
+.align-justify { text-align: justify; }
+.indent-1 { margin-left: 2em; }
+.indent-2 { margin-left: 4em; }
+.indent-3 { margin-left: 6em; }
+.indent-4 { margin-left: 8em; }
+`;
 
 const STYLE = `
   :root { color-scheme: light; }
@@ -19,6 +31,7 @@ const STYLE = `
   blockquote { margin: 1rem 1.5rem; font-style: italic; }
   figure { margin: 1.5rem 0; text-align: center; }
   figure img { max-width: 100%; height: auto; }
+  ${BLOCK_FORMAT_CSS}
   @media print {
     body { background: none; }
     section.part, section.chapter { break-before: page; }
@@ -91,11 +104,11 @@ export function contentHtml(nodes: JsonNode[], image: ImageSource): string {
 function block(node: JsonNode, image: ImageSource): string {
   switch (node.type) {
     case 'paragraph':
-      return `<p>${inline(node.content ?? [])}</p>`;
-    case 'heading':
-      return node.attrs?.['level'] === 3
-        ? `<h5>${inline(node.content ?? [])}</h5>`
-        : `<h4>${inline(node.content ?? [])}</h4>`;
+      return `<p${formatClass(node)}>${inline(node.content ?? [])}</p>`;
+    case 'heading': {
+      const tag = node.attrs?.['level'] === 3 ? 'h5' : 'h4';
+      return `<${tag}${formatClass(node)}>${inline(node.content ?? [])}</${tag}>`;
+    }
     case 'blockquote':
       return `<blockquote>${contentHtml(node.content ?? [], image)}</blockquote>`;
     case 'bulletList':
@@ -133,13 +146,18 @@ function inline(nodes: JsonNode[]): string {
       if (marks.has('underline')) html = `<u>${html}</u>`;
       if (marks.has('italic')) html = `<em>${html}</em>`;
       if (marks.has('bold')) html = `<strong>${html}</strong>`;
-      if (marks.has('link')) {
-        const href = String(node.marks?.find((m) => m.type === 'link')?.attrs?.['href'] ?? '');
-        if (/^(https?:|mailto:)/i.test(href)) html = `<a href="${escapeHtml(href)}">${html}</a>`;
-      }
+      const href = marks.has('link') ? linkHref(node) : null;
+      if (href) html = `<a href="${escapeHtml(href)}">${html}</a>`;
       return html;
     })
     .join('');
+}
+
+/** Classes instead of inline styles, so the EPUB's and the preview's stylesheets decide the look. */
+function formatClass(node: JsonNode): string {
+  const { align, indent } = blockFormat(node);
+  const classes = [align && `align-${align}`, indent && `indent-${indent}`].filter(Boolean);
+  return classes.length ? ` class="${classes.join(' ')}"` : '';
 }
 
 /** Control characters that XML forbids are dropped. */

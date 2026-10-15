@@ -115,6 +115,34 @@
     a {
       color: inherit;
     }
+
+    // Alignment and indentation from the editor (classes of the backend's HTML renderer)
+    .align-left {
+      text-align: left;
+    }
+
+    .align-center,
+    .align-right {
+      text-indent: 0;
+    }
+
+    .align-center {
+      text-align: center;
+    }
+
+    .align-right {
+      text-align: right;
+    }
+
+    .align-justify {
+      text-align: justify;
+    }
+
+    @for $step from 1 through 4 {
+      .indent-#{$step} {
+        margin-left: 2em * $step;
+      }
+    }
   }
 
   .empty {
@@ -156,6 +184,16 @@
 
     .content p + p {
       text-indent: 21.6pt;
+    }
+
+    // Always ragged, as in the Word and PDF export
+    .content .align-justify {
+      text-align: left;
+    }
+
+    .content p.align-center,
+    .content p.align-right {
+      text-indent: 0;
     }
 
     .chapter-title {

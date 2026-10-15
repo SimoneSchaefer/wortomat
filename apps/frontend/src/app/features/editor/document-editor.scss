@@ -75,8 +75,9 @@
   }
 
   // Background, border and hover as for all buttons (styles.scss), just more compact. All the same
-  // height – text, icons and arrow glyphs have different line heights otherwise
-  button {
+  // height – text, icons and arrow glyphs have different line heights otherwise. Only the bar's own
+  // buttons: the dropdown entries have their look (toolbar-menu.scss)
+  > button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -92,35 +93,36 @@
     }
   }
 
-  .clear svg {
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  > button svg {
     display: block;
     width: 0.95rem;
     height: 0.95rem;
     margin: 0 auto;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    stroke-linecap: round;
   }
 
-  .revision {
-    svg {
-      display: block;
-      width: 0.95rem;
-      height: 0.95rem;
-      margin: 0 auto;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.5;
-      stroke-linecap: round;
-    }
-  }
-
-  .annotation {
+  .format-glyph {
     display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.8rem;
+    gap: 0.1rem;
+    font-size: 0.9rem;
+  }
+
+  .swatches {
+    display: inline-flex;
+    gap: 0.15rem;
+  }
+
+  // The letters as previews in front of the menu entries
+  .glyph {
+    width: 0.95rem;
+    text-align: center;
   }
 
   .sep {

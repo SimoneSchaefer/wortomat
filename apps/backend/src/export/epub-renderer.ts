@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import type { Book, ExportOptions, ImageResolver, ResolvedImage } from './book.js';
-import { contentHtml, escapeHtml } from './html-renderer.js';
+import { BLOCK_FORMAT_CSS, contentHtml, escapeHtml } from './html-renderer.js';
 import { type Localized, localized } from '../i18n.js';
 
 export interface EpubMeta {
@@ -42,7 +42,7 @@ figure img { max-width: 100%; max-height: 90vh; }
 body.cover { margin: 0; padding: 0; text-align: center; }
 body.cover svg { display: block; width: 100%; height: 100%; }
 body.cover img { max-width: 100%; max-height: 100%; }
-`;
+${BLOCK_FORMAT_CSS}`;
 
 interface Chapter {
   id: string;

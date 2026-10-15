@@ -263,6 +263,44 @@ mark {
     text-indent: 1.5em;
   }
 
+  // A first-line indent would push centred or right-aligned lines off their axis
+  p[style*='text-align: center'],
+  p[style*='text-align: right'] {
+    text-indent: 0;
+  }
+
+  // Block indentation (toolbar), one step per level
+  [data-indent='1'] {
+    margin-left: 2em;
+  }
+  [data-indent='2'] {
+    margin-left: 4em;
+  }
+  [data-indent='3'] {
+    margin-left: 6em;
+  }
+  [data-indent='4'] {
+    margin-left: 8em;
+  }
+
+  ul,
+  ol {
+    margin: 0.5rem 0;
+    padding-left: 1.75em;
+  }
+
+  // In lists no book indent – the items are short and each one starts a new line anyway
+  li p + p {
+    text-indent: 0;
+  }
+
+  a {
+    color: var(--accent-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: text;
+  }
+
   h2,
   h3 {
     font-weight: 400;

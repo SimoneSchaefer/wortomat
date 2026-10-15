@@ -125,6 +125,30 @@ export function printMarks(node: JsonNode): Set<PrintMark> {
   return result;
 }
 
+export type BlockAlign = 'left' | 'center' | 'right' | 'justify';
+const ALIGNMENTS: readonly string[] = ['left', 'center', 'right', 'justify'];
+/** As in the editor (Indent extension). */
+export const MAX_BLOCK_INDENT = 4;
+
+/**
+ * Alignment and indentation of a paragraph or heading, set in the editor's toolbar. `align: null`
+ * keeps the template's own (justified novel, ragged standard page).
+ */
+export function blockFormat(node: JsonNode): { align: BlockAlign | null; indent: number } {
+  const align = node.attrs?.['textAlign'];
+  const indent = Math.round(Number(node.attrs?.['indent'] ?? 0));
+  return {
+    align: typeof align === 'string' && ALIGNMENTS.includes(align) ? (align as BlockAlign) : null,
+    indent: Number.isFinite(indent) ? Math.max(0, Math.min(MAX_BLOCK_INDENT, indent)) : 0,
+  };
+}
+
+/** Only these open from an exported book; anything else (javascript: …) stays plain text. */
+export function linkHref(node: JsonNode): string | null {
+  const href = String(node.marks?.find((m) => m.type === 'link')?.attrs?.['href'] ?? '');
+  return /^(https?:|mailto:)/i.test(href) ? href : null;
+}
+
 /** Never scales up. */
 export function fitImage(
   image: { width: number | null; height: number | null },

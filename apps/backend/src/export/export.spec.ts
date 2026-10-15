@@ -14,6 +14,7 @@ import type {
   ImageInfo,
   ManuscriptNode,
   ProjectInfo,
+  SceneContent,
 } from '@wortomat/shared';
 import JSZip from 'jszip';
 import { AUTH_HEADER, type RunningServer, startServer } from '../server.js';
@@ -143,7 +144,20 @@ describe('Export', () => {
       { type: 'image', attrs: { src: png, alt: 'Karte' } },
     ]);
     const s2 = await node(k1.id, 'scene', 'Markt');
-    await save(s2.id, [paragraph(text('Am Markt roch es nach Fisch.'))]);
+    await save(s2.id, [
+      { type: 'heading', attrs: { level: 2, textAlign: 'center' }, content: [text('Marktplatz')] },
+      paragraph(text('Am Markt roch es nach Fisch.')),
+      { type: 'paragraph', attrs: { textAlign: 'right', indent: 2 }, content: [text('Rechts')] },
+      paragraph(
+        text('Siehe '),
+        {
+          type: 'text',
+          text: 'die Karte',
+          marks: [{ type: 'link', attrs: { href: 'https://example.com/a_b?x=1&y=2#top' } }],
+        },
+        text('.'),
+      ),
+    ]);
     await node(k1.id, 'scene', 'Leere Szene'); // without text → left out
     const k2 = await node(teil.id, 'chapter', 'Abschied');
     const s3 = await node(k2.id, 'scene', 'Kai');
@@ -273,6 +287,39 @@ describe('Export', () => {
     assert.doesNotMatch(html, /Leere Szene/);
     const withTitles = (await exportTo('html', 'normseite', true)).data.toString('utf8');
     assert.match(withTitles, /<h3 class="scene-title">Bahnhof \(Arbeitstitel\)<\/h3>/);
+  });
+
+  it('carries alignment, indentation and links from the editor into every format', async () => {
+    const html = (await exportTo('html', 'roman')).data.toString('utf8');
+    assert.match(html, /<h4 class="align-center">Marktplatz<\/h4>/);
+    assert.match(html, /<p class="align-right indent-2">Rechts<\/p>/);
+    assert.match(html, /<a href="https:\/\/example\.com\/a_b\?x=1&amp;y=2#top">die Karte<\/a>/);
+    assert.match(html, /\.indent-2 \{ margin-left: 4em; \}/);
+
+    const epub = await JSZip.loadAsync((await exportTo('epub', 'roman')).data);
+    const chapters = await Promise.all(
+      Object.keys(epub.files)
+        .filter((name) => name.endsWith('.xhtml'))
+        .map((name) => epub.file(name)!.async('string')),
+    );
+    assert.ok(
+      chapters.some((xhtml) => xhtml.includes('<p class="align-right indent-2">Rechts</p>')),
+    );
+    assert.match(await epub.file('OEBPS/styles.css')!.async('string'), /\.align-center \{/);
+
+    for (const template of ['normseite', 'roman']) {
+      const zip = await JSZip.loadAsync((await exportTo('docx', template)).data);
+      const document = await zip.file('word/document.xml')!.async('string');
+      const rels = await zip.file('word/_rels/document.xml.rels')!.async('string');
+      assert.match(document, /<w:jc w:val="center"\/>(?:(?!<\/w:p>).)*Marktplatz/, template);
+      assert.match(document, /<w:ind w:left="1134" w:firstLine="0"\/><w:jc w:val="right"\/>/);
+      assert.match(
+        document,
+        /<w:hyperlink [^>]*r:id="[^"]+"[^>]*>(?:(?!<\/w:hyperlink>).)*die Karte/,
+      );
+      // Word keeps the part after # as the link's anchor
+      assert.ok(rels.includes('Target="https://example.com/a_b?x=1&amp;y=2"'), rels);
+    }
   });
 
   it('leaves out parts on request – the chapters stay', async () => {
@@ -485,6 +532,7 @@ describe('Export', () => {
   it('keeps a cover that also appears in the text', async () => {
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     const scene = nodes.find((node) => node.title === 'Markt')!;
+    const original = await api<SceneContent>('GET', `/api/scenes/${scene.id}/content`);
     const shared = await upload(PNG_1PX, 'beides.png');
     const sharedId = shared.split('/').pop()!;
     await api('PUT', `/api/scenes/${scene.id}/content`, {
@@ -504,10 +552,11 @@ describe('Export', () => {
       headers: { [AUTH_HEADER]: TOKEN },
     });
     assert.equal(response.status, 200, 'the image is still needed in the scene');
+    // Back to the shared fixture – the PDF test below reads it
     await api('PUT', `/api/scenes/${scene.id}/content`, {
-      doc: { type: 'doc', content: [paragraph(text('Am Markt roch es nach Fisch.'))] },
+      doc: original.doc,
       text: '',
-      wordCount: 6,
+      wordCount: original.wordCount,
     });
   });
 
@@ -550,6 +599,8 @@ describe('Export', () => {
           'Am Markt roch es nach Fisch',
           '100 % & $ # _ ~ \\ <<Tag>> "Zitat" ,,unten“',
           'Ein Stand war leer.',
+          'Marktplatz',
+          'Siehe die Karte.',
         ]) {
           assert.ok(pdfText.includes(needle), `${template}: „${needle}“ fehlt im PDF`);
         }
@@ -626,6 +677,75 @@ describe('LaTeX helpers', () => {
       tex.includes(
         String.raw`\IfFileExists{type1ec.sty}{\usepackage{type1ec}}{\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}}`,
       ),
+    );
+  });
+
+  it('groups alignment and indentation per paragraph and escapes link addresses', () => {
+    const book = {
+      title: 'T',
+      author: '',
+      wordCount: 0,
+      characterCount: 0,
+      items: [
+        {
+          kind: 'chapter' as const,
+          title: 'K',
+          scenes: [
+            {
+              title: 'S',
+              doc: {
+                type: 'doc',
+                content: [
+                  {
+                    type: 'heading',
+                    attrs: { level: 2, textAlign: 'center' },
+                    content: [{ type: 'text', text: 'Mitte' }],
+                  },
+                  {
+                    type: 'paragraph',
+                    attrs: { textAlign: 'right', indent: 2 },
+                    content: [{ type: 'text', text: 'Rechts' }],
+                  },
+                  {
+                    type: 'paragraph',
+                    attrs: { textAlign: 'justify', indent: 9 },
+                    content: [
+                      {
+                        type: 'text',
+                        text: 'Link',
+                        marks: [
+                          { type: 'bold' },
+                          {
+                            type: 'link',
+                            attrs: { href: 'https://example.com/a_b~c?x=1&y=2#top' },
+                          },
+                        ],
+                      },
+                      {
+                        type: 'text',
+                        text: 'Skript',
+                        marks: [{ type: 'link', attrs: { href: 'javascript:alert(1)' } }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const { tex } = renderLatex(book, 'roman', { includeSceneTitles: false }, () => null);
+    assert.ok(tex.includes(String.raw`{\centering \noindent\textbf{Mitte}\par}`), tex);
+    assert.ok(
+      tex.includes(String.raw`{\raggedleft\advance\leftskip by 4em\relax \noindent Rechts\par}`),
+    );
+    // justified is the novel's default; the indent is capped at 4 steps
+    assert.ok(
+      tex.includes(
+        String.raw`{\advance\leftskip by 8em\relax \href{https://example.com/a\%5Fb\%7Ec?x=1\&y=2\#top}{\textbf{Link}}Skript\par}`,
+      ),
+      tex,
     );
   });
 
