@@ -15,11 +15,19 @@ const READER_CSS = `
   --bg: #fffdfa; --surface: #f6f3ee; --border: #e3ddd4; --text: #1f1b17; --muted: #6b645c;
   --accent: #84cc16; --accent-strong: #4d7c0f; --fixme: #d64545; --suggest: #2a78d6;
   --font-scale: 1;
+  --strand-violet: oklch(0.58 0.15 295); --strand-teal: oklch(0.58 0.1 185);
+  --strand-rose: oklch(0.58 0.16 5); --strand-amber: oklch(0.58 0.12 70);
+  --strand-blue: oklch(0.58 0.13 250); --strand-green: oklch(0.58 0.13 140);
+  --strand-coral: oklch(0.58 0.15 35); --strand-slate: oklch(0.58 0.03 250);
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #1b1a19; --surface: #232220; --border: #3b3835; --text: #eeeae4; --muted: #a19a91;
     --accent: #a3e635; --accent-strong: #bef264; --fixme: #f07070; --suggest: #5b9cf0;
+    --strand-violet: oklch(0.74 0.13 295); --strand-teal: oklch(0.74 0.1 185);
+    --strand-rose: oklch(0.74 0.13 5); --strand-amber: oklch(0.74 0.12 70);
+    --strand-blue: oklch(0.74 0.11 250); --strand-green: oklch(0.74 0.13 140);
+    --strand-coral: oklch(0.74 0.13 35); --strand-slate: oklch(0.74 0.03 250);
   }
 }
 * { box-sizing: border-box; }
@@ -106,6 +114,42 @@ mark.flash { animation: flash 1.2s ease-out 2; }
 .toast { position: fixed; left: 1rem; right: 1rem; bottom: 5rem; z-index: 5; max-width: 30rem;
   margin: 0 auto; padding: 0.7rem 1rem; border-radius: 0.6rem; background: var(--text);
   color: var(--bg); box-shadow: 0 4px 16px rgb(0 0 0 / 0.25); }
+.scene { scroll-margin-top: 4rem; }
+.plot-entry { margin: 0.4rem 0 0.2rem; }
+.plot-filter { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; }
+.plot-filter button { padding: 0.35rem 0.75rem; font-size: 0.85rem; background: var(--bg);
+  color: var(--muted); }
+.plot-filter button[aria-pressed='true'] { border-color: var(--accent-strong); color: var(--text);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg)); }
+.plot-hint { margin: 0 0 0.8rem; font-size: 0.85rem; }
+/* Thread names stand upright above their lines and stay in view while scrolling */
+.plot-lanes { position: sticky; top: var(--bar-height, 3rem); z-index: 1; display: flex;
+  background: var(--bg); border-bottom: 1px solid var(--border); }
+.plot-lane { max-height: 8.5rem; display: flex; align-items: center;
+  justify-content: flex-end; gap: 0.35rem; padding: 0.4rem 0; overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis; font-size: 0.8rem;
+  writing-mode: vertical-rl; rotate: 180deg; }
+.plot-lane.unassigned { color: var(--muted); font-style: italic; }
+.dot { flex-shrink: 0; width: 0.6rem; height: 0.6rem; border-radius: 50%; }
+.plot-drawing { display: block; overflow: visible; }
+.plot-guide { stroke: var(--border); stroke-dasharray: 2 4; }
+.plot-group-line { stroke: var(--border); }
+.plot-group { fill: var(--muted); font-size: 11px; font-weight: 600; paint-order: stroke;
+  stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.plot-together { fill: color-mix(in srgb, var(--accent) 8%, transparent);
+  stroke: color-mix(in srgb, var(--accent) 35%, transparent); stroke-dasharray: 3 3; }
+.plot-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.plot-node { cursor: pointer; outline: none; }
+.plot-node rect, .plot-node polygon { fill: var(--bg); stroke: var(--muted); stroke-width: 2.5; }
+.plot-node.turning rect, .plot-node.turning polygon {
+  fill: color-mix(in srgb, var(--accent) 45%, var(--bg)); stroke: var(--accent-strong); }
+.plot-node:focus-visible rect, .plot-node:focus-visible polygon { stroke: var(--text); }
+.plot-number { fill: var(--text); font-size: 9px; font-weight: 600; text-anchor: middle;
+  dominant-baseline: central; pointer-events: none; user-select: none; }
+.plot-info h2 { margin: 0; font: 400 1.3rem/1.3 Georgia, 'Iowan Old Style', serif; }
+.plot-info .kicker { margin: 0; }
+.plot-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; margin: 0; font-size: 0.9rem; }
+.plot-strand { display: inline-flex; align-items: center; gap: 0.35rem; }
 [hidden] { display: none !important; }
 `;
 

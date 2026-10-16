@@ -16,9 +16,20 @@ const proof: ProofPackage = {
       title: 'K',
       number: 1,
       part: null,
-      scenes: [{ id: 's1', title: 'S', paragraphs: ['Er schrieb </script><script>alert(1)'] }],
+      scenes: [
+        {
+          id: 's1',
+          title: 'S',
+          paragraphs: ['Er schrieb </script><script>alert(1)'],
+          strandIds: [],
+          turningPoint: false,
+          storyOrder: null,
+        },
+      ],
     },
   ],
+  strands: [],
+  storyMarks: [],
 };
 
 describe('readerHtml', () => {
