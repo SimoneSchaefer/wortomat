@@ -457,6 +457,10 @@ export interface ProofPackage {
   author: string;
   exportedAt: string;
   chapters: ProofChapter[];
+  /** For the plot view on the phone; empty without threads. */
+  strands: Array<Pick<Strand, 'id' | 'name' | 'color'>>;
+  /** Sections of the story order, e.g. "Day 2". */
+  storyMarks: Array<Pick<StoryMark, 'label' | 'position'>>;
 }
 
 export interface ProofChapter {
@@ -474,6 +478,11 @@ export interface ProofScene {
   title: string;
   /** Plain text per paragraph (empty ones too, so the numbers match the book). */
   paragraphs: string[];
+  /** In thread order. */
+  strandIds: string[];
+  turningPoint: boolean;
+  /** As on the computer: `null` = follows the scene before it in the book. */
+  storyOrder: number | null;
 }
 
 /** Notes from the phone back to the computer. */

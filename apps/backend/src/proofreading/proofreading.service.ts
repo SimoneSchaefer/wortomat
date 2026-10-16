@@ -15,8 +15,11 @@ import type {
 } from '@wortomat/shared';
 import { SERVER_OPTIONS, type ServerOptions } from '../config.js';
 import { nowIso, transaction } from '../database/sqlite.js';
+import { LinksService } from '../links/links.service.js';
 import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { ProjectService } from '../project/project.service.js';
+import { StoryService } from '../story/story.service.js';
+import { StrandsService } from '../strands/strands.service.js';
 import { localized } from '../i18n.js';
 import { addMark, findAnchor, textBlocks } from './proof-text.js';
 import { readerHtml } from './reader/reader-html.js';
@@ -49,6 +52,9 @@ export class ProofreadingService {
   constructor(
     private readonly projects: ProjectService,
     private readonly manuscript: ManuscriptService,
+    private readonly links: LinksService,
+    private readonly strands: StrandsService,
+    private readonly story: StoryService,
     @Inject(SERVER_OPTIONS) private readonly options: ServerOptions,
   ) {}
 
@@ -60,6 +66,7 @@ export class ProofreadingService {
     const nodes = this.manuscript.list(); // responds with 409 when no book is open
     const project = this.projects.info()!;
     const docs = this.docs();
+    const strandIds = new Map(this.links.relations().map((r) => [r.sceneId, r.strandIds]));
     const children = (parentId: string | null) =>
       nodes.filter((node) => node.parentId === parentId).sort((a, b) => a.sortOrder - b.sortOrder);
 
@@ -76,6 +83,9 @@ export class ProofreadingService {
             id: scene.id,
             title: scene.title,
             paragraphs: textBlocks(docs.get(scene.id)).map((block) => block.text),
+            strandIds: strandIds.get(scene.id) ?? [],
+            turningPoint: !!scene.turningPoint,
+            storyOrder: scene.storyOrder,
           })),
       });
     };
@@ -96,6 +106,8 @@ export class ProofreadingService {
       author: project.author,
       exportedAt: nowIso(),
       chapters,
+      strands: this.strands.list().map(({ id, name, color }) => ({ id, name, color })),
+      storyMarks: this.story.marks().map(({ label, position }) => ({ label, position })),
     };
   }
 

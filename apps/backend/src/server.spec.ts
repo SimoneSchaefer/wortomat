@@ -1332,8 +1332,25 @@ describe('REST API', () => {
       text: 'Lena wartete am Bahnhof.\nDer Zug kam zu spät.',
       wordCount: 9,
     });
+    // For the plot view on the phone
+    const lena = await api<{ id: string }>('POST', '/api/strands', { name: 'Lena', color: 'teal' });
+    await api('POST', `/api/scenes/${szene.id}/strands`, { strandId: lena.id });
+    await api('PATCH', `/api/nodes/${szene.id}`, { turningPoint: true });
+    await api('PUT', '/api/story', {
+      columns: [[leer.id], [szene.id]],
+      marks: [{ label: 'Tag 1', beforeColumn: 1 }],
+    });
 
     const proof = await api<ProofPackage>('GET', '/api/proofreading/package');
+    assert.deepEqual(proof.strands, [{ id: lena.id, name: 'Lena', color: 'teal' }]);
+    assert.deepEqual(proof.storyMarks, [{ label: 'Tag 1', position: 2 }]);
+    assert.deepEqual(
+      proof.chapters[0]!.scenes.map((s) => [s.title, s.strandIds, s.turningPoint, s.storyOrder]),
+      [
+        ['Am Bahnhof', [lena.id], true, 2],
+        ['Noch leer', [], false, 1],
+      ],
+    );
     assert.equal(proof.format, 'wortomat-proof');
     assert.equal(proof.title, 'Korrekturbuch');
     assert.deepEqual(
