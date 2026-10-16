@@ -62,7 +62,7 @@ export const TEST_SETTINGS: AppSettings = {
   theme: 'system',
   fontSize: 'medium',
   revisionMode: false,
-  plotView: { order: 'story', onlyTurningPoints: true, compact: false },
+  plotView: { order: 'story', onlyTurningPoints: true, compact: false, vertical: false },
 };
 
 /**

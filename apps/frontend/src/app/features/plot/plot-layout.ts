@@ -1,11 +1,17 @@
 import type { ManuscriptNode, Strand } from '@wortomat/shared';
 
-/** In pixels. */
+/**
+ * In pixels, along the time axis (columns) and across it (lanes) – the same numbers whether time
+ * runs to the right or downwards.
+ */
 export interface PlotGeometry {
   columnWidth: number;
   /** Distance between the threads (lanes). */
   laneHeight: number;
-  /** How far the title reaches below a node; 0 = no title. */
+  /**
+   * How far the title reaches past a node across the time axis (below it, or beside it when
+   * vertical); 0 = no title.
+   */
   labelReach: number;
 }
 
@@ -14,6 +20,12 @@ export const PLOT_GEOMETRY = {
   regular: { columnWidth: 120, laneHeight: 88, labelReach: 40 },
   /** Without titles – for long books. */
   compact: { columnWidth: 44, laneHeight: 56, labelReach: 0 },
+  /**
+   * Time runs downwards: the title stands beside the node, so the lanes get wide and the rows
+   * only need two lines of text.
+   */
+  vertical: { columnWidth: 44, laneHeight: 170, labelReach: 150 },
+  verticalCompact: { columnWidth: 30, laneHeight: 48, labelReach: 0 },
 } satisfies Record<string, PlotGeometry>;
 
 /** Extra gap between two groups (chapters or story sections). */
@@ -77,8 +89,11 @@ export interface PlotColumn {
 
 export interface PlotLine {
   strand: Strand;
-  /** SVG path (`d`). */
+  /** SVG path (`d`), time running to the right. */
   path: string;
+  /** What the path is made of – to draw it with time running downwards instead. */
+  points: Array<{ x: number; y: number }>;
+  laneY: number;
 }
 
 export interface PlotGroup extends PlotGroupInfo {
@@ -192,7 +207,8 @@ export function layoutPlot(
   const lines = strands.flatMap((strand): PlotLine[] => {
     const points = (anchors.get(strand.id) ?? []).sort((a, b) => a.x - b.x);
     if (points.length < 2) return [];
-    return [{ strand, path: linePath(points, laneY(laneIndex.get(strand.id)!)) }];
+    const y = laneY(laneIndex.get(strand.id)!);
+    return [{ strand, path: linePath(points, y), points, laneY: y }];
   });
 
   return {
@@ -208,32 +224,36 @@ export function layoutPlot(
 
 /**
  * Between two nodes it runs on its row `laneY` and only bends shortly before or after a shared
- * scene.
+ * scene. `vertical` draws the same line with time running downwards (x and y swapped).
  */
-export function linePath(points: ReadonlyArray<{ x: number; y: number }>, laneY: number): string {
+export function linePath(
+  points: ReadonlyArray<{ x: number; y: number }>,
+  laneY: number,
+  vertical = false,
+): string {
+  const at = (x: number, y: number) => (vertical ? `${y} ${x}` : `${x} ${y}`);
+  const along = (x: number) => `${vertical ? 'V' : 'H'}${x}`;
+  /** Soft S-curve from (x1, y1) to (x2, y2) with ends along the time axis. */
+  const curve = (x1: number, y1: number, x2: number, y2: number) => {
+    const middle = (x1 + x2) / 2;
+    return `C${at(middle, y1)} ${at(middle, y2)} ${at(x2, y2)}`;
+  };
   const [first, ...rest] = points;
   if (!first) return '';
-  const parts = [`M${first.x} ${first.y}`];
+  const parts = [`M${at(first.x, first.y)}`];
   let a = first;
   for (const b of rest) {
     const distance = b.x - a.x;
     if (a.y === laneY && b.y === laneY) {
-      parts.push(`H${b.x}`);
+      parts.push(along(b.x));
     } else if (distance <= 2 * BEND) {
-      const middle = a.x + distance / 2;
-      parts.push(`C${middle} ${a.y} ${middle} ${b.y} ${b.x} ${b.y}`);
+      parts.push(curve(a.x, a.y, b.x, b.y));
     } else {
       if (a.y !== laneY) parts.push(curve(a.x, a.y, a.x + BEND, laneY));
-      parts.push(`H${b.x - (b.y === laneY ? 0 : BEND)}`);
+      parts.push(along(b.x - (b.y === laneY ? 0 : BEND)));
       if (b.y !== laneY) parts.push(curve(b.x - BEND, laneY, b.x, b.y));
     }
     a = b;
   }
   return parts.join(' ');
-}
-
-/** Soft S-curve from (x1, y1) to (x2, y2) with horizontal ends. */
-function curve(x1: number, y1: number, x2: number, y2: number): string {
-  const middle = (x1 + x2) / 2;
-  return `C${middle} ${y1} ${middle} ${y2} ${x2} ${y2}`;
 }

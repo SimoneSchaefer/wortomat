@@ -2,7 +2,7 @@
   <div class="head">
     <div>
       <h1>{{ t().plot.title }}</h1>
-      <p class="muted intro">{{ t().plot.intro }}</p>
+      <p class="muted intro">{{ vertical() ? t().plot.introVertical : t().plot.intro }}</p>
     </div>
     <div class="switches">
       <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.orderBy">
@@ -28,11 +28,37 @@
         type="button"
         class="titles"
         [attr.aria-pressed]="!compact()"
-        [title]="t().plot.titlesHint"
+        [title]="vertical() ? t().plot.titlesHintVertical : t().plot.titlesHint"
         (click)="setView({ compact: !compact() })"
       >
         {{ t().plot.titles }}
       </button>
+      <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.direction">
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="!vertical()"
+          [title]="t().plot.horizontalHint"
+          (click)="setView({ vertical: false })"
+        >
+          <svg class="direction-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2 8h11M10 5l3 3-3 3" />
+          </svg>
+          {{ t().plot.horizontal }}
+        </button>
+        <button
+          type="button"
+          role="radio"
+          [attr.aria-checked]="vertical()"
+          [title]="t().plot.verticalHint"
+          (click)="setView({ vertical: true })"
+        >
+          <svg class="direction-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 2v11M5 10l3 3 3-3" />
+          </svg>
+          {{ t().plot.vertical }}
+        </button>
+      </div>
       <div class="mode" role="radiogroup" [attr.aria-label]="t().plot.show">
         <button
           type="button"
@@ -68,7 +94,13 @@
     } @else {
       <div class="hint-row">
         <p class="muted mode-hint">
-          {{ order() === 'story' ? t().plot.storyHint : t().plot.bookHint }}
+          {{
+            order() === 'book'
+              ? t().plot.bookHint
+              : vertical()
+                ? t().plot.storyHintVertical
+                : t().plot.storyHint
+          }}
         </p>
         @if (order() === 'story' && arranged()) {
           <button type="button" class="link" (click)="reset()">{{ t().plot.reset }}</button>
@@ -114,21 +146,30 @@
         }
       </div>
 
-      <div class="card chart">
-        <!-- Fixed on the left: the thread names; the drawing scrolls sideways on the right -->
-        <ul class="lanes" [style.padding-top.px]="headerHeight">
+      <!-- Thread names: beside the drawing, or above it when time runs downwards -->
+      <ng-template #lanesTemplate>
+        <ul class="lanes" [style.padding-top.px]="vertical() ? null : headerHeight">
           @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
             @if (lane.strand; as strand) {
-              <!-- Dragging a row (or Alt + arrow up/down) changes the thread order -->
+              <!-- Dragging a row (or Alt + arrow) changes the thread order -->
               <li
                 tabindex="0"
                 class="movable"
                 [attr.data-strand]="strand.id"
                 [class.dragged]="laneDrag()?.strand?.id === strand.id"
                 [class.idle]="!lane.nodeCount"
-                [style.height.px]="laneHeight()"
-                [title]="t().plot.sceneCount(lane.nodeCount) + ' · ' + t().plot.moveLaneHint"
-                [attr.aria-description]="t().plot.moveLaneHint"
+                [style.height.px]="vertical() ? null : laneHeight()"
+                [style.width.px]="vertical() ? laneHeight() : null"
+                [title]="
+                  strand.name +
+                  ' · ' +
+                  t().plot.sceneCount(lane.nodeCount) +
+                  ' · ' +
+                  (vertical() ? t().plot.moveLaneHintVertical : t().plot.moveLaneHint)
+                "
+                [attr.aria-description]="
+                  vertical() ? t().plot.moveLaneHintVertical : t().plot.moveLaneHint
+                "
                 (pointerdown)="onLanePointerDown($event, strand)"
                 (keydown)="onLaneKeydown($event, strand)"
               >
@@ -139,7 +180,8 @@
             } @else {
               <li
                 class="unassigned"
-                [style.height.px]="laneHeight()"
+                [style.height.px]="vertical() ? null : laneHeight()"
+                [style.width.px]="vertical() ? laneHeight() : null"
                 [title]="t().plot.sceneCount(lane.nodeCount)"
               >
                 <span class="name">{{ t().plot.noStrand }}</span>
@@ -147,218 +189,249 @@
             }
           }
         </ul>
+      </ng-template>
 
-        <div class="scroller">
-          @if (layout().nodes.length) {
-            <!-- Header: chapters (book) or sections (story); "+" starts a section -->
-            <div
-              class="groups"
-              [class.story]="order() === 'story'"
-              [style.height.px]="headerHeight"
-              [style.width.px]="layout().width + padding"
+      <!-- Chapters (book) or sections (story) along the time axis; "+" starts a section -->
+      <ng-template #groupsTemplate>
+        <div
+          class="groups"
+          [class.story]="order() === 'story'"
+          [style.height.px]="vertical() ? size().height : headerHeight"
+          [style.width.px]="vertical() ? null : size().width"
+        >
+          @for (group of layout().groups; track group.id) {
+            @if (group.number !== null) {
+              <span
+                class="group"
+                [style]="alongStyle(group.x, group.width)"
+                [title]="t().plot.chapter(group.number) + ' · ' + group.label"
+              >
+                <b>{{ group.number }}</b> {{ group.label }}
+              </span>
+            } @else if (group.label) {
+              <button
+                type="button"
+                class="group mark"
+                [style]="alongStyle(group.x, group.width)"
+                [title]="t().plot.editMark(group.label)"
+                (click)="editMark(group.id, group.x)"
+              >
+                {{ group.label }}
+              </button>
+            }
+          }
+          @for (slot of markSlots(); track slot.beforeColumn) {
+            <button
+              type="button"
+              class="add-mark"
+              [style]="alongStyle(slot.x)"
+              [title]="t().plot.addMark"
+              [attr.aria-label]="t().plot.addMark"
+              (click)="startMark(slot.beforeColumn, slot.x)"
             >
-              @for (group of layout().groups; track group.id) {
-                @if (group.number !== null) {
-                  <span
-                    class="group"
-                    [style.left.px]="group.x"
-                    [style.width.px]="group.width"
-                    [title]="t().plot.chapter(group.number) + ' · ' + group.label"
-                  >
-                    <b>{{ group.number }}</b> {{ group.label }}
-                  </span>
-                } @else if (group.label) {
-                  <button
-                    type="button"
-                    class="group mark"
-                    [style.left.px]="group.x"
-                    [style.width.px]="group.width"
-                    [title]="t().plot.editMark(group.label)"
-                    (click)="editMark(group.id, group.x)"
-                  >
-                    {{ group.label }}
-                  </button>
-                }
-              }
-              @for (slot of markSlots(); track slot.beforeColumn) {
+              +
+            </button>
+          }
+          @if (markDraft(); as draft) {
+            <div class="mark-editor" [style]="alongStyle(draft.x)">
+              <input
+                #markInput
+                wmAutofocus
+                [attr.aria-label]="t().plot.markLabel"
+                [placeholder]="t().plot.markPlaceholder"
+                [value]="draft.label"
+                maxlength="40"
+                (keydown.enter)="saveMark(markInput.value)"
+                (keydown.escape)="markDraft.set(null)"
+                (blur)="saveMark(markInput.value)"
+              />
+              @if (draft.id) {
                 <button
                   type="button"
-                  class="add-mark"
-                  [style.left.px]="slot.x"
-                  [title]="t().plot.addMark"
-                  [attr.aria-label]="t().plot.addMark"
-                  (click)="startMark(slot.beforeColumn, slot.x)"
+                  class="delete-mark"
+                  [title]="t().plot.deleteMark"
+                  [attr.aria-label]="t().plot.deleteMark"
+                  (pointerdown)="$event.preventDefault(); deleteMark()"
                 >
-                  +
+                  ×
                 </button>
               }
-              @if (markDraft(); as draft) {
-                <div class="mark-editor" [style.left.px]="draft.x">
-                  <input
-                    #markInput
-                    wmAutofocus
-                    [attr.aria-label]="t().plot.markLabel"
-                    [placeholder]="t().plot.markPlaceholder"
-                    [value]="draft.label"
-                    maxlength="40"
-                    (keydown.enter)="saveMark(markInput.value)"
-                    (keydown.escape)="markDraft.set(null)"
-                    (blur)="saveMark(markInput.value)"
-                  />
-                  @if (draft.id) {
-                    <button
-                      type="button"
-                      class="delete-mark"
-                      [title]="t().plot.deleteMark"
-                      [attr.aria-label]="t().plot.deleteMark"
-                      (pointerdown)="$event.preventDefault(); deleteMark()"
-                    >
-                      ×
-                    </button>
-                  }
-                </div>
-              }
             </div>
-
-            <div #drawing class="drawing" [class.dragging]="drag()?.moved">
-              <svg
-                [attr.width]="layout().width + padding"
-                [attr.height]="layout().height"
-                [attr.viewBox]="'0 0 ' + (layout().width + padding) + ' ' + layout().height"
-              >
-                <!-- Groups (chapters or sections), alternately tinted -->
-                @for (group of layout().groups; track group.id; let odd = $odd) {
-                  @if (odd) {
-                    <rect
-                      class="group-band"
-                      [attr.x]="group.x"
-                      y="0"
-                      [attr.width]="group.width"
-                      [attr.height]="layout().height"
-                    />
-                  }
-                }
-                <!-- Simultaneous scenes: one shared column, lightly shaded -->
-                @for (column of layout().columns; track $index; let index = $index) {
-                  @if (column.sceneIds.length > 1 || dropColumn() === index) {
-                    <rect
-                      class="together"
-                      [class.drop]="dropColumn() === index"
-                      [attr.x]="column.left + 6"
-                      y="4"
-                      [attr.width]="column.width - 12"
-                      [attr.height]="layout().height - 8"
-                      rx="10"
-                    />
-                  }
-                }
-                @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
-                  <line
-                    class="guide"
-                    x1="0"
-                    [attr.x2]="layout().width + padding"
-                    [attr.y1]="lane.y"
-                    [attr.y2]="lane.y"
-                  />
-                }
-                @for (line of layout().lines; track line.strand.id) {
-                  <path
-                    class="line"
-                    [attr.d]="line.path"
-                    [style.stroke]="strandColor(line.strand.color)"
-                  />
-                }
-                @if (dropGapX(); as x) {
-                  <line
-                    class="drop-gap"
-                    [attr.x1]="x"
-                    [attr.x2]="x"
-                    y1="0"
-                    [attr.y2]="layout().height"
-                  />
-                }
-                @for (node of layout().nodes; track node.scene.id) {
-                  <g
-                    class="node"
-                    role="link"
-                    tabindex="0"
-                    [attr.data-scene]="node.scene.id"
-                    [class.turning]="node.scene.turningPoint"
-                    [class.active]="active() === node"
-                    [class.movable]="order() === 'story'"
-                    [class.lifted]="drag()?.moved && drag()?.node === node"
-                    [style.transform]="
-                      drag()?.moved && drag()?.node === node
-                        ? 'translateX(' + drag()!.dx + 'px)'
-                        : null
-                    "
-                    [style.--status-color]="statusInfo(node.scene.status ?? 'idea').color"
-                    [attr.aria-label]="t().plot.openScene(node.scene.title)"
-                    [attr.aria-description]="order() === 'story' ? t().plot.moveHint : null"
-                    (pointerenter)="active.set(node)"
-                    (pointerleave)="leave(node)"
-                    (focus)="active.set(node)"
-                    (blur)="leave(node)"
-                    (pointerdown)="onPointerDown($event, node)"
-                    (pointermove)="onPointerMove($event)"
-                    (pointerup)="onPointerUp()"
-                    (pointercancel)="onPointerCancel()"
-                    (keydown)="onKeydown($event, node)"
-                  >
-                    @if (isDiamond(node)) {
-                      <polygon [attr.points]="diamond(node)" />
-                    } @else {
-                      <rect
-                        [attr.x]="node.x - nodeSize / 2"
-                        [attr.y]="node.y - node.height / 2"
-                        [attr.width]="nodeSize"
-                        [attr.height]="node.height"
-                        [attr.rx]="nodeSize / 2"
-                      />
-                    }
-                    <text class="number" [attr.x]="node.x" [attr.y]="node.y">
-                      {{ node.bookNumber }}
-                    </text>
-                    @if (isDisplaced(node)) {
-                      <circle
-                        class="displaced"
-                        [attr.cx]="node.x + nodeSize / 2"
-                        [attr.cy]="node.y - reach(node)"
-                        r="4"
-                      />
-                    }
-                  </g>
-                }
-              </svg>
-              <!-- Titles below the nodes: as HTML so long titles wrap and get truncated -->
-              @for (node of compact() ? [] : layout().nodes; track node.scene.id) {
-                <span
-                  class="label"
-                  aria-hidden="true"
-                  [class.active]="active() === node"
-                  [class.lifted]="drag()?.moved && drag()?.node === node"
-                  [style.left.px]="node.x - columnWidth() / 2"
-                  [style.width.px]="columnWidth()"
-                  [style.top.px]="labelTop(node)"
-                  [title]="node.scene.title"
-                  (pointerenter)="active.set(node)"
-                  (pointerleave)="leave(node)"
-                  (click)="open(node)"
-                >
-                  <span>{{ node.scene.title }}</span>
-                </span>
-              }
-            </div>
-          } @else {
-            <p class="no-nodes muted">
-              {{ t().plot.noTurningPoints }}
-              <button type="button" class="link" (click)="setView({ onlyTurningPoints: false })">
-                {{ t().plot.showAll }}
-              </button>
-            </p>
           }
         </div>
-      </div>
+      </ng-template>
+
+      <ng-template #drawingTemplate>
+        <div #drawing class="drawing" [class.dragging]="drag()?.moved">
+          <svg
+            [attr.width]="size().width"
+            [attr.height]="size().height"
+            [attr.viewBox]="'0 0 ' + size().width + ' ' + size().height"
+          >
+            <!-- Groups (chapters or sections), alternately tinted -->
+            @for (group of layout().groups; track group.id; let odd = $odd) {
+              @if (odd) {
+                @let band = bandBox(group);
+                <rect
+                  class="group-band"
+                  [attr.x]="band.x"
+                  [attr.y]="band.y"
+                  [attr.width]="band.width"
+                  [attr.height]="band.height"
+                />
+              }
+            }
+            <!-- Simultaneous scenes: one shared column, lightly shaded -->
+            @for (column of layout().columns; track $index; let index = $index) {
+              @if (column.sceneIds.length > 1 || dropColumn() === index) {
+                @let together = togetherBox(column);
+                <rect
+                  class="together"
+                  [class.drop]="dropColumn() === index"
+                  [attr.x]="together.x"
+                  [attr.y]="together.y"
+                  [attr.width]="together.width"
+                  [attr.height]="together.height"
+                  rx="10"
+                />
+              }
+            }
+            @for (lane of layout().lanes; track lane.strand?.id ?? 'none') {
+              @let guide = guideBox(lane);
+              <line
+                class="guide"
+                [attr.x1]="guide.x"
+                [attr.y1]="guide.y"
+                [attr.x2]="guide.x + guide.width"
+                [attr.y2]="guide.y + guide.height"
+              />
+            }
+            @for (line of layout().lines; track line.strand.id) {
+              <path
+                class="line"
+                [attr.d]="linePathOf(line)"
+                [style.stroke]="strandColor(line.strand.color)"
+              />
+            }
+            @if (dropGapX(); as at) {
+              @let gap = gapBox(at);
+              <line
+                class="drop-gap"
+                [attr.x1]="gap.x"
+                [attr.y1]="gap.y"
+                [attr.x2]="gap.x + gap.width"
+                [attr.y2]="gap.y + gap.height"
+              />
+            }
+            @for (node of layout().nodes; track node.scene.id) {
+              @let lifted = drag()?.moved && drag()?.node === node;
+              <g
+                class="node"
+                role="link"
+                tabindex="0"
+                [attr.data-scene]="node.scene.id"
+                [class.turning]="node.scene.turningPoint"
+                [class.active]="active() === node"
+                [class.movable]="order() === 'story'"
+                [class.lifted]="lifted"
+                [style.transform]="lifted ? liftTransform() : null"
+                [style.--status-color]="statusInfo(node.scene.status ?? 'idea').color"
+                [attr.aria-label]="t().plot.openScene(node.scene.title)"
+                [attr.aria-description]="order() === 'story' ? t().plot.moveHint : null"
+                (pointerenter)="active.set(node)"
+                (pointerleave)="leave(node)"
+                (focus)="active.set(node)"
+                (blur)="leave(node)"
+                (pointerdown)="onPointerDown($event, node)"
+                (pointermove)="onPointerMove($event)"
+                (pointerup)="onPointerUp()"
+                (pointercancel)="onPointerCancel()"
+                (keydown)="onKeydown($event, node)"
+              >
+                @let mid = center(node);
+                @if (isDiamond(node)) {
+                  <polygon [attr.points]="diamond(node)" />
+                } @else {
+                  @let box = nodeBox(node);
+                  <rect
+                    [attr.x]="box.x"
+                    [attr.y]="box.y"
+                    [attr.width]="box.width"
+                    [attr.height]="box.height"
+                    [attr.rx]="nodeSize / 2"
+                  />
+                }
+                <text class="number" [attr.x]="mid.x" [attr.y]="mid.y">
+                  {{ node.bookNumber }}
+                </text>
+                @if (isDisplaced(node)) {
+                  @let mark = displacedAt(node);
+                  <circle class="displaced" [attr.cx]="mark.x" [attr.cy]="mark.y" r="4" />
+                }
+              </g>
+            }
+          </svg>
+          <!-- Scene titles: as HTML so long titles wrap and get truncated -->
+          @for (node of compact() ? [] : layout().nodes; track node.scene.id) {
+            <span
+              class="label"
+              aria-hidden="true"
+              [class.active]="active() === node"
+              [class.lifted]="drag()?.moved && drag()?.node === node"
+              [style]="labelStyle(node)"
+              [title]="node.scene.title"
+              (pointerenter)="active.set(node)"
+              (pointerleave)="leave(node)"
+              (click)="open(node)"
+            >
+              <span>{{ node.scene.title }}</span>
+            </span>
+          }
+        </div>
+      </ng-template>
+
+      <ng-template #noNodes>
+        <p class="no-nodes muted">
+          {{ t().plot.noTurningPoints }}
+          <button type="button" class="link" (click)="setView({ onlyTurningPoints: false })">
+            {{ t().plot.showAll }}
+          </button>
+        </p>
+      </ng-template>
+
+      @if (vertical()) {
+        <!--
+          Time runs downwards: thread names on top and chapters/sections on the left stay in view
+          while the box scrolls in both directions
+        -->
+        <div
+          class="card chart vertical"
+          [class.compact]="compact()"
+          [style.--lane-width.px]="laneHeight()"
+        >
+          <div class="corner"></div>
+          <ng-container *ngTemplateOutlet="lanesTemplate" />
+          @if (layout().nodes.length) {
+            <ng-container *ngTemplateOutlet="groupsTemplate" />
+            <ng-container *ngTemplateOutlet="drawingTemplate" />
+          } @else {
+            <ng-container *ngTemplateOutlet="noNodes" />
+          }
+        </div>
+      } @else {
+        <!-- Fixed on the left: the thread names; the drawing scrolls sideways on the right -->
+        <div class="card chart">
+          <ng-container *ngTemplateOutlet="lanesTemplate" />
+          <div class="scroller">
+            @if (layout().nodes.length) {
+              <ng-container *ngTemplateOutlet="groupsTemplate" />
+              <ng-container *ngTemplateOutlet="drawingTemplate" />
+            } @else {
+              <ng-container *ngTemplateOutlet="noNodes" />
+            }
+          </div>
+        </div>
+      }
     }
   }
 </div>

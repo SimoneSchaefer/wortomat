@@ -153,6 +153,17 @@ h1 {
   }
 }
 
+.direction-icon {
+  flex-shrink: 0;
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .diamond-icon {
   flex-shrink: 0;
   width: 0.75rem;

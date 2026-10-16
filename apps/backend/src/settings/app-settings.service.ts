@@ -29,7 +29,7 @@ const DEFAULTS: AppSettings = {
   theme: 'system',
   fontSize: 'medium',
   revisionMode: false,
-  plotView: { order: 'story', onlyTurningPoints: true, compact: false },
+  plotView: { order: 'story', onlyTurningPoints: true, compact: false, vertical: false },
 };
 
 /**
@@ -130,6 +130,7 @@ export class AppSettingsService {
         order: plotView.order,
         onlyTurningPoints: plotView.onlyTurningPoints,
         compact: plotView.compact,
+        vertical: plotView.vertical,
       };
     }
     mkdirSync(path.dirname(this.file), { recursive: true });
@@ -162,6 +163,7 @@ function sanitize(stored: Partial<AppSettings>): Partial<AppSettings> {
         ? plotView.onlyTurningPoints
         : fallback.onlyTurningPoints,
     compact: typeof plotView.compact === 'boolean' ? plotView.compact : fallback.compact,
+    vertical: typeof plotView.vertical === 'boolean' ? plotView.vertical : fallback.vertical,
   };
   return result;
 }
@@ -170,7 +172,8 @@ function isPlotView(value: Partial<PlotViewSettings>): value is PlotViewSettings
   return (
     (value.order === 'story' || value.order === 'book') &&
     typeof value.onlyTurningPoints === 'boolean' &&
-    typeof value.compact === 'boolean'
+    typeof value.compact === 'boolean' &&
+    typeof value.vertical === 'boolean'
   );
 }
 

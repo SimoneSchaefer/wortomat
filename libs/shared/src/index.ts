@@ -53,6 +53,8 @@ export interface PlotViewSettings {
   onlyTurningPoints: boolean;
   /** Narrow columns without scene titles – for long books. */
   compact: boolean;
+  /** Time runs downwards and the threads stand side by side, instead of left to right. */
+  vertical: boolean;
 }
 
 export type UpdateAppSettingsRequest = Partial<Omit<AppSettings, 'plotView'>> & {

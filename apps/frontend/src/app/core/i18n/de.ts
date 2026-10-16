@@ -448,11 +448,15 @@ export const de = {
     title: 'Handlung',
     intro:
       'Jeder Strang eine Linie, von links nach rechts. Wo Stränge zusammenlaufen, teilen sie sich eine Szene.',
+    introVertical:
+      'Jeder Strang eine Linie, von oben nach unten. Wo Stränge zusammenlaufen, teilen sie sich eine Szene.',
     orderBy: 'Ordnen nach',
     storyOrder: 'Handlung',
     bookOrder: 'Buch',
     storyHint:
       'Ziehe Szenen an die Stelle, an der sie passieren – auf eine andere Szene gezogen passieren sie gleichzeitig. Über den Spalten beginnst du mit „+“ einen Abschnitt wie „Tag 2“.',
+    storyHintVertical:
+      'Ziehe Szenen an die Stelle, an der sie passieren – auf eine andere Szene gezogen passieren sie gleichzeitig. Links neben den Zeilen beginnst du mit „+“ einen Abschnitt wie „Tag 2“.',
     bookHint: 'Die Szenen in der Reihenfolge des Buchs, nach Kapiteln.',
     bookPosition: (number: number) => `im Buch Szene ${number}`,
     displaced: 'versetzt',
@@ -474,6 +478,14 @@ export const de = {
     titles: 'Szenentitel',
     titlesHint: 'Titel unter den Szenen zeigen – ohne Titel wird die Übersicht viel schmaler',
     moveLaneHint: 'Ziehen oder Alt + Pfeil hoch/runter ändert die Reihenfolge der Stränge',
+    moveLaneHintVertical: 'Ziehen oder Alt + Pfeil links/rechts ändert die Reihenfolge der Stränge',
+    titlesHintVertical:
+      'Titel neben den Szenen zeigen – ohne Titel wird die Übersicht viel schmaler',
+    direction: 'Richtung',
+    horizontal: 'Waagerecht',
+    horizontalHint: 'Die Zeit läuft von links nach rechts, jeder Strang ist eine Zeile',
+    vertical: 'Senkrecht',
+    verticalHint: 'Die Zeit läuft von oben nach unten, jeder Strang ist eine Spalte',
     show: 'Anzeigen',
     turningPoints: 'Wendepunkte',
     allScenes: 'Alle Szenen',

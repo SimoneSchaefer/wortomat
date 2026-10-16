@@ -36,7 +36,7 @@ function book(): FakeApi {
 
 async function setup(
   api = book(),
-  view: Partial<{ order: 'story' | 'book'; onlyTurningPoints: boolean }> = {},
+  view: Partial<{ order: 'story' | 'book'; onlyTurningPoints: boolean; vertical: boolean }> = {},
 ) {
   const rendered = await render(PlotPage, {
     api,
@@ -44,7 +44,13 @@ async function setup(
     before: () =>
       TestBed.inject(AppSettingsStore).settings.update((settings) => ({
         ...settings,
-        plotView: { order: 'story', onlyTurningPoints: false, compact: false, ...view },
+        plotView: {
+          order: 'story',
+          onlyTurningPoints: false,
+          compact: false,
+          vertical: false,
+          ...view,
+        },
       })),
   });
   await until(rendered.settle, () => api.storyMarks.mock.calls.length > 0);
@@ -61,11 +67,16 @@ async function setup(
     }
     return Number(shape.getAttribute('points')!.split(' ')[0]!.split(',')[0]);
   };
-  const pointer = (target: Element, type: string, clientX: number) =>
+  /** Centre of a node on screen, whichever way time runs. */
+  const at = (id: string) => {
+    const number = node(id).querySelector('.number')!;
+    return { x: Number(number.getAttribute('x')), y: Number(number.getAttribute('y')) };
+  };
+  const pointer = (target: Element, type: string, clientX: number, clientY = 0) =>
     target.dispatchEvent(
-      new PointerEvent(type, { bubbles: true, button: 0, pointerId: 1, clientX, clientY: 0 }),
+      new PointerEvent(type, { bubbles: true, button: 0, pointerId: 1, clientX, clientY }),
     );
-  return { ...rendered, node, nodes, centre, pointer, confirm: TestBed.inject(ConfirmDialog) };
+  return { ...rendered, node, nodes, centre, at, pointer, confirm: TestBed.inject(ConfirmDialog) };
 }
 
 describe('PlotPage', () => {
@@ -196,5 +207,62 @@ describe('PlotPage', () => {
     key(node('a'), 'ArrowRight', { altKey: true });
     await settle();
     expect(api.saveStory).not.toHaveBeenCalled();
+  });
+
+  describe('vertical', () => {
+    it('switches to time running downwards and remembers the choice', async () => {
+      const { api, element, at, settle } = await setup();
+      expect(at('b').x).toBeGreaterThan(at('a').x);
+      button(element, P.vertical).click();
+      await settle();
+      expect(api.updateSettings).toHaveBeenCalledWith({ plotView: { vertical: true } });
+      expect(element.querySelector('.chart.vertical')).not.toBeNull();
+      // Later scenes further down; the threads side by side
+      expect(at('b').y).toBeGreaterThan(at('a').y);
+      expect(at('c').y).toBeGreaterThan(at('b').y);
+      expect(at('b').x).toBeGreaterThan(at('a').x);
+      expect(text(element.querySelector('.intro'))).toBe(P.introVertical);
+    });
+
+    it('puts the chapters beside the drawing, from top to bottom', async () => {
+      const { element } = await setup(book(), { order: 'book', vertical: true });
+      const groups = [...element.querySelectorAll<HTMLElement>('.groups .group')];
+      expect(groups.map(text)).toEqual(['1 Ankunft', '2 Flucht']);
+      expect(groups.map((group) => group.style.left)).toEqual(['', '']);
+      expect(parseFloat(groups[1]!.style.top)).toBeGreaterThan(parseFloat(groups[0]!.style.top));
+    });
+
+    it('drags a scene up or down instead of sideways', async () => {
+      const { api, node, pointer, at, settle } = await setup(book(), { vertical: true });
+      pointer(node('a'), 'pointerdown', at('a').x, at('a').y);
+      // Sideways is not along the time axis: nothing happens
+      pointer(node('a'), 'pointermove', at('a').x + 200, at('a').y);
+      await settle();
+      expect(node('a').classList).not.toContain('lifted');
+      pointer(node('a'), 'pointermove', at('a').x, at('c').y);
+      await settle();
+      expect(node('a').getAttribute('style')).toContain('translateY');
+      pointer(node('a'), 'pointerup', at('a').x, at('c').y);
+      await until(settle, () => api.saveStory.mock.calls.length > 0);
+      expect(api.saveStory).toHaveBeenCalledWith({ columns: [['b'], ['c', 'a']], marks: [] });
+    });
+
+    it('moves scenes with Alt + down and threads with Alt + right', async () => {
+      const { api, element, node, settle } = await setup(book(), { vertical: true });
+      key(node('a'), 'ArrowRight', { altKey: true });
+      await settle();
+      expect(api.saveStory).not.toHaveBeenCalled();
+      key(node('a'), 'ArrowDown', { altKey: true });
+      await until(settle, () => api.saveStory.mock.calls.length > 0);
+      expect(api.saveStory).toHaveBeenCalledWith({ columns: [['b'], ['a'], ['c']], marks: [] });
+
+      const lena = element.querySelector('.lanes [data-strand="lena"]')!;
+      key(lena, 'ArrowDown', { altKey: true });
+      await settle();
+      expect(api.moveStrand).not.toHaveBeenCalled();
+      key(lena, 'ArrowRight', { altKey: true });
+      await until(settle, () => api.moveStrand.mock.calls.length > 0);
+      expect(api.moveStrand).toHaveBeenCalledWith('lena', null);
+    });
   });
 });

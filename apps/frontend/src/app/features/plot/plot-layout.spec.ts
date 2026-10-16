@@ -169,4 +169,17 @@ describe('linePath', () => {
     );
     expect(path).toMatch(/^M0 50 C.* 28 H.* C.* 400 50$/);
   });
+
+  it('draws the same line with time running downwards', () => {
+    const points = [
+      { x: 0, y: 50 },
+      { x: 60, y: 28 },
+      { x: 400, y: 50 },
+    ];
+    const swapped = linePath(points, 28)
+      .replace(/(-?[\d.]+) (-?[\d.]+)/g, '$2 $1')
+      .replaceAll('H', 'V');
+    expect(linePath(points, 28, true)).toBe(swapped);
+    expect(linePath(points.slice(0, 1).concat({ x: 200, y: 50 }), 50, true)).toBe('M50 0 V200');
+  });
 });
