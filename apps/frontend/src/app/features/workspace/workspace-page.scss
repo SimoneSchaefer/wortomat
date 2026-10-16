@@ -300,6 +300,10 @@
 .scroll {
   grid-row: 2;
   overflow-y: auto;
+  // The editor's toolbar (up to ~47 px) and status bar (~33 px) stick to the top and bottom of this
+  // area. While typing or moving the cursor, the browser keeps the cursor line this far from the
+  // edges – clear of both bars, with about a line to spare below.
+  scroll-padding: 64px 0 72px;
 }
 
 // Bar above the content: "Manuscript › scene title" – a click opens the list
