@@ -46,3 +46,42 @@ test('deletes a scene only after confirming', async ({ page }) => {
   await expect(manuscript(page).getByRole('link', { name: 'Gewitter' })).toBeVisible();
   await expect(manuscript(page).getByRole('link', { name: 'Der Steg' })).toBeHidden();
 });
+
+test('keeps the cursor and the new text in view while typing a long scene', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 600 });
+  await createBook(page, 'Lange Nacht');
+  await addChapter(page, 'Eins');
+  await addScene(page, 'Eins', 'Die ganze Nacht');
+  await editor(page).click();
+
+  const statusbar = page.locator('.statusbar');
+  // The cursor sits in the last paragraph: it must stay fully above the status bar at the bottom
+  const current = editor(page).locator('p').last();
+  for (let line = 1; line <= 25; line++) {
+    await page.keyboard.press('Enter');
+    await page.keyboard.type(`Zeile ${line}: Sie schrieb weiter, Satz um Satz.`);
+    const bar = (await statusbar.boundingBox())!;
+    await expect
+      .poll(
+        async () => {
+          const text = (await current.boundingBox())!;
+          return text.y + text.height;
+        },
+        { message: `line ${line}` },
+      )
+      .toBeLessThanOrEqual(bar.y);
+  }
+
+  // Going back up, the line must not disappear behind the toolbar sticking to the top
+  const toolbar = page.getByRole('toolbar');
+  for (let step = 1; step <= 20; step++) {
+    await page.keyboard.press('ArrowUp');
+    const bar = (await toolbar.boundingBox())!;
+    // Firefox may finish scrolling a moment after the key press
+    await expect
+      .poll(() => page.evaluate(() => getSelection()!.getRangeAt(0).getBoundingClientRect().top), {
+        message: `step ${step}`,
+      })
+      .toBeGreaterThanOrEqual(bar.y + bar.height);
+  }
+});
