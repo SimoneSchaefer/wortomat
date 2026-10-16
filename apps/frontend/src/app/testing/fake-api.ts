@@ -44,6 +44,7 @@ import type {
   UpdateNoteRequest,
   ManuscriptNode,
   MoveNodeRequest,
+  ArrangeScenesRequest,
   NoteGroup,
   NoteSummary,
   SceneRelations,
@@ -105,6 +106,19 @@ export class FakeApi {
       if (index < 0) throw new Error(`unknown node ${id}`);
       this.nodes[index] = { ...this.nodes[index]!, ...request };
       return structuredClone(this.nodes[index]!);
+    },
+  );
+  /** Like the backend: every scene into its chapter, in the given order. */
+  readonly arrangeScenes = vi.fn(
+    async (request: ArrangeScenesRequest): Promise<ManuscriptNode[]> => {
+      for (const { chapterId, sceneIds } of request.chapters) {
+        sceneIds.forEach((id, index) => {
+          const scene = this.nodes.find((node) => node.id === id)!;
+          scene.parentId = chapterId;
+          scene.sortOrder = index + 1;
+        });
+      }
+      return structuredClone(this.nodes);
     },
   );
   // Tests check the request; reordering itself is covered by the backend tests.

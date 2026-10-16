@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import type {
   AnnotationCounts,
+  ArrangeScenesRequest,
   CreateNodeRequest,
   ManuscriptNode,
   MoveNodeRequest,
@@ -108,6 +109,10 @@ export class ProjectStore {
   /** E.g. after marks were added from outside. */
   async reloadNodes(): Promise<void> {
     this.nodes.set(await this.api.listNodes());
+  }
+
+  async arrangeScenes(request: ArrangeScenesRequest): Promise<void> {
+    this.nodes.set(await this.api.arrangeScenes(request));
   }
 
   async moveNode(id: string, request: MoveNodeRequest): Promise<void> {

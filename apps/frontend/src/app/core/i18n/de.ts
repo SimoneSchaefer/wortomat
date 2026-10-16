@@ -471,6 +471,21 @@ export const de = {
     deleteMark: 'Abschnitt entfernen',
     moveHint: 'Alt + Pfeiltasten verschieben die Szene in der Handlung',
     reset: 'Auf Buchreihenfolge zurücksetzen …',
+    toManuscript: 'Ins Manuskript übernehmen …',
+    toManuscriptTitle: 'Reihenfolge ins Manuskript übernehmen?',
+    toManuscriptIntro: (count: number) =>
+      `${count === 1 ? 'Eine Szene wandert' : `${count} Szenen wandern`} im Manuskript an ihre Stelle in der Handlung – jeweils ins Kapitel der Szene davor. Alle anderen bleiben, wo sie sind. Die bisherige Reihenfolge im Buch lässt sich danach nicht automatisch wiederherstellen.`,
+    chapterNamed: (number: number, title: string) => `Kapitel ${number} „${title}“`,
+    moveAfter: (chapter: string, scene: string) => `in ${chapter}, nach „${scene}“`,
+    moveToStart: (chapter: string) => `an den Anfang von ${chapter}`,
+    moveFrom: (chapter: string, where: string) => `aus ${chapter} ${where}`,
+    toManuscriptApply: 'Übernehmen',
+    movedLabel: 'verschoben',
+    markMoved: 'Verschobene Szenen am Anfang mit „verschoben“ als TODO markieren',
+    markedHint:
+      'Du findest sie über die TODO-Markierung „verschoben“ – im Baum und im Szenenfilter unter „Offen“.',
+    toManuscriptDone: (count: number) =>
+      `${count === 1 ? '1 Szene' : `${count} Szenen`} im Manuskript verschoben – Buch und Handlung stimmen jetzt überein.`,
     resetTitle: 'Reihenfolge zurücksetzen?',
     resetMessage:
       'Alle Szenen stehen danach wieder in der Reihenfolge des Buchs, und die Abschnitte werden entfernt.',

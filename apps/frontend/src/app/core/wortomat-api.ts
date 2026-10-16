@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
   AppSettings,
+  ArrangeScenesRequest,
   CreateMapRequest,
   CreateNodeRequest,
   CreateNoteGroupRequest,
@@ -120,6 +121,11 @@ export class WortomatApi {
 
   updateNode(id: string, request: UpdateNodeRequest): Promise<ManuscriptNode> {
     return this.call(this.http.patch<ManuscriptNode>(`/api/nodes/${id}`, request));
+  }
+
+  /** All scenes at once, e.g. in story order; returns the complete tree. */
+  arrangeScenes(request: ArrangeScenesRequest): Promise<ManuscriptNode[]> {
+    return this.call(this.http.post<ManuscriptNode[]>('/api/nodes/arrange', request));
   }
 
   /** Returns the complete tree after moving. */
