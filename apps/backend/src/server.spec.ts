@@ -35,7 +35,12 @@ import type {
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
 
 const TOKEN = 'test-token';
-const DEFAULT_PLOT_VIEW = { order: 'story', onlyTurningPoints: true, compact: false };
+const DEFAULT_PLOT_VIEW = {
+  order: 'story',
+  onlyTurningPoints: true,
+  compact: false,
+  vertical: false,
+};
 // Smallest valid PNG (1×1 pixel).
 const PNG_1PX = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
@@ -1594,14 +1599,15 @@ describe('REST API', () => {
     assert.equal(await invalid({ revisionMode: 'ja' }), 400);
     assert.equal(await invalid({ plotView: { order: 'zufällig' } }), 400);
     assert.equal(await invalid({ plotView: { compact: 'ja' } }), 400);
+    assert.equal(await invalid({ plotView: { vertical: 'ja' } }), 400);
     // The plot view can be changed partially
     assert.deepEqual(
       (await api<AppSettings>('PATCH', '/api/settings', { plotView: { order: 'book' } })).plotView,
-      { order: 'book', onlyTurningPoints: true, compact: false },
+      { order: 'book', onlyTurningPoints: true, compact: false, vertical: false },
     );
     assert.deepEqual(
       (await api<AppSettings>('PATCH', '/api/settings', { plotView: { compact: true } })).plotView,
-      { order: 'book', onlyTurningPoints: true, compact: true },
+      { order: 'book', onlyTurningPoints: true, compact: true, vertical: false },
     );
     await api('PATCH', '/api/settings', { plotView: DEFAULT_PLOT_VIEW });
     assert.equal(

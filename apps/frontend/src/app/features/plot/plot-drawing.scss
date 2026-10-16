@@ -1,6 +1,6 @@
 // Drawing of the plot view – separate from the rest of the page (header, switches, info line) so
-// each stylesheet stays manageable. Belongs to PlotPage. Thread names on the left, the sideways
-// scrolling area on the right.
+// each stylesheet stays manageable. Belongs to PlotPage. Horizontal: thread names on the left, the
+// sideways scrolling area on the right. Vertical: see the end of the file.
 
 .chart {
   display: flex;
@@ -319,4 +319,123 @@
   font-size: 0.8rem;
   opacity: 0;
   transition: opacity 0.15s;
+}
+
+// Time runs downwards: thread names as a row on top, chapters or sections as a column on the left.
+// The box scrolls in both directions itself, so both stay in view (sticky) – the page around it
+// would only scroll vertically.
+.chart.vertical {
+  display: grid;
+  grid-template-columns: 8rem max-content;
+  grid-template-rows: auto auto;
+  overflow: auto;
+  max-height: calc(100vh - 10rem);
+  min-height: 12rem;
+
+  .corner,
+  .lanes,
+  .groups {
+    position: sticky;
+    z-index: 2;
+    background: var(--bg);
+  }
+
+  .corner {
+    top: 0;
+    left: 0;
+    z-index: 3;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .lanes {
+    top: 0;
+    display: flex;
+    width: auto;
+    padding: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--hairline);
+
+    li {
+      box-sizing: border-box;
+      height: 2.6rem;
+      // The dot sits right above its thread's line
+      padding: 0 0.4rem 0 calc(var(--lane-width) / 2 - 0.3rem);
+      gap: 0.35rem;
+
+      &.unassigned {
+        padding-left: calc(var(--lane-width) / 2 - 0.3rem);
+      }
+    }
+
+    .grip {
+      margin-left: -0.95rem;
+    }
+  }
+
+  .groups {
+    left: 0;
+    border-right: 1px solid var(--hairline);
+
+    .group {
+      left: 0;
+      right: 0;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding: 0.35rem 0.5rem;
+      border-bottom: none;
+      border-top: 2px solid var(--hairline);
+      white-space: normal;
+      line-height: 1.3;
+    }
+
+    .mark {
+      border-top-color: var(--accent);
+    }
+  }
+
+  .add-mark {
+    top: auto;
+    left: 50%;
+  }
+
+  .mark-editor {
+    top: auto;
+    left: 2px;
+    translate: 0 -50%;
+
+    input {
+      width: 7rem;
+      height: auto;
+    }
+  }
+
+  .no-nodes {
+    grid-column: 1 / -1;
+  }
+
+  // Narrow lanes: the names run upwards so they still fit
+  &.compact .lanes li {
+    height: auto;
+    max-height: 9rem;
+    padding: 0.5rem 0;
+    justify-content: flex-end;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+
+    .grip {
+      display: none;
+    }
+  }
+
+  .label {
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0;
+
+    span {
+      text-align: left;
+    }
+  }
 }

@@ -24,7 +24,7 @@ export class AppSettingsStore {
     theme: 'system',
     fontSize: 'medium',
     revisionMode: false,
-    plotView: { order: 'story', onlyTurningPoints: true, compact: false },
+    plotView: { order: 'story', onlyTurningPoints: true, compact: false, vertical: false },
   });
 
   /** Errors are no reason not to start the app – the defaults apply then. */

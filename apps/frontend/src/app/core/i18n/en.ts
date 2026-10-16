@@ -414,11 +414,15 @@ export const en: Texts = {
     title: 'Plot',
     intro:
       'Each plot thread is a line running from left to right. Where threads meet, they share a scene.',
+    introVertical:
+      'Each plot thread is a line running from top to bottom. Where threads meet, they share a scene.',
     orderBy: 'Order by',
     storyOrder: 'Story',
     bookOrder: 'Book',
     storyHint:
       'Drag scenes to where they happen – dropped onto another scene, they happen at the same time. Use “+” above the columns to start a section like “Day 2”.',
+    storyHintVertical:
+      'Drag scenes to where they happen – dropped onto another scene, they happen at the same time. Use “+” left of the rows to start a section like “Day 2”.',
     bookHint: 'The scenes in book order, by chapter.',
     bookPosition: (number: number) => `scene ${number} in the book`,
     displaced: 'out of order',
@@ -439,6 +443,14 @@ export const en: Texts = {
     titles: 'Scene titles',
     titlesHint: 'Show titles below the scenes – without them the overview gets much narrower',
     moveLaneHint: 'Drag or press Alt + up/down to reorder the plot threads',
+    moveLaneHintVertical: 'Drag or press Alt + left/right to reorder the plot threads',
+    titlesHintVertical:
+      'Show titles beside the scenes – without them the overview gets much narrower',
+    direction: 'Direction',
+    horizontal: 'Horizontal',
+    horizontalHint: 'Time runs from left to right, each plot thread is a row',
+    vertical: 'Vertical',
+    verticalHint: 'Time runs from top to bottom, each plot thread is a column',
     show: 'Show',
     turningPoints: 'Turning points',
     allScenes: 'All scenes',

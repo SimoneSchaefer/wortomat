@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
   Component,
@@ -25,9 +26,14 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { scenesInOrder } from '../stats/stats';
 import {
   layoutPlot,
+  linePath,
   NODE_SIZE,
   PLOT_GEOMETRY,
+  type PlotColumn,
   type PlotColumnInput,
+  type PlotGroup,
+  type PlotLane,
+  type PlotLine,
   type PlotGroupInfo,
   type PlotNode,
   type PlotScene,
@@ -46,6 +52,14 @@ const DIAMOND_RADIUS = NODE_SIZE * 0.68;
 
 const HEADER_HEIGHT = 30;
 
+/** Screen coordinates of an SVG rectangle. */
+interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /** From this distance a click turns into a drag. */
 const DRAG_THRESHOLD_PX = 4;
 
@@ -57,16 +71,18 @@ type Hit = { join: number } | { gap: number };
 
 interface LaneDrag {
   strand: Strand;
-  startY: number;
+  /** Pointer position across the time axis, minus the row's own offset. */
+  start: number;
   /** Index of the row it would land on when released. */
   target: number;
 }
 
 interface Drag {
   node: PlotNode;
-  startX: number;
+  /** Pointer position along the time axis. */
+  start: number;
   moved: boolean;
-  dx: number;
+  delta: number;
   hit: Hit | null;
 }
 
@@ -75,6 +91,7 @@ interface MarkDraft {
   id: string | null;
   /** Before this story column (all scenes, not only the displayed ones). */
   beforeColumn: number;
+  /** Along the time axis. */
   x: number;
   label: string;
 }
@@ -82,13 +99,16 @@ interface MarkDraft {
 const START_SECTION: PlotGroupInfo = { id: 'start', label: '', number: null };
 
 /**
- * Story overview: each thread a line, from left to right – either in story order (rearranged by
- * dragging, with sections like "Day 2") or in book order (by chapters). Scenes in several threads
- * are where lines merge.
+ * Story overview: each thread a line, from left to right or top to bottom – either in story order
+ * (rearranged by dragging, with sections like "Day 2") or in book order (by chapters). Scenes in
+ * several threads are where lines merge.
+ *
+ * The layout always thinks of time as x and the threads as y; only drawing swaps them when
+ * `vertical` is on, so dragging and sections work the same way in both directions.
  */
 @Component({
   selector: 'wm-plot-page',
-  imports: [Autofocus, Mascot],
+  imports: [Autofocus, Mascot, NgTemplateOutlet],
   templateUrl: './plot-page.html',
   styleUrls: ['./plot-page.scss', './plot-drawing.scss'],
   // Dragging rows: listen on the document – the dragged row moves in the DOM while dragging and
@@ -139,8 +159,15 @@ export class PlotPage {
   protected readonly order = computed(() => this.plotView().order);
   protected readonly onlyTurningPoints = computed(() => this.plotView().onlyTurningPoints);
   protected readonly compact = computed(() => this.plotView().compact);
+  protected readonly vertical = computed(() => this.plotView().vertical);
   private readonly geometry = computed(() =>
-    this.compact() ? PLOT_GEOMETRY.compact : PLOT_GEOMETRY.regular,
+    this.vertical()
+      ? this.compact()
+        ? PLOT_GEOMETRY.verticalCompact
+        : PLOT_GEOMETRY.vertical
+      : this.compact()
+        ? PLOT_GEOMETRY.compact
+        : PLOT_GEOMETRY.regular,
   );
   protected readonly laneHeight = computed(() => this.geometry().laneHeight);
   protected readonly columnWidth = computed(() => this.geometry().columnWidth);
@@ -251,19 +278,89 @@ export class PlotPage {
     if (this.active() === node) this.active.set(null);
   }
 
+  // --- Drawing: from layout coordinates (time = x, threads = y) to the screen ---
+
+  /** Size of the drawing on screen. */
+  protected readonly size = computed(() => {
+    const along = this.layout().width + this.padding;
+    const across = this.layout().height;
+    return this.vertical() ? { width: across, height: along } : { width: along, height: across };
+  });
+
+  private box(along: number, across: number, alongSize: number, acrossSize: number): Box {
+    return this.vertical()
+      ? { x: across, y: along, width: acrossSize, height: alongSize }
+      : { x: along, y: across, width: alongSize, height: acrossSize };
+  }
+
+  protected nodeBox(node: PlotNode): Box {
+    return this.box(node.x - NODE_SIZE / 2, node.y - node.height / 2, NODE_SIZE, node.height);
+  }
+
+  protected center(node: PlotNode): { x: number; y: number } {
+    return this.vertical() ? { x: node.y, y: node.x } : { x: node.x, y: node.y };
+  }
+
+  protected bandBox(group: PlotGroup): Box {
+    return this.box(group.x, 0, group.width, this.layout().height);
+  }
+
+  protected togetherBox(column: PlotColumn): Box {
+    return this.box(column.left + 6, 4, column.width - 12, this.layout().height - 8);
+  }
+
+  /** The dotted line a thread runs along. */
+  protected guideBox(lane: PlotLane): Box {
+    return this.box(0, lane.y, this.layout().width + this.padding, 0);
+  }
+
+  /** "Insert here" line across all threads. */
+  protected gapBox(at: number): Box {
+    return this.box(at, 0, 0, this.layout().height);
+  }
+
+  protected linePathOf(line: PlotLine): string {
+    return this.vertical() ? linePath(line.points, line.laneY, true) : line.path;
+  }
+
+  protected liftTransform(): string | null {
+    const drag = this.drag();
+    if (!drag?.moved) return null;
+    return `translate${this.vertical() ? 'Y' : 'X'}(${drag.delta}px)`;
+  }
+
+  /** Position of something in the header (chapters, sections) along the time axis. */
+  protected alongStyle(start: number, size?: number): Record<string, string> {
+    const [position, extent] = this.vertical() ? ['top', 'height'] : ['left', 'width'];
+    return size === undefined
+      ? { [position]: `${start}px` }
+      : { [position]: `${start}px`, [extent]: `${size}px` };
+  }
+
+  /** Pointer position along the time axis, or across it. */
+  private alongOf(event: PointerEvent): number {
+    return this.vertical() ? event.clientY : event.clientX;
+  }
+
+  private acrossOf(event: PointerEvent): number {
+    return this.vertical() ? event.clientX : event.clientY;
+  }
+
   protected onPointerDown(event: PointerEvent, node: PlotNode): void {
     if (event.button !== 0) return;
     (event.currentTarget as Element).setPointerCapture(event.pointerId);
-    this.drag.set({ node, startX: event.clientX, moved: false, dx: 0, hit: null });
+    this.drag.set({ node, start: this.alongOf(event), moved: false, delta: 0, hit: null });
   }
 
   protected onPointerMove(event: PointerEvent): void {
     const drag = this.drag();
     if (!drag || this.order() !== 'story') return;
-    const dx = event.clientX - drag.startX;
-    if (!drag.moved && Math.abs(dx) < DRAG_THRESHOLD_PX) return;
-    const left = this.drawing()?.nativeElement.getBoundingClientRect().left ?? 0;
-    this.drag.set({ ...drag, moved: true, dx, hit: this.hitAt(event.clientX - left, drag.node) });
+    const delta = this.alongOf(event) - drag.start;
+    if (!drag.moved && Math.abs(delta) < DRAG_THRESHOLD_PX) return;
+    const rect = this.drawing()?.nativeElement.getBoundingClientRect();
+    const origin = (this.vertical() ? rect?.top : rect?.left) ?? 0;
+    const hit = this.hitAt(this.alongOf(event) - origin, drag.node);
+    this.drag.set({ ...drag, moved: true, delta, hit });
   }
 
   protected onPointerUp(): void {
@@ -334,7 +431,14 @@ export class PlotPage {
     return (previous.left + previous.width + next.left) / 2;
   }
 
-  /** Enter opens; Alt + arrow left/right: the scene one column earlier or later. */
+  /** Arrow keys along the time axis (earlier, later) and across it (previous, next thread). */
+  private arrows(): { earlier: string; later: string; up: string; down: string } {
+    return this.vertical()
+      ? { earlier: 'ArrowUp', later: 'ArrowDown', up: 'ArrowLeft', down: 'ArrowRight' }
+      : { earlier: 'ArrowLeft', later: 'ArrowRight', up: 'ArrowUp', down: 'ArrowDown' };
+  }
+
+  /** Enter opens; Alt + arrow along the time axis: the scene one column earlier or later. */
   protected onKeydown(event: KeyboardEvent, node: PlotNode): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -342,12 +446,13 @@ export class PlotPage {
       return;
     }
     if (!event.altKey || this.order() !== 'story') return;
-    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const { earlier, later } = this.arrows();
+    if (event.key !== earlier && event.key !== later) return;
     event.preventDefault();
     // Simultaneous with others? Then first out of the column, before or after it.
     const alone = this.layout().columns[node.column]!.sceneIds.length === 1;
     const gap =
-      event.key === 'ArrowLeft' ? node.column - (alone ? 1 : 0) : node.column + (alone ? 2 : 1);
+      event.key === earlier ? node.column - (alone ? 1 : 0) : node.column + (alone ? 2 : 1);
     if (gap < 0) return;
     const target = this.dropTarget({ gap }, node.scene.id);
     if (target) void this.moveTo(node.scene.id, target, true);
@@ -374,14 +479,15 @@ export class PlotPage {
     if (event.button !== 0) return;
     event.preventDefault(); // no text selection while dragging
     const index = this.strands().findIndex((s) => s.id === strand.id);
-    this.laneDrag.set({ strand, startY: event.clientY - index * this.laneHeight(), target: index });
+    const start = this.acrossOf(event) - index * this.laneHeight();
+    this.laneDrag.set({ strand, start, target: index });
   }
 
   protected onLanePointerMove(event: PointerEvent): void {
     const drag = this.laneDrag();
     if (!drag) return;
     const last = (this.data.value()?.strands.length ?? 1) - 1;
-    const target = Math.round((event.clientY - drag.startY) / this.laneHeight());
+    const target = Math.round((this.acrossOf(event) - drag.start) / this.laneHeight());
     const clamped = Math.max(0, Math.min(last, target));
     if (clamped !== drag.target) this.laneDrag.set({ ...drag, target: clamped });
   }
@@ -398,11 +504,12 @@ export class PlotPage {
   }
 
   protected onLaneKeydown(event: KeyboardEvent, strand: Strand): void {
-    if (!event.altKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
+    const { up, down } = this.arrows();
+    if (!event.altKey || (event.key !== up && event.key !== down)) return;
     event.preventDefault();
     const strands = this.data.value()?.strands ?? [];
     const index = strands.findIndex((s) => s.id === strand.id);
-    const target = index + (event.key === 'ArrowUp' ? -1 : 1);
+    const target = index + (event.key === up ? -1 : 1);
     if (target < 0 || target >= strands.length) return;
     void this.moveStrand(strand, target).then(() =>
       afterNextRender(
@@ -499,13 +606,41 @@ export class PlotPage {
     }
   }
 
-  /** Just below the node (the diamond reaches a little further). */
-  protected labelTop(node: PlotNode): number {
-    return node.y + this.reach(node) + 3;
+  /**
+   * Just below the node, or beside it when vertical (the diamond reaches a little further). As
+   * HTML on top of the SVG, so long titles wrap and get truncated.
+   */
+  protected labelStyle(node: PlotNode): Record<string, string> {
+    const { x, y } = this.center(node);
+    const column = this.columnWidth();
+    if (this.vertical()) {
+      const left = x + this.reach(node) + 4;
+      const width = this.geometry().labelReach - 6;
+      return {
+        left: `${left}px`,
+        top: `${y - column / 2}px`,
+        width: `${width}px`,
+        height: `${column}px`,
+      };
+    }
+    return {
+      left: `${x - column / 2}px`,
+      top: `${y + this.reach(node) + 3}px`,
+      width: `${column}px`,
+    };
   }
 
+  /** Half the node's extent across the time axis. */
   protected reach(node: PlotNode): number {
     return this.isDiamond(node) ? DIAMOND_RADIUS : node.height / 2;
+  }
+
+  /** Top right of the node: past its far edge across the time axis. */
+  protected displacedAt(node: PlotNode): { x: number; y: number } {
+    const { x, y } = this.center(node);
+    return this.vertical()
+      ? { x: x + this.reach(node), y: y - NODE_SIZE / 2 }
+      : { x: x + NODE_SIZE / 2, y: y - this.reach(node) };
   }
 
   protected isDiamond(node: PlotNode): boolean {
@@ -514,6 +649,7 @@ export class PlotPage {
 
   protected diamond(node: PlotNode): string {
     const r = DIAMOND_RADIUS;
-    return `${node.x},${node.y - r} ${node.x + r},${node.y} ${node.x},${node.y + r} ${node.x - r},${node.y}`;
+    const { x, y } = this.center(node);
+    return `${x},${y - r} ${x + r},${y} ${x},${y + r} ${x - r},${y}`;
   }
 }
