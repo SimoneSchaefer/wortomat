@@ -8,7 +8,7 @@ import { Mascot } from '../../core/mascot';
   imports: [Mascot],
   template: `
     <div class="content">
-      <wm-mascot />
+      <wm-mascot sleeping />
       <p class="muted">{{ message()?.(t()) }}</p>
     </div>
   `,
