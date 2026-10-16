@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put } from '@nestjs/common';
 import type {
+  ArrangeScenesRequest,
   CreateNodeRequest,
   ManuscriptNode,
   MoveNodeRequest,
@@ -27,6 +28,12 @@ export class ManuscriptController {
   @Patch('nodes/:id')
   update(@Param('id') id: string, @Body() body: UpdateNodeRequest): ManuscriptNode {
     return this.manuscript.update(id, body);
+  }
+
+  @Post('nodes/arrange')
+  @HttpCode(200)
+  arrange(@Body() body: ArrangeScenesRequest): ManuscriptNode[] {
+    return this.manuscript.arrange(body);
   }
 
   @Post('nodes/:id/move')

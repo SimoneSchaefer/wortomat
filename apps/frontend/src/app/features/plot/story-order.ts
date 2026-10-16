@@ -130,3 +130,72 @@ export function remapMark(
   }
   return after.length - 1;
 }
+
+/** A scene where it stands in the book. */
+export interface BookScene {
+  id: string;
+  chapterId: string;
+}
+
+/** A scene that changes its place in the manuscript. */
+export interface ManuscriptMove {
+  sceneId: string;
+  fromChapterId: string;
+  toChapterId: string;
+  /** The scene it follows in its new chapter; `null` = at the start of the chapter. */
+  afterId: string | null;
+}
+
+export interface ManuscriptPlan {
+  /** Chapters with scenes, in book order – as the backend takes it. */
+  chapters: Array<{ chapterId: string; sceneIds: string[] }>;
+  moves: ManuscriptMove[];
+}
+
+/**
+ * How the manuscript has to change to follow the story. Only the displaced scenes move – everything
+ * else keeps its chapter – and a displaced scene goes into the chapter of the scene before it in the
+ * story (at the very front: the chapter of the first scene that stays). Chapters keep their order.
+ * As the scenes that stay are in book order, the chapters then follow each other just as the story
+ * does. `scenes` in book order.
+ */
+export function manuscriptPlan(
+  columns: readonly (readonly string[])[],
+  scenes: readonly BookScene[],
+): ManuscriptPlan {
+  const bookIndex = new Map(scenes.map((scene, index) => [scene.id, index]));
+  const chapterOf = new Map(scenes.map((scene) => [scene.id, scene.chapterId]));
+  const displaced = displacedScenes(columns, bookIndex);
+  const sequence = columns.flatMap((ids) =>
+    [...ids].sort((a, b) => bookIndex.get(a)! - bookIndex.get(b)!),
+  );
+  const firstStaying = sequence.find((id) => !displaced.has(id));
+  let current = firstStaying === undefined ? null : chapterOf.get(firstStaying)!;
+  const target = new Map<string, string>();
+  for (const id of sequence) {
+    if (!displaced.has(id)) current = chapterOf.get(id)!;
+    target.set(id, displaced.has(id) ? current! : chapterOf.get(id)!);
+  }
+
+  const chapterOrder = [...new Set(scenes.map((scene) => scene.chapterId))];
+  const chapters = chapterOrder
+    .map((chapterId) => ({
+      chapterId,
+      sceneIds: sequence.filter((id) => target.get(id) === chapterId),
+    }))
+    .filter((chapter) => chapter.sceneIds.length > 0);
+
+  const moves = sequence
+    .filter((id) => displaced.has(id))
+    .map((sceneId): ManuscriptMove => {
+      const toChapterId = target.get(sceneId)!;
+      const inChapter = chapters.find((chapter) => chapter.chapterId === toChapterId)!.sceneIds;
+      return {
+        sceneId,
+        fromChapterId: chapterOf.get(sceneId)!,
+        toChapterId,
+        afterId: inChapter[inChapter.indexOf(sceneId) - 1] ?? null,
+      };
+    });
+  return { chapters, moves };
+}

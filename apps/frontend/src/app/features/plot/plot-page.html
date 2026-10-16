@@ -102,10 +102,52 @@
                 : t().plot.storyHint
           }}
         </p>
-        @if (order() === 'story' && arranged()) {
-          <button type="button" class="link" (click)="reset()">{{ t().plot.reset }}</button>
-        }
+        <span class="hint-actions">
+          @if (plan()) {
+            <button
+              type="button"
+              class="link"
+              aria-controls="manuscript-plan"
+              [attr.aria-expanded]="planOpen()"
+              (click)="planOpen.set(!planOpen())"
+            >
+              {{ t().plot.toManuscript }}
+            </button>
+          }
+          @if (order() === 'story' && arranged()) {
+            <button type="button" class="link" (click)="reset()">{{ t().plot.reset }}</button>
+          }
+        </span>
       </div>
+
+      <!-- Preview: which scenes move where in the manuscript; nothing changes before "Apply" -->
+      @if (planOpen() && plan(); as plan) {
+        <section
+          id="manuscript-plan"
+          class="card manuscript-plan"
+          [attr.aria-labelledby]="'manuscript-plan-title'"
+        >
+          <h2 id="manuscript-plan-title">{{ t().plot.toManuscriptTitle }}</h2>
+          <p class="muted">{{ t().plot.toManuscriptIntro(plan.moves.length) }}</p>
+          <ul>
+            @for (move of plan.moves; track move.sceneId) {
+              <li>
+                <strong>{{ titleOf(move.sceneId) }}</strong>
+                <span class="muted">{{ describeMove(move) }}</span>
+              </li>
+            }
+          </ul>
+          <div class="plan-actions">
+            <button type="button" class="primary" [disabled]="applying()" (click)="applyPlan()">
+              {{ t().plot.toManuscriptApply }}
+            </button>
+            <button type="button" (click)="planOpen.set(false)">{{ t().confirm.cancel }}</button>
+          </div>
+        </section>
+      }
+      @if (applied(); as count) {
+        <p class="muted applied" role="status">{{ t().plot.toManuscriptDone(count) }}</p>
+      }
 
       <!-- Info line: which scene is under the mouse pointer -->
       <div class="info" aria-live="polite">

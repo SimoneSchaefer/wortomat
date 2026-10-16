@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   AnnotationCounts,
+  ArrangeScenesRequest,
   CreateNodeRequest,
   EditorDoc,
   ManuscriptNode,
@@ -175,6 +176,56 @@ export class ManuscriptService {
         .run(parentId, now, id);
       const setOrder = this.db.prepare('UPDATE nodes SET sort_order = ? WHERE id = ?');
       siblings.forEach((siblingId, position) => setOrder.run(position + 1, siblingId));
+      this.projects.touch();
+    });
+    return this.list();
+  }
+
+  /**
+   * All scenes at once and in one transaction, so a book is never left half rearranged. Every
+   * scene must appear exactly once – otherwise the request no longer matches the book (e.g. a
+   * scene was added in the meantime) and nothing changes.
+   */
+  arrange(request: ArrangeScenesRequest): ManuscriptNode[] {
+    const chapters = Array.isArray(request?.chapters) ? request.chapters : [];
+    const kinds = new Map(
+      (
+        this.db.prepare('SELECT id, kind FROM nodes').all() as Array<{ id: string; kind: NodeKind }>
+      ).map((row) => [row.id, row.kind]),
+    );
+    const sceneIds = chapters.flatMap((chapter) =>
+      Array.isArray(chapter?.sceneIds) ? chapter.sceneIds : [],
+    );
+    const allScenes = [...kinds].filter(([, kind]) => kind === 'scene').map(([id]) => id);
+    const valid =
+      chapters.every((chapter) => kinds.get(chapter?.chapterId) === 'chapter') &&
+      new Set(chapters.map((chapter) => chapter.chapterId)).size === chapters.length &&
+      sceneIds.every((id) => kinds.get(id) === 'scene') &&
+      new Set(sceneIds).size === sceneIds.length &&
+      sceneIds.length === allScenes.length;
+    if (!valid) {
+      throw new BadRequestException(
+        localized(
+          'Die neue Anordnung passt nicht mehr zum Buch. Bitte lade die Ansicht neu.',
+          'The new arrangement no longer matches the book. Please reload the view.',
+        ),
+      );
+    }
+
+    transaction(this.db, () => {
+      const now = nowIso();
+      // Only a scene that changes chapter counts as edited, as with moving it in the tree
+      const place = this.db.prepare(
+        `UPDATE nodes SET sort_order = :position,
+                updated_at = CASE WHEN parent_id IS :parent THEN updated_at ELSE :now END,
+                parent_id = :parent
+          WHERE id = :id`,
+      );
+      for (const { chapterId, sceneIds } of chapters) {
+        sceneIds.forEach((id, index) =>
+          place.run({ position: index + 1, parent: chapterId, now, id }),
+        );
+      }
       this.projects.touch();
     });
     return this.list();

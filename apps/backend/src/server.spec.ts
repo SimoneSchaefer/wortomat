@@ -218,6 +218,63 @@ describe('REST API', () => {
     await api('DELETE', `/api/nodes/${k2.id}`);
   });
 
+  it('arranges all scenes at once and rejects arrangements that miss the book', async () => {
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const titlesUnder = (nodes: ManuscriptNode[], parentId: string) =>
+      nodes
+        .filter((n) => n.parentId === parentId)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((n) => n.title);
+    const k1 = await node(null, 'chapter', 'K1');
+    const k2 = await node(null, 'chapter', 'K2');
+    const a = await node(k1.id, 'scene', 'A');
+    const b = await node(k1.id, 'scene', 'B');
+    const c = await node(k2.id, 'scene', 'C');
+
+    const nodes = await api<ManuscriptNode[]>('POST', '/api/nodes/arrange', {
+      chapters: [
+        { chapterId: k1.id, sceneIds: [c.id, a.id] },
+        { chapterId: k2.id, sceneIds: [b.id] },
+      ],
+    });
+    assert.deepEqual(titlesUnder(nodes, k1.id), ['C', 'A']);
+    assert.deepEqual(titlesUnder(nodes, k2.id), ['B']);
+
+    const status = async (chapters: unknown) =>
+      (
+        await fetch(`${server.url}/api/nodes/arrange`, {
+          method: 'POST',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chapters }),
+        })
+      ).status;
+    const twice = [{ chapterId: k1.id, sceneIds: [a.id, b.id, c.id, a.id] }];
+    assert.equal(
+      await status([{ chapterId: k1.id, sceneIds: [a.id, b.id] }]),
+      400,
+      'scene missing',
+    );
+    assert.equal(await status(twice), 400, 'scene twice');
+    assert.equal(
+      await status([{ chapterId: a.id, sceneIds: [a.id, b.id, c.id] }]),
+      400,
+      'no chapter',
+    );
+    assert.equal(
+      await status([{ chapterId: k1.id, sceneIds: [a.id, b.id, k2.id] }]),
+      400,
+      'no scene',
+    );
+    assert.equal(await status(undefined), 400, 'nothing at all');
+    // A rejected arrangement changes nothing
+    const unchanged = await api<ManuscriptNode[]>('GET', '/api/nodes');
+    assert.deepEqual(titlesUnder(unchanged, k1.id), ['C', 'A']);
+
+    await api('DELETE', `/api/nodes/${k1.id}`);
+    await api('DELETE', `/api/nodes/${k2.id}`);
+  });
+
   it('keeps a list of all created and opened projects', async () => {
     const titles = (list: ProjectListEntry[]) => list.map((p) => p.title);
     const create = (name: string) =>

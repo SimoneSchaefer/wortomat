@@ -41,6 +41,8 @@ import {
 import {
   displacedScenes,
   type DropTarget,
+  type ManuscriptMove,
+  manuscriptPlan,
   marksByColumn,
   moveScene,
   remapMark,
@@ -579,6 +581,60 @@ export class PlotPage {
     await this.saveMark('');
   }
 
+  // --- Taking the story order over into the manuscript ---
+
+  /** What would change; only in story order, and only when something differs from the book. */
+  protected readonly plan = computed(() => {
+    if (this.order() !== 'story') return null;
+    const scenes = this.entries().map(({ scene, chapter }) => ({
+      id: scene.id,
+      chapterId: chapter.id,
+    }));
+    const plan = manuscriptPlan(this.storyIds(), scenes);
+    return plan.moves.length ? plan : null;
+  });
+  protected readonly planOpen = signal(false);
+  protected readonly applying = signal(false);
+  /** Number of scenes just moved – as feedback until the next change. */
+  protected readonly applied = signal<number | null>(null);
+
+  protected titleOf(sceneId: string): string {
+    return this.byId().get(sceneId)?.scene.title ?? '';
+  }
+
+  protected describeMove(move: ManuscriptMove): string {
+    const t = this.t();
+    const chapter = (id: string) => {
+      const entry = this.entries().find((e) => e.chapter.id === id)!;
+      return t.plot.chapterNamed(entry.chapterNumber, entry.chapter.title);
+    };
+    const to = chapter(move.toChapterId);
+    const where = move.afterId
+      ? t.plot.moveAfter(to, this.titleOf(move.afterId))
+      : t.plot.moveToStart(to);
+    return move.fromChapterId === move.toChapterId
+      ? where
+      : t.plot.moveFrom(chapter(move.fromChapterId), where);
+  }
+
+  protected async applyPlan(): Promise<void> {
+    const plan = this.plan();
+    if (!plan || this.applying()) return;
+    this.applying.set(true);
+    try {
+      // Fix every scene's place in the story first: scenes never placed follow the scene before
+      // them in the book, and that is about to change.
+      if (!(await this.save(this.storyIds(), this.currentMarks()))) return;
+      await this.store.arrangeScenes({ chapters: plan.chapters });
+      this.planOpen.set(false);
+      this.applied.set(plan.moves.length);
+    } catch (error) {
+      this.error.set(errorMessage(error, this.t()));
+    } finally {
+      this.applying.set(false);
+    }
+  }
+
   protected async reset(): Promise<void> {
     const t = this.t();
     const confirmed = await this.confirm.ask({
@@ -589,11 +645,13 @@ export class PlotPage {
     if (confirmed) await this.save([], []);
   }
 
+  /** `false` if it failed (the message is shown already). */
   private async save(
     columns: string[][],
     marks: Array<{ id: string; label: string; beforeColumn: number }>,
-  ): Promise<void> {
+  ): Promise<boolean> {
     this.error.set(null);
+    this.applied.set(null);
     try {
       this.marks.set(
         await this.store.saveStory({
@@ -601,8 +659,10 @@ export class PlotPage {
           marks: marks.map(({ id, ...mark }) => (id ? { id, ...mark } : mark)),
         }),
       );
+      return true;
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
+      return false;
     }
   }
 

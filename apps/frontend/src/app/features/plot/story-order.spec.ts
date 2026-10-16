@@ -1,5 +1,12 @@
 import type { StoryMark } from '@wortomat/shared';
-import { displacedScenes, marksByColumn, moveScene, remapMark, storyColumns } from './story-order';
+import {
+  displacedScenes,
+  manuscriptPlan,
+  marksByColumn,
+  moveScene,
+  remapMark,
+  storyColumns,
+} from './story-order';
 
 const ids = (columns: ReturnType<typeof storyColumns>) => columns.map((c) => c.sceneIds);
 
@@ -93,5 +100,63 @@ describe('remapMark', () => {
     // "b" stood alone after the mark and moves away: the mark stays before "c"
     const after = moveScene(before, 'b', { before: 'a' });
     expect(after[remapMark(before, after, 1, 'b')]).toEqual(['c']);
+  });
+});
+
+describe('manuscriptPlan', () => {
+  // K1: A B · K2: C · K3: X
+  const book = [
+    { id: 'a', chapterId: 'k1' },
+    { id: 'b', chapterId: 'k1' },
+    { id: 'c', chapterId: 'k2' },
+    { id: 'x', chapterId: 'k3' },
+  ];
+
+  it('changes nothing while story and book agree', () => {
+    expect(manuscriptPlan([['a'], ['b'], ['c'], ['x']], book)).toEqual({
+      chapters: [
+        { chapterId: 'k1', sceneIds: ['a', 'b'] },
+        { chapterId: 'k2', sceneIds: ['c'] },
+        { chapterId: 'k3', sceneIds: ['x'] },
+      ],
+      moves: [],
+    });
+  });
+
+  it('moves a displaced scene into the chapter of the scene before it', () => {
+    const plan = manuscriptPlan([['a'], ['b'], ['x'], ['c']], book);
+    expect(plan.chapters).toEqual([
+      { chapterId: 'k1', sceneIds: ['a', 'b', 'x'] },
+      { chapterId: 'k2', sceneIds: ['c'] },
+    ]);
+    expect(plan.moves).toEqual([
+      { sceneId: 'x', fromChapterId: 'k3', toChapterId: 'k1', afterId: 'b' },
+    ]);
+  });
+
+  it('puts a scene moved to the very front at the start of the first chapter', () => {
+    const plan = manuscriptPlan([['x'], ['a'], ['b'], ['c']], book);
+    expect(plan.chapters[0]).toEqual({ chapterId: 'k1', sceneIds: ['x', 'a', 'b'] });
+    expect(plan.moves).toEqual([
+      { sceneId: 'x', fromChapterId: 'k3', toChapterId: 'k1', afterId: null },
+    ]);
+  });
+
+  it('reorders within a chapter without changing it', () => {
+    const plan = manuscriptPlan([['b'], ['a'], ['c'], ['x']], book);
+    expect(plan.chapters[0]).toEqual({ chapterId: 'k1', sceneIds: ['b', 'a'] });
+    expect(plan.moves).toHaveLength(1);
+    expect(plan.moves[0]!.fromChapterId).toBe(plan.moves[0]!.toChapterId);
+  });
+
+  it('keeps simultaneous scenes in book order', () => {
+    const plan = manuscriptPlan([['a'], ['x', 'b'], ['c']], book);
+    expect(plan.chapters.flatMap((chapter) => chapter.sceneIds)).toEqual(['a', 'b', 'x', 'c']);
+  });
+
+  it('makes the manuscript read exactly like the story', () => {
+    const story = [['c'], ['x'], ['a'], ['b']];
+    const plan = manuscriptPlan(story, book);
+    expect(plan.chapters.flatMap((chapter) => chapter.sceneIds)).toEqual(story.flat());
   });
 });

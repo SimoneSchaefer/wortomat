@@ -437,6 +437,17 @@ export const en: Texts = {
     deleteMark: 'Remove section',
     moveHint: 'Alt + arrow keys move the scene in the story',
     reset: 'Reset to book order …',
+    toManuscript: 'Apply to the manuscript …',
+    toManuscriptTitle: 'Apply this order to the manuscript?',
+    toManuscriptIntro: (count: number) =>
+      `${count === 1 ? 'One scene moves to its place' : `${count} scenes move to their places`} in the story within the manuscript – each into the chapter of the scene before it. All others stay where they are. The previous order of the book cannot be restored automatically afterwards.`,
+    chapterNamed: (number: number, title: string) => `chapter ${number} “${title}”`,
+    moveAfter: (chapter: string, scene: string) => `into ${chapter}, after “${scene}”`,
+    moveToStart: (chapter: string) => `to the start of ${chapter}`,
+    moveFrom: (chapter: string, where: string) => `from ${chapter} ${where}`,
+    toManuscriptApply: 'Apply',
+    toManuscriptDone: (count: number) =>
+      `${count === 1 ? '1 scene' : `${count} scenes`} moved in the manuscript – book and story now match.`,
     resetTitle: 'Reset the order?',
     resetMessage: 'All scenes go back to book order, and the sections are removed.',
     resetConfirm: 'Reset',

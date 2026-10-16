@@ -171,6 +171,14 @@ export interface UpdateNodeRequest {
 }
 
 /** The backend computes the order; the client only names the neighbour. */
+/**
+ * Puts every scene of the book into a chapter, in this order – e.g. to take over the story order.
+ * Chapters themselves stay where they are; one left out ends up without scenes.
+ */
+export interface ArrangeScenesRequest {
+  chapters: Array<{ chapterId: string; sceneIds: string[] }>;
+}
+
 export interface MoveNodeRequest {
   /** `null` = top level. */
   parentId: string | null;

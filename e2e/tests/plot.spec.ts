@@ -72,6 +72,38 @@ test('drags a scene downwards in the vertical view', async ({ page }) => {
   }
 });
 
+test('takes the story order over into the manuscript', async ({ page }) => {
+  // In the story, the farewell comes first
+  const abschied = scene(page, 'Abschied');
+  await abschied.focus();
+  await page.keyboard.press('Alt+ArrowLeft');
+  await expect(page.locator('.node .displaced')).toHaveCount(1);
+  await page.keyboard.press('Alt+ArrowLeft');
+
+  await page.getByRole('button', { name: 'Ins Manuskript übernehmen …' }).click();
+  const preview = page.getByRole('region', { name: 'Reihenfolge ins Manuskript übernehmen?' });
+  await expect(preview.getByRole('listitem')).toHaveText([
+    /Abschied.*aus Kapitel 2 „Kapitel zwei“ an den Anfang von Kapitel 1 „Kapitel eins“/,
+  ]);
+  await preview.getByRole('button', { name: 'Übernehmen' }).click();
+  await expect(
+    page.getByRole('status').filter({ hasText: '1 Szene im Manuskript verschoben' }),
+  ).toBeVisible();
+  await expect(page.locator('.node .displaced')).toHaveCount(0);
+
+  await page
+    .getByRole('navigation', { name: 'Bereiche' })
+    .getByRole('button', { name: 'Manuskript' })
+    .click();
+  const tree = page.getByRole('navigation', { name: 'Manuskript' });
+  await expect(tree.getByRole('link')).toHaveText(['Abschied', 'Ankunft', 'Der Brief']);
+  await page.reload();
+  await expect(tree.getByRole('link')).toHaveText(['Abschied', 'Ankunft', 'Der Brief']);
+  await expect(tree.locator('li.chapter').filter({ hasText: 'Kapitel eins' })).toContainText(
+    'Abschied',
+  );
+});
+
 /** Later scenes further down, the threads side by side. */
 async function expectVertical(page: Page): Promise<void> {
   const ankunft = await centre(scene(page, 'Ankunft'));

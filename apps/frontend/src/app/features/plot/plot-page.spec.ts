@@ -209,6 +209,74 @@ describe('PlotPage', () => {
     expect(api.saveStory).not.toHaveBeenCalled();
   });
 
+  describe('taking the story order over into the manuscript', () => {
+    // Story: C first, then A and B – C (chapter 2) is displaced
+    function rearranged(): FakeApi {
+      const api = book();
+      const order: Record<string, number> = { c: 1, a: 2, b: 3 };
+      api.nodes = api.nodes.map((n) => (n.id in order ? { ...n, storyOrder: order[n.id]! } : n));
+      return api;
+    }
+
+    it('is not offered while story and book agree', async () => {
+      const { element } = await setup();
+      expect(element.textContent).not.toContain(P.toManuscript);
+    });
+
+    it('is not offered in book order', async () => {
+      const { element } = await setup(rearranged(), { order: 'book' });
+      expect(element.textContent).not.toContain(P.toManuscript);
+    });
+
+    it('shows where scenes would go and changes nothing when cancelled', async () => {
+      const { api, element, settle } = await setup(rearranged());
+      button(element, P.toManuscript).click();
+      await settle();
+      const preview = element.querySelector('.manuscript-plan')!;
+      expect(text(preview.querySelector('h2'))).toBe(P.toManuscriptTitle);
+      expect(text(preview.querySelector('li strong'))).toBe('C');
+      expect(text(preview.querySelector('li .muted'))).toBe(
+        P.moveFrom(P.chapterNamed(2, 'Flucht'), P.moveToStart(P.chapterNamed(1, 'Ankunft'))),
+      );
+      button(preview as HTMLElement, de.confirm.cancel).click();
+      await settle();
+      expect(element.querySelector('.manuscript-plan')).toBeNull();
+      expect(api.arrangeScenes).not.toHaveBeenCalled();
+    });
+
+    it('fixes the story, then rearranges the manuscript to match it', async () => {
+      const { api, element, settle } = await setup(rearranged());
+      button(element, P.toManuscript).click();
+      await settle();
+      button(element.querySelector<HTMLElement>('.manuscript-plan')!, P.toManuscriptApply).click();
+      await until(settle, () => api.arrangeScenes.mock.calls.length > 0);
+      expect(api.saveStory).toHaveBeenCalledWith({ columns: [['c'], ['a'], ['b']], marks: [] });
+      expect(api.saveStory.mock.invocationCallOrder[0]).toBeLessThan(
+        api.arrangeScenes.mock.invocationCallOrder[0]!,
+      );
+      expect(api.arrangeScenes).toHaveBeenCalledWith({
+        chapters: [{ chapterId: 'k1', sceneIds: ['c', 'a', 'b'] }],
+      });
+      await until(settle, () => text(element.querySelector('.applied')) === P.toManuscriptDone(1));
+      expect(element.querySelector('.manuscript-plan')).toBeNull();
+      expect(element.textContent).not.toContain(P.toManuscript);
+      expect(element.querySelector('.node .displaced')).toBeNull();
+    });
+
+    it('leaves the manuscript alone if the story could not be saved', async () => {
+      const api = rearranged();
+      api.saveStory.mockRejectedValueOnce(new Error('kaputt'));
+      const { element, settle } = await setup(api);
+      button(element, P.toManuscript).click();
+      await settle();
+      button(element.querySelector<HTMLElement>('.manuscript-plan')!, P.toManuscriptApply).click();
+      await until(settle, () => api.saveStory.mock.calls.length > 0);
+      await settle();
+      expect(api.arrangeScenes).not.toHaveBeenCalled();
+      expect(element.querySelector('.manuscript-plan')).not.toBeNull();
+    });
+  });
+
   describe('vertical', () => {
     it('switches to time running downwards and remembers the choice', async () => {
       const { api, element, at, settle } = await setup();
