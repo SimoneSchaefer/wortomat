@@ -148,10 +148,10 @@ npm run typecheck && npm test
 ```
 
 **End-to-End-Tests** (Playwright, Chromium und Firefox): klicken die wichtigsten Abläufe – Buch
-anlegen und wieder öffnen, schreiben, Szenen löschen, Charaktere verknüpfen, Suche, Export,
-Korrekturfassung samt Notizen vom Handy – in der gebauten App gegen das echte Backend durch. Das
-Backend läuft dafür auf Port 3101 (anderer Port: `E2E_PORT=3102`) und legt alles in
-`e2e/.tmp/<port>/` ab, eigene Bücher und `~/Downloads` bleiben unberührt.
+anlegen und wieder öffnen, schreiben, Szenen löschen, Charaktere verknüpfen, Suche, Handlung
+(senkrecht), Export, Korrekturfassung samt Notizen vom Handy – in der gebauten App gegen das echte
+Backend durch. Das Backend läuft dafür auf Port 3101 (anderer Port: `E2E_PORT=3102`) und legt
+alles in `e2e/.tmp/<port>/` ab, eigene Bücher und `~/Downloads` bleiben unberührt.
 
 ```bash
 npx playwright install chromium firefox   # einmalig
