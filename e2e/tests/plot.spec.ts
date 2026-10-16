@@ -102,6 +102,14 @@ test('takes the story order over into the manuscript', async ({ page }) => {
   await expect(tree.locator('li.chapter').filter({ hasText: 'Kapitel eins' })).toContainText(
     'Abschied',
   );
+
+  // The moved scene starts with a todo, so it is easy to find again
+  await tree.getByRole('link', { name: 'Abschied' }).click();
+  const todo = page.locator('.ProseMirror [data-annotation="todo"]');
+  await expect(todo).toHaveText('verschoben');
+  await expect(page.locator('.ProseMirror p').first()).toHaveText('verschoben');
+  await tree.getByRole('link', { name: 'Ankunft' }).click();
+  await expect(page.locator('.ProseMirror')).toHaveText('');
 });
 
 /** Later scenes further down, the threads side by side. */

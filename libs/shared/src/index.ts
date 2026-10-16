@@ -177,6 +177,11 @@ export interface UpdateNodeRequest {
  */
 export interface ArrangeScenesRequest {
   chapters: Array<{ chapterId: string; sceneIds: string[] }>;
+  /**
+   * These scenes get `label` (e.g. "verschoben") at the very start of their text, marked as todo –
+   * so they are easy to find in the manuscript afterwards.
+   */
+  markMoved?: { sceneIds: string[]; label: string };
 }
 
 export interface MoveNodeRequest {

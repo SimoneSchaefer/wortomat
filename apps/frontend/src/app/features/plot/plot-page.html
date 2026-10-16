@@ -137,6 +137,14 @@
               </li>
             }
           </ul>
+          <label class="check">
+            <input
+              type="checkbox"
+              [checked]="markMoved()"
+              (change)="markMoved.set($any($event.target).checked)"
+            />
+            {{ t().plot.markMoved }}
+          </label>
           <div class="plan-actions">
             <button type="button" class="primary" [disabled]="applying()" (click)="applyPlan()">
               {{ t().plot.toManuscriptApply }}
@@ -145,8 +153,13 @@
           </div>
         </section>
       }
-      @if (applied(); as count) {
-        <p class="muted applied" role="status">{{ t().plot.toManuscriptDone(count) }}</p>
+      @if (applied(); as applied) {
+        <p class="muted applied" role="status">
+          {{ t().plot.toManuscriptDone(applied.count) }}
+          @if (applied.marked) {
+            {{ t().plot.markedHint }}
+          }
+        </p>
       }
 
       <!-- Info line: which scene is under the mouse pointer -->

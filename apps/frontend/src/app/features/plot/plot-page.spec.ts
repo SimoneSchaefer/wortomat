@@ -256,11 +256,32 @@ describe('PlotPage', () => {
       );
       expect(api.arrangeScenes).toHaveBeenCalledWith({
         chapters: [{ chapterId: 'k1', sceneIds: ['c', 'a', 'b'] }],
+        markMoved: { sceneIds: ['c'], label: P.movedLabel },
       });
-      await until(settle, () => text(element.querySelector('.applied')) === P.toManuscriptDone(1));
+      await until(
+        settle,
+        () =>
+          text(element.querySelector('.applied')) === `${P.toManuscriptDone(1)} ${P.markedHint}`,
+      );
       expect(element.querySelector('.manuscript-plan')).toBeNull();
       expect(element.textContent).not.toContain(P.toManuscript);
       expect(element.querySelector('.node .displaced')).toBeNull();
+    });
+
+    it('leaves the moved scenes unmarked when asked to', async () => {
+      const { api, element, settle } = await setup(rearranged());
+      button(element, P.toManuscript).click();
+      await settle();
+      const preview = element.querySelector<HTMLElement>('.manuscript-plan')!;
+      const box = preview.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+      expect(box.checked).toBe(true);
+      box.click();
+      button(preview, P.toManuscriptApply).click();
+      await until(settle, () => api.arrangeScenes.mock.calls.length > 0);
+      expect(api.arrangeScenes).toHaveBeenCalledWith({
+        chapters: [{ chapterId: 'k1', sceneIds: ['c', 'a', 'b'] }],
+      });
+      await until(settle, () => text(element.querySelector('.applied')) === P.toManuscriptDone(1));
     });
 
     it('leaves the manuscript alone if the story could not be saved', async () => {

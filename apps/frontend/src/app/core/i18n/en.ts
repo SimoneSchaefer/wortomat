@@ -446,6 +446,10 @@ export const en: Texts = {
     moveToStart: (chapter: string) => `to the start of ${chapter}`,
     moveFrom: (chapter: string, where: string) => `from ${chapter} ${where}`,
     toManuscriptApply: 'Apply',
+    movedLabel: 'moved',
+    markMoved: 'Mark moved scenes with “moved” as a TODO at the start',
+    markedHint:
+      'You can find them by the TODO mark “moved” – in the tree and under “Open” in the scene filter.',
     toManuscriptDone: (count: number) =>
       `${count === 1 ? '1 scene' : `${count} scenes`} moved in the manuscript – book and story now match.`,
     resetTitle: 'Reset the order?',

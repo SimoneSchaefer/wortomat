@@ -271,6 +271,57 @@ describe('REST API', () => {
     const unchanged = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.deepEqual(titlesUnder(unchanged, k1.id), ['C', 'A']);
 
+    // Moved scenes can get a todo-marked label in front, to find them in the manuscript
+    const paragraph = (text: string) => ({
+      type: 'paragraph',
+      content: [{ type: 'text', text }],
+    });
+    await api('PUT', `/api/scenes/${a.id}/content`, {
+      doc: { type: 'doc', content: [paragraph('Es regnete.')] },
+      text: 'Es regnete.',
+      wordCount: 2,
+    });
+    const todayBefore = await api<{ words: number }>('GET', '/api/writing-log/today');
+    await api('POST', '/api/nodes/arrange', {
+      chapters: [{ chapterId: k1.id, sceneIds: [a.id, b.id, c.id] }],
+      markMoved: { sceneIds: [a.id, b.id], label: 'verschoben' },
+    });
+    const todo = {
+      type: 'text',
+      text: 'verschoben',
+      marks: [{ type: 'annotation', attrs: { kind: 'todo', note: null, suggestion: null } }],
+    };
+    const withText = await api<SceneContent>('GET', `/api/scenes/${a.id}/content`);
+    assert.deepEqual(withText.doc?.content, [
+      {
+        type: 'paragraph',
+        content: [todo, { type: 'text', text: ' ' }, { type: 'text', text: 'Es regnete.' }],
+      },
+    ]);
+    assert.equal(withText.wordCount, 3);
+    assert.deepEqual(withText.annotations, { todo: 1, idea: 0, fixme: 0 });
+    const empty = await api<SceneContent>('GET', `/api/scenes/${b.id}/content`);
+    assert.deepEqual(empty.doc?.content, [{ type: 'paragraph', content: [todo] }]);
+    const untouched = await api<SceneContent>('GET', `/api/scenes/${c.id}/content`);
+    assert.equal(untouched.doc, null);
+    const hits = await api<SearchHit[]>('GET', '/api/search?q=verschoben');
+    assert.deepEqual(hits.map((hit) => hit.id).sort(), [a.id, b.id].sort());
+    assert.ok((await api<SearchHit[]>('GET', '/api/search?q=regnete')).length > 0);
+    // Not written by the author
+    assert.deepEqual(await api('GET', '/api/writing-log/today'), todayBefore);
+    const all = [{ chapterId: k1.id, sceneIds: [a.id, b.id, c.id] }];
+    assert.equal(
+      (
+        await fetch(`${server.url}/api/nodes/arrange`, {
+          method: 'POST',
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chapters: all, markMoved: { sceneIds: [a.id], label: ' ' } }),
+        })
+      ).status,
+      400,
+      'empty label',
+    );
+
     await api('DELETE', `/api/nodes/${k1.id}`);
     await api('DELETE', `/api/nodes/${k2.id}`);
   });

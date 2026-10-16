@@ -480,6 +480,10 @@ export const de = {
     moveToStart: (chapter: string) => `an den Anfang von ${chapter}`,
     moveFrom: (chapter: string, where: string) => `aus ${chapter} ${where}`,
     toManuscriptApply: 'Übernehmen',
+    movedLabel: 'verschoben',
+    markMoved: 'Verschobene Szenen am Anfang mit „verschoben“ als TODO markieren',
+    markedHint:
+      'Du findest sie über die TODO-Markierung „verschoben“ – im Baum und im Szenenfilter unter „Offen“.',
     toManuscriptDone: (count: number) =>
       `${count === 1 ? '1 Szene' : `${count} Szenen`} im Manuskript verschoben – Buch und Handlung stimmen jetzt überein.`,
     resetTitle: 'Reihenfolge zurücksetzen?',

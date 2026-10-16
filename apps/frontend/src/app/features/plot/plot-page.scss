@@ -252,6 +252,13 @@ h1 {
   }
 }
 
+.manuscript-plan .check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+}
+
 .plan-actions {
   display: flex;
   gap: 0.5rem;

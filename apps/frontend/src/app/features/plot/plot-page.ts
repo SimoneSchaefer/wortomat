@@ -595,8 +595,10 @@ export class PlotPage {
   });
   protected readonly planOpen = signal(false);
   protected readonly applying = signal(false);
-  /** Number of scenes just moved – as feedback until the next change. */
-  protected readonly applied = signal<number | null>(null);
+  /** Put a todo "moved" in front of each moved scene, to find them in the manuscript. */
+  protected readonly markMoved = signal(true);
+  /** Feedback until the next change. */
+  protected readonly applied = signal<{ count: number; marked: boolean } | null>(null);
 
   protected titleOf(sceneId: string): string {
     return this.byId().get(sceneId)?.scene.title ?? '';
@@ -625,9 +627,18 @@ export class PlotPage {
       // Fix every scene's place in the story first: scenes never placed follow the scene before
       // them in the book, and that is about to change.
       if (!(await this.save(this.storyIds(), this.currentMarks()))) return;
-      await this.store.arrangeScenes({ chapters: plan.chapters });
+      const marked = this.markMoved();
+      await this.store.arrangeScenes({
+        chapters: plan.chapters,
+        ...(marked && {
+          markMoved: {
+            sceneIds: plan.moves.map((move) => move.sceneId),
+            label: this.t().plot.movedLabel,
+          },
+        }),
+      });
       this.planOpen.set(false);
-      this.applied.set(plan.moves.length);
+      this.applied.set({ count: plan.moves.length, marked });
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
     } finally {

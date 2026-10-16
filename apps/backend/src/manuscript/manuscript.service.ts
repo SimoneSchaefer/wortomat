@@ -197,7 +197,14 @@ export class ManuscriptService {
       Array.isArray(chapter?.sceneIds) ? chapter.sceneIds : [],
     );
     const allScenes = [...kinds].filter(([, kind]) => kind === 'scene').map(([id]) => id);
+    const markMoved = request?.markMoved;
+    const label = typeof markMoved?.label === 'string' ? markMoved.label.trim() : '';
+    const marked = Array.isArray(markMoved?.sceneIds) ? markMoved.sceneIds : [];
     const valid =
+      (markMoved === undefined ||
+        (label.length > 0 &&
+          label.length <= 100 &&
+          marked.every((id) => kinds.get(id) === 'scene'))) &&
       chapters.every((chapter) => kinds.get(chapter?.chapterId) === 'chapter') &&
       new Set(chapters.map((chapter) => chapter.chapterId)).size === chapters.length &&
       sceneIds.every((id) => kinds.get(id) === 'scene') &&
@@ -226,9 +233,62 @@ export class ManuscriptService {
           place.run({ position: index + 1, parent: chapterId, now, id }),
         );
       }
+      for (const id of new Set(marked)) this.prependTodo(id, label, now);
       this.projects.touch();
     });
     return this.list();
+  }
+
+  /**
+   * Puts `label` in front of the scene's text, marked as todo. Not something the author wrote, so
+   * it stays out of the writing log; word count and search index follow along.
+   */
+  private prependTodo(nodeId: string, label: string, now: string): void {
+    const row = this.db
+      .prepare('SELECT doc, word_count FROM scene_content WHERE node_id = ?')
+      .get(nodeId) as { doc: string; word_count: number } | undefined;
+    const doc = (row ? JSON.parse(row.doc) : { type: 'doc', content: [] }) as EditorDoc;
+    const blocks = (Array.isArray(doc.content) ? doc.content : []) as Array<{
+      type?: unknown;
+      content?: unknown[];
+    }>;
+    const todo = {
+      type: 'text',
+      text: label,
+      marks: [{ type: 'annotation', attrs: { kind: 'todo', note: null, suggestion: null } }],
+    };
+    const first = blocks[0];
+    // Into the first paragraph – a heading or list would swallow it, so then a paragraph of its own
+    const inline = first?.type === 'paragraph';
+    if (inline) {
+      const rest = Array.isArray(first.content) ? first.content : [];
+      first.content = rest.length ? [todo, { type: 'text', text: ' ' }, ...rest] : [todo];
+    } else {
+      blocks.unshift({ type: 'paragraph', content: [todo] });
+    }
+    doc.content = blocks;
+
+    const annotations = countAnnotations(doc);
+    const words = label.split(/\s+/).filter(Boolean).length;
+    this.db
+      .prepare(
+        `INSERT INTO scene_content
+           (node_id, doc, word_count, todo_count, idea_count, fixme_count, updated_at)
+         VALUES (:id, :doc, :words, :todo, :idea, :fixme, :now)
+         ON CONFLICT (node_id) DO UPDATE SET
+           doc = excluded.doc, word_count = word_count + :words,
+           todo_count = excluded.todo_count, idea_count = excluded.idea_count,
+           fixme_count = excluded.fixme_count, updated_at = excluded.updated_at`,
+      )
+      .run({ id: nodeId, doc: JSON.stringify(doc), words, ...annotations, now });
+    const fts = this.db
+      .prepare('SELECT title, body FROM scene_fts WHERE node_id = ?')
+      .get(nodeId) as { title: string; body: string } | undefined;
+    const body = fts?.body ? `${label}${inline ? ' ' : '\n'}${fts.body}` : label;
+    this.db.prepare('DELETE FROM scene_fts WHERE node_id = ?').run(nodeId);
+    this.db
+      .prepare('INSERT INTO scene_fts (node_id, title, body) VALUES (?, ?, ?)')
+      .run(nodeId, fts?.title ?? this.get(nodeId).title, body);
   }
 
   remove(id: string): void {
