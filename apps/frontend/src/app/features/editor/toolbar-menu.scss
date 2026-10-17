@@ -29,19 +29,6 @@ wm-toolbar-menu {
     }
   }
 
-  // Fixed width: the label changes with the cursor, the bar must not jump
-  &.block-style > .menu-toggle {
-    width: 7.5rem;
-    justify-content: space-between;
-    font-size: 0.8rem;
-  }
-
-  .menu-label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   svg {
     fill: none;
     stroke: currentColor;

@@ -317,7 +317,6 @@ export const en: Texts = {
     clearFormat: 'Clear formatting',
     textStyle: 'Text style',
     annotations: 'Mark passage',
-    blockStyle: 'Paragraph style',
     paragraph: 'Text',
     heading: 'Heading',
     subheading: 'Subheading',

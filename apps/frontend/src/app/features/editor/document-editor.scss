@@ -125,6 +125,11 @@
     text-align: center;
   }
 
+  // The paragraph styles have no letter, so their labels line up with those after the letters
+  .text-style button[role='menuitemradio'] {
+    padding-left: calc(0.6rem + 0.95rem + 0.55rem);
+  }
+
   .sep {
     width: 1px;
     height: 1.25rem;

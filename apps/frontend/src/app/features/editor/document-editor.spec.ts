@@ -222,7 +222,7 @@ describe('DocumentEditor', () => {
   it('sets paragraph style, alignment and indentation from the grouped menus', async () => {
     const { choose, saved, element, settle } = await setup(fakeSource({ s1: PLAIN }));
     const E = de.editor;
-    await choose(E.blockStyle, E.heading);
+    await choose(E.textStyle, E.heading);
     await choose(E.alignment, E.alignCenter);
     await choose(E.alignment, E.indent);
     await choose(E.alignment, E.indent);
@@ -232,7 +232,7 @@ describe('DocumentEditor', () => {
     });
 
     await choose(E.alignment, E.outdent);
-    await choose(E.blockStyle, E.blockquote);
+    await choose(E.textStyle, E.blockquote);
     expect((await saved())?.doc.content?.[0]).toMatchObject({
       type: 'blockquote',
       content: [{ type: 'heading', attrs: { indent: 1 } }],

@@ -10,6 +10,7 @@
       <div class="toolbar" role="toolbar" [attr.aria-label]="t().editor.toolbar">
         <!-- Grouped in dropdowns so the bar does not wrap; the shortcuts work without opening them -->
         <wm-toolbar-menu
+          class="text-style"
           [label]="t().editor.textStyle"
           [active]="
             isActive('bold') || isActive('italic') || isActive('underline') || isActive('strike')
@@ -59,14 +60,11 @@
             {{ t().editor.strike }}
             <span class="key">{{ shortcut('S', { shift: true }) }}</span>
           </button>
-        </wm-toolbar-menu>
-        <span class="sep"></span>
-        <wm-toolbar-menu class="block-style" [label]="t().editor.blockStyle">
-          <span toggle class="menu-label">{{ blockStyle() }}</span>
+          <span class="menu-sep" role="separator"></span>
           <button
             type="button"
             role="menuitemradio"
-            [attr.aria-checked]="blockStyle() === t().editor.paragraph"
+            [attr.aria-checked]="isParagraph()"
             (click)="command('paragraph')"
           >
             {{ t().editor.paragraph }}

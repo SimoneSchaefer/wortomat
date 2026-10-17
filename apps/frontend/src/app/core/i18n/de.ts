@@ -348,7 +348,6 @@ export const de = {
     clearFormat: 'Formatierung entfernen',
     textStyle: 'Textformatierung',
     annotations: 'Stelle markieren',
-    blockStyle: 'Absatzformat',
     paragraph: 'Text',
     heading: 'Überschrift',
     subheading: 'Unterüberschrift',
