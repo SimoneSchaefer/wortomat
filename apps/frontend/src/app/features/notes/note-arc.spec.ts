@@ -189,6 +189,13 @@ describe('NoteArc order check', () => {
       'lässt Lena helfen',
     );
     expect(text(flagged[0]!.querySelector('.order-hint'))).toBe(de.arc.belongsAfter(3));
+    // Also on the number, above the drag hint
+    expect(flagged[0]!.querySelector<HTMLElement>('.marker')!.title).toBe(
+      `${de.arc.belongsAfter(3)}\n${de.arc.dragHint}`,
+    );
+    expect(element.querySelector<HTMLElement>('.step:not(.misplaced) .marker')!.title).toBe(
+      de.arc.dragHint,
+    );
 
     button(element, de.arc.sortByStory).click();
     await until(settle, () => labels()[0] === 'traut niemandem');
