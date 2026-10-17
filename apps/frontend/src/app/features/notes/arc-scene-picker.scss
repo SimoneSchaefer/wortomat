@@ -25,6 +25,11 @@
     text-overflow: ellipsis;
     color: var(--accent-strong);
   }
+
+  wm-status-icon {
+    margin-right: 0.3rem;
+    vertical-align: -0.1rem;
+  }
 }
 
 .path {
