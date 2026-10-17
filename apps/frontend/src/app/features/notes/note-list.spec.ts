@@ -148,6 +148,7 @@ describe('NoteList', () => {
     expect(confirm.pending()).toMatchObject({
       title: de.notes.deleteTitle(CHARACTERS.singular),
       message: de.notes.deleteMessage('Anna'),
+      confirmLabel: de.tree.moveToTrash,
     });
     confirm.answer(true);
     await until(settle, () => router.url === '/write/characters');

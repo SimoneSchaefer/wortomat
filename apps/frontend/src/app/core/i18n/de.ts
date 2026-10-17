@@ -1,10 +1,12 @@
 import type {
   AnnotationKind,
   FontSize,
+  NodeKind,
   NoteKind,
   QuoteStyle,
   SceneStatus,
   Theme,
+  TrashArea,
 } from '@wortomat/shared';
 
 const numberFormat = new Intl.NumberFormat('de');
@@ -154,13 +156,25 @@ export const de = {
 
   trash: {
     title: 'Papierkorb',
-    hint: 'Gelöschte Teile, Kapitel und Szenen bleiben hier, bis du sie endgültig löschst.',
+    hint: {
+      manuscript: 'Gelöschte Teile, Kapitel und Szenen bleiben hier, bis du sie endgültig löschst.',
+      character: 'Gelöschte Charaktere bleiben hier, bis du sie endgültig löschst.',
+      place: 'Gelöschte Orte bleiben hier, bis du sie endgültig löschst.',
+      research: 'Gelöschte Recherchen bleiben hier, bis du sie endgültig löschst.',
+    } satisfies Record<TrashArea, string>,
     empty: 'Der Papierkorb ist leer.',
-    kind: { part: 'Teil', chapter: 'Kapitel', scene: 'Szene' } satisfies Record<
-      'part' | 'chapter' | 'scene',
-      string
-    >,
+    kind: {
+      part: 'Teil',
+      chapter: 'Kapitel',
+      scene: 'Szene',
+      character: 'Charakter',
+      place: 'Ort',
+      research: 'Recherche',
+    } satisfies Record<NodeKind | NoteKind, string>,
     topLevel: 'oberste Ebene',
+    noGroup: 'ohne Gruppe',
+    linkedScenes: (count: number) =>
+      count === 1 ? 'in 1 Szene' : `in ${numberFormat.format(count)} Szenen`,
     scenes: (count: number) => (count === 1 ? '1 Szene' : `${numberFormat.format(count)} Szenen`),
     deletedAt: (when: string) => `gelöscht ${when}`,
     restore: 'Wiederherstellen',
@@ -170,6 +184,8 @@ export const de = {
     deleteForGoodTitle: 'Endgültig löschen?',
     deleteForGoodMessage: (title: string) =>
       `„${title}“ wird mit allen enthaltenen Szenen endgültig gelöscht.`,
+    deleteNoteForGoodMessage: (title: string) =>
+      `„${title}“ wird mit allen Angaben und Bildern endgültig gelöscht.`,
     emptyTrash: 'Papierkorb leeren',
     emptyTrashTitle: 'Papierkorb leeren?',
     emptyTrashMessage: (count: number) =>
@@ -179,6 +195,8 @@ export const de = {
     restored: (title: string) => `„${title}“ ist wieder da.`,
     restoredElsewhere: (title: string) =>
       `„${title}“ ist wieder da – am Ende des Buchs, weil der alte Platz nicht mehr existiert.`,
+    restoredWithoutGroup: (title: string) =>
+      `„${title}“ ist wieder da – ohne Gruppe, weil die Gruppe nicht mehr existiert.`,
   },
 
   filter: {
@@ -260,7 +278,8 @@ export const de = {
 
   notes: {
     deleteTitle: (singular: string) => `${singular} löschen?`,
-    deleteMessage: (title: string) => `„${title}“ wird mit allen Angaben gelöscht.`,
+    deleteMessage: (title: string) =>
+      `„${title}“ wandert mit allen Angaben in den Papierkorb. Von dort lässt sich alles wiederherstellen.`,
     deleteGroupTitle: 'Gruppe löschen?',
     deleteLabel: (title: string) => `${title} löschen`,
     deleteGroupLabel: (name: string) => `Gruppe ${name} löschen`,

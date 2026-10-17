@@ -58,6 +58,7 @@ import type {
   UpdateNoteRequest,
   UpdateProjectRequest,
   WritingDay,
+  TrashArea,
   TrashEntry,
 } from '@wortomat/shared';
 import { firstValueFrom, type Observable } from 'rxjs';
@@ -156,8 +157,8 @@ export class WortomatApi {
     return this.call(this.http.delete<void>(`/api/trash/${id}`));
   }
 
-  emptyTrash(): Promise<void> {
-    return this.call(this.http.delete<void>('/api/trash'));
+  emptyTrash(area: TrashArea): Promise<void> {
+    return this.call(this.http.delete<void>('/api/trash', { params: { area } }));
   }
 
   sceneContent(id: string): Promise<SceneContent> {

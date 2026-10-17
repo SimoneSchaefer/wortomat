@@ -3,14 +3,15 @@ import { TestBed } from '@angular/core/testing';
 import { ConfirmDialog } from '../../core/confirm-dialog';
 import { de } from '../../core/i18n/de';
 import { ProjectStore } from '../../core/project-store';
-import { FakeApi, testNode, testProject } from '../../testing/fake-api';
+import { FakeApi, testNode, testNote, testProject } from '../../testing/fake-api';
 import { button, render, text, until } from '../../testing/render';
+import { NotesStore } from '../notes/notes-store';
 import { TrashPage } from './trash-page';
 
 @Component({ template: '' })
 class Blank {}
 
-async function setup() {
+async function setup(trashArea?: string) {
   const api = new FakeApi();
   api.project = testProject();
   api.nodes = [
@@ -23,10 +24,22 @@ async function setup() {
   api.trash[0]!.entry.path = ['Frieda', 'Fokuszeit'];
   api.trash[0]!.entry.wordCount = 1200;
   await api.deleteNode('teil');
+  api.noteGroups = [{ id: 'familie', kind: 'character', name: 'Familie' }];
+  api.notes = [
+    testNote('frieda', 'character', { title: 'Frieda', groupId: 'familie' }),
+    testNote('ben', 'character', { title: 'Ben' }),
+    testNote('hafen', 'place', { title: 'Hafen' }),
+  ];
+  for (const id of ['frieda', 'ben', 'hafen']) await api.deleteNote(id);
   const view = await render(TrashPage, {
     api,
+    inputs: trashArea ? { trashArea } : {},
+    providers: [NotesStore],
     before: () => TestBed.inject(ProjectStore).reload(),
-    routes: [{ path: 'write/scene/:id', component: Blank }],
+    routes: [
+      { path: 'write/scene/:id', component: Blank },
+      { path: 'write/characters/:id', component: Blank },
+    ],
   });
   const confirm = TestBed.inject(ConfirmDialog);
   const item = (title: string) =>
@@ -85,6 +98,57 @@ describe('TrashPage', () => {
     expect(confirm.pending()?.message).toBe(de.trash.emptyTrashMessage(1));
     confirm.answer(true);
     await until(settle, () => titles().length === 0);
+    expect(api.emptyTrash).toHaveBeenCalledWith('manuscript');
     expect(text(element.querySelector('.empty'))).toBe(de.trash.empty);
+  });
+
+  it('lists only the notes of its area, with their group', async () => {
+    const { element, item, titles } = await setup('character');
+    expect(titles()).toEqual(['Ben', 'Frieda']);
+    expect(text(element.querySelector('.muted'))).toBe(de.trash.hint.character);
+    expect(text(item('Frieda').querySelector('.kind'))).toBe(de.trash.kind.character);
+    expect(text(item('Frieda').querySelector('.path'))).toBe('Familie');
+    expect(text(item('Ben').querySelector('.path'))).toBe(de.trash.noGroup);
+  });
+
+  it('restores a note into its list and opens it', async () => {
+    const { api, item, router, settle } = await setup('character');
+    const notes = TestBed.inject(NotesStore);
+    button(item('Frieda'), de.trash.restoreLabel('Frieda')).click();
+    await until(settle, () => router.url === '/write/characters/frieda');
+    expect(api.restoreFromTrash).toHaveBeenCalledWith('frieda');
+    expect(notes.find('frieda')?.title).toBe('Frieda');
+  });
+
+  it('says so when a restored note lost its group', async () => {
+    const { api, element, item, router, settle } = await setup('character');
+    api.restoreFromTrash.mockImplementationOnce(async (id: string) => ({
+      nodes: [],
+      id,
+      atOldPlace: false,
+    }));
+    button(item('Frieda'), de.trash.restoreLabel('Frieda')).click();
+    await until(settle, () => text(element.querySelector('[role=status]')) !== '');
+    expect(text(element.querySelector('[role=status]'))).toBe(
+      de.trash.restoredWithoutGroup('Frieda'),
+    );
+    expect(router.url).toBe('/');
+  });
+
+  it('empties only its own area', async () => {
+    const { api, confirm, element, item, settle, store, titles } = await setup('character');
+    button(item('Ben'), de.trash.deleteForGoodLabel('Ben')).click();
+    await settle();
+    expect(confirm.pending()?.message).toBe(de.trash.deleteNoteForGoodMessage('Ben'));
+    confirm.answer(false);
+    await settle();
+
+    button(element, de.trash.emptyTrash).click();
+    await settle();
+    expect(confirm.pending()?.message).toBe(de.trash.emptyTrashMessage(2));
+    confirm.answer(true);
+    await until(settle, () => titles().length === 0);
+    expect(api.emptyTrash).toHaveBeenCalledWith('character');
+    expect(store.trash().map((entry) => entry.title)).toEqual(['Hafen', 'Frieda', 'Abschied']);
   });
 });

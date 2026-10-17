@@ -65,7 +65,7 @@ export class ImagesService {
 
   /**
    * Only when it is used nowhere any more: not in a gallery, not as a cover or map image, not in
-   * the text of a scene or note – including a scene in the trash.
+   * the text of a scene or note – including the ones in the trash.
    */
   deleteIfUnused(id: string): void {
     const reference = `%/api/images/${id}%`;
@@ -77,9 +77,11 @@ export class ImagesService {
          UNION ALL SELECT 1 FROM scene_content WHERE doc LIKE ?
          UNION ALL SELECT 1 FROM notes WHERE doc LIKE ?
          UNION ALL SELECT 1 FROM trash WHERE snapshot LIKE ?
+         UNION ALL SELECT 1 FROM trash, json_each(trash.snapshot, '$.dependents.note_images') g
+                    WHERE json_extract(g.value, '$.image_id') = ?
          LIMIT 1`,
       )
-      .get(id, id, id, reference, reference, reference);
+      .get(id, id, id, reference, reference, reference, id);
     if (!used) {
       this.projects.db.prepare('DELETE FROM images WHERE id = ?').run(id);
     }

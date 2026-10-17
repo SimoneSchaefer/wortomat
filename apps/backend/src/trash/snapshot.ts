@@ -1,32 +1,54 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync, SQLInputValue, SQLOutputValue } from 'node:sqlite';
-import type { NodeKind } from '@wortomat/shared';
+import type { NodeKind, NoteKind } from '@wortomat/shared';
 import { nowIso } from '../database/sqlite.js';
 
 type Row = Record<string, SQLOutputValue>;
 /** Blobs do not survive JSON, so they are stored as base64. */
-type StoredValue = string | number | null | { blob: string };
-type StoredRow = Record<string, StoredValue>;
+type StoredRow = Record<string, string | number | null | { blob: string }>;
+type Values = Record<string, SQLInputValue>;
+
+/** The tables whose rows can be in the trash. */
+type Source = 'nodes' | 'notes';
+
+interface StoredReference {
+  table: string;
+  column: string;
+  key: StoredRow;
+  value: string;
+}
 
 /**
- * Everything that deleting a subtree removes or changes. Trashed nodes leave the regular tables
- * completely, so no query elsewhere (tree, search, export, statistics …) has to filter them out.
- * Tables are found through their foreign keys instead of being listed here, so a table added
- * later that refers to nodes is covered without touching this file.
+ * Everything that deleting a subtree or a note removes or changes. Trashed rows leave the regular
+ * tables completely, so no query elsewhere (tree, search, export, statistics …) has to filter
+ * them out. Tables are found through their foreign keys instead of being listed here, so a table
+ * added later that refers to nodes or notes is covered without touching this file.
  */
 interface Snapshot {
-  version: 1;
-  /** Parents before their children, so they can be inserted in this order. */
-  nodes: StoredRow[];
-  /** Rows removed along with the nodes by ON DELETE CASCADE, per table. */
+  version: 2;
+  table: Source;
+  /** The deleted rows; for nodes parents before their children, so they can be inserted in order. */
+  rows: StoredRow[];
+  /**
+   * Rows removed along with them by ON DELETE CASCADE, per table – and rows handed over by
+   * another restore because they also refer to something in here.
+   */
   dependents: Record<string, StoredRow[]>;
-  /** Rows that only lost their reference to a node (ON DELETE SET NULL). */
-  references: Array<{ table: string; column: string; key: StoredRow; value: string }>;
+  /** Rows that only lost their reference to one of them (ON DELETE SET NULL). */
+  references: StoredReference[];
   /** Unused tags get cleaned up, so the tags of the scenes may be gone when restoring. */
   tags: StoredRow[];
   /** The search index has no foreign key. */
   fts: StoredRow[];
 }
+
+/** Written before notes could be trashed. */
+interface SnapshotV1 extends Omit<Snapshot, 'version' | 'table' | 'rows'> {
+  version: 1;
+  nodes: StoredRow[];
+}
+
+const FTS_TABLE: Record<Source, string> = { nodes: 'scene_fts', notes: 'note_fts' };
 
 interface ForeignKey {
   table: string;
@@ -38,7 +60,7 @@ interface ForeignKey {
 
 export interface TrashRow {
   id: string;
-  kind: NodeKind;
+  kind: NodeKind | NoteKind;
   title: string;
   path: string;
   scene_count: number;
@@ -56,44 +78,15 @@ export function moveToTrash(db: DatabaseSync, nodeId: string): void {
     .all(idList) as Row[];
   const root = nodes[0]!;
 
-  const snapshot: Snapshot = {
-    version: 1,
-    nodes: nodes.map(store),
-    dependents: {},
-    references: [],
-    tags: (
-      db
-        .prepare(
-          `SELECT DISTINCT t.* FROM tags t JOIN scene_tags st ON st.tag_id = t.id
-            WHERE st.scene_id ${inSubtree}`,
-        )
-        .all(idList) as Row[]
-    ).map(store),
-    fts: (
-      db
-        .prepare(`SELECT node_id, title, body FROM scene_fts WHERE node_id ${inSubtree}`)
-        .all(idList) as Row[]
-    ).map(store),
-  };
-  for (const key of foreignKeys(db)) {
-    if (key.target !== 'nodes' || key.table === 'nodes') continue;
-    const rows = db
-      .prepare(`SELECT * FROM "${key.table}" WHERE "${key.column}" ${inSubtree}`)
-      .all(idList) as Row[];
-    if (key.onDelete === 'CASCADE') {
-      (snapshot.dependents[key.table] ??= []).push(...rows.map(store));
-    } else if (key.onDelete === 'SET NULL') {
-      const primaryKey = primaryKeyOf(db, key.table);
-      for (const row of rows) {
-        snapshot.references.push({
-          table: key.table,
-          column: key.column,
-          key: store(Object.fromEntries(primaryKey.map((column) => [column, row[column]!]))),
-          value: row[key.column] as string,
-        });
-      }
-    }
-  }
+  const snapshot = collect(db, 'nodes', nodes, ids);
+  snapshot.tags = (
+    db
+      .prepare(
+        `SELECT DISTINCT t.* FROM tags t JOIN scene_tags st ON st.tag_id = t.id
+          WHERE st.scene_id ${inSubtree}`,
+      )
+      .all(idList) as Row[]
+  ).map(store);
 
   const totals = db
     .prepare(
@@ -102,28 +95,99 @@ export function moveToTrash(db: DatabaseSync, nodeId: string): void {
         WHERE n.kind = 'scene' AND n.id ${inSubtree}`,
     )
     .get(idList) as { scenes: number; words: number };
+  insertEntry(db, snapshot, {
+    id: nodeId,
+    kind: root['kind'] as NodeKind,
+    title: root['title'] as string,
+    path: JSON.stringify(ancestorTitles(db, root['parent_id'] as string | null)),
+    scene_count: totals.scenes,
+    word_count: totals.words,
+    deleted_at: nowIso(),
+  });
+}
+
+/** Copies the note into the trash; the caller deletes it from `notes` afterwards. */
+export function moveNoteToTrash(db: DatabaseSync, noteId: string): void {
+  const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(noteId) as Row;
+  const group = db
+    .prepare('SELECT name FROM note_groups WHERE id = ?')
+    .get(note['group_id'] ?? null) as { name: string } | undefined;
+  const { scenes } = db
+    .prepare('SELECT COUNT(*) AS scenes FROM scene_links WHERE note_id = ?')
+    .get(noteId) as { scenes: number };
+  insertEntry(db, collect(db, 'notes', [note], [noteId]), {
+    id: noteId,
+    kind: note['kind'] as NoteKind,
+    title: note['title'] as string,
+    path: JSON.stringify(group ? [group.name] : []),
+    scene_count: scenes,
+    word_count: note['word_count'] as number,
+    deleted_at: nowIso(),
+  });
+}
+
+function collect(db: DatabaseSync, table: Source, rows: Row[], ids: string[]): Snapshot {
+  const idList = JSON.stringify(ids);
+  const inIds = 'IN (SELECT value FROM json_each(?))';
+  const ftsKey = table === 'nodes' ? 'node_id' : 'note_id';
+  const snapshot: Snapshot = {
+    version: 2,
+    table,
+    rows: rows.map(store),
+    dependents: {},
+    references: [],
+    tags: [],
+    fts: (
+      db.prepare(`SELECT * FROM ${FTS_TABLE[table]} WHERE ${ftsKey} ${inIds}`).all(idList) as Row[]
+    ).map(store),
+  };
+  for (const key of foreignKeys(db)) {
+    if (key.target !== table || key.table === table) continue;
+    const found = db
+      .prepare(`SELECT * FROM "${key.table}" WHERE "${key.column}" ${inIds}`)
+      .all(idList) as Row[];
+    if (key.onDelete === 'CASCADE') {
+      (snapshot.dependents[key.table] ??= []).push(...found.map(store));
+    } else if (key.onDelete === 'SET NULL') {
+      for (const row of found) {
+        snapshot.references.push({
+          table: key.table,
+          column: key.column,
+          key: store(primaryKey(db, key.table, row)),
+          value: row[key.column] as string,
+        });
+      }
+    }
+  }
+  return snapshot;
+}
+
+function insertEntry(db: DatabaseSync, snapshot: Snapshot, entry: TrashRow): void {
   db.prepare(
     `INSERT INTO trash (id, kind, title, path, scene_count, word_count, snapshot, deleted_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
-    nodeId,
-    root['kind'] as string,
-    root['title'] as string,
-    JSON.stringify(ancestorTitles(db, root['parent_id'] as string | null)),
-    totals.scenes,
-    totals.words,
+    entry.id,
+    entry.kind,
+    entry.title,
+    entry.path,
+    entry.scene_count,
+    entry.word_count,
     JSON.stringify(snapshot),
-    nowIso(),
+    entry.deleted_at,
   );
 }
 
 /**
- * Puts the subtree back at its old place. When the old parent is gone, parts and chapters go to
- * the end of the book and scenes into its last chapter – which is created with `chapterTitle` if
- * the book has none.
+ * Puts the entry back. The caller has removed it from the trash table already.
  *
- * Rows that refer to something deleted in the meantime (a character, a plot thread …) are left
- * out instead of failing the whole restore.
+ * A subtree goes to its old place. When the old parent is gone, parts and chapters go to the end
+ * of the book and scenes into its last chapter – which is created with `chapterTitle` if the book
+ * has none. A note goes back into its group, or into none when the group is gone.
+ *
+ * Rows that refer to something deleted for good in the meantime (a plot thread, a map …) are left
+ * out instead of failing the whole restore. Rows that refer to something still in the trash (a
+ * scene link whose note is trashed too) are handed over to that entry, so they come back with it.
  *
  * @returns whether it went back to its old place
  */
@@ -132,8 +196,61 @@ export function restoreFromTrash(
   snapshotJson: string,
   chapterTitle: string,
 ): boolean {
-  const snapshot = JSON.parse(snapshotJson) as Snapshot;
-  const nodes = snapshot.nodes.map(load);
+  const snapshot = parse(snapshotJson);
+  const keys = foreignKeys(db);
+  const others = new OtherEntries(db);
+
+  const atOldPlace =
+    snapshot.table === 'nodes'
+      ? restoreNodes(db, snapshot.rows.map(load), chapterTitle)
+      : restoreNote(db, keys, others, load(snapshot.rows[0]!));
+
+  // A tag of the same name may have been created anew since; the scenes then join that one.
+  const tagIds = new Map<SQLInputValue, SQLInputValue>();
+  for (const tag of snapshot.tags.map(load)) {
+    const existing = db.prepare('SELECT id FROM tags WHERE key = ?').get(tag['key']!) as
+      { id: string } | undefined;
+    if (!existing) insertRow(db, 'tags', tag);
+    tagIds.set(tag['id']!, existing?.id ?? tag['id']!);
+  }
+
+  for (const [table, rows] of Object.entries(snapshot.dependents)) {
+    if (!tableExists(db, table)) continue;
+    for (const stored of rows) {
+      const row = load(stored);
+      if (table === 'scene_tags') row['tag_id'] = tagIds.get(row['tag_id']!) ?? row['tag_id']!;
+      if (settle(db, keys, others, table, row)) insertRow(db, table, row);
+    }
+  }
+
+  for (const reference of snapshot.references) {
+    if (!columnsOf(db, reference.table).includes(reference.column)) continue;
+    const key = load(reference.key);
+    const where = Object.keys(key)
+      .map((column) => `"${column}" = ?`)
+      .join(' AND ');
+    const params = Object.values(key);
+    // Only where nobody pointed it somewhere else in the meantime
+    db.prepare(
+      `UPDATE "${reference.table}" SET "${reference.column}" = ?
+        WHERE ${where} AND "${reference.column}" IS NULL`,
+    ).run(reference.value, ...params);
+    const exists = db.prepare(`SELECT 1 FROM "${reference.table}" WHERE ${where}`).get(...params);
+    if (!exists) others.restoreReference(reference);
+  }
+
+  const ftsTable = FTS_TABLE[snapshot.table];
+  for (const row of snapshot.fts.map(load)) {
+    const columns = Object.keys(row);
+    db.prepare(
+      `INSERT INTO ${ftsTable} (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+    ).run(...Object.values(row));
+  }
+  others.save();
+  return atOldPlace;
+}
+
+function restoreNodes(db: DatabaseSync, nodes: Values[], chapterTitle: string): boolean {
   const root = nodes[0]!;
   const kind = root['kind'] as NodeKind;
 
@@ -155,55 +272,132 @@ export function restoreFromTrash(
   order.splice(index, 0, root['id'] as string);
   const setOrder = db.prepare('UPDATE nodes SET sort_order = ? WHERE id = ?');
   order.forEach((id, position) => setOrder.run(position + 1, id));
+  return atOldPlace;
+}
 
-  // A tag of the same name may have been created anew since; the scenes then join that one.
-  const tagIds = new Map<SQLInputValue, SQLInputValue>();
-  for (const tag of snapshot.tags.map(load)) {
-    const existing = db.prepare('SELECT id FROM tags WHERE key = ?').get(tag['key']!) as
-      { id: string } | undefined;
-    if (!existing) insertRow(db, 'tags', tag);
-    tagIds.set(tag['id']!, existing?.id ?? tag['id']!);
+function restoreNote(
+  db: DatabaseSync,
+  keys: ForeignKey[],
+  others: OtherEntries,
+  note: Values,
+): boolean {
+  const groupId = note['group_id'] ?? null;
+  settle(db, keys, others, 'notes', note);
+  insertRow(db, 'notes', note);
+  return (note['group_id'] ?? null) === groupId;
+}
+
+/**
+ * Makes the row fit what exists now. A SET NULL reference to something gone is cleared, any other
+ * one keeps the row out. Where that something is in the trash, the row or reference goes there.
+ *
+ * @returns whether the row can be inserted
+ */
+function settle(
+  db: DatabaseSync,
+  keys: ForeignKey[],
+  others: OtherEntries,
+  table: string,
+  row: Values,
+): boolean {
+  const missing = keys.filter(
+    (key) => key.table === table && key.column in row && !targetExists(db, key, row[key.column]),
+  );
+  const required = missing.find((key) => key.onDelete !== 'SET NULL');
+  if (required) {
+    others.holding(required.target, row[required.column])?.addDependent(table, row);
+    return false;
+  }
+  for (const key of missing) {
+    const value = row[key.column] as string;
+    row[key.column] = null;
+    others.holding(key.target, value)?.addReference({
+      table,
+      column: key.column,
+      key: store(primaryKey(db, table, row) as Row),
+      value,
+    });
+  }
+  return true;
+}
+
+/** The other trash entries, read and written back only when a restore hands something over. */
+class OtherEntries {
+  private entries?: Array<{ id: string; snapshot: Snapshot; ids: Set<unknown>; changed: boolean }>;
+
+  constructor(private readonly db: DatabaseSync) {}
+
+  /** The entry whose deleted rows include this one. */
+  holding(table: string, id: SQLInputValue | undefined) {
+    const entry = this.all().find((e) => e.snapshot.table === table && e.ids.has(id));
+    if (!entry) return undefined;
+    return {
+      addDependent: (dependentTable: string, row: Values) => {
+        (entry.snapshot.dependents[dependentTable] ??= []).push(store(row as Row));
+        entry.changed = true;
+      },
+      addReference: (reference: StoredReference) => {
+        entry.snapshot.references.push(reference);
+        entry.changed = true;
+      },
+    };
   }
 
-  const keys = foreignKeys(db);
-  for (const [table, rows] of Object.entries(snapshot.dependents)) {
-    if (!tableExists(db, table)) continue;
-    const tableKeys = keys.filter((key) => key.table === table);
-    for (const stored of rows) {
-      const row = load(stored);
-      if (table === 'scene_tags') row['tag_id'] = tagIds.get(row['tag_id']!) ?? row['tag_id']!;
-      if (tableKeys.every((key) => targetExists(db, key, row[key.column]))) {
-        insertRow(db, table, row);
+  /** The row that lost its reference is in the trash itself (e.g. the station of a trashed note). */
+  restoreReference(reference: StoredReference): void {
+    const key = Object.entries(reference.key);
+    for (const entry of this.all()) {
+      for (const row of entry.snapshot.dependents[reference.table] ?? []) {
+        if (
+          key.every(([column, value]) => row[column] === value) &&
+          row[reference.column] === null
+        ) {
+          row[reference.column] = reference.value;
+          entry.changed = true;
+        }
       }
     }
   }
 
-  for (const reference of snapshot.references) {
-    if (!columnsOf(db, reference.table).includes(reference.column)) continue;
-    const key = load(reference.key);
-    const where = Object.keys(key)
-      .map((column) => `"${column}" = ?`)
-      .join(' AND ');
-    // Only where nobody pointed it somewhere else in the meantime
-    db.prepare(
-      `UPDATE "${reference.table}" SET "${reference.column}" = ?
-        WHERE ${where} AND "${reference.column}" IS NULL`,
-    ).run(reference.value, ...Object.values(key));
+  save(): void {
+    const update = this.db.prepare('UPDATE trash SET snapshot = ? WHERE id = ?');
+    for (const entry of this.entries ?? []) {
+      if (entry.changed) update.run(JSON.stringify(entry.snapshot), entry.id);
+    }
   }
 
-  for (const row of snapshot.fts.map(load)) {
-    db.prepare('INSERT INTO scene_fts (node_id, title, body) VALUES (?, ?, ?)').run(
-      row['node_id']!,
-      row['title']!,
-      row['body']!,
-    );
+  private all() {
+    return (this.entries ??= (
+      this.db.prepare('SELECT id, snapshot FROM trash').all() as Array<{
+        id: string;
+        snapshot: string;
+      }>
+    ).map((row) => {
+      const snapshot = parse(row.snapshot);
+      return {
+        id: row.id,
+        snapshot,
+        ids: new Set(snapshot.rows.map((stored) => stored['id'])),
+        changed: false,
+      };
+    }));
   }
-  return atOldPlace;
 }
 
-/** Image ids the trashed text refers to – they may only be cleaned up once it is gone for good. */
+/** Image ids the trashed rows refer to – they may only be cleaned up once these are gone for good. */
 export function imageIdsIn(snapshotJson: string): string[] {
-  return [...new Set([...snapshotJson.matchAll(/\/api\/images\/([0-9a-f-]+)/g)].map((m) => m[1]!))];
+  const inText = [...snapshotJson.matchAll(/\/api\/images\/([0-9a-f-]+)/g)].map((m) => m[1]!);
+  const inGallery = (parse(snapshotJson).dependents['note_images'] ?? []).map(
+    (row) => row['image_id'] as string,
+  );
+  return [...new Set([...inText, ...inGallery])];
+}
+
+function parse(json: string): Snapshot {
+  const snapshot = JSON.parse(json) as Snapshot | SnapshotV1;
+  if (snapshot.version === 2) return snapshot;
+  const { nodes, ...rest } = snapshot;
+  return { ...rest, version: 2, table: 'nodes', rows: nodes };
 }
 
 function subtreeIds(db: DatabaseSync, nodeId: string): string[] {
@@ -290,19 +484,20 @@ function columnsOf(db: DatabaseSync, table: string): string[] {
   ).map((row) => row.name);
 }
 
-function primaryKeyOf(db: DatabaseSync, table: string): string[] {
-  return (
+function primaryKey(db: DatabaseSync, table: string, row: Row | Values): Row {
+  const columns = (
     db
       .prepare('SELECT name FROM pragma_table_info(?) WHERE pk > 0 ORDER BY pk')
       .all(table) as Array<{ name: string }>
-  ).map((row) => row.name);
+  ).map((column) => column.name);
+  return Object.fromEntries(columns.map((column) => [column, row[column]!])) as Row;
 }
 
 /**
  * Columns dropped by a later migration are left out; added ones take their default. Rows that
  * exist already (e.g. a link that was recreated by hand) are kept as they are.
  */
-function insertRow(db: DatabaseSync, table: string, row: Record<string, SQLInputValue>): void {
+function insertRow(db: DatabaseSync, table: string, row: Values): void {
   const existing = new Set(columnsOf(db, table));
   const columns = Object.keys(row).filter((column) => existing.has(column));
   db.prepare(
@@ -320,7 +515,7 @@ function store(row: Row): StoredRow {
   ) as StoredRow;
 }
 
-function load(row: StoredRow): Record<string, SQLInputValue> {
+function load(row: StoredRow): Values {
   return Object.fromEntries(
     Object.entries(row).map(([column, value]) => [
       column,

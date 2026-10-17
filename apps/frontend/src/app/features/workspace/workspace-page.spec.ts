@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
+import { NotesStore } from '../notes/notes-store';
 import { FakeApi, testNode, testNote, testProject } from '../../testing/fake-api';
 import { button, findButton, key, render, text, until } from '../../testing/render';
 import { WorkspacePage } from './workspace-page';
@@ -31,6 +32,7 @@ async function setup(prepare: (api: FakeApi) => void = () => undefined) {
       'write/stats',
       'write/scene/:id',
       'write/trash',
+      'write/characters/trash',
       'export',
       'settings',
     ]
@@ -87,6 +89,25 @@ describe('WorkspacePage', () => {
     await until(settle, () => router.url === '/write/trash');
     // Still the manuscript area, so the tree stays next to it
     expect(sidebar()?.querySelector('wm-manuscript-tree')).not.toBeNull();
+  });
+
+  it('gives each note area its own trash link', async () => {
+    const { fixture, go, sidebar, router, settle } = await setup();
+    await go(de.noteKinds.character.label, '/write/characters');
+    expect(sidebar()?.querySelector('.trash-link')).toBeNull();
+
+    await TestBed.inject(ProjectStore).deleteNode('k1');
+    await settle();
+    // The manuscript trash does not show up next to the characters
+    expect(sidebar()?.querySelector('.trash-link')).toBeNull();
+
+    await fixture.debugElement.injector.get(NotesStore).remove('anna');
+    await settle();
+    const link = sidebar()!.querySelector<HTMLAnchorElement>('.trash-link')!;
+    expect(text(link)).toBe(de.tree.trashLink(1));
+    link.click();
+    await until(settle, () => router.url === '/write/characters/trash');
+    expect(sidebar()?.querySelector('wm-note-list')).not.toBeNull();
   });
 
   it('gives plot and statistics the full width', async () => {

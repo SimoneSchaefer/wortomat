@@ -162,13 +162,17 @@ export interface CreateNodeRequest {
   title: string;
 }
 
-/** A deleted part, chapter or scene, together with everything below it. */
+/** Each area has its own trash: the manuscript, and every kind of note. */
+export type TrashArea = 'manuscript' | NoteKind;
+
+/** A deleted part, chapter or scene together with everything below it, or a deleted note. */
 export interface TrashEntry {
   id: string;
-  kind: NodeKind;
+  kind: NodeKind | NoteKind;
   title: string;
-  /** Titles of the part and chapter it was in when deleted. */
+  /** Titles of the part and chapter it was in when deleted; for a note, its group. */
   path: string[];
+  /** For a note: the scenes it was linked to. */
   sceneCount: number;
   wordCount: number;
   deletedAt: string;
@@ -176,9 +180,12 @@ export interface TrashEntry {
 
 export interface RestoreResult {
   nodes: ManuscriptNode[];
-  /** The id of the restored part, chapter or scene. */
-  nodeId: string;
-  /** `false` when the old place was gone and it went to the end of the book instead. */
+  /** The id of the restored entry. */
+  id: string;
+  /**
+   * `false` when the old place was gone: a part, chapter or scene went to the end of the book
+   * instead, a note lost its group.
+   */
   atOldPlace: boolean;
 }
 

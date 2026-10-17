@@ -7,6 +7,7 @@ import type {
   NoteSummary,
   UpdateNoteRequest,
 } from '@wortomat/shared';
+import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 
 const collator = new Intl.Collator('de', { sensitivity: 'base', numeric: true });
@@ -21,6 +22,7 @@ export interface GroupedNotes {
 @Injectable()
 export class NotesStore {
   private readonly api = inject(WortomatApi);
+  private readonly project = inject(ProjectStore);
 
   readonly notes = signal<NoteSummary[]>([]);
   readonly groups = signal<NoteGroup[]>([]);
@@ -102,9 +104,11 @@ export class NotesStore {
     );
   }
 
+  /** Into the trash. */
   async remove(id: string): Promise<void> {
     await this.api.deleteNote(id);
     this.notes.update((notes) => notes.filter((note) => note.id !== id));
+    await this.project.reloadTrash();
   }
 
   async createGroup(kind: NoteKind, name: string): Promise<NoteGroup> {

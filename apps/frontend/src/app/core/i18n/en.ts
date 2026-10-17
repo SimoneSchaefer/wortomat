@@ -122,10 +122,25 @@ export const en: Texts = {
 
   trash: {
     title: 'Trash',
-    hint: 'Deleted parts, chapters and scenes stay here until you delete them for good.',
+    hint: {
+      manuscript: 'Deleted parts, chapters and scenes stay here until you delete them for good.',
+      character: 'Deleted characters stay here until you delete them for good.',
+      place: 'Deleted places stay here until you delete them for good.',
+      research: 'Deleted research notes stay here until you delete them for good.',
+    },
     empty: 'The trash is empty.',
-    kind: { part: 'Part', chapter: 'Chapter', scene: 'Scene' },
+    kind: {
+      part: 'Part',
+      chapter: 'Chapter',
+      scene: 'Scene',
+      character: 'Character',
+      place: 'Place',
+      research: 'Research',
+    },
     topLevel: 'top level',
+    noGroup: 'no group',
+    linkedScenes: (count: number) =>
+      count === 1 ? 'in 1 scene' : `in ${numberFormat.format(count)} scenes`,
     scenes: (count: number) => (count === 1 ? '1 scene' : `${numberFormat.format(count)} scenes`),
     deletedAt: (when: string) => `deleted ${when}`,
     restore: 'Restore',
@@ -135,6 +150,8 @@ export const en: Texts = {
     deleteForGoodTitle: 'Delete for good?',
     deleteForGoodMessage: (title: string) =>
       `“${title}” will be deleted for good, with all scenes in it.`,
+    deleteNoteForGoodMessage: (title: string) =>
+      `“${title}” will be deleted for good, with everything recorded for it and its images.`,
     emptyTrash: 'Empty trash',
     emptyTrashTitle: 'Empty the trash?',
     emptyTrashMessage: (count: number) =>
@@ -144,6 +161,8 @@ export const en: Texts = {
     restored: (title: string) => `“${title}” is back.`,
     restoredElsewhere: (title: string) =>
       `“${title}” is back – at the end of the book, because its old place no longer exists.`,
+    restoredWithoutGroup: (title: string) =>
+      `“${title}” is back – without a group, because its group no longer exists.`,
   },
 
   filter: {
@@ -225,7 +244,8 @@ export const en: Texts = {
 
   notes: {
     deleteTitle: (singular: string) => `Delete ${singular.toLowerCase()}?`,
-    deleteMessage: (title: string) => `“${title}” will be deleted with everything recorded for it.`,
+    deleteMessage: (title: string) =>
+      `“${title}” moves to the trash with everything recorded for it. You can restore it from there.`,
     deleteGroupTitle: 'Delete group?',
     deleteLabel: (title: string) => `Delete ${title}`,
     deleteGroupLabel: (name: string) => `Delete group ${name}`,

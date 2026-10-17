@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import type { RestoreResult, TrashEntry } from '@wortomat/shared';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { RestoreResult, TrashArea, TrashEntry } from '@wortomat/shared';
 import { transaction } from '../database/sqlite.js';
 import { ImagesService } from '../images/images.service.js';
 import { localized } from '../i18n.js';
@@ -7,7 +7,14 @@ import { ManuscriptService } from '../manuscript/manuscript.service.js';
 import { ProjectService } from '../project/project.service.js';
 import { imageIdsIn, restoreFromTrash, type TrashRow } from './snapshot.js';
 
-/** Deleted parts, chapters and scenes; they stay until deleted for good – nothing expires. */
+const KINDS: Record<TrashArea, readonly string[]> = {
+  manuscript: ['part', 'chapter', 'scene'],
+  character: ['character'],
+  place: ['place'],
+  research: ['research'],
+};
+
+/** Deleted parts, chapters, scenes and notes; they stay until deleted for good – nothing expires. */
 @Injectable()
 export class TrashService {
   constructor(
@@ -41,23 +48,35 @@ export class TrashService {
   /** @param chapterTitle for the chapter created when a scene has nowhere else to go */
   restore(id: string, chapterTitle: string): RestoreResult {
     const atOldPlace = transaction(this.db, () => {
-      const result = restoreFromTrash(this.db, this.snapshot(id), chapterTitle);
+      const snapshot = this.snapshot(id);
+      // Out first, so nothing gets handed over to the entry being restored
       this.db.prepare('DELETE FROM trash WHERE id = ?').run(id);
+      const result = restoreFromTrash(this.db, snapshot, chapterTitle);
       this.projects.touch();
       return result;
     });
-    return { nodes: this.manuscript.list(), nodeId: id, atOldPlace };
+    return { nodes: this.manuscript.list(), id, atOldPlace };
   }
 
   remove(id: string): void {
     this.deleteForGood([this.snapshot(id)], 'DELETE FROM trash WHERE id = ?', id);
   }
 
-  empty(): void {
+  /** Without an area, the whole trash. */
+  empty(area?: string): void {
+    if (area !== undefined && !Object.hasOwn(KINDS, area)) {
+      throw new BadRequestException(localized('Unbekannter Bereich.', 'Unknown area.'));
+    }
+    const kinds = JSON.stringify(
+      area === undefined ? Object.values(KINDS).flat() : KINDS[area as TrashArea],
+    );
+    const where = 'WHERE kind IN (SELECT value FROM json_each(?))';
     const snapshots = (
-      this.db.prepare('SELECT snapshot FROM trash').all() as Array<{ snapshot: string }>
+      this.db.prepare(`SELECT snapshot FROM trash ${where}`).all(kinds) as Array<{
+        snapshot: string;
+      }>
     ).map((row) => row.snapshot);
-    this.deleteForGood(snapshots, 'DELETE FROM trash');
+    this.deleteForGood(snapshots, `DELETE FROM trash ${where}`, kinds);
   }
 
   private deleteForGood(snapshots: string[], sql: string, ...params: string[]): void {
