@@ -107,6 +107,28 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--accent-strong);
+  cursor: grab;
+}
+
+// Drop marker in the middle of the gap – as the line in the manuscript tree and the note list
+.step[data-drop]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px solid var(--accent);
+}
+
+.step[data-drop='before']::after {
+  top: -0.35rem;
+}
+
+.step[data-drop='after']::after {
+  bottom: -0.35rem;
+}
+
+.step.dragging {
+  opacity: 0.4;
 }
 
 .step-label {

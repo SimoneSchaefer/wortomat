@@ -24,6 +24,13 @@ import { type ArcOrderIssue, arcOrderIssues, sortedByStory, storyPositions } fro
 import { ArcScenePicker } from './arc-scene-picker';
 
 const SAVE_DELAY_MS = 600;
+const DRAG_TYPE = 'application/x-wortomat-arc-step';
+
+/** Where a dragged station would land. */
+interface StepDrop {
+  targetId: string;
+  position: 'before' | 'after';
+}
 
 /**
  * "Development" of a character: the overall arc as text and its stations, each optionally with
@@ -53,6 +60,9 @@ export class NoteArc {
   protected readonly steps = signal<ArcStep[]>([]);
   /** Stations whose note field is shown although it is still empty. */
   protected readonly detailsShown = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly draggingId = signal<string | null>(null);
+  protected readonly drop = signal<StepDrop | null>(null);
 
   /** Follows rearranging in the plot view and moving scenes in the manuscript. */
   private readonly projectStore = inject(ProjectStore);
@@ -122,6 +132,56 @@ export class NoteArc {
       event.preventDefault();
       if (index < steps.length - 1) void this.move(steps[index], steps[index + 2]?.id ?? null);
     }
+  }
+
+  protected onDragStart(event: DragEvent, step: ArcStep): void {
+    if (!event.dataTransfer) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData(DRAG_TYPE, step.id);
+    // The whole station follows the pointer, not just its number
+    const station = (event.target as HTMLElement).closest('.step');
+    if (station) event.dataTransfer.setDragImage?.(station, 12, 12);
+    this.draggingId.set(step.id);
+  }
+
+  protected onDragEnd(): void {
+    this.draggingId.set(null);
+    this.drop.set(null);
+  }
+
+  /** Upper half of the station: before, lower half: after – as in the other lists. */
+  protected onDragOver(event: DragEvent, step: ArcStep): void {
+    if (!this.draggingId() || !event.dataTransfer?.types.includes(DRAG_TYPE)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const position = event.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+    this.drop.set({ targetId: step.id, position });
+  }
+
+  protected onDragLeave(event: DragEvent, step: ArcStep): void {
+    const station = event.currentTarget as HTMLElement;
+    if (station.contains(event.relatedTarget as Node | null)) return;
+    if (this.drop()?.targetId === step.id) this.drop.set(null);
+  }
+
+  protected async onDrop(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    const id = this.draggingId();
+    const drop = this.drop();
+    this.onDragEnd();
+    if (!id || !drop) return;
+    const order = this.steps().map((step) => step.id);
+    const beforeId =
+      drop.position === 'before'
+        ? drop.targetId
+        : (order[order.indexOf(drop.targetId) + 1] ?? null);
+    // Already in this place? Then do nothing.
+    if (beforeId === id || (order[order.indexOf(id) + 1] ?? null) === beforeId) return;
+    await this.move(
+      this.steps().find((step) => step.id === id)!,
+      beforeId,
+    );
   }
 
   protected showDetails(step: ArcStep): void {
