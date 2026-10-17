@@ -1,11 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  afterNextRender,
   Component,
   computed,
   DestroyRef,
   effect,
   type ElementRef,
   inject,
+  Injector,
   input,
   signal,
   untracked,
@@ -91,6 +93,7 @@ export class DocumentEditor {
   private readonly desktop = inject(DESKTOP_BRIDGE);
   private readonly settings = inject(AppSettingsStore);
   private readonly notes = inject(NotesStore, { optional: true });
+  private readonly injector = inject(Injector);
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
   private readonly noteInput = viewChild<ElementRef<HTMLInputElement>>('noteInput');
 
@@ -139,8 +142,6 @@ export class DocumentEditor {
       const id = this.documentId();
       untracked(() => void this.load(id));
     });
-
-    effect(() => this.noteInput()?.nativeElement.focus());
 
     effect(() => {
       const revising = this.revising();
@@ -438,9 +439,19 @@ export class DocumentEditor {
 
   protected editNote(annotation: AnnotationAt): void {
     // Leave the text right away: the input only gets focus after rendering, and anything typed
-    // until then would otherwise land in the scene
-    this.editor?.commands.blur();
+    // until then would otherwise land in the scene. Not `commands.blur()`: it runs a frame later
+    // and clears the selection, possibly after the input already has the focus.
+    this.editor?.view.dom.blur();
     this.editingNoteAt.set(annotation.from);
+    // Only once the input is in the page; focusing it any earlier silently does nothing
+    afterNextRender(
+      () => {
+        const input = this.noteInput()?.nativeElement;
+        input?.focus();
+        input?.setSelectionRange(input.value.length, input.value.length);
+      },
+      { injector: this.injector },
+    );
   }
 
   /** Enter, "Done" or a click elsewhere. */

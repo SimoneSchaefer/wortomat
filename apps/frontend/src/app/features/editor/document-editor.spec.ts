@@ -141,6 +141,9 @@ describe('DocumentEditor', () => {
     await settle();
     const input = bar()!.querySelector<HTMLInputElement>('input')!;
     expect(input.value).toBe('Name klären');
+    // Focused with the cursor at the end, ready to add to the note
+    expect(document.activeElement).toBe(input);
+    expect(input.selectionStart).toBe('Name klären'.length);
 
     input.value = 'Anders';
     key(input, 'Escape');
