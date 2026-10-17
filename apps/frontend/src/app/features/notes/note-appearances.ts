@@ -32,16 +32,16 @@ import { StatusMessages } from '../../core/status-messages';
     }
   `,
   styles: `
+    // List below the label: beside it, long scene titles wrapped in a narrow column
     :host {
       display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
+      flex-direction: column;
+      gap: 0.35rem;
       margin-top: 0.9rem;
       font-size: 0.82rem;
     }
 
     .label {
-      flex-shrink: 0;
       font-size: 0.72rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
