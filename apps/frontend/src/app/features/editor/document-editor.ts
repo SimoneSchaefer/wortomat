@@ -341,14 +341,13 @@ export class DocumentEditor {
     return this.editor?.can()[action]() ?? false;
   }
 
-  /** Label of the paragraph style dropdown. */
-  protected readonly blockStyle = computed(() => {
-    const t = this.t().editor;
-    if (this.isActive('heading', { level: 2 })) return t.heading;
-    if (this.isActive('heading', { level: 3 })) return t.subheading;
-    if (this.isActive('blockquote')) return t.blockquote;
-    return t.paragraph;
-  });
+  /** "Text" is checked when no other paragraph style applies. */
+  protected readonly isParagraph = computed(
+    () =>
+      !this.isActive('heading', { level: 2 }) &&
+      !this.isActive('heading', { level: 3 }) &&
+      !this.isActive('blockquote'),
+  );
 
   /** Without an explicit alignment the text runs left like in the editor. */
   protected readonly alignment = computed<Alignment>(() => {
