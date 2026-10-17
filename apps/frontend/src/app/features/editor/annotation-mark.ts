@@ -6,6 +6,7 @@ import type {
 } from '@tiptap/pm/model';
 import { type EditorState, TextSelection } from '@tiptap/pm/state';
 import type { AnnotationKind } from '@wortomat/shared';
+import { ANNOTATION_KINDS } from '../../core/annotations';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -156,11 +157,12 @@ export const Annotation = Mark.create<AnnotationOptions>({
   },
 
   addKeyboardShortcuts() {
-    return {
-      'Mod-Alt-t': () => this.editor.commands.toggleAnnotation('todo'),
-      'Mod-Alt-i': () => this.editor.commands.toggleAnnotation('idea'),
-      'Mod-Alt-f': () => this.editor.commands.toggleAnnotation('fixme'),
-    };
+    return Object.fromEntries(
+      ANNOTATION_KINDS.map(({ kind, key }) => [
+        `Mod-Alt-${key.toLowerCase()}`,
+        () => this.editor.commands.toggleAnnotation(kind),
+      ]),
+    );
   },
 });
 

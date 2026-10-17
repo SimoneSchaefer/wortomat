@@ -39,6 +39,25 @@ describe('Annotation (todo/idea/fixme)', () => {
     editor.destroy();
   });
 
+  // Ctrl+Alt+T would open a terminal on Ubuntu before the editor sees it
+  it.each([
+    ['o', 'todo'],
+    ['i', 'idea'],
+    ['f', 'fixme'],
+  ])('marks the selection on Ctrl+Alt+%s as %s', (key, kind) => {
+    const editor = createEditor();
+    editor.commands.setTextSelection({ from: 6, to: 11 });
+    const event = new KeyboardEvent('keydown', {
+      key,
+      keyCode: key.toUpperCase().charCodeAt(0),
+      ctrlKey: true,
+      altKey: true,
+    });
+    editor.view.someProp('handleKeyDown', (handle) => handle(editor.view, event));
+    expect(marksOf(editor)[1]).toEqual(['fehlt', kind]);
+    editor.destroy();
+  });
+
   it('removes the whole mark when the cursor is inside it', () => {
     const editor = createEditor();
     editor.chain().setTextSelection({ from: 6, to: 11 }).toggleAnnotation('idea').run();

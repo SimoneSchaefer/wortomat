@@ -57,7 +57,7 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Szene als Stufenleiste, im Manuskript-Baum als farbiger Punkt; Farben in `styles.scss`.
 - **Todo/Idee/Fixme im Text:** eigene Tiptap-Mark-Erweiterung
   ([`annotation-mark.ts`](apps/frontend/src/app/features/editor/annotation-mark.ts)), Werkzeugleiste
-  oder Strg+Alt+T/I/F. Farbig hinterlegt und je Art anders unterstrichen (auch ohne Farbwahrnehmung
+  oder Strg+Alt+O/I/F. Farbig hinterlegt und je Art anders unterstrichen (auch ohne Farbwahrnehmung
   unterscheidbar). Das Backend zählt beim Speichern selbst
   ([`annotations.ts`](apps/backend/src/manuscript/annotations.ts)) – zusammenhängend markierter Text
   zählt einmal –, der Manuskript-Baum zeigt die Zahlen je Szene und als Summe je Kapitel/Teil.
