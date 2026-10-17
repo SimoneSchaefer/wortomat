@@ -1,0 +1,99 @@
+@if (loaded()) {
+  <section class="arc" [class.open]="open()">
+    <button type="button" class="toggle" [attr.aria-expanded]="open()" (click)="open.set(!open())">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4" /></svg>
+      <span class="title">{{ t().arc.title }}</span>
+      @if (steps().length) {
+        <span class="count">{{ t().arc.steps(steps().length) }}</span>
+      }
+    </button>
+
+    @if (open()) {
+      <div class="content">
+        <textarea
+          class="summary doc-input"
+          rows="1"
+          [attr.aria-label]="t().arc.summary"
+          [placeholder]="t().arc.summaryPlaceholder"
+          [value]="summary()"
+          (input)="onSummaryInput($any($event.target).value)"
+        ></textarea>
+
+        @if (steps().length) {
+          <ol class="steps">
+            @for (step of steps(); track step.id; let i = $index, first = $first, last = $last) {
+              <li class="step" [attr.data-step-id]="step.id">
+                <span class="marker" aria-hidden="true">{{ i + 1 }}</span>
+                <div class="body">
+                  <textarea
+                    class="step-label doc-input"
+                    rows="1"
+                    [attr.aria-label]="t().arc.stepLabel(i + 1)"
+                    [placeholder]="t().arc.stepPlaceholder"
+                    [value]="step.label"
+                    (input)="onStepInput(step, 'label', $any($event.target).value)"
+                    (keydown)="onLabelKeydown($event, i)"
+                  ></textarea>
+                  @if (step.details || detailsShown().has(step.id)) {
+                    <textarea
+                      class="step-details doc-input"
+                      rows="1"
+                      [attr.aria-label]="t().arc.details"
+                      [placeholder]="t().arc.detailsPlaceholder"
+                      [value]="step.details"
+                      (input)="onStepInput(step, 'details', $any($event.target).value)"
+                    ></textarea>
+                  }
+                  <div class="meta">
+                    <wm-arc-scene-picker
+                      [sceneId]="step.sceneId"
+                      (picked)="setScene(step, $event)"
+                    />
+                    @if (!step.details && !detailsShown().has(step.id)) {
+                      <button type="button" class="link add-details" (click)="showDetails(step)">
+                        {{ t().arc.addDetails }}
+                      </button>
+                    }
+                  </div>
+                </div>
+                <div class="actions">
+                  <button
+                    type="button"
+                    [disabled]="first"
+                    [title]="t().arc.moveUp"
+                    [attr.aria-label]="t().arc.moveUp"
+                    (click)="move(step, steps()[i - 1].id)"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    [disabled]="last"
+                    [title]="t().arc.moveDown"
+                    [attr.aria-label]="t().arc.moveDown"
+                    (click)="move(step, steps()[i + 2]?.id ?? null)"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    class="remove"
+                    [title]="t().arc.remove"
+                    [attr.aria-label]="t().arc.remove"
+                    (click)="remove(step)"
+                  >
+                    ×
+                  </button>
+                </div>
+              </li>
+            }
+          </ol>
+        }
+
+        <button type="button" class="link add-step" (click)="addStep()">
+          {{ t().arc.addStep }}
+        </button>
+      </div>
+    }
+  </section>
+}

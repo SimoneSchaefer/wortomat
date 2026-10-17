@@ -258,6 +258,22 @@ const MIGRATIONS: readonly Migration[] = [
   /* 19: crop of a gallery image (JSON {x, y, width, height}, relative); NULL = whole image */ `
     ALTER TABLE note_images ADD COLUMN crop TEXT;
   `,
+  /* 20: character arc – the overall arc as text plus stations, each optionally shown in a scene */ `
+    ALTER TABLE notes ADD COLUMN arc TEXT NOT NULL DEFAULT '';
+
+    CREATE TABLE arc_steps (
+      id          TEXT PRIMARY KEY,
+      note_id     TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+      label       TEXT NOT NULL,
+      details     TEXT NOT NULL DEFAULT '',
+      -- the station survives its scene being deleted; it only loses the reference
+      scene_id    TEXT REFERENCES nodes(id) ON DELETE SET NULL,
+      sort_order  REAL NOT NULL,
+      created_at  TEXT NOT NULL
+    );
+    CREATE INDEX arc_steps_by_note ON arc_steps(note_id, sort_order);
+    CREATE INDEX arc_steps_by_scene ON arc_steps(scene_id);
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

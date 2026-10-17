@@ -18,6 +18,7 @@ import { PendingSaves } from '../../core/pending-saves';
 import { ProjectStore } from '../../core/project-store';
 import { WortomatApi } from '../../core/wortomat-api';
 import { DocumentEditor, type DocumentSource } from './document-editor';
+import { SceneArcSteps } from './scene-arc-steps';
 import { SceneLinks } from './scene-links';
 import { SceneStatusPicker } from './scene-status';
 import { StatusMessages } from '../../core/status-messages';
@@ -26,7 +27,7 @@ const TITLE_SAVE_DELAY_MS = 600;
 
 @Component({
   selector: 'wm-scene-page',
-  imports: [DocumentEditor, SceneLinks, SceneStatusPicker],
+  imports: [DocumentEditor, SceneArcSteps, SceneLinks, SceneStatusPicker],
   template: `
     <wm-document-editor [documentId]="id()" [source]="source" [revisable]="true">
       <input
@@ -43,6 +44,7 @@ const TITLE_SAVE_DELAY_MS = 600;
           <wm-scene-status [node]="scene" />
         }
         <wm-scene-links [sceneId]="id()" />
+        <wm-scene-arc-steps [sceneId]="id()" />
       </div>
     </wm-document-editor>
   `,

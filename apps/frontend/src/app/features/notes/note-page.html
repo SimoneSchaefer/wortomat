@@ -34,7 +34,7 @@
         ></textarea>
         <wm-note-group-picker [noteId]="id()" [kind]="kind()" />
         @if (config().linkable) {
-          <wm-note-appearances [noteId]="id()" />
+          <wm-note-appearances [noteId]="id()" [version]="appearancesVersion()" />
         }
       </div>
       @if (config().gallery) {
@@ -51,6 +51,9 @@
         </div>
       }
     </div>
+    @if (config().arc) {
+      <wm-note-arc [noteId]="id()" (sceneLinked)="appearancesVersion.update((v) => v + 1)" />
+    }
   </wm-document-editor>
 } @else {
   <p class="muted not-found">{{ t().notes.notFound }}</p>

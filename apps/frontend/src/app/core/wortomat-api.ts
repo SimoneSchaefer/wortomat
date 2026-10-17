@@ -3,6 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import type {
   AppInfo,
   AppSettings,
+  ArcStep,
+  CharacterArc,
+  CreateArcStepRequest,
+  UpdateArcStepRequest,
   ArrangeScenesRequest,
   CreateMapRequest,
   CreateNodeRequest,
@@ -252,6 +256,35 @@ export class WortomatApi {
   /** In manuscript order. */
   noteScenes(noteId: string): Promise<SceneReference[]> {
     return this.call(this.http.get<SceneReference[]>(`/api/notes/${noteId}/scenes`));
+  }
+
+  noteArc(noteId: string): Promise<CharacterArc> {
+    return this.call(this.http.get<CharacterArc>(`/api/notes/${noteId}/arc`));
+  }
+
+  updateArcSummary(noteId: string, summary: string): Promise<CharacterArc> {
+    return this.call(this.http.put<CharacterArc>(`/api/notes/${noteId}/arc`, { summary }));
+  }
+
+  createArcStep(noteId: string, request: CreateArcStepRequest): Promise<CharacterArc> {
+    return this.call(this.http.post<CharacterArc>(`/api/notes/${noteId}/arc/steps`, request));
+  }
+
+  updateArcStep(id: string, request: UpdateArcStepRequest): Promise<CharacterArc> {
+    return this.call(this.http.patch<CharacterArc>(`/api/arc-steps/${id}`, request));
+  }
+
+  moveArcStep(id: string, beforeId: string | null): Promise<CharacterArc> {
+    return this.call(this.http.post<CharacterArc>(`/api/arc-steps/${id}/move`, { beforeId }));
+  }
+
+  deleteArcStep(id: string): Promise<CharacterArc> {
+    return this.call(this.http.delete<CharacterArc>(`/api/arc-steps/${id}`));
+  }
+
+  /** Stations of all characters that show in the scene. */
+  sceneArcSteps(sceneId: string): Promise<ArcStep[]> {
+    return this.call(this.http.get<ArcStep[]>(`/api/scenes/${sceneId}/arc-steps`));
   }
 
   listMaps(): Promise<MapSummary[]> {

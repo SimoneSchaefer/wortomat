@@ -77,23 +77,29 @@ import { StatusMessages } from '../../core/status-messages';
 })
 export class NoteAppearances {
   readonly noteId = input.required<string>();
+  /** Changes when links were made elsewhere on the page – then load again. */
+  readonly version = input(0);
 
   protected readonly t = inject(I18n).t;
   private readonly api = inject(WortomatApi);
   protected readonly scenes = signal<SceneReference[] | null>(null);
   private readonly error = inject(StatusMessages).channel();
   private loadCounter = 0;
+  private loadedNoteId: string | null = null;
 
   constructor() {
     effect(() => {
       const noteId = this.noteId();
+      this.version();
       untracked(() => void this.load(noteId));
     });
   }
 
   private async load(noteId: string): Promise<void> {
     const loadId = ++this.loadCounter;
-    this.scenes.set(null);
+    // Reloading the same note keeps the old list until the new one is there (no flicker)
+    if (noteId !== this.loadedNoteId) this.scenes.set(null);
+    this.loadedNoteId = noteId;
     this.error.set(null);
     try {
       const scenes = await this.api.noteScenes(noteId);
