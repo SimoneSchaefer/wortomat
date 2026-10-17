@@ -130,6 +130,46 @@ describe('NoteArc', () => {
   });
 });
 
+describe('NoteArc order check', () => {
+  function outOfOrder(api: FakeApi) {
+    api.arcs.set('mara', {
+      noteId: 'mara',
+      summary: '',
+      steps: [
+        { id: 'a', noteId: 'mara', label: 'lässt Lena helfen', details: '', sceneId: 'hilfe' },
+        { id: 'b', noteId: 'mara', label: 'ohne Szene', details: '', sceneId: null },
+        { id: 'c', noteId: 'mara', label: 'traut niemandem', details: '', sceneId: 'flucht' },
+      ],
+    });
+  }
+
+  it('says nothing while the stations follow the story', async () => {
+    const { element } = await setup(withSteps);
+    expect(element.querySelector('.order-warning')).toBeNull();
+    expect(element.querySelector('.misplaced')).toBeNull();
+  });
+
+  it('flags stations against the story and sorts them on request', async () => {
+    const { element, api, settle, labels } = await setup(outOfOrder);
+    expect(text(element.querySelector('.order-warning span:not(.warning-dot)'))).toBe(
+      de.arc.outOfOrder(1),
+    );
+    const flagged = [...element.querySelectorAll('.step.misplaced')];
+    expect(flagged).toHaveLength(1);
+    // Two stations with swapped scenes: either one could be the odd one out
+    expect(flagged[0]!.querySelector<HTMLTextAreaElement>('.step-label')!.value).toBe(
+      'lässt Lena helfen',
+    );
+    expect(text(flagged[0]!.querySelector('.order-hint'))).toBe(de.arc.belongsAfter(3));
+
+    button(element, de.arc.sortByStory).click();
+    await until(settle, () => labels()[0] === 'traut niemandem');
+    expect(api.reorderArcSteps).toHaveBeenCalledWith('mara', ['c', 'b', 'a']);
+    expect(labels()).toEqual(['traut niemandem', 'ohne Szene', 'lässt Lena helfen']);
+    expect(element.querySelector('.order-warning')).toBeNull();
+  });
+});
+
 describe('filterScenes', () => {
   const scenes = [
     { id: '1', title: 'Flucht', path: ['Teil I', 'Kapitel 1'] },

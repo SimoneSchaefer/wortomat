@@ -278,6 +278,10 @@ export class WortomatApi {
     return this.call(this.http.post<CharacterArc>(`/api/arc-steps/${id}/move`, { beforeId }));
   }
 
+  reorderArcSteps(noteId: string, stepIds: string[]): Promise<CharacterArc> {
+    return this.call(this.http.put<CharacterArc>(`/api/notes/${noteId}/arc/steps`, { stepIds }));
+  }
+
   deleteArcStep(id: string): Promise<CharacterArc> {
     return this.call(this.http.delete<CharacterArc>(`/api/arc-steps/${id}`));
   }

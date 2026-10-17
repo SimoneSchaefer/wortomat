@@ -273,6 +273,15 @@ export const de = {
     remove: 'Station löschen',
     removeTitle: 'Station löschen?',
     removeMessage: (label: string) => `„${label}“ wird gelöscht.`,
+    outOfOrder: (count: number) =>
+      `${count === 1 ? '1 Station passt' : `${count} Stationen passen`} nicht zur Reihenfolge der Handlung.`,
+    sortByStory: 'Nach Handlung sortieren',
+    sortByStoryHint:
+      'Stationen nach der Reihenfolge ihrer Szenen in der Handlung ordnen – Stationen ohne Szene bleiben, wo sie sind',
+    belongsBefore: (index: number) => `Passiert in der Handlung vor Station ${index}`,
+    belongsAfter: (index: number) => `Passiert in der Handlung nach Station ${index}`,
+    belongsBetween: (after: number, before: number) =>
+      `Passiert in der Handlung zwischen Station ${after} und ${before}`,
     inScene: 'Entwicklung',
     inSceneHint: 'Stationen der Figuren, die sich in dieser Szene zeigen',
   },

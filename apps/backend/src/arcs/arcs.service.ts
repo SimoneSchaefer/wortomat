@@ -115,6 +115,35 @@ export class ArcsService {
     return this.arc(step.noteId);
   }
 
+  /** Takes the complete list – a missing or foreign station is refused. */
+  reorderSteps(noteId: string, stepIds: unknown): CharacterArc {
+    this.notes.get(noteId);
+    const current = (
+      this.db.prepare('SELECT id FROM arc_steps WHERE note_id = ?').all(noteId) as Array<{
+        id: string;
+      }>
+    ).map((row) => row.id);
+    const valid =
+      Array.isArray(stepIds) &&
+      stepIds.length === current.length &&
+      new Set(stepIds).size === stepIds.length &&
+      stepIds.every((id) => current.includes(id));
+    if (!valid) {
+      throw new BadRequestException(
+        localized(
+          'Die Reihenfolge muss alle Stationen genau einmal enthalten.',
+          'The order must contain every step exactly once.',
+        ),
+      );
+    }
+    transaction(this.db, () => {
+      const setOrder = this.db.prepare('UPDATE arc_steps SET sort_order = ? WHERE id = ?');
+      (stepIds as string[]).forEach((id, position) => setOrder.run(position + 1, id));
+      this.projects.touch();
+    });
+    return this.arc(noteId);
+  }
+
   removeStep(id: string): CharacterArc {
     const step = this.getStep(id);
     this.db.prepare('DELETE FROM arc_steps WHERE id = ?').run(id);

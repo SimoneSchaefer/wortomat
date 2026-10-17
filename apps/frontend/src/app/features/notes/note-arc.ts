@@ -1,6 +1,7 @@
 import {
   afterNextRender,
   Component,
+  computed,
   DestroyRef,
   effect,
   ElementRef,
@@ -16,8 +17,10 @@ import { ConfirmDialog } from '../../core/confirm-dialog';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
+import { ProjectStore } from '../../core/project-store';
 import { StatusMessages } from '../../core/status-messages';
 import { WortomatApi } from '../../core/wortomat-api';
+import { type ArcOrderIssue, arcOrderIssues, sortedByStory, storyPositions } from './arc-order';
 import { ArcScenePicker } from './arc-scene-picker';
 
 const SAVE_DELAY_MS = 600;
@@ -50,6 +53,11 @@ export class NoteArc {
   protected readonly steps = signal<ArcStep[]>([]);
   /** Stations whose note field is shown although it is still empty. */
   protected readonly detailsShown = signal<ReadonlySet<string>>(new Set());
+
+  /** Follows rearranging in the plot view and moving scenes in the manuscript. */
+  private readonly projectStore = inject(ProjectStore);
+  private readonly positions = computed(() => storyPositions(this.projectStore.tree()));
+  protected readonly issues = computed(() => arcOrderIssues(this.steps(), this.positions()));
 
   // Typed text is saved delayed; responses never overwrite it (see apply())
   private pendingSummary: { noteId: string; summary: string } | null = null;
@@ -131,6 +139,18 @@ export class NoteArc {
   protected async move(step: ArcStep, beforeId: string | null): Promise<void> {
     await this.mutate(() => this.api.moveArcStep(step.id, beforeId));
     this.focusStep(step.id, 'label');
+  }
+
+  protected orderHint({ afterId, beforeId }: ArcOrderIssue): string {
+    const number = (id: string) => this.steps().findIndex((step) => step.id === id) + 1;
+    const texts = this.t().arc;
+    if (afterId && beforeId) return texts.belongsBetween(number(afterId), number(beforeId));
+    return afterId ? texts.belongsAfter(number(afterId)) : texts.belongsBefore(number(beforeId!));
+  }
+
+  protected async sortByStory(): Promise<void> {
+    const stepIds = sortedByStory(this.steps(), this.positions());
+    await this.mutate(() => this.api.reorderArcSteps(this.noteId(), stepIds));
   }
 
   protected async setScene(step: ArcStep, sceneId: string | null): Promise<void> {

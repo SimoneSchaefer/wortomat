@@ -4,6 +4,7 @@ import type {
   CharacterArc,
   CreateArcStepRequest,
   MoveArcStepRequest,
+  ReorderArcStepsRequest,
   UpdateArcRequest,
   UpdateArcStepRequest,
 } from '@wortomat/shared';
@@ -26,6 +27,11 @@ export class ArcsController {
   @Post('notes/:id/arc/steps')
   createStep(@Param('id') noteId: string, @Body() body: CreateArcStepRequest): CharacterArc {
     return this.arcs.createStep(noteId, body);
+  }
+
+  @Put('notes/:id/arc/steps')
+  reorderSteps(@Param('id') noteId: string, @Body() body: ReorderArcStepsRequest): CharacterArc {
+    return this.arcs.reorderSteps(noteId, body?.stepIds);
   }
 
   @Patch('arc-steps/:id')
