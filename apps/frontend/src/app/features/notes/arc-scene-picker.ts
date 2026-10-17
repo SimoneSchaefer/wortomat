@@ -4,6 +4,8 @@ import type { SceneReference } from '@wortomat/shared';
 import { Autofocus } from '../../core/autofocus';
 import { I18n } from '../../core/i18n/i18n';
 import { ProjectStore, type TreeItem } from '../../core/project-store';
+import { statusInfo, type SceneStatusInfo } from '../../core/scene-status';
+import { StatusIcon } from '../../core/status-icon';
 import { normalizeForSearch } from './note-matching';
 
 const MAX_OPTIONS = 30;
@@ -36,7 +38,7 @@ export function filterScenes(
 /** The scene of an arc station: a chip leading to it, or "+ Scene" with a search. */
 @Component({
   selector: 'wm-arc-scene-picker',
-  imports: [Autofocus],
+  imports: [Autofocus, StatusIcon],
   template: `
     <div class="add-wrapper">
       @if (scene(); as scene) {
@@ -44,9 +46,19 @@ export function filterScenes(
           <button
             type="button"
             class="open"
-            [title]="t().arc.openScene + ': ' + [...scene.path, scene.title].join(' › ')"
+            [title]="
+              t().arc.openScene +
+              ': ' +
+              [...scene.path, scene.title].join(' › ') +
+              ' · ' +
+              t().sceneStatus.names[statusOf(scene.id).status]
+            "
             (click)="openScene(scene.id)"
           >
+            <wm-status-icon
+              [status]="statusOf(scene.id).status"
+              [style.color]="statusOf(scene.id).color"
+            />
             @if (scene.path.length) {
               <span class="path">{{ scene.path.at(-1) }} ›</span>
             }
@@ -96,6 +108,11 @@ export function filterScenes(
                 (pointerenter)="activeIndex.set(i)"
                 (click)="choose(option)"
               >
+                <wm-status-icon
+                  [status]="statusOf(option.id).status"
+                  [style.color]="statusOf(option.id).color"
+                  [title]="t().sceneStatus.names[statusOf(option.id).status]"
+                />
                 <span class="option-text">
                   <span>{{ option.title }}</span>
                   @if (option.path.length) {
@@ -138,6 +155,11 @@ export class ArcScenePicker {
   protected readonly options = computed(() =>
     filterScenes(this.scenes(), this.query()).slice(0, MAX_OPTIONS),
   );
+
+  /** Always current from the manuscript, as in the tree. */
+  protected statusOf(sceneId: string): SceneStatusInfo {
+    return statusInfo(this.projectStore.findNode(sceneId)?.status ?? 'idea');
+  }
 
   protected optionId(index: number): string {
     return this.idPrefix + index;

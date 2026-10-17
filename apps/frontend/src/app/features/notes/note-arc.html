@@ -52,7 +52,7 @@
                 <span
                   class="marker"
                   draggable="true"
-                  [title]="t().arc.dragHint"
+                  [title]="issue ? orderHint(issue) + '\n' + t().arc.dragHint : t().arc.dragHint"
                   (dragstart)="onDragStart($event, step)"
                   (dragend)="onDragEnd()"
                   >{{ i + 1 }}</span

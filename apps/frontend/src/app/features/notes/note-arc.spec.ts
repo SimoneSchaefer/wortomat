@@ -11,7 +11,7 @@ async function setup(prepare: (api: FakeApi) => void = () => {}) {
   const api = new FakeApi();
   api.nodes = [
     testNode('k1', 'chapter', null, { title: 'Kapitel 1', sortOrder: 1 }),
-    testNode('flucht', 'scene', 'k1', { title: 'Flucht', sortOrder: 1 }),
+    testNode('flucht', 'scene', 'k1', { title: 'Flucht', sortOrder: 1, status: 'draft' }),
     testNode('hilfe', 'scene', 'k1', { title: 'Hilfe', sortOrder: 2 }),
   ];
   prepare(api);
@@ -58,6 +58,14 @@ describe('NoteArc', () => {
     const steps = element.querySelectorAll('.step');
     expect(text(steps[0]!.querySelector('wm-arc-scene-picker .chip .open'))).toBe(
       'Kapitel 1 › Flucht',
+    );
+    // The scene's status as in the manuscript tree
+    const chip = steps[0]!.querySelector<HTMLElement>('wm-arc-scene-picker .chip .open')!;
+    expect(chip.querySelector('wm-status-icon')!.getAttribute('style')).toContain(
+      'var(--status-draft)',
+    );
+    expect(chip.title).toBe(
+      `${de.arc.openScene}: Kapitel 1 › Flucht · ${de.sceneStatus.names.draft}`,
     );
     expect(steps[1]!.querySelector<HTMLTextAreaElement>('.step-details')!.value).toBe(
       'widerwillig',
@@ -189,6 +197,13 @@ describe('NoteArc order check', () => {
       'lässt Lena helfen',
     );
     expect(text(flagged[0]!.querySelector('.order-hint'))).toBe(de.arc.belongsAfter(3));
+    // Also on the number, above the drag hint
+    expect(flagged[0]!.querySelector<HTMLElement>('.marker')!.title).toBe(
+      `${de.arc.belongsAfter(3)}\n${de.arc.dragHint}`,
+    );
+    expect(element.querySelector<HTMLElement>('.step:not(.misplaced) .marker')!.title).toBe(
+      de.arc.dragHint,
+    );
 
     button(element, de.arc.sortByStory).click();
     await until(settle, () => labels()[0] === 'traut niemandem');
