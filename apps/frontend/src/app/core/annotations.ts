@@ -2,14 +2,14 @@ import type { AnnotationCounts, AnnotationKind } from '@wortomat/shared';
 
 export interface AnnotationInfo {
   kind: AnnotationKind;
-  /** Key for Ctrl+Alt+… (⌘+Alt on the Mac). */
+  /** Key for Ctrl+Alt+… (⌘+Alt on the Mac). Not T: Ubuntu opens a terminal on Ctrl+Alt+T. */
   key: string;
   /** CSS variable with the colour (in styles.scss, light and dark). */
   color: string;
 }
 
 export const ANNOTATION_KINDS: readonly AnnotationInfo[] = [
-  { kind: 'todo', key: 'T', color: 'var(--annotation-todo)' },
+  { kind: 'todo', key: 'O', color: 'var(--annotation-todo)' },
   { kind: 'idea', key: 'I', color: 'var(--annotation-idea)' },
   { kind: 'fixme', key: 'F', color: 'var(--annotation-fixme)' },
 ];
