@@ -274,6 +274,21 @@ const MIGRATIONS: readonly Migration[] = [
     CREATE INDEX arc_steps_by_note ON arc_steps(note_id, sort_order);
     CREATE INDEX arc_steps_by_scene ON arc_steps(scene_id);
   `,
+  /* 21: trash – deleted parts, chapters and scenes can be restored */ `
+    CREATE TABLE trash (
+      -- id of the deleted node; it no longer exists in nodes while it is here
+      id           TEXT PRIMARY KEY,
+      kind         TEXT NOT NULL,
+      title        TEXT NOT NULL,
+      -- JSON array of the titles above it when it was deleted
+      path         TEXT NOT NULL,
+      scene_count  INTEGER NOT NULL,
+      word_count   INTEGER NOT NULL,
+      -- JSON copy of the subtree and every row that referred to it, see trash/snapshot.ts
+      snapshot     TEXT NOT NULL,
+      deleted_at   TEXT NOT NULL
+    );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

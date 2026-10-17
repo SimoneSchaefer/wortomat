@@ -18,6 +18,7 @@ import type {
 import { nowIso, transaction } from '../database/sqlite.js';
 import { ProjectService } from '../project/project.service.js';
 import { WritingLogService } from '../writing-log/writing-log.service.js';
+import { moveToTrash } from '../trash/snapshot.js';
 import { countAnnotations } from './annotations.js';
 import { localized } from '../i18n.js';
 
@@ -291,9 +292,11 @@ export class ManuscriptService {
       .run(nodeId, fts?.title ?? this.get(nodeId).title, body);
   }
 
+  /** Into the trash, see TrashService. */
   remove(id: string): void {
     this.get(id);
     transaction(this.db, () => {
+      moveToTrash(this.db, id);
       // The FTS table has no foreign keys, so clean up by hand.
       this.db
         .prepare(

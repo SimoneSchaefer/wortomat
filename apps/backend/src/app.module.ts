@@ -32,6 +32,8 @@ import { StrandsController } from './strands/strands.controller.js';
 import { StrandsService } from './strands/strands.service.js';
 import { TagsController } from './tags/tags.controller.js';
 import { TagsService } from './tags/tags.service.js';
+import { TrashController } from './trash/trash.controller.js';
+import { TrashService } from './trash/trash.service.js';
 import { WritingLogController } from './writing-log/writing-log.controller.js';
 import { WritingLogService } from './writing-log/writing-log.service.js';
 
@@ -51,6 +53,7 @@ export class AppModule {
         ArcsController,
         MapsController,
         TagsController,
+        TrashController,
         StrandsController,
         StoryController,
         ProofreadingController,
@@ -71,6 +74,7 @@ export class AppModule {
         ArcsService,
         MapsService,
         TagsService,
+        TrashService,
         StrandsService,
         StoryService,
         ProofreadingService,

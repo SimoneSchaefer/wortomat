@@ -162,6 +162,26 @@ export interface CreateNodeRequest {
   title: string;
 }
 
+/** A deleted part, chapter or scene, together with everything below it. */
+export interface TrashEntry {
+  id: string;
+  kind: NodeKind;
+  title: string;
+  /** Titles of the part and chapter it was in when deleted. */
+  path: string[];
+  sceneCount: number;
+  wordCount: number;
+  deletedAt: string;
+}
+
+export interface RestoreResult {
+  nodes: ManuscriptNode[];
+  /** The id of the restored part, chapter or scene. */
+  nodeId: string;
+  /** `false` when the old place was gone and it went to the end of the book instead. */
+  atOldPlace: boolean;
+}
+
 export interface UpdateNodeRequest {
   title?: string;
   /** Only for scenes. */

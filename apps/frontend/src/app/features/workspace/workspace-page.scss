@@ -265,6 +265,33 @@
     margin: 0 calc(-1 * var(--sidebar-padding-x));
     padding: 0 var(--sidebar-padding-x);
   }
+
+  .trash-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-decoration: none;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &:hover,
+    &.active {
+      background: var(--button-hover);
+      color: var(--text);
+    }
+  }
 }
 
 // Narrow window: the sidebar lies as a popover over the content, below the bar with the open entry

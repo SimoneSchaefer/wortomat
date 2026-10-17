@@ -24,7 +24,9 @@ test('writes a scene and keeps the text after a reload', async ({ page }) => {
   await expect(page.locator('.sidebar-head .word-count')).toHaveText('9 Wörter');
 });
 
-test('deletes a scene only after confirming', async ({ page }) => {
+test('moves a deleted scene to the trash only after confirming and restores it', async ({
+  page,
+}) => {
   await createBook(page, 'Kurzgeschichten');
   await addChapter(page, 'Sommer');
   await addScene(page, 'Sommer', 'Der Steg');
@@ -39,12 +41,19 @@ test('deletes a scene only after confirming', async ({ page }) => {
 
   await row.hover();
   await row.getByRole('button', { name: 'Löschen' }).click();
-  await dialog.getByRole('button', { name: 'Löschen' }).click();
+  await dialog.getByRole('button', { name: 'In den Papierkorb' }).click();
   await expect(manuscript(page).getByRole('link', { name: 'Der Steg' })).toBeHidden();
 
   await page.reload();
   await expect(manuscript(page).getByRole('link', { name: 'Gewitter' })).toBeVisible();
   await expect(manuscript(page).getByRole('link', { name: 'Der Steg' })).toBeHidden();
+
+  await page.getByRole('link', { name: 'Papierkorb (1)' }).click();
+  await expect(page.locator('wm-trash-page li')).toContainText('Sommer');
+  await page.getByRole('button', { name: 'Der Steg wiederherstellen' }).click();
+  await expect(page).toHaveURL(/\/write\/scene\//);
+  await expect(manuscript(page).getByRole('link', { name: 'Der Steg' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Papierkorb/ })).toBeHidden();
 });
 
 test('keeps the cursor and the new text in view while typing a long scene', async ({ page }) => {

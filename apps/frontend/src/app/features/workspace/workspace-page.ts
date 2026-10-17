@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import type { NoteKind } from '@wortomat/shared';
 import { filter, map } from 'rxjs';
 import { AppSettingsStore } from '../../core/app-settings';
@@ -66,6 +66,7 @@ const MENU: readonly MenuItem[] = [
   imports: [
     RouterOutlet,
     RouterLink,
+    RouterLinkActive,
     ManuscriptTree,
     NoteList,
     MapList,

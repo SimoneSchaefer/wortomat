@@ -37,6 +37,7 @@ import type {
   ProofPackage,
   ProjectInfo,
   ProjectListEntry,
+  RestoreResult,
   SaveDocumentRequest,
   SceneContent,
   SceneReference,
@@ -57,6 +58,7 @@ import type {
   UpdateNoteRequest,
   UpdateProjectRequest,
   WritingDay,
+  TrashEntry,
 } from '@wortomat/shared';
 import { firstValueFrom, type Observable } from 'rxjs';
 
@@ -139,6 +141,23 @@ export class WortomatApi {
 
   deleteNode(id: string): Promise<void> {
     return this.call(this.http.delete<void>(`/api/nodes/${id}`));
+  }
+
+  /** Newest first. */
+  listTrash(): Promise<TrashEntry[]> {
+    return this.call(this.http.get<TrashEntry[]>('/api/trash'));
+  }
+
+  restoreFromTrash(id: string): Promise<RestoreResult> {
+    return this.call(this.http.post<RestoreResult>(`/api/trash/${id}/restore`, {}));
+  }
+
+  deleteFromTrash(id: string): Promise<void> {
+    return this.call(this.http.delete<void>(`/api/trash/${id}`));
+  }
+
+  emptyTrash(): Promise<void> {
+    return this.call(this.http.delete<void>('/api/trash'));
   }
 
   sceneContent(id: string): Promise<SceneContent> {

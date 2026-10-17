@@ -61,6 +61,10 @@ export const routes: Routes = [
         path: 'stats',
         loadComponent: () => import('./features/stats/stats-page').then((m) => m.StatsPage),
       },
+      {
+        path: 'trash',
+        loadComponent: () => import('./features/workspace/trash-page').then((m) => m.TrashPage),
+      },
     ],
   },
   {

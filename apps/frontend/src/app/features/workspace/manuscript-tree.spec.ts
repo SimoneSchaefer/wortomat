@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ConfirmDialog } from '../../core/confirm-dialog';
 import { de } from '../../core/i18n/de';
+import { ProjectStore } from '../../core/project-store';
 import { FakeApi, testNode } from '../../testing/fake-api';
 import { button, findButton, key, render, startDrag, text, until } from '../../testing/render';
 import { NotesStore } from '../notes/notes-store';
@@ -124,6 +125,8 @@ describe('ManuscriptTree', () => {
     expect(confirm.pending()).toMatchObject({
       title: de.tree.deleteTitle.scene,
       message: de.tree.deleteScene('B'),
+      confirmLabel: de.tree.moveToTrash,
+      destructive: false,
     });
     confirm.answer(false);
     await settle();
@@ -136,6 +139,11 @@ describe('ManuscriptTree', () => {
     await until(settle, () => !titles().includes('Kapitel 1'));
     expect(api.deleteNode).toHaveBeenCalledWith('k1');
     expect(titles()).toEqual(['Teil I', 'Kapitel 2', 'D']);
+    expect(
+      TestBed.inject(ProjectStore)
+        .trash()
+        .map((entry) => entry.title),
+    ).toEqual(['Kapitel 1']);
   });
 
   it('leaves a deleted scene that is currently open', async () => {

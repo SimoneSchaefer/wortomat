@@ -51,9 +51,11 @@ import type {
   ArrangeScenesRequest,
   NoteGroup,
   NoteSummary,
+  RestoreResult,
   SceneRelations,
   SearchHit,
   Strand,
+  TrashEntry,
   UpdateAppSettingsRequest,
   UpdateNodeRequest,
 } from '@wortomat/shared';
@@ -83,6 +85,8 @@ export class FakeApi {
   relations: SceneRelations[] = [];
   strands: Strand[] = [];
   hits: SearchHit[] = [];
+  /** Newest first, each with the nodes it took along. */
+  trash: Array<{ entry: TrashEntry; nodes: ManuscriptNode[] }> = [];
   private nextId = 1;
 
   readonly settings = vi.fn(async (): Promise<AppSettings> => TEST_SETTINGS);
@@ -141,7 +145,37 @@ export class FakeApi {
         }
       }
     }
+    const root = this.nodes.find((node) => node.id === id)!;
+    this.trash.unshift({
+      entry: {
+        id,
+        kind: root.kind,
+        title: root.title,
+        path: [],
+        sceneCount: this.nodes.filter((node) => doomed.has(node.id) && node.kind === 'scene')
+          .length,
+        wordCount: 0,
+        deletedAt: '2026-10-15T12:00:00.000Z',
+      },
+      nodes: this.nodes.filter((node) => doomed.has(node.id)),
+    });
     this.nodes = this.nodes.filter((node) => !doomed.has(node.id));
+  });
+  readonly listTrash = vi.fn(async (): Promise<TrashEntry[]> =>
+    structuredClone(this.trash.map((item) => item.entry)),
+  );
+  // Always back at the old place – the fallbacks are covered by the backend tests.
+  readonly restoreFromTrash = vi.fn(async (id: string): Promise<RestoreResult> => {
+    const item = this.trash.find((candidate) => candidate.entry.id === id)!;
+    this.trash = this.trash.filter((candidate) => candidate !== item);
+    this.nodes.push(...item.nodes);
+    return { nodes: structuredClone(this.nodes), nodeId: id, atOldPlace: true };
+  });
+  readonly deleteFromTrash = vi.fn(async (id: string): Promise<void> => {
+    this.trash = this.trash.filter((item) => item.entry.id !== id);
+  });
+  readonly emptyTrash = vi.fn(async (): Promise<void> => {
+    this.trash = [];
   });
 
   readonly listNotes = vi.fn(async (): Promise<NoteSummary[]> => structuredClone(this.notes));
