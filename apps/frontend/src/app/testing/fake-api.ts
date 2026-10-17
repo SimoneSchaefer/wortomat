@@ -55,12 +55,14 @@ import type {
   SceneRelations,
   SearchHit,
   Strand,
+  TrashArea,
   TrashEntry,
   UpdateAppSettingsRequest,
   UpdateNodeRequest,
 } from '@wortomat/shared';
 import type { Provider } from '@angular/core';
 import { WortomatApi } from '../core/wortomat-api';
+import { trashArea } from '../core/project-store';
 
 export const TEST_SETTINGS: AppSettings = {
   language: 'de',
@@ -85,8 +87,8 @@ export class FakeApi {
   relations: SceneRelations[] = [];
   strands: Strand[] = [];
   hits: SearchHit[] = [];
-  /** Newest first, each with the nodes it took along. */
-  trash: Array<{ entry: TrashEntry; nodes: ManuscriptNode[] }> = [];
+  /** Newest first, each with the nodes or the note it took along. */
+  trash: Array<{ entry: TrashEntry; nodes: ManuscriptNode[]; notes?: NoteSummary[] }> = [];
   private nextId = 1;
 
   readonly settings = vi.fn(async (): Promise<AppSettings> => TEST_SETTINGS);
@@ -169,13 +171,14 @@ export class FakeApi {
     const item = this.trash.find((candidate) => candidate.entry.id === id)!;
     this.trash = this.trash.filter((candidate) => candidate !== item);
     this.nodes.push(...item.nodes);
-    return { nodes: structuredClone(this.nodes), nodeId: id, atOldPlace: true };
+    this.notes.push(...(item.notes ?? []));
+    return { nodes: structuredClone(this.nodes), id, atOldPlace: true };
   });
   readonly deleteFromTrash = vi.fn(async (id: string): Promise<void> => {
     this.trash = this.trash.filter((item) => item.entry.id !== id);
   });
-  readonly emptyTrash = vi.fn(async (): Promise<void> => {
-    this.trash = [];
+  readonly emptyTrash = vi.fn(async (area: TrashArea): Promise<void> => {
+    this.trash = this.trash.filter((item) => trashArea(item.entry) !== area);
   });
 
   readonly listNotes = vi.fn(async (): Promise<NoteSummary[]> => structuredClone(this.notes));
@@ -385,7 +388,22 @@ export class FakeApi {
     return structuredClone(this.notes[index]!);
   });
   readonly deleteNote = vi.fn(async (id: string): Promise<void> => {
-    this.notes = this.notes.filter((note) => note.id !== id);
+    const note = this.notes.find((candidate) => candidate.id === id)!;
+    const group = this.noteGroups.find((candidate) => candidate.id === note.groupId);
+    this.trash.unshift({
+      entry: {
+        id,
+        kind: note.kind,
+        title: note.title,
+        path: group ? [group.name] : [],
+        sceneCount: 0,
+        wordCount: 0,
+        deletedAt: new Date().toISOString(),
+      },
+      nodes: [],
+      notes: [note],
+    });
+    this.notes = this.notes.filter((candidate) => candidate !== note);
   });
 
   readonly createNoteGroup = vi.fn(async (request: CreateNoteGroupRequest): Promise<NoteGroup> => {

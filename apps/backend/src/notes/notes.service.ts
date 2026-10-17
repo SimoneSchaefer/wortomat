@@ -21,6 +21,7 @@ import { ImagesService, type UploadedImage } from '../images/images.service.js';
 import { ProjectService } from '../project/project.service.js';
 import { localized } from '../i18n.js';
 import { countAnnotations } from '../manuscript/annotations.js';
+import { moveNoteToTrash } from '../trash/snapshot.js';
 
 const NOTE_KINDS: readonly NoteKind[] = ['character', 'place', 'research'];
 /** Same as in the frontend (`NotePage`), which limits the input the same way. */
@@ -206,13 +207,13 @@ export class NotesService {
     return group;
   }
 
+  /** Into the trash, see TrashService. Its gallery images stay until it is deleted for good. */
   remove(id: string): void {
     this.get(id);
-    const imageIds = this.imageIds(id);
     transaction(this.db, () => {
+      moveNoteToTrash(this.db, id);
       this.db.prepare('DELETE FROM note_fts WHERE note_id = ?').run(id);
-      this.db.prepare('DELETE FROM notes WHERE id = ?').run(id); // gallery entries via CASCADE
-      imageIds.forEach((imageId) => this.images.deleteIfUnused(imageId));
+      this.db.prepare('DELETE FROM notes WHERE id = ?').run(id);
       this.projects.touch();
     });
   }

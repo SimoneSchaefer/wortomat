@@ -19,7 +19,7 @@ import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
 import { ProofInboxStore } from '../../core/proof-inbox';
 import { ProjectStore } from '../../core/project-store';
-import { NOTE_KIND_LIST } from '../notes/note-kinds';
+import { NOTE_KIND_LIST, NOTE_KINDS } from '../notes/note-kinds';
 import { BookCover } from '../cover/book-cover';
 import { BookDialog } from '../cover/book-dialog';
 import { MapList } from '../maps/map-list';
@@ -149,6 +149,14 @@ export class WorkspacePage {
   protected readonly noteKind = computed(() => {
     const section = this.section();
     return section === 'manuscript' || section === 'plot' || section === 'stats' ? null : section;
+  });
+  /** The trash of the area whose list is shown – each area has its own. */
+  protected readonly trashCount = computed(
+    () => this.store.trashOf(this.noteKind() ?? 'manuscript').length,
+  );
+  protected readonly trashUrl = computed(() => {
+    const kind = this.noteKind();
+    return kind ? `/write/${NOTE_KINDS[kind].path}/trash` : '/write/trash';
   });
   /** Plot and statistics need no list on the left and take the full width. */
   protected readonly hasSidebar = computed(

@@ -222,7 +222,7 @@ export class NoteList {
     const confirmed = await this.confirm.ask({
       title: this.t().notes.deleteTitle(this.texts().singular),
       message: this.t().notes.deleteMessage(note.title),
-      confirmLabel: this.t().confirm.delete,
+      confirmLabel: this.t().tree.moveToTrash,
     });
     if (!confirmed) return;
     await this.run(async () => {

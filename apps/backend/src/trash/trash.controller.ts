@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpCode, Param, Post, Req } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Param, Post, Query, Req } from '@nestjs/common';
 import type { RestoreResult, TrashEntry } from '@wortomat/shared';
 import type { Request } from 'express';
 import { requestLanguage } from '../i18n.js';
@@ -29,7 +29,7 @@ export class TrashController {
 
   @Delete()
   @HttpCode(204)
-  empty(): void {
-    this.trash.empty();
+  empty(@Query('area') area?: string): void {
+    this.trash.empty(area);
   }
 }

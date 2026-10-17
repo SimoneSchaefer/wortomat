@@ -1,26 +1,34 @@
 <div class="trash">
   <div class="head">
     <h1>{{ t().trash.title }}</h1>
-    @if (store.trash().length) {
+    @if (entries().length) {
       <button type="button" class="link" (click)="emptyTrash()">{{ t().trash.emptyTrash }}</button>
     }
   </div>
-  <p class="muted">{{ t().trash.hint }}</p>
+  <p class="muted">{{ t().trash.hint[trashArea()] }}</p>
 
   <p class="notice" role="status">{{ notice() }}</p>
 
-  @if (store.trash().length) {
+  @if (entries().length) {
     <ul>
-      @for (entry of store.trash(); track entry.id) {
+      @for (entry of entries(); track entry.id) {
         <li>
           <div class="info">
             <span class="kind">{{ t().trash.kind[entry.kind] }}</span>
             <span class="title">{{ entry.title }}</span>
             <span class="muted path">{{
-              entry.path.length ? entry.path.join(' › ') : t().trash.topLevel
+              entry.path.length
+                ? entry.path.join(' › ')
+                : trashArea() === 'manuscript'
+                  ? t().trash.topLevel
+                  : t().trash.noGroup
             }}</span>
             <span class="muted details">
-              @if (entry.kind !== 'scene') {
+              @if (trashArea() !== 'manuscript') {
+                @if (entry.sceneCount) {
+                  {{ t().trash.linkedScenes(entry.sceneCount) }} ·
+                }
+              } @else if (entry.kind !== 'scene') {
                 {{ t().trash.scenes(entry.sceneCount) }} ·
               }
               {{ t().words(entry.wordCount) }} ·

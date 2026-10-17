@@ -17,6 +17,11 @@ function noteRoutes(kind: NoteKind): Route[] {
       },
     },
     {
+      path: `${config.path}/trash`,
+      loadComponent: () => import('./features/workspace/trash-page').then((m) => m.TrashPage),
+      data: { trashArea: kind },
+    },
+    {
       path: `${config.path}/:id`,
       loadComponent: () => import('./features/notes/note-page').then((m) => m.NotePage),
       data: { kind },
@@ -64,6 +69,7 @@ export const routes: Routes = [
       {
         path: 'trash',
         loadComponent: () => import('./features/workspace/trash-page').then((m) => m.TrashPage),
+        data: { trashArea: 'manuscript' },
       },
     ],
   },

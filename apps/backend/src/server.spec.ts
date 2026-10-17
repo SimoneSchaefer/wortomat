@@ -262,10 +262,11 @@ describe('REST API', () => {
 
     // Things deleted in the meantime are left out, a removed tag comes back
     await api('DELETE', `/api/notes/${ort.id}`);
+    await api('DELETE', `/api/trash/${ort.id}`);
     await api('DELETE', `/api/strands/${nebenstrang.id}`);
 
     const restored = await api<RestoreResult>('POST', `/api/trash/${teil.id}/restore`);
-    assert.equal(restored.nodeId, teil.id);
+    assert.equal(restored.id, teil.id);
     assert.equal(restored.atOldPlace, true);
     assert.deepEqual(await topLevel(), [
       ['Vorher', 1],
@@ -847,9 +848,214 @@ describe('REST API', () => {
     await api('DELETE', `/api/notes/${ben.id}/images/${zwei.id}`);
     assert.equal(await imageExists(zwei.url), true);
 
-    // Deleting the note cleans up its gallery too
+    // Deleting the note keeps its gallery while it is in the trash, deleting it for good does not
     await api('DELETE', `/api/notes/${ben.id}`);
+    assert.equal(await imageExists(eins.url), true);
+    await api('DELETE', `/api/trash/${ben.id}`);
     assert.equal(await imageExists(eins.url), false);
+  });
+
+  it('moves deleted notes to the trash and restores them with everything attached', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'notiz-papierkorb', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const trash = () => api<TrashEntry[]>('GET', '/api/trash');
+    const status = async (method: string, urlPath: string) =>
+      (await fetch(server.url + urlPath, { method, headers: { [AUTH_HEADER]: TOKEN } })).status;
+    const restore = (id: string) => api<RestoreResult>('POST', `/api/trash/${id}/restore`);
+    const linked = async (sceneId: string) =>
+      (await api<NoteSummary[]>('GET', `/api/scenes/${sceneId}/links`)).map((n) => n.title);
+    const stations = async (noteId: string) =>
+      (await api<CharacterArc>('GET', `/api/notes/${noteId}/arc`)).steps.map((step) => [
+        step.label,
+        step.sceneId,
+      ]);
+    const noteHits = async (q: string) =>
+      (await api<SearchHit[]>('GET', `/api/search?q=${q}`)).filter((h) => h.kind !== 'scene');
+
+    const kapitel = await node(null, 'chapter', 'Kapitel');
+    const ankunft = await node(kapitel.id, 'scene', 'Ankunft');
+    const abschied = await node(kapitel.id, 'scene', 'Abschied');
+    const familie = await api<NoteGroup>('POST', '/api/note-groups', {
+      kind: 'character',
+      name: 'Familie',
+    });
+    const frieda = await api<NoteSummary>('POST', '/api/notes', {
+      kind: 'character',
+      title: 'Frieda',
+    });
+    await api('PATCH', `/api/notes/${frieda.id}`, {
+      summary: 'Kommt zurück',
+      groupId: familie.id,
+    });
+    const doc = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Trägt einen Hut.' }] }],
+    };
+    await api('PUT', `/api/notes/${frieda.id}/content`, {
+      doc,
+      text: 'Trägt einen Hut.',
+      wordCount: 3,
+    });
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), 'frieda.png');
+    const [bild] = (await (
+      await fetch(`${server.url}/api/notes/${frieda.id}/images`, {
+        method: 'POST',
+        headers: { [AUTH_HEADER]: TOKEN },
+        body: form,
+      })
+    ).json()) as [GalleryImage];
+    const crop = { x: 0.1, y: 0.2, width: 0.5, height: 0.5 };
+    await api('PUT', `/api/notes/${frieda.id}/images/${bild.id}/crop`, { crop });
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: frieda.id });
+    await api('POST', `/api/notes/${frieda.id}/arc/steps`, {
+      label: 'kommt an',
+      sceneId: ankunft.id,
+    });
+    await api('POST', `/api/notes/${frieda.id}/arc/steps`, {
+      label: 'geht',
+      sceneId: abschied.id,
+    });
+
+    await api('DELETE', `/api/notes/${frieda.id}`);
+    assert.deepEqual(await api('GET', '/api/notes'), []);
+    assert.deepEqual(await noteHits('hut'), []);
+    assert.deepEqual(await linked(ankunft.id), []);
+    assert.deepEqual(await api('GET', `/api/scenes/${ankunft.id}/arc-steps`), []);
+    const [entry] = await trash();
+    assert.deepEqual(
+      { ...entry, deletedAt: undefined },
+      {
+        id: frieda.id,
+        kind: 'character',
+        title: 'Frieda',
+        path: ['Familie'],
+        sceneCount: 2,
+        wordCount: 3,
+        deletedAt: undefined,
+      },
+    );
+    // While in the trash, its gallery is kept even when an image cleanup runs
+    await api('PATCH', '/api/project', { coverImageId: bild.id });
+    await api('PATCH', '/api/project', { coverImageId: null });
+    assert.equal(await status('GET', bild.url), 200);
+
+    // Its group is gone in the meantime, and so is the scene of a station
+    await api('DELETE', `/api/note-groups/${familie.id}`);
+    await api('DELETE', `/api/nodes/${abschied.id}`);
+    const back = await restore(frieda.id);
+    assert.deepEqual([back.id, back.atOldPlace], [frieda.id, false]);
+    const [note] = await api<NoteSummary[]>('GET', '/api/notes');
+    assert.deepEqual(
+      [note!.title, note!.summary, note!.groupId, note!.coverImageUrl, note!.coverCrop],
+      ['Frieda', 'Kommt zurück', null, bild.url, crop],
+    );
+    assert.deepEqual((await api<NoteContent>('GET', `/api/notes/${frieda.id}/content`)).doc, doc);
+    assert.equal((await noteHits('hut')).length, 1);
+    assert.deepEqual(await linked(ankunft.id), ['Frieda']);
+    assert.deepEqual(await stations(frieda.id), [
+      ['kommt an', ankunft.id],
+      ['geht', null],
+    ]);
+    // … the station gets its scene back once that is restored, too
+    await restore(abschied.id);
+    assert.deepEqual(await stations(frieda.id), [
+      ['kommt an', ankunft.id],
+      ['geht', abschied.id],
+    ]);
+
+    // Scene and note both in the trash: whatever comes back first keeps what links them
+    await api('DELETE', `/api/nodes/${ankunft.id}`);
+    await api('DELETE', `/api/notes/${frieda.id}`);
+    await restore(ankunft.id);
+    assert.deepEqual(await linked(ankunft.id), []);
+    await restore(frieda.id);
+    assert.deepEqual(await linked(ankunft.id), ['Frieda']);
+    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', ankunft.id]);
+    await api('DELETE', `/api/notes/${frieda.id}`);
+    await api('DELETE', `/api/nodes/${ankunft.id}`);
+    await restore(frieda.id);
+    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', null]);
+    await restore(ankunft.id);
+    assert.deepEqual(await linked(ankunft.id), ['Frieda']);
+    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', ankunft.id]);
+
+    // A place comes back onto its map
+    const bahnhof = await api<NoteSummary>('POST', '/api/notes', {
+      kind: 'place',
+      title: 'Bahnhof',
+    });
+    const map = await api<PlaceMap>('POST', '/api/maps', { name: 'Stadt' });
+    await api('PATCH', `/api/maps/${map.id}`, { pins: [{ noteId: bahnhof.id, x: 1, y: 2 }] });
+    await api('DELETE', `/api/notes/${bahnhof.id}`);
+    assert.deepEqual((await api<PlaceMap>('GET', `/api/maps/${map.id}`)).pins, []);
+    await restore(bahnhof.id);
+    assert.deepEqual((await api<PlaceMap>('GET', `/api/maps/${map.id}`)).pins, [
+      { noteId: bahnhof.id, x: 1, y: 2 },
+    ]);
+
+    // Each area is emptied on its own
+    await api('DELETE', `/api/notes/${bahnhof.id}`);
+    await api('DELETE', `/api/notes/${frieda.id}`);
+    await api('DELETE', `/api/nodes/${abschied.id}`);
+    assert.equal(await status('DELETE', '/api/trash?area=monster'), 400);
+    assert.equal(await status('DELETE', '/api/trash?area=place'), 204);
+    assert.deepEqual(
+      (await trash()).map((e) => e.title),
+      ['Abschied', 'Frieda'],
+    );
+    assert.equal(await status('DELETE', '/api/trash?area=character'), 204);
+    assert.equal(await status('GET', bild.url), 404);
+    assert.deepEqual(
+      (await trash()).map((e) => e.title),
+      ['Abschied'],
+    );
+    assert.equal(await status('DELETE', '/api/trash?area=manuscript'), 204);
+    assert.deepEqual(await trash(), []);
+  });
+
+  it('restores trash entries written before notes could be trashed', async () => {
+    const project = await api<ProjectInfo>('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'alter-papierkorb', 'Buch'),
+      title: 'Buch',
+    });
+    const kapitel = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: null,
+      kind: 'chapter',
+      title: 'K',
+    });
+    const szene = await api<ManuscriptNode>('POST', '/api/nodes', {
+      parentId: kapitel.id,
+      kind: 'scene',
+      title: 'S',
+    });
+    await api('PUT', `/api/scenes/${szene.id}/content`, {
+      doc: { type: 'doc', content: [] },
+      text: 'Nebel über dem Fluss',
+      wordCount: 4,
+    });
+    await api('DELETE', `/api/nodes/${szene.id}`);
+    await api('POST', '/api/project/close');
+
+    const file = new DatabaseSync(project.filePath);
+    const row = file.prepare('SELECT snapshot FROM trash').get() as { snapshot: string };
+    const { rows, table: _table, ...rest } = JSON.parse(row.snapshot) as Record<string, unknown>;
+    file
+      .prepare('UPDATE trash SET snapshot = ?')
+      .run(JSON.stringify({ ...rest, version: 1, nodes: rows }));
+    file.close();
+
+    await api('POST', '/api/project/open', { filePath: project.filePath });
+    await api('POST', `/api/trash/${szene.id}/restore`);
+    assert.equal(
+      (await api<ManuscriptNode[]>('GET', '/api/nodes')).find((n) => n.id === szene.id)?.parentId,
+      kapitel.id,
+    );
+    assert.equal((await api<SearchHit[]>('GET', '/api/search?q=nebel')).length, 1);
   });
 
   it('links scenes with characters and places – in both directions', async () => {
@@ -1973,6 +2179,17 @@ describe('REST API', () => {
     );
     await api('POST', `/api/trash/${szene.id}/restore`);
     assert.equal((await api<ManuscriptNode[]>('GET', '/api/nodes')).length, 2);
+    // Notes too
+    await api('DELETE', `/api/notes/${note.id}`);
+    assert.deepEqual(
+      (await api<TrashEntry[]>('GET', '/api/trash')).map((e) => [e.kind, e.title]),
+      [['place', 'Mühle']],
+    );
+    await api('POST', `/api/trash/${note.id}/restore`);
+    assert.deepEqual(
+      (await api<NoteSummary[]>('GET', '/api/notes')).map((n) => n.title),
+      ['Mühle'],
+    );
   });
 
   it('stores app settings permanently – even without an open project', async () => {

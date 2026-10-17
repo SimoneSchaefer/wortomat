@@ -10,6 +10,7 @@ import type {
   SaveStoryRequest,
   SceneStatus,
   StoryMark,
+  TrashArea,
   TrashEntry,
 } from '@wortomat/shared';
 import { addCounts, NO_ANNOTATIONS } from './annotations';
@@ -134,6 +135,15 @@ export class ProjectStore {
     this.trash.set(trash);
   }
 
+  /** After deleting a note, which went to the trash. */
+  async reloadTrash(): Promise<void> {
+    this.trash.set(await this.api.listTrash());
+  }
+
+  trashOf(area: TrashArea): TrashEntry[] {
+    return this.trash().filter((entry) => trashArea(entry) === area);
+  }
+
   async restoreFromTrash(id: string): Promise<RestoreResult> {
     const result = await this.api.restoreFromTrash(id);
     this.nodes.set(result.nodes);
@@ -147,9 +157,9 @@ export class ProjectStore {
     this.trash.update((entries) => entries.filter((entry) => entry.id !== id));
   }
 
-  async emptyTrash(): Promise<void> {
-    await this.api.emptyTrash();
-    this.trash.set([]);
+  async emptyTrash(area: TrashArea): Promise<void> {
+    await this.api.emptyTrash(area);
+    this.trash.update((entries) => entries.filter((entry) => trashArea(entry) !== area));
   }
 
   updateSceneStats(id: string, wordCount: number, annotations: AnnotationCounts): void {
@@ -209,4 +219,10 @@ export function buildTree(nodes: readonly ManuscriptNode[]): TreeItem[] {
   };
   finish(roots);
   return roots;
+}
+
+export function trashArea(entry: Pick<TrashEntry, 'kind'>): TrashArea {
+  return entry.kind === 'part' || entry.kind === 'chapter' || entry.kind === 'scene'
+    ? 'manuscript'
+    : entry.kind;
 }
