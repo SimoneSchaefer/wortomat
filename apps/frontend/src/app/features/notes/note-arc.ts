@@ -1,6 +1,7 @@
 import {
   afterNextRender,
   Component,
+  computed,
   DestroyRef,
   effect,
   ElementRef,
@@ -16,11 +17,20 @@ import { ConfirmDialog } from '../../core/confirm-dialog';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { PendingSaves } from '../../core/pending-saves';
+import { ProjectStore } from '../../core/project-store';
 import { StatusMessages } from '../../core/status-messages';
 import { WortomatApi } from '../../core/wortomat-api';
+import { type ArcOrderIssue, arcOrderIssues, sortedByStory, storyPositions } from './arc-order';
 import { ArcScenePicker } from './arc-scene-picker';
 
 const SAVE_DELAY_MS = 600;
+const DRAG_TYPE = 'application/x-wortomat-arc-step';
+
+/** Where a dragged station would land. */
+interface StepDrop {
+  targetId: string;
+  position: 'before' | 'after';
+}
 
 /**
  * "Development" of a character: the overall arc as text and its stations, each optionally with
@@ -50,6 +60,14 @@ export class NoteArc {
   protected readonly steps = signal<ArcStep[]>([]);
   /** Stations whose note field is shown although it is still empty. */
   protected readonly detailsShown = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly draggingId = signal<string | null>(null);
+  protected readonly drop = signal<StepDrop | null>(null);
+
+  /** Follows rearranging in the plot view and moving scenes in the manuscript. */
+  private readonly projectStore = inject(ProjectStore);
+  private readonly positions = computed(() => storyPositions(this.projectStore.tree()));
+  protected readonly issues = computed(() => arcOrderIssues(this.steps(), this.positions()));
 
   // Typed text is saved delayed; responses never overwrite it (see apply())
   private pendingSummary: { noteId: string; summary: string } | null = null;
@@ -116,6 +134,56 @@ export class NoteArc {
     }
   }
 
+  protected onDragStart(event: DragEvent, step: ArcStep): void {
+    if (!event.dataTransfer) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData(DRAG_TYPE, step.id);
+    // The whole station follows the pointer, not just its number
+    const station = (event.target as HTMLElement).closest('.step');
+    if (station) event.dataTransfer.setDragImage?.(station, 12, 12);
+    this.draggingId.set(step.id);
+  }
+
+  protected onDragEnd(): void {
+    this.draggingId.set(null);
+    this.drop.set(null);
+  }
+
+  /** Upper half of the station: before, lower half: after – as in the other lists. */
+  protected onDragOver(event: DragEvent, step: ArcStep): void {
+    if (!this.draggingId() || !event.dataTransfer?.types.includes(DRAG_TYPE)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const position = event.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+    this.drop.set({ targetId: step.id, position });
+  }
+
+  protected onDragLeave(event: DragEvent, step: ArcStep): void {
+    const station = event.currentTarget as HTMLElement;
+    if (station.contains(event.relatedTarget as Node | null)) return;
+    if (this.drop()?.targetId === step.id) this.drop.set(null);
+  }
+
+  protected async onDrop(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    const id = this.draggingId();
+    const drop = this.drop();
+    this.onDragEnd();
+    if (!id || !drop) return;
+    const order = this.steps().map((step) => step.id);
+    const beforeId =
+      drop.position === 'before'
+        ? drop.targetId
+        : (order[order.indexOf(drop.targetId) + 1] ?? null);
+    // Already in this place? Then do nothing.
+    if (beforeId === id || (order[order.indexOf(id) + 1] ?? null) === beforeId) return;
+    await this.move(
+      this.steps().find((step) => step.id === id)!,
+      beforeId,
+    );
+  }
+
   protected showDetails(step: ArcStep): void {
     this.detailsShown.update((shown) => new Set(shown).add(step.id));
     this.focusStep(step.id, 'details');
@@ -131,6 +199,18 @@ export class NoteArc {
   protected async move(step: ArcStep, beforeId: string | null): Promise<void> {
     await this.mutate(() => this.api.moveArcStep(step.id, beforeId));
     this.focusStep(step.id, 'label');
+  }
+
+  protected orderHint({ afterId, beforeId }: ArcOrderIssue): string {
+    const number = (id: string) => this.steps().findIndex((step) => step.id === id) + 1;
+    const texts = this.t().arc;
+    if (afterId && beforeId) return texts.belongsBetween(number(afterId), number(beforeId));
+    return afterId ? texts.belongsAfter(number(afterId)) : texts.belongsBefore(number(beforeId!));
+  }
+
+  protected async sortByStory(): Promise<void> {
+    const stepIds = sortedByStory(this.steps(), this.positions());
+    await this.mutate(() => this.api.reorderArcSteps(this.noteId(), stepIds));
   }
 
   protected async setScene(step: ArcStep, sceneId: string | null): Promise<void> {

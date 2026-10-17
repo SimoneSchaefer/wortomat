@@ -792,6 +792,23 @@ describe('REST API', () => {
     });
     assert.deepEqual(labels(arc), ['traut niemandem', 'zweifelt', 'lässt Lena helfen']);
 
+    // Reordering all at once – only complete lists
+    arc = await api<CharacterArc>('PUT', `/api/notes/${mara.id}/arc/steps`, {
+      stepIds: [laesst.id, traut.id, zweifel.id],
+    });
+    assert.deepEqual(labels(arc), ['lässt Lena helfen', 'traut niemandem', 'zweifelt']);
+    for (const stepIds of [[laesst.id, traut.id], [laesst.id, traut.id, traut.id], 'x']) {
+      const response = await fetch(`${server.url}/api/notes/${mara.id}/arc/steps`, {
+        method: 'PUT',
+        headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stepIds }),
+      });
+      assert.equal(response.status, 400, JSON.stringify(stepIds));
+    }
+    arc = await api<CharacterArc>('PUT', `/api/notes/${mara.id}/arc/steps`, {
+      stepIds: [traut.id, zweifel.id, laesst.id],
+    });
+
     // The scene side: stations of all characters, by character name
     await api('POST', `/api/notes/${lena.id}/arc/steps`, { label: 'gibt nach', sceneId: hilfe.id });
     const inScene = await api<ArcStep[]>('GET', `/api/scenes/${hilfe.id}/arc-steps`);

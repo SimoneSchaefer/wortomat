@@ -331,6 +331,11 @@ export interface UpdateArcStepRequest {
   sceneId?: string | null;
 }
 
+/** All stations of the note in their new order. */
+export interface ReorderArcStepsRequest {
+  stepIds: string[];
+}
+
 export interface MoveArcStepRequest {
   /** Station to insert before; `null` = at the end. */
   beforeId: string | null;

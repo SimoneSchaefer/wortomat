@@ -3,7 +3,7 @@ import { ConfirmDialog } from '../../core/confirm-dialog';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
 import { FakeApi, testNode } from '../../testing/fake-api';
-import { button, key, render, text, type, until } from '../../testing/render';
+import { button, key, render, startDrag, text, type, until } from '../../testing/render';
 import { filterScenes } from './arc-scene-picker';
 import { NoteArc } from './note-arc';
 
@@ -100,6 +100,34 @@ describe('NoteArc', () => {
     expect(api.moveArcStep).toHaveBeenLastCalledWith('b', null);
   });
 
+  it('moves stations by dragging their number', async () => {
+    const { element, api, settle, labels } = await setup(withSteps);
+    const steps = () => [...element.querySelectorAll('.step')];
+    const drag = startDrag();
+    drag.fire(steps()[0]!.querySelector('.marker')!, 'dragstart');
+    await settle();
+    expect(steps()[0]!.classList).toContain('dragging');
+    // jsdom has no layout: the pointer counts as in the lower half – after the station
+    drag.fire(steps()[1]!, 'dragover');
+    await settle();
+    expect(steps()[1]!.getAttribute('data-drop')).toBe('after');
+    drag.fire(steps()[1]!, 'drop');
+    await until(settle, () => labels()[0] === 'lässt Lena helfen');
+    expect(api.moveArcStep).toHaveBeenCalledWith('a', null);
+    expect(element.querySelector('[data-drop], .dragging')).toBeNull();
+  });
+
+  it('does not save when a station is dropped onto its own place', async () => {
+    const { element, api, settle } = await setup(withSteps);
+    const first = element.querySelector('.step')!;
+    const drag = startDrag();
+    drag.fire(first.querySelector('.marker')!, 'dragstart');
+    drag.fire(first, 'dragover');
+    drag.fire(first, 'drop');
+    await settle();
+    expect(api.moveArcStep).not.toHaveBeenCalled();
+  });
+
   it('picks a scene and reports that the character is now linked', async () => {
     const { element, api, fixture, settle } = await setup(withSteps);
     let linked = 0;
@@ -127,6 +155,46 @@ describe('NoteArc', () => {
     confirm.answer(true);
     await until(settle, () => labels().length === 1);
     expect(api.deleteArcStep).toHaveBeenCalledWith('a');
+  });
+});
+
+describe('NoteArc order check', () => {
+  function outOfOrder(api: FakeApi) {
+    api.arcs.set('mara', {
+      noteId: 'mara',
+      summary: '',
+      steps: [
+        { id: 'a', noteId: 'mara', label: 'lässt Lena helfen', details: '', sceneId: 'hilfe' },
+        { id: 'b', noteId: 'mara', label: 'ohne Szene', details: '', sceneId: null },
+        { id: 'c', noteId: 'mara', label: 'traut niemandem', details: '', sceneId: 'flucht' },
+      ],
+    });
+  }
+
+  it('says nothing while the stations follow the story', async () => {
+    const { element } = await setup(withSteps);
+    expect(element.querySelector('.order-warning')).toBeNull();
+    expect(element.querySelector('.misplaced')).toBeNull();
+  });
+
+  it('flags stations against the story and sorts them on request', async () => {
+    const { element, api, settle, labels } = await setup(outOfOrder);
+    expect(text(element.querySelector('.order-warning span:not(.warning-dot)'))).toBe(
+      de.arc.outOfOrder(1),
+    );
+    const flagged = [...element.querySelectorAll('.step.misplaced')];
+    expect(flagged).toHaveLength(1);
+    // Two stations with swapped scenes: either one could be the odd one out
+    expect(flagged[0]!.querySelector<HTMLTextAreaElement>('.step-label')!.value).toBe(
+      'lässt Lena helfen',
+    );
+    expect(text(flagged[0]!.querySelector('.order-hint'))).toBe(de.arc.belongsAfter(3));
+
+    button(element, de.arc.sortByStory).click();
+    await until(settle, () => labels()[0] === 'traut niemandem');
+    expect(api.reorderArcSteps).toHaveBeenCalledWith('mara', ['c', 'b', 'a']);
+    expect(labels()).toEqual(['traut niemandem', 'ohne Szene', 'lässt Lena helfen']);
+    expect(element.querySelector('.order-warning')).toBeNull();
   });
 });
 

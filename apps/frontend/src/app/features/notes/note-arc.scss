@@ -107,6 +107,28 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--accent-strong);
+  cursor: grab;
+}
+
+// Drop marker in the middle of the gap – as the line in the manuscript tree and the note list
+.step[data-drop]::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px solid var(--accent);
+}
+
+.step[data-drop='before']::after {
+  top: -0.35rem;
+}
+
+.step[data-drop='after']::after {
+  bottom: -0.35rem;
+}
+
+.step.dragging {
+  opacity: 0.4;
 }
 
 .step-label {
@@ -164,4 +186,35 @@
 .step:hover .actions,
 .step:focus-within .actions {
   visibility: visible;
+}
+
+// Like the displaced scenes in the plot view: the todo yellow
+.order-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--annotation-todo) 12%, var(--bg));
+  font-size: 0.85rem;
+}
+
+.warning-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--annotation-todo);
+}
+
+.step.misplaced .marker {
+  border-color: var(--annotation-todo);
+  color: var(--text);
+}
+
+.order-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }

@@ -237,11 +237,19 @@ export const en: Texts = {
     noScenes: 'No matching scene.',
     openScene: 'Go to scene',
     removeScene: 'Remove scene',
-    moveUp: 'Move up (Alt+↑)',
-    moveDown: 'Move down (Alt+↓)',
+    dragHint: 'Drag to move – or Alt+↑/↓ in the text',
     remove: 'Delete step',
     removeTitle: 'Delete step?',
     removeMessage: (label: string) => `“${label}” will be deleted.`,
+    outOfOrder: (count: number) =>
+      `${count === 1 ? '1 step does' : `${count} steps do`} not match the order of the story.`,
+    sortByStory: 'Sort by story',
+    sortByStoryHint:
+      'Order the steps by the story order of their scenes – steps without a scene stay where they are',
+    belongsBefore: (index: number) => `Happens before step ${index} in the story`,
+    belongsAfter: (index: number) => `Happens after step ${index} in the story`,
+    belongsBetween: (after: number, before: number) =>
+      `Happens between steps ${after} and ${before} in the story`,
     inScene: 'Development',
     inSceneHint: 'Steps of the characters that show in this scene',
   },

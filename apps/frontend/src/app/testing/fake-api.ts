@@ -505,6 +505,11 @@ export class FakeApi {
     );
     return structuredClone(arc);
   });
+  readonly reorderArcSteps = vi.fn(async (noteId: string, stepIds: string[]) => {
+    const arc = this.arc(noteId);
+    arc.steps = stepIds.map((id) => arc.steps.find((step) => step.id === id)!);
+    return structuredClone(arc);
+  });
   readonly deleteArcStep = vi.fn(async (id: string) => {
     const arc = this.arcOfStep(id);
     arc.steps = arc.steps.filter((step) => step.id !== id);
