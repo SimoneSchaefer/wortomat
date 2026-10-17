@@ -12,6 +12,8 @@ export interface NoteKindConfig {
   linkable: boolean;
   /** Can be placed on maps (location preview on the page). */
   mappable: boolean;
+  /** Has a development section (arc with stations in scenes). */
+  arc: boolean;
 }
 
 export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
@@ -22,6 +24,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     galleryIcon: 'person',
     linkable: true,
     mappable: false,
+    arc: true,
   },
   place: {
     kind: 'place',
@@ -30,6 +33,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     galleryIcon: 'picture',
     linkable: true,
     mappable: true,
+    arc: false,
   },
   research: {
     kind: 'research',
@@ -38,6 +42,7 @@ export const NOTE_KINDS: Record<NoteKind, NoteKindConfig> = {
     galleryIcon: 'picture',
     linkable: false,
     mappable: false,
+    arc: false,
   },
 };
 

@@ -9,6 +9,7 @@ import {
   Injector,
   input,
   linkedSignal,
+  signal,
   untracked,
   viewChild,
 } from '@angular/core';
@@ -21,6 +22,7 @@ import { DocumentEditor, type DocumentSource } from '../editor/document-editor';
 import { NoteLocation } from '../maps/note-location';
 import { ImageGallery } from './image-gallery';
 import { NoteAppearances } from './note-appearances';
+import { NoteArc } from './note-arc';
 import { NoteGroupPicker } from './note-group-picker';
 import { NOTE_KINDS, outlineDoc } from './note-kinds';
 import { NotesStore } from './notes-store';
@@ -33,7 +35,7 @@ const MAX_SUMMARY_LENGTH = 2000;
 /** A character, place or research note: route `write/<kind>/:id`. */
 @Component({
   selector: 'wm-note-page',
-  imports: [DocumentEditor, ImageGallery, NoteAppearances, NoteGroupPicker, NoteLocation],
+  imports: [DocumentEditor, ImageGallery, NoteAppearances, NoteArc, NoteGroupPicker, NoteLocation],
   templateUrl: './note-page.html',
   styleUrl: './note-page.scss',
 })
@@ -54,6 +56,8 @@ export class NotePage {
   protected readonly note = computed(() => this.store.find(this.id()));
   private readonly error = inject(StatusMessages).channel();
   protected readonly maxSummaryLength = MAX_SUMMARY_LENGTH;
+  /** Raised when the arc linked a scene, so "Appears in" reloads. */
+  protected readonly appearancesVersion = signal(0);
 
   // Only fill the inputs from the store when the note changes – not after every save, or a late
   // response could overwrite what was just typed.

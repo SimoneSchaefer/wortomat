@@ -6,6 +6,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { after, before, describe, it } from 'node:test';
 import type {
   AppSettings,
+  ArcStep,
+  CharacterArc,
   DirectoryListing,
   GalleryImage,
   ImageInfo,
@@ -725,6 +727,114 @@ describe('REST API', () => {
     );
     await api('DELETE', `/api/notes/${anna.id}`);
     assert.deepEqual(await linked(ankunft.id), []);
+  });
+
+  it('keeps a character arc with stations in scenes', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'arc', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const kapitel = await node(null, 'chapter', 'Kapitel 1');
+    const flucht = await node(kapitel.id, 'scene', 'Flucht');
+    const hilfe = await node(kapitel.id, 'scene', 'Hilfe');
+    const mara = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Mara' });
+    const lena = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Lena' });
+    const labels = (arc: CharacterArc) => arc.steps.map((step) => step.label);
+
+    const empty = await api<CharacterArc>('GET', `/api/notes/${mara.id}/arc`);
+    assert.deepEqual(empty, { noteId: mara.id, summary: '', steps: [] });
+
+    let arc = await api<CharacterArc>('PUT', `/api/notes/${mara.id}/arc`, {
+      summary: '  Von der Einzelgängerin zur Teamplayerin ',
+    });
+    assert.equal(arc.summary, 'Von der Einzelgängerin zur Teamplayerin');
+
+    // Stations: at the end, before another one, empty at first
+    arc = await api<CharacterArc>('POST', `/api/notes/${mara.id}/arc/steps`, {
+      label: 'traut niemandem',
+      sceneId: flucht.id,
+    });
+    arc = await api<CharacterArc>('POST', `/api/notes/${mara.id}/arc/steps`, {
+      label: 'lässt Lena helfen',
+    });
+    const [traut, laesst] = arc.steps;
+    arc = await api<CharacterArc>('POST', `/api/notes/${mara.id}/arc/steps`, {
+      beforeId: laesst.id,
+    });
+    assert.deepEqual(labels(arc), ['traut niemandem', '', 'lässt Lena helfen']);
+    const zweifel = arc.steps[1];
+
+    // A station in a scene links the character with it
+    const linked = await api<NoteSummary[]>('GET', `/api/scenes/${flucht.id}/links`);
+    assert.deepEqual(
+      linked.map((n) => n.title),
+      ['Mara'],
+    );
+    arc = await api<CharacterArc>('PATCH', `/api/arc-steps/${laesst.id}`, {
+      sceneId: hilfe.id,
+      details: 'Erst widerwillig.',
+    });
+    assert.equal(arc.steps[2].sceneId, hilfe.id);
+    assert.equal(arc.steps[2].details, 'Erst widerwillig.');
+    assert.deepEqual(
+      (await api<SceneReference[]>('GET', `/api/notes/${mara.id}/scenes`)).map((s) => s.title),
+      ['Flucht', 'Hilfe'],
+    );
+    arc = await api<CharacterArc>('PATCH', `/api/arc-steps/${zweifel.id}`, { label: 'zweifelt' });
+
+    // Reordering
+    arc = await api<CharacterArc>('POST', `/api/arc-steps/${traut.id}/move`, { beforeId: null });
+    assert.deepEqual(labels(arc), ['zweifelt', 'lässt Lena helfen', 'traut niemandem']);
+    arc = await api<CharacterArc>('POST', `/api/arc-steps/${traut.id}/move`, {
+      beforeId: zweifel.id,
+    });
+    assert.deepEqual(labels(arc), ['traut niemandem', 'zweifelt', 'lässt Lena helfen']);
+
+    // The scene side: stations of all characters, by character name
+    await api('POST', `/api/notes/${lena.id}/arc/steps`, { label: 'gibt nach', sceneId: hilfe.id });
+    const inScene = await api<ArcStep[]>('GET', `/api/scenes/${hilfe.id}/arc-steps`);
+    assert.deepEqual(
+      inScene.map((step) => [step.noteId, step.label]),
+      [
+        [lena.id, 'gibt nach'],
+        [mara.id, 'lässt Lena helfen'],
+      ],
+    );
+
+    // Deleting the scene keeps the station without a scene
+    await api('DELETE', `/api/nodes/${hilfe.id}`);
+    arc = await api<CharacterArc>('GET', `/api/notes/${mara.id}/arc`);
+    assert.equal(arc.steps[2].sceneId, null);
+
+    arc = await api<CharacterArc>('DELETE', `/api/arc-steps/${zweifel.id}`);
+    assert.deepEqual(labels(arc), ['traut niemandem', 'lässt Lena helfen']);
+
+    // Invalid input
+    const status = async (method: string, urlPath: string, body: unknown) =>
+      (
+        await fetch(server.url + urlPath, {
+          method,
+          headers: { [AUTH_HEADER]: TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        })
+      ).status;
+    assert.equal(
+      await status('POST', `/api/notes/${mara.id}/arc/steps`, { sceneId: kapitel.id }),
+      400,
+      'chapter instead of scene',
+    );
+    assert.equal(await status('POST', `/api/notes/gibt-es-nicht/arc/steps`, {}), 404);
+    assert.equal(await status('PATCH', `/api/arc-steps/gibt-es-nicht`, { label: 'x' }), 404);
+    assert.equal(
+      await status('POST', `/api/arc-steps/${traut.id}/move`, { beforeId: 'gibt-es-nicht' }),
+      404,
+    );
+
+    // Deleting the character deletes the arc
+    await api('DELETE', `/api/notes/${mara.id}`);
+    assert.deepEqual(await api<ArcStep[]>('GET', `/api/scenes/${flucht.id}/arc-steps`), []);
   });
 
   it('draws maps and places places on them', async () => {
@@ -1622,7 +1732,7 @@ describe('REST API', () => {
     // Reset the file to the state before notes and scene status (schema 1)
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE arc_steps; ALTER TABLE notes DROP COLUMN arc; DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

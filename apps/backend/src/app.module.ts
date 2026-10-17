@@ -1,5 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
+import { ArcsController } from './arcs/arcs.controller.js';
+import { ArcsService } from './arcs/arcs.service.js';
 import { SERVER_OPTIONS, type ServerOptions } from './config.js';
 import { ExportController } from './export/export.controller.js';
 import { ExportService } from './export/export.service.js';
@@ -46,6 +48,7 @@ export class AppModule {
         NotesController,
         NoteGroupsController,
         LinksController,
+        ArcsController,
         MapsController,
         TagsController,
         StrandsController,
@@ -65,6 +68,7 @@ export class AppModule {
         ManuscriptService,
         NotesService,
         LinksService,
+        ArcsService,
         MapsService,
         TagsService,
         StrandsService,

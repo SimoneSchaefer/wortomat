@@ -297,6 +297,45 @@ export interface MoveNoteGroupRequest {
   beforeId: string | null;
 }
 
+/** How a character changes: the overall arc as text and its stations in a chosen order. */
+export interface CharacterArc {
+  noteId: string;
+  summary: string;
+  steps: ArcStep[];
+}
+
+/** A station of the arc, e.g. "lets Lena help for the first time". */
+export interface ArcStep {
+  id: string;
+  noteId: string;
+  label: string;
+  details: string;
+  /** The scene where the station shows; `null` = none (yet). */
+  sceneId: string | null;
+}
+
+export interface UpdateArcRequest {
+  summary: string;
+}
+
+export interface CreateArcStepRequest {
+  label?: string;
+  sceneId?: string | null;
+  /** Station to insert before; `null`/missing = at the end. */
+  beforeId?: string | null;
+}
+
+export interface UpdateArcStepRequest {
+  label?: string;
+  details?: string;
+  sceneId?: string | null;
+}
+
+export interface MoveArcStepRequest {
+  /** Station to insert before; `null` = at the end. */
+  beforeId: string | null;
+}
+
 export interface LinkNoteRequest {
   noteId: string;
 }

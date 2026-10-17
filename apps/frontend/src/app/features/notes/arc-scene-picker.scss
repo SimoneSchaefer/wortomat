@@ -1,0 +1,48 @@
+@use '../../core/picker';
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.add-wrapper {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+// Long scene titles are cut off rather than pushing the row apart; the tooltip has the full path
+.chip {
+  max-width: 100%;
+  flex-shrink: 1;
+
+  // A block instead of flex so the ellipsis works
+  .open {
+    display: block;
+    min-width: 0;
+    line-height: calc(var(--pill-height) - 2px);
+    padding: 0 0.15rem 0 0.6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--accent-strong);
+  }
+}
+
+.path {
+  color: var(--text-muted);
+}
+
+.add-scene {
+  height: var(--pill-height);
+  padding: 0 0.6rem;
+  font-size: var(--pill-font-size);
+
+  &.open {
+    border-color: var(--accent);
+    background: var(--button-hover);
+  }
+}
+
+.picker {
+  width: 22rem;
+  max-width: 80vw;
+}

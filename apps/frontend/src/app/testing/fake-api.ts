@@ -10,6 +10,10 @@ import type {
   StoryMark,
   StoryState,
   AppSettings,
+  ArcStep,
+  CharacterArc,
+  CreateArcStepRequest,
+  UpdateArcStepRequest,
   CreateProjectRequest,
   DesktopBridge,
   DirectoryListing,
@@ -447,6 +451,70 @@ export class FakeApi {
   readonly mapsWithPlace = vi.fn(async (noteId: string): Promise<PlaceMap[]> =>
     structuredClone(
       [...this.maps.values()].filter((map) => map.pins.some((p) => p.noteId === noteId)),
+    ),
+  );
+
+  /** Note → arc; stations in their order. */
+  arcs = new Map<string, CharacterArc>();
+  private arc = (noteId: string): CharacterArc => {
+    let arc = this.arcs.get(noteId);
+    if (!arc) {
+      arc = { noteId, summary: '', steps: [] };
+      this.arcs.set(noteId, arc);
+    }
+    return arc;
+  };
+  private arcOfStep = (id: string): CharacterArc =>
+    [...this.arcs.values()].find((arc) => arc.steps.some((step) => step.id === id))!;
+  /** Puts `id` before `beforeId` (`null` = at the end). */
+  private placeStep = (arc: CharacterArc, step: ArcStep, beforeId: string | null) => {
+    arc.steps = arc.steps.filter((other) => other.id !== step.id);
+    const index = beforeId === null ? -1 : arc.steps.findIndex((other) => other.id === beforeId);
+    arc.steps.splice(index < 0 ? arc.steps.length : index, 0, step);
+  };
+  readonly noteArc = vi.fn(async (noteId: string) => structuredClone(this.arc(noteId)));
+  readonly updateArcSummary = vi.fn(async (noteId: string, summary: string) => {
+    this.arc(noteId).summary = summary.trim();
+    return structuredClone(this.arc(noteId));
+  });
+  readonly createArcStep = vi.fn(async (noteId: string, request: CreateArcStepRequest) => {
+    const arc = this.arc(noteId);
+    const step: ArcStep = {
+      id: `station-${this.nextId++}`,
+      noteId,
+      label: request.label ?? '',
+      details: '',
+      sceneId: request.sceneId ?? null,
+    };
+    this.placeStep(arc, step, request.beforeId ?? null);
+    return structuredClone(arc);
+  });
+  readonly updateArcStep = vi.fn(async (id: string, request: UpdateArcStepRequest) => {
+    const arc = this.arcOfStep(id);
+    const step = arc.steps.find((other) => other.id === id)!;
+    Object.assign(step, request);
+    if (request.sceneId) await this.linkNote(request.sceneId, arc.noteId);
+    return structuredClone(arc);
+  });
+  readonly moveArcStep = vi.fn(async (id: string, beforeId: string | null) => {
+    const arc = this.arcOfStep(id);
+    this.placeStep(
+      arc,
+      arc.steps.find((step) => step.id === id)!,
+      beforeId,
+    );
+    return structuredClone(arc);
+  });
+  readonly deleteArcStep = vi.fn(async (id: string) => {
+    const arc = this.arcOfStep(id);
+    arc.steps = arc.steps.filter((step) => step.id !== id);
+    return structuredClone(arc);
+  });
+  readonly sceneArcSteps = vi.fn(async (sceneId: string) =>
+    structuredClone(
+      [...this.arcs.values()].flatMap((arc) =>
+        arc.steps.filter((step) => step.sceneId === sceneId),
+      ),
     ),
   );
 
