@@ -112,9 +112,38 @@ export const en: Texts = {
     addChapterButton: '+ Chapter',
     addPartButton: '+ Part',
     deleteTitle: { part: 'Delete part?', chapter: 'Delete chapter?', scene: 'Delete scene?' },
-    deleteScene: (title: string) => `“${title}” will be deleted with all of its text.`,
+    deleteScene: (title: string) =>
+      `“${title}” moves to the trash with all of its text. You can restore it from there.`,
     deleteContainer: (title: string) =>
-      `“${title}” will be deleted along with all the scenes it contains.`,
+      `“${title}” moves to the trash with all scenes in it. You can restore everything from there.`,
+    moveToTrash: 'Move to trash',
+    trashLink: (count: number) => `Trash (${count})`,
+  },
+
+  trash: {
+    title: 'Trash',
+    hint: 'Deleted parts, chapters and scenes stay here until you delete them for good.',
+    empty: 'The trash is empty.',
+    kind: { part: 'Part', chapter: 'Chapter', scene: 'Scene' },
+    topLevel: 'top level',
+    scenes: (count: number) => (count === 1 ? '1 scene' : `${numberFormat.format(count)} scenes`),
+    deletedAt: (when: string) => `deleted ${when}`,
+    restore: 'Restore',
+    restoreLabel: (title: string) => `Restore ${title}`,
+    deleteForGood: 'Delete for good',
+    deleteForGoodLabel: (title: string) => `Delete ${title} for good`,
+    deleteForGoodTitle: 'Delete for good?',
+    deleteForGoodMessage: (title: string) =>
+      `“${title}” will be deleted for good, with all scenes in it.`,
+    emptyTrash: 'Empty trash',
+    emptyTrashTitle: 'Empty the trash?',
+    emptyTrashMessage: (count: number) =>
+      count === 1
+        ? 'The item in the trash will be deleted for good.'
+        : `All ${count} items in the trash will be deleted for good.`,
+    restored: (title: string) => `“${title}” is back.`,
+    restoredElsewhere: (title: string) =>
+      `“${title}” is back – at the end of the book, because its old place no longer exists.`,
   },
 
   filter: {

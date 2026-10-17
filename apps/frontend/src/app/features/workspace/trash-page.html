@@ -1,0 +1,55 @@
+<div class="trash">
+  <div class="head">
+    <h1>{{ t().trash.title }}</h1>
+    @if (store.trash().length) {
+      <button type="button" class="link" (click)="emptyTrash()">{{ t().trash.emptyTrash }}</button>
+    }
+  </div>
+  <p class="muted">{{ t().trash.hint }}</p>
+
+  <p class="notice" role="status">{{ notice() }}</p>
+
+  @if (store.trash().length) {
+    <ul>
+      @for (entry of store.trash(); track entry.id) {
+        <li>
+          <div class="info">
+            <span class="kind">{{ t().trash.kind[entry.kind] }}</span>
+            <span class="title">{{ entry.title }}</span>
+            <span class="muted path">{{
+              entry.path.length ? entry.path.join(' › ') : t().trash.topLevel
+            }}</span>
+            <span class="muted details">
+              @if (entry.kind !== 'scene') {
+                {{ t().trash.scenes(entry.sceneCount) }} ·
+              }
+              {{ t().words(entry.wordCount) }} ·
+              <time [attr.datetime]="entry.deletedAt" [title]="exactTime(entry)">{{
+                deletedAt(entry)
+              }}</time>
+            </span>
+          </div>
+          <span class="actions">
+            <button
+              type="button"
+              class="primary"
+              [attr.aria-label]="t().trash.restoreLabel(entry.title)"
+              (click)="restore(entry)"
+            >
+              {{ t().trash.restore }}
+            </button>
+            <button
+              type="button"
+              [attr.aria-label]="t().trash.deleteForGoodLabel(entry.title)"
+              (click)="deleteForGood(entry)"
+            >
+              {{ t().trash.deleteForGood }}
+            </button>
+          </span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="muted empty">{{ t().trash.empty }}</p>
+  }
+</div>

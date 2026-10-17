@@ -32,6 +32,7 @@ describe('project guards', () => {
               openProject = null;
             },
             listNodes: async () => [],
+            listTrash: async () => [],
           } satisfies Partial<WortomatApi>,
         },
       ],

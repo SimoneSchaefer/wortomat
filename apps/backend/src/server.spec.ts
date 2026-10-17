@@ -22,6 +22,7 @@ import type {
   ProofPackage,
   ProjectInfo,
   ProjectListEntry,
+  RestoreResult,
   SceneContent,
   SceneReference,
   SceneRelations,
@@ -32,6 +33,7 @@ import type {
   Strand,
   Tag,
   TagSummary,
+  TrashEntry,
   WritingDay,
 } from '@wortomat/shared';
 import { AUTH_HEADER, type RunningServer, startServer } from './server.js';
@@ -160,6 +162,206 @@ describe('REST API', () => {
     await api('DELETE', `/api/nodes/${chapter.id}`);
     assert.deepEqual(await api('GET', '/api/nodes'), []);
     assert.deepEqual(await api('GET', '/api/search?q=hauser'), []);
+  });
+
+  it('moves deleted parts, chapters and scenes to the trash and restores them', async () => {
+    await api('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'papierkorb', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const topLevel = async () =>
+      (await api<ManuscriptNode[]>('GET', '/api/nodes'))
+        .filter((n) => n.parentId === null)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((n) => [n.title, n.sortOrder]);
+    const sceneHits = async (q: string) =>
+      (await api<SearchHit[]>('GET', `/api/search?q=${q}`)).filter((h) => h.kind === 'scene');
+    const trash = () => api<TrashEntry[]>('GET', '/api/trash');
+    const status = async (method: string, urlPath: string) =>
+      (await fetch(server.url + urlPath, { method, headers: { [AUTH_HEADER]: TOKEN } })).status;
+
+    const form = new FormData();
+    form.append('file', new Blob([new Uint8Array(PNG_1PX)], { type: 'image/png' }), 'karte.png');
+    const image = (await (
+      await fetch(`${server.url}/api/images`, {
+        method: 'POST',
+        headers: { [AUTH_HEADER]: TOKEN },
+        body: form,
+      })
+    ).json()) as ImageInfo;
+
+    const vorher = await node(null, 'chapter', 'Vorher');
+    const teil = await node(null, 'part', 'Frieda');
+    const nachher = await node(null, 'chapter', 'Nachher');
+    const kapitel = await node(teil.id, 'chapter', 'Fokuszeit');
+    const ankunft = await node(kapitel.id, 'scene', 'Ankunft');
+    const abschied = await node(kapitel.id, 'scene', 'Abschied');
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Frieda kommt am Bahnhof an.' }] },
+        { type: 'image', attrs: { src: image.url } },
+      ],
+    };
+    await api('PUT', `/api/scenes/${ankunft.id}/content`, {
+      doc,
+      text: 'Frieda kommt am Bahnhof an.',
+      wordCount: 5,
+    });
+    await api('PATCH', `/api/nodes/${ankunft.id}`, { status: 'draft', turningPoint: true });
+    const frieda = await api<NoteSummary>('POST', '/api/notes', {
+      kind: 'character',
+      title: 'Frieda',
+    });
+    const ort = await api<NoteSummary>('POST', '/api/notes', { kind: 'place', title: 'Bahnhof' });
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: frieda.id });
+    await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: ort.id });
+    await api('POST', `/api/scenes/${ankunft.id}/tags`, { name: 'Rückblende' });
+    const strang = await api<Strand>('POST', '/api/strands', { name: 'Frieda' });
+    const nebenstrang = await api<Strand>('POST', '/api/strands', { name: 'Neben' });
+    await api('POST', `/api/scenes/${ankunft.id}/strands`, { strandId: strang.id });
+    await api('POST', `/api/scenes/${ankunft.id}/strands`, { strandId: nebenstrang.id });
+    await api('PUT', '/api/story', { columns: [[abschied.id], [ankunft.id]], marks: [] });
+    const arc = await api<CharacterArc>('POST', `/api/notes/${frieda.id}/arc/steps`, {
+      label: 'kommt an',
+      sceneId: ankunft.id,
+    });
+
+    // Deleting a part takes everything below it into one trash entry
+    await api('DELETE', `/api/nodes/${teil.id}`);
+    assert.deepEqual(await topLevel(), [
+      ['Vorher', 1],
+      ['Nachher', 3],
+    ]);
+    assert.deepEqual(await sceneHits('bahnhof'), []);
+    assert.deepEqual(await api('GET', '/api/tags'), []);
+    assert.deepEqual(await api('GET', `/api/notes/${frieda.id}/scenes`), []);
+    assert.equal(
+      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.sceneId,
+      null,
+    );
+    const [entry] = await trash();
+    assert.deepEqual(
+      { ...entry, deletedAt: undefined },
+      {
+        id: teil.id,
+        kind: 'part',
+        title: 'Frieda',
+        path: [],
+        sceneCount: 2,
+        wordCount: 5,
+        deletedAt: undefined,
+      },
+    );
+    // While in the trash, the image in its text is kept
+    await api('PATCH', '/api/project', { coverImageId: image.id });
+    await api('PATCH', '/api/project', { coverImageId: null });
+    assert.equal(await status('GET', image.url), 200);
+
+    // Things deleted in the meantime are left out, a removed tag comes back
+    await api('DELETE', `/api/notes/${ort.id}`);
+    await api('DELETE', `/api/strands/${nebenstrang.id}`);
+
+    const restored = await api<RestoreResult>('POST', `/api/trash/${teil.id}/restore`);
+    assert.equal(restored.nodeId, teil.id);
+    assert.equal(restored.atOldPlace, true);
+    assert.deepEqual(await topLevel(), [
+      ['Vorher', 1],
+      ['Frieda', 2],
+      ['Nachher', 3],
+    ]);
+    const byId = new Map(restored.nodes.map((n) => [n.id, n]));
+    assert.deepEqual(
+      [kapitel, ankunft, abschied].map((n) => [
+        byId.get(n.id)?.parentId,
+        byId.get(n.id)?.sortOrder,
+      ]),
+      [
+        [teil.id, 1],
+        [kapitel.id, 1],
+        [kapitel.id, 2],
+      ],
+    );
+    const scene = byId.get(ankunft.id)!;
+    assert.deepEqual(
+      [scene.status, scene.turningPoint, scene.storyOrder, scene.wordCount],
+      ['draft', true, 2, 5],
+    );
+    assert.deepEqual(
+      (await api<SceneContent>('GET', `/api/scenes/${ankunft.id}/content`)).doc,
+      doc,
+    );
+    assert.equal((await sceneHits('bahnhof')).length, 1);
+    assert.deepEqual(
+      (await api<NoteSummary[]>('GET', `/api/scenes/${ankunft.id}/links`)).map((n) => n.title),
+      ['Frieda'],
+    );
+    assert.deepEqual(
+      (await api<Tag[]>('GET', `/api/scenes/${ankunft.id}/tags`)).map((t) => t.name),
+      ['Rückblende'],
+    );
+    assert.deepEqual(
+      (await api<Strand[]>('GET', `/api/scenes/${ankunft.id}/strands`)).map((s) => s.name),
+      ['Frieda'],
+    );
+    assert.equal(
+      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.id,
+      arc.steps[0]!.id,
+    );
+    assert.equal(
+      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.sceneId,
+      ankunft.id,
+    );
+    assert.deepEqual(await trash(), []);
+    assert.equal(await status('POST', `/api/trash/${teil.id}/restore`), 404);
+
+    // A scene whose chapter is gone goes to the last chapter of the book
+    await api('DELETE', `/api/nodes/${abschied.id}`);
+    assert.deepEqual((await trash())[0]!.path, ['Frieda', 'Fokuszeit']);
+    await api('DELETE', `/api/nodes/${kapitel.id}`);
+    assert.deepEqual(
+      (await trash()).map((e) => e.title),
+      ['Fokuszeit', 'Abschied'],
+    );
+    let back = await api<RestoreResult>('POST', `/api/trash/${abschied.id}/restore`);
+    assert.equal(back.atOldPlace, false);
+    assert.equal(back.nodes.find((n) => n.id === abschied.id)!.parentId, nachher.id);
+
+    // … and into a new one when there is no chapter at all
+    await api('DELETE', `/api/nodes/${abschied.id}`);
+    await api('DELETE', `/api/nodes/${vorher.id}`);
+    await api('DELETE', `/api/nodes/${nachher.id}`);
+    back = await api<RestoreResult>('POST', `/api/trash/${abschied.id}/restore`);
+    const parentId = back.nodes.find((n) => n.id === abschied.id)!.parentId;
+    const neu = back.nodes.find((n) => n.id === parentId)!;
+    assert.deepEqual([neu.kind, neu.title, neu.parentId], ['chapter', 'Wiederhergestellt', null]);
+
+    // A chapter whose part is gone goes to the end of the book
+    await api('DELETE', `/api/nodes/${teil.id}`);
+    back = await api<RestoreResult>('POST', `/api/trash/${kapitel.id}/restore`);
+    assert.equal(back.atOldPlace, false);
+    assert.deepEqual(
+      (await topLevel()).filter(([title]) => title !== 'Abschied'),
+      [
+        ['Wiederhergestellt', 1],
+        ['Fokuszeit', 2],
+      ],
+    );
+
+    // Deleting for good; the image goes along once nothing refers to it any more
+    await api('DELETE', `/api/nodes/${kapitel.id}`);
+    assert.equal(await status('DELETE', `/api/trash/${kapitel.id}`), 204);
+    assert.equal(await status('DELETE', `/api/trash/${kapitel.id}`), 404);
+    assert.equal(await status('GET', image.url), 404);
+    await api('DELETE', `/api/nodes/${neu.id}`);
+    assert.deepEqual(
+      (await trash()).map((e) => e.title),
+      ['Wiederhergestellt', 'Frieda', 'Nachher', 'Vorher'],
+    );
+    assert.equal(await status('DELETE', '/api/trash'), 204);
+    assert.deepEqual(await trash(), []);
   });
 
   it('moves scenes and chapters and renumbers', async () => {
@@ -1749,7 +1951,7 @@ describe('REST API', () => {
     // Reset the file to the state before notes and scene status (schema 1)
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE arc_steps; ALTER TABLE notes DROP COLUMN arc; DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE trash; DROP TABLE arc_steps; ALTER TABLE notes DROP COLUMN arc; DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 
@@ -1763,6 +1965,14 @@ describe('REST API', () => {
     const nodes = await api<ManuscriptNode[]>('GET', '/api/nodes');
     assert.equal(nodes.find((n) => n.id === szene.id)?.status, 'idea');
     assert.equal(nodes.find((n) => n.id === szene.id)?.turningPoint, false);
+    // Deleting goes to the trash, which the upgrade created
+    await api('DELETE', `/api/nodes/${szene.id}`);
+    assert.deepEqual(
+      (await api<TrashEntry[]>('GET', '/api/trash')).map((e) => [e.title, e.path]),
+      [['S', ['K']]],
+    );
+    await api('POST', `/api/trash/${szene.id}/restore`);
+    assert.equal((await api<ManuscriptNode[]>('GET', '/api/nodes')).length, 2);
   });
 
   it('stores app settings permanently – even without an open project', async () => {

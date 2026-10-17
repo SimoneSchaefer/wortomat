@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+.trash {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--font-prose);
+  font-size: 1.9rem;
+  font-weight: 500;
+}
+
+// Kept in the layout even when empty so the list does not jump when a notice appears
+.notice {
+  min-height: 1.5em;
+  margin: 0.5rem 0;
+}
+
+ul {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+}
+
+.info {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.kind {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.path,
+.details {
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.empty {
+  margin-top: 2rem;
+  text-align: center;
+}

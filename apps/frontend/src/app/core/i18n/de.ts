@@ -144,8 +144,41 @@ export const de = {
     addChapterButton: '+ Kapitel',
     addPartButton: '+ Teil',
     deleteTitle: { part: 'Teil löschen?', chapter: 'Kapitel löschen?', scene: 'Szene löschen?' },
-    deleteScene: (title: string) => `„${title}“ wird mit ihrem ganzen Text gelöscht.`,
-    deleteContainer: (title: string) => `„${title}“ wird mit allen enthaltenen Szenen gelöscht.`,
+    deleteScene: (title: string) =>
+      `„${title}“ wandert mit ihrem ganzen Text in den Papierkorb. Von dort kannst du sie wiederherstellen.`,
+    deleteContainer: (title: string) =>
+      `„${title}“ wandert mit allen enthaltenen Szenen in den Papierkorb. Von dort kannst du alles wiederherstellen.`,
+    moveToTrash: 'In den Papierkorb',
+    trashLink: (count: number) => `Papierkorb (${count})`,
+  },
+
+  trash: {
+    title: 'Papierkorb',
+    hint: 'Gelöschte Teile, Kapitel und Szenen bleiben hier, bis du sie endgültig löschst.',
+    empty: 'Der Papierkorb ist leer.',
+    kind: { part: 'Teil', chapter: 'Kapitel', scene: 'Szene' } satisfies Record<
+      'part' | 'chapter' | 'scene',
+      string
+    >,
+    topLevel: 'oberste Ebene',
+    scenes: (count: number) => (count === 1 ? '1 Szene' : `${numberFormat.format(count)} Szenen`),
+    deletedAt: (when: string) => `gelöscht ${when}`,
+    restore: 'Wiederherstellen',
+    restoreLabel: (title: string) => `${title} wiederherstellen`,
+    deleteForGood: 'Endgültig löschen',
+    deleteForGoodLabel: (title: string) => `${title} endgültig löschen`,
+    deleteForGoodTitle: 'Endgültig löschen?',
+    deleteForGoodMessage: (title: string) =>
+      `„${title}“ wird mit allen enthaltenen Szenen endgültig gelöscht.`,
+    emptyTrash: 'Papierkorb leeren',
+    emptyTrashTitle: 'Papierkorb leeren?',
+    emptyTrashMessage: (count: number) =>
+      count === 1
+        ? 'Der Eintrag im Papierkorb wird endgültig gelöscht.'
+        : `Alle ${count} Einträge im Papierkorb werden endgültig gelöscht.`,
+    restored: (title: string) => `„${title}“ ist wieder da.`,
+    restoredElsewhere: (title: string) =>
+      `„${title}“ ist wieder da – am Ende des Buchs, weil der alte Platz nicht mehr existiert.`,
   },
 
   filter: {

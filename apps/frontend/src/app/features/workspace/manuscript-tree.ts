@@ -81,7 +81,8 @@ export class ManuscriptTree {
       title: t.tree.deleteTitle[node.kind],
       message:
         node.kind === 'scene' ? t.tree.deleteScene(node.title) : t.tree.deleteContainer(node.title),
-      confirmLabel: t.confirm.delete,
+      confirmLabel: t.tree.moveToTrash,
+      destructive: false,
     });
     if (!confirmed) return;
     await this.run(async () => {

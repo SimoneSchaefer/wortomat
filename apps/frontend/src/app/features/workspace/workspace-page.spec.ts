@@ -24,7 +24,16 @@ async function setup(prepare: (api: FakeApi) => void = () => undefined) {
   const view = await render(WorkspacePage, {
     api,
     before: () => TestBed.inject(ProjectStore).reload(),
-    routes: ['', 'write', 'write/plot', 'write/stats', 'write/scene/:id', 'export', 'settings']
+    routes: [
+      '',
+      'write',
+      'write/plot',
+      'write/stats',
+      'write/scene/:id',
+      'write/trash',
+      'export',
+      'settings',
+    ]
       .concat(['write/characters', 'write/characters/:id', 'write/places', 'write/research'])
       .concat(['proofreading'])
       .map((path) => ({ path, component: Blank })),
@@ -64,6 +73,20 @@ describe('WorkspacePage', () => {
 
     await go(W.manuscript, '/write/scene/s1');
     await go(de.noteKinds.character.label, '/write/characters/anna');
+  });
+
+  it('links to the trash below the tree once something is in it', async () => {
+    const { sidebar, router, settle } = await setup();
+    expect(sidebar()?.querySelector('.trash-link')).toBeNull();
+
+    await TestBed.inject(ProjectStore).deleteNode('k1');
+    await settle();
+    const link = sidebar()!.querySelector<HTMLAnchorElement>('.trash-link')!;
+    expect(text(link)).toBe(de.tree.trashLink(1));
+    link.click();
+    await until(settle, () => router.url === '/write/trash');
+    // Still the manuscript area, so the tree stays next to it
+    expect(sidebar()?.querySelector('wm-manuscript-tree')).not.toBeNull();
   });
 
   it('gives plot and statistics the full width', async () => {

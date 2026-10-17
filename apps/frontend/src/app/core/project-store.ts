@@ -6,9 +6,11 @@ import type {
   ManuscriptNode,
   MoveNodeRequest,
   ProjectInfo,
+  RestoreResult,
   SaveStoryRequest,
   SceneStatus,
   StoryMark,
+  TrashEntry,
 } from '@wortomat/shared';
 import { addCounts, NO_ANNOTATIONS } from './annotations';
 import { WortomatApi } from './wortomat-api';
@@ -31,6 +33,7 @@ export class ProjectStore {
   readonly nodes = signal<ManuscriptNode[]>([]);
   readonly tree = computed(() => buildTree(this.nodes()));
   readonly totalWords = computed(() => this.nodes().reduce((sum, node) => sum + node.wordCount, 0));
+  readonly trash = signal<TrashEntry[]>([]);
   /** Display only, valid until the project is closed. */
   readonly collapsed = signal<ReadonlySet<string>>(new Set());
 
@@ -48,18 +51,21 @@ export class ProjectStore {
     const project = await this.api.currentProject();
     this.project.set(project);
     this.nodes.set(project ? await this.api.listNodes() : []);
+    this.trash.set(project ? await this.api.listTrash() : []);
     return project;
   }
 
   async create(filePath: string, title: string): Promise<void> {
     this.project.set(await this.api.createProject({ filePath, title }));
     this.nodes.set([]);
+    this.trash.set([]);
     this.collapsed.set(new Set());
   }
 
   async open(filePath: string): Promise<void> {
     this.project.set(await this.api.openProject(filePath));
     this.nodes.set(await this.api.listNodes());
+    this.trash.set(await this.api.listTrash());
     this.collapsed.set(new Set());
   }
 
@@ -75,6 +81,7 @@ export class ProjectStore {
     await this.api.closeProject();
     this.project.set(null);
     this.nodes.set([]);
+    this.trash.set([]);
     this.collapsed.set(new Set());
   }
 
@@ -119,10 +126,30 @@ export class ProjectStore {
     this.nodes.set(await this.api.moveNode(id, request));
   }
 
+  /** Into the trash, with everything below it. */
   async deleteNode(id: string): Promise<void> {
     await this.api.deleteNode(id);
-    // The backend deletes the child nodes too; just reload.
-    this.nodes.set(await this.api.listNodes());
+    const [nodes, trash] = await Promise.all([this.api.listNodes(), this.api.listTrash()]);
+    this.nodes.set(nodes);
+    this.trash.set(trash);
+  }
+
+  async restoreFromTrash(id: string): Promise<RestoreResult> {
+    const result = await this.api.restoreFromTrash(id);
+    this.nodes.set(result.nodes);
+    this.trash.update((entries) => entries.filter((entry) => entry.id !== id));
+    this.reveal(id);
+    return result;
+  }
+
+  async deleteFromTrash(id: string): Promise<void> {
+    await this.api.deleteFromTrash(id);
+    this.trash.update((entries) => entries.filter((entry) => entry.id !== id));
+  }
+
+  async emptyTrash(): Promise<void> {
+    await this.api.emptyTrash();
+    this.trash.set([]);
   }
 
   updateSceneStats(id: string, wordCount: number, annotations: AnnotationCounts): void {
