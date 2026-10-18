@@ -177,15 +177,18 @@ npm run dist
   und legen die Installer als Artefakt am Lauf ab. Den gemeinsamen Ablauf beschreibt
   [`release-build.yml`](.github/workflows/release-build.yml). Die Installer sind nicht signiert.
 
-**Release-Nummer:** `2.0.<N>`, wobei N die Position des Commits auf `main` ist (nur erste Eltern,
-`git rev-list --count --first-parent`). Sie hängt also nur am Commit: Derselbe Stand von `main`
-bekommt auf Linux, Windows und macOS dieselbe Nummer, egal wann und wie oft gebaut wird. Builds
-von anderen Ständen heißen `2.0.<N>-dev.g<hash>` (mit `.changed`, wenn es nicht committete
-Änderungen gibt). Berechnet wird sie in
+**Release-Nummer:** fortlaufend `2.0.1`, `2.0.2` … – eine pro Stand von `main`, der je als
+Release gebaut wurde. Der erste Release-Workflow, der einen Commit baut, vergibt die nächste
+Nummer und hält sie als Git-Tag fest (`v2.0.7`); jeder weitere Build desselben Commits – auf
+Linux, Windows oder macOS, egal wann – findet den Tag und nimmt dieselbe Nummer. Ein älterer Stand,
+der nach einem neueren gebaut wird, bekommt keine eigene Nummer. Alles andere (Branches,
+ungetaggte Commits, lokale Builds) heißt `2.0.<nächste>-dev.g<hash>`, mit `.changed` bei nicht
+committeten Änderungen. Die Logik steckt in
 [`apps/desktop/scripts/version.mjs`](apps/desktop/scripts/version.mjs) (`node
-apps/desktop/scripts/version.mjs` zeigt sie an). Sie steht in den Dateinamen der Installer, im
-Namen der Artefakte und in der App auf der Startseite und in den Einstellungen. Major und Minor
-kommen aus `apps/desktop/package.json`.
+apps/desktop/scripts/version.mjs` zeigt die Version an). Sie steht in den Dateinamen der
+Installer, im Namen der Artefakte und in der App auf der Startseite und in den Einstellungen.
+Major und Minor kommen aus `apps/desktop/package.json`; eine neue Minor-Version beginnt wieder
+bei 1.
 
 ## REST-API
 
