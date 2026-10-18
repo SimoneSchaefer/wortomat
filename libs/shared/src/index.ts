@@ -337,8 +337,8 @@ export interface ArcStep {
   noteId: string;
   label: string;
   details: string;
-  /** The scene where the station shows; `null` = none (yet). */
-  sceneId: string | null;
+  /** The scenes where the station shows, in no particular order; empty = none (yet). */
+  sceneIds: string[];
 }
 
 export interface UpdateArcRequest {
@@ -347,7 +347,7 @@ export interface UpdateArcRequest {
 
 export interface CreateArcStepRequest {
   label?: string;
-  sceneId?: string | null;
+  sceneIds?: string[];
   /** Station to insert before; `null`/missing = at the end. */
   beforeId?: string | null;
 }
@@ -355,7 +355,10 @@ export interface CreateArcStepRequest {
 export interface UpdateArcStepRequest {
   label?: string;
   details?: string;
-  sceneId?: string | null;
+}
+
+export interface AddArcStepSceneRequest {
+  sceneId: string;
 }
 
 /** All stations of the note in their new order. */

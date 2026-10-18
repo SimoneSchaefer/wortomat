@@ -1,13 +1,16 @@
 @use '../../core/picker';
 
+// Wraps rather than scrolls: a station rarely has more than a handful of scenes
 :host {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
   min-width: 0;
 }
 
 .add-wrapper {
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 // Long scene titles are cut off rather than pushing the row apart; the tooltip has the full path

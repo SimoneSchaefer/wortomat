@@ -3,8 +3,14 @@ import { buildTree } from '../../core/project-store';
 import { testNode } from '../../testing/fake-api';
 import { arcOrderIssues, sortedByStory, storyPositions } from './arc-order';
 
-function step(id: string, sceneId: string | null): ArcStep {
-  return { id, noteId: 'mara', label: id, details: '', sceneId };
+function step(id: string, ...sceneIds: Array<string | null>): ArcStep {
+  return {
+    id,
+    noteId: 'mara',
+    label: id,
+    details: '',
+    sceneIds: sceneIds.filter((s) => s !== null),
+  };
 }
 
 /** Scene s1 … s5 at positions 1 … 5. */
@@ -61,6 +67,17 @@ describe('arcOrderIssues', () => {
     });
   });
 
+  it('counts a station with several scenes from its earliest one', () => {
+    // b shows in s2 and s5 – from s2 on, so it is in order between a and c
+    const spread = [step('a', 's1'), step('b', 's5', 's2'), step('c', 's3')];
+    expect(arcOrderIssues(spread, positions).size).toBe(0);
+    // x starts with s4, after c
+    const late = [step('a', 's1'), step('x', 's4', 's5'), step('b', 's2'), step('c', 's3')];
+    expect(Object.fromEntries(arcOrderIssues(late, positions))).toEqual({
+      x: { afterId: 'c', beforeId: null },
+    });
+  });
+
   it('ignores scenes that no longer exist', () => {
     expect(arcOrderIssues([step('a', 's3'), step('b', 'gone')], positions).size).toBe(0);
   });
@@ -70,6 +87,11 @@ describe('sortedByStory', () => {
   it('sorts the stations with scenes and keeps the others in place', () => {
     const steps = [step('a', 's3'), step('b', null), step('c', 's1'), step('d', 's2')];
     expect(sortedByStory(steps, positions)).toEqual(['c', 'b', 'd', 'a']);
+  });
+
+  it('sorts stations with several scenes by their earliest one', () => {
+    const steps = [step('a', 's3'), step('b', 's5', 's1'), step('c', 's2')];
+    expect(sortedByStory(steps, positions)).toEqual(['b', 'c', 'a']);
   });
 
   it('keeps the current order on simultaneous scenes', () => {

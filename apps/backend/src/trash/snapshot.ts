@@ -141,7 +141,8 @@ function collect(db: DatabaseSync, table: Source, rows: Row[], ids: string[]): S
       db.prepare(`SELECT * FROM ${FTS_TABLE[table]} WHERE ${ftsKey} ${inIds}`).all(idList) as Row[]
     ).map(store),
   };
-  for (const key of foreignKeys(db)) {
+  const keys = foreignKeys(db);
+  for (const key of keys) {
     if (key.target !== table || key.table === table) continue;
     const found = db
       .prepare(`SELECT * FROM "${key.table}" WHERE "${key.column}" ${inIds}`)
@@ -159,7 +160,35 @@ function collect(db: DatabaseSync, table: Source, rows: Row[], ids: string[]): S
       }
     }
   }
+  collectCascades(db, keys, snapshot);
   return snapshot;
+}
+
+/**
+ * Rows that cascade from the rows collected so far, as deep as it goes – e.g. the scenes of a
+ * station, which go when its note goes.
+ */
+function collectCascades(db: DatabaseSync, keys: ForeignKey[], snapshot: Snapshot): void {
+  const queue = Object.keys(snapshot.dependents);
+  for (let i = 0; i < queue.length; i++) {
+    const parent = queue[i]!;
+    for (const key of keys) {
+      if (key.target !== parent || key.onDelete !== 'CASCADE' || key.table === parent) continue;
+      const values = snapshot.dependents[parent]!.map((row) => row[key.targetColumn]);
+      const found = db
+        .prepare(
+          `SELECT * FROM "${key.table}" WHERE "${key.column}" IN (SELECT value FROM json_each(?))`,
+        )
+        .all(JSON.stringify(values)) as Row[];
+      if (!found.length) continue;
+      const list = (snapshot.dependents[key.table] ??= []);
+      const known = new Set(list.map((row) => JSON.stringify(row)));
+      for (const row of found.map(store)) {
+        if (!known.has(JSON.stringify(row))) list.push(row);
+      }
+      if (!queue.includes(key.table)) queue.push(key.table);
+    }
+  }
 }
 
 function insertEntry(db: DatabaseSync, snapshot: Snapshot, entry: TrashRow): void {
@@ -305,13 +334,15 @@ function settle(
   );
   const required = missing.find((key) => key.onDelete !== 'SET NULL');
   if (required) {
-    others.holding(required.target, row[required.column])?.addDependent(table, row);
+    others
+      .holding(required.target, required.targetColumn, row[required.column])
+      ?.addDependent(table, row);
     return false;
   }
   for (const key of missing) {
     const value = row[key.column] as string;
     row[key.column] = null;
-    others.holding(key.target, value)?.addReference({
+    others.holding(key.target, key.targetColumn, value)?.addReference({
       table,
       column: key.column,
       key: store(primaryKey(db, table, row) as Row),
@@ -327,9 +358,16 @@ class OtherEntries {
 
   constructor(private readonly db: DatabaseSync) {}
 
-  /** The entry whose deleted rows include this one. */
-  holding(table: string, id: SQLInputValue | undefined) {
-    const entry = this.all().find((e) => e.snapshot.table === table && e.ids.has(id));
+  /**
+   * The entry whose deleted rows include this one – also among the rows that went along with it
+   * (the station of a trashed note).
+   */
+  holding(table: string, column: string, value: SQLInputValue | undefined) {
+    const entry = this.all().find(
+      (e) =>
+        (e.snapshot.table === table && e.ids.has(value)) ||
+        (e.snapshot.dependents[table] ?? []).some((row) => row[column] === value),
+    );
     if (!entry) return undefined;
     return {
       addDependent: (dependentTable: string, row: Values) => {

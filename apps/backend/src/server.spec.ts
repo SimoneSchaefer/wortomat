@@ -226,7 +226,7 @@ describe('REST API', () => {
     await api('PUT', '/api/story', { columns: [[abschied.id], [ankunft.id]], marks: [] });
     const arc = await api<CharacterArc>('POST', `/api/notes/${frieda.id}/arc/steps`, {
       label: 'kommt an',
-      sceneId: ankunft.id,
+      sceneIds: [ankunft.id, abschied.id],
     });
 
     // Deleting a part takes everything below it into one trash entry
@@ -238,9 +238,9 @@ describe('REST API', () => {
     assert.deepEqual(await sceneHits('bahnhof'), []);
     assert.deepEqual(await api('GET', '/api/tags'), []);
     assert.deepEqual(await api('GET', `/api/notes/${frieda.id}/scenes`), []);
-    assert.equal(
-      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.sceneId,
-      null,
+    assert.deepEqual(
+      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.sceneIds,
+      [],
     );
     const [entry] = await trash();
     assert.deepEqual(
@@ -311,9 +311,10 @@ describe('REST API', () => {
       (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.id,
       arc.steps[0]!.id,
     );
-    assert.equal(
-      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.sceneId,
-      ankunft.id,
+    // The scenes of a station have no order of their own – the page sorts them by the book
+    assert.deepEqual(
+      (await api<CharacterArc>('GET', `/api/notes/${frieda.id}/arc`)).steps[0]!.sceneIds.sort(),
+      [ankunft.id, abschied.id].sort(),
     );
     assert.deepEqual(await trash(), []);
     assert.equal(await status('POST', `/api/trash/${teil.id}/restore`), 404);
@@ -871,7 +872,7 @@ describe('REST API', () => {
     const stations = async (noteId: string) =>
       (await api<CharacterArc>('GET', `/api/notes/${noteId}/arc`)).steps.map((step) => [
         step.label,
-        step.sceneId,
+        step.sceneIds.sort(),
       ]);
     const noteHits = async (q: string) =>
       (await api<SearchHit[]>('GET', `/api/search?q=${q}`)).filter((h) => h.kind !== 'scene');
@@ -914,11 +915,11 @@ describe('REST API', () => {
     await api('POST', `/api/scenes/${ankunft.id}/links`, { noteId: frieda.id });
     await api('POST', `/api/notes/${frieda.id}/arc/steps`, {
       label: 'kommt an',
-      sceneId: ankunft.id,
+      sceneIds: [ankunft.id],
     });
     await api('POST', `/api/notes/${frieda.id}/arc/steps`, {
       label: 'geht',
-      sceneId: abschied.id,
+      sceneIds: [ankunft.id, abschied.id],
     });
 
     await api('DELETE', `/api/notes/${frieda.id}`);
@@ -958,14 +959,14 @@ describe('REST API', () => {
     assert.equal((await noteHits('hut')).length, 1);
     assert.deepEqual(await linked(ankunft.id), ['Frieda']);
     assert.deepEqual(await stations(frieda.id), [
-      ['kommt an', ankunft.id],
-      ['geht', null],
+      ['kommt an', [ankunft.id]],
+      ['geht', [ankunft.id]],
     ]);
     // … the station gets its scene back once that is restored, too
     await restore(abschied.id);
     assert.deepEqual(await stations(frieda.id), [
-      ['kommt an', ankunft.id],
-      ['geht', abschied.id],
+      ['kommt an', [ankunft.id]],
+      ['geht', [ankunft.id, abschied.id].sort()],
     ]);
 
     // Scene and note both in the trash: whatever comes back first keeps what links them
@@ -975,14 +976,20 @@ describe('REST API', () => {
     assert.deepEqual(await linked(ankunft.id), []);
     await restore(frieda.id);
     assert.deepEqual(await linked(ankunft.id), ['Frieda']);
-    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', ankunft.id]);
+    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', [ankunft.id]]);
     await api('DELETE', `/api/notes/${frieda.id}`);
     await api('DELETE', `/api/nodes/${ankunft.id}`);
     await restore(frieda.id);
-    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', null]);
+    assert.deepEqual(await stations(frieda.id), [
+      ['kommt an', []],
+      ['geht', [abschied.id]],
+    ]);
     await restore(ankunft.id);
     assert.deepEqual(await linked(ankunft.id), ['Frieda']);
-    assert.deepEqual((await stations(frieda.id))[0], ['kommt an', ankunft.id]);
+    assert.deepEqual(await stations(frieda.id), [
+      ['kommt an', [ankunft.id]],
+      ['geht', [abschied.id, ankunft.id].sort()],
+    ]);
 
     // A place comes back onto its map
     const bahnhof = await api<NoteSummary>('POST', '/api/notes', {
@@ -1147,6 +1154,7 @@ describe('REST API', () => {
     const kapitel = await node(null, 'chapter', 'Kapitel 1');
     const flucht = await node(kapitel.id, 'scene', 'Flucht');
     const hilfe = await node(kapitel.id, 'scene', 'Hilfe');
+    const keller = await node(kapitel.id, 'scene', 'Keller');
     const mara = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Mara' });
     const lena = await api<NoteSummary>('POST', '/api/notes', { kind: 'character', title: 'Lena' });
     const labels = (arc: CharacterArc) => arc.steps.map((step) => step.label);
@@ -1162,7 +1170,7 @@ describe('REST API', () => {
     // Stations: at the end, before another one, empty at first
     arc = await api<CharacterArc>('POST', `/api/notes/${mara.id}/arc/steps`, {
       label: 'traut niemandem',
-      sceneId: flucht.id,
+      sceneIds: [flucht.id],
     });
     arc = await api<CharacterArc>('POST', `/api/notes/${mara.id}/arc/steps`, {
       label: 'lässt Lena helfen',
@@ -1181,14 +1189,26 @@ describe('REST API', () => {
       ['Mara'],
     );
     arc = await api<CharacterArc>('PATCH', `/api/arc-steps/${laesst.id}`, {
-      sceneId: hilfe.id,
       details: 'Erst widerwillig.',
     });
-    assert.equal(arc.steps[2].sceneId, hilfe.id);
     assert.equal(arc.steps[2].details, 'Erst widerwillig.');
+
+    // Several scenes per station, each added once; removing one keeps the link to the character
+    for (const scene of [hilfe, keller, hilfe]) {
+      arc = await api<CharacterArc>('POST', `/api/arc-steps/${laesst.id}/scenes`, {
+        sceneId: scene.id,
+      });
+    }
+    assert.deepEqual(arc.steps[2].sceneIds, [hilfe.id, keller.id]);
     assert.deepEqual(
       (await api<SceneReference[]>('GET', `/api/notes/${mara.id}/scenes`)).map((s) => s.title),
-      ['Flucht', 'Hilfe'],
+      ['Flucht', 'Hilfe', 'Keller'],
+    );
+    arc = await api<CharacterArc>('DELETE', `/api/arc-steps/${laesst.id}/scenes/${keller.id}`);
+    assert.deepEqual(arc.steps[2].sceneIds, [hilfe.id]);
+    assert.deepEqual(
+      (await api<SceneReference[]>('GET', `/api/notes/${mara.id}/scenes`)).map((s) => s.title),
+      ['Flucht', 'Hilfe', 'Keller'],
     );
     arc = await api<CharacterArc>('PATCH', `/api/arc-steps/${zweifel.id}`, { label: 'zweifelt' });
 
@@ -1218,7 +1238,10 @@ describe('REST API', () => {
     });
 
     // The scene side: stations of all characters, by character name
-    await api('POST', `/api/notes/${lena.id}/arc/steps`, { label: 'gibt nach', sceneId: hilfe.id });
+    await api('POST', `/api/notes/${lena.id}/arc/steps`, {
+      label: 'gibt nach',
+      sceneIds: [flucht.id, hilfe.id],
+    });
     const inScene = await api<ArcStep[]>('GET', `/api/scenes/${hilfe.id}/arc-steps`);
     assert.deepEqual(
       inScene.map((step) => [step.noteId, step.label]),
@@ -1228,10 +1251,10 @@ describe('REST API', () => {
       ],
     );
 
-    // Deleting the scene keeps the station without a scene
+    // Deleting the scene keeps the station without it
     await api('DELETE', `/api/nodes/${hilfe.id}`);
     arc = await api<CharacterArc>('GET', `/api/notes/${mara.id}/arc`);
-    assert.equal(arc.steps[2].sceneId, null);
+    assert.deepEqual(arc.steps[2].sceneIds, []);
 
     arc = await api<CharacterArc>('DELETE', `/api/arc-steps/${zweifel.id}`);
     assert.deepEqual(labels(arc), ['traut niemandem', 'lässt Lena helfen']);
@@ -1246,10 +1269,15 @@ describe('REST API', () => {
         })
       ).status;
     assert.equal(
-      await status('POST', `/api/notes/${mara.id}/arc/steps`, { sceneId: kapitel.id }),
+      await status('POST', `/api/notes/${mara.id}/arc/steps`, { sceneIds: [kapitel.id] }),
       400,
       'chapter instead of scene',
     );
+    assert.equal(
+      await status('POST', `/api/arc-steps/${traut.id}/scenes`, { sceneId: 'gibt-es-nicht' }),
+      404,
+    );
+    assert.equal(await status('POST', `/api/arc-steps/${traut.id}/scenes`, {}), 400);
     assert.equal(await status('POST', `/api/notes/gibt-es-nicht/arc/steps`, {}), 404);
     assert.equal(await status('PATCH', `/api/arc-steps/gibt-es-nicht`, { label: 'x' }), 404);
     assert.equal(
@@ -1259,7 +1287,10 @@ describe('REST API', () => {
 
     // Deleting the character deletes the arc
     await api('DELETE', `/api/notes/${mara.id}`);
-    assert.deepEqual(await api<ArcStep[]>('GET', `/api/scenes/${flucht.id}/arc-steps`), []);
+    assert.deepEqual(
+      (await api<ArcStep[]>('GET', `/api/scenes/${flucht.id}/arc-steps`)).map((s) => s.noteId),
+      [lena.id],
+    );
   });
 
   it('draws maps and places places on them', async () => {
@@ -2137,6 +2168,108 @@ describe('REST API', () => {
     ]);
   });
 
+  it('moves the scene of arc stations into their own table, also in the trash', async () => {
+    const project = await api<ProjectInfo>('POST', '/api/project/create', {
+      filePath: path.join(tmpDir, 'stationen-alt', 'Buch'),
+      title: 'Buch',
+    });
+    const node = (parentId: string | null, kind: string, title: string) =>
+      api<ManuscriptNode>('POST', '/api/nodes', { parentId, kind, title });
+    const kapitel = await node(null, 'chapter', 'Kapitel');
+    const flucht = await node(kapitel.id, 'scene', 'Flucht');
+    const hilfe = await node(kapitel.id, 'scene', 'Hilfe');
+    const keller = await node(kapitel.id, 'scene', 'Keller');
+    const note = (title: string) =>
+      api<NoteSummary>('POST', '/api/notes', { kind: 'character', title });
+    const mara = await note('Mara');
+    const lena = await note('Lena');
+    const step = (noteId: string, label: string, sceneId: string | null) =>
+      api<CharacterArc>('POST', `/api/notes/${noteId}/arc/steps`, {
+        label,
+        sceneIds: sceneId ? [sceneId] : [],
+      });
+    await step(mara.id, 'flieht', flucht.id);
+    await step(mara.id, 'wartet', null);
+    await step(mara.id, 'versteckt sich', keller.id);
+    await step(lena.id, 'hilft', hilfe.id);
+    // In the trash: Lena with her station, and the scene of Mara's last station
+    await api('DELETE', `/api/notes/${lena.id}`);
+    await api('DELETE', `/api/nodes/${keller.id}`);
+    await api('POST', '/api/project/close');
+
+    // Back to schema 21: one scene per station in arc_steps.scene_id – also in the trash snapshots
+    type Stored = Record<string, unknown>;
+    const old = new DatabaseSync(project.filePath);
+    const links = old.prepare('SELECT step_id, scene_id FROM arc_step_scenes').all() as Stored[];
+    old.exec(`
+      PRAGMA foreign_keys = OFF;
+      DROP TABLE arc_step_scenes;
+      ALTER TABLE arc_steps RENAME TO arc_steps_new;
+      CREATE TABLE arc_steps (
+        id          TEXT PRIMARY KEY,
+        note_id     TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+        label       TEXT NOT NULL,
+        details     TEXT NOT NULL DEFAULT '',
+        scene_id    TEXT REFERENCES nodes(id) ON DELETE SET NULL,
+        sort_order  REAL NOT NULL,
+        created_at  TEXT NOT NULL
+      );
+      INSERT INTO arc_steps (id, note_id, label, details, sort_order, created_at)
+        SELECT id, note_id, label, details, sort_order, created_at FROM arc_steps_new;
+      DROP TABLE arc_steps_new;
+      CREATE INDEX arc_steps_by_note ON arc_steps(note_id, sort_order);
+      CREATE INDEX arc_steps_by_scene ON arc_steps(scene_id);
+      PRAGMA user_version = 21;
+    `);
+    const setScene = old.prepare('UPDATE arc_steps SET scene_id = ? WHERE id = ?');
+    for (const link of links) setScene.run(link['scene_id'] as string, link['step_id'] as string);
+    for (const entry of old.prepare('SELECT id, snapshot FROM trash').all() as Stored[]) {
+      const snapshot = JSON.parse(entry['snapshot'] as string) as {
+        dependents: Record<string, Stored[]>;
+        references: Stored[];
+      };
+      const moved = snapshot.dependents['arc_step_scenes'] ?? [];
+      delete snapshot.dependents['arc_step_scenes'];
+      for (const row of snapshot.dependents['arc_steps'] ?? []) {
+        row['scene_id'] = moved.find((m) => m['step_id'] === row['id'])?.['scene_id'] ?? null;
+      }
+      if (entry['id'] === keller.id) {
+        for (const m of moved) {
+          snapshot.references.push({
+            table: 'arc_steps',
+            column: 'scene_id',
+            key: { id: m['step_id'] },
+            value: m['scene_id'],
+          });
+        }
+      }
+      old
+        .prepare('UPDATE trash SET snapshot = ? WHERE id = ?')
+        .run(JSON.stringify(snapshot), entry['id'] as string);
+    }
+    old.close();
+
+    await api('POST', '/api/project/open', { filePath: project.filePath });
+    const stations = async (noteId: string) =>
+      (await api<CharacterArc>('GET', `/api/notes/${noteId}/arc`)).steps.map((s) => [
+        s.label,
+        s.sceneIds.sort(),
+      ]);
+    assert.deepEqual(await stations(mara.id), [
+      ['flieht', [flucht.id]],
+      ['wartet', []],
+      ['versteckt sich', []],
+    ]);
+    await api('POST', `/api/trash/${lena.id}/restore`);
+    assert.deepEqual(await stations(lena.id), [['hilft', [hilfe.id]]]);
+    await api('POST', `/api/trash/${keller.id}/restore`);
+    assert.deepEqual((await stations(mara.id))[2], ['versteckt sich', [keller.id]]);
+    // More scenes can now be added to an upgraded station
+    const [flieht] = (await api<CharacterArc>('GET', `/api/notes/${mara.id}/arc`)).steps;
+    await api('POST', `/api/arc-steps/${flieht!.id}/scenes`, { sceneId: hilfe.id });
+    assert.deepEqual((await stations(mara.id))[0], ['flieht', [flucht.id, hilfe.id].sort()]);
+  });
+
   it('upgrades older project files to the new schema on opening', async () => {
     const project = await api<ProjectInfo>('POST', '/api/project/create', {
       filePath: path.join(tmpDir, 'alt', 'Altes Buch'),
@@ -2157,7 +2290,7 @@ describe('REST API', () => {
     // Reset the file to the state before notes and scene status (schema 1)
     const old = new DatabaseSync(project.filePath);
     old.exec(
-      'DROP TABLE trash; DROP TABLE arc_steps; ALTER TABLE notes DROP COLUMN arc; DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
+      'DROP TABLE arc_step_scenes; DROP TABLE trash; DROP TABLE arc_steps; ALTER TABLE notes DROP COLUMN arc; DROP TABLE proof_imported; DROP TABLE story_marks; ALTER TABLE nodes DROP COLUMN story_order; DROP TABLE scene_strands; DROP TABLE strands; ALTER TABLE nodes DROP COLUMN turning_point; DROP TABLE map_pins; DROP TABLE maps; DROP TABLE writing_log; ALTER TABLE project DROP COLUMN export_settings; ALTER TABLE project DROP COLUMN cover_image_id; ALTER TABLE scene_content DROP COLUMN todo_count; ALTER TABLE scene_content DROP COLUMN idea_count; ALTER TABLE scene_content DROP COLUMN fixme_count; ALTER TABLE nodes DROP COLUMN status; DROP TABLE scene_tags; DROP TABLE tags; DROP TABLE scene_links; DROP TABLE note_images; DROP TABLE notes; DROP TABLE note_groups; DROP TABLE note_fts; PRAGMA user_version = 1;',
     );
     old.close();
 

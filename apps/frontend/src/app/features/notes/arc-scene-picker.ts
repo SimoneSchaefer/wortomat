@@ -35,56 +35,55 @@ export function filterScenes(
   );
 }
 
-/** The scene of an arc station: a chip leading to it, or "+ Scene" with a search. */
+/** The scenes of an arc station: chips in book order leading to them, "+ Scene" with a search. */
 @Component({
   selector: 'wm-arc-scene-picker',
   imports: [Autofocus, StatusIcon],
   template: `
-    <div class="add-wrapper">
-      @if (scene(); as scene) {
-        <span class="chip">
-          <button
-            type="button"
-            class="open"
-            [title]="
-              t().arc.openScene +
-              ': ' +
-              [...scene.path, scene.title].join(' › ') +
-              ' · ' +
-              t().sceneStatus.names[statusOf(scene.id).status]
-            "
-            (click)="openScene(scene.id)"
-          >
-            <wm-status-icon
-              [status]="statusOf(scene.id).status"
-              [style.color]="statusOf(scene.id).color"
-            />
-            @if (scene.path.length) {
-              <span class="path">{{ scene.path.at(-1) }} ›</span>
-            }
-            {{ scene.title }}
-          </button>
-          <button
-            type="button"
-            class="remove"
-            [title]="t().arc.removeScene"
-            [attr.aria-label]="t().arc.removeScene"
-            (click)="picked.emit(null)"
-          >
-            ×
-          </button>
-        </span>
-      } @else {
+    @for (scene of linked(); track scene.id) {
+      <span class="chip">
         <button
           type="button"
-          class="link add-scene"
-          [class.open]="open()"
-          [attr.aria-expanded]="open()"
-          (click)="toggle()"
+          class="open"
+          [title]="
+            t().arc.openScene +
+            ': ' +
+            [...scene.path, scene.title].join(' › ') +
+            ' · ' +
+            t().sceneStatus.names[statusOf(scene.id).status]
+          "
+          (click)="openScene(scene.id)"
         >
-          {{ t().arc.addScene }}
+          <wm-status-icon
+            [status]="statusOf(scene.id).status"
+            [style.color]="statusOf(scene.id).color"
+          />
+          @if (scene.path.length) {
+            <span class="path">{{ scene.path.at(-1) }} ›</span>
+          }
+          {{ scene.title }}
         </button>
-      }
+        <button
+          type="button"
+          class="remove"
+          [title]="t().arc.removeScene"
+          [attr.aria-label]="t().arc.removeScene"
+          (click)="removed.emit(scene.id)"
+        >
+          ×
+        </button>
+      </span>
+    }
+    <div class="add-wrapper">
+      <button
+        type="button"
+        class="link add-scene"
+        [class.open]="open()"
+        [attr.aria-expanded]="open()"
+        (click)="toggle()"
+      >
+        {{ t().arc.addScene }}
+      </button>
 
       @if (open()) {
         <div class="picker" role="dialog" [attr.aria-label]="t().arc.scene">
@@ -132,8 +131,9 @@ export function filterScenes(
   host: { '(document:pointerdown)': 'onDocumentPointerDown($event)' },
 })
 export class ArcScenePicker {
-  readonly sceneId = input.required<string | null>();
-  readonly picked = output<string | null>();
+  readonly sceneIds = input.required<readonly string[]>();
+  readonly added = output<string>();
+  readonly removed = output<string>();
 
   protected readonly t = inject(I18n).t;
   private readonly projectStore = inject(ProjectStore);
@@ -143,17 +143,20 @@ export class ArcScenePicker {
   private readonly idPrefix = `arc-scene-${ArcScenePicker.nextId++}-`;
 
   private readonly scenes = computed(() => scenesInBookOrder(this.projectStore.tree()));
-  /** Title and chapter always current from the manuscript. */
-  protected readonly scene = computed(() => {
-    const id = this.sceneId();
-    return id ? (this.scenes().find((scene) => scene.id === id) ?? null) : null;
-  });
+  private readonly linkedIds = computed(() => new Set(this.sceneIds()));
+  /** Title and chapter always current from the manuscript; scenes deleted meanwhile drop out. */
+  protected readonly linked = computed(() =>
+    this.scenes().filter((scene) => this.linkedIds().has(scene.id)),
+  );
 
   protected readonly open = signal(false);
   protected readonly query = signal('');
   protected readonly activeIndex = signal(0);
   protected readonly options = computed(() =>
-    filterScenes(this.scenes(), this.query()).slice(0, MAX_OPTIONS),
+    filterScenes(
+      this.scenes().filter((scene) => !this.linkedIds().has(scene.id)),
+      this.query(),
+    ).slice(0, MAX_OPTIONS),
   );
 
   /** Always current from the manuscript, as in the tree. */
@@ -207,7 +210,7 @@ export class ArcScenePicker {
 
   protected choose(scene: SceneReference): void {
     this.open.set(false);
-    this.picked.emit(scene.id);
+    this.added.emit(scene.id);
   }
 
   protected openScene(id: string): void {

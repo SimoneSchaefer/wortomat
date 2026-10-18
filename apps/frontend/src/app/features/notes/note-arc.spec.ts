@@ -28,13 +28,13 @@ function withSteps(api: FakeApi) {
     noteId: 'mara',
     summary: 'Von der Einzelgängerin zur Teamplayerin',
     steps: [
-      { id: 'a', noteId: 'mara', label: 'traut niemandem', details: '', sceneId: 'flucht' },
+      { id: 'a', noteId: 'mara', label: 'traut niemandem', details: '', sceneIds: ['flucht'] },
       {
         id: 'b',
         noteId: 'mara',
         label: 'lässt Lena helfen',
         details: 'widerwillig',
-        sceneId: null,
+        sceneIds: [],
       },
     ],
   });
@@ -154,6 +154,25 @@ describe('NoteArc', () => {
     expect(text(second.querySelector('.chip .open'))).toBe('Kapitel 1 › Hilfe');
   });
 
+  it('holds several scenes per station, in book order, and removes single ones', async () => {
+    const { element, api, settle } = await setup(withSteps);
+    const first = () => element.querySelectorAll('.step')[0]!;
+    const chips = () => [...first().querySelectorAll('.chip .open')].map(text);
+    // "Flucht" is there already; "Hilfe" comes after it in the book
+    button(first(), de.arc.addScene).click();
+    await settle();
+    expect([...first().querySelectorAll('.picker li')].map(text)).toEqual(['HilfeKapitel 1']);
+    key(first().querySelector<HTMLInputElement>('.picker input')!, 'Enter');
+    await until(settle, () => chips().length === 2);
+    expect(api.addArcStepScene).toHaveBeenCalledWith('a', 'hilfe');
+    expect(chips()).toEqual(['Kapitel 1 › Flucht', 'Kapitel 1 › Hilfe']);
+
+    button(first(), de.arc.removeScene).click();
+    await until(settle, () => chips().length === 1);
+    expect(api.removeArcStepScene).toHaveBeenCalledWith('a', 'flucht');
+    expect(chips()).toEqual(['Kapitel 1 › Hilfe']);
+  });
+
   it('asks before deleting a station with content', async () => {
     const { element, api, settle, labels } = await setup(withSteps);
     const confirm = TestBed.inject(ConfirmDialog);
@@ -172,9 +191,9 @@ describe('NoteArc order check', () => {
       noteId: 'mara',
       summary: '',
       steps: [
-        { id: 'a', noteId: 'mara', label: 'lässt Lena helfen', details: '', sceneId: 'hilfe' },
-        { id: 'b', noteId: 'mara', label: 'ohne Szene', details: '', sceneId: null },
-        { id: 'c', noteId: 'mara', label: 'traut niemandem', details: '', sceneId: 'flucht' },
+        { id: 'a', noteId: 'mara', label: 'lässt Lena helfen', details: '', sceneIds: ['hilfe'] },
+        { id: 'b', noteId: 'mara', label: 'ohne Szene', details: '', sceneIds: [] },
+        { id: 'c', noteId: 'mara', label: 'traut niemandem', details: '', sceneIds: ['flucht'] },
       ],
     });
   }

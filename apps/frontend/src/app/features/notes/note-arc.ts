@@ -213,13 +213,17 @@ export class NoteArc {
     await this.mutate(() => this.api.reorderArcSteps(this.noteId(), stepIds));
   }
 
-  protected async setScene(step: ArcStep, sceneId: string | null): Promise<void> {
-    await this.mutate(() => this.api.updateArcStep(step.id, { sceneId }));
-    if (sceneId) this.sceneLinked.emit();
+  protected async addScene(step: ArcStep, sceneId: string): Promise<void> {
+    const arc = await this.mutate(() => this.api.addArcStepScene(step.id, sceneId));
+    if (arc) this.sceneLinked.emit();
+  }
+
+  protected async removeScene(step: ArcStep, sceneId: string): Promise<void> {
+    await this.mutate(() => this.api.removeArcStepScene(step.id, sceneId));
   }
 
   protected async remove(step: ArcStep): Promise<void> {
-    if (step.label || step.details || step.sceneId) {
+    if (step.label || step.details || step.sceneIds.length) {
       const confirmed = await this.confirm.ask({
         title: this.t().arc.removeTitle,
         message: this.t().arc.removeMessage(step.label || this.t().arc.stepPlaceholder),

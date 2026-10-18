@@ -289,6 +289,65 @@ const MIGRATIONS: readonly Migration[] = [
       deleted_at   TEXT NOT NULL
     );
   `,
+  /* 22: an arc station can show in several scenes */ (db) => {
+    // arc_steps loses its scene_id. SQLite cannot drop a column with a foreign key, so the table is
+    // rebuilt – before arc_step_scenes exists, or dropping the old table would cascade into it.
+    db.exec(`
+      CREATE TEMP TABLE moved_arc_scenes AS
+        SELECT id AS step_id, scene_id FROM arc_steps WHERE scene_id IS NOT NULL;
+
+      CREATE TABLE arc_steps_new (
+        id          TEXT PRIMARY KEY,
+        note_id     TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+        label       TEXT NOT NULL,
+        details     TEXT NOT NULL DEFAULT '',
+        sort_order  REAL NOT NULL,
+        created_at  TEXT NOT NULL
+      );
+      INSERT INTO arc_steps_new (id, note_id, label, details, sort_order, created_at)
+        SELECT id, note_id, label, details, sort_order, created_at FROM arc_steps;
+      DROP TABLE arc_steps;
+      ALTER TABLE arc_steps_new RENAME TO arc_steps;
+      CREATE INDEX arc_steps_by_note ON arc_steps(note_id, sort_order);
+
+      -- a deleted scene simply drops out of the station
+      CREATE TABLE arc_step_scenes (
+        step_id   TEXT NOT NULL REFERENCES arc_steps(id) ON DELETE CASCADE,
+        scene_id  TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+        PRIMARY KEY (step_id, scene_id)
+      );
+      CREATE INDEX arc_step_scenes_by_scene ON arc_step_scenes(scene_id);
+      INSERT INTO arc_step_scenes SELECT step_id, scene_id FROM moved_arc_scenes;
+      DROP TABLE moved_arc_scenes;
+    `);
+
+    // Trash entries keep their stations' scenes: as rows of the new table instead of the column
+    type Stored = Record<string, unknown>;
+    const entries = db.prepare('SELECT id, snapshot FROM trash').all() as Array<{
+      id: string;
+      snapshot: string;
+    }>;
+    const update = db.prepare('UPDATE trash SET snapshot = ? WHERE id = ?');
+    for (const entry of entries) {
+      const snapshot = JSON.parse(entry.snapshot) as {
+        dependents: Record<string, Stored[]>;
+        references: Array<{ table: string; column: string; key: Stored; value: string }>;
+      };
+      const moved: Stored[] = [];
+      for (const step of snapshot.dependents['arc_steps'] ?? []) {
+        if (step['scene_id']) moved.push({ step_id: step['id'], scene_id: step['scene_id'] });
+        delete step['scene_id'];
+      }
+      snapshot.references = snapshot.references.filter((reference) => {
+        if (reference.table !== 'arc_steps' || reference.column !== 'scene_id') return true;
+        moved.push({ step_id: reference.key['id'], scene_id: reference.value });
+        return false;
+      });
+      if (!moved.length) continue;
+      (snapshot.dependents['arc_step_scenes'] ??= []).push(...moved);
+      update.run(JSON.stringify(snapshot), entry.id);
+    }
+  },
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

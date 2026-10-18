@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put } from '@nestjs/common';
 import type {
+  AddArcStepSceneRequest,
   ArcStep,
   CharacterArc,
   CreateArcStepRequest,
@@ -37,6 +38,16 @@ export class ArcsController {
   @Patch('arc-steps/:id')
   updateStep(@Param('id') id: string, @Body() body: UpdateArcStepRequest): CharacterArc {
     return this.arcs.updateStep(id, body);
+  }
+
+  @Post('arc-steps/:id/scenes')
+  addScene(@Param('id') id: string, @Body() body: AddArcStepSceneRequest): CharacterArc {
+    return this.arcs.addScene(id, body?.sceneId);
+  }
+
+  @Delete('arc-steps/:id/scenes/:sceneId')
+  removeScene(@Param('id') id: string, @Param('sceneId') sceneId: string): CharacterArc {
+    return this.arcs.removeScene(id, sceneId);
   }
 
   @Post('arc-steps/:id/move')
