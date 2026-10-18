@@ -98,4 +98,8 @@
       </div>
     </fieldset>
   </section>
+
+  @if (appInfo.value(); as info) {
+    <p class="muted version">{{ t().start.version(info.version) }}</p>
+  }
 </main>

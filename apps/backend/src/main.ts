@@ -2,21 +2,17 @@
  * Standalone start for development in the browser (`npm run dev`). In the packaged app the Electron
  * shell starts the server via `startServer()` instead.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { startServer } from './server.js';
 
-const packageJson = JSON.parse(
-  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
-) as {
-  version: string;
-};
 const documentsDir = path.join(os.homedir(), 'Documents');
 
 const server = await startServer({
   mode: 'browser',
-  version: packageJson.version,
+  // Release numbers only exist for the desktop app (see apps/desktop/scripts/version.mjs)
+  version: 'dev',
   // Overridable so end-to-end tests create their books in a throwaway folder.
   defaultProjectDir:
     process.env['WORTOMAT_PROJECT_DIR'] ?? (existsSync(documentsDir) ? documentsDir : os.homedir()),

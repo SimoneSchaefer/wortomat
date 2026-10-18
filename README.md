@@ -177,6 +177,16 @@ npm run dist
   und legen die Installer als Artefakt am Lauf ab. Den gemeinsamen Ablauf beschreibt
   [`release-build.yml`](.github/workflows/release-build.yml). Die Installer sind nicht signiert.
 
+**Release-Nummer:** `2.0.<N>`, wobei N die Position des Commits auf `main` ist (nur erste Eltern,
+`git rev-list --count --first-parent`). Sie hängt also nur am Commit: Derselbe Stand von `main`
+bekommt auf Linux, Windows und macOS dieselbe Nummer, egal wann und wie oft gebaut wird. Builds
+von anderen Ständen heißen `2.0.<N>-dev.g<hash>` (mit `.changed`, wenn es nicht committete
+Änderungen gibt). Berechnet wird sie in
+[`apps/desktop/scripts/version.mjs`](apps/desktop/scripts/version.mjs) (`node
+apps/desktop/scripts/version.mjs` zeigt sie an). Sie steht in den Dateinamen der Installer, im
+Namen der Artefakte und in der App auf der Startseite und in den Einstellungen. Major und Minor
+kommen aus `apps/desktop/package.json`.
+
 ## REST-API
 
 | Methode | Pfad | Zweck |

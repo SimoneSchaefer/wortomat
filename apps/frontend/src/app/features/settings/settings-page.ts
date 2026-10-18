@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, resource } from '@angular/core';
 import { Router } from '@angular/router';
 import type { FontSize, Language, QuoteStyle, Theme } from '@wortomat/shared';
 import { AppSettingsStore } from '../../core/app-settings';
@@ -9,6 +9,7 @@ import { I18n, LANGUAGES } from '../../core/i18n/i18n';
 import { ProjectStore } from '../../core/project-store';
 import { APOSTROPHE, QUOTE_STYLES, type QuoteStyleInfo } from '../../core/quotes';
 import { StatusMessages } from '../../core/status-messages';
+import { WortomatApi } from '../../core/wortomat-api';
 
 /** Reachable with and without an open project. */
 @Component({
@@ -23,6 +24,9 @@ export class SettingsPage {
   private readonly location = inject(Location);
   private readonly project = inject(ProjectStore);
   protected readonly settings = inject(AppSettingsStore);
+  private readonly api = inject(WortomatApi);
+  /** Also here, so the release can be looked up while a book is open. */
+  protected readonly appInfo = resource({ loader: () => this.api.appInfo() });
 
   protected readonly languages = LANGUAGES;
   protected readonly quoteStyles = QUOTE_STYLES;

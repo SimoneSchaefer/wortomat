@@ -30,15 +30,21 @@ jobs:
       CSC_IDENTITY_AUTO_DISCOVERY: false
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The release number is counted along main's history (apps/desktop/scripts/version.mjs)
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - id: version
+        shell: bash
+        run: echo "version=$(node apps/desktop/scripts/version.mjs)" >> "$GITHUB_OUTPUT"
       - run: npm run build
       - run: npm run dist -w @wortomat/desktop -- ${{ inputs.platform }} --publish never
       - uses: actions/upload-artifact@v5
         with:
-          name: ${{ inputs.artifact }}
+          name: ${{ inputs.artifact }}-${{ steps.version.outputs.version }}
           path: ${{ inputs.files }}
           if-no-files-found: error
