@@ -36,6 +36,12 @@ describe('SettingsPage', () => {
     expect(radio('quoteStyle', 'de').checked).toBe(true);
   });
 
+  it('shows the release number', async () => {
+    const { element, settle } = await setup();
+    await until(settle, () => !!element.querySelector('.version'));
+    expect(text(element.querySelector('.version'))).toBe(de.start.version('2.0.0'));
+  });
+
   it('saves a choice right away', async () => {
     const { api, choose, settings } = await setup();
     await choose('theme', 'dark');

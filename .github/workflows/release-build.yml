@@ -25,20 +25,29 @@ on:
 jobs:
   package:
     runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: write # pushes the release tag
     env:
       # Without a certificate, do not sign instead of searching the keychain for one.
       CSC_IDENTITY_AUTO_DISCOVERY: false
     steps:
       - uses: actions/checkout@v5
+        with:
+          # All tags and main's history: the release number is a tag (apps/desktop/scripts/version.mjs)
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Takes the number of this commit, or gives it the next one and pushes the tag
+      - id: version
+        shell: bash
+        run: echo "version=$(node apps/desktop/scripts/version.mjs --assign)" >> "$GITHUB_OUTPUT"
       - run: npm run build
       - run: npm run dist -w @wortomat/desktop -- ${{ inputs.platform }} --publish never
       - uses: actions/upload-artifact@v5
         with:
-          name: ${{ inputs.artifact }}
+          name: ${{ inputs.artifact }}-${{ steps.version.outputs.version }}
           path: ${{ inputs.files }}
           if-no-files-found: error

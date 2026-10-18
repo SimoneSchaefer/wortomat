@@ -6,6 +6,9 @@ on:
 
 jobs:
   build:
+    # The shared build pushes the release tag
+    permissions:
+      contents: write
     uses: ./.github/workflows/release-build.yml
     with:
       runner: windows-latest

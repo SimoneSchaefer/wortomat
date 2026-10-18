@@ -16,6 +16,7 @@ import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
+import { appVersion } from './version.mjs';
 
 const dev = process.argv.includes('--dev');
 const desktopDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -95,7 +96,8 @@ await writeFile(
     {
       name: 'wortomat',
       productName: pkg.productName,
-      version: pkg.version,
+      // electron-builder takes it from here (installer names), the app shows it via getVersion()
+      version: appVersion(),
       description: 'Software zum Schreiben von Büchern und Romanen',
       // The .deb package needs a homepage and a maintainer (name with email).
       homepage: pkg.homepage,
@@ -110,7 +112,7 @@ await writeFile(
 );
 
 console.log(
-  `Desktop-App gebündelt nach ${path.relative(process.cwd(), outDir) || '.'}${dev ? ' (Dev-Modus)' : ''}`,
+  `Desktop-App ${appVersion()} gebündelt nach ${path.relative(process.cwd(), outDir) || '.'}${dev ? ' (Dev-Modus)' : ''}`,
 );
 
 function fail(message) {
