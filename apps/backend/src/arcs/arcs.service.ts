@@ -21,10 +21,9 @@ interface StepRow {
   note_id: string;
   label: string;
   details: string;
-  scene_id: string | null;
 }
 
-const STEP_COLUMNS = 'id, note_id, label, details, scene_id';
+const STEP_COLUMNS = 'id, note_id, label, details';
 
 /**
  * The stations keep the order the author gives them – it is the order of the development, which
@@ -50,7 +49,7 @@ export class ArcsService {
     const rows = this.db
       .prepare(`SELECT ${STEP_COLUMNS} FROM arc_steps WHERE note_id = ? ORDER BY sort_order`)
       .all(noteId) as unknown as StepRow[];
-    return { noteId, summary: arc, steps: rows.map(toStep) };
+    return { noteId, summary: arc, steps: this.withScenes(rows) };
   }
 
   updateSummary(noteId: string, summary: unknown): CharacterArc {
@@ -68,18 +67,22 @@ export class ArcsService {
   createStep(noteId: string, request: CreateArcStepRequest): CharacterArc {
     this.notes.get(noteId);
     const label = cleanLabel(request?.label ?? '');
-    const sceneId = this.requireSceneOrNull(request?.sceneId ?? null);
+    const sceneIds = request?.sceneIds ?? [];
+    if (!Array.isArray(sceneIds)) {
+      throw new BadRequestException(localized('Ungültige Szene.', 'Invalid scene.'));
+    }
+    for (const sceneId of sceneIds) this.requireScene(sceneId);
     const beforeId = request?.beforeId ?? null;
     transaction(this.db, () => {
       const id = randomUUID();
       this.db
         .prepare(
-          `INSERT INTO arc_steps (id, note_id, label, scene_id, sort_order, created_at)
-           VALUES (?, ?, ?, ?, 0, ?)`,
+          `INSERT INTO arc_steps (id, note_id, label, sort_order, created_at)
+           VALUES (?, ?, ?, 0, ?)`,
         )
-        .run(id, noteId, label, sceneId, nowIso());
+        .run(id, noteId, label, nowIso());
       this.place(id, noteId, beforeId);
-      if (sceneId) this.linkScene(sceneId, noteId);
+      for (const sceneId of sceneIds) this.insertScene(id, sceneId, noteId);
       this.projects.touch();
     });
     return this.arc(noteId);
@@ -89,15 +92,31 @@ export class ArcsService {
     const step = this.getStep(id);
     const label = request?.label === undefined ? step.label : cleanLabel(request.label);
     const details = request?.details === undefined ? step.details : cleanDetails(request.details);
-    const sceneId =
-      request?.sceneId === undefined ? step.sceneId : this.requireSceneOrNull(request.sceneId);
+    this.db
+      .prepare('UPDATE arc_steps SET label = ?, details = ? WHERE id = ?')
+      .run(label, details, id);
+    this.projects.touch();
+    return this.arc(step.noteId);
+  }
+
+  /** Adding a scene twice is harmless. */
+  addScene(id: string, sceneId: unknown): CharacterArc {
+    const step = this.getStep(id);
+    this.requireScene(sceneId);
     transaction(this.db, () => {
-      this.db
-        .prepare('UPDATE arc_steps SET label = ?, details = ?, scene_id = ? WHERE id = ?')
-        .run(label, details, sceneId, id);
-      if (sceneId && sceneId !== step.sceneId) this.linkScene(sceneId, step.noteId);
+      this.insertScene(id, sceneId as string, step.noteId);
       this.projects.touch();
     });
+    return this.arc(step.noteId);
+  }
+
+  /** The character stays linked with the scene – it may appear there for other reasons. */
+  removeScene(id: string, sceneId: string): CharacterArc {
+    const step = this.getStep(id);
+    this.db
+      .prepare('DELETE FROM arc_step_scenes WHERE step_id = ? AND scene_id = ?')
+      .run(id, sceneId);
+    this.projects.touch();
     return this.arc(step.noteId);
   }
 
@@ -156,13 +175,15 @@ export class ArcsService {
     this.manuscript.requireScene(sceneId);
     const rows = this.db
       .prepare(
-        `SELECT a.id, a.note_id, a.label, a.details, a.scene_id
-           FROM arc_steps a JOIN notes n ON n.id = a.note_id
-          WHERE a.scene_id = ?
+        `SELECT a.id, a.note_id, a.label, a.details
+           FROM arc_steps a
+           JOIN arc_step_scenes s ON s.step_id = a.id
+           JOIN notes n ON n.id = a.note_id
+          WHERE s.scene_id = ?
           ORDER BY n.title COLLATE NOCASE, a.sort_order`,
       )
       .all(sceneId) as unknown as StepRow[];
-    return rows.map(toStep);
+    return this.withScenes(rows);
   }
 
   /** Renumbers all stations of the note with `id` before `beforeId` (`null` = at the end). */
@@ -181,20 +202,34 @@ export class ArcsService {
     others.forEach((stepId, position) => setOrder.run(position + 1, stepId));
   }
 
-  /** A station in a scene means the character appears there. */
-  private linkScene(sceneId: string, noteId: string): void {
+  /** A station in a scene means the character appears there, so it gets linked too. */
+  private insertScene(stepId: string, sceneId: string, noteId: string): void {
+    this.db
+      .prepare('INSERT OR IGNORE INTO arc_step_scenes (step_id, scene_id) VALUES (?, ?)')
+      .run(stepId, sceneId);
     this.db
       .prepare('INSERT OR IGNORE INTO scene_links (scene_id, note_id) VALUES (?, ?)')
       .run(sceneId, noteId);
   }
 
-  private requireSceneOrNull(sceneId: unknown): string | null {
-    if (sceneId === null) return null;
+  private requireScene(sceneId: unknown): void {
     if (typeof sceneId !== 'string' || !sceneId) {
       throw new BadRequestException(localized('Ungültige Szene.', 'Invalid scene.'));
     }
     this.manuscript.requireScene(sceneId);
-    return sceneId;
+  }
+
+  private withScenes(rows: StepRow[]): ArcStep[] {
+    const scenesOf = this.db.prepare(
+      'SELECT scene_id FROM arc_step_scenes WHERE step_id = ? ORDER BY rowid',
+    );
+    return rows.map((row) => ({
+      id: row.id,
+      noteId: row.note_id,
+      label: row.label,
+      details: row.details,
+      sceneIds: (scenesOf.all(row.id) as Array<{ scene_id: string }>).map((r) => r.scene_id),
+    }));
   }
 
   private getStep(id: string): ArcStep {
@@ -203,18 +238,8 @@ export class ArcsService {
     if (!row) {
       throw new NotFoundException(localized('Station nicht gefunden.', 'Arc step not found.'));
     }
-    return toStep(row);
+    return this.withScenes([row])[0]!;
   }
-}
-
-function toStep(row: StepRow): ArcStep {
-  return {
-    id: row.id,
-    noteId: row.note_id,
-    label: row.label,
-    details: row.details,
-    sceneId: row.scene_id,
-  };
 }
 
 /** Empty is allowed: a new station is created first and named right after. */

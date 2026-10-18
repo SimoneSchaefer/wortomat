@@ -3,7 +3,7 @@ import type { TreeItem } from '../../core/project-store';
 import { storyColumns } from '../plot/story-order';
 
 /**
- * A station whose scene happens earlier or later in the story than its place in the arc says. By
+ * A station whose (first) scene happens earlier or later in the story than its place in the arc says. By
  * story order it belongs after `afterId` and before `beforeId` (`null` = no such neighbour).
  */
 export interface ArcOrderIssue {
@@ -41,7 +41,7 @@ export function arcOrderIssues(
   positions: ReadonlyMap<string, number>,
 ): Map<string, ArcOrderIssue> {
   const placed = steps.flatMap((step) => {
-    const position = step.sceneId === null ? undefined : positions.get(step.sceneId);
+    const position = firstPosition(step, positions);
     return position === undefined ? [] : [{ id: step.id, position }];
   });
 
@@ -81,11 +81,19 @@ export function sortedByStory(
   steps: readonly ArcStep[],
   positions: ReadonlyMap<string, number>,
 ): string[] {
-  const position = (step: ArcStep) =>
-    step.sceneId === null ? undefined : positions.get(step.sceneId);
+  const position = (step: ArcStep) => firstPosition(step, positions);
   const slots = steps.flatMap((step, index) => (position(step) === undefined ? [] : [index]));
   const sorted = slots.map((index) => steps[index]!).sort((a, b) => position(a)! - position(b)!);
   const result = steps.map((step) => step.id);
   slots.forEach((slot, i) => (result[slot] = sorted[i]!.id));
   return result;
+}
+
+/**
+ * Where the station first shows in the story – a change that spreads over several scenes starts
+ * with the earliest one. `undefined` without any (existing) scene.
+ */
+function firstPosition(step: ArcStep, positions: ReadonlyMap<string, number>): number | undefined {
+  const found = step.sceneIds.flatMap((id) => positions.get(id) ?? []);
+  return found.length ? Math.min(...found) : undefined;
 }

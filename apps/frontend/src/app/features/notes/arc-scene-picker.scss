@@ -1,13 +1,23 @@
 @use '../../core/picker';
 
+// One scene per row – side by side they wrapped at random places
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
   min-width: 0;
 }
 
+.add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .add-wrapper {
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 // Long scene titles are cut off rather than pushing the row apart; the tooltip has the full path

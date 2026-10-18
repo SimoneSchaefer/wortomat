@@ -17,7 +17,7 @@ async function setup(withSteps: boolean) {
           noteId: 'mara',
           label: 'lässt Lena helfen',
           details: 'widerwillig',
-          sceneId: 's1',
+          sceneIds: ['s1'],
         },
       ],
     });

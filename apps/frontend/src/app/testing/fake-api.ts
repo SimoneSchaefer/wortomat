@@ -536,16 +536,29 @@ export class FakeApi {
       noteId,
       label: request.label ?? '',
       details: '',
-      sceneId: request.sceneId ?? null,
+      sceneIds: [],
     };
     this.placeStep(arc, step, request.beforeId ?? null);
+    for (const sceneId of request.sceneIds ?? []) await this.addArcStepScene(step.id, sceneId);
     return structuredClone(arc);
   });
   readonly updateArcStep = vi.fn(async (id: string, request: UpdateArcStepRequest) => {
     const arc = this.arcOfStep(id);
     const step = arc.steps.find((other) => other.id === id)!;
     Object.assign(step, request);
-    if (request.sceneId) await this.linkNote(request.sceneId, arc.noteId);
+    return structuredClone(arc);
+  });
+  readonly addArcStepScene = vi.fn(async (id: string, sceneId: string) => {
+    const arc = this.arcOfStep(id);
+    const step = arc.steps.find((other) => other.id === id)!;
+    if (!step.sceneIds.includes(sceneId)) step.sceneIds.push(sceneId);
+    await this.linkNote(sceneId, arc.noteId);
+    return structuredClone(arc);
+  });
+  readonly removeArcStepScene = vi.fn(async (id: string, sceneId: string) => {
+    const arc = this.arcOfStep(id);
+    const step = arc.steps.find((other) => other.id === id)!;
+    step.sceneIds = step.sceneIds.filter((other) => other !== sceneId);
     return structuredClone(arc);
   });
   readonly moveArcStep = vi.fn(async (id: string, beforeId: string | null) => {
@@ -570,7 +583,7 @@ export class FakeApi {
   readonly sceneArcSteps = vi.fn(async (sceneId: string) =>
     structuredClone(
       [...this.arcs.values()].flatMap((arc) =>
-        arc.steps.filter((step) => step.sceneId === sceneId),
+        arc.steps.filter((step) => step.sceneIds.includes(sceneId)),
       ),
     ),
   );

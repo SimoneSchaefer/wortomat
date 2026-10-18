@@ -82,14 +82,16 @@
                   }
                   <div class="meta">
                     <wm-arc-scene-picker
-                      [sceneId]="step.sceneId"
-                      (picked)="setScene(step, $event)"
-                    />
-                    @if (!step.details && !detailsShown().has(step.id)) {
-                      <button type="button" class="link add-details" (click)="showDetails(step)">
-                        {{ t().arc.addDetails }}
-                      </button>
-                    }
+                      [sceneIds]="step.sceneIds"
+                      (added)="addScene(step, $event)"
+                      (removed)="removeScene(step, $event)"
+                    >
+                      @if (!step.details && !detailsShown().has(step.id)) {
+                        <button type="button" class="link add-details" (click)="showDetails(step)">
+                          {{ t().arc.addDetails }}
+                        </button>
+                      }
+                    </wm-arc-scene-picker>
                   </div>
                 </div>
                 <div class="actions">
