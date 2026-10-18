@@ -1,12 +1,19 @@
 @use '../../core/picker';
 
-// Wraps rather than scrolls: a station rarely has more than a handful of scenes
+// One scene per row – side by side they wrapped at random places
 :host {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.add-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  min-width: 0;
+  gap: 0.4rem;
 }
 
 .add-wrapper {

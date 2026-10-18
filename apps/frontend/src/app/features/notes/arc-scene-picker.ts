@@ -35,7 +35,10 @@ export function filterScenes(
   );
 }
 
-/** The scenes of an arc station: chips in book order leading to them, "+ Scene" with a search. */
+/**
+ * The scenes of an arc station: one below the other in book order, each leading to its scene;
+ * below them "+ Scene" with a search.
+ */
 @Component({
   selector: 'wm-arc-scene-picker',
   imports: [Autofocus, StatusIcon],
@@ -74,57 +77,61 @@ export function filterScenes(
         </button>
       </span>
     }
-    <div class="add-wrapper">
-      <button
-        type="button"
-        class="link add-scene"
-        [class.open]="open()"
-        [attr.aria-expanded]="open()"
-        (click)="toggle()"
-      >
-        {{ t().arc.addScene }}
-      </button>
+    <div class="add-row">
+      <div class="add-wrapper">
+        <button
+          type="button"
+          class="link add-scene"
+          [class.open]="open()"
+          [attr.aria-expanded]="open()"
+          (click)="toggle()"
+        >
+          {{ t().arc.addScene }}
+        </button>
 
-      @if (open()) {
-        <div class="picker" role="dialog" [attr.aria-label]="t().arc.scene">
-          <input
-            wmAutofocus
-            role="combobox"
-            aria-autocomplete="list"
-            [attr.aria-activedescendant]="optionId(activeIndex())"
-            [placeholder]="t().arc.searchScene"
-            [value]="query()"
-            (input)="onQuery($any($event.target).value)"
-            (keydown)="onKeydown($event)"
-          />
-          <ul role="listbox">
-            @for (option of options(); track option.id; let i = $index) {
-              <li
-                role="option"
-                [id]="optionId(i)"
-                [class.active]="i === activeIndex()"
-                [attr.aria-selected]="i === activeIndex()"
-                (pointerenter)="activeIndex.set(i)"
-                (click)="choose(option)"
-              >
-                <wm-status-icon
-                  [status]="statusOf(option.id).status"
-                  [style.color]="statusOf(option.id).color"
-                  [title]="t().sceneStatus.names[statusOf(option.id).status]"
-                />
-                <span class="option-text">
-                  <span>{{ option.title }}</span>
-                  @if (option.path.length) {
-                    <small>{{ option.path.join(' › ') }}</small>
-                  }
-                </span>
-              </li>
-            } @empty {
-              <li class="hint">{{ t().arc.noScenes }}</li>
-            }
-          </ul>
-        </div>
-      }
+        @if (open()) {
+          <div class="picker" role="dialog" [attr.aria-label]="t().arc.scene">
+            <input
+              wmAutofocus
+              role="combobox"
+              aria-autocomplete="list"
+              [attr.aria-activedescendant]="optionId(activeIndex())"
+              [placeholder]="t().arc.searchScene"
+              [value]="query()"
+              (input)="onQuery($any($event.target).value)"
+              (keydown)="onKeydown($event)"
+            />
+            <ul role="listbox">
+              @for (option of options(); track option.id; let i = $index) {
+                <li
+                  role="option"
+                  [id]="optionId(i)"
+                  [class.active]="i === activeIndex()"
+                  [attr.aria-selected]="i === activeIndex()"
+                  (pointerenter)="activeIndex.set(i)"
+                  (click)="choose(option)"
+                >
+                  <wm-status-icon
+                    [status]="statusOf(option.id).status"
+                    [style.color]="statusOf(option.id).color"
+                    [title]="t().sceneStatus.names[statusOf(option.id).status]"
+                  />
+                  <span class="option-text">
+                    <span>{{ option.title }}</span>
+                    @if (option.path.length) {
+                      <small>{{ option.path.join(' › ') }}</small>
+                    }
+                  </span>
+                </li>
+              } @empty {
+                <li class="hint">{{ t().arc.noScenes }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+      <!-- Further actions of the station, e.g. "+ Note", in the same row -->
+      <ng-content />
     </div>
   `,
   styleUrl: './arc-scene-picker.scss',
