@@ -2,13 +2,25 @@ import type { ArcStep, ManuscriptNode } from '@wortomat/shared';
 import type { TreeItem } from '../../core/project-store';
 import { storyColumns } from '../plot/story-order';
 
+/** A scene of a flagged station that clashes with the stations in order. */
+export interface SceneClash {
+  sceneId: string;
+  /** It happens before (some scene of) / after (the start of) the station `stationId`. */
+  relation: 'before' | 'after';
+  stationId: string;
+}
+
 /**
- * A station whose (first) scene happens earlier or later in the story than its place in the arc says. By
- * story order it belongs after `afterId` and before `beforeId` (`null` = no such neighbour).
+ * A station whose scenes do not fit between the stations around it in the story.
  */
 export interface ArcOrderIssue {
-  afterId: string | null;
-  beforeId: string | null;
+  /**
+   * Where the whole station would fit: after `afterId` and before `beforeId` (`null` = no such
+   * neighbour). `null` when no place fits – its scenes reach past other stations.
+   */
+  slot: { afterId: string | null; beforeId: string | null } | null;
+  /** Its scenes that are out of place; at least one. */
+  clashes: SceneClash[];
 }
 
 /**
@@ -31,69 +43,121 @@ export function storyPositions(tree: readonly TreeItem[]): Map<string, number> {
   return positions;
 }
 
+interface Span {
+  id: string;
+  /** Story positions of its earliest and latest scene. */
+  first: number;
+  last: number;
+  scenes: Array<{ id: string; position: number }>;
+}
+
 /**
- * As few stations as possible are flagged: all except the longest run whose scenes already follow
- * the story order (like the displaced scenes in the plot view). Stations without a scene never
- * count, simultaneous scenes are in order either way.
+ * In order means: every scene of a station happens no earlier than every scene of the stations
+ * before it. Simultaneous scenes – or a scene two stations share – are fine.
+ *
+ * As few stations as possible are flagged: all except the longest run that is in order (like the
+ * displaced scenes in the plot view). Stations without a scene never count.
  */
 export function arcOrderIssues(
   steps: readonly ArcStep[],
   positions: ReadonlyMap<string, number>,
 ): Map<string, ArcOrderIssue> {
-  const placed = steps.flatMap((step) => {
-    const position = firstPosition(step, positions);
-    return position === undefined ? [] : [{ id: step.id, position }];
+  const spans = steps.flatMap((step): Span[] => {
+    const scenes = step.sceneIds.flatMap((id) => {
+      const position = positions.get(id);
+      return position === undefined ? [] : [{ id, position }];
+    });
+    if (!scenes.length) return [];
+    const all = scenes.map((scene) => scene.position);
+    return [{ id: step.id, first: Math.min(...all), last: Math.max(...all), scenes }];
   });
 
-  // Longest non-decreasing subsequence (patience sorting)
-  const tails: number[] = [];
-  const previous = new Array<number>(placed.length).fill(-1);
-  placed.forEach(({ position }, i) => {
-    let low = 0;
-    let high = tails.length;
-    while (low < high) {
-      const middle = (low + high) >> 1;
-      if (placed[tails[middle]!]!.position <= position) low = middle + 1;
-      else high = middle;
+  // Longest chain in which each station starts no earlier than the one before ends. On a tie the
+  // narrower stations stay – a stray scene is likelier in one that spans much of the story – and
+  // then the later ones, so the station that moved is flagged rather than the one it jumped over.
+  const width = (span: Span) => span.last - span.first;
+  const length = spans.map(() => 1);
+  const spread = spans.map(width);
+  const previous = spans.map(() => -1);
+  const better = (len: number, wide: number, i: number) =>
+    len > length[i]! || (len === length[i]! && wide <= spread[i]!);
+  spans.forEach((span, i) => {
+    for (let j = 0; j < i; j++) {
+      if (spans[j]!.last > span.first) continue;
+      if (better(length[j]! + 1, spread[j]! + width(span), i)) {
+        length[i] = length[j]! + 1;
+        spread[i] = spread[j]! + width(span);
+        previous[i] = j;
+      }
     }
-    if (low > 0) previous[i] = tails[low - 1]!;
-    tails[low] = i;
   });
-  const inOrder: typeof placed = [];
-  for (let i = tails.at(-1) ?? -1; i >= 0; i = previous[i]!) inOrder.unshift(placed[i]!);
-  const inOrderIds = new Set(inOrder.map((step) => step.id));
+  let end = -1;
+  length.forEach((len, i) => {
+    if (end < 0 || len > length[end]! || (len === length[end]! && spread[i]! <= spread[end]!)) {
+      end = i;
+    }
+  });
+  const kept: Span[] = [];
+  for (let i = end; i >= 0; i = previous[i]!) kept.unshift(spans[i]!);
+  const keptIds = new Set(kept.map((span) => span.id));
+  const order = new Map(steps.map((step, index) => [step.id, index]));
 
   const issues = new Map<string, ArcOrderIssue>();
-  for (const step of placed) {
-    if (inOrderIds.has(step.id)) continue;
-    const before = inOrder.find((other) => other.position > step.position);
-    const after = inOrder.filter((other) => other.position <= step.position).at(-1);
-    issues.set(step.id, { afterId: after?.id ?? null, beforeId: before?.id ?? null });
+  for (const span of spans) {
+    if (keptIds.has(span.id)) continue;
+    issues.set(span.id, { slot: slotFor(span, kept), clashes: clashesOf(span, kept, order) });
   }
   return issues;
 }
 
+/** The last gap in the run the whole station fits into – after simultaneous ones, as in a list. */
+function slotFor(span: Span, kept: readonly Span[]): ArcOrderIssue['slot'] {
+  for (let t = kept.length; t >= 0; t--) {
+    const before = kept[t - 1];
+    const after = kept[t];
+    if ((!before || before.last <= span.first) && (!after || span.last <= after.first)) {
+      return { afterId: before?.id ?? null, beforeId: after?.id ?? null };
+    }
+  }
+  return null;
+}
+
+/** Measured against the stations in order around it in the list. */
+function clashesOf(
+  span: Span,
+  kept: readonly Span[],
+  order: ReadonlyMap<string, number>,
+): SceneClash[] {
+  const index = order.get(span.id)!;
+  const earlier = kept.filter((other) => order.get(other.id)! < index);
+  const later = kept.filter((other) => order.get(other.id)! > index);
+  return span.scenes.flatMap(({ id, position }): SceneClash[] => {
+    const overtaken = earlier.find((other) => other.last > position);
+    if (overtaken) return [{ sceneId: id, relation: 'before', stationId: overtaken.id }];
+    const passed = later.filter((other) => other.first < position).at(-1);
+    if (passed) return [{ sceneId: id, relation: 'after', stationId: passed.id }];
+    return [];
+  });
+}
+
 /**
- * Station IDs sorted by the story order of their scenes. Stations without a scene keep their place;
- * on equal positions the current order stays.
+ * Station IDs sorted by the story order of their scenes (earliest first, then latest). Stations
+ * without a scene keep their place; on equal positions the current order stays. Stations whose
+ * scenes overlap stay flagged – no order fixes that.
  */
 export function sortedByStory(
   steps: readonly ArcStep[],
   positions: ReadonlyMap<string, number>,
 ): string[] {
-  const position = (step: ArcStep) => firstPosition(step, positions);
-  const slots = steps.flatMap((step, index) => (position(step) === undefined ? [] : [index]));
-  const sorted = slots.map((index) => steps[index]!).sort((a, b) => position(a)! - position(b)!);
+  const range = (step: ArcStep) => {
+    const found = step.sceneIds.flatMap((id) => positions.get(id) ?? []);
+    return found.length ? [Math.min(...found), Math.max(...found)] : undefined;
+  };
+  const slots = steps.flatMap((step, index) => (range(step) === undefined ? [] : [index]));
+  const sorted = slots
+    .map((index) => steps[index]!)
+    .sort((a, b) => range(a)![0]! - range(b)![0]! || range(a)![1]! - range(b)![1]!);
   const result = steps.map((step) => step.id);
   slots.forEach((slot, i) => (result[slot] = sorted[i]!.id));
   return result;
-}
-
-/**
- * Where the station first shows in the story – a change that spreads over several scenes starts
- * with the earliest one. `undefined` without any (existing) scene.
- */
-function firstPosition(step: ArcStep, positions: ReadonlyMap<string, number>): number | undefined {
-  const found = step.sceneIds.flatMap((id) => positions.get(id) ?? []);
-  return found.length ? Math.min(...found) : undefined;
 }

@@ -61,6 +61,7 @@ export class NoteArc {
   /** Stations whose note field is shown although it is still empty. */
   protected readonly detailsShown = signal<ReadonlySet<string>>(new Set());
 
+  protected readonly noScenes: ReadonlyMap<string, string> = new Map();
   protected readonly draggingId = signal<string | null>(null);
   protected readonly drop = signal<StepDrop | null>(null);
 
@@ -68,6 +69,18 @@ export class NoteArc {
   private readonly projectStore = inject(ProjectStore);
   private readonly positions = computed(() => storyPositions(this.projectStore.tree()));
   protected readonly issues = computed(() => arcOrderIssues(this.steps(), this.positions()));
+  /** Per flagged station: what to tell about it, and about each of its scenes out of place. */
+  protected readonly hints = computed(() => {
+    const result = new Map<string, { station: string; scenes: Map<string, string> }>();
+    for (const [stepId, issue] of this.issues()) result.set(stepId, this.describe(issue));
+    return result;
+  });
+  /** Only offered when it helps: overlapping scenes cannot be sorted away. */
+  protected readonly canSort = computed(() => {
+    const byId = new Map(this.steps().map((step) => [step.id, step]));
+    const sorted = sortedByStory(this.steps(), this.positions()).map((id) => byId.get(id)!);
+    return arcOrderIssues(sorted, this.positions()).size < this.issues().size;
+  });
 
   // Typed text is saved delayed; responses never overwrite it (see apply())
   private pendingSummary: { noteId: string; summary: string } | null = null;
@@ -201,11 +214,33 @@ export class NoteArc {
     this.focusStep(step.id, 'label');
   }
 
-  protected orderHint({ afterId, beforeId }: ArcOrderIssue): string {
+  /**
+   * When the whole station fits elsewhere, that place; otherwise (its scenes reach past other
+   * stations) each scene out of place.
+   */
+  private describe({ slot, clashes }: ArcOrderIssue): {
+    station: string;
+    scenes: Map<string, string>;
+  } {
     const number = (id: string) => this.steps().findIndex((step) => step.id === id) + 1;
     const texts = this.t().arc;
-    if (afterId && beforeId) return texts.belongsBetween(number(afterId), number(beforeId));
-    return afterId ? texts.belongsAfter(number(afterId)) : texts.belongsBefore(number(beforeId!));
+    const scenes = new Map(
+      clashes.map(({ sceneId, relation, stationId }) => {
+        const title = this.projectStore.findNode(sceneId)?.title ?? '';
+        const text =
+          relation === 'before'
+            ? texts.sceneBefore(title, number(stationId))
+            : texts.sceneAfter(title, number(stationId));
+        return [sceneId, text];
+      }),
+    );
+    let station: string;
+    if (!slot) station = [...scenes.values()].join('\n');
+    else if (slot.afterId && slot.beforeId) {
+      station = texts.belongsBetween(number(slot.afterId), number(slot.beforeId));
+    } else if (slot.afterId) station = texts.belongsAfter(number(slot.afterId));
+    else station = texts.belongsBefore(number(slot.beforeId!));
+    return { station, scenes };
   }
 
   protected async sortByStory(): Promise<void> {

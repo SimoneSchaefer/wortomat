@@ -51,31 +51,62 @@ describe('arcOrderIssues', () => {
     // s5 is too early in the arc: it belongs after c (s3), at the end
     const early = [step('a', 's1'), step('x', 's5'), step('b', 's2'), step('c', 's3')];
     expect(Object.fromEntries(arcOrderIssues(early, positions))).toEqual({
-      x: { afterId: 'c', beforeId: null },
+      x: {
+        slot: { afterId: 'c', beforeId: null },
+        clashes: [{ sceneId: 's5', relation: 'after', stationId: 'c' }],
+      },
     });
 
     // s1 is too late: it belongs before a (s2), at the start
     const late = [step('a', 's2'), step('b', 's3'), step('x', 's1'), step('c', 's4')];
     expect(Object.fromEntries(arcOrderIssues(late, positions))).toEqual({
-      x: { afterId: null, beforeId: 'a' },
+      x: {
+        slot: { afterId: null, beforeId: 'a' },
+        clashes: [{ sceneId: 's1', relation: 'before', stationId: 'a' }],
+      },
     });
 
     // s3 belongs between b (s2) and c (s4)
     const between = [step('a', 's1'), step('x', 's3'), step('b', 's2'), step('c', 's4')];
-    expect(Object.fromEntries(arcOrderIssues(between, positions))).toEqual({
-      x: { afterId: 'b', beforeId: 'c' },
+    expect(arcOrderIssues(between, positions).get('x')?.slot).toEqual({
+      afterId: 'b',
+      beforeId: 'c',
     });
   });
 
-  it('counts a station with several scenes from its earliest one', () => {
-    // b shows in s2 and s5 – from s2 on, so it is in order between a and c
-    const spread = [step('a', 's1'), step('b', 's5', 's2'), step('c', 's3')];
-    expect(arcOrderIssues(spread, positions).size).toBe(0);
-    // x starts with s4, after c
-    const late = [step('a', 's1'), step('x', 's4', 's5'), step('b', 's2'), step('c', 's3')];
-    expect(Object.fromEntries(arcOrderIssues(late, positions))).toEqual({
-      x: { afterId: 'c', beforeId: null },
+  it('flags a station when only one of its scenes is out of place', () => {
+    // b starts in s2, fine after a – but s5 happens after c (s3)
+    const spread = [step('a', 's1'), step('b', 's2', 's5'), step('c', 's3')];
+    expect(Object.fromEntries(arcOrderIssues(spread, positions))).toEqual({
+      b: {
+        // reaching past c, it fits nowhere as a whole
+        slot: null,
+        clashes: [{ sceneId: 's5', relation: 'after', stationId: 'c' }],
+      },
     });
+
+    // x lies wholly after c: moving it there fixes both scenes
+    const moved = [step('a', 's1'), step('x', 's4', 's5'), step('b', 's2'), step('c', 's3')];
+    expect(arcOrderIssues(moved, positions).get('x')).toEqual({
+      slot: { afterId: 'c', beforeId: null },
+      clashes: [
+        { sceneId: 's4', relation: 'after', stationId: 'c' },
+        { sceneId: 's5', relation: 'after', stationId: 'c' },
+      ],
+    });
+  });
+
+  it('flags the wider of two overlapping stations', () => {
+    // a and b overlap in s2: b spans s1–s3, a only s2
+    const steps = [step('a', 's2'), step('b', 's3', 's1')];
+    expect(Object.fromEntries(arcOrderIssues(steps, positions))).toEqual({
+      b: { slot: null, clashes: [{ sceneId: 's1', relation: 'before', stationId: 'a' }] },
+    });
+  });
+
+  it('lets stations share a scene or end where the next one starts', () => {
+    const steps = [step('a', 's1', 's2'), step('b', 's2', 's3'), step('c', 's3')];
+    expect(arcOrderIssues(steps, positions).size).toBe(0);
   });
 
   it('ignores scenes that no longer exist', () => {
