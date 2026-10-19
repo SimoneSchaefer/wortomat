@@ -133,6 +133,14 @@ test('workspace', async ({ page, request }) => {
   await expect(page.locator('.ProseMirror')).toContainText('Frau Petersen');
   await shoot(page, 'scene-annotations');
 
+  // Only Mara's strand: the tree shows just her scenes.
+  await page.getByRole('button', { name: 'Filter' }).click();
+  const filter = page.getByRole('dialog', { name: 'Filter' });
+  await filter.getByRole('button', { name: 'Mara', exact: true }).click();
+  await expect(page.getByRole('status').filter({ hasText: /von/ })).toBeVisible();
+  await shoot(page, 'filter');
+  await page.keyboard.press('Escape');
+
   await page.goto(`/write/characters/${ids.notes['Mara Lindqvist']}`);
   await expect(page.locator('.ProseMirror')).toBeVisible();
   await shoot(page, 'character');
