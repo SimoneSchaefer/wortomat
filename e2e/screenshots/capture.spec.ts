@@ -74,16 +74,6 @@ test.beforeAll(async ({ request, browser }) => {
       plotView: { order: 'story', onlyTurningPoints: false, compact: false, vertical: false },
     },
   });
-  // Other books first, so that the sample novel is the most recent one on the start page.
-  for (const [title, author] of [
-    ['Die Uhrmacherin', 'Simone Schäfer'],
-    ['Sommer in Lissabon', 'Simone Schäfer'],
-  ]) {
-    await request.post('/api/project/create', {
-      data: { filePath: path.join(books, `${title}.wortomat`), title, author },
-    });
-    await request.post('/api/project/close');
-  }
   await request.post('/api/project/create', {
     data: { filePath: mainBook, title: 'Das Licht von Kaltenhafen', author: 'Simone Schäfer' },
   });
@@ -110,16 +100,6 @@ test.beforeAll(async ({ request, browser }) => {
   for (const { day, added, removed } of writingHistory(new Date()))
     insert.run(day, ids.scenes['Der Turm'], added, removed);
   db.close();
-});
-
-test('start page', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('.start .carousel')).toBeVisible();
-  // The throwaway folder of the test server would look odd on the project page.
-  await page
-    .locator('.book-path')
-    .evaluate((el) => (el.textContent = '~/Bücher/Das Licht von Kaltenhafen.wortomat'));
-  await shoot(page, 'start');
 });
 
 test('workspace', async ({ page, request }) => {
