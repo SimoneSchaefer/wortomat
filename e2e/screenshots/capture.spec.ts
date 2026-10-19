@@ -185,6 +185,20 @@ test('dark mode', async ({ page, request }) => {
   await request.patch('/api/settings', { data: { theme: 'light' } });
 });
 
+test('light and dark side by side', async ({ page }) => {
+  // The same scene in both themes, split diagonally – the first picture on the project page.
+  const image = (name: string) =>
+    `data:image/png;base64,${readFileSync(path.join(out, `${name}.png`)).toString('base64')}`;
+  await page.setContent(`
+    <style>
+      body { margin: 0; }
+      img { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .dark { clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); }
+    </style>
+    <img src="${image('scene')}"><img class="dark" src="${image('scene-dark')}">`);
+  await shoot(page, 'scene-split');
+});
+
 test('proofreading copy on the phone', async ({ browser, request }) => {
   const copy = await (await request.post('/api/proofreading/export', { data: {} })).text();
   const context = await browser.newContext({ ...devices['Pixel 7'], locale: 'de-DE' });
