@@ -1,4 +1,5 @@
-import { devices, expect, test, type Page } from '@playwright/test';
+import { devices, expect, test, type Browser, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { port } from '../tests/server-paths';
@@ -16,9 +17,22 @@ async function shoot(page: Page, name: string) {
   await page.screenshot({ path: path.join(out, `${name}.png`) });
 }
 
+/** The mascot as a square profile picture; the backend takes no SVG, so it is rendered to PNG. */
+async function mascotPortrait(browser: Browser): Promise<Buffer> {
+  const svg = readFileSync(path.join(__dirname, '../../apps/frontend/public/maskottchen.svg'));
+  const page = await browser.newPage({ viewport: { width: 800, height: 800 } });
+  await page.setContent(
+    `<body style="margin:0;display:grid;place-items:center;height:100vh;background:#e4f2c7">
+      <img style="width:72%" src="data:image/svg+xml;base64,${svg.toString('base64')}"></body>`,
+  );
+  const png = await page.screenshot();
+  await page.close();
+  return png;
+}
+
 test.describe.configure({ mode: 'serial' });
 
-test.beforeAll(async ({ request }) => {
+test.beforeAll(async ({ request, browser }) => {
   await request.patch('/api/settings', {
     data: {
       language: 'de',
@@ -41,6 +55,13 @@ test.beforeAll(async ({ request }) => {
     data: { filePath: mainBook, title: 'Das Licht von Kaltenhafen', author: 'Simone Schäfer' },
   });
   ids = await seedDemoBook(request);
+  await request.post(`/api/notes/${ids.notes['Mara Lindqvist']}/images`, {
+    multipart: {
+      file: { name: 'mara.png', mimeType: 'image/png', buffer: await mascotPortrait(browser) },
+      width: '800',
+      height: '800',
+    },
+  });
   await request.post('/api/project/close');
 
   // The writing log only grows by writing, so the history goes straight into the file.
