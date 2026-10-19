@@ -134,13 +134,8 @@
 
     /* Download */
     section.download { margin: 72px 0 0; padding: 64px 0; background: var(--bg-soft); border-top: 1px solid var(--line); }
-    .download .steps { counter-reset: step; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
-    .download .steps .card { counter-increment: step; }
-    .download .steps .card h4::before {
-      content: counter(step); display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px;
-      border-radius: 50%; background: var(--accent); color: var(--bg); font-size: 14px;
-    }
-    .note { color: var(--muted); font-size: 15px; text-align: center; margin-top: 24px; }
+    .download .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+        .note { color: var(--muted); font-size: 15px; text-align: center; margin-top: 24px; }
     code { font: 14px ui-monospace, 'SFMono-Regular', Menlo, monospace; background: var(--bg-soft); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--line); }
     pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 12px 0 0; }
     pre code { border: 0; padding: 0; background: none; }
@@ -359,20 +354,29 @@
       <div class="wrap">
         <h2 class="section-title" style="margin-top:0">Wortomat herunterladen</h2>
         <p class="section-sub">
-          Die Installer für Windows, macOS (Apple Silicon) und Linux entstehen automatisch auf GitHub.
+          Die Installer für Windows, macOS und Linux findest du bei jeder Version unter
+          „Releases“ auf GitHub – kostenlos und ohne Anmeldung.
         </p>
+        <div class="buttons" style="margin-top:0">
+          <a class="button primary" href="https://github.com/SimoneSchaefer/wortomat/releases/latest">Zur neuesten Version</a>
+          <a class="button" href="https://github.com/SimoneSchaefer/wortomat/releases">Alle Versionen</a>
+        </div>
         <div class="steps">
           <div class="card">
-            <h4>Build öffnen</h4>
-            <p>Unter <a href="https://github.com/SimoneSchaefer/wortomat/actions">GitHub&nbsp;Actions</a> den neuesten erfolgreichen Lauf von „Release Windows“, „Release macOS“ oder „Release Linux“ wählen.</p>
+            <h4>Windows</h4>
+            <p>Die <code>.exe</code> herunterladen und starten. Weil der Installer nicht signiert ist,
+              warnt SmartScreen einmal: „Weitere Informationen“ → „Trotzdem ausführen“.</p>
           </div>
           <div class="card">
-            <h4>Installer laden</h4>
-            <p>Unten auf der Seite des Laufs liegt der Installer als Artefakt (dafür ist ein GitHub-Konto nötig).</p>
+            <h4>macOS</h4>
+            <p>Die <code>.dmg</code> öffnen und Wortomat in „Programme“ ziehen (Mac mit Apple-Chip).
+              Weil die App nicht signiert ist, blockiert macOS den ersten Start: dann unter
+              Systemeinstellungen → Datenschutz &amp; Sicherheit „Trotzdem öffnen“ wählen.</p>
           </div>
           <div class="card">
-            <h4>Installieren</h4>
-            <p>Die Installer sind nicht signiert: Windows SmartScreen und macOS Gatekeeper fragen deshalb einmal nach.</p>
+            <h4>Linux</h4>
+            <p>Die <code>.AppImage</code> ausführbar machen und starten – oder unter Debian und
+              Ubuntu das <code>.deb</code>-Paket installieren.</p>
           </div>
         </div>
         <p class="note">Selbst bauen geht auch – mit Node.js ≥ 24.15:</p>
