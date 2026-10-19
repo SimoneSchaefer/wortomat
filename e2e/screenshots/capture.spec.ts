@@ -155,13 +155,6 @@ test('workspace', async ({ page, request }) => {
   await page.goto('/write/stats');
   await shoot(page, 'stats');
 
-  await page.goto(`/write/scene/${ids.scenes['Die Fähre']}`);
-  await expect(page.locator('.ProseMirror')).toContainText('Nebel');
-  await page.getByRole('combobox', { name: /suchen/i }).fill('leuchtturm');
-  await expect(page.locator('#search-results')).toBeVisible();
-  await shoot(page, 'search');
-  await page.keyboard.press('Escape');
-
   await page.goto('/export');
   // The options stay locked until the export settings have loaded.
   await expect(page.getByRole('radio', { name: /^Roman/ })).toBeEnabled();
