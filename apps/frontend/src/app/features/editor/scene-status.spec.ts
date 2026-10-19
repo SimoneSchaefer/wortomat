@@ -24,22 +24,22 @@ async function setup(status: 'idea' | 'draft' = 'idea') {
 describe('SceneStatusPicker', () => {
   it('shows the current status as the selected button with a single tab stop', async () => {
     const { element, checked } = await setup('draft');
-    expect(checked()).toBe('Entwurf');
+    expect(checked()).toBe('1. Entwurf');
     const tabbable = element.querySelectorAll('[role=radio][tabindex="0"]');
-    expect([...tabbable].map((b) => b.textContent?.trim())).toEqual(['Entwurf']);
+    expect([...tabbable].map((b) => b.textContent?.trim())).toEqual(['1. Entwurf']);
   });
 
   it('saves a clicked status', async () => {
     const { element, api, sync, checked } = await setup();
-    button(element, 'Überarbeitet').click();
+    button(element, '2. Entwurf').click();
     await sync();
     expect(api.updateNode).toHaveBeenCalledWith('s', { status: 'revised' });
-    expect(checked()).toBe('Überarbeitet');
+    expect(checked()).toBe('2. Entwurf');
   });
 
   it('saves nothing when the status already applies', async () => {
     const { element, api } = await setup('draft');
-    button(element, 'Entwurf').click();
+    button(element, '1. Entwurf').click();
     expect(api.updateNode).not.toHaveBeenCalled();
   });
 
@@ -49,8 +49,8 @@ describe('SceneStatusPicker', () => {
 
     key(group, 'ArrowRight');
     await sync();
-    expect(checked()).toBe('Struktur');
-    expect(document.activeElement?.textContent?.trim()).toBe('Struktur');
+    expect(checked()).toBe('Begonnen');
+    expect(document.activeElement?.textContent?.trim()).toBe('Begonnen');
 
     key(group, 'End');
     await sync();
