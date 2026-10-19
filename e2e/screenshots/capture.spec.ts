@@ -133,6 +133,10 @@ test('workspace', async ({ page, request }) => {
   await shoot(page, 'map');
 
   await page.goto('/write/stats');
+  // The appearances card sits further down; it shows which character turns up when.
+  await page
+    .locator('section.card', { has: page.getByRole('heading', { name: 'Auftritte' }) })
+    .evaluate((el) => el.scrollIntoView({ block: 'center' }));
   await shoot(page, 'stats');
 
   await page.goto('/export');
