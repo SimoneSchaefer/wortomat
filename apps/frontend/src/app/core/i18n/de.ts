@@ -716,9 +716,9 @@ export const de = {
     label: 'Status',
     names: {
       idea: 'Idee',
-      outline: 'Struktur',
-      draft: 'Entwurf',
-      revised: 'Überarbeitet',
+      outline: 'Begonnen',
+      draft: '1. Entwurf',
+      revised: '2. Entwurf',
       final: 'Fertig',
     } satisfies Record<SceneStatus, string>,
   },

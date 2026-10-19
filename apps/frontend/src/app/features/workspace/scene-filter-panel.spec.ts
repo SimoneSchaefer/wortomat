@@ -64,7 +64,7 @@ describe('SceneFilterPanel', () => {
     const { element, open, group, filter, settle } = await setup();
     const popover = await open();
 
-    const draft = button(group(popover, 'Status'), 'Entwurf');
+    const draft = button(group(popover, 'Status'), '1. Entwurf');
     draft.click();
     await settle();
     expect(draft.getAttribute('aria-pressed')).toBe('true');

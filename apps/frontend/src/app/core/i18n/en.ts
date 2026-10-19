@@ -677,9 +677,9 @@ export const en: Texts = {
     label: 'Status',
     names: {
       idea: 'Idea',
-      outline: 'Outline',
-      draft: 'Draft',
-      revised: 'Revised',
+      outline: 'Started',
+      draft: '1st draft',
+      revised: '2nd draft',
       final: 'Final',
     },
   },
