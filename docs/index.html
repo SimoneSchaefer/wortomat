@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wortomat – Software zum Schreiben von Büchern</title>
+  <meta name="description" content="Wortomat ist eine freie Desktop-App zum Schreiben von Romanen: Manuskript, Charaktere, Orte, Handlungsstränge, Statistik und Export nach Word, PDF und EPUB – komplett lokal, ein Buch = eine Datei." />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="Wortomat – Software zum Schreiben von Büchern" />
+  <meta property="og:description" content="Dein Buch. Deine Datei. Kein Server." />
+  <meta property="og:image" content="screenshots/scene.png" />
+  <style>
+    :root {
+      --bg: #fdfcf8;
+      --bg-soft: #f5f2ea;
+      --card: #ffffff;
+      --text: #1f1d18;
+      --muted: #5f5a4f;
+      --line: #e4dfd2;
+      --accent: #4d7c0f;
+      --accent-strong: #3f6212;
+      --accent-soft: #e4f2c7;
+      --shadow: 0 1px 2px rgb(40 35 20 / 6%), 0 12px 32px -8px rgb(40 35 20 / 18%);
+      --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+      --sans: system-ui, -apple-system, 'Segoe UI', 'Noto Sans', Roboto, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1b1b18;
+        --bg-soft: #232320;
+        --card: #2a2a26;
+        --text: #ecebe4;
+        --muted: #aeaa9c;
+        --line: #3a3934;
+        --accent: #a3d65c;
+        --accent-strong: #bde27f;
+        --accent-soft: #2f3a1e;
+        --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -8px rgb(0 0 0 / 60%);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.6 var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-strong); }
+    h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.2; margin: 0; }
+    p { margin: 0; }
+    img { max-width: 100%; display: block; }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+    /* Navigation */
+    nav.top {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    nav.top .wrap { display: flex; align-items: center; gap: 24px; height: 60px; }
+    nav.top .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font: 500 21px var(--serif); }
+    nav.top .brand img { width: 32px; height: 32px; }
+    nav.top ul { display: flex; gap: 20px; list-style: none; margin: 0 0 0 auto; padding: 0; font-size: 15px; }
+    nav.top ul a { color: var(--muted); text-decoration: none; }
+    nav.top ul a:hover { color: var(--text); }
+    @media (max-width: 760px) { nav.top ul li.optional { display: none; } }
+
+    /* Hero */
+    .hero { padding: 72px 0 40px; text-align: center; }
+    .hero .mascot { width: 120px; margin: 0 auto 16px; }
+    .hero h1 { font-size: clamp(40px, 7vw, 68px); letter-spacing: -0.01em; }
+    .hero .tagline { font: italic 400 clamp(20px, 3vw, 26px) var(--serif); color: var(--muted); margin-top: 8px; }
+    .hero .lead { max-width: 680px; margin: 24px auto 0; color: var(--muted); font-size: 18px; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 32px; }
+    .button {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 10px; font-weight: 600; text-decoration: none;
+      border: 1px solid var(--accent); color: var(--accent);
+    }
+    .button.primary { background: var(--accent); color: var(--bg); }
+    .button.primary:hover { background: var(--accent-strong); color: var(--bg); }
+    .button:hover { background: var(--accent-soft); }
+    .hero-shot { margin: 56px auto 0; max-width: 1100px; }
+
+    .shot {
+      border-radius: 12px; overflow: hidden; border: 1px solid var(--line);
+      box-shadow: var(--shadow); background: var(--card); cursor: zoom-in;
+    }
+    .shot img { width: 100%; height: auto; }
+
+    .facts {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+      margin: 56px 0 0;
+    }
+    .fact { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+    .fact strong { display: block; font-size: 16px; margin-bottom: 4px; }
+    .fact span { color: var(--muted); font-size: 15px; line-height: 1.5; display: block; }
+
+    /* Features */
+    section.features { padding: 48px 0 24px; }
+    .section-title { text-align: center; margin: 48px 0 8px; font-size: clamp(30px, 4vw, 42px); }
+    .section-sub { text-align: center; color: var(--muted); max-width: 620px; margin: 0 auto 32px; }
+    .feature {
+      display: grid; grid-template-columns: 5fr 7fr; gap: 48px; align-items: center;
+      padding: 48px 0; border-top: 1px solid var(--line);
+    }
+    .feature:nth-of-type(even) { grid-template-columns: 7fr 5fr; }
+    .feature:nth-of-type(even) .text { order: 2; }
+    .feature .eyebrow { color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .feature h3 { font-size: clamp(26px, 3vw, 34px); margin: 6px 0 14px; }
+    .feature p { color: var(--muted); }
+    .feature ul { margin: 16px 0 0; padding: 0; list-style: none; color: var(--muted); }
+    .feature li { padding-left: 26px; position: relative; margin: 6px 0; }
+    .feature li::before {
+      content: ''; position: absolute; left: 4px; top: .55em; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent-soft); border: 2px solid var(--accent);
+    }
+    .feature .shots { display: grid; gap: 16px; }
+    .feature .shots.phones { grid-template-columns: 1fr 1fr; max-width: 520px; margin: 0 auto; }
+    .feature .shots.phones .shot { border-radius: 22px; }
+    @media (max-width: 860px) {
+      .feature, .feature:nth-of-type(even) { grid-template-columns: 1fr; gap: 24px; }
+      .feature:nth-of-type(even) .text { order: 0; }
+    }
+
+    /* Small things */
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 24px;
+    }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+    .card h4 { margin: 0 0 6px; font-size: 16px; }
+    .card p { color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+    /* Download */
+    section.download { margin: 72px 0 0; padding: 64px 0; background: var(--bg-soft); border-top: 1px solid var(--line); }
+    .download .steps { counter-reset: step; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+    .download .steps .card { counter-increment: step; }
+    .download .steps .card h4::before {
+      content: counter(step); display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px;
+      border-radius: 50%; background: var(--accent); color: var(--bg); font-size: 14px;
+    }
+    .note { color: var(--muted); font-size: 15px; text-align: center; margin-top: 24px; }
+    code { font: 14px ui-monospace, 'SFMono-Regular', Menlo, monospace; background: var(--bg-soft); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--line); }
+    pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 12px 0 0; }
+    pre code { border: 0; padding: 0; background: none; }
+
+    footer { padding: 40px 0 56px; color: var(--muted); font-size: 15px; text-align: center; }
+    footer img { width: 64px; margin: 0 auto 12px; }
+
+    /* Lightbox */
+    dialog.lightbox {
+      border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 96vh;
+    }
+    dialog.lightbox::backdrop { background: rgb(15 15 10 / 82%); }
+    dialog.lightbox img { max-width: 96vw; max-height: 92vh; width: auto; height: auto; border-radius: 10px; }
+    dialog.lightbox p { color: #eee; text-align: center; margin-top: 8px; font-size: 15px; }
+  </style>
+</head>
+<body>
+  <nav class="top" aria-label="Seitennavigation">
+    <div class="wrap">
+      <a class="brand" href="#"><img src="icon.svg" alt="" />Wortomat</a>
+      <ul>
+        <li class="optional"><a href="#schreiben">Schreiben</a></li>
+        <li class="optional"><a href="#figuren">Figuren &amp; Welt</a></li>
+        <li class="optional"><a href="#handlung">Handlung</a></li>
+        <li class="optional"><a href="#export">Export</a></li>
+        <li><a href="#download">Download</a></li>
+        <li><a href="https://github.com/SimoneSchaefer/wortomat">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
+      <img class="mascot" src="maskottchen.svg" alt="Das Wortomat-Maskottchen, ein kleiner grüner Drache" />
+      <h1>Wortomat</h1>
+      <p class="tagline">Dein Buch. Deine Datei. Kein Server.</p>
+      <p class="lead">
+        Eine Schreib-App für Romane und Bücher – mit Manuskript, Charakteren, Orten,
+        Handlungssträngen, Schreibstatistik und Export nach Word, PDF und E-Book.
+        Läuft komplett auf deinem Rechner, unter Windows, macOS und Linux.
+      </p>
+      <div class="buttons">
+        <a class="button primary" href="#download">Herunterladen</a>
+        <a class="button" href="https://github.com/SimoneSchaefer/wortomat">Quellcode auf GitHub</a>
+      </div>
+      <figure class="hero-shot shot" style="margin-left:auto;margin-right:auto">
+        <img src="screenshots/scene.png" width="2880" height="1800"
+             alt="Der Wortomat-Arbeitsbereich: links das Manuskript mit Teilen, Kapiteln und Szenen, rechts der Editor mit Status, Strängen und verknüpften Charakteren" />
+      </figure>
+
+      <div class="facts">
+        <div class="fact"><strong>Ein Buch = eine Datei</strong><span>Kopieren, mailen und sichern wie ein Word-Dokument – absturzsicher gespeichert.</span></div>
+        <div class="fact"><strong>Komplett offline</strong><span>Kein Konto, keine Cloud, keine Werbung. Deine Texte verlassen nie deinen Rechner.</span></div>
+        <div class="fact"><strong>Speichert von selbst</strong><span>Jede Eingabe wird nach einem Wimpernschlag gesichert, auch beim Schließen.</span></div>
+        <div class="fact"><strong>Freie Software</strong><span>Open Source unter der GPL-3.0 – für Windows, macOS und Linux.</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="features">
+      <div class="wrap">
+
+        <article class="feature" id="schreiben">
+          <div class="text">
+            <span class="eyebrow">Schreiben</span>
+            <h3>Ein Manuskript, das mitwächst</h3>
+            <p>
+              Gliedere dein Buch in Teile, Kapitel und Szenen und ordne alles per Drag &amp; Drop um.
+              Der Editor bleibt ruhig und lesbar – mit typografischen Anführungszeichen,
+              Silbentrennung und einer Wortzahl für jede Szene.
+            </p>
+            <ul>
+              <li>Szenenstatus von <em>Idee</em> über <em>Entwurf</em> bis <em>Fertig</em> – als farbiger Punkt im Baum</li>
+              <li>Charaktere, Orte, Tags und Handlungsstränge direkt an der Szene</li>
+              <li>Filter nach Status, Strang, Figur, Ort oder offenen Markierungen</li>
+              <li>Papierkorb für gelöschte Szenen, Kapitel und Notizen</li>
+            </ul>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/scene-annotations.png" width="2880" height="1800" loading="lazy" alt="Eine Szene mit Fixme-Markierung und Notiz, im Manuskript-Baum zählen Kreise die offenen Markierungen" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Notizen im Text</span>
+            <h3>Todo, Idee, Fixme</h3>
+            <p>
+              Markiere Stellen, an die du noch ranmusst – mit einer Notiz dazu. Jede Art ist anders
+              eingefärbt und unterstrichen, auch ohne Farbwahrnehmung gut zu unterscheiden.
+              Der Manuskript-Baum zählt offene Markierungen je Szene und Kapitel.
+            </p>
+            <ul>
+              <li>Werkzeugleiste oder <code>Strg+Alt+O / I / F</code></li>
+              <li>Markierungen landen nie im Export</li>
+            </ul>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/scene-dark.png" width="2880" height="1800" loading="lazy" alt="Eine Szene im dunklen Farbschema mit einer Ideen-Markierung samt Notiz über dem Text" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Überarbeiten</span>
+            <h3>Der Überarbeitungsmodus</h3>
+            <p>
+              Ein Klick, und Wortomat zeigt dir, wo der Text hakt: Wortwiederholungen, Füllwörter
+              wie „eigentlich“ oder „irgendwie“, überlange Sätze und doppelte Wörter.
+              Unten in der Leiste stehen die Zahlen für die ganze Szene.
+            </p>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/revision.png" width="2880" height="1800" loading="lazy" alt="Überarbeitungsmodus: Füllwörter blau gestrichelt, Wiederholungen gepunktet, ein langer Satz hinterlegt" /></figure>
+          </div>
+        </article>
+
+        <article class="feature" id="figuren">
+          <div class="text">
+            <span class="eyebrow">Charaktere, Orte, Recherche</span>
+            <h3>Alles über deine Figuren an einem Ort</h3>
+            <p>
+              Jeder Charakter, jeder Ort und jede Recherche hat eine eigene Seite mit Kurzbeschreibung,
+              Bildergalerie und Text. Wortomat zeigt dir, in welchen Szenen eine Figur vorkommt –
+              in der Reihenfolge des Manuskripts.
+            </p>
+            <ul>
+              <li><strong>Entwicklung:</strong> die Stationen eines Charakterbogens, jeweils mit den Szenen, in denen sie passieren</li>
+              <li>Wortomat merkt, wenn eine Station nicht zur Reihenfolge der Handlung passt</li>
+              <li>Gruppen wie „Hauptfiguren“ und „Nebenfiguren“, Profilbilder mit Zuschnitt</li>
+            </ul>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/character.png" width="2880" height="1800" loading="lazy" alt="Charakterseite von Mara Lindqvist mit Szenen, in denen sie vorkommt, und ihrer Entwicklung in Stationen" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Karten</span>
+            <h3>Zeichne deine Welt</h3>
+            <p>
+              Skizziere Küsten, Flüsse, Wege und Wälder mit Stift und Fläche – oder lege ein
+              abfotografiertes Papier als Vorlage darunter. Deine Orte steckst du als Pins auf
+              die Karte, und auf jeder Ortsseite siehst du, wo er liegt.
+            </p>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/map.png" width="2880" height="1800" loading="lazy" alt="Eine gezeichnete Inselkarte mit Fluss, Weg, Salzwiesen und vier Orts-Pins" /></figure>
+          </div>
+        </article>
+
+        <article class="feature" id="handlung">
+          <div class="text">
+            <span class="eyebrow">Handlung</span>
+            <h3>Handlungsstränge auf einen Blick</h3>
+            <p>
+              Jeder Strang ist eine Linie; wo Stränge in einer Szene zusammenlaufen, treffen sich die Linien.
+              Erzählst du nicht chronologisch, ziehst du die Szenen einfach an die Stelle, an der sie
+              in der Geschichte passieren – unabhängig von der Reihenfolge im Buch.
+            </p>
+            <ul>
+              <li>Abschnitte wie „Tag 1“ oder „Die Sturmnacht“ auf der Zeitachse</li>
+              <li>Wendepunkte hervorheben oder nur sie anzeigen</li>
+              <li>Waagerecht oder senkrecht, mit oder ohne Szenentitel</li>
+              <li>Die Reihenfolge der Handlung auf Wunsch ins Manuskript übernehmen</li>
+            </ul>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/plot.png" width="2880" height="1800" loading="lazy" alt="Die Handlungsansicht mit drei farbigen Strängen über sieben Szenen und Abschnitten auf der Zeitachse" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Suche</span>
+            <h3>Alles finden – auch ohne Umlaute</h3>
+            <p>
+              <code>Strg+K</code> durchsucht Szenen, Charaktere, Orte und Recherchen gleichzeitig
+              und gruppiert die Treffer nach Bereich. „hauser“ findet auch „Häuser“.
+            </p>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/search.png" width="2880" height="1800" loading="lazy" alt="Die Volltextsuche mit Treffern in Szenen und Orten" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Statistik</span>
+            <h3>Dranbleiben, sichtbar gemacht</h3>
+            <p>
+              Ein Kalender zeigt, an welchen Tagen du wie viel geschrieben hast – eingefügter Text
+              zählt nicht mit. Dazu Wörter, Normseiten, Fortschritt nach Szenenstatus, Wörter je
+              Kapitel, Dialoganteil und deine Lieblingswörter.
+            </p>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/stats.png" width="2880" height="1800" loading="lazy" alt="Statistikseite mit Kacheln, Schreibkalender und Fortschrittsbalken" /></figure>
+          </div>
+        </article>
+
+        <article class="feature" id="export">
+          <div class="text">
+            <span class="eyebrow">Export</span>
+            <h3>Vom Entwurf zum fertigen Buch</h3>
+            <p>
+              Exportiere dein Manuskript als Word-Datei, E-Book (EPUB&nbsp;3), HTML oder – mit
+              installiertem LaTeX – als druckfertiges PDF. Die Vorschau zeigt sofort, wie es aussieht.
+            </p>
+            <ul>
+              <li><strong>Normseite</strong> für Verlage und Agenturen: Courier, 30 × 60 Anschläge</li>
+              <li><strong>Roman</strong>: Buchsatz mit Silbentrennung, Format, Schrift und Ränder wählbar</li>
+              <li>Titelbild fürs E-Book – eigenes Bild oder aus dem Titel gestaltet</li>
+            </ul>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/export.png" width="2880" height="1800" loading="lazy" alt="Exportseite mit der Vorlage Roman, Satzspiegel-Einstellungen und Seitenvorschau" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Korrektur unterwegs</span>
+            <h3>Korrekturlesen auf dem Handy</h3>
+            <p>
+              Wortomat erstellt eine Korrekturfassung als einzelne HTML-Datei für dein Android-Handy.
+              Lies offline, markiere Stellen mit dem Finger, schreib Notizen oder Ersetzungsvorschläge –
+              und hol sie zurück am Rechner mit einem Klick ins Buch. Vorschläge übernimmst oder
+              verwirfst du direkt im Editor.
+            </p>
+          </div>
+          <div class="shots phones">
+            <figure class="shot"><img src="screenshots/phone-start.png" width="1082" height="2202" loading="lazy" alt="Die Korrekturfassung auf dem Handy: Übersicht mit Kapiteln" /></figure>
+            <figure class="shot"><img src="screenshots/phone.png" width="1082" height="2202" loading="lazy" alt="Die Korrekturfassung auf dem Handy: ein Kapitel zum Lesen" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Hell &amp; dunkel</span>
+            <h3>Schreiben bis spät in die Nacht</h3>
+            <p>
+              Wortomat folgt dem Farbschema deines Systems oder bleibt hell bzw. dunkel, wie du es
+              einstellst. Schriftgröße und Art der Anführungszeichen (deutsch, Guillemets, Schweiz,
+              englisch, französisch) wählst du in den Einstellungen; die Oberfläche gibt es auf
+              Deutsch und Englisch.
+            </p>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/plot-dark.png" width="2880" height="1800" loading="lazy" alt="Die Handlungsansicht senkrecht im dunklen Farbschema" /></figure>
+          </div>
+        </article>
+
+        <article class="feature">
+          <div class="text">
+            <span class="eyebrow">Bücherregal</span>
+            <h3>Alle Bücher im Blick</h3>
+            <p>
+              Die Startseite zeigt deine Bücher mit Titelbild, Wortzahl und letzter Bearbeitung.
+              Neue Bücher legst du mit einem Titel an – Wortomat schlägt einen Speicherort vor.
+            </p>
+          </div>
+          <div class="shots">
+            <figure class="shot"><img src="screenshots/start.png" width="2880" height="1800" loading="lazy" alt="Die Startseite mit drei Büchern im Karussell" /></figure>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2 class="section-title">Und noch mehr Kleinigkeiten</h2>
+        <p class="section-sub">Die Dinge, die man erst vermisst, wenn sie fehlen.</p>
+        <div class="grid">
+          <div class="card"><h4>Papierkorb</h4><p>Gelöschte Szenen, Kapitel und Notizen landen im Papierkorb und lassen sich samt Verknüpfungen wiederherstellen. Er leert sich nie von allein.</p></div>
+          <div class="card"><h4>Tags</h4><p>Freie Schlagwörter für Szenen – Groß-/Kleinschreibung und ein führendes # spielen keine Rolle.</p></div>
+          <div class="card"><h4>Bilder im Text</h4><p>Bilder in Szenen und Notizen werden verkleinert direkt in der Buchdatei gespeichert.</p></div>
+          <div class="card"><h4>Schreibtag zählt ab 4 Uhr</h4><p>Wer nachts schreibt, bekommt die Wörter noch dem Vortag gutgeschrieben.</p></div>
+          <div class="card"><h4>Sicher lokal</h4><p>Der eingebaute Server lauscht nur auf deinem Rechner, mit Zufalls-Token pro Start und Sandbox für das Fenster.</p></div>
+          <div class="card"><h4>Keine Installation von Extras</h4><p>Kein Java, keine Datenbank, keine Laufzeitumgebung – ein Installer, fertig.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="download" id="download">
+      <div class="wrap">
+        <h2 class="section-title" style="margin-top:0">Wortomat herunterladen</h2>
+        <p class="section-sub">
+          Die Installer für Windows, macOS (Apple Silicon) und Linux entstehen automatisch auf GitHub.
+        </p>
+        <div class="steps">
+          <div class="card">
+            <h4>Build öffnen</h4>
+            <p>Unter <a href="https://github.com/SimoneSchaefer/wortomat/actions">GitHub&nbsp;Actions</a> den neuesten erfolgreichen Lauf von „Release Windows“, „Release macOS“ oder „Release Linux“ wählen.</p>
+          </div>
+          <div class="card">
+            <h4>Installer laden</h4>
+            <p>Unten auf der Seite des Laufs liegt der Installer als Artefakt (dafür ist ein GitHub-Konto nötig).</p>
+          </div>
+          <div class="card">
+            <h4>Installieren</h4>
+            <p>Die Installer sind nicht signiert: Windows SmartScreen und macOS Gatekeeper fragen deshalb einmal nach.</p>
+          </div>
+        </div>
+        <p class="note">Selbst bauen geht auch – mit Node.js ≥ 24.15:</p>
+        <pre><code>git clone https://github.com/SimoneSchaefer/wortomat.git
+cd wortomat
+npm install
+npm run dist</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <img src="maskottchen-schlafend.svg" alt="" />
+      <p>
+        Wortomat ist freie Software unter der
+        <a href="https://github.com/SimoneSchaefer/wortomat/blob/main/LICENSE">GNU GPL&nbsp;3.0</a>
+        · <a href="https://github.com/SimoneSchaefer/wortomat">Quellcode &amp; Fehler melden</a>
+      </p>
+      <p style="margin-top:6px">Alle Bilder zeigen das Beispielbuch „Das Licht von Kaltenhafen“.</p>
+    </div>
+  </footer>
+
+  <dialog class="lightbox" aria-label="Screenshot vergrößert">
+    <img alt="" />
+    <p></p>
+  </dialog>
+
+  <script>
+    // Click a screenshot to see it at full size; click again or press Escape to close.
+    const dialog = document.querySelector('dialog.lightbox');
+    const big = dialog.querySelector('img');
+    const caption = dialog.querySelector('p');
+    document.querySelectorAll('.shot img').forEach((img) => {
+      img.addEventListener('click', () => {
+        big.src = img.src;
+        big.alt = img.alt;
+        caption.textContent = img.alt;
+        dialog.showModal();
+      });
+    });
+    dialog.addEventListener('click', () => dialog.close());
+  </script>
+</body>
+</html>

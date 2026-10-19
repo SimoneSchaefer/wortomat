@@ -161,6 +161,14 @@ npm run build && npm run e2e
 Einzelne Tests oder Browser: `npm run e2e -- --project=firefox tests/writing.spec.ts`,
 mit `--ui` interaktiv.
 
+**Projektseite** ([`docs/`](docs/index.html), über GitHub Pages veröffentlicht): Die Screenshots
+dort legt ein Playwright-Lauf an – er füllt ein Beispielbuch über die REST-API und fotografiert
+die wichtigsten Ansichten nach `docs/screenshots/`:
+
+```bash
+npm run build && npm run screenshots -w @wortomat/e2e
+```
+
 **Installer bauen** (für das aktuelle Betriebssystem, Ergebnis in `apps/desktop/release/`):
 
 ```bash
