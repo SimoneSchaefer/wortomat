@@ -61,7 +61,7 @@ describe('StatsPage', () => {
   it('shows progress by words or by scenes', async () => {
     const { element, segments, settle } = await setup();
     expect(segments()).toEqual([
-      `Entwurf: ${de.words(1400)} · ${S.scenes(2)}`,
+      `1. Entwurf: ${de.words(1400)} · ${S.scenes(2)}`,
       `Fertig: ${de.words(600)} · ${S.scenes(1)}`,
     ]);
     button(element.querySelector('.toggle')!, S.unitScenes).click();

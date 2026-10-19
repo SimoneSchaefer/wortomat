@@ -52,7 +52,7 @@ Läuft komplett lokal: kein Server, keine Installation von Java o. Ä. beim Benu
   Chips unter dem Titel – mit Suche, die Umlaute ignoriert, und Neuanlage direkt aus der Suche.
   Charaktere und Orte zeigen umgekehrt „Kommt vor in“ in Manuskript-Reihenfolge. Welche
   Notizarten verknüpfbar sind, steuert `linkable` in `note-kinds.ts`.
-- **Szenenstatus:** Idee → Struktur → Erster Entwurf → Überarbeiteter Entwurf → Fertig (Spalte
+- **Szenenstatus:** Idee → Begonnen → 1. Entwurf → 2. Entwurf → Fertig (Spalte
   `nodes.status`, per `CHECK` abgesichert; neue und bestehende Szenen starten als „Idee“). In der
   Szene als Stufenleiste, im Manuskript-Baum als farbiger Punkt; Farben in `styles.scss`.
 - **Todo/Idee/Fixme im Text:** eigene Tiptap-Mark-Erweiterung

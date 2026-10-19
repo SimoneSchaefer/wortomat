@@ -53,7 +53,7 @@ describe('ManuscriptTree', () => {
     expect(text(row('A').querySelector('.count'))).toBe('1.200');
     expect(row('A').querySelector('a')!.getAttribute('href')).toBe('/write/scene/a');
     expect(row('A').querySelector('wm-status-icon')!.getAttribute('title')).toBe(
-      de.tree.status('Entwurf'),
+      de.tree.status('1. Entwurf'),
     );
   });
 
