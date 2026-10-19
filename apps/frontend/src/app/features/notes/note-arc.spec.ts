@@ -3,7 +3,16 @@ import { ConfirmDialog } from '../../core/confirm-dialog';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
 import { FakeApi, testNode } from '../../testing/fake-api';
-import { button, key, render, startDrag, text, type, until } from '../../testing/render';
+import {
+  button,
+  findButton,
+  key,
+  render,
+  startDrag,
+  text,
+  type,
+  until,
+} from '../../testing/render';
 import { filterScenes } from './arc-scene-picker';
 import { NoteArc } from './note-arc';
 
@@ -229,6 +238,39 @@ describe('NoteArc order check', () => {
     expect(api.reorderArcSteps).toHaveBeenCalledWith('mara', ['c', 'b', 'a']);
     expect(labels()).toEqual(['traut niemandem', 'ohne Szene', 'lässt Lena helfen']);
     expect(element.querySelector('.order-warning')).toBeNull();
+  });
+
+  it('marks a single scene out of place and offers no sorting that would not help', async () => {
+    const { element, settle } = await setup((api) => {
+      api.nodes.push(testNode('keller', 'scene', 'k1', { title: 'Keller', sortOrder: 3 }));
+      api.arcs.set('mara', {
+        noteId: 'mara',
+        summary: '',
+        steps: [
+          { id: 'a', noteId: 'mara', label: 'zweifelt', details: '', sceneIds: ['hilfe'] },
+          // Flucht happens before "zweifelt", Keller after it
+          {
+            id: 'b',
+            noteId: 'mara',
+            label: 'lässt sich helfen',
+            details: '',
+            sceneIds: ['keller', 'flucht'],
+          },
+        ],
+      });
+    });
+    await settle();
+    const flagged = [...element.querySelectorAll('.step.misplaced')];
+    expect(
+      flagged.map((li) => li.querySelector<HTMLTextAreaElement>('.step-label')!.value),
+    ).toEqual(['lässt sich helfen']);
+    const hint = de.arc.sceneBefore('Flucht', 1);
+    expect(text(flagged[0]!.querySelector('.order-hint'))).toBe(hint);
+    // In book order: Flucht, Keller
+    const chips = [...flagged[0]!.querySelectorAll('.chip')];
+    expect(chips.map((chip) => chip.classList.contains('misplaced'))).toEqual([true, false]);
+    expect(chips[0]!.querySelector<HTMLElement>('.open')!.title.split('\n')[0]).toBe(hint);
+    expect(findButton(element, de.arc.sortByStory)).toBeNull();
   });
 });
 

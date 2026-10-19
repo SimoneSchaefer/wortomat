@@ -331,6 +331,10 @@ export const de = {
       'Stationen nach der Reihenfolge ihrer Szenen in der Handlung ordnen – Stationen ohne Szene bleiben, wo sie sind',
     belongsBefore: (index: number) => `Passiert in der Handlung vor Station ${index}`,
     belongsAfter: (index: number) => `Passiert in der Handlung nach Station ${index}`,
+    sceneBefore: (scene: string, index: number) =>
+      `„${scene}“ passiert in der Handlung schon vor Station ${index}`,
+    sceneAfter: (scene: string, index: number) =>
+      `„${scene}“ passiert in der Handlung erst nach Station ${index}`,
     belongsBetween: (after: number, before: number) =>
       `Passiert in der Handlung zwischen Station ${after} und ${before}`,
     inScene: 'Entwicklung',

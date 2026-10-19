@@ -297,6 +297,10 @@ export const en: Texts = {
       'Order the steps by the story order of their scenes – steps without a scene stay where they are',
     belongsBefore: (index: number) => `Happens before step ${index} in the story`,
     belongsAfter: (index: number) => `Happens after step ${index} in the story`,
+    sceneBefore: (scene: string, index: number) =>
+      `“${scene}” happens before step ${index} in the story`,
+    sceneAfter: (scene: string, index: number) =>
+      `“${scene}” happens after step ${index} in the story`,
     belongsBetween: (after: number, before: number) =>
       `Happens between steps ${after} and ${before} in the story`,
     inScene: 'Development',

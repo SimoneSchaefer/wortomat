@@ -23,24 +23,26 @@
           <div class="order-warning" role="status">
             <span class="warning-dot" aria-hidden="true"></span>
             <span>{{ t().arc.outOfOrder(issues().size) }}</span>
-            <button
-              type="button"
-              class="link"
-              [title]="t().arc.sortByStoryHint"
-              (click)="sortByStory()"
-            >
-              {{ t().arc.sortByStory }}
-            </button>
+            @if (canSort()) {
+              <button
+                type="button"
+                class="link"
+                [title]="t().arc.sortByStoryHint"
+                (click)="sortByStory()"
+              >
+                {{ t().arc.sortByStory }}
+              </button>
+            }
           </div>
         }
 
         @if (steps().length) {
           <ol class="steps">
             @for (step of steps(); track step.id; let i = $index) {
-              @let issue = issues().get(step.id);
+              @let hint = hints().get(step.id);
               <li
                 class="step"
-                [class.misplaced]="!!issue"
+                [class.misplaced]="!!hint"
                 [class.dragging]="draggingId() === step.id"
                 [attr.data-drop]="drop()?.targetId === step.id ? drop()?.position : null"
                 [attr.data-step-id]="step.id"
@@ -52,7 +54,7 @@
                 <span
                   class="marker"
                   draggable="true"
-                  [title]="issue ? orderHint(issue) + '\n' + t().arc.dragHint : t().arc.dragHint"
+                  [title]="hint ? hint.station + '\n' + t().arc.dragHint : t().arc.dragHint"
                   (dragstart)="onDragStart($event, step)"
                   (dragend)="onDragEnd()"
                   >{{ i + 1 }}</span
@@ -77,12 +79,13 @@
                       (input)="onStepInput(step, 'details', $any($event.target).value)"
                     ></textarea>
                   }
-                  @if (issue) {
-                    <p class="order-hint">{{ orderHint(issue) }}</p>
+                  @if (hint) {
+                    <p class="order-hint">{{ hint.station }}</p>
                   }
                   <div class="meta">
                     <wm-arc-scene-picker
                       [sceneIds]="step.sceneIds"
+                      [misplaced]="hint?.scenes ?? noScenes"
                       (added)="addScene(step, $event)"
                       (removed)="removeScene(step, $event)"
                     >

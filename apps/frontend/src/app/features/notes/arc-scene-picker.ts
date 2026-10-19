@@ -44,11 +44,17 @@ export function filterScenes(
   imports: [Autofocus, StatusIcon],
   template: `
     @for (scene of linked(); track scene.id) {
-      <span class="chip">
+      @let hint = misplaced().get(scene.id);
+      <span class="chip" [class.misplaced]="!!hint">
         <button
           type="button"
           class="open"
           [title]="
+            (hint
+              ? hint +
+                '
+'
+              : '') +
             t().arc.openScene +
             ': ' +
             [...scene.path, scene.title].join(' › ') +
@@ -139,6 +145,8 @@ export function filterScenes(
 })
 export class ArcScenePicker {
   readonly sceneIds = input.required<readonly string[]>();
+  /** Scenes out of place in the story, with the hint why. */
+  readonly misplaced = input<ReadonlyMap<string, string>>(new Map());
   readonly added = output<string>();
   readonly removed = output<string>();
 

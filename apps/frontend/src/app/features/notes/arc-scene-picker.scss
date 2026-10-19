@@ -61,3 +61,8 @@
   width: 22rem;
   max-width: 80vw;
 }
+
+// As the station's number: the todo yellow of displaced scenes in the plot view
+.chip.misplaced {
+  border-color: var(--annotation-todo);
+}
