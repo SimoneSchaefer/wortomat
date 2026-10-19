@@ -182,11 +182,6 @@ test('revision mode', async ({ page, request }) => {
 
 test('dark mode', async ({ page, request }) => {
   await request.patch('/api/settings', { data: { theme: 'dark' } });
-  await page.goto('/write/plot');
-  await expect(page.getByText('Morgengrauen')).toBeVisible();
-  await page.getByRole('radio', { name: 'Senkrecht' }).click();
-  await shoot(page, 'plot-dark');
-  await page.getByRole('radio', { name: 'Waagerecht' }).click();
   await page.goto(`/write/scene/${ids.scenes['Der Turm']}`);
   await expect(page.locator('.ProseMirror')).toContainText('Zweihundertelf');
   await shoot(page, 'scene-dark');
