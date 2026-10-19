@@ -17,13 +17,46 @@ async function shoot(page: Page, name: string) {
   await page.screenshot({ path: path.join(out, `${name}.png`) });
 }
 
-/** The mascot as a square profile picture; the backend takes no SVG, so it is rendered to PNG. */
-async function mascotPortrait(browser: Browser): Promise<Buffer> {
-  const svg = readFileSync(path.join(__dirname, '../../apps/frontend/public/maskottchen.svg'));
-  const page = await browser.newPage({ viewport: { width: 800, height: 800 } });
+/** Each main and side character gets their own variant of the mascot. */
+const portraits: Array<{
+  character: string;
+  svg: string;
+  hue: number;
+  background: string;
+  flip?: boolean;
+}> = [
+  { character: 'Mara Lindqvist', svg: 'maskottchen.svg', hue: 0, background: '#e4f2c7' },
+  {
+    character: 'Ella Lindqvist',
+    svg: 'maskottchen-schlafend.svg',
+    hue: 150,
+    background: '#dfe6f7',
+  },
+  { character: 'Jonas Brandt', svg: 'maskottchen.svg', hue: 90, background: '#dcefee', flip: true },
+  { character: 'Hinnerk Feddersen', svg: 'maskottchen.svg', hue: -55, background: '#f6e7cf' },
+  {
+    character: 'Frau Petersen',
+    svg: 'maskottchen.svg',
+    hue: 200,
+    background: '#f7e0e6',
+    flip: true,
+  },
+];
+
+/**
+ * A mascot picture in the gallery's 4:3 format, so it fills it without bars. The backend takes
+ * no SVG, so the browser renders it to PNG; the colour comes from a hue rotation.
+ */
+async function mascotPortrait(
+  browser: Browser,
+  { svg, hue, background, flip }: (typeof portraits)[number],
+): Promise<Buffer> {
+  const source = readFileSync(path.join(__dirname, '../../apps/frontend/public', svg));
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
   await page.setContent(
-    `<body style="margin:0;display:grid;place-items:center;height:100vh;background:#e4f2c7">
-      <img style="width:72%" src="data:image/svg+xml;base64,${svg.toString('base64')}"></body>`,
+    `<body style="margin:0;display:grid;place-items:center;height:100vh;background:${background}">
+      <img style="height:62%;filter:hue-rotate(${hue}deg);transform:scaleX(${flip ? -1 : 1})"
+        src="data:image/svg+xml;base64,${source.toString('base64')}"></body>`,
   );
   const png = await page.screenshot();
   await page.close();
@@ -55,13 +88,18 @@ test.beforeAll(async ({ request, browser }) => {
     data: { filePath: mainBook, title: 'Das Licht von Kaltenhafen', author: 'Simone Schäfer' },
   });
   ids = await seedDemoBook(request);
-  await request.post(`/api/notes/${ids.notes['Mara Lindqvist']}/images`, {
-    multipart: {
-      file: { name: 'mara.png', mimeType: 'image/png', buffer: await mascotPortrait(browser) },
-      width: '800',
-      height: '800',
-    },
-  });
+  for (const portrait of portraits)
+    await request.post(`/api/notes/${ids.notes[portrait.character]}/images`, {
+      multipart: {
+        file: {
+          name: 'portrait.png',
+          mimeType: 'image/png',
+          buffer: await mascotPortrait(browser, portrait),
+        },
+        width: '1200',
+        height: '900',
+      },
+    });
   await request.post('/api/project/close');
 
   // The writing log only grows by writing, so the history goes straight into the file.
