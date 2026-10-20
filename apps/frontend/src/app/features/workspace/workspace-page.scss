@@ -261,8 +261,10 @@
   // The tree reaches the edges of the sidebar so the lines between parts run all the way across; it
   // keeps its own distance to the content. Without a fixed scrollbar gutter, or every line would
   // end before it on the right.
+  // Pulled up by the tree's drop strip at the top (see manuscript-tree.scss), so the entries stay
+  // where they were.
   wm-manuscript-tree {
-    margin: 0 calc(-1 * var(--sidebar-padding-x));
+    margin: -0.5rem calc(-1 * var(--sidebar-padding-x)) 0;
     padding: 0 var(--sidebar-padding-x);
   }
 

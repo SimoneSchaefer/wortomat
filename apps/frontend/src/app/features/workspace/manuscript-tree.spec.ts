@@ -228,6 +228,20 @@ describe('ManuscriptTree', () => {
     expect(element.querySelector('[data-drop]')).toBeNull();
   });
 
+  it('puts a chapter before the first part via the strip above the tree', async () => {
+    const { api, element, row, settle } = await setup();
+    vi.spyOn(row('Teil I'), 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 10, 200, 30));
+    const drag = startDrag();
+    drag.fire(row('Kapitel 2').parentElement!, 'dragstart');
+    const nav = element.querySelector('nav')!;
+    drag.fire(nav, 'dragover', 4);
+    await settle();
+    expect(row('Teil I').parentElement!.getAttribute('data-drop')).toBe('before');
+    drag.fire(nav, 'drop', 4);
+    await settle();
+    expect(api.moveNode).toHaveBeenCalledWith('k2', { parentId: null, beforeId: 'teil' });
+  });
+
   it('ignores foreign things dragged into the tree (e.g. files)', async () => {
     const { row, settle } = await setup();
     const files = startDrag();

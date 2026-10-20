@@ -4,8 +4,11 @@
   flex-direction: column;
 }
 
+// The strip above the first entry is a drop target too: "before the first part" needs room – the
+// edge of the (sticky) row alone is a few pixels.
 nav {
   flex: 1;
+  padding-top: 0.5rem;
 }
 
 // Do not hide keyboard-focused entries under the sticky part
@@ -263,6 +266,12 @@ li.dragging > .row {
 // Before/after marks the whole entry including its children: "after chapter 2" lands behind its
 // scenes, not between the chapter and its first scene.
 li[data-drop='before'] {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+// The opaque sticky row would cover the mark at the top of the first part (later parts have room
+// above their row)
+nav > ul > li.part:first-child[data-drop='before'] > .row {
   box-shadow: inset 0 2px 0 var(--accent);
 }
 
