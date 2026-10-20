@@ -227,13 +227,40 @@ li[draggable='true'],
   cursor: grab;
 }
 
-// Drop marker when reordering groups – as in the manuscript tree
-.group[data-drop='before'] {
-  box-shadow: inset 0 2px 0 var(--accent);
+// Drop marker when reordering groups: a straight bar in the middle of the gap between two cards.
+// An inset shadow would bend along the rounded corners – and "after A" and "before B" would be two
+// lines a few pixels apart instead of one.
+.group {
+  position: relative;
 }
 
-.group[data-drop='after'] {
-  box-shadow: inset 0 -2px 0 var(--accent);
+.group[data-drop]::before {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+// Half the 0.4rem gap, plus the border and half the bar
+.group[data-drop='before']::before {
+  top: calc(-0.2rem - 2px);
+}
+
+.group[data-drop='after']::before {
+  bottom: calc(-0.2rem - 2px);
+}
+
+// No gap above the first or below the last card – the scrolling list would cut the bar off
+.group:first-of-type[data-drop='before']::before {
+  top: 0;
+}
+
+.group:last-of-type[data-drop='after']::before {
+  bottom: 0;
 }
 
 .group.dragging {
