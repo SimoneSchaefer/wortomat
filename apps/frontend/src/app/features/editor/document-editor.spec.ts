@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import type { Editor } from '@tiptap/core';
 import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
@@ -259,5 +260,25 @@ describe('DocumentEditor', () => {
     expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'orderedList' });
     await choose(de.editor.lists, de.editor.orderedList);
     expect((await saved())?.doc.content?.[0]).toMatchObject({ type: 'paragraph' });
+  });
+
+  it('does not count words brought back by undo or redo as written', async () => {
+    const { element, prose, settle, saved } = await setup(fakeSource({ s1: PLAIN }));
+    const editor = (prose() as HTMLElement & { editor: Editor }).editor;
+    // "Es war " – deleted and saved, so undo really restores text the backend already lost
+    editor.commands.deleteRange({ from: 1, to: 8 });
+    await settle();
+    expect(await saved()).toMatchObject({ text: 'einmal.', pastedWords: 0 });
+
+    button(element, '↶').click();
+    await settle();
+    expect(await saved()).toMatchObject({ text: 'Es war einmal.', pastedWords: 2 });
+
+    button(element, '↷').click();
+    await settle();
+    expect(await saved()).toMatchObject({ text: 'einmal.', pastedWords: 0 });
+    button(element, '↶').click();
+    await settle();
+    expect(await saved()).toMatchObject({ pastedWords: 2 });
   });
 });
