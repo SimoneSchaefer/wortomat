@@ -12,6 +12,7 @@ import { StatusIcon } from '../../core/status-icon';
 import { ProjectStore } from '../../core/project-store';
 import {
   changesPosition,
+  dropMark,
   type DropPlan,
   type DropPosition,
   planDrop,
@@ -50,6 +51,10 @@ export class ManuscriptTree {
 
   protected readonly draggingId = signal<string | null>(null);
   protected readonly dropPlan = signal<DropPlan | null>(null);
+  private readonly mark = computed(() => {
+    const plan = this.dropPlan();
+    return plan ? dropMark(plan, this.store.nodes()) : null;
+  });
 
   /** Also called from the sidebar header (new chapter/part). */
   async add(kind: NodeKind, parentId: string | null): Promise<void> {
@@ -135,21 +140,9 @@ export class ManuscriptTree {
     this.draggingId.set(node.id);
   }
 
-  protected onDragOverItem(event: DragEvent, target: ManuscriptNode): void {
+  protected onDragOver(event: DragEvent): void {
     const dragged = this.draggedNode(event);
-    if (!dragged) return;
-    event.stopPropagation(); // do not count it as a drop onto the free area
-    const row = event.currentTarget as HTMLElement;
-    const { top, height } = row.getBoundingClientRect();
-    const ratio = height > 0 ? (event.clientY - top) / height : 0.5;
-    this.acceptDrop(event, planDrop(dragged, target, ratio, this.store.nodes()));
-  }
-
-  protected onDragOverFreeSpace(event: DragEvent): void {
-    const dragged = this.draggedNode(event);
-    if (dragged) {
-      this.acceptDrop(event, planRootDrop(dragged));
-    }
+    if (dragged) this.acceptDrop(event, this.planAt(event, dragged));
   }
 
   protected onDragLeave(event: DragEvent): void {
@@ -161,7 +154,8 @@ export class ManuscriptTree {
 
   protected async onDrop(event: DragEvent): Promise<void> {
     const dragged = this.draggedNode(event);
-    const plan = this.dropPlan();
+    // From the drop itself, not the last dragover: a dragleave in between may have cleared that
+    const plan = dragged ? this.planAt(event, dragged) : null;
     this.onDragEnd();
     if (!dragged || !plan) return;
     event.preventDefault();
@@ -177,8 +171,8 @@ export class ManuscriptTree {
 
   /** For `data-drop`. */
   protected dropMarker(id: string | null): DropPosition | null {
-    const plan = this.dropPlan();
-    return plan && plan.targetId === id ? plan.position : null;
+    const mark = this.mark();
+    return mark && mark.targetId === id ? mark.position : null;
   }
 
   private draggedNode(event: DragEvent): ManuscriptNode | undefined {
@@ -186,6 +180,46 @@ export class ManuscriptTree {
     return id && event.dataTransfer?.types.includes(DRAG_TYPE)
       ? this.store.findNode(id)
       : undefined;
+  }
+
+  /**
+   * Every point of the tree maps to an entry – also the indentation left of the scenes and the gaps
+   * around the chapter cards, which are no row. A drop there used to be refused, so the scene stayed
+   * where it was.
+   */
+  private planAt(event: DragEvent, dragged: ManuscriptNode): DropPlan | null {
+    const tree = event.currentTarget as HTMLElement;
+    const hit = (event.target as Element | null)?.closest?.<HTMLElement>('.row[data-id]');
+    if (hit && tree.contains(hit)) return this.planOnRow(dragged, hit, event.clientY);
+
+    const rows = [...tree.querySelectorAll<HTMLElement>('.row[data-id]')];
+    const y = event.clientY;
+    // Beside a row (indentation): that row
+    const beside = rows.find((row) => {
+      const { top, bottom } = row.getBoundingClientRect();
+      return y >= top && y < bottom;
+    });
+    if (beside) return this.planOnRow(dragged, beside, y);
+
+    const above = rows.filter((row) => row.getBoundingClientRect().bottom <= y).at(-1);
+    const below = rows.find((row) => row.getBoundingClientRect().top > y);
+    // Below the whole tree: end of the book where allowed (chapters, parts)
+    const root = below ? null : planRootDrop(dragged);
+    if (root) return root;
+    const atEnd = above ? this.planOnRow(dragged, above, Infinity) : null;
+    const atStart = below ? this.planOnRow(dragged, below, -Infinity) : null;
+    // Between a container and its first child: at the start of the container – otherwise behind
+    // the entry above (e.g. the end of the previous chapter)
+    const opensContainer = above && below && above.parentElement!.contains(below);
+    return opensContainer ? (atStart ?? atEnd) : (atEnd ?? atStart);
+  }
+
+  private planOnRow(dragged: ManuscriptNode, row: HTMLElement, y: number): DropPlan | null {
+    const target = this.store.findNode(row.dataset['id']!);
+    if (!target) return null;
+    const { top, height } = row.getBoundingClientRect();
+    const ratio = height > 0 ? Math.min(1, Math.max(0, (y - top) / height)) : 0.5;
+    return planDrop(dragged, target, ratio, this.store.nodes());
   }
 
   private acceptDrop(event: DragEvent, plan: DropPlan | null): void {

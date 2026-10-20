@@ -156,19 +156,20 @@ describe('ManuscriptTree', () => {
   });
 
   it('moves by dragging and marks where it lands', async () => {
-    const { api, row, settle } = await setup();
+    const { api, element, row, settle } = await setup();
     const drag = startDrag();
     drag.fire(row('C').parentElement!, 'dragstart');
     await settle();
-    // jsdom has no layout: the pointer counts as the middle of the row, i.e. "after".
+    // jsdom has no layout: the pointer counts as the middle of the row, i.e. "after" – marked as
+    // "before" the next scene, the same place.
     drag.fire(row('A'), 'dragover');
     await settle();
-    expect(row('A').parentElement!.getAttribute('data-drop')).toBe('after');
+    expect(row('B').parentElement!.getAttribute('data-drop')).toBe('before');
 
     drag.fire(row('A'), 'drop');
     await settle();
     expect(api.moveNode).toHaveBeenCalledWith('c', { parentId: 'k1', beforeId: 'b' });
-    expect(row('A').parentElement!.hasAttribute('data-drop')).toBe(false);
+    expect(element.querySelector('[data-drop]')).toBeNull();
   });
 
   it('does not ask the backend when a drop changes nothing or is not allowed', async () => {
@@ -188,6 +189,58 @@ describe('ManuscriptTree', () => {
     await settle();
 
     expect(api.moveNode).not.toHaveBeenCalled();
+  });
+
+  it('also takes drops beside and between the rows (indentation, gaps at the chapter cards)', async () => {
+    const { api, element, row, settle } = await setup();
+    // jsdom has no layout: rows of 30 px, with gaps after C (end of the card) and after Kapitel 2
+    const tops: Record<string, number> = {
+      'Teil I': 0,
+      'Kapitel 1': 30,
+      A: 60,
+      B: 90,
+      C: 120,
+      'Kapitel 2': 160,
+      D: 200,
+    };
+    for (const [title, top] of Object.entries(tops)) {
+      vi.spyOn(row(title), 'getBoundingClientRect').mockReturnValue(new DOMRect(0, top, 200, 30));
+    }
+    const chapter2 = row('Kapitel 2').parentElement!;
+    const dropAt = async (title: string, target: Element, y: number) => {
+      const drag = startDrag();
+      drag.fire(row(title).parentElement!, 'dragstart');
+      const over = drag.fire(target, 'dragover', y);
+      await settle();
+      expect(over.defaultPrevented).toBe(true);
+      drag.fire(target, 'drop', y);
+      await settle();
+    };
+
+    // In the indentation left of B, upper half: before B
+    await dropAt('D', row('B').closest('ul')!, 95);
+    expect(api.moveNode).toHaveBeenLastCalledWith('d', { parentId: 'k1', beforeId: 'b' });
+    // Gap between C and the next chapter: end of Kapitel 1
+    await dropAt('A', chapter2, 155);
+    expect(api.moveNode).toHaveBeenLastCalledWith('a', { parentId: 'k1', beforeId: null });
+    // Gap between a chapter and its first scene: start of that chapter
+    await dropAt('B', chapter2, 195);
+    expect(api.moveNode).toHaveBeenLastCalledWith('b', { parentId: 'k2', beforeId: 'd' });
+    expect(element.querySelector('[data-drop]')).toBeNull();
+  });
+
+  it('puts a chapter before the first part via the strip above the tree', async () => {
+    const { api, element, row, settle } = await setup();
+    vi.spyOn(row('Teil I'), 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 10, 200, 30));
+    const drag = startDrag();
+    drag.fire(row('Kapitel 2').parentElement!, 'dragstart');
+    const nav = element.querySelector('nav')!;
+    drag.fire(nav, 'dragover', 4);
+    await settle();
+    expect(row('Teil I').parentElement!.getAttribute('data-drop')).toBe('before');
+    drag.fire(nav, 'drop', 4);
+    await settle();
+    expect(api.moveNode).toHaveBeenCalledWith('k2', { parentId: null, beforeId: 'teil' });
   });
 
   it('ignores foreign things dragged into the tree (e.g. files)', async () => {

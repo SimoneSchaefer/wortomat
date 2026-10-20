@@ -1,5 +1,5 @@
 import type { ManuscriptNode, NodeKind } from '@wortomat/shared';
-import { changesPosition, planDrop, planRootDrop } from './drop-plan';
+import { changesPosition, dropMark, planDrop, planRootDrop } from './drop-plan';
 
 function node(id: string, kind: NodeKind, parentId: string | null, sortOrder: number) {
   return {
@@ -68,6 +68,25 @@ describe('planRootDrop', () => {
   it('allows only parts and chapters at the top level', () => {
     expect(planRootDrop(K1)?.request).toEqual({ parentId: null, beforeId: null });
     expect(planRootDrop(A)).toBeNull();
+  });
+});
+
+describe('dropMark', () => {
+  it('shows "after" as "before" the next entry, so one place has one mark', () => {
+    expect(dropMark(planDrop(D, A, 0.9, nodes)!, nodes)).toEqual({
+      targetId: 'B',
+      position: 'before',
+    });
+    // The dragged entry still stands there
+    expect(dropMark(planDrop(B, A, 0.9, nodes)!, nodes)).toEqual({
+      targetId: 'B',
+      position: 'before',
+    });
+    // Last in its chapter: stays "after"
+    expect(dropMark(planDrop(D, C, 0.9, nodes)!, nodes)).toEqual({
+      targetId: 'C',
+      position: 'after',
+    });
   });
 });
 

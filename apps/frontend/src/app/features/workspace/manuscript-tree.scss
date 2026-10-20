@@ -4,8 +4,11 @@
   flex-direction: column;
 }
 
+// The strip above the first entry is a drop target too: "before the first part" needs room – the
+// edge of the (sticky) row alone is a few pixels.
 nav {
   flex: 1;
+  padding-top: 0.5rem;
 }
 
 // Do not hide keyboard-focused entries under the sticky part
@@ -266,8 +269,46 @@ li[data-drop='before'] {
   box-shadow: inset 0 2px 0 var(--accent);
 }
 
+// The opaque sticky row would cover the mark at the top of the first part (later parts have room
+// above their row)
+nav > ul > li.part:first-child[data-drop='before'] > .row {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
 li[data-drop='after'] {
   box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+// Chapter cards are rounded: an inset shadow would bend along the corners. A straight bar on the
+// border line instead – consecutive cards share that line, so before/after meet on it. Kept clear
+// of the corner radius at the sides.
+li.chapter {
+  position: relative;
+}
+
+li.chapter[data-drop='before'],
+li.chapter[data-drop='after'] {
+  box-shadow: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    pointer-events: none;
+  }
+}
+
+// Centred on the 1px border just outside the padding box
+li.chapter[data-drop='before']::before {
+  top: -1.5px;
+}
+
+li.chapter[data-drop='after']::before {
+  bottom: -1.5px;
 }
 
 li[data-drop='inside'] > .row {

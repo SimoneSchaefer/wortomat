@@ -113,7 +113,11 @@ export async function until(settle: () => Promise<void>, check: () => boolean): 
  * browser, so `dragstart` data is visible in `dragover` and `drop`.
  */
 export function startDrag(options: { files?: File[] } = {}): {
-  fire: (target: Element, type: 'dragstart' | 'dragover' | 'drop' | 'dragend') => Event;
+  fire: (
+    target: Element,
+    type: 'dragstart' | 'dragover' | 'drop' | 'dragend',
+    clientY?: number,
+  ) => Event;
 } {
   const data = new Map<string, string>();
   const files = options.files ?? [];
@@ -128,11 +132,11 @@ export function startDrag(options: { files?: File[] } = {}): {
     files,
   };
   return {
-    fire(target, type) {
+    fire(target, type, clientY = 0) {
       const event = new Event(type, { bubbles: true, cancelable: true });
       Object.defineProperties(event, {
         dataTransfer: { value: transfer },
-        clientY: { value: 0 },
+        clientY: { value: clientY },
       });
       target.dispatchEvent(event);
       return event;
