@@ -12,6 +12,7 @@ import { StatusIcon } from '../../core/status-icon';
 import { ProjectStore } from '../../core/project-store';
 import {
   changesPosition,
+  dropMark,
   type DropPlan,
   type DropPosition,
   planDrop,
@@ -50,6 +51,10 @@ export class ManuscriptTree {
 
   protected readonly draggingId = signal<string | null>(null);
   protected readonly dropPlan = signal<DropPlan | null>(null);
+  private readonly mark = computed(() => {
+    const plan = this.dropPlan();
+    return plan ? dropMark(plan, this.store.nodes()) : null;
+  });
 
   /** Also called from the sidebar header (new chapter/part). */
   async add(kind: NodeKind, parentId: string | null): Promise<void> {
@@ -166,8 +171,8 @@ export class ManuscriptTree {
 
   /** For `data-drop`. */
   protected dropMarker(id: string | null): DropPosition | null {
-    const plan = this.dropPlan();
-    return plan && plan.targetId === id ? plan.position : null;
+    const mark = this.mark();
+    return mark && mark.targetId === id ? mark.position : null;
   }
 
   private draggedNode(event: DragEvent): ManuscriptNode | undefined {

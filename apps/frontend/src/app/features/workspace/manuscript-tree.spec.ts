@@ -156,19 +156,20 @@ describe('ManuscriptTree', () => {
   });
 
   it('moves by dragging and marks where it lands', async () => {
-    const { api, row, settle } = await setup();
+    const { api, element, row, settle } = await setup();
     const drag = startDrag();
     drag.fire(row('C').parentElement!, 'dragstart');
     await settle();
-    // jsdom has no layout: the pointer counts as the middle of the row, i.e. "after".
+    // jsdom has no layout: the pointer counts as the middle of the row, i.e. "after" – marked as
+    // "before" the next scene, the same place.
     drag.fire(row('A'), 'dragover');
     await settle();
-    expect(row('A').parentElement!.getAttribute('data-drop')).toBe('after');
+    expect(row('B').parentElement!.getAttribute('data-drop')).toBe('before');
 
     drag.fire(row('A'), 'drop');
     await settle();
     expect(api.moveNode).toHaveBeenCalledWith('c', { parentId: 'k1', beforeId: 'b' });
-    expect(row('A').parentElement!.hasAttribute('data-drop')).toBe(false);
+    expect(element.querySelector('[data-drop]')).toBeNull();
   });
 
   it('does not ask the backend when a drop changes nothing or is not allowed', async () => {

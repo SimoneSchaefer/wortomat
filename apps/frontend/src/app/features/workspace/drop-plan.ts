@@ -83,6 +83,23 @@ export function planRootDrop(dragged: ManuscriptNode): DropPlan | null {
     : null;
 }
 
+/**
+ * Where the mark is drawn. "After A" and "before B" are the same place but would be drawn at A's
+ * bottom and B's top – a few pixels of pointer movement made the bar jump between the two. So
+ * "after" shows as "before" the next entry wherever there is one (the dragged entry counts: it
+ * still stands there).
+ */
+export function dropMark(
+  plan: DropPlan,
+  nodes: readonly ManuscriptNode[],
+): { targetId: string | null; position: DropPosition } {
+  const target = plan.targetId && nodes.find((node) => node.id === plan.targetId);
+  const next = target && plan.position === 'after' ? nextSibling(target, target.id, nodes) : null;
+  return next
+    ? { targetId: next.id, position: 'before' }
+    : { targetId: plan.targetId, position: plan.position };
+}
+
 /** Avoids needless requests. */
 export function changesPosition(
   dragged: ManuscriptNode,
