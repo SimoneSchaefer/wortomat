@@ -19,7 +19,7 @@
         (dragstart)="onDragStart($event, item.node)"
         (dragend)="onDragEnd()"
       >
-        <div class="row" (dragover)="onDragOverItem($event, item.node)">
+        <div class="row" [attr.data-id]="item.node.id">
           @if (item.node.kind !== 'scene' && !filter.active()) {
             <button
               type="button"
@@ -132,7 +132,7 @@
 
 <nav
   [attr.aria-label]="t().workspace.manuscript"
-  (dragover)="onDragOverFreeSpace($event)"
+  (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
