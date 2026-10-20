@@ -279,6 +279,38 @@ li[data-drop='after'] {
   box-shadow: inset 0 -2px 0 var(--accent);
 }
 
+// Chapter cards are rounded: an inset shadow would bend along the corners. A straight bar on the
+// border line instead – consecutive cards share that line, so before/after meet on it. Kept clear
+// of the corner radius at the sides.
+li.chapter {
+  position: relative;
+}
+
+li.chapter[data-drop='before'],
+li.chapter[data-drop='after'] {
+  box-shadow: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    pointer-events: none;
+  }
+}
+
+// Centred on the 1px border just outside the padding box
+li.chapter[data-drop='before']::before {
+  top: -1.5px;
+}
+
+li.chapter[data-drop='after']::before {
+  bottom: -1.5px;
+}
+
 li[data-drop='inside'] > .row {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   outline: 1px dashed var(--accent);
