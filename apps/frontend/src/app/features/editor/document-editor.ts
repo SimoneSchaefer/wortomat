@@ -17,7 +17,9 @@ import { Editor, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import { CharacterCount, Placeholder } from '@tiptap/extensions';
-import type { Node as ProseMirrorNode, Slice } from '@tiptap/pm/model';
+import { isHistoryTransaction } from '@tiptap/pm/history';
+import type { Fragment, Node as ProseMirrorNode, Slice } from '@tiptap/pm/model';
+import type { Transaction } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
 import type { AnnotationKind, EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
 import { ANNOTATION_KINDS } from '../../core/annotations';
@@ -120,7 +122,7 @@ export class DocumentEditor {
   private editor: Editor | null = null;
   private currentId: string | null = null;
   private dirty = false;
-  /** Words pasted/moved since the last save – they do not count in the writing log. */
+  /** Words pasted, moved or restored by undo/redo since the last save – not counted as written. */
   private pastedWords = 0;
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
   /** Saves run strictly one after another. */
@@ -287,7 +289,9 @@ export class DocumentEditor {
           return true;
         },
       },
-      onUpdate: ({ editor }) => {
+      onUpdate: ({ editor, transaction }) => {
+        // Undoing a deletion brings back words that were counted when they were first typed.
+        if (isHistoryTransaction(transaction)) this.pastedWords += insertedWords(transaction);
         this.wordCount.set(editor.storage.characterCount.words());
         this.scheduleSave();
       },
@@ -581,6 +585,27 @@ function imageFiles(data: DataTransfer | null): File[] {
 
 /** Counted like the editor does. */
 function wordsIn(slice: Slice): number {
-  return slice.content.textBetween(0, slice.content.size, ' ', ' ').split(/\s+/).filter(Boolean)
-    .length;
+  return wordList(slice.content).length;
+}
+
+/**
+ * Only an estimate: the words between the first and the last change. The backend caps it at what
+ * its own diff counts as added.
+ */
+function insertedWords(transaction: Transaction): number {
+  const before = wordList(transaction.before.content);
+  const after = wordList(transaction.doc.content);
+  let start = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) start++;
+  let endBefore = before.length;
+  let endAfter = after.length;
+  while (endBefore > start && endAfter > start && before[endBefore - 1] === after[endAfter - 1]) {
+    endBefore--;
+    endAfter--;
+  }
+  return endAfter - start;
+}
+
+function wordList(content: Fragment): string[] {
+  return content.textBetween(0, content.size, ' ', ' ').split(/\s+/).filter(Boolean);
 }
