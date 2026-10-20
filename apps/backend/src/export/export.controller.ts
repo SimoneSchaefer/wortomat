@@ -25,6 +25,7 @@ import type {
 } from '@wortomat/shared';
 import type { Request, Response } from 'express';
 import { ExportService } from './export.service.js';
+import { sanitizeSceneBreak } from './layout.js';
 import { localized, requestLanguage } from '../i18n.js';
 
 @Controller('export')
@@ -66,8 +67,11 @@ export class ExportController {
   }
 
   @Get('preview')
-  preview(@Query('sceneTitles') sceneTitles?: string): ExportPreview {
-    return this.exporter.preview(sceneTitles === 'true');
+  preview(
+    @Query('sceneTitles') sceneTitles?: string,
+    @Query('sceneBreak') sceneBreak?: string,
+  ): ExportPreview {
+    return this.exporter.preview(sceneTitles === 'true', sanitizeSceneBreak(sceneBreak));
   }
 
   /**

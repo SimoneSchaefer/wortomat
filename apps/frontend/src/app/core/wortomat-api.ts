@@ -456,12 +456,11 @@ export class WortomatApi {
     return this.call(this.http.put<ExportSettings>('/api/export/settings', settings));
   }
 
-  exportPreview(includeSceneTitles: boolean): Promise<ExportPreview> {
-    return this.call(
-      this.http.get<ExportPreview>('/api/export/preview', {
-        params: { sceneTitles: String(includeSceneTitles) },
-      }),
-    );
+  /** `sceneBreak`: `null` for the template default. */
+  exportPreview(includeSceneTitles: boolean, sceneBreak: string | null): Promise<ExportPreview> {
+    const params: Record<string, string> = { sceneTitles: String(includeSceneTitles) };
+    if (sceneBreak !== null) params['sceneBreak'] = sceneBreak;
+    return this.call(this.http.get<ExportPreview>('/api/export/preview', { params }));
   }
 
   exportToFile(request: ExportRequest & { filePath: string }): Promise<ExportResult> {

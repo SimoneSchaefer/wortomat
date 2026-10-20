@@ -260,6 +260,59 @@ describe('Export', () => {
     assert.match(withTitles.html, /class="scene-title"/);
   });
 
+  it('remembers an own scene break – empty is allowed, line breaks are not', async () => {
+    const initial = await api<ExportSettingsResponse>('GET', '/api/export/settings');
+    assert.equal(initial.defaults.sceneBreak, null);
+    const put = (sceneBreak: unknown) =>
+      api<ExportSettings>('PUT', '/api/export/settings', { ...initial.settings, sceneBreak });
+    assert.equal((await put('  ~  ~  ')).sceneBreak, '~  ~');
+    assert.equal((await put('')).sceneBreak, '');
+    assert.equal((await put('a\nb')).sceneBreak, 'a b');
+    assert.equal((await put(42)).sceneBreak, null);
+    const again = await api<ExportSettingsResponse>('GET', '/api/export/settings');
+    assert.equal(again.settings.sceneBreak, null);
+  });
+
+  it('puts an own scene break into every format and the preview', async () => {
+    const exportWithBreak = async (format: string, template: string, sceneBreak: string) => {
+      const result = await api<ExportResult>('POST', '/api/export', {
+        format,
+        template,
+        includeSceneTitles: false,
+        sceneBreak,
+        filePath: path.join(tmpDir, `out-${format}-${template}-break-${sceneBreak.length}`),
+      });
+      return readFile(result.filePath);
+    };
+
+    const html = (await exportWithBreak('html', 'normseite', '~ <> ~')).toString('utf8');
+    assert.match(html, /<p class="scene-break" aria-hidden="true">~ &lt;&gt; ~<\/p>/);
+    assert.doesNotMatch(html, /\* \* \*/);
+    // Empty keeps a line of its own, otherwise the scenes would run together
+    const empty = (await exportWithBreak('html', 'normseite', '')).toString('utf8');
+    assert.match(empty, /<p class="scene-break" aria-hidden="true">&#xA0;<\/p>/);
+
+    const epub = await JSZip.loadAsync(await exportWithBreak('epub', 'roman', '§'));
+    const chapters = await Promise.all(
+      Object.keys(epub.files)
+        .filter((name) => name.includes('kapitel-'))
+        .map((name) => epub.file(name)!.async('string')),
+    );
+    assert.ok(
+      chapters.some((xhtml) => xhtml.includes('<p class="scene-break" aria-hidden="true">§</p>')),
+    );
+
+    for (const template of ['normseite', 'roman']) {
+      const zip = await JSZip.loadAsync(await exportWithBreak('docx', template, '#  #'));
+      const document = await zip.file('word/document.xml')!.async('string');
+      assert.match(document, /<w:t xml:space="preserve">#  #<\/w:t>/, template);
+      assert.doesNotMatch(document, /<w:t xml:space="preserve">\*/, template);
+    }
+
+    const preview = await api<ExportPreview>('GET', '/api/export/preview?sceneBreak=%E2%80%A2');
+    assert.match(preview.html, /<p class="scene-break" aria-hidden="true">•<\/p>/);
+  });
+
   it('exports self-contained HTML in reading order – without todo marks', async () => {
     const { data, filePath, warnings } = await exportTo('html', 'normseite');
     const html = data.toString('utf8');
@@ -678,6 +731,15 @@ describe('LaTeX helpers', () => {
         String.raw`\IfFileExists{type1ec.sty}{\usepackage{type1ec}}{\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}}`,
       ),
     );
+  });
+
+  it('replaces the text of the scene break, keeping its spaces', () => {
+    const book = { title: 'T', author: '', wordCount: 0, characterCount: 0, items: [] };
+    const render = (sceneBreak?: string | null) =>
+      renderLatex(book, 'roman', { includeSceneTitles: false, sceneBreak }, () => null).tex;
+    assert.ok(render('%  %').includes(String.raw`\renewcommand{\wmscenebreaktext}{\%\ \ \%}`));
+    assert.ok(render('').includes(String.raw`\renewcommand{\wmscenebreaktext}{}`));
+    assert.doesNotMatch(render(null), /renewcommand\{\\wmscenebreaktext/);
   });
 
   it('groups alignment and indentation per paragraph and escapes link addresses', () => {

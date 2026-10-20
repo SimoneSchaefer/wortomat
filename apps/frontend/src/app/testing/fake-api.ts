@@ -296,12 +296,14 @@ export class FakeApi {
     this.exportState = { ...this.exportState, settings: structuredClone(settings) };
     return structuredClone(settings);
   });
-  readonly exportPreview = vi.fn(async (_includeSceneTitles: boolean): Promise<ExportPreview> => ({
-    title: 'Buch',
-    author: '',
-    chapterTitle: 'Kapitel 1',
-    html: '<p>Es war einmal.</p>',
-  }));
+  readonly exportPreview = vi.fn(
+    async (_includeSceneTitles: boolean, _sceneBreak: string | null): Promise<ExportPreview> => ({
+      title: 'Buch',
+      author: '',
+      chapterTitle: 'Kapitel 1',
+      html: '<p>Es war einmal.</p>',
+    }),
+  );
   readonly exportToFile = vi.fn(
     async (request: ExportRequest & { filePath: string }): Promise<ExportResult> => ({
       filePath: request.filePath,
@@ -681,6 +683,7 @@ export const TEST_EXPORT_SETTINGS: ExportSettings = {
   template: 'normseite',
   includeSceneTitles: false,
   includeParts: true,
+  sceneBreak: null,
   layout: {
     pageWidth: 125,
     pageHeight: 190,

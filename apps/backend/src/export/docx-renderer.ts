@@ -131,6 +131,7 @@ export async function renderDocx(
     maxImage: { width: textWidth / TWIPS_PER_PIXEL, height: (textHeight / TWIPS_PER_PIXEL) * 0.7 },
     indentNext: false,
     textHeight,
+    sceneBreak: options.sceneBreak ?? null,
   };
 
   const body: Paragraph[] = [];
@@ -264,6 +265,8 @@ interface Context {
   /** Indent only from the second paragraph after a heading or scene break. */
   indentNext: boolean;
   textHeight: number;
+  /** `null`: the template's own. */
+  sceneBreak: string | null;
 }
 
 function titlePage(
@@ -355,7 +358,8 @@ function sceneBreak(ctx: Context): Paragraph {
     alignment: AlignmentType.CENTER,
     keepNext: true,
     spacing: { before: spacing, after: spacing },
-    children: [new TextRun(ctx.layout.sceneBreak)],
+    // An empty run still yields a line of its own – the blank line between the scenes
+    children: [new TextRun(ctx.sceneBreak ?? ctx.layout.sceneBreak)],
   });
 }
 

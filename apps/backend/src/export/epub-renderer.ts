@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import type { Book, ExportOptions, ImageResolver, ResolvedImage } from './book.js';
-import { BLOCK_FORMAT_CSS, contentHtml, escapeHtml } from './html-renderer.js';
+import { BLOCK_FORMAT_CSS, contentHtml, escapeHtml, sceneBreakHtml } from './html-renderer.js';
 import { type Localized, localized } from '../i18n.js';
 
 export interface EpubMeta {
@@ -34,7 +34,7 @@ h3.scene-title { font-size: 1.1em; margin: 2em 0 0.8em; }
 h4, h5 { margin: 1.5em 0 0.5em; }
 p { margin: 0; text-align: justify; -epub-hyphens: auto; hyphens: auto; }
 p + p { text-indent: 1.5em; }
-p.scene-break { text-align: center; text-indent: 0; margin: 1.2em 0; }
+p.scene-break { text-align: center; text-indent: 0; margin: 1.2em 0; white-space: pre-wrap; }
 p.scene-break + p { text-indent: 0; }
 blockquote { margin: 1em 1.5em; font-style: italic; }
 figure { margin: 1.5em 0; text-align: center; }
@@ -155,9 +155,9 @@ export async function renderEpub(
       const heading = options.includeSceneTitles
         ? `<h3 class="scene-title">${escapeHtml(scene.title)}</h3>`
         : index > 0
-          ? '<p class="scene-break" aria-hidden="true">* * *</p>'
+          ? sceneBreakHtml(options.sceneBreak)
           : '';
-      return heading + contentHtml(scene.doc.content ?? [], imageSource);
+      return heading + contentHtml(scene.doc.content ?? [], imageSource, options.sceneBreak);
     });
     const chapter = addPage(
       `kapitel-${++chapterCount}`,

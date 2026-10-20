@@ -31,7 +31,7 @@ import {
 } from './book.js';
 import { renderDocx } from './docx-renderer.js';
 import { renderEpub } from './epub-renderer.js';
-import { contentHtml, escapeHtml, renderHtml } from './html-renderer.js';
+import { contentHtml, escapeHtml, renderHtml, sceneBreakHtml } from './html-renderer.js';
 import {
   BOOK_FONTS,
   COURIER_FILES,
@@ -39,6 +39,7 @@ import {
   type FontFiles,
   type FontStyle,
   sanitizeLayout,
+  sanitizeSceneBreak,
   sanitizeSettings,
 } from './layout.js';
 import { renderLatex } from './latex-renderer.js';
@@ -138,7 +139,7 @@ export class ExportService {
     return settings;
   }
 
-  preview(includeSceneTitles: boolean): ExportPreview {
+  preview(includeSceneTitles: boolean, sceneBreak: string | null = null): ExportPreview {
     const project = this.requireProject();
     const book = this.book(project);
     const chapter = book.items.find((item) => item.kind === 'chapter' && item.scenes.length > 0);
@@ -153,7 +154,9 @@ export class ExportService {
           includeSceneTitles
             ? `<h3 class="scene-title">${escapeHtml(scene.title)}</h3>`
             : index > 0
-              ? '<p class="scene-break" aria-hidden="true">*&#x2003;*&#x2003;*</p>'
+              ? sceneBreak === null
+                ? '<p class="scene-break" aria-hidden="true">*&#x2003;*&#x2003;*</p>'
+                : sceneBreakHtml(sceneBreak)
               : '',
         );
         const blocks: JsonNode[] = [];
@@ -162,7 +165,7 @@ export class ExportService {
           blocks.push(block);
           budget -= plainText(block).length;
         }
-        parts.push(contentHtml(blocks, image));
+        parts.push(contentHtml(blocks, image, sceneBreak));
       }
     }
     const html = parts.join('');
@@ -182,7 +185,10 @@ export class ExportService {
       );
     }
     const template = TEMPLATES.includes(request.template) ? request.template : 'normseite';
-    const options = { includeSceneTitles: request.includeSceneTitles === true };
+    const options = {
+      includeSceneTitles: request.includeSceneTitles === true,
+      sceneBreak: sanitizeSceneBreak(request.sceneBreak),
+    };
     const layout = sanitizeLayout(request.layout);
     const project = this.requireProject();
     const fullBook = this.book(project);

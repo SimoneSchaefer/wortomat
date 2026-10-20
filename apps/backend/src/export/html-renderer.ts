@@ -27,7 +27,7 @@ const STYLE = `
   h4, h5 { margin: 1.5rem 0 0.5rem; }
   p { margin: 0; text-align: justify; hyphens: auto; }
   p + p { text-indent: 1.5em; }
-  p.scene-break { text-align: center; margin: 1.5rem 0; letter-spacing: 0.6em; }
+  p.scene-break { text-align: center; margin: 1.5rem 0; letter-spacing: 0.6em; white-space: pre-wrap; }
   blockquote { margin: 1rem 1.5rem; font-style: italic; }
   figure { margin: 1.5rem 0; text-align: center; }
   figure img { max-width: 100%; height: auto; }
@@ -60,9 +60,9 @@ export function renderHtml(book: Book, options: ExportOptions, images: ImageReso
       const heading = options.includeSceneTitles
         ? `<h3 class="scene-title">${escapeHtml(scene.title)}</h3>`
         : index > 0
-          ? '<p class="scene-break" aria-hidden="true">* * *</p>'
+          ? sceneBreakHtml(options.sceneBreak)
           : '';
-      return heading + contentHtml(scene.doc.content ?? [], embedImage);
+      return heading + contentHtml(scene.doc.content ?? [], embedImage, options.sceneBreak);
     });
     parts.push(
       `<section class="chapter"><h2>${escapeHtml(item.title)}</h2>${scenes.join('')}</section>`,
@@ -96,12 +96,27 @@ ${parts.join('\n')}
  */
 export type ImageSource = (src: string) => string | null;
 
-/** The output is valid XHTML as well (`<br/>`, `<img … />`) so the EPUB can use it too. */
-export function contentHtml(nodes: JsonNode[], image: ImageSource): string {
-  return nodes.map((node) => block(node, image)).join('');
+export const DEFAULT_SCENE_BREAK = '* * *';
+
+/**
+ * An empty break still keeps its line (no-break space) – otherwise the paragraph and its margins
+ * collapse and the scenes run into each other.
+ */
+export function sceneBreakHtml(text: string | null | undefined): string {
+  const content = escapeHtml(text ?? DEFAULT_SCENE_BREAK) || '&#xA0;';
+  return `<p class="scene-break" aria-hidden="true">${content}</p>`;
 }
 
-function block(node: JsonNode, image: ImageSource): string {
+/** The output is valid XHTML as well (`<br/>`, `<img … />`) so the EPUB can use it too. */
+export function contentHtml(
+  nodes: JsonNode[],
+  image: ImageSource,
+  sceneBreak?: string | null,
+): string {
+  return nodes.map((node) => block(node, image, sceneBreak)).join('');
+}
+
+function block(node: JsonNode, image: ImageSource, sceneBreak?: string | null): string {
   switch (node.type) {
     case 'paragraph':
       return `<p${formatClass(node)}>${inline(node.content ?? [])}</p>`;
@@ -110,19 +125,19 @@ function block(node: JsonNode, image: ImageSource): string {
       return `<${tag}${formatClass(node)}>${inline(node.content ?? [])}</${tag}>`;
     }
     case 'blockquote':
-      return `<blockquote>${contentHtml(node.content ?? [], image)}</blockquote>`;
+      return `<blockquote>${contentHtml(node.content ?? [], image, sceneBreak)}</blockquote>`;
     case 'bulletList':
-      return `<ul>${contentHtml(node.content ?? [], image)}</ul>`;
+      return `<ul>${contentHtml(node.content ?? [], image, sceneBreak)}</ul>`;
     case 'orderedList': {
       const start = Number(node.attrs?.['start'] ?? 1);
-      return `<ol${start !== 1 ? ` start="${start}"` : ''}>${contentHtml(node.content ?? [], image)}</ol>`;
+      return `<ol${start !== 1 ? ` start="${start}"` : ''}>${contentHtml(node.content ?? [], image, sceneBreak)}</ol>`;
     }
     case 'listItem':
-      return `<li>${contentHtml(node.content ?? [], image)}</li>`;
+      return `<li>${contentHtml(node.content ?? [], image, sceneBreak)}</li>`;
     case 'codeBlock':
       return `<pre><code>${escapeHtml((node.content ?? []).map((t) => t.text ?? '').join(''))}</code></pre>`;
     case 'horizontalRule':
-      return '<p class="scene-break" aria-hidden="true">* * *</p>';
+      return sceneBreakHtml(sceneBreak);
     case 'image': {
       const src = image(String(node.attrs?.['src'] ?? ''));
       if (!src) return '';
@@ -130,7 +145,7 @@ function block(node: JsonNode, image: ImageSource): string {
       return `<figure><img src="${escapeHtml(src)}" alt="${alt}"/></figure>`;
     }
     default:
-      return node.content ? contentHtml(node.content, image) : '';
+      return node.content ? contentHtml(node.content, image, sceneBreak) : '';
   }
 }
 

@@ -6,17 +6,41 @@
 
   <form class="export-form" (submit)="$event.preventDefault(); run()">
     <div class="options">
-      <!-- Applies to all formats, hence before the format choice -->
-      <label class="check">
-        <input
-          type="checkbox"
-          [checked]="includeSceneTitles()"
-          [disabled]="!loaded()"
-          (change)="includeSceneTitles.set($any($event.target).checked)"
-        />
-        {{ t().export.sceneTitles }}
-        <span class="muted">{{ t().export.sceneTitlesHint }}</span>
-      </label>
+      <!-- Applies to all formats, hence before the format choice. Titles and breaks both mark
+           where a scene starts, so they share a card. -->
+      <div class="check-group">
+        <label class="check">
+          <input
+            type="checkbox"
+            [checked]="includeSceneTitles()"
+            [disabled]="!loaded()"
+            (change)="includeSceneTitles.set($any($event.target).checked)"
+          />
+          {{ t().export.sceneTitles }}
+          <span class="muted">{{ t().export.sceneTitlesHint }}</span>
+        </label>
+        <!-- Also replaces the breaks (horizontal rules) inside a scene -->
+        <div class="check scene-break">
+          <label class="check">
+            <input
+              type="checkbox"
+              [checked]="customSceneBreak()"
+              [disabled]="!loaded()"
+              (change)="customSceneBreak.set($any($event.target).checked)"
+            />
+            {{ t().export.sceneBreak }}
+          </label>
+          <input
+            type="text"
+            maxlength="50"
+            [attr.aria-label]="t().export.sceneBreakText"
+            [value]="sceneBreakText()"
+            [disabled]="!loaded() || !customSceneBreak()"
+            (input)="sceneBreakText.set($any($event.target).value)"
+          />
+          <span class="muted">{{ t().export.sceneBreakHint }}</span>
+        </div>
+      </div>
       <label class="check">
         <input
           type="checkbox"
@@ -273,6 +297,13 @@
       @if (!paged()) {
         <p class="preview-none">{{ t().export.previewNone }}</p>
       } @else if (layout(); as layout) {
+        <!-- Above the pages – below them it is easily missed -->
+        <p class="hint">
+          {{ t().export.previewHint }}
+          @if (template() === 'roman' && !fontInstalled()) {
+            {{ t().export.fontMissingPreview }}
+          }
+        </p>
         <div class="preview-scroll">
           <wm-export-preview
             [template]="template()"
@@ -281,12 +312,6 @@
             [content]="preview()"
           />
         </div>
-        <p class="hint">
-          {{ t().export.previewHint }}
-          @if (template() === 'roman' && !fontInstalled()) {
-            {{ t().export.fontMissingPreview }}
-          }
-        </p>
       }
     </aside>
   </form>

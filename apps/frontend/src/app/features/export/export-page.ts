@@ -25,6 +25,8 @@ import { ExportPreviewPages, isPreviewFontAvailable, previewFontFamily } from '.
 const FORMATS: readonly ExportFormat[] = ['html', 'docx', 'pdf', 'epub'];
 const TEMPLATES: readonly ExportTemplate[] = ['normseite', 'roman'];
 const SAVE_DELAY_MS = 500;
+/** Suggestion when switching on an own break – the templates differ slightly (`*` on the standard page). */
+const DEFAULT_SCENE_BREAK = '* * *';
 
 /** Common book sizes in mm; the default of the novel template is 125 × 190. */
 const PAGE_SIZES: ReadonlyArray<{ width: number; height: number; name?: string }> = [
@@ -68,6 +70,12 @@ export class ExportPage {
   protected readonly template = signal<ExportTemplate>('normseite');
   protected readonly includeSceneTitles = signal(false);
   protected readonly includeParts = signal(true);
+  protected readonly customSceneBreak = signal(false);
+  /** Kept while the own break is switched off, so switching back restores it. */
+  protected readonly sceneBreakText = signal(DEFAULT_SCENE_BREAK);
+  private readonly sceneBreak = computed(() =>
+    this.customSceneBreak() ? this.sceneBreakText() : null,
+  );
   protected readonly layout = signal<BookLayout | null>(null);
   private defaults: ExportSettings | null = null;
   /**
@@ -80,6 +88,7 @@ export class ExportPage {
   private savedJson = '';
 
   protected readonly preview = signal<ExportPreview | null>(null);
+  private previewRequest = 0;
   /** Optional fonts (Computer Modern) only when installed – or already chosen. */
   protected readonly fonts = computed<BookFontInfo[]>(() =>
     (this.capabilities()?.fonts ?? []).filter(
@@ -124,11 +133,12 @@ export class ExportPage {
         this.saveTimer = setTimeout(() => void this.save(settings), SAVE_DELAY_MS);
       });
     });
-    // Scene titles change the text of the preview
+    // Scene titles and breaks change the text of the preview
     effect(() => {
       const withTitles = this.includeSceneTitles();
+      const sceneBreak = this.sceneBreak();
       untracked(() => {
-        if (this.loaded()) void this.loadPreview(withTitles);
+        if (this.loaded()) void this.loadPreview(withTitles, sceneBreak);
       });
     });
     // Check whether the preview can load the chosen font (file from TeX or system font)
@@ -151,6 +161,7 @@ export class ExportPage {
           template: this.template(),
           includeSceneTitles: this.includeSceneTitles(),
           includeParts: this.includeParts(),
+          sceneBreak: this.sceneBreak(),
           layout,
         }
       : null;
@@ -183,12 +194,14 @@ export class ExportPage {
       this.template.set(settings.template);
       this.includeSceneTitles.set(settings.includeSceneTitles);
       this.includeParts.set(settings.includeParts);
+      this.customSceneBreak.set(settings.sceneBreak !== null);
+      if (settings.sceneBreak !== null) this.sceneBreakText.set(settings.sceneBreak);
       this.layout.set(settings.layout);
       this.customSize.set(this.pageSizeIndex() < 0);
       this.savedJson = JSON.stringify(settings);
       this.loaded.set(true);
       this.applyPdfFallback();
-      await this.loadPreview(settings.includeSceneTitles);
+      await this.loadPreview(settings.includeSceneTitles, settings.sceneBreak);
     } catch (error) {
       this.error.set(errorMessage(error, this.t()));
     }
@@ -214,11 +227,14 @@ export class ExportPage {
     if (this.saveTimer === undefined) this.savedJson = JSON.stringify(this.currentSettings());
   }
 
-  private async loadPreview(includeSceneTitles: boolean): Promise<void> {
+  private async loadPreview(includeSceneTitles: boolean, sceneBreak: string | null): Promise<void> {
+    // While typing a break, an older answer may arrive after a newer one
+    const request = ++this.previewRequest;
     try {
-      this.preview.set(await this.api.exportPreview(includeSceneTitles));
+      const preview = await this.api.exportPreview(includeSceneTitles, sceneBreak);
+      if (request === this.previewRequest) this.preview.set(preview);
     } catch {
-      this.preview.set(null); // exporting still works without a preview
+      if (request === this.previewRequest) this.preview.set(null); // exporting still works without a preview
     }
   }
 
@@ -302,6 +318,7 @@ export class ExportPage {
       template: this.template(),
       includeSceneTitles: this.includeSceneTitles(),
       includeParts: this.includeParts(),
+      sceneBreak: this.sceneBreak(),
       layout: this.layout() ?? undefined,
     };
     this.flushSave();

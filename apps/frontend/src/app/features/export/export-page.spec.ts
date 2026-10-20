@@ -157,7 +157,48 @@ describe('ExportPage', () => {
     const { api, element, settle } = await setup();
     element.querySelector<HTMLInputElement>('input[type=checkbox]')!.click();
     await until(settle, () => api.exportPreview.mock.calls.length === 2);
-    expect(api.exportPreview).toHaveBeenLastCalledWith(true);
+    expect(api.exportPreview).toHaveBeenLastCalledWith(true, null);
+  });
+
+  it('takes an own scene break – also an empty one – into preview, settings and export', async () => {
+    const { api, element, submit, settle } = await setup();
+    const option = element.querySelector('.scene-break')!;
+    const toggle = option.querySelector<HTMLInputElement>('input[type=checkbox]')!;
+    const field = option.querySelector<HTMLInputElement>('input[type=text]')!;
+    expect(toggle.checked).toBe(false);
+    expect(field.disabled).toBe(true);
+
+    toggle.click();
+    await settle();
+    expect(field.disabled).toBe(false);
+    expect(field.value).toBe('* * *');
+    field.value = '';
+    field.dispatchEvent(new Event('input'));
+    await until(settle, () => api.exportPreview.mock.lastCall?.[1] === '');
+    await wait(SAVE_DELAY);
+    await settle();
+    expect(api.saveExportSettings.mock.calls.at(-1)![0].sceneBreak).toBe('');
+
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    await submit();
+    expect(api.exportDownload).toHaveBeenCalledWith(expect.objectContaining({ sceneBreak: '' }));
+    click.mockRestore();
+  });
+
+  it('restores a remembered scene break; switched off it means the template default', async () => {
+    const { api, element, settle } = await setup((api) => {
+      api.exportState.settings = { ...TEST_EXPORT_SETTINGS, sceneBreak: '~' };
+    });
+    const option = element.querySelector('.scene-break')!;
+    const toggle = option.querySelector<HTMLInputElement>('input[type=checkbox]')!;
+    expect(toggle.checked).toBe(true);
+    expect(option.querySelector<HTMLInputElement>('input[type=text]')!.value).toBe('~');
+    expect(api.exportPreview).toHaveBeenLastCalledWith(false, '~');
+
+    toggle.click();
+    await until(settle, () => api.exportPreview.mock.lastCall?.[1] === null);
   });
 
   it('downloads in browser mode, with the editor saved first and warnings shown', async () => {
