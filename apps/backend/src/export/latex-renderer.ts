@@ -44,7 +44,8 @@ const NORMSEITE_PREAMBLE = String.raw`\documentclass[12pt,a4paper]{article}
 \newcommand{\wmpart}[1]{\clearpage\vspace*{8\baselineskip}\begin{center}\textbf{#1}\end{center}\clearpage}
 \newcommand{\wmchapter}[1]{\clearpage\begin{center}\textbf{#1}\end{center}\vspace{\baselineskip}}
 \newcommand{\wmscenetitle}[1]{\par\vspace{\baselineskip}\noindent\textbf{#1}\par\nopagebreak}
-\newcommand{\wmscenebreak}{\par\noindent\hfill*\hfill\null\par}
+\newcommand{\wmscenebreaktext}{*}
+\newcommand{\wmscenebreak}{\par\noindent\hfill\wmscenebreaktext\hfill\null\par}
 `;
 
 /**
@@ -107,7 +108,8 @@ ${font}
 \newcommand{\wmpart}[1]{\cleardoublepage\thispagestyle{empty}\vspace*{0.3\textheight}\begin{center}\LARGE #1\end{center}\clearpage}
 \newcommand{\wmchapter}[1]{\clearpage\thispagestyle{plain}\vspace*{0.15\textheight}\begin{center}\Large #1\end{center}\vspace{2\baselineskip}}
 \newcommand{\wmscenetitle}[1]{\par\bigskip\noindent\textit{#1}\par\nopagebreak\smallskip}
-\newcommand{\wmscenebreak}{\par\bigskip\noindent\hfill*\quad*\quad*\hfill\null\par\bigskip}
+\newcommand{\wmscenebreaktext}{*\quad*\quad*}
+\newcommand{\wmscenebreak}{\par\bigskip\noindent\hfill\wmscenebreaktext\hfill\null\par\bigskip}
 `;
 }
 
@@ -133,6 +135,14 @@ export function renderLatex(
       .map((t) => escape(t, ctx))
       .join(': ');
     out.push(`\\fancyhead[L]{${header}}`, '\\fancyhead[R]{\\thepage}');
+  }
+  if (options.sceneBreak != null) {
+    // Control spaces: TeX would merge the spaces of `*   *   *` into one. Empty leaves a blank line.
+    const text = options.sceneBreak
+      .split(' ')
+      .map((piece) => escape(piece, ctx))
+      .join('\\ ');
+    out.push(`\\renewcommand{\\wmscenebreaktext}{${text}}`);
   }
   out.push('\\begin{document}', titlePage(book, template, ctx));
 

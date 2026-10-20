@@ -712,6 +712,8 @@ export interface ExportSettings {
   template: ExportTemplate;
   includeSceneTitles: boolean;
   includeParts: boolean;
+  /** Own text between scenes (may be empty – then only a blank line); `null` = template default. */
+  sceneBreak: string | null;
   layout: BookLayout;
 }
 
@@ -744,6 +746,8 @@ export interface ExportRequest {
   template: ExportTemplate;
   /** Otherwise only scene breaks. */
   includeSceneTitles: boolean;
+  /** As in `ExportSettings`; missing means the template default. */
+  sceneBreak?: string | null;
   /**
    * Parts as pages or headings of their own. Missing means printed; without them the chapters
    * follow each other directly.

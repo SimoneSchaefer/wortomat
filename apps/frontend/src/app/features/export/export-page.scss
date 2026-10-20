@@ -35,7 +35,8 @@ header {
 }
 
 .options > fieldset,
-.options > .check {
+.options > .check,
+.options > .check-group {
   padding: 1rem 1.25rem 1.25rem;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
@@ -54,8 +55,23 @@ header {
   }
 }
 
-.options > .check {
+.options > .check,
+.options > .check-group {
   padding-block: 0.9rem;
+}
+
+.check-group {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.scene-break {
+  column-gap: 0.75rem;
+
+  input[type='text'] {
+    width: 10rem;
+    font-family: inherit;
+  }
 }
 
 .layout legend {

@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS: ExportSettings = {
   template: 'normseite',
   includeSceneTitles: false,
   includeParts: true,
+  sceneBreak: null,
   layout: DEFAULT_LAYOUT,
 };
 
@@ -250,8 +251,23 @@ export function sanitizeSettings(input: unknown): ExportSettings {
     includeSceneTitles: value.includeSceneTitles === true,
     // Older settings do not know the switch – parts were always printed there
     includeParts: value.includeParts !== false,
+    sceneBreak: sanitizeSceneBreak(value.sceneBreak),
     layout: sanitizeLayout(value.layout),
   };
+}
+
+const MAX_SCENE_BREAK_LENGTH = 50;
+
+/**
+ * One line only: the break is a single centred paragraph in every format. Inner spaces stay – they
+ * are the usual way to spread out `*   *   *`.
+ */
+export function sanitizeSceneBreak(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  return value
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim()
+    .slice(0, MAX_SCENE_BREAK_LENGTH);
 }
 
 function round(value: number, digits: number): number {

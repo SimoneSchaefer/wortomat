@@ -30,6 +30,8 @@ export interface Book {
 
 export interface ExportOptions {
   includeSceneTitles: boolean;
+  /** `undefined`/`null`: each format's own default. */
+  sceneBreak?: string | null;
 }
 
 /** `null` when unknown. */
