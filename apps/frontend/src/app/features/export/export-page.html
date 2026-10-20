@@ -297,6 +297,13 @@
       @if (!paged()) {
         <p class="preview-none">{{ t().export.previewNone }}</p>
       } @else if (layout(); as layout) {
+        <!-- Above the pages – below them it is easily missed -->
+        <p class="hint">
+          {{ t().export.previewHint }}
+          @if (template() === 'roman' && !fontInstalled()) {
+            {{ t().export.fontMissingPreview }}
+          }
+        </p>
         <div class="preview-scroll">
           <wm-export-preview
             [template]="template()"
@@ -305,12 +312,6 @@
             [content]="preview()"
           />
         </div>
-        <p class="hint">
-          {{ t().export.previewHint }}
-          @if (template() === 'roman' && !fontInstalled()) {
-            {{ t().export.fontMissingPreview }}
-          }
-        </p>
       }
     </aside>
   </form>
