@@ -23,6 +23,14 @@ describe('diffWords', () => {
     assert.deepEqual(diffWords('a b c d e f g', 'X b c d e f Y'), { added: 2, removed: 2 });
   });
 
+  it('does not count a word whose punctuation or capital letter changed', () => {
+    assert.deepEqual(diffWords('Er kam hier. Er ging.', 'Er kam hier, aber er ging.'), {
+      added: 1,
+      removed: 0,
+    });
+    assert.deepEqual(diffWords('»Komm!«', '»Komm?«'), { added: 0, removed: 0 });
+  });
+
   it('ignores pure whitespace changes', () => {
     assert.deepEqual(diffWords('Es  war\neinmal', 'Es war einmal'), { added: 0, removed: 0 });
   });
