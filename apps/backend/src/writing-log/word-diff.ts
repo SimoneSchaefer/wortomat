@@ -11,8 +11,8 @@ export interface WordDiff {
  * the length stays the same.
  */
 export function diffWords(before: string, after: string): WordDiff {
-  const a = words(before);
-  const b = words(after);
+  const a = words(before).map(comparable);
+  const b = words(after).map(comparable);
 
   // Drop the common start and end – usually only the changed spot remains.
   let start = 0;
@@ -42,6 +42,16 @@ export function diffWords(before: string, after: string): WordDiff {
 /** Counts like the editor (Tiptap CharacterCount): runs without whitespace. */
 export function words(text: string): string[] {
   return text.split(/\s+/).filter(Boolean);
+}
+
+const TRIM_PUNCTUATION = /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu;
+
+/**
+ * Inserting ", aber" turns "hier." into "hier," – without this the old word would count as
+ * rewritten. A changed capital letter after merging two sentences is no new word either.
+ */
+function comparable(word: string): string {
+  return word.replace(TRIM_PUNCTUATION, '').toLowerCase();
 }
 
 function longestCommonSubsequence(a: readonly string[], b: readonly string[]): number {

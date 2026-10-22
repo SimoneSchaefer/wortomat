@@ -29,6 +29,7 @@ import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
+import { wordCore } from '../../core/text-analysis';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
 import { Annotation, type AnnotationAt, annotationAt, annotationsIn } from './annotation-mark';
@@ -593,8 +594,9 @@ function wordsIn(slice: Slice): number {
  * its own diff counts as added.
  */
 function insertedWords(transaction: Transaction): number {
-  const before = wordList(transaction.before.content);
-  const after = wordList(transaction.doc.content);
+  // Compared like the backend diff: "hier." and "hier," are the same word.
+  const before = wordList(transaction.before.content).map(comparable);
+  const after = wordList(transaction.doc.content).map(comparable);
   let start = 0;
   while (start < before.length && start < after.length && before[start] === after[start]) start++;
   let endBefore = before.length;
@@ -604,6 +606,10 @@ function insertedWords(transaction: Transaction): number {
     endAfter--;
   }
   return endAfter - start;
+}
+
+function comparable(word: string): string {
+  return wordCore(word).toLowerCase();
 }
 
 function wordList(content: Fragment): string[] {
