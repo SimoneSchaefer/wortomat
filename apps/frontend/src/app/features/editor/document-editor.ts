@@ -34,6 +34,7 @@ import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
 import { Annotation, type AnnotationAt, annotationAt, annotationsIn } from './annotation-mark';
 import { Indent } from './indent';
+import { ReadingPositions } from './reading-position';
 import { ToolbarMenu } from './toolbar-menu';
 import { Revision, revisionResult } from './revision';
 import type { Finding, FindingKind, RevisionResult } from './revision-check';
@@ -97,6 +98,7 @@ export class DocumentEditor {
   private readonly settings = inject(AppSettingsStore);
   private readonly notes = inject(NotesStore, { optional: true });
   private readonly injector = inject(Injector);
+  private readonly readingPositions = inject(ReadingPositions);
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
   private readonly noteInput = viewChild<ElementRef<HTMLInputElement>>('noteInput');
 
@@ -129,12 +131,15 @@ export class DocumentEditor {
   /** Saves run strictly one after another. */
   private saveQueue: Promise<void> = Promise.resolve();
   private loadCounter = 0;
+  private stopTracking: (() => void) | null = null;
 
   constructor() {
     const unregister = inject(PendingSaves).register(() => this.flush());
     inject(DestroyRef).onDestroy(() => {
       unregister();
       const editor = this.editor;
+      this.stopTracking?.();
+      this.stopTracking = null;
       // flush() reads the content synchronously; the editor may go after that.
       void this.flush();
       editor?.destroy();
@@ -163,6 +168,8 @@ export class DocumentEditor {
       if (loadId !== this.loadCounter) return; // another document was chosen meanwhile
 
       // One editor per document so the undo history does not mix.
+      this.stopTracking?.();
+      this.stopTracking = null;
       this.editor?.destroy();
       this.currentId = id;
       this.dirty = false;
@@ -171,6 +178,7 @@ export class DocumentEditor {
       this.editor = this.createEditor(content.doc ?? this.template());
       this.editor.commands.setRevisionMode(this.revising());
       this.wordCount.set(content.wordCount);
+      this.stopTracking = this.readingPositions.track(id, this.editor);
       this.status.set('saved');
       void this.refreshWrittenToday();
     } catch (error) {

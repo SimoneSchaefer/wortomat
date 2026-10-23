@@ -201,6 +201,23 @@ describe('DocumentEditor', () => {
     expect(source.save.mock.calls.map(([id]) => id)).toEqual(['s1']);
   });
 
+  it('puts the cursor back where it was when a document is opened again', async () => {
+    const source = fakeSource({ s1: PLAIN, s2: SCENE });
+    const { fixture, settle, prose } = await setup(source);
+    const editorOf = () => (prose() as HTMLElement & { editor: Editor }).editor;
+    editorOf().commands.setTextSelection({ from: 4, to: 7 });
+    await settle();
+
+    fixture.componentRef.setInput('documentId', 's2');
+    await until(settle, () => text(prose()).startsWith('Am Abend'));
+    expect(editorOf().state.selection.from).not.toBe(4);
+
+    fixture.componentRef.setInput('documentId', 's1');
+    await until(settle, () => text(prose()).startsWith('Es war'));
+    expect(editorOf().state.selection).toMatchObject({ from: 4, to: 7 });
+    await until(settle, () => document.activeElement === prose());
+  });
+
   it('starts a never saved document with the template', async () => {
     const template = {
       type: 'doc',
