@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { diffWords } from './word-diff.js';
+import { diffWords, isTypoFix } from './word-diff.js';
 import { writingDay } from './writing-log.service.js';
 
 describe('diffWords', () => {
@@ -31,6 +31,31 @@ describe('diffWords', () => {
     assert.deepEqual(diffWords('»Komm!«', '»Komm?«'), { added: 0, removed: 0 });
   });
 
+  it('does not count fixing a typo as written', () => {
+    assert.deepEqual(diffWords('Er ging nach Hasue.', 'Er ging nach Hause.'), {
+      added: 0,
+      removed: 0,
+    });
+    assert.deepEqual(diffWords('Sie lachte laut', 'Sie lachte sehr laut und lange'), {
+      added: 3,
+      removed: 0,
+    });
+    assert.deepEqual(
+      diffWords('Der Hnud bellte. Es war kalt.', 'Der Hund bellte laut. Es war bitterkalt.'),
+      { added: 2, removed: 1 },
+    );
+    assert.deepEqual(diffWords('Er sah die Strasse.', 'Er sah die Straße.'), {
+      added: 0,
+      removed: 0,
+    });
+  });
+
+  it('counts a rewritten passage in full even if words look alike', () => {
+    const before = Array.from({ length: 100 }, (_, i) => `wort${i}a`).join(' ');
+    const after = Array.from({ length: 100 }, (_, i) => `wort${i}b`).join(' ');
+    assert.deepEqual(diffWords(before, after), { added: 100, removed: 100 });
+  });
+
   it('ignores pure whitespace changes', () => {
     assert.deepEqual(diffWords('Es  war\neinmal', 'Es war einmal'), { added: 0, removed: 0 });
   });
@@ -39,6 +64,25 @@ describe('diffWords', () => {
     const before = Array.from({ length: 3000 }, (_, i) => `a${i}`).join(' ');
     const after = Array.from({ length: 3500 }, (_, i) => `b${i}`).join(' ');
     assert.deepEqual(diffWords(before, after), { added: 500, removed: 0 });
+  });
+});
+
+describe('isTypoFix', () => {
+  it('accepts one wrong, missing, extra or swapped letter', () => {
+    assert.ok(isTypoFix('hasue', 'hause'));
+    assert.ok(isTypoFix('hause', 'haus'));
+    assert.ok(isTypoFix('gehn', 'gehen'));
+    assert.ok(isTypoFix('lachre', 'lachte'));
+  });
+
+  it('accepts two mistakes in long words only', () => {
+    assert.ok(isTypoFix('vregangenhiet', 'vergangenheit'));
+    assert.ok(!isTypoFix('kalt', 'halb'));
+  });
+
+  it('keeps short words and real replacements apart', () => {
+    assert.ok(!isTypoFix('der', 'die'));
+    assert.ok(!isTypoFix('alte', 'junge'));
   });
 });
 
