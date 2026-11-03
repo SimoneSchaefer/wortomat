@@ -22,7 +22,7 @@
     "@types/node": "^24.9.0",
     "@wortomat/backend": "*",
     "@wortomat/shared": "*",
-    "electron": "44.7.0",
+    "electron": "44.9.1",
     "electron-builder": "^26.15.3",
     "esbuild": "^0.28.2",
     "wait-on": "^9.5.1"
