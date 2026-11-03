@@ -9,6 +9,7 @@ import { Tooltip } from './tooltip';
     <button type="button" id="undo" title="Rückgängig">U</button>
     <span id="cell" data-tip="Mo., 5. Okt.: 300 geschrieben"><i>·</i></span>
     <p id="plain">ohne Hinweis</p>
+    <div contenteditable="true"><span id="mark" title="Füllwort">eigentlich</span></div>
     <wm-tooltip />
   `,
 })
@@ -98,6 +99,15 @@ describe('Tooltip', () => {
 
     el('undo').blur();
     expect(shown()).toBeNull();
+  });
+
+  it('leaves titles inside editable text untouched, but still shows them', async () => {
+    const { el, shown, over } = await setup();
+    over(el('mark'));
+    expect(el('mark').getAttribute('title')).toBe('Füllwort');
+    expect(el('mark').hasAttribute('data-wm-title')).toBe(false);
+    vi.advanceTimersByTime(500);
+    expect(shown()).toBe('Füllwort');
   });
 
   it('stays quiet when focus comes from a click', async () => {

@@ -60,7 +60,8 @@ export const Annotation = Mark.create<AnnotationOptions>({
           const note = attributes['note'] as string | null;
           return {
             'data-annotation': attributes['kind'],
-            title: note ? `${title}: ${note}` : title,
+            // Not `title`: the app tooltip would park it, and ProseMirror redraws on that change
+            'data-tip': note ? `${title}: ${note}` : title,
           };
         },
       },

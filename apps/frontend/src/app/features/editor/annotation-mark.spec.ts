@@ -34,7 +34,7 @@ describe('Annotation (todo/idea/fixme)', () => {
       [' noch was.', null],
     ]);
     expect(editor.getHTML()).toContain(
-      '<mark class="wm-annotation" data-annotation="todo" title="Todo">fehlt</mark>',
+      '<mark class="wm-annotation" data-annotation="todo" data-tip="Todo">fehlt</mark>',
     );
     editor.destroy();
   });
@@ -165,7 +165,7 @@ describe('proofreading notes (from proofreading on the go)', () => {
     }
     editor.commands.setTextSelection(2);
     expect(annotationAt(editor.state)).toBeNull();
-    expect(editor.getHTML()).toContain('title="Fixme: Was fehlt?"');
+    expect(editor.getHTML()).toContain('data-tip="Fixme: Was fehlt?"');
     expect(editor.getHTML()).toContain('data-suggestion="mangelt"');
     editor.destroy();
   });

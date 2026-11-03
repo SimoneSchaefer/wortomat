@@ -81,9 +81,11 @@ export class Tooltip {
       this.anchor = target;
       this.schedule();
     }
-    // Also when keyboard focus already shows the tooltip for it
+    // Also when keyboard focus already shows the tooltip for it. Never inside the editor text:
+    // ProseMirror redraws the changed element, the pointer is over a new one, and so on – no click
+    // gets through then. Marks there use data-tip.
     const title = target?.getAttribute('title');
-    if (target && title != null) {
+    if (target && title != null && !target.closest('[contenteditable="true"]')) {
       target.setAttribute('data-wm-title', title);
       target.removeAttribute('title');
     }
