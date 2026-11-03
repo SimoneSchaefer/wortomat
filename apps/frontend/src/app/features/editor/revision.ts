@@ -94,7 +94,7 @@ export const Revision = Extension.create<RevisionOptions>({
       const decorations = result.findings.map((finding) =>
         Decoration.inline(finding.from, finding.to, {
           class: `wm-rev wm-rev-${finding.kind}`,
-          title: options.describe(finding),
+          'data-tip': options.describe(finding),
         }),
       );
       return { result, decorations: DecorationSet.create(doc, decorations) };
