@@ -2,8 +2,9 @@
 #
 # Gives the commit its release number (tag v2.0.<n>, see apps/desktop/scripts/version.mjs), builds
 # the installers for Linux, Windows and macOS and publishes them as a GitHub release with notes
-# from the merged pull requests. Running it again for the same commit replaces the installers of
-# that release. Started on another branch it only builds (dev version, run artifacts, no release).
+# from the merged pull requests. If a platform fails, the others are published anyway; "Re-run
+# failed jobs" then adds the missing installers to the same release. Started on another branch it
+# only builds (dev version, run artifacts, no release).
 name: Release
 
 on:
@@ -79,7 +80,16 @@ jobs:
             exit 1
           fi
       - run: npm run build
-      - run: npm run dist -w @wortomat/desktop -- ${{ matrix.platform }} --publish never
+      # electron-builder downloads tools while packaging; their servers time out now and then (504)
+      - name: Package
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            npm run dist -w @wortomat/desktop -- ${{ matrix.platform }} --publish never && exit 0
+            echo "::warning::Packaging failed (attempt $attempt of 3)"
+            sleep $((attempt * 30))
+          done
+          exit 1
       - uses: actions/upload-artifact@v5
         with:
           name: wortomat-${{ matrix.name }}-${{ needs.version.outputs.version }}
@@ -88,8 +98,9 @@ jobs:
 
   publish:
     needs: [version, build]
-    # Dev versions (another branch, uncommitted state) get no release
-    if: ${{ !contains(needs.version.outputs.version, '-') }}
+    # Also when a platform failed: the others are published, and "Re-run failed jobs" adds the
+    # missing one to the same release later. Dev versions (another branch) get no release.
+    if: ${{ !cancelled() && needs.version.result == 'success' && !contains(needs.version.outputs.version, '-') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # creates the release
@@ -102,9 +113,15 @@ jobs:
         with:
           path: installers
           merge-multiple: true
+      # download-artifact creates it only when there is something to download
+      - run: mkdir -p installers
       - name: Publish the release
         run: |
           ls -l installers
+          if [ -z "$(ls -A installers)" ]; then
+            echo "::error::No platform was built"
+            exit 1
+          fi
           if gh release view "$TAG" > /dev/null 2>&1; then
             gh release upload "$TAG" installers/* --clobber
           else
