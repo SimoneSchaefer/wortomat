@@ -1,0 +1,113 @@
+# Start manually: Actions → "Release" → "Run workflow" (on main).
+#
+# Gives the commit its release number (tag v2.0.<n>, see apps/desktop/scripts/version.mjs), builds
+# the installers for Linux, Windows and macOS and publishes them as a GitHub release with notes
+# from the merged pull requests. Running it again for the same commit replaces the installers of
+# that release. Started on another branch it only builds (dev version, run artifacts, no release).
+name: Release
+
+on:
+  workflow_dispatch:
+
+# Two releases at once would fight over the next number
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # pushes the release tag
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # All tags and main's history: the release number is a tag
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      # Once here instead of in every build, so all platforms get the same number
+      - id: version
+        run: echo "version=$(node apps/desktop/scripts/version.mjs --assign)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      # One platform failing should not throw away the others' work; the release waits for all
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: --linux
+            name: linux
+            files: |
+              apps/desktop/release/*.AppImage
+              apps/desktop/release/*.deb
+          - runner: windows-latest
+            platform: --win
+            name: windows
+            files: apps/desktop/release/*.exe
+          - runner: macos-latest
+            platform: --mac
+            name: macos
+            files: apps/desktop/release/*.dmg
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    env:
+      # Without a certificate, do not sign instead of searching the keychain for one.
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The build reads its version from the tag the version job pushed
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Check the version
+        shell: bash
+        run: |
+          actual="$(node apps/desktop/scripts/version.mjs)"
+          if [ "$actual" != "${{ needs.version.outputs.version }}" ]; then
+            echo "::error::Built $actual, expected ${{ needs.version.outputs.version }}"
+            exit 1
+          fi
+      - run: npm run build
+      - run: npm run dist -w @wortomat/desktop -- ${{ matrix.platform }} --publish never
+      - uses: actions/upload-artifact@v5
+        with:
+          name: wortomat-${{ matrix.name }}-${{ needs.version.outputs.version }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+
+  publish:
+    needs: [version, build]
+    # Dev versions (another branch, uncommitted state) get no release
+    if: ${{ !contains(needs.version.outputs.version, '-') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # creates the release
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: v${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Publish the release
+        run: |
+          ls -l installers
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" installers/* --clobber
+          else
+            gh release create "$TAG" installers/* --verify-tag --generate-notes \
+              --title "Wortomat ${{ needs.version.outputs.version }}"
+          fi

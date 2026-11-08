@@ -180,15 +180,17 @@ npm run dist
 - [`ci.yml`](.github/workflows/ci.yml) prüft Typen, baut und testet bei jedem Push und Pull Request;
   ein zweiter Job führt die End-to-End-Tests aus und legt bei Fehlern den Playwright-Bericht
   (mit Traces) als Artefakt ab.
-- „Release Linux“, „Release Windows“ und „Release macOS“ bauen die Installer im Release-Modus
-  auf dem jeweiligen Betriebssystem. Sie laufen nur von Hand (Actions → Workflow → „Run workflow“)
-  und legen die Installer als Artefakt am Lauf ab. Den gemeinsamen Ablauf beschreibt
-  [`release-build.yml`](.github/workflows/release-build.yml). Die Installer sind nicht signiert.
+- [„Release“](.github/workflows/release.yml) läuft nur von Hand (Actions → „Release“ → „Run
+  workflow“ auf `main`): vergibt die Release-Nummer, baut die Installer für Linux, Windows und
+  macOS parallel auf dem jeweiligen Betriebssystem und veröffentlicht sie als GitHub-Release
+  `v2.0.<n>` mit Release-Notes aus den gemergten Pull Requests. Ein zweiter Lauf für denselben
+  Commit ersetzt die Installer dieses Releases. Auf einem anderen Branch gestartet, baut er nur
+  (Dev-Version, Installer als Artefakt am Lauf, kein Release). Die Installer sind nicht signiert.
 
 **Release-Nummer:** fortlaufend `2.0.1`, `2.0.2` … – eine pro Stand von `main`, der je als
-Release gebaut wurde. Der erste Release-Workflow, der einen Commit baut, vergibt die nächste
-Nummer und hält sie als Git-Tag fest (`v2.0.7`); jeder weitere Build desselben Commits – auf
-Linux, Windows oder macOS, egal wann – findet den Tag und nimmt dieselbe Nummer. Ein älterer Stand,
+Release gebaut wurde. Der erste Release-Lauf für einen Commit vergibt die nächste
+Nummer und hält sie als Git-Tag fest (`v2.0.7`); jeder weitere Build desselben Commits findet den
+Tag und nimmt dieselbe Nummer. Ein älterer Stand,
 der nach einem neueren gebaut wird, bekommt keine eigene Nummer. Alles andere (Branches,
 ungetaggte Commits, lokale Builds) heißt `2.0.<nächste>-dev.g<hash>`, mit `.changed` bei nicht
 committeten Änderungen. Die Logik steckt in
