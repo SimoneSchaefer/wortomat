@@ -392,6 +392,15 @@ export const en: Texts = {
   },
 
   editor: {
+    find: {
+      label: 'Find in text',
+      count: (current: number, total: number) =>
+        `${numberFormat.format(current)} of ${numberFormat.format(total)}`,
+      none: 'No matches in the text',
+      previous: 'Previous match (Shift+Enter)',
+      next: 'Next match (Enter)',
+      close: 'Close search (Esc)',
+    },
     toolbar: 'Formatting',
     bold: 'Bold',
     boldLetter: 'B',

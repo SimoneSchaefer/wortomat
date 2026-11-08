@@ -129,7 +129,7 @@ export const Revision = Extension.create<RevisionOptions>({
  * Images and line breaks become a space – they take exactly one position like a character, so text
  * index = position − start.
  */
-function textBlocks(doc: ProseMirrorNode): TextBlock[] {
+export function textBlocks(doc: ProseMirrorNode): TextBlock[] {
   const blocks: TextBlock[] = [];
   doc.descendants((node, pos) => {
     if (!node.isTextblock) return true;

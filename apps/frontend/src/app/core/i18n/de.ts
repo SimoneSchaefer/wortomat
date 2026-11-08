@@ -426,6 +426,15 @@ export const de = {
   },
 
   editor: {
+    find: {
+      label: 'Im Text suchen',
+      count: (current: number, total: number) =>
+        `${numberFormat.format(current)} von ${numberFormat.format(total)}`,
+      none: 'Keine Treffer im Text',
+      previous: 'Vorheriger Treffer (Umschalt+Enter)',
+      next: 'Nächster Treffer (Enter)',
+      close: 'Suche schließen (Esc)',
+    },
     toolbar: 'Formatierung',
     bold: 'Fett',
     boldLetter: 'F',

@@ -26,6 +26,7 @@ import { ANNOTATION_KINDS } from '../../core/annotations';
 import { AppSettingsStore } from '../../core/app-settings';
 import { DESKTOP_BRIDGE } from '../../core/desktop-bridge';
 import { errorMessage } from '../../core/errors';
+import { FindRequest } from '../../core/find-request';
 import { I18n } from '../../core/i18n/i18n';
 import { isSupportedImage, prepareImage } from '../../core/image-resize';
 import { PendingSaves } from '../../core/pending-saves';
@@ -33,6 +34,7 @@ import { wordCore } from '../../core/text-analysis';
 import { WortomatApi } from '../../core/wortomat-api';
 import { NotesStore } from '../notes/notes-store';
 import { Annotation, type AnnotationAt, annotationAt, annotationsIn } from './annotation-mark';
+import { Find, findInfo } from './find';
 import { Indent } from './indent';
 import { ReadingPositions } from './reading-position';
 import { ToolbarMenu } from './toolbar-menu';
@@ -99,8 +101,17 @@ export class DocumentEditor {
   private readonly notes = inject(NotesStore, { optional: true });
   private readonly injector = inject(Injector);
   private readonly readingPositions = inject(ReadingPositions);
+  private readonly findRequest = inject(FindRequest);
   private readonly host = viewChild.required<ElementRef<HTMLElement>>('editorHost');
   private readonly noteInput = viewChild<ElementRef<HTMLInputElement>>('noteInput');
+  private readonly findInput = viewChild<ElementRef<HTMLInputElement>>('findInput');
+
+  /** The find bar's term; `null` while the bar is closed. */
+  protected readonly findQuery = signal<string | null>(null);
+  protected readonly find = computed(() => {
+    this.editorTick();
+    return this.editor ? findInfo(this.editor.state) : null;
+  });
 
   protected readonly status = signal<SaveStatus>('loading');
   protected readonly wordCount = signal(0);
@@ -132,6 +143,7 @@ export class DocumentEditor {
   private saveQueue: Promise<void> = Promise.resolve();
   private loadCounter = 0;
   private stopTracking: (() => void) | null = null;
+  private lastFindQuery = '';
 
   constructor() {
     const unregister = inject(PendingSaves).register(() => this.flush());
@@ -149,6 +161,18 @@ export class DocumentEditor {
     effect(() => {
       const id = this.documentId();
       untracked(() => void this.load(id));
+    });
+
+    // Clicked a search hit of the document that is already open – no load picks it up then
+    effect(() => {
+      const request = this.findRequest.request();
+      if (!request) return;
+      untracked(() => {
+        if (!this.editor || this.currentId !== request.documentId) return;
+        if (this.status() === 'loading') return;
+        const query = this.findRequest.take(request.documentId);
+        if (query !== null) this.openFind(query);
+      });
     });
 
     effect(() => {
@@ -175,11 +199,15 @@ export class DocumentEditor {
       this.dirty = false;
       this.pastedWords = 0;
       this.editingNoteAt.set(null);
+      this.findQuery.set(null);
       this.editor = this.createEditor(content.doc ?? this.template());
       this.editor.commands.setRevisionMode(this.revising());
       this.wordCount.set(content.wordCount);
-      this.stopTracking = this.readingPositions.track(id, this.editor);
+      const find = this.findRequest.take(id);
+      // From a search hit the find bar keeps the focus, so Enter steps on at once
+      this.stopTracking = this.readingPositions.track(id, this.editor, { focus: find === null });
       this.status.set('saved');
+      if (find !== null) this.openFind(find);
       void this.refreshWrittenToday();
     } catch (error) {
       if (loadId !== this.loadCounter) return;
@@ -273,6 +301,11 @@ export class DocumentEditor {
           names: () => this.names(),
           describe: (finding) => this.describeFinding(finding),
           toggle: () => this.toggleRevision(),
+        }),
+        Find.configure({
+          open: () => this.openFind(),
+          close: () => this.closeFind(),
+          stepped: () => this.revealMatch(),
         }),
       ],
       editorProps: {
@@ -490,6 +523,69 @@ export class DocumentEditor {
     const { node } = editor.view.domAtPos(annotation.from + 1);
     const element = node instanceof Element ? node : node.parentElement;
     element?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  /** Without a term: the selected text, or the last term. */
+  protected openFind(query?: string): void {
+    const editor = this.editor;
+    if (!editor) return;
+    const { from, to, empty } = editor.state.selection;
+    const selected = empty ? '' : editor.state.doc.textBetween(from, to, ' ').trim();
+    const term = query ?? (selected.length <= 100 ? selected : '');
+    this.lastFindQuery = term || this.lastFindQuery;
+    this.findQuery.set(this.lastFindQuery);
+    editor.commands.setFind(this.lastFindQuery);
+    this.revealMatch();
+    afterNextRender(
+      () => {
+        const input = this.findInput()?.nativeElement;
+        input?.focus();
+        input?.select();
+      },
+      { injector: this.injector },
+    );
+  }
+
+  protected onFindInput(value: string): void {
+    this.lastFindQuery = value;
+    this.findQuery.set(value);
+    this.editor?.commands.setFind(value);
+    this.revealMatch();
+  }
+
+  protected findStep(direction: 1 | -1): void {
+    this.editor?.commands.findStep(direction);
+    this.revealMatch();
+  }
+
+  protected onFindKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === 'F3') {
+      this.findStep(event.shiftKey ? -1 : 1);
+    } else if (event.key === 'Escape') {
+      this.closeFind();
+    } else {
+      return;
+    }
+    event.preventDefault();
+  }
+
+  /** Back into the text, at the match that was shown last. */
+  protected closeFind(): void {
+    const editor = this.editor;
+    const match = this.find()?.match;
+    this.findQuery.set(null);
+    if (!editor) return;
+    editor.commands.setFind(null);
+    const chain = editor.chain();
+    (match ? chain.setTextSelection(match.from) : chain)
+      .focus(null, { scrollIntoView: false })
+      .run();
+  }
+
+  /** The current match to the middle, like jumping to a mark. */
+  private revealMatch(): void {
+    const current = this.editor?.view.dom.querySelector('.wm-find-current');
+    current?.scrollIntoView({ block: 'center' });
   }
 
   protected toggleRevision(): void {
