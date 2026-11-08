@@ -183,8 +183,10 @@ npm run dist
 - [„Release“](.github/workflows/release.yml) läuft nur von Hand (Actions → „Release“ → „Run
   workflow“ auf `main`): vergibt die Release-Nummer, baut die Installer für Linux, Windows und
   macOS parallel auf dem jeweiligen Betriebssystem und veröffentlicht sie als GitHub-Release
-  `v2.0.<n>` mit Release-Notes aus den gemergten Pull Requests. Ein zweiter Lauf für denselben
-  Commit ersetzt die Installer dieses Releases. Auf einem anderen Branch gestartet, baut er nur
+  `v2.0.<n>` mit Release-Notes aus den gemergten Pull Requests. Das Packen wird bei
+  Netzwerkfehlern bis zu dreimal versucht; scheitert eine Plattform trotzdem, erscheint das
+  Release mit den übrigen, und „Re-run failed jobs“ hängt die fehlende später an. Ein zweiter
+  Lauf für denselben Commit ersetzt die Installer dieses Releases. Auf einem anderen Branch gestartet, baut er nur
   (Dev-Version, Installer als Artefakt am Lauf, kein Release). Die Installer sind nicht signiert.
 
 **Release-Nummer:** fortlaufend `2.0.1`, `2.0.2` … – eine pro Stand von `main`, der je als
