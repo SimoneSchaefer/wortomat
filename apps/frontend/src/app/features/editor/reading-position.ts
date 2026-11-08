@@ -21,13 +21,14 @@ export class ReadingPositions {
 
   /**
    * Puts the editor where the document was left and keeps track from then on. The returned
-   * function stops that; call it while the editor is still in the page.
+   * function stops that; call it while the editor is still in the page. Without `focus` the cursor
+   * is put back but something else keeps the focus (the find bar).
    */
-  track(id: string, editor: Editor): () => void {
+  track(id: string, editor: Editor, { focus = true } = {}): () => void {
     const view = editor.view;
     const container = scrollParent(view.dom);
     const target: EventTarget = container === document.scrollingElement ? window : container;
-    this.restore(id, editor, container);
+    this.restore(id, editor, container, focus);
 
     let frame = 0;
     const rememberScroll = () => {
@@ -63,7 +64,7 @@ export class ReadingPositions {
     return entry;
   }
 
-  private restore(id: string, editor: Editor, container: Element): void {
+  private restore(id: string, editor: Editor, container: Element, focus: boolean): void {
     const saved = this.positions.get(id);
     // The scroll area is shared with the previous page – do not open halfway down.
     if (!saved) {
@@ -71,11 +72,10 @@ export class ReadingPositions {
       return;
     }
     const size = editor.state.doc.content.size;
-    editor
+    const chain = editor
       .chain()
-      .setTextSelection({ from: Math.min(saved.from, size), to: Math.min(saved.to, size) })
-      .focus(null, { scrollIntoView: false })
-      .run();
+      .setTextSelection({ from: Math.min(saved.from, size), to: Math.min(saved.to, size) });
+    (focus ? chain.focus(null, { scrollIntoView: false }) : chain).run();
 
     if ('top' in saved.scroll) {
       container.scrollTop = saved.scroll.top;

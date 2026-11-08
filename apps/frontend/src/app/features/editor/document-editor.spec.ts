@@ -1,10 +1,12 @@
+import type { Provider } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { Editor } from '@tiptap/core';
 import type { EditorDoc, SaveDocumentRequest } from '@wortomat/shared';
+import { FindRequest } from '../../core/find-request';
 import { de } from '../../core/i18n/de';
 import { PendingSaves } from '../../core/pending-saves';
 import { StatusMessages } from '../../core/status-messages';
-import { button, findButton, key, render, text, until } from '../../testing/render';
+import { button, findButton, key, render, text, type, until } from '../../testing/render';
 import { DocumentEditor, type DocumentSource } from './document-editor';
 
 const mark = (kind: string, attrs: { note?: string; suggestion?: string } = {}) => [
@@ -39,9 +41,14 @@ function fakeSource(docs: Record<string, EditorDoc | null> = { s1: SCENE }) {
   } satisfies DocumentSource;
 }
 
-async function setup(source = fakeSource(), inputs: Record<string, unknown> = {}) {
+async function setup(
+  source = fakeSource(),
+  inputs: Record<string, unknown> = {},
+  providers: Provider[] = [],
+) {
   const view = await render(DocumentEditor, {
     inputs: { documentId: 's1', source, ...inputs },
+    providers,
   });
   const prose = () => view.element.querySelector<HTMLElement>('.ProseMirror');
   const status = () => text(view.element.querySelector('.statusbar .status'));
@@ -216,6 +223,72 @@ describe('DocumentEditor', () => {
     await until(settle, () => text(prose()).startsWith('Es war'));
     expect(editorOf().state.selection).toMatchObject({ from: 4, to: 7 });
     await until(settle, () => document.activeElement === prose());
+  });
+
+  it('highlights the term from a search hit and steps through the matches', async () => {
+    const doc = {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'Anna kam spät.' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Dann lachte Anna.' }] },
+      ],
+    } as EditorDoc;
+    // As the search leaves it before opening the scene
+    const requested = new FindRequest();
+    requested.find('s1', 'anna');
+    const { element, prose, settle } = await setup(fakeSource({ s1: doc }), {}, [
+      { provide: FindRequest, useValue: requested },
+    ]);
+    const editor = (prose() as HTMLElement & { editor: Editor }).editor;
+    const bar = () => element.querySelector<HTMLElement>('.find-bar');
+    const count = () => text(bar()?.querySelector('.find-count'));
+    const current = () => text(prose()!.querySelector('.wm-find-current'));
+    await until(settle, () => !!bar());
+
+    expect([...prose()!.querySelectorAll('.wm-find')].map(text)).toEqual(['Anna', 'Anna']);
+    expect(count()).toBe(de.editor.find.count(1, 2));
+    const input = bar()!.querySelector('input')!;
+    await until(settle, () => document.activeElement === input);
+
+    key(input, 'Enter');
+    await settle();
+    expect(count()).toBe(de.editor.find.count(2, 2));
+    key(input, 'Enter');
+    await settle();
+    expect(count()).toBe(de.editor.find.count(1, 2));
+    key(input, 'Enter', { shiftKey: true });
+    await settle();
+    expect(count()).toBe(de.editor.find.count(2, 2));
+    expect(current()).toBe('Anna');
+
+    type(input, 'lach');
+    await settle();
+    expect(current()).toBe('lach');
+    expect(count()).toBe(de.editor.find.count(1, 1));
+    type(input, 'Zeppelin');
+    await settle();
+    expect(count()).toBe(de.editor.find.none);
+
+    // Closing leaves the cursor at the match shown last
+    type(input, 'Anna');
+    await settle();
+    key(input, 'Enter');
+    await settle();
+    key(input, 'Escape');
+    await settle();
+    expect(bar()).toBeNull();
+    expect(prose()!.querySelector('.wm-find')).toBeNull();
+    expect(editor.state.selection.from).toBe(29);
+  });
+
+  it('opens the find bar with Ctrl+F, prefilled with the selection', async () => {
+    const { element, prose, settle } = await setup();
+    const editor = (prose() as HTMLElement & { editor: Editor }).editor;
+    editor.commands.setTextSelection({ from: 14, to: 17 }); // "der"
+    key(prose()!, 'f', { ctrlKey: true });
+    await settle();
+    expect(element.querySelector<HTMLInputElement>('.find-bar input')?.value).toBe('der');
+    expect([...prose()!.querySelectorAll('.wm-find')].map(text)).toEqual(['der']);
   });
 
   it('starts a never saved document with the template', async () => {

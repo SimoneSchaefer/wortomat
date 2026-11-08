@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import type { SearchHit } from '@wortomat/shared';
+import { FindRequest } from '../../core/find-request';
 import { de } from '../../core/i18n/de';
 import { SearchRequest } from '../../core/search-request';
 import { FakeApi } from '../../testing/fake-api';
@@ -82,6 +83,8 @@ describe('GlobalSearch', () => {
     await search('Hafen');
     (options()[1] as HTMLElement).click();
     expect(navigate).toHaveBeenCalledWith(['/write/scene', 's2']);
+    // so the scene highlights the term
+    expect(TestBed.inject(FindRequest).take('s2')).toBe('Hafen');
   });
 
   it('reports when nothing was found', async () => {

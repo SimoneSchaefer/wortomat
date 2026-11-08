@@ -231,6 +231,54 @@
           </button>
         }
       </div>
+      @if (findQuery() !== null) {
+        @let info = find();
+        <div class="find-bar" role="search">
+          <input
+            #findInput
+            class="find-input"
+            type="text"
+            [value]="findQuery()"
+            [placeholder]="t().editor.find.label"
+            [attr.aria-label]="t().editor.find.label"
+            (input)="onFindInput($any($event.target).value)"
+            (keydown)="onFindKeydown($event)"
+          />
+          <span class="find-count" aria-live="polite">
+            @if (info?.count) {
+              {{ t().editor.find.count(info!.current + 1, info!.count) }}
+            } @else if (findQuery()?.trim()) {
+              {{ t().editor.find.none }}
+            }
+          </span>
+          <button
+            type="button"
+            [title]="t().editor.find.previous"
+            [attr.aria-label]="t().editor.find.previous"
+            [disabled]="!info?.count"
+            (click)="findStep(-1)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10l4-4 4 4" /></svg>
+          </button>
+          <button
+            type="button"
+            [title]="t().editor.find.next"
+            [attr.aria-label]="t().editor.find.next"
+            [disabled]="!info?.count"
+            (click)="findStep(1)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" /></svg>
+          </button>
+          <button
+            type="button"
+            [title]="t().editor.find.close"
+            [attr.aria-label]="t().editor.find.close"
+            (click)="closeFind()"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" /></svg>
+          </button>
+        </div>
+      }
       @if (annotation(); as mark) {
         <div class="mark-note" role="note" [style.--annotation-color]="colorOf(mark.kind)">
           <span class="mark-label">{{ t().annotations[mark.kind].label }}</span>

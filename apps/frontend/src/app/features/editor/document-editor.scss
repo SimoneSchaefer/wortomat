@@ -224,6 +224,53 @@
 }
 
 // Sticks to the top together with the toolbar
+// Find in text: like the browser's find bar, below the toolbar and sticky with it
+.find-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, var(--bg));
+  background: color-mix(in srgb, var(--bg) 50%, var(--surface));
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.75rem;
+    min-width: 2rem;
+    padding: 0 0.5rem;
+  }
+
+  svg {
+    display: block;
+    width: 0.95rem;
+    height: 0.95rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.find-input {
+  flex: 0 1 16rem;
+  min-width: 6rem;
+  height: 1.75rem;
+  padding: 0 0.5rem;
+}
+
+.find-count {
+  flex: 1;
+  padding: 0 0.4rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .mark-note {
   display: flex;
   align-items: baseline;

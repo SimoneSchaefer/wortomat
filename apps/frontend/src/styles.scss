@@ -36,6 +36,11 @@
   --revision-double: #eb6834;
   --revision-long: color-mix(in srgb, var(--text) 7%, transparent);
 
+  // Find in text: a highlighter, its hue apart from todo (amber); the current match like the
+  // browser's in orange
+  --find-match: #b8f05a;
+  --find-current: #ff9a3c;
+
   // Plot threads: same lightness, only the hue changes ("slate" almost without colour)
   --strand-violet: oklch(0.58 0.15 295);
   --strand-teal: oklch(0.58 0.1 185);
@@ -102,6 +107,9 @@
   --revision-filler: #3987e5;
   --revision-double: #d95926;
   --revision-long: color-mix(in srgb, var(--text) 9%, transparent);
+
+  --find-match: #5d7f1e;
+  --find-current: #c2610f;
 
   --strand-violet: oklch(0.74 0.13 295);
   --strand-teal: oklch(0.74 0.1 185);
@@ -390,6 +398,18 @@ mark {
   background: var(--revision-long);
   border-radius: 2px;
   box-decoration-break: clone;
+}
+
+// Find in text (decorations, display only)
+.wm-find {
+  background: var(--find-match);
+  border-radius: 2px;
+  box-decoration-break: clone;
+}
+
+.wm-find-current {
+  background: var(--find-current);
+  outline: 2px solid var(--find-current);
 }
 
 // Header area above the editor (projected into <wm-document-editor>)

@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import type { SearchHit } from '@wortomat/shared';
 import { errorMessage } from '../../core/errors';
 import { I18n } from '../../core/i18n/i18n';
+import { FindRequest } from '../../core/find-request';
 import { SearchRequest } from '../../core/search-request';
 import { WortomatApi } from '../../core/wortomat-api';
 import { groupHits, hitLink } from './search-hits';
@@ -36,6 +37,7 @@ export class GlobalSearch {
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
+  private readonly findRequest = inject(FindRequest);
   private readonly input = viewChild.required<ElementRef<HTMLInputElement>>('input');
 
   private readonly i18n = inject(I18n);
@@ -138,6 +140,7 @@ export class GlobalSearch {
   protected go(hit: SearchHit): void {
     this.open.set(false);
     this.input().nativeElement.blur();
+    this.findRequest.find(hit.id, this.query());
     void this.router.navigate(hitLink(hit));
   }
 
